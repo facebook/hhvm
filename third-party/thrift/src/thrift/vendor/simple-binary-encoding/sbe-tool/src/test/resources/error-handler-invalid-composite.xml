@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="tests"
+               id="4"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="varDataEncoding" semanticType="Length">
+            <type name="length" primitiveType="uint8" semanticType="Length"/>
+            <type name="varData" primitiveType="char" semanticType="data"/>
+        </composite>
+        <composite name="testType">
+            <group name="fuelFigures" id="10" dimensionType="groupSizeEncoding">
+                <field name="speed" id="11" type="uint16"/>
+                <field name="mpg" id="12" type="float"/>
+                <data name="usageDescription" id="200" type="varStringEncoding"/>
+            </group>
+            <data type="varDataEncoding" name="password" id="12"/>
+        </composite>
+    </types>
+    <message name="TestMessage1" id="1" description="TestMessage">
+        <data type="varDataEncoding" name="encryptedNewPassword" id="1404"/>
+    </message>
+    <message name="TestMessage2" id="2">
+        <field name="foo" id="41" type="testType"/>
+    </message>
+</messageSchema>

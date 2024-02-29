@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AssemblyName>SBE</AssemblyName>
+    <RootNamespace>Org.SbeTool.Sbe.Dll</RootNamespace>
+    <Product>Org.SbeTool.Sbe.Dll</Product>
+    <Copyright>Copyright (C) Bill Segall 2018-2021, MarketFactory Inc 2017, Adaptive 2014-2024. All rights reserved.</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>Bill Segall, MarketFactory Inc, Adaptive Consulting</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/real-logic/simple-binary-encoding</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/real-logic/simple-binary-encoding</RepositoryUrl>
+    <PackageTags>SBE;Marshaling;Low;Latency;Simple;Binary;Encoding</PackageTags>
+    <PackageId>sbe-tool</PackageId>
+    <PackageVersion>1.23.1.1</PackageVersion>
+    <Title>Simple Binary Encoding for .NET</Title>
+    <Description>This package contains all you need to define SBE messages and generate C# encoders and decoders. See https://github.com/real-logic/simple-binary-encoding for more detailed instructions</Description>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Update="README.txt">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="sbe-tool.sh">
+      <Pack>true</Pack>
+      <PackagePath>tools/sbe-tool.sh</PackagePath>
+    </None>
+    <None Include="../../sbe-all/build/libs/sbe-all-*-SNAPSHOT.jar">
+      <Pack>true</Pack>
+      <PackagePath>tools/sbe-tool-all.jar</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-preview.2" PrivateAssets="All" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+  
+</Project>

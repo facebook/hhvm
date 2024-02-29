@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="uk.co.real_logic.sbe.benchmarks.fix"
+                   id="1"
+                   version="1"
+                   semanticVersion="5.2"
+                   description="Order Types and Quote Examples"
+                   byteOrder="littleEndian">
+    <!--
+        Inspired from:
+        New Order - http://www.cmegroup.com/confluence/display/EPICSANDBOX/New+Order
+        Cancel Order - http://www.cmegroup.com/confluence/display/EPICSANDBOX/Order+Cancel+Request
+        Cancel and Replace Order - http://www.cmegroup.com/confluence/display/EPICSANDBOX/Order+Cancel-Replace+Request
+        Mass Quote (with repeating groups) - http://www.cmegroup.com/confluence/display/EPICSANDBOX/Mass+Quote
+    -->
+
+    <types>
+        <type name="string2" length="2" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string3" length="3" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string10" length="10" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string12" length="12" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string18" length="18" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string20" length="20" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="string23" length="23" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="Symbol" length="6" primitiveType="char" characterEncoding="US-ASCII"/>
+        <type name="timestamp" primitiveType="uint64" semanticType="UTCTimestamp"/>
+        <type name="LocalMktDate" primitiveType="uint16" semanticType="LocalMktDate"/>
+        <type name="optionalInt64" primitiveType="int64" presence="optional" semanticType="int"/>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="IntQty32" semanticType="Qty">
+            <type name="mantissa" primitiveType="int32"/>
+            <type name="exponent" primitiveType="int8" presence="constant">0</type>
+        </composite>
+        <composite name="Decimal64">
+            <type name="mantissa" primitiveType="int64"/>
+            <type name="exponent" primitiveType="int8" presence="constant">7</type>
+        </composite>
+        <composite name="OptionalPrice">
+            <type name="mantissa" primitiveType="int64"/>
+            <type name="exponent" primitiveType="int8"/>
+        </composite>
+        <composite name="groupSizeEncoding" semanticType="NumInGroup">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <enum name="HandInst" encodingType="char">
+            <validValue name="AUTOMATED_EXECUTION">1</validValue>
+        </enum>
+        <enum name="CustOrderHandlingInst" encodingType="char">
+            <validValue name="PHONE_SIMPLE">A</validValue>
+            <validValue name="PHONE_COMPLEX">B</validValue>
+            <validValue name="FCM_PROVIDED_SCREEN">C</validValue>
+            <validValue name="OTHER_PROVIDED_SCREEN">D</validValue>
+            <validValue name="CLIENT_PROVIDED_PLATFORM_CONTROLLED_BY_FCM">E</validValue>
+            <validValue name="CLIENT_PROVIDED_PLATFORM_DIRECT_TO_EXCHANGE">F</validValue>
+            <validValue name="FCM_API_OR_FIX">G</validValue>
+            <validValue name="ALGO_ENGINE">H</validValue>
+            <validValue name="PRICE_AT_EXECUTION">J</validValue>
+            <validValue name="DESK_ELECTRONIC">W</validValue>
+            <validValue name="DESK_PIT">X</validValue>
+            <validValue name="CLIENT_ELECTRONIC">Y</validValue>
+            <validValue name="CLIENT_PIT">Z</validValue>
+        </enum>
+        <enum name="OrdType" encodingType="char">
+            <validValue name="MARKET_ORDER">1</validValue>
+            <validValue name="LIMIT_ORDER">2</validValue>
+            <validValue name="STOP_ORDER">3</validValue>
+            <validValue name="STOP_LIMIT_ORDER">4</validValue>
+            <validValue name="MARKET_LIMIT_ORDER">K</validValue>
+        </enum>
+        <enum name="Side" encodingType="char">
+            <validValue name="BUY">1</validValue>
+            <validValue name="SELL">2</validValue>
+        </enum>
+        <enum name="TimeInForce" encodingType="char">
+            <validValue name="DAY">0</validValue>
+            <validValue name="GOOD_TILL_CANCEL">1</validValue>
+            <validValue name="FILL_AND_KILL">3</validValue>
+            <validValue name="GOOD_TILL_DATE">6</validValue>
+        </enum>
+        <enum name="BooleanType" encodingType="uint8" semanticType="Boolean">
+            <validValue name="FIX_FALSE">0</validValue>
+            <validValue name="FIX_TRUE">1</validValue>
+        </enum>
+        <enum name="CustomerOrFirm" encodingType="uint8" semanticType="int">
+            <validValue name="CUSTOMER">0</validValue>
+            <validValue name="FIRM">1</validValue>
+        </enum>
+        <enum name="CtiCode" encodingType="char" semanticType="char">
+            <validValue name="OWN">1</validValue>
+            <validValue name="HOUSE">2</validValue>
+            <validValue name="ON_FLOOR">3</validValue>
+            <validValue name="NOT_ON_FLOOR">4</validValue>
+        </enum>
+        <enum name="NoAllocs" encodingType="char" semanticType="char">
+            <validValue name="ONE">1</validValue>
+        </enum>
+        <enum name="OFMOverride" encodingType="char" semanticType="char">
+            <validValue name="ENABLED">Y</validValue>
+            <validValue name="DISABLED">N</validValue>
+        </enum>
+        <enum name="MMProtectionReset" encodingType="char" semanticType="char">
+            <validValue name="RESET">Y</validValue>
+            <validValue name="DO_NOT_RESET">N</validValue>
+        </enum>
+        <enum name="SecurityIDSource" encodingType="char" semanticType="char">
+            <validValue name="EXCHANGE_SYMBOL">8</validValue>
+        </enum>
+        <enum name="MDUpdateAction" encodingType="uint8" semanticType="int">
+            <validValue name="NEW">0</validValue>
+            <validValue name="CHANGE">1</validValue>
+            <validValue name="DELETE">2</validValue>
+            <validValue name="OVERLAY">5</validValue>
+        </enum>
+        <enum name="MDEntryType" encodingType="char" semanticType="char">
+            <validValue name="BID">0</validValue>
+            <validValue name="OFFER">1</validValue>
+            <validValue name="TRADE">2</validValue>
+            <validValue name="OPENING_PRICE">4</validValue>
+            <validValue name="SETTLEMENT_PRICE">6</validValue>
+            <validValue name="TRADING_SESSION_HIGH_PRICE">7</validValue>
+            <validValue name="TRADING_SESSION_LOW_PRICE">8</validValue>
+            <validValue name="TRADE_VOLUME">B</validValue>
+            <validValue name="OPEN_INTEREST">C</validValue>
+            <validValue name="SIMULATED_SELL">E</validValue>
+            <validValue name="SIMULATED_BUY">F</validValue>
+            <validValue name="EMPTY_THE_BOOK">J</validValue>
+            <validValue name="SESSION_HIGH_BID">N</validValue>
+            <validValue name="SESSION_LOW_OFFER">O</validValue>
+            <validValue name="FIXING_PRICE">W</validValue>
+            <validValue name="CASH_NOTE">X</validValue>
+        </enum>
+        <enum name="MarketStateIdentifier" encodingType="uint8" semanticType="int">
+            <validValue name="PRE_OPENING">0</validValue>
+            <validValue name="OPENING_MODE">1</validValue>
+            <validValue name="CONTINUOUS_TRADING_MODE">2</validValue>
+        </enum>
+        <enum name="TickDirection" encodingType="uint8" semanticType="int">
+            <validValue name="PLUS_TICK">0</validValue>
+            <validValue name="MINUS_TICK">1</validValue>
+        </enum>
+        <enum name="OpenCloseSettleFlag" encodingType="uint16" semanticType="int">
+            <validValue name="THEORETICAL_PRICE_VALUE">5</validValue>
+            <validValue name="ACTUAL_PRELIMINARY_NOT_ROUNDED">100</validValue>
+            <validValue name="ACTUAL_PRELIMINARY_ROUNDED">101</validValue>
+        </enum>
+        <enum name="MDQuoteType" encodingType="uint8" semanticType="int">
+            <validValue name="TRADABLE">1</validValue>
+        </enum>
+        <enum name="MatchEventIndicator" encodingType="char" semanticType="MatchEventIndicator">
+            <validValue name="MID_EVENT">0</validValue>
+            <validValue name="BEGINNING_EVENT">1</validValue>
+            <validValue name="END_EVENT">2</validValue>
+            <validValue name="BEGINNING_AND_END_EVENT">3</validValue>
+        </enum>
+
+        <set name="QuoteCondition" encodingType="uint8" semanticType="QuoteCondition">
+            <choice name="Implied">0</choice>
+            <choice name="ExchangeBest">1</choice>
+        </set>
+        <set name="TradeCondition" encodingType="uint8" semanticType="TradeCondition">
+            <choice name="OpeningTrade">0</choice>
+            <choice name="CmeGlobexPrice">1</choice>
+        </set>
+    </types>
+
+    <!-- Each message is ordered based on the order of fields in the spec. They do NOT fall onto nice boundaries. -->
+    <!-- Message template IDs are based on decimal of the FIX MsgType values. e.g. D is 68 -->
+
+    <sbe:message name="NewOrder" id="68" description="submit a new order on an instrument" semanticType="D">
+        <field name="Account" id="1" type="string12" semanticType="String"/>
+        <field name="ClOrdID" id="11" type="string20" semanticType="String"/>
+        <field name="HandInst" id="21" type="HandInst" semanticType="char"/>
+        <field name="CustOrderHandlingInst" id="1031" type="CustOrderHandlingInst" semanticType="char" presence="optional"/>
+        <field name="OrderQty" id="38" type="IntQty32" semanticType="Qty"/>
+        <field name="OrdType" id="40" type="OrdType" semanticType="char"/>
+        <field name="Price" id="44" type="OptionalPrice" semanticType="Price"/>
+        <field name="Side" id="54" type="Side" semanticType="char"/>
+        <field name="Symbol" id="55" type="Symbol" semanticType="String"/>
+        <field name="TimeInForce" id="59" type="TimeInForce" semanticType="char" presence="optional"/>
+        <field name="TransactTime" id="60" type="timestamp" timeUnit="nanosecond" semanticType="UTCTimestamp"/>
+        <field name="ManualOrderIndicator" id="1028" type="BooleanType"/>
+        <field name="AllocAccount" id="79" type="string10" semanticType="String"/>
+        <field name="StopPx" id="99" type="OptionalPrice" semanticType="Price"/>
+        <field name="SecurityDesc" id="107" type="string20" semanticType="String"/>
+        <field name="MinQty" id="110" type="IntQty32" semanticType="Qty"/>
+        <field name="SecurityType" id="167" type="string3" semanticType="String"/>
+        <field name="CustomerOrFirm" id="204" type="CustomerOrFirm"/>
+        <field name="MaxShow" id="210" type="IntQty32" semanticType="Qty"/>
+        <field name="ExpireDate" id="432" type="LocalMktDate"/>
+        <field name="SelfMatchPreventionID" id="7928" type="string12" semanticType="String"/>
+        <field name="CtiCode" id="9702" type="CtiCode"/>
+        <field name="GiveUpFirm" id="9707" type="string3" semanticType="String"/>
+        <field name="CmtaGiveupCD" id="9708" type="string2" semanticType="String"/>
+        <field name="CorrelationClOrdID" id="9717" type="string20" semanticType="String"/>
+    </sbe:message>
+
+    <sbe:message name="OrderCancelRequest" id="70" semanticType="F">
+        <field name="Account" id="1" type="string12" semanticType="String"/>
+        <field name="ClOrdID" id="11" type="string20" semanticType="String"/>
+        <field name="OrderID" id="37" type="int64" semanticType="int"/>
+        <field name="OrigClOrdID" id="41" type="string20" semanticType="String"/>
+        <field name="Side" id="54" type="Side" semanticType="char"/>
+        <field name="Symbol" id="55" type="Symbol" semanticType="String"/>
+        <field name="TransactTime" id="60" type="timestamp" timeUnit="nanosecond" semanticType="UTCTimestamp"/>
+        <field name="ManualOrderIndicator" id="1028" type="BooleanType"/>
+        <field name="SecurityDesc" id="107" type="string20" semanticType="String"/>
+        <field name="SecurityType" id="167" type="string3" semanticType="String"/>
+        <field name="CorrelationClOrdID" id="9717" type="string20" semanticType="String"/>
+    </sbe:message>
+
+    <sbe:message name="OrderCancelReplaceRequest" id="71" semanticType="G">
+        <field name="Account" id="1" type="string12" semanticType="String"/>
+        <field name="ClOrdID" id="11" type="string20" semanticType="String"/>
+        <field name="OrderID" id="37" type="int64" semanticType="int"/>
+        <field name="HandInst" id="21" type="HandInst" semanticType="char"/>
+        <field name="OrderQty" id="38" type="IntQty32" semanticType="Qty"/>
+        <field name="CustOrderHandlingInst" id="1031" type="CustOrderHandlingInst" semanticType="char" presence="optional"/>
+        <field name="OrdType" id="40" type="OrdType" semanticType="char"/>
+        <field name="OrigClOrdID" id="41" type="string20" semanticType="String"/>
+        <field name="Price" id="44" type="OptionalPrice" semanticType="Price"/>
+        <field name="Side" id="54" type="Side" semanticType="char"/>
+        <field name="Symbol" id="55" type="Symbol" semanticType="String"/>
+        <field name="Test" id="58" type="string18" semanticType="String"/>
+        <field name="TimeInForce" id="59" type="TimeInForce" semanticType="char" presence="optional"/>
+        <field name="ManualOrderIndicator" id="1028" type="BooleanType"/>
+        <field name="TransactTime" id="60" type="timestamp" timeUnit="nanosecond" semanticType="UTCTimestamp"/>
+        <field name="NoAllocs" id="78" type="NoAllocs" presence="optional"/>
+        <field name="AllocAccount" id="79" type="string10" semanticType="String"/>
+        <field name="StopPx" id="99" type="OptionalPrice" semanticType="Price"/>
+        <field name="SecurityDesc" id="107" type="string20" semanticType="String"/>
+        <field name="MinQty" id="110" type="IntQty32" semanticType="Qty"/>
+        <field name="SecurityType" id="167" type="string3" semanticType="String"/>
+        <field name="CustomerOrFirm" id="204" type="CustomerOrFirm"/>
+        <field name="MaxShow" id="210" type="IntQty32" semanticType="Qty"/>
+        <field name="ExpireDate" id="432" type="LocalMktDate"/>
+        <field name="SelfMatchPreventionID" id="7928" type="string12" semanticType="String"/>
+        <field name="CtiCode" id="9702" type="CtiCode"/>
+        <field name="GiveUpFirm" id="9707" type="string3" semanticType="String"/>
+        <field name="CmtaGiveupCD" id="9708" type="string2" semanticType="String"/>
+        <field name="CorrelationClOrdID" id="9717" type="string20" semanticType="String"/>
+        <field name="OFMOverride" id="9768" type="OFMOverride"/>
+    </sbe:message>
+
+    <sbe:message name="MarketDataIncrementalRefresh" id="88" semanticType="X">
+        <field name="TradeDate" id="75" type="LocalMktDate"/>
+        <group name="Entries" id="268">
+            <field name="MdUpdateAction" id="279" type="MDUpdateAction"/>
+            <field name="MdPriceLevel" id="1023" type="uint8" semanticType="MDPriceLevel"/>
+            <field name="MdEntryType" id="269" type="MDEntryType"/>
+            <field name="SecurityIdSource" id="22" type="char" semanticType="SecurityID"/>
+            <field name="SecurityId" id="48" type="uint64" semanticType="InstrumentID"/>
+            <field name="RptSeq" id="83" type="uint8" semanticType="SequenceNumber"/>
+            <field name="QuoteCondition" id="276" type="QuoteCondition"/>
+            <field name="MdEntryPx" id="270" type="Decimal64" semanticType="Price"/>
+            <field name="NumberOfOrders" id="346" type="uint32" semanticType="NumberOfOrders"/>
+            <field name="MdEntryTime" id="273" type="timestamp" timeUnit="nanosecond"/>
+            <field name="MdEntrySize" id="271" type="IntQty32"/>
+            <field name="TradingSessionId" id="336" type="MarketStateIdentifier"/>
+            <field name="NetChgPrevDay" id="451" type="Decimal64"/>
+            <field name="TickDirection" id="274" type="TickDirection"/>
+            <field name="OpenCloseSettleFlag" id="286" type="OpenCloseSettleFlag"/>
+            <field name="SettleDate" id="64" type="timestamp" timeUnit="nanosecond"/>
+            <field name="TradeCondition" id="277" type="TradeCondition"/>
+            <field name="TradeVolume" id="1020" type="IntQty32"/>
+            <field name="MdQuoteType" id="1070" type="MDQuoteType"/>
+            <field name="FixingBracket" id="5790" type="timestamp" timeUnit="nanosecond"/>
+            <field name="AggressorSide" id="5797" type="Side"/>
+            <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator"/>
+            <field name="TradeId" id="1003" type="uint64" semanticType="ExecID"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="MarketDataIncrementalRefreshTrades" id="2" semanticType="X" description="Trade">
+        <field name="TransactTime" id="60" type="timestamp" timeUnit="nanosecond"/>
+        <field name="EventTimeDelta" id="37704" type="uint16"/>
+        <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator"/>
+        <group name="MdIncGrp" id="268">
+            <field name="TradeId" id="1003" type="uint64"/>
+            <field name="SecurityId" id="48" type="uint64"/>
+            <field name="MdEntryPx" id="270" type="Decimal64"/>
+            <field name="MdEntrySize" id="271" type="IntQty32"/>
+            <field name="NumberOfOrders" id="346" type="uint16"/>
+            <field name="MdUpdateAction" id="279" type="MDUpdateAction"/>
+            <field name="RptSeq" id="83" type="uint8"/>
+            <field name="AggressorSide" id="5797" type="Side"/>
+            <field name="MdEntryType" id="269" type="MDEntryType" presence="constant" valueRef="MDEntryType.TRADE"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="MassQuote" id="105" semanticType="i">
+        <field name="QuoteReqID" id="131" type="string23" semanticType="String"/>
+        <field name="QuoteID" id="117" type="string10" semanticType="String"/>
+        <field name="MMAccount" id="9771" type="string12" semanticType="String"/>
+        <field name="ManualOrderIndicator" id="1028" type="BooleanType"/>
+        <field name="CustOrderHandlingInst" id="1031" type="CustOrderHandlingInst" semanticType="char" presence="optional"/>
+        <field name="CustomerOrFirm" id="204" type="CustomerOrFirm"/>
+        <field name="SelfMatchPreventionID" id="7928" type="string12" semanticType="String"/>
+        <field name="CtiCode" id="9702" type="CtiCode"/>
+        <field name="MMProtectionReset" id="9773" type="MMProtectionReset" presence="optional"/>
+        <!-- <field name="NoQuoteSets" id="296" type="groupSize" groupName="QuoteSets"/> -->
+        <group name="QuoteSets" id="296">
+            <field name="QuoteSetID" id="302" type="string3" semanticType="String"/>
+            <field name="UnderlyingSecurityDesc" id="307" type="string20" semanticType="String"/>
+            <field name="TotQuoteEntries" id="304" type="uint8" semanticType="int"/>
+            <!-- <field name="NoQuoteEntries" id="295" type="groupSize" groupName="QuoteEntries"/> -->
+            <group name="QuoteEntries" id="295">
+                <field name="QuoteEntryID" id="299" type="string10" semanticType="String"/>
+                <field name="Symbol" id="55" type="Symbol" semanticType="String"/>
+                <field name="SecurityDesc" id="107" type="string20" semanticType="String"/>
+                <field name="SecurityType" id="167" type="string3" semanticType="String"/>
+                <field name="SecurityID" id="48" type="optionalInt64" semanticType="int"/>
+                <field name="SecurityIDSource" id="22" type="SecurityIDSource" presence="optional"/>
+                <field name="TransactTime" id="60" type="timestamp" timeUnit="nanosecond" semanticType="UTCTimestamp"/>
+                <field name="BidPx" id="132" type="OptionalPrice" semanticType="Price"/>
+                <field name="BidSize" id="134" type="optionalInt64" semanticType="int"/>
+                <field name="OfferPx" id="133" type="OptionalPrice" semanticType="Price"/>
+                <field name="OfferSize" id="135" type="optionalInt64" semanticType="int"/>
+            </group>
+        </group>
+    </sbe:message>
+</sbe:messageSchema>

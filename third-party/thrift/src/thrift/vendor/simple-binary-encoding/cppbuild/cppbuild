@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+SOURCE_DIR="$(pwd)"
+BUILD_DIR="${SOURCE_DIR}/cppbuild/Release"
+EXTRA_CMAKE_ARGS=""
+
+ncpus=1
+case "$(uname)" in
+  Darwin* )
+    ncpus=$(sysctl -n hw.ncpu)
+    ;;
+  Linux*)
+    ncpus=$(lscpu -p | grep -c -E -v '^#')
+    ;;
+esac
+
+while [[ $# -gt 0 ]]
+do
+  option="${1}"
+  case ${option} in
+    --c-warnings-as-errors)
+      EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DC_WARNINGS_AS_ERRORS=ON"
+      echo "Enabling warnings as errors for C"
+      shift
+      ;;
+    --cxx-warnings-as-errors)
+      EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DCXX_WARNINGS_AS_ERRORS=ON"
+      echo "Enabling warnings as errors for C++"
+      shift
+      ;;
+    -d|--debug-build)
+      EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Debug"
+      export BUILD_DIR="${SOURCE_DIR}/cppbuild/Debug"
+      export BUILD_CONFIG=Debug
+      shift
+      ;;
+    --sanitise-build)
+      EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DSANITISE_BUILD=ON"
+      echo "Enabling sanitise build"
+      shift
+      ;;
+    -h|--help)
+      echo "${0} [--c-warnings-as-errors] [--cxx-warnings-as-errors] [--debug-build] [--sanitise-build]"
+      exit
+      ;;
+    *)
+      echo "Unknown option ${option}"
+      echo "Use --help for help"
+      exit
+      ;;
+  esac
+done
+
+echo "Will make with \"-j ${ncpus}\"."
+
+if [ -d "${BUILD_DIR}" ] ; then
+    echo "Build directory (${BUILD_DIR}) exists, removing."
+    rm -rf "${BUILD_DIR}"
+fi
+
+mkdir -p "${BUILD_DIR}"
+cd "${BUILD_DIR}" || exit
+
+(cmake -G "Unix Makefiles" ${EXTRA_CMAKE_ARGS} "${SOURCE_DIR}" && make clean && make -j ${ncpus} all && ctest -C Release --output-on-failure)

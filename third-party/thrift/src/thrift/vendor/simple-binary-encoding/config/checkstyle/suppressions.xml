@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.0//EN"
+        "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+<suppressions>
+    <suppress files=".*generated-src.*" checks="."/>
+    <suppress files=".*generated.*" checks="."/>
+    <suppress files="[\\/]test[\\/]" checks="MissingJavadoc.*"/>
+    <suppress files="[\\/]sbe-benchmarks[\\/]" checks="MissingJavadoc.*"/>
+</suppressions>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue661"
+                   id="661"
+                   version="1"
+                   semanticVersion="1.0"
+                   description="issue 661 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <set name="set" encodingType="uint8">
+            <choice name="One">0</choice>
+            <choice name="Two">1</choice>
+        </set>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="issue661" id="1" description="issue 661 test">
+	<field name="set0" type="set" id="10"/>
+	<field name="set1" type="set" id="11" sinceVersion="1"/>
+    </sbe:message>
+</sbe:messageSchema>

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Org.SbeTool.Sbe.Generated</RootNamespace>
+    <AssemblyName>Org.SbeTool.Sbe.Generated</AssemblyName>
+    <Copyright>Copyright (C) Bill Segall 2018, MarketFactory Inc 2017, Adaptive 2014-2024. All rights reserved.</Copyright>
+    <LangVersion>9</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>TRACE;SBE_ENABLE_PRECEDENCE_CHECKS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE;SBE_ENABLE_PRECEDENCE_CHECKS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sbe-dll\sbe-dll.csproj" />
+  </ItemGroup>
+
+</Project>

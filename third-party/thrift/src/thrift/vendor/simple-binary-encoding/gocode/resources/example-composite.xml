@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="composite"
+                   id="1"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="Example Simple4"
+                   byteOrder="littleEndian">
+  <types>
+    <composite name="messageHeader" description="Message identifiers and length of message root">
+      <type name="blockLength" primitiveType="uint16"/>
+      <type name="templateId" primitiveType="uint16"/>
+      <type name="schemaId" primitiveType="uint16"/>
+      <type name="version" primitiveType="uint16"/>
+    </composite>
+  </types>
+
+  <types>
+
+    <enum name="booleanEnum" encodingType="uint8" semanticType="Boolean">
+      <validValue name="F">0</validValue>
+      <validValue name="T">1</validValue>
+    </enum>
+
+    <composite name="point">
+      <type name="name" primitiveType="char" length="5" />
+      <type name="d" primitiveType="double" />
+      <type name="i" primitiveType="int32" />
+      <type name="u" primitiveType="uint8" length="2" />
+      <ref name="truthval1" type="booleanEnum"/>
+      <ref name="truthval2" type="booleanEnum"/>
+    </composite>
+
+  </types>
+
+  <sbe:message name="Composite" id="1" description="A very simple composite example">
+    <field name="start" id="2" type="point" />
+    <field name="end" id="3" type="point" />
+  </sbe:message>
+</sbe:messageSchema>

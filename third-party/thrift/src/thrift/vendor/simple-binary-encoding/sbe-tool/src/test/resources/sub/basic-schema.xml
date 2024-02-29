@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="2"
+               xmlns:xi="http://www.w3.org/2001/XInclude"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <xi:include href='sub2/common.xml'/>
+    <message name="TestMessage50001" id="50001" description="TestMessage" blockLength="16">
+        <field name="Tag40001" id="40001" type="uint32" semanticType="int"/>
+    </message>
+</messageSchema>

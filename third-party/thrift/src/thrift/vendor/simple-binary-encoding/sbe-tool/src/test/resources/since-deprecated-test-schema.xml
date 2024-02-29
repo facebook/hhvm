@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="since-deprecated"
+                   id="108"
+                   version="4"
+                   semanticVersion="5.2"
+                   description="Test case for SincVersion/DeprecatedVersion"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="SinceDeprecated" id="1" semanticType="n/a" description="Since/Deprecated version testing" >
+        <!-- Version 1 was initial with just field v1
+             Version 2 added field v2
+             Version 3 added field v3
+             Version 4 deprecated field v3
+        -->
+        <field name="v1"     id="1"  type="uint64" />
+        <field name="v2"     id="2"  type="uint64" sinceVersion="2"/>
+        <field name="v3"     id="3"  type="uint64" sinceVersion="3" deprecated="4"/>
+    </sbe:message>
+</sbe:messageSchema>

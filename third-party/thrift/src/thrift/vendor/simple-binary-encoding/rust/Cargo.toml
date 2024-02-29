@@ -1,0 +1,28 @@
+[package]
+name = "sbe_rust_example"
+version = "0.1.0"
+authors = []
+edition = "2018"
+publish = false
+
+[dependencies]
+examples_baseline = { path = "../generated/rust/baseline" }
+examples_extension = { path = "../generated/rust/extension" }
+examples_uk_co_real_logic_sbe_benchmarks = { path = "../generated/rust/uk_co_real_logic_sbe_benchmarks" }
+examples_uk_co_real_logic_sbe_benchmarks_fix = { path = "../generated/rust/uk_co_real_logic_sbe_benchmarks_fix" }
+
+issue_435 = { path = "../generated/rust/issue435" }
+issue_895 = { path = "../generated/rust/issue895" }
+baseline_bigendian = { path = "../generated/rust/baseline-bigendian" }
+nested_composite_name = { path = "../generated/rust/nested-composite-name" }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "car_benchmark"
+harness = false
+
+[[bench]]
+name = "md_benchmark"
+harness = false

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Org.SbeTool.Sbe.Benchmarks</RootNamespace>
+    <AssemblyName>sbe-benchmarks</AssemblyName>
+    <OutputTypeEx>exe</OutputTypeEx>
+    <Copyright>Copyright (C) Bill Segall 2018, MarketFactory Inc 2017, Adaptive 2014-2024. All rights reserved.</Copyright>
+    <Product>SBE</Product>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sbe-dll\sbe-dll.csproj" />
+    <ProjectReference Include="..\sbe-generated\sbe-generated.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.12" />
+  </ItemGroup>
+
+</Project>

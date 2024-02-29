@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="15"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions" >
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint8"/>
+        </composite>
+        <composite name="varStringEncoding">
+            <type name="length" primitiveType="uint8"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+        <type name="uuid_t" primitiveType="int64" length="2" presence="optional" sinceVersion="1"/>
+    </types>
+    <message name="TestMessage" id="1" sinceVersion="1">
+        <field name="field0" id="0" type="uint8" sinceVersion="2"/>
+        <field name="field1" id="1" type="uint32"/>
+        <group name="group2" id="2" dimensionType="groupSizeEncoding">
+            <field name="field3" id="3" type="uint8"/>
+            <field name="field4" id="4" type="uint8" sinceVersion="2"/>
+        </group>
+        <group name="group5" id="5" dimensionType="groupSizeEncoding" sinceVersion="2">
+            <field name="field6" id="6" type="uint16"/>
+            <field name="field7" id="7" type="float"/>
+        </group>
+        <data name="data8" id="8" type="varStringEncoding"/>
+        <data name="data9" id="9" type="varStringEncoding"/>
+    </message>
+</messageSchema>

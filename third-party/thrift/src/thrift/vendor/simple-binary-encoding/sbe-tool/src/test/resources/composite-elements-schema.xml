@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="composite.elements"
+                   id="3"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="Unit Test"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+
+        <composite name="outer">
+            <enum name="enumOne" description="enum as uint8" encodingType="uint8" semanticType="int">
+                <validValue name="Value1">1</validValue>
+                <validValue name="Value10">10</validValue>
+            </enum>
+            <type name="zeroth" primitiveType="uint8"/>
+            <set name="setOne" description="set as uint32" encodingType="uint32" semanticType="int">
+                <choice name="Bit0">0</choice>
+                <choice name="Bit16">16</choice>
+                <choice name="Bit26">26</choice>
+            </set>
+            <composite name="inner">
+                <type name="first" primitiveType="int64"/>
+                <type name="second" primitiveType="int64"/>
+            </composite>
+        </composite>
+    </types>
+
+    <sbe:message name="Msg" id="1">
+        <field name="structure" id="42" type="outer"/>
+    </sbe:message>
+</sbe:messageSchema>

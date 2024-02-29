@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:messageSchema
+    xmlns:ns2="http://www.fixprotocol.org/ns/simple/1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    package="simple"
+    id="1"
+    version="9"
+    semanticVersion="FIX5SP2"
+    description="20180308"
+    byteOrder="littleEndian"
+    xsi:schemaLocation="http://www.fixtradingcommunity.org/pg/file/fplpo/read/1196759/simple-binary-encoding-rc2xsd SimpleBinary-RC2.xsd">
+    <types>
+        <type name="Asset" description="Asset" length="6" primitiveType="char" semanticType="String"/>
+        <type name="CFICode" length="6" primitiveType="char" semanticType="String"/>
+        <type name="CHAR" description="char" primitiveType="char"/>
+        <type name="Currency" description="Currency" length="3" primitiveType="char" semanticType="Currency"/>
+        <type name="InstAttribType" description="Eligibility" presence="constant" primitiveType="int8">24</type>
+        <type name="Int16" description="int16" primitiveType="int16"/>
+        <type name="Int32" description="int32" primitiveType="int32"/>
+        <type name="Int32NULL" presence="optional" nullValue="2147483647" primitiveType="int32"/>
+        <type name="Int8" description="int8" primitiveType="int8"/>
+        <type name="Int8NULL" description="int8 optional" presence="optional" nullValue="127" primitiveType="int8"/>
+        <type name="LocalMktDate" presence="optional" nullValue="65535" primitiveType="uint16" semanticType="LocalMktDate"/>
+        <type name="MDEntryTypeChannelReset" description="Channel Reset message entry type" presence="constant" primitiveType="char">J</type>
+        <type name="MDEntryTypeLimits" description="MDEntryTypeLimits" presence="constant" primitiveType="char">g</type>
+        <type name="MDEntryTypeTrade" description="MDEntryTypeTrade" presence="constant" primitiveType="char">2</type>
+        <type name="MDEntryTypeVol" description="MDEntryTypeVol" presence="constant" primitiveType="char">e</type>
+        <type name="MDFeedType" length="3" primitiveType="char" semanticType="String"/>
+        <type name="MDUpdateActionNew" description="MDUpdateActionNew" presence="constant" primitiveType="int8">0</type>
+        <type name="MDUpdateTypeNew" description="MDUpdateTypeNew" presence="constant" primitiveType="int8">0</type>
+        <type name="QuoteReqId" length="23" primitiveType="char" semanticType="String"/>
+        <type name="SecurityExchange" length="4" primitiveType="char" semanticType="Exchange"/>
+        <type name="SecurityGroup" length="6" primitiveType="char" semanticType="String"/>
+        <type name="SecurityIDSource" description="SecurityIDSource" presence="constant" length="1" primitiveType="char" semanticType="char">8</type>
+        <type name="SecuritySubType" length="5" primitiveType="char" semanticType="String"/>
+        <type name="SecurityType" description="SecurityType" length="6" primitiveType="char" semanticType="String"/>
+        <type name="Symbol" description="Symbol" length="20" primitiveType="char" semanticType="String"/>
+        <type name="Text" description="Text" length="180" primitiveType="char" semanticType="String"/>
+        <type name="UnderlyingSymbol" length="20" primitiveType="char" semanticType="String"/>
+        <type name="UnitOfMeasure" length="30" primitiveType="char" semanticType="String"/>
+        <type name="UserDefinedInstrument" length="1" primitiveType="char" semanticType="char"/>
+        <type name="uInt32" description="uInt32" primitiveType="uint32"/>
+        <type name="uInt32NULL" description="uInt32 optional" presence="optional" nullValue="4294967295" primitiveType="uint32"/>
+        <type name="uInt64" description="uInt64" primitiveType="uint64"/>
+        <type name="uInt64NULL" description="uInt64 optional" presence="optional" nullValue="18446744073709551615" primitiveType="uint64" sinceVersion="7"/>
+        <type name="uInt8" description="uInt8" primitiveType="uint8"/>
+        <type name="uInt8NULL" description="uInt8NULL" presence="optional" nullValue="255" primitiveType="uint8"/>
+        <composite name="Decimal9" description="Decimal with constant exponent -9" sinceVersion="9">
+            <type name="mantissa" description="mantissa" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-9</type>
+        </composite>
+        <composite name="Decimal9NULL" description="Optional Decimal with constant exponent -9 " sinceVersion="9">
+            <type name="mantissa" description="mantissa" presence="optional" nullValue="9223372036854775807" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-9</type>
+        </composite>
+        <composite name="DecimalQty" description="A number representing quantity" semanticType="Qty">
+            <type name="mantissa" description="mantissa " presence="optional" nullValue="2147483647" primitiveType="int32"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-4</type>
+        </composite>
+        <composite name="FLOAT" description="Decimal">
+            <type name="mantissa" description="mantissa" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-7</type>
+        </composite>
+        <composite name="MaturityMonthYear" description="Year, Month and Date" semanticType="MonthYear">
+            <type name="year" description="YYYY" presence="optional" nullValue="65535" primitiveType="uint16"/>
+            <type name="month" description="MM" presence="optional" nullValue="255" primitiveType="uint8"/>
+            <type name="day" description="DD" presence="optional" nullValue="255" primitiveType="uint8"/>
+            <type name="week" description="WW" presence="optional" nullValue="255" primitiveType="uint8"/>
+        </composite>
+        <composite name="PRICE" description="PRICE">
+            <type name="mantissa" description="mantissa" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-7</type>
+        </composite>
+        <composite name="PRICE9" description="Price with constant exponent -9" sinceVersion="9">
+            <type name="mantissa" description="mantissa" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-9</type>
+        </composite>
+        <composite name="PRICENULL" description="Price NULL">
+            <type name="mantissa" description="mantissa" presence="optional" nullValue="9223372036854775807" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-7</type>
+        </composite>
+        <composite name="PRICENULL9" description="Optional Price with constant exponent -9" sinceVersion="9">
+            <type name="mantissa" description="mantissa" presence="optional" nullValue="9223372036854775807" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-9</type>
+        </composite>
+        <composite name="groupSize" description="Repeating group dimensions" semanticType="NumInGroup">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint8"/>
+        </composite>
+        <composite name="groupSize8Byte" description="8 Byte aligned repeating group dimensions" semanticType="NumInGroup">
+            <type name="blockLength" description="Length" primitiveType="uint16"/>
+            <type name="numInGroup" description="NumInGroup" offset="7" primitiveType="uint8"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16" semanticType="Length"/>
+            <type name="numInGroup" primitiveType="uint16" semanticType="NumInGroup"/>
+        </composite>
+        <composite name="messageHeader" description="Template ID and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <enum name="AggressorSide" encodingType="uInt8NULL">
+            <validValue name="NoAggressor" description="No Aggressor">0</validValue>
+            <validValue name="Buy" description="Buy">1</validValue>
+            <validValue name="Sell" description="Sell">2</validValue>
+        </enum>
+        <enum name="EventType" encodingType="uInt8">
+            <validValue name="Activation" description="Activation">5</validValue>
+            <validValue name="LastEligibleTradeDate" description="Last Eligible Trade Date">7</validValue>
+        </enum>
+        <enum name="HaltReason" encodingType="uInt8">
+            <validValue name="GroupSchedule" description="Group Schedule">0</validValue>
+            <validValue name="SurveillanceIntervention" description="Surveillance Intervention ">1</validValue>
+            <validValue name="MarketEvent" description="Market Event ">2</validValue>
+            <validValue name="InstrumentActivation" description="Instrument Activation">3</validValue>
+            <validValue name="InstrumentExpiration" description="Instrument Expiration">4</validValue>
+            <validValue name="Unknown" description="Unknown">5</validValue>
+            <validValue name="RecoveryInProcess" description="Recovery In Process" sinceVersion="3">6</validValue>
+        </enum>
+        <enum name="LegSide" encodingType="uInt8">
+            <validValue name="BuySide" description="Buy Side">1</validValue>
+            <validValue name="SellSide" description="Sell Side">2</validValue>
+        </enum>
+        <enum name="MDEntryType" encodingType="CHAR">
+            <validValue name="Bid" description="Bid">0</validValue>
+            <validValue name="Offer" description="Offer">1</validValue>
+            <validValue name="Trade" description="Trade">2</validValue>
+            <validValue name="OpenPrice" description="Open Price">4</validValue>
+            <validValue name="SettlementPrice" description="Settlement Price">6</validValue>
+            <validValue name="TradingSessionHighPrice" description="Trading Session High Price">7</validValue>
+            <validValue name="TradingSessionLowPrice" description="Trading Session Low Price">8</validValue>
+            <validValue name="ClearedVolume" description="Cleared Volume">B</validValue>
+            <validValue name="OpenInterest" description="Open Interest">C</validValue>
+            <validValue name="ImpliedBid" description="Implied Bid">E</validValue>
+            <validValue name="ImpliedOffer" description="Implied Offer">F</validValue>
+            <validValue name="BookReset" description="Book Reset">J</validValue>
+            <validValue name="SessionHighBid" description="Session High Bid">N</validValue>
+            <validValue name="SessionLowOffer" description="Session Low Offer">O</validValue>
+            <validValue name="FixingPrice" description="Fixing Price">W</validValue>
+            <validValue name="ElectronicVolume" description="Electronic Volume">e</validValue>
+            <validValue name="ThresholdLimitsandPriceBandVariation" description="Threshold Limits and Price Band Variation">g</validValue>
+        </enum>
+        <enum name="MDEntryTypeBook" encodingType="CHAR">
+            <validValue name="Bid" description="Bid">0</validValue>
+            <validValue name="Offer" description="Offer">1</validValue>
+            <validValue name="ImpliedBid" description="Implied Bid">E</validValue>
+            <validValue name="ImpliedOffer" description="Implied Offer">F</validValue>
+            <validValue name="BookReset" description="Book Reset">J</validValue>
+        </enum>
+        <enum name="MDEntryTypeDailyStatistics" encodingType="CHAR">
+            <validValue name="SettlementPrice" description="Settlement Price">6</validValue>
+            <validValue name="ClearedVolume" description="Cleared Volume">B</validValue>
+            <validValue name="OpenInterest" description="Open Interest">C</validValue>
+            <validValue name="FixingPrice" description="Fixing Price">W</validValue>
+        </enum>
+        <enum name="MDEntryTypeStatistics" encodingType="CHAR">
+            <validValue name="OpenPrice" description="Open Price">4</validValue>
+            <validValue name="HighTrade" description="High Trade">7</validValue>
+            <validValue name="LowTrade" description="Low Trade">8</validValue>
+            <validValue name="HighestBid" description="Highest Bid">N</validValue>
+            <validValue name="LowestOffer" description="Lowest Offer">O</validValue>
+        </enum>
+        <enum name="MDUpdateAction" encodingType="uInt8">
+            <validValue name="New" description="New">0</validValue>
+            <validValue name="Change" description="Change">1</validValue>
+            <validValue name="Delete" description="Delete">2</validValue>
+            <validValue name="DeleteThru" description="Delete Thru">3</validValue>
+            <validValue name="DeleteFrom" description="Delete From">4</validValue>
+            <validValue name="Overlay" description="Overlay">5</validValue>
+        </enum>
+        <enum name="OpenCloseSettlFlag" encodingType="uInt8NULL">
+            <validValue name="DailyOpenPrice" description="Daily Open Price">0</validValue>
+            <validValue name="IndicativeOpeningPrice" description="Indicative Opening Price">5</validValue>
+        </enum>
+        <enum name="OrderUpdateAction" encodingType="uInt8" sinceVersion="7">
+            <validValue name="New" description="New">0</validValue>
+            <validValue name="Update" description="Update">1</validValue>
+            <validValue name="Delete" description="Delete">2</validValue>
+        </enum>
+        <enum name="PutOrCall" encodingType="uInt8" sinceVersion="3">
+            <validValue name="Put" description="Put Option">0</validValue>
+            <validValue name="Call" description="Call Option">1</validValue>
+        </enum>
+        <enum name="SecurityTradingEvent" encodingType="uInt8">
+            <validValue name="NoEvent" description="No Event">0</validValue>
+            <validValue name="NoCancel" description="No Cancel">1</validValue>
+            <validValue name="ResetStatistics" description="Reset Statistics">4</validValue>
+            <validValue name="ImpliedMatchingON" description="Implied Matching ON">5</validValue>
+            <validValue name="ImpliedMatchingOFF" description="Implied Matching OFF">6</validValue>
+        </enum>
+        <enum name="SecurityTradingStatus" encodingType="uInt8NULL">
+            <validValue name="TradingHalt" description="Trading Halt">2</validValue>
+            <validValue name="Close" description="Close">4</validValue>
+            <validValue name="NewPriceIndication" description="New Price Indication">15</validValue>
+            <validValue name="ReadyToTrade" description="Ready To Trade">17</validValue>
+            <validValue name="NotAvailableForTrading" description="Not Available For Trading">18</validValue>
+            <validValue name="UnknownorInvalid" description="Unknown or Invalid">20</validValue>
+            <validValue name="PreOpen" description="Pre Open">21</validValue>
+            <validValue name="PreCross" description="Pre Cross">24</validValue>
+            <validValue name="Cross" description="Cross">25</validValue>
+            <validValue name="PostClose" description="Post Close">26</validValue>
+            <validValue name="NoChange" description="No Change">103</validValue>
+        </enum>
+        <enum name="SecurityUpdateAction" encodingType="CHAR">
+            <validValue name="Add" description="Add">A</validValue>
+            <validValue name="Delete" description="Delete">D</validValue>
+            <validValue name="Modify" description="Modify">M</validValue>
+        </enum>
+        <set name="InstAttribValue" encodingType="uInt32">
+            <choice name="ElectronicMatchEligible" description="1=Electronic Match Eligible">0</choice>
+            <choice name="OrderCrossEligible" description="1=Order Cross Eligible">1</choice>
+            <choice name="BlockTradeEligible" description="1=Block Trade Eligible">2</choice>
+            <choice name="EFPEligible" description="1=EFP Eligible">3</choice>
+            <choice name="EBFEligible" description="1=EBF Eligible">4</choice>
+            <choice name="EFSEligible" description="1=EFS Eligible">5</choice>
+            <choice name="EFREligible" description="1=EFR Eligible">6</choice>
+            <choice name="OTCEligible" description="1=OTC Eligible">7</choice>
+            <choice name="iLinkIndicativeMassQuotingEligible" description="1=iLink Indicative Mass Quoting Eligible">8</choice>
+            <choice name="NegativeStrikeEligible" description="1=Negative Strike Eligible">9</choice>
+            <choice name="NegativePriceOutrightEligible" description="1=Negative Price Outright Eligible">10</choice>
+            <choice name="IsFractional" description="1=Indicates product has fractional display price">11</choice>
+            <choice name="VolatilityQuotedOption" description="1=Volatility Quoted Option">12</choice>
+            <choice name="RFQCrossEligible" description="1=RFQ Cross Eligible">13</choice>
+            <choice name="ZeroPriceOutrightEligible" description="1=Zero Price Outright Eligible">14</choice>
+            <choice name="DecayingProductEligibility" description="1=Decaying Product Eligibility">15</choice>
+            <choice name="VariableProductEligibility" description="1=Variable Product Eligibility">16</choice>
+            <choice name="DailyProductEligibility" description="1=Daily Product Eligibility">17</choice>
+            <choice name="GTOrdersEligibility" description="1=GT Orders Eligibility">18</choice>
+            <choice name="ImpliedMatchingEligibility" description="1=Implied Matching Eligibility">19</choice>
+            <choice name="TriangulationEligible" description="1=Triangulation Eligible" sinceVersion="9">20</choice>
+            <choice name="VariableCabEligible" description="1=Variable Cab Eligible" sinceVersion="9">21</choice>
+        </set>
+        <set name="MatchEventIndicator" encodingType="uInt8">
+            <choice name="LastTradeMsg" description="1=Last trade message for the event, 0=Not last">0</choice>
+            <choice name="LastVolumeMsg" description="1=Last electronic volume message, 0=Not last">1</choice>
+            <choice name="LastQuoteMsg" description="1=Last real quote message, 0=Not last">2</choice>
+            <choice name="LastStatsMsg" description="1=Last statistics message, 0=Not last">3</choice>
+            <choice name="LastImpliedMsg" description="1=Last implied quote message, 0=Not last">4</choice>
+            <choice name="RecoveryMsg" description="1=Message is sent during  recovery process">5</choice>
+            <choice name="Reserved" description="0=Reserved for future use">6</choice>
+            <choice name="EndOfEvent" description="1=Last message for the event, 0=Not last">7</choice>
+        </set>
+        <set name="SettlPriceType" encodingType="uInt8">
+            <choice name="FinalDaily" description="1=FinalDaily, 0=Preliminary">0</choice>
+            <choice name="Actual" description="1=Actual, 0=Theoretically Calculated">1</choice>
+            <choice name="Rounded" description="1=Rounded, 0=Non-Rounded or Undefined">2</choice>
+            <choice name="Intraday" description="1=Intraday, 0=Undefined" sinceVersion="4">3</choice>
+            <choice name="ReservedBits" description="Bits 4-6 are reserved">4</choice>
+            <choice name="NullValue" description="1=Entire set is NULL, 0=not NULL">7</choice>
+        </set>
+    </types>
+    <ns2:message name="MDIncrementalRefreshOrderBook47" id="47" description="MDIncrementalRefreshOrderBook" blockLength="11" semanticType="X" sinceVersion="9">
+        <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
+        <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
+        <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="40" dimensionType="groupSize">
+            <field name="OrderID" id="37" type="uInt64NULL" description="Order ID" offset="0" semanticType="int"/>
+            <field name="MDOrderPriority" id="37707" type="uInt64NULL" description="Order priority for execution on the order book" offset="8" semanticType="int"/>
+            <field name="MDEntryPx" id="270" type="PRICENULL9" description="Order price" offset="16" semanticType="Price"/>
+            <field name="MDDisplayQty" id="37706" type="Int32NULL" description="Visible order qty" offset="24" semanticType="Qty"/>
+            <field name="SecurityID" id="48" type="Int32" description="Security ID " offset="28" semanticType="int"/>
+            <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Order book update action to be applied to the order referenced by OrderID" offset="32" semanticType="int"/>
+            <field name="MDEntryType" id="269" type="MDEntryTypeBook" description="Market Data entry type " offset="33" semanticType="char"/>
+        </group>
+    </ns2:message>
+</ns2:messageSchema>

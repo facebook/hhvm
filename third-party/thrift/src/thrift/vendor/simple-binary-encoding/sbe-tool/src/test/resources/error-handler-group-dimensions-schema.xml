@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="10"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint8" semanticType="NumInGroup"/>
+        </composite>
+        <type name="fakeSizeEncoding" primitiveType="uint8"/>
+    </types>
+    <message name="TestMessage1" id="1" description="TestMessage" blockLength="16">
+        <group name="Entries" id="2" dimensionType="fakeSizeEncoding">
+            <field name="TagGroup1" id="3" type="uint64" semanticType="int"/>
+            <field name="TagGroup2" id="4" type="int64" semanticType="int"/>
+        </group>
+    </message>
+</messageSchema>

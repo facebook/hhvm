@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="Examples"
+               id="14"
+               description="Test dictionary"
+               byteOrder="littleEndian">
+    <types>
+        <type name="enumEncoding" primitiveType="char"/>
+        <type name="idString" length="8" primitiveType="char" semanticType="String"/>
+        <type name="timestampEncoding" primitiveType="uint64" semanticType="UTCTimestamp"/>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="optionalDecimalEncoding" description="Optional decimal with constant exponent">
+            <type name="mantissa" presence="optional" primitiveType="int64"/>
+            <type name="exponent" presence="constant" primitiveType="int8">-3</type>
+        </composite>
+        <composite name="qtyEncoding" description="Decimal constrainted to integers">
+            <type name="mantissa" primitiveType="int32"/>
+            <type name="exponent" presence="constant" primitiveType="int8">0</type>
+        </composite>
+        <enum name="ordTypeEnum" encodingType="enumEncoding">
+            <validValue name="Market" description="Market">1</validValue>
+            <validValue name="Limit" description="Limit">2</validValue>
+            <validValue name="Stop" description="Stop Loss">3</validValue>
+            <validValue name="StopLimit" description="Stop Limit">4</validValue>
+        </enum>
+        <enum name="sideEnum" encodingType="enumEncoding">
+            <validValue name="Buy" description="Buy">1</validValue>
+            <validValue name="Sell" description="Sell">2</validValue>
+        </enum>
+    </types>
+
+    <message name="NewOrderSingle" id="99" blockLength="54" semanticType="D">
+        <field name="ClOrdId" id="11" type="idString" description="Customer Order ID"
+               offset="0" semanticType="String"/>
+        <field name="Account" id="1" type="idString" description="Account mnemonic"
+               offset="8" semanticType="String"/>
+        <field name="Symbol" id="55" type="idString" description="Security ID"
+               offset="16" semanticType="String"/>
+        <field name="Side" id="54" type="sideEnum" description="Side" offset="24"
+               semanticType="char"/>
+        <field name="TransactTime" id="60" type="timestampEncoding"
+               description="Order entry time" offset="25" semanticType="UTCTimestamp"/>
+        <field name="OrderQty" id="38" type="qtyEncoding" description="Order quantity"
+               offset="33" semanticType="Qty"/>
+        <field name="OrdType" id="40" type="ordTypeEnum" description="Order type"
+               offset="37" semanticType="char"/>
+        <field name="Price" id="44" type="optionalDecimalEncoding"
+               description="Limit price" offset="38" semanticType="Price"/>
+        <field name="StopPx" id="99" type="optionalDecimalEncoding"
+               description="Stop price" offset="46" semanticType="Price"/>
+    </message>
+</messageSchema>

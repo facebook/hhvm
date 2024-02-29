@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="composite.elements"
+                   id="3"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="Unit Test"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <enum name="TimeUnit" encodingType="uint8">
+            <validValue name="second">0</validValue>
+            <validValue name="millisecond">3</validValue>
+            <validValue name="microsecond">6</validValue>
+            <validValue name="nanosecond">9</validValue>
+        </enum>
+        <composite name="UTCTimestampNanos" description="UTC timestamp with nanosecond precision" semanticType="UTCTimestamp" >
+            <type name="time" primitiveType="uint64" />
+            <type name="unit" primitiveType="uint8" presence="constant" valueRef="TimeUnit.nanosecond"/>
+        </composite>
+        <type name="testConstantOne" primitiveType="uint8" presence="constant">7</type>
+        <type name="testConstantTwo" primitiveType="uint8" presence="constant" valueRef="TimeUnit.nanosecond"/>
+    </types>
+
+    <sbe:message name="MsgOne" id="1">
+        <field name="timestampComposite" id="1" type="UTCTimestampNanos"/>
+    </sbe:message>
+    <sbe:message name="MsgTwo" id="2">
+        <field name="timeUnitTypeOne" id="1" type="uint8" presence="constant" valueRef="TimeUnit.millisecond"/>
+    </sbe:message>
+    <sbe:message name="MsgThree" id="3">
+        <field name="timeUnitTypeOne" id="1" type="TimeUnit" presence="constant" valueRef="TimeUnit.millisecond"/>
+    </sbe:message>
+    <sbe:message name="MsgFour" id="4">
+        <field name="testConstantOneField" id="1" type="testConstantOne"/>
+    </sbe:message>
+    <sbe:message name="MsgFive" id="5">
+        <field name="testConstantTwoField" id="1" type="testConstantTwo"/>
+    </sbe:message>
+</sbe:messageSchema>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="nested-composite-name"
+                   id="1"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="test case for nested composite field where the field name from the composite name"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="MyComposite">
+            <ref name="myFieldName" type="MyNestedComposite"/> <!-- The field name here is different from the nested composite name -->
+        </composite>
+        <composite name="MyNestedComposite">
+            <type name="irrelevantField" primitiveType="uint16"/>
+        </composite>
+        <composite name="messageHeader">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId"  primitiveType="uint16"/>
+            <type name="schemaId"    primitiveType="uint16"/>
+            <type name="version"     primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="MyMessage" id="1" description="Nested composite name different from field name">
+        <field name="irrelevantHeader" id="1" type="messageHeader"/>
+        <field name="irrelevantField" id="2" type="MyComposite"/>
+    </sbe:message>
+</sbe:messageSchema>
+

@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputTypeEx>exe</OutputTypeEx>
+    <RootNamespace>Org.SbeTool.Sbe.Example.Extension</RootNamespace>
+    <AssemblyName>Org.SbeTool.Sbe.Example.Extension</AssemblyName>
+    <Copyright>Copyright (C) Bill Segall 2018, MarketFactory Inc 2017, Adaptive 2014-2024. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\sbe-samples\src\main\resources\example-extension-schema.xml" Link="example-extension-schema.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sbe-dll\sbe-dll.csproj" />
+    <ProjectReference Include="..\sbe-generated\sbe-generated.csproj" />
+  </ItemGroup>
+
+</Project>

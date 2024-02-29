@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="2"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint8"/>
+            <type name="numInGroup" primitiveType="uint8"/>
+        </composite>
+    </types>
+    <message name="Top" id="1" description="Top" blockLength="16">
+        <field name="a" id="1" type="uint8" />
+        <group name="x" id="2" dimensionType="groupSizeEncoding" >
+            <field name="b" id="3" type="uint8"/>
+            <group name="y" id="4" dimensionType="groupSizeEncoding">
+                <field name="c" id="5" type="uint8"/>
+                <!-- TODO - multiple subgroups -->
+                <group name="z" id="6" dimensionType="groupSizeEncoding">
+                    <field name="d" id="7" type="uint8"/>
+                </group>
+            </group>
+        </group>
+    </message>
+</messageSchema>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="simple"
+                   id="3"
+                   version="2"
+                   semanticVersion="5.2"
+                   description="insert_type_here"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint8"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <types>
+      <type name="ascii6" primitiveType="char" semanticType="String" length="6" characterEncoding="ASCII"/>
+      <type name="ascii1" primitiveType="char" semanticType="String" length="1" characterEncoding="ASCII"/>
+      <type name="int2" primitiveType="int32" length="2"/>
+      <type name="uint64nv" presence="optional" nullValue="18446744073709551615"   description="Large Null Value test" primitiveType="uint64"/>
+
+      <!-- not yet
+      <type name="utf86" primitiveType="char" semanticType="String" length="6" characterEncoding="UTF-8"/>
+      <type name="utf166" primitiveType="char" semanticType="String" length="6" characterEncoding="UTF-8"/>
+      -->
+    </types>
+    <sbe:message name="Simple0" id="11" semanticType="womble" description="A very simple first example" blockLength="76">
+        <field name="U64nv"   id="10"  type="uint64nv" sinceVersion="1"/>
+        <!-- open spec issue on whether this can be allowed 
+             <field name="U64"     id="20"  type="uint64" deprecated="2" sinceVersion="1" presence="optional" nullValue="18446744073709551615"/>
+        -->
+        <field name="U64"     id="20"  type="uint64" deprecated="2" sinceVersion="1"/>
+        <field name="U32"     id="30"  type="uint32"/>
+        <field name="U16"     id="40"  type="uint16"/>
+        <field name="U8"      id="50"  type="uint8"/>
+        <field name="S8"      id="60"  type="int8" offset="31"/>
+        <field name="S16"     id="70"  type="int16"/>
+        <field name="S32"     id="80"  type="int32"/>
+        <field name="S64"     id="90"  type="int64"/>
+        <field name="F32"     id="100"  type="float"/>
+        <field name="D64"     id="110" type="double"/>
+        <field name="String6ASCII" id="120" type="ascii6"/>
+        <field name="String1ASCII" id="130" type="ascii1"/>
+        <field name="Int2"    id="140" type="int2"/>
+    </sbe:message>
+</sbe:messageSchema>

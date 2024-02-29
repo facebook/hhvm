@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="12"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <!-- this test has a duplicate type defined. -->
+        <type name="TypeToTest" primitiveType="char"/>
+        <type name="TypeToTest" primitiveType="uint8"/>
+    </types>
+    <message name="Message1" id="1">
+        <field name="field" id="10" type="TypeToTest" semanticType="int"/>
+    </message>
+</messageSchema>

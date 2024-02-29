@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue827"
+                   id="827"
+                   version="1"
+                   semanticVersion="1.0"
+                   description="issue 827 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <set name="FlagsSet" encodingType="uint64">
+            <choice name="Bit0" description="Bit 0">0</choice>
+            <choice name="Bit35" description="Bit 35">35</choice>
+        </set>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="test" id="1" description="issue 827 test">
+	    <field name="set0" type="FlagsSet" id="1"/>
+    </sbe:message>
+</sbe:messageSchema>

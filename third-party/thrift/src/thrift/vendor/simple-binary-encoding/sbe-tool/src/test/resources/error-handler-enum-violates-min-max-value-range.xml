@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="13"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <type name="EnumValueRange" primitiveType="int32" minValue="1" maxValue="5"/>
+        <enum name="EnumWithCustomEncodingType" encodingType="EnumValueRange">
+            <validValue name="INVALID_ZERO">0</validValue>
+            <validValue name="ONE">1</validValue>
+            <validValue name="FIVE">5</validValue>
+            <validValue name="INVALID_SIX">6</validValue>
+            <validValue name="INVALID_NULL_VALUE">-2147483648</validValue>
+        </enum>
+        <enum name="EnumWithCustomEncodingTypeOptional" encodingType="EnumValueRange" presence="optional" nullValue="3">
+            <validValue name="INVALID_THREE">3</validValue>
+            <validValue name="FOUR">4</validValue>
+        </enum>
+    </types>
+    <message name="Message" id="1">
+        <field name="ref1" id="1" type="EnumWithCustomEncodingType"/>
+    </message>
+</messageSchema>

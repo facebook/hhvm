@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="2"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <type name="Symbol" description="Symbol" length="20" primitiveType="char" semanticType="char"/>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <message name="TestMessage50001" id="50001" description="TestMessage" blockLength="16">
+        <field name="Tag40001" id="40001" type="uint32" semanticType="int"/>
+    </message>
+</messageSchema>

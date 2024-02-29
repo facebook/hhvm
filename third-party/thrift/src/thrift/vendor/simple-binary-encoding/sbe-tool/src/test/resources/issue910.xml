@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue910"
+                   id="910"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 910 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="varDataEncoding" semanticType="Length">
+            <type name="length" primitiveType="uint8" semanticType="Length"/>
+            <type name="varData" primitiveType="char" semanticType="data"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <enum name="Enum" encodingType="char">
+            <validValue name="A">A</validValue>
+            <validValue name="B">B</validValue>
+            <validValue name="C">C</validValue>
+        </enum>
+        <set name="Set" encodingType="uint8">
+            <choice name="A">0</choice>
+            <choice name="B">1</choice>
+            <choice name="C">2</choice>
+        </set>
+        <type name="Array" primitiveType="int32" length="5"/>
+        <type name="CharArray" primitiveType="char" length="5"/>
+    </types>
+    <sbe:message name="Issue910Field" id="1" description="issue 910 field test">
+        <field name="yield" type="uint64" id="1"/>
+    </sbe:message>
+    <sbe:message name="Issue910Vardata" id="2" description="issue 910 vardata test">
+        <field name="yield" type="varDataEncoding" id="1"/>
+    </sbe:message>
+    <sbe:message name="Issue910Group" id="3" description="issue 910 group test">
+        <group name="yield" id="1" dimensionType="groupSizeEncoding">
+            <field name="whatever" type="uint64" id="1"/>
+        </group>
+    </sbe:message>
+    <sbe:message name="Issue910GroupField" id="4" description="issue 910 group field test">
+        <group name="whatever" id="1" dimensionType="groupSizeEncoding">
+            <field name="yield" type="uint64" id="1"/>
+        </group>
+    </sbe:message>
+    <sbe:message name="Issue910Enum" id="5" description="issue 910 enum test">
+        <field name="yield" type="Enum" id="1"/>
+    </sbe:message>
+    <sbe:message name="Issue910Set" id="6" description="issue 910 set test">
+        <field name="yield" type="Set" id="1"/>
+    </sbe:message>
+    <sbe:message name="Issue910Array" id="7" description="issue 910 array test">
+        <field name="yield" type="Array" id="1"/>
+    </sbe:message>
+    <sbe:message name="Issue910CharArray" id="8" description="issue 910 char array test">
+        <field name="yield" type="CharArray" id="1"/>
+    </sbe:message>
+</sbe:messageSchema>

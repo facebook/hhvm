@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue488"
+                   id="488"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 488 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <composite name="messageHeader" description="header">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+
+        <type name="string10" length="10" primitiveType="char"/>
+
+        <composite name="compositeThree">
+            <ref name="field1" type="string10"/>
+        </composite>
+
+        <composite name="compositeTwo">
+            <ref name="compFieldTwo" type="string10"/>
+            <ref name="compThree" type="compositeThree"/>
+        </composite>
+
+        <composite name="compositeOne">
+            <ref name="compFieldOne" type="string10"/>
+            <ref name="compTwo" type="compositeTwo"/>
+        </composite>
+    </types>
+
+    <sbe:message name="SomeMessage" id="1">
+        <field name="id" id="1" type="int64"/>
+        <field name="comp" id="2" type="compositeOne"/>
+    </sbe:message>
+</sbe:messageSchema>

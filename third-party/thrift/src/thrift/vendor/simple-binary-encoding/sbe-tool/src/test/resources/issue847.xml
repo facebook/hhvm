@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue847"
+                   id="1"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="test case 847 20210511"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="Comp1" description="C1">
+            <type name="lmn"  primitiveType="uint16"/>
+            <type name="wxy" primitiveType="uint16"/>
+        </composite>
+        <composite name="messageHeader" description="MH">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId"  primitiveType="uint16"/>
+            <type name="schemaId"    primitiveType="uint16"/>
+            <type name="version"     primitiveType="uint16"/>
+            <ref  name="c1"          type="Comp1"/>
+        </composite>
+    </types>
+    <sbe:message name="barmsg" id="4">
+        <field name="header" id="1" type="messageHeader"/>
+    </sbe:message>
+</sbe:messageSchema>

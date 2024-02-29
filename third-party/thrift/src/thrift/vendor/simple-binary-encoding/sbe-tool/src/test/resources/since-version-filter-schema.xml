@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="since-deprecated"
+                   id="109"
+                   version="5"
+                   semanticVersion="5.2"
+                   description="Test case for transforming based on sinceVersion"
+                   byteOrder="littleEndian">
+    <types>
+        <type name="typeSince0" primitiveType="int32"/>
+        <type name="typeSince4" primitiveType="int32" sinceVersion="4"/>
+        <type name="typeSince5" primitiveType="int32" sinceVersion="5"/>
+
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+
+        <composite name="groupSizeEncoding" description="Repeating group dimensions" >
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+
+        <composite name="varStringEncoding">
+            <type name="length" primitiveType="uint8"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+
+        <composite name="compositeSince0">
+            <type name="f1" primitiveType="int32"/>
+        </composite>
+
+        <composite name="compositeSince4" sinceVersion="4">
+            <type name="f1" primitiveType="int32"/>
+        </composite>
+
+        <composite name="compositeSince5" sinceVersion="5">
+            <type name="f1" primitiveType="int32"/>
+        </composite>
+
+        <composite name="compositeWithSinceFields" sinceVersion="5">
+            <type name="compTypeSince0" primitiveType="int32"/>
+            <type name="compTypeSince4" primitiveType="int32" sinceVersion="4"/>
+            <type name="compTypeSince5" primitiveType="int32" sinceVersion="5"/>
+        </composite>
+
+        <enum name="enumSince0" encodingType="char">
+            <validValue name="A">A</validValue>
+        </enum>
+
+        <enum name="enumSince4" encodingType="char">
+            <validValue name="A">A</validValue>
+        </enum>
+
+        <enum name="enumSince5" encodingType="char">
+            <validValue name="A">A</validValue>
+        </enum>
+
+        <enum name="enumWithSinceValues" encodingType="char">
+            <validValue name="valueSince0">A</validValue>
+            <validValue name="valueSince4" sinceVersion="4">B</validValue>
+            <validValue name="valueSince5" sinceVersion="5">C</validValue>
+        </enum>
+
+        <set name="setSince0" encodingType="uint32">
+            <choice name="A">0</choice>
+        </set>
+
+        <set name="setSince4" encodingType="uint32" sinceVersion="4">
+            <choice name="A">0</choice>
+        </set>
+
+        <set name="setSince5" encodingType="uint32" sinceVersion="5">
+            <choice name="A">0</choice>
+        </set>
+
+        <set name="setWithSinceChoices" encodingType="uint32" sinceVersion="5">
+            <choice name="choiceSince0">0</choice>
+            <choice name="choiceSince4" sinceVersion="4">1</choice>
+            <choice name="choiceSince5" sinceVersion="5">2</choice>
+        </set>
+    </types>
+
+    <sbe:message name="MessageSince0" id="1">
+        <field name="a" id="1" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="MessageSince4" id="2" sinceVersion="4">
+        <field name="a" id="1" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="MessageSince5" id="3" sinceVersion="5">
+        <field name="a" id="1" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="MessageWithSince" id="4">
+        <field name="fieldSince0" id="1" type="int32"/>
+        <field name="fieldSince4" id="5" type="int32" sinceVersion="4"/>
+        <field name="fieldSince5" id="10" type="int32" sinceVersion="5"/>
+        <group name="groupSince0" id="2">
+            <field id="3" name="groupFieldSince0" type="int32"/>
+            <field id="6" name="groupFieldSince4" type="int32" sinceVersion="4"/>
+            <field id="11" name="groupFieldSince5" type="int32" sinceVersion="5"/>
+        </group>
+        <group name="groupSince4" id="7" sinceVersion="4">
+            <field id="8" name="a" type="int32"/>
+        </group>
+        <group name="groupSince5" id="11" sinceVersion="5">
+            <field id="12" name="a" type="int32"/>
+        </group>
+        <data name="dataSince0" id="4" type="varStringEncoding"/>
+        <data name="dataSince4" id="9" type="varStringEncoding" sinceVersion="4"/>
+        <data name="dataSince5" id="13" type="varStringEncoding" sinceVersion="5"/>
+    </sbe:message>
+
+</sbe:messageSchema>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue967"
+                   id="1"
+                   version="13"
+                   semanticVersion="1.0"
+                   description="Example null enum"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="PRICENULL9" description="Optional Price with constant exponent -9" sinceVersion="9">
+            <type name="mantissa" description="mantissa" presence="optional" nullValue="9223372036854775807" primitiveType="int64"/>
+            <type name="exponent" description="exponent" presence="constant" primitiveType="int8">-9</type>
+        </composite>
+    </types>
+    <sbe:message name="MDInstrumentDefinitionFX63" id="63" description="MDInstrumentDefinitionFX" blockLength="337" semanticType="d" sinceVersion="12">
+        <field name="AltMinPriceIncrement" id="37739" type="PRICENULL9" description="New sub-tick which is only available for order entry when certain conditions are met, tick value which corresponds to the Alt Min Quote Life" offset="309" sinceVersion="12" semanticType="Price"/>
+        <field name="AltPriceIncrementConstraint" id="37742" type="PRICENULL9" description="Minimum price offset better than the best Standard Tick order for an order to be allowed into the market" offset="321" sinceVersion="13" semanticType="Price"/>
+    </sbe:message>
+</sbe:messageSchema>

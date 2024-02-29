@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="3"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <type name="EDT" description="char array" length="20" primitiveType="char" semanticType="char"/>
+        <enum name="ENUM" description="enum as uint8" encodingType="uint8" semanticType="int">
+            <validValue name="Value1">1</validValue>
+            <validValue name="Value10">10</validValue>
+        </enum>
+        <set name="SET" description="set as uint32" encodingType="uint32" semanticType="int">
+            <choice name="Bit0">0</choice>
+            <choice name="Bit16">16</choice>
+            <choice name="Bit26">26</choice>
+        </set>
+    </types>
+    <message name="Message1" id="1">
+        <field name="header" id="41" type="messageHeader"/>
+        <field name="EDTField" id="42" type="EDT"/>
+        <field name="ENUMField" id="43" type="ENUM"/>
+        <field name="SETField" id="44" type="SET"/>
+        <field name="int64Field" id="45" type="int64" semanticType="int"/>
+    </message>
+    <message name="Message1WithOffsets" id="2">
+        <field name="header" id="41" type="messageHeader" offset="0"/>
+        <field name="EDTField" id="42" type="EDT" offset="8"/>
+        <field name="ENUMField" id="43" type="ENUM" offset="32"/>
+        <field name="SETField" id="44" type="SET" offset="128"/>
+        <field name="int64Field" id="45" type="int64" offset="136" semanticType="int"/>
+    </message>
+</messageSchema>

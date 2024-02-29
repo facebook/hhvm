@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<types>
+    <type name="Symbol" description="Symbol" length="20" primitiveType="char" semanticType="char"/>
+    <composite name="messageHeader" description="Message identifiers and length of message root">
+        <type name="blockLength" primitiveType="uint16"/>
+        <type name="templateId" primitiveType="uint16"/>
+        <type name="schemaId" primitiveType="uint16"/>
+        <type name="version" primitiveType="uint16"/>
+    </composite>
+</types>

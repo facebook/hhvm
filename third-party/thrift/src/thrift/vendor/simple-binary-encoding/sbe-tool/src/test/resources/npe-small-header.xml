@@ -1,0 +1,26 @@
+<sbe:messageSchema
+        xmlns:sbe="http://fixprotocol.io/2016/sbe"
+        package="NOT_USED"
+        id="2001"
+        version="1"
+        semanticVersion="NOT_USED"
+        description="Message format for XXXXXX"
+        byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Header included before every SBE message">
+            <type name="schemaId" primitiveType="uint16"
+                  description="ID for the schema"/>
+            <type name="version" primitiveType="uint8"
+                  description="Version number of the schema"/>
+            <type name="templateId" primitiveType="uint8"
+                  description="ID of the msg type."/>
+            <type name="blockLength" primitiveType="uint8"
+                  description="Length of fixed-size root-block, excludes this header, repeating-groups and var-data"/>
+            <type name="numGroups" primitiveType="uint8"
+                  description="Number of repeating-groups"/>
+            <type name="numVarDataFields" primitiveType="uint8"
+                  description="Number of variable-length fields"/>
+        </composite>
+    </types>
+    <sbe:message name="Ping" id="0"> </sbe:message>
+</sbe:messageSchema>

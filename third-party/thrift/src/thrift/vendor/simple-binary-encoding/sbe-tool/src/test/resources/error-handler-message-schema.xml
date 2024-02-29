@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="11"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <type name="NamedCharType" primitiveType="char" semanticType="char"/>
+        <type name="CharTypeNoFixUsage" primitiveType="char"/>
+        <type name="RawData" primitiveType="uint8" variableLength="true" semanticType="data"/>
+        <composite name="messageHeader" semanticType="Length">
+            <type name="encOfNoUse" primitiveType="uint8"/>
+        </composite>
+        <composite name="invalidGroupSizeEncoding" semanticType="NumInGroup">
+            <type name="encOfNoUse" primitiveType="uint32"/>
+        </composite>
+        <composite name="invalidVarDataEncoding" semanticType="Length">
+            <type name="encOfNouse" primitiveType="uint32"/>
+        </composite>
+    </types>
+
+    <!-- blockLength too small for start of group -->
+    <message name="Message_1" id="1" blockLength="2">
+        <!-- mismatched semanticType -->
+        <field name="mismatched_semanticType" id="1" type="NamedCharType" semanticType="int"/>
+
+        <!-- field has no semanticType -->
+        <field name="no_field_semanticType" id="2" type="NamedCharType"/>
+
+        <!-- field has semanticType, type does not -->
+        <field name="no_type_semanticType" id="3" type="CharTypeNoFixUsage"/>
+
+        <!-- unknown type for field -->
+        <field name="unknown_type" id="4" type="XXXX"/>
+
+        <!-- field offset too small -->
+        <field name="offset_too_small" id="5" type="uint8" offset="1" semanticType="int"/>
+
+        <!-- no matching dimensionType composite and blockLength too small -->
+        <group name="group_1" id="100" blockLength="3">
+            <field name="just_a_name" id="10" type="uint64" semanticType="int"/>
+        </group>
+
+        <!-- dimensionType is invalid (2 missing fields) -->
+        <group name="group_2" id="101" dimensionType="invalidGroupSizeEncoding">
+            <field name="just_another_name" id="11" type="uint64" semanticType="int"/>
+        </group>
+
+        <!-- invalid variable length field (2 missing fields) -->
+        <data name="has_no_length_field" id="100" type="invalidVarDataEncoding"/>
+
+        <!-- variable length field without right type-->
+        <data name="has_invalid_type" id="101" type="RawData"/>
+
+        <!-- field declared after group -->
+        <field name="field_misordered" id="20" type="uint32" semanticType="int"/>
+
+    </message>
+</messageSchema>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="uk.co.real_logic.sbe.ir.generated"
+                   id="1"
+                   version="0"
+                   byteOrder="littleEndian"
+                   description="SBE IR Serialization Codecs.">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root.">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Header for repeating groups.">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <composite name="varDataEncoding" description="Header for var data fields.">
+            <type name="length" primitiveType="uint16"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+        <enum name="PrimitiveTypeCodec" encodingType="uint8" description="Primitive types in type system.">
+            <validValue name="NONE" description="No type is provided.">0</validValue>
+            <validValue name="CHAR" description="Single byte character encoding in ASCII.">1</validValue>
+            <validValue name="INT8" description="8-bit signed integer.">2</validValue>
+            <validValue name="INT16" description="16-bit signed integer.">3</validValue>
+            <validValue name="INT32" description="32-bit signed integer.">4</validValue>
+            <validValue name="INT64" description="64-bit signed integer.">5</validValue>
+            <validValue name="UINT8" description="8-bit unsigned integer.">6</validValue>
+            <validValue name="UINT16" description="16-bit unsigned integer.">7</validValue>
+            <validValue name="UINT32" description="32-bit unsigned integer.">8</validValue>
+            <validValue name="UINT64" description="64-bit unsigned integer.">9</validValue>
+            <validValue name="FLOAT" description="32-bit single precision floating point.">10</validValue>
+            <validValue name="DOUBLE" description="64-bit double precision floating point.">11</validValue>
+        </enum>
+        <enum name="SignalCodec" encodingType="uint8" description="Token signal type in IR.">
+            <validValue name="BEGIN_MESSAGE" description="Signal the beginning of a message.">1</validValue>
+            <validValue name="END_MESSAGE" description="Signal the end of a message.">2</validValue>
+            <validValue name="BEGIN_COMPOSITE" description="Signal the beginning of a composite.">3</validValue>
+            <validValue name="END_COMPOSITE" description="Signal the end of a composite.">4</validValue>
+            <validValue name="BEGIN_FIELD" description="Signal the beginning of a field.">5</validValue>
+            <validValue name="END_FIELD" description="Signal end beginning of a field.">6</validValue>
+            <validValue name="BEGIN_GROUP" description="Signal the beginning of a group.">7</validValue>
+            <validValue name="END_GROUP" description="Signal the end of a group.">8</validValue>
+            <validValue name="BEGIN_ENUM" description="Signal the beginning of a enum.">9</validValue>
+            <validValue name="VALID_VALUE" description="Signal a value of an enum.">10</validValue>
+            <validValue name="END_ENUM" description="Signal the end of a enum.">11</validValue>
+            <validValue name="BEGIN_SET" description="Signal the beginning of a set.">12</validValue>
+            <validValue name="CHOICE" description="Signal the choice in a set.">13</validValue>
+            <validValue name="END_SET" description="Signal the end of a set.">14</validValue>
+            <validValue name="BEGIN_VAR_DATA" description="Signal the beginning of variable data.">15</validValue>
+            <validValue name="END_VAR_DATA" description="Signal the end of variable data.">16</validValue>
+            <validValue name="ENCODING" description="Signal the encoding of a field.">17</validValue>
+        </enum>
+        <enum name="ByteOrderCodec" encodingType="uint8" description="Number encoding byte order.">
+            <validValue name="SBE_LITTLE_ENDIAN" description="Little Endian byte encoding.">0</validValue>
+            <validValue name="SBE_BIG_ENDIAN" description="Big Endian byte encoding.">1</validValue>
+        </enum>
+        <enum name="PresenceCodec" encodingType="uint8" description="Field presence declaration.">
+            <validValue name="SBE_REQUIRED" description="A field is required.">0</validValue>
+            <validValue name="SBE_OPTIONAL" description="A field is optional.">1</validValue>
+            <validValue name="SBE_CONSTANT" description="A field is a constant value.">2</validValue>
+        </enum>
+        <type name="deprecatedVersionType" primitiveType="int32" presence="optional" nullValue="0"/>
+    </types>
+
+    <sbe:message name="FrameCodec" id="1" description="Frame Header for start of encoding IR.">
+        <field name="irId" id="1" type="int32"/>
+        <field name="irVersion" id="2" type="int32"/>
+        <field name="schemaVersion" id="3" type="int32"/>
+        <data name="packageName" id="4" type="varDataEncoding"/>
+        <data name="namespaceName" id="5" type="varDataEncoding"/>
+        <data name="semanticVersion" id="6" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="TokenCodec" id="2" description="Codec for an IR Token.">
+        <field name="tokenOffset" id="1" type="int32"/>
+        <field name="tokenSize" id="2" type="int32"/>
+        <field name="fieldId" id="3" type="int32"/>
+        <field name="tokenVersion" id="4" type="int32"/>
+        <field name="componentTokenCount" id="5" type="int32"/>
+        <field name="signal" id="6" type="SignalCodec"/>
+        <field name="primitiveType" id="7" type="PrimitiveTypeCodec"/>
+        <field name="byteOrder" id="8" type="ByteOrderCodec"/>
+        <field name="presence" id="9" type="PresenceCodec"/>
+        <field name="deprecated" id="10" type="deprecatedVersionType"/>
+        <data name="name" id="11" type="varDataEncoding"/>
+        <data name="constValue" id="12" type="varDataEncoding"/>
+        <data name="minValue" id="13" type="varDataEncoding"/>
+        <data name="maxValue" id="14" type="varDataEncoding"/>
+        <data name="nullValue" id="15" type="varDataEncoding"/>
+        <data name="characterEncoding" id="16" type="varDataEncoding"/>
+        <data name="epoch" id="17" type="varDataEncoding"/>
+        <data name="timeUnit" id="18" type="varDataEncoding"/>
+        <data name="semanticType" id="19" type="varDataEncoding"/>
+        <data name="description" id="20" type="varDataEncoding"/>
+        <data name="referencedName" id="21" type="varDataEncoding"/>
+    </sbe:message>
+</sbe:messageSchema>

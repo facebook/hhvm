@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="baseline"
+                   id="1"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="Constants galore"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <types>
+        <type name="PrimitiveConst" primitiveType="uint16" presence="constant">9000</type>
+        <type name="StrConst" primitiveType="char" presence="constant">Huzzah</type>
+        <composite name="CompositeWithConst">
+            <type name="w" primitiveType="uint8"/>
+            <type name="x" primitiveType="uint8" presence="constant">250</type>
+            <ref name="y" type="PrimitiveConst"/>
+        </composite>
+        <enum name="Model" encodingType="char">
+            <validValue name="A">A</validValue>
+            <validValue name="B">B</validValue>
+            <validValue name="C">C</validValue>
+        </enum>
+    </types>
+    <sbe:message name="ConstantsGalore" id="1" description="">
+        <field name="a" id="2" type="uint8"/>
+        <field name="b" id="3" type="PrimitiveConst" presence="constant"/>
+        <field name="c" id="4" type="Model" presence="constant" valueRef="Model.C"/>
+        <field name="d" id="5" type="PrimitiveConst"/>
+        <field name="e" id="6" type="CompositeWithConst"/>
+        <group name="f" id="7" dimensionType="groupSizeEncoding">
+            <field name="g" id="8" type="uint8"/>
+            <field name="h" id="9" type="CompositeWithConst"/>
+            <field name="i" id="10" type="PrimitiveConst" presence="constant"/>
+            <field name="j" id="11" type="PrimitiveConst"/>
+            <field name="k" id="12" type="Model" presence="constant" valueRef="Model.C"/>
+            <field name="l" id="13" type="StrConst"/>
+        </group>
+    </sbe:message>
+</sbe:messageSchema>

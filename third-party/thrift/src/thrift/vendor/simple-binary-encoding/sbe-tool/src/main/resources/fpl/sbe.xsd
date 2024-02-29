@@ -1,0 +1,388 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:sbe="http://fixprotocol.io/2016/sbe" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://fixprotocol.io/2016/sbe" elementFormDefault="unqualified" version="1.0 Draft Standard">
+    <xs:annotation>
+        <xs:documentation>
+            Message schema for FIX Simple Binary Encoding
+            Version: 1.0 Draft Standard
+            © Copyright 2014-2016 FIX Protocol Limited
+            License: Creative Commons Attribution-NoDerivatives 4.0 International Public License
+        </xs:documentation>
+    </xs:annotation>
+    <xs:element name="messageSchema">
+        <xs:annotation>
+            <xs:documentation>
+                Root of XML document, holds all message templates
+                and their elements
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="types" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            More than one set of types may be provided.
+                            Names must be unique across all encoding
+                            types.
+                            Encoding types may appear in any order.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded">
+                            <xs:element name="type" type="sbe:encodedDataType"/>
+                            <xs:element name="composite" type="sbe:compositeDataType"/>
+                            <xs:element name="enum" type="sbe:enumType"/>
+                            <xs:element name="set" type="sbe:setType"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element ref="sbe:message" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="package" type="xs:string"/>
+            <xs:attribute name="id" type="xs:unsignedShort">
+                <xs:annotation>
+                    <xs:documentation>Unique ID of a message schema
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="version" type="xs:nonNegativeInteger" use="required">
+                <xs:annotation>
+                    <xs:documentation>The version of a message schema. Initial version
+                        is 0.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="semanticVersion" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation>Application layer specification version, such as
+                        FIX version 'FIX.5.0SP2'
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="description" type="xs:string" use="optional"/>
+            <xs:attribute name="byteOrder" default="littleEndian">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="bigEndian"/>
+                        <xs:enumeration value="littleEndian"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="headerType" type="sbe:symbolicName_t" default="messageHeader">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the encoding type of the message header,
+                        which is the same for all messages in a schema. The name has a
+                        default, but an encoding of that name must be present under a
+                        'types' element.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="message" type="sbe:blockType">
+        <xs:annotation>
+            <xs:documentation>
+                A message type, also known as a message template
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="blockType">
+        <xs:annotation>
+            <xs:documentation>Base type of message and repeating group entry
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="field" type="sbe:fieldType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Fixed-length fields</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="group" type="sbe:groupType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="data" type="sbe:fieldType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Variable-length fields</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attribute name="id" type="xs:unsignedShort" use="required">
+            <xs:annotation>
+                <xs:documentation>Unique ID of a message template
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="blockLength" type="xs:nonNegativeInteger" use="optional">
+            <xs:annotation>
+                <xs:documentation>Space reserved for root level of message, not
+                    include groups or variable-length
+                    data elements.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attributeGroup ref="sbe:semanticAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+    </xs:complexType>
+    <xs:complexType name="groupType">
+        <xs:annotation>
+            <xs:documentation>
+                A repeating group contains an array of entries
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="sbe:blockType">
+                <xs:attribute name="dimensionType" type="sbe:symbolicName_t" default="groupSizeEncoding"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="encodedDataType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                Simple wire encoding consisting of a primitive type
+                or array of primitives
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:token">
+                <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+                <xs:attribute name="nullValue" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Override of default null indicator for the data
+                            type in SBE specification,
+                            as a string.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="minValue" type="xs:string" use="optional"/>
+                <xs:attribute name="maxValue" type="xs:string" use="optional"/>
+                <xs:attribute name="length" type="xs:nonNegativeInteger" default="1"/>
+                <xs:attribute name="primitiveType" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:token">
+                            <xs:enumeration value="char"/>
+                            <xs:enumeration value="int8"/>
+                            <xs:enumeration value="int16"/>
+                            <xs:enumeration value="int32"/>
+                            <xs:enumeration value="int64"/>
+                            <xs:enumeration value="uint8"/>
+                            <xs:enumeration value="uint16"/>
+                            <xs:enumeration value="uint32"/>
+                            <xs:enumeration value="uint64"/>
+                            <xs:enumeration value="float"/>
+                            <xs:enumeration value="double"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="characterEncoding" type="xs:string" use="optional"/>
+                <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+                <xs:attributeGroup ref="sbe:presenceAttributes"/>
+                <xs:attributeGroup ref="sbe:semanticAttributes"/>
+                <xs:attributeGroup ref="sbe:versionAttributes"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="compositeDataType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                A wire encoding composed of multiple parts
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="type" type="sbe:encodedDataType"/>
+            <xs:element name="enum" type="sbe:enumType"/>
+            <xs:element name="set" type="sbe:setType"/>
+            <xs:element name="composite" type="sbe:compositeDataType"/>
+            <xs:element name="ref" type="sbe:refType"/>
+        </xs:choice>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+        <xs:attributeGroup ref="sbe:semanticAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+    </xs:complexType>
+    <xs:complexType name="enumType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                An enumeration of valid values
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="validValue" type="sbe:validValue" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attribute name="encodingType" type="sbe:symbolicName_t" use="required"/>
+        <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+        <xs:attributeGroup ref="sbe:semanticAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+    </xs:complexType>
+    <xs:complexType name="validValue">
+        <xs:annotation>
+            <xs:documentation>
+                Valid value as a string
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:token">
+                <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+                <xs:attribute name="description" type="xs:string" use="optional"/>
+                <xs:attributeGroup ref="sbe:versionAttributes"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="refType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to any existing encoding type (simple type, enum or set)
+                to reuse as a member of a composite type
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attribute name="type" type="sbe:symbolicName_t" use="required"/>
+        <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+    </xs:complexType>
+    <xs:complexType name="setType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                A multi value choice (encoded as a bitset)
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="choice" type="sbe:choice" maxOccurs="64"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attribute name="encodingType" type="sbe:symbolicName_t" use="required"/>
+        <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+        <xs:attributeGroup ref="sbe:semanticAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+    </xs:complexType>
+    <xs:complexType name="choice">
+        <xs:annotation>
+            <xs:documentation>
+                A choice within a multi value set. Value is the
+                position within a bitset (zero-based index).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:nonNegativeInteger">
+                <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+                <xs:attribute name="description" type="xs:string" use="optional"/>
+                <xs:attributeGroup ref="sbe:versionAttributes"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="fieldType">
+        <xs:annotation>
+            <xs:documentation>
+                A field of a message of a specified dataType
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="sbe:symbolicName_t" use="required"/>
+        <xs:attribute name="id" type="xs:unsignedShort" use="required"/>
+        <xs:attribute name="type" type="sbe:symbolicName_t" use="required">
+            <xs:annotation>
+                <xs:documentation>Must match the name of an encoding contained by
+                    'types' element
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="epoch" type="xs:string" default="unix"/>
+        <xs:attribute name="timeUnit" type="xs:string" default="nanosecond">
+            <xs:annotation>
+                <xs:documentation>Deprecated - only for back compatibility with RC2
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attributeGroup ref="sbe:alignmentAttributes"/>
+        <xs:attributeGroup ref="sbe:presenceAttributes"/>
+        <xs:attributeGroup ref="sbe:semanticAttributes"/>
+        <xs:attributeGroup ref="sbe:versionAttributes"/>
+        <!-- start of time period - default is UNIX epoch -->
+    </xs:complexType>
+    <xs:attributeGroup name="semanticAttributes">
+        <xs:annotation>
+            <xs:documentation>
+                Application layer class. Maps a field or encoding
+                to a FIX data type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="semanticType" type="xs:token" use="optional"/>
+        <xs:attribute name="description" type="xs:string" use="optional"/>
+    </xs:attributeGroup>
+    <xs:attributeGroup name="versionAttributes">
+        <xs:annotation>
+            <xs:documentation>
+                Schema versioning supports message extension
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="sinceVersion" type="xs:nonNegativeInteger" default="0">
+            <xs:annotation>
+                <xs:documentation>
+                    The schema version in which an element was added
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="deprecated" type="xs:nonNegativeInteger" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The version of the schema in which an element was
+                    deprecated. It is retained for back compatibility but should no
+                    longer be used by updated applications.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:attributeGroup name="alignmentAttributes">
+        <xs:attribute name="offset" type="xs:unsignedInt" use="optional">
+            <xs:annotation>
+                <xs:documentation>Offset from start of a composite type or block
+                    as a zero-based index.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:attributeGroup name="presenceAttributes">
+        <xs:attribute name="presence" default="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="required">
+                        <xs:annotation>
+                            <xs:documentation>The value must always be populated
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="optional">
+                        <xs:annotation>
+                            <xs:documentation>Value may be set to nullValue for its data type
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="constant">
+                        <xs:annotation>
+                            <xs:documentation>Value does not vary so it need not be
+                                serialized on the wire
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:enumeration>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="valueRef" type="sbe:qualifiedName_t" use="optional">
+            <xs:annotation>
+                <xs:documentation>A constant value as valid value of an enum
+                    in the form enum-name.valid-value-name
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:simpleType name="symbolicName_t">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="64"/>
+            <xs:pattern value="([A-Z]|[a-z]|_)([0-9]|[A-Z]|[a-z]|_)*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="qualifiedName_t">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([A-Z]|[a-z]|_)([0-9]|[A-Z]|[a-z]|_)*\.([A-Z]|[a-z]|_)([0-9]|[A-Z]|[a-z]|_)*"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

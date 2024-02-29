@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="13"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <enum name="NullBoolean" encodingType="uint8" nullValue="255" semanticType="Boolean">
+            <validValue name="F">0</validValue>
+            <validValue name="T">1</validValue>
+            <validValue name="BOGUS">255</validValue>
+        </enum>
+        <type name="ConstButNoValue" primitiveType="char" presence="constant"></type>
+    </types>
+    <message name="Message1" id="1">
+        <field name="word!" id="10" type="uint32" semanticType="int"/>
+    </message>
+</messageSchema>

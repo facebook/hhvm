@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="message.block.length.test"
+               id="187"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint8" semanticType="NumInGroup"/>
+        </composite>
+        <set name="eventType" encodingType="uint8">
+            <choice name="choice0">0</choice>
+            <choice name="choice1">1</choice>
+            <choice name="choice2">2</choice>
+            <choice name="choice3">3</choice>
+            <choice name="choice4">4</choice>
+            <choice name="choice5">5</choice>
+            <choice name="choice6">6</choice>
+            <choice name="choice7">7</choice>
+        </set>
+    </types>
+    <message name="msgName" id="10" blockLength="11" semanticType="M">
+        <field name="field1" id="11" type="uint64" offset="0" semanticType="UTCTimestamp"/>
+        <field name="field2" id="12" type="eventType" offset="8" semanticType="MultipleCharValue"/>
+        <group name="grName" id="20" dimensionType="groupSizeEncoding">
+            <field name="grField1" id="21" type="uint64" semanticType="int"/>
+            <field name="grField2" id="22" type="int64" semanticType="int"/>
+        </group>
+    </message>
+</messageSchema>

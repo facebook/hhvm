@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="test.message.schema"
+                   id="879"
+                   version="1"
+                   semanticVersion="1.0"
+                   description="Issue 507 - Test case for explicit packages for types"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <types package="test.message.schema.common">
+        <composite name="Car" description="Message identifiers and length of message root">
+            <type name="make" primitiveType="uint16"/>
+            <type name="model" primitiveType="uint16"/>
+            <ref name="vintage" type="BooleanType"/>
+            <composite name="Engine">
+                <type name="power" primitiveType="int32"/>
+                <type name="torque" primitiveType="int32"/>
+                <ref name="ice" type="BooleanType"/>
+                <ref name="fuel" type="FuelSpec"/>
+            </composite>
+        </composite>
+    </types>
+    <types package="outside.schema">
+        <enum name="BooleanType" encodingType="int8">
+            <validValue name="FALSE">0</validValue>
+            <validValue name="TRUE">1</validValue>
+        </enum>
+        <composite name="FuelSpec">
+           <type name="limit" primitiveType="int32"/>
+           <ref name="fuel" type="FuelType"/>
+        </composite>
+        <set name="Days" encodingType="uint8">
+            <choice name="Monday">0</choice>
+            <choice name="Tuesday">1</choice>
+            <choice name="Wednesday">2</choice>
+            <choice name="Thursday">3</choice>
+            <choice name="Friday">4</choice>
+            <choice name="Saturday">5</choice>
+            <choice name="Sunday">6</choice>
+        </set>
+        <set name="FuelType" encodingType="uint8">
+            <choice name="Petrol">1</choice>
+            <choice name="Diesel">2</choice>
+            <choice name="LPG">3</choice>
+            <choice name="Electric">4</choice>
+            <choice name="Hybrid">5</choice>
+        </set>
+    </types>
+    
+    <sbe:message name="TestMessage" id="1">
+        <field name="id" id="1" type="uint64" />
+        <field name="car" id="2" type="Car" />
+        <field name="electric" id="3" type="BooleanType" />
+        <field name="toChargeOn" id="4" type="Days" />
+    </sbe:message>
+</sbe:messageSchema>

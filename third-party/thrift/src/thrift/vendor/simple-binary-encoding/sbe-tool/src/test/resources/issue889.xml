@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue889"
+                   id="1"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="Example null enum"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <type name="uInt8NULL" primitiveType="uint8" presence="optional" nullValue="0"/>
+        <enum name="LotType" encodingType="uInt8NULL" semanticType="Int" >
+            <validValue name="ODD_LOT" description="Odd lot">1</validValue>
+            <validValue name="ROUND_LOT" description="Round lot">2</validValue>
+            <validValue name="BLOCK_LOT" description="Block lot">3</validValue>
+        </enum>
+    </types>
+    <sbe:message name="enumMessage" id="1">
+        <field name="field1" id="1" type="LotType"/>
+    </sbe:message>
+</sbe:messageSchema>

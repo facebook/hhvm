@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue505"
+                   id="505"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 505 test case">
+    <types>
+        <composite name="messageHeader" description="header">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+
+        <type name="idSourceOne"   presence="constant" length="1" primitiveType="char">C</type>
+        <type name="idSourceTwo"   presence="constant" primitiveType="char">D</type>
+        <type name="idSourceThree" presence="constant" primitiveType="char">EF</type>
+        <type name="idSourceFour"  presence="constant" length="2" primitiveType="char">GH</type>
+    </types>
+
+    <sbe:message name="SomeMessage" id="1">
+        <field name="sourceOne"   id="1" type="idSourceOne"/>
+        <field name="sourceTwo"   id="2" type="idSourceTwo"/>
+        <field name="sourceThree" id="3" type="idSourceThree"/>
+        <field name="sourceFour"  id="4" type="idSourceFour" />
+    </sbe:message>
+</sbe:messageSchema>

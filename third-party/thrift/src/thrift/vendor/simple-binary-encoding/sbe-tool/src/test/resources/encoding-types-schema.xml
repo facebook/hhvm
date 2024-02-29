@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE.tests"
+               id="8"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <type name="EDTChar"  primitiveType="char" semanticType="char"/>
+        <type name="EDTUInt8"  primitiveType="uint8" semanticType="int"/>
+        <type name="EDTUInt16"  primitiveType="uint16" semanticType="int"/>
+        <type name="EDTUInt32"  primitiveType="uint32" semanticType="int"/>
+        <type name="EDTUInt64"  primitiveType="uint64" semanticType="int"/>
+        <enum name="EChar" description="enum as char" encodingType="EDTChar" semanticType="int">
+            <validValue name="ValueA">A</validValue>
+            <validValue name="ValueB">B</validValue>
+        </enum>
+        <enum name="EUInt8" description="enum as uint8" encodingType="EDTUInt8" semanticType="int">
+            <validValue name="Value1">1</validValue>
+            <validValue name="Value10">10</validValue>
+        </enum>
+        <set name="SUInt8" description="set as uint8" encodingType="EDTUInt8" semanticType="int">
+            <choice name="Bit0">0</choice>
+            <choice name="Bit6">6</choice>
+        </set>
+        <set name="SUInt16" description="set as uint16" encodingType="EDTUInt16" semanticType="int">
+            <choice name="Bit0">0</choice>
+            <choice name="Bit15">15</choice>
+        </set>
+        <set name="SUInt32" description="set as uint32" encodingType="EDTUInt32" semanticType="int">
+            <choice name="Bit0">0</choice>
+            <choice name="Bit16">16</choice>
+            <choice name="Bit26">26</choice>
+        </set>
+        <set name="SUInt64" description="set as uint64" encodingType="EDTUInt64" semanticType="int">
+            <choice name="Bit0">0</choice>
+            <choice name="Bit16">16</choice>
+            <choice name="Bit26">26</choice>
+        </set>
+    </types>
+    <message name="Message1" id="1">
+        <field name="header" id="41" type="messageHeader"/>
+        <field name="EC" id="42" type="EChar"/>
+        <field name="E8" id="43" type="EUInt8"/>
+        <field name="S8" id="44" type="SUInt8"/>
+        <field name="S16" id="45" type="SUInt16"/>
+        <field name="S32" id="46" type="SUInt32"/>
+        <field name="S64" id="47" type="SUInt64"/>
+    </message>
+</messageSchema>

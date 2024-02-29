@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue472"
+                   id="472"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 472 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="issue472" id="1" description="issue 472 test">
+        <field name="optional" type="uint64" id="2" presence="optional"/>
+    </sbe:message>
+</sbe:messageSchema>

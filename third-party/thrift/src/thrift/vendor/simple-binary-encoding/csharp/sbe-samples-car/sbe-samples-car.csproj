@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>exe</OutputType>
+    <RootNamespace>Org.SbeTool.Sbe.Example.Car</RootNamespace>
+    <AssemblyName>Org.SbeTool.Sbe.Example.Car</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\sbe-samples\src\main\resources\example-schema.xml" Link="example-schema.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sbe-dll\sbe-dll.csproj" />
+    <ProjectReference Include="..\sbe-generated\sbe-generated.csproj" />
+  </ItemGroup>
+
+</Project>

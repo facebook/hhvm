@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue435"
+                   id="435"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 435 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <set name="setRef" encodingType="uint8">
+            <choice name="One">0</choice>
+            <choice name="Two">1</choice>
+        </set>
+        <enum name="enumRef" encodingType="uint8">
+            <validValue name="One">0</validValue>
+            <validValue name="Two">1</validValue>
+        </enum>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+            <ref name="s" type="setRef"/>
+        </composite>
+        <composite name="exampleRef">
+            <ref name="e" type="enumRef"/>
+        </composite>
+    </types>
+    <sbe:message name="issue435" id="1" description="issue 435 test">
+	    <field name="example" type="exampleRef" id="10"/>
+    </sbe:message>
+</sbe:messageSchema>

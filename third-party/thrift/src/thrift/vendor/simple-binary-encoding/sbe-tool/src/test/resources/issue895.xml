@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="issue895"
+                   id="895"
+                   version="0"
+                   semanticVersion="1.0"
+                   description="issue 895 test case"
+                   byteOrder="bigEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+    </types>
+    <sbe:message name="issue895" id="1" description="issue 895 test">
+        <field name="optional_float" type="float" id="1" presence="optional"/>
+        <field name="optional_double" type="double" id="2" presence="optional"/>
+    </sbe:message>
+</sbe:messageSchema>

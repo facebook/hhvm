@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="order.check"
+                   id="1"
+                   description="Unit Test"
+                   byteOrder="littleEndian"
+                   version="1">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+            <type name="numGroups" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint8"/>
+            <type name="numInGroup" primitiveType="uint8"/>
+        </composite>
+        <composite name="varDataEncoding" semanticType="Length">
+            <type name="length" primitiveType="uint8" semanticType="Length"/>
+            <type name="varData" primitiveType="char" semanticType="data"/>
+        </composite>
+        <composite name="point" semanticType="Point">
+            <type name="x" primitiveType="int32"/>
+            <type name="y" primitiveType="int32"/>
+        </composite>
+        <enum name="direction" encodingType="int8">
+            <validValue name="BUY">1</validValue>
+            <validValue name="SELL">2</validValue>
+        </enum>
+        <type name="ipV4Address" primitiveType="uint8" length="4"/>
+        <set name="flags" encodingType="uint8">
+            <choice name="guacamole">1</choice>
+            <choice name="cheese">2</choice>
+            <choice name="sourCream">4</choice>
+        </set>
+        <type name="ccyPair" primitiveType="char" characterEncoding="US-ASCII" length="6"/>
+    </types>
+
+    <sbe:message name="MultipleVarLength" id="1">
+        <field name="a" id="1" type="int32"/>
+        <data name="b" id="2" type="varDataEncoding"/>
+        <data name="c" id="3" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="GroupAndVarLength" id="2">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+        <data name="d" id="4" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="VarLengthInsideGroup" id="3">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+            <data name="d" id="4" type="varDataEncoding"/>
+        </group>
+        <data name="e" id="5" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="NestedGroups" id="4">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+            <group name="d" id="4">
+                <field name="e" id="5" type="int32"/>
+            </group>
+            <group name="f" id="6">
+                <field name="g" id="7" type="int32"/>
+            </group>
+        </group>
+        <group name="h" id="8">
+            <field name="i" id="9" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="CompositeInsideGroup" id="5">
+        <field name="a" id="1" type="point"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="point"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveV0" id="6">
+        <field name="a" id="1" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveV1" id="1006">
+        <field name="a" id="1" type="int32"/>
+        <field name="b" id="2" sinceVersion="1" presence="optional" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveBeforeGroupV0" id="7">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveBeforeGroupV1" id="1007">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" presence="optional" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveBeforeVarDataV0" id="8">
+        <field name="a" id="1" type="int32"/>
+        <data name="b" id="2" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveBeforeVarDataV1" id="1008">
+        <field name="a" id="1" type="int32"/>
+        <field name="c" id="3" sinceVersion="1" presence="optional" type="int32"/>
+        <data name="b" id="2" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveInsideGroupV0" id="9">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddPrimitiveInsideGroupV1" id="1009">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+            <field name="d" id="4" sinceVersion="1" presence="optional" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddGroupBeforeVarDataV0" id="10">
+        <field name="a" id="1" type="int32"/>
+        <data name="b" id="2" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="AddGroupBeforeVarDataV1" id="1010">
+        <field name="a" id="1" type="int32"/>
+        <group name="c" id="3" sinceVersion="1">
+            <field name="d" id="4" type="int32"/>
+        </group>
+        <data name="b" id="2" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="AddEnumBeforeGroupV0" id="11">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddEnumBeforeGroupV1" id="1011">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" type="direction" presence="optional"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddCompositeBeforeGroupV0" id="12">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddCompositeBeforeGroupV1" id="1012">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" type="point" presence="optional"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddArrayBeforeGroupV0" id="13">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddArrayBeforeGroupV1" id="1013">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" type="ipV4Address" presence="optional"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddBitSetBeforeGroupV0" id="14">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddBitSetBeforeGroupV1" id="1014">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" type="flags" presence="optional"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="EnumInsideGroup" id="15">
+        <field name="a" id="1" type="direction"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="direction"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="ArrayInsideGroup" id="16">
+        <field name="a" id="1" type="ipV4Address"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="ipV4Address"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="BitSetInsideGroup" id="17">
+        <field name="a" id="1" type="flags"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="flags"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="MultipleGroups" id="18">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+        <group name="d" id="4">
+            <field name="e" id="5" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddVarDataV0" id="19">
+        <field name="a" id="1" type="int32"/>
+    </sbe:message>
+
+    <sbe:message name="AddVarDataV1" id="1019">
+        <field name="a" id="1" type="int32"/>
+        <data name="b" id="2" sinceVersion="1" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="AddAsciiBeforeGroupV0" id="20">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AddAsciiBeforeGroupV1" id="1020">
+        <field name="a" id="1" type="int32"/>
+        <field name="d" id="3" sinceVersion="1" type="ccyPair" presence="optional"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="AsciiInsideGroup" id="21">
+        <field name="a" id="1" type="ccyPair"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="ccyPair"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="NoBlock" id="22">
+        <data name="a" id="1" type="varDataEncoding"/>
+    </sbe:message>
+
+    <sbe:message name="GroupWithNoBlock" id="23">
+        <group name="a" id="1">
+            <data name="b" id="2" type="varDataEncoding"/>
+        </group>
+    </sbe:message>
+
+    <sbe:message name="NestedGroupWithVarLength" id="24">
+        <field name="a" id="1" type="int32"/>
+        <group name="b" id="2">
+            <field name="c" id="3" type="int32"/>
+            <group name="d" id="4">
+                <field name="e" id="5" type="int32"/>
+                <data name="f" id="6" type="varDataEncoding"/>
+            </group>
+        </group>
+    </sbe:message>
+</sbe:messageSchema>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messageSchema package="SBE tests"
+               id="2"
+               semanticVersion="5.2"
+               description="Unit Test"
+               byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="selfReferencingComposite">
+            <ref name="selfRef" type="selfReferencingComposite"/>
+        </composite>
+    </types>
+    <message name="TestMessage" id="1" description="TestMessage">
+        <field name="fieldOne" id="1" type="selfReferencingComposite"/>
+    </message>
+</messageSchema>

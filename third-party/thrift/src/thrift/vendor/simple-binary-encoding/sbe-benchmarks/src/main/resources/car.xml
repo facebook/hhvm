@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="uk.co.real_logic.sbe.benchmarks"
+                   id="1"
+                   version="1"
+                   semanticVersion="5.2"
+                   description="Example schema"
+                   byteOrder="littleEndian">
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <composite name="varStringEncoding">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="ISO-8859-1"/>
+        </composite>
+        <composite name="varDataEncoding">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0"/>
+        </composite>
+    </types>
+    <types>
+        <type name="ModelYear" primitiveType="uint16"/>
+        <type name="VehicleCode" primitiveType="char" length="6"/>
+        <type name="someNumbers" primitiveType="int32" length="5"/>
+        <composite name="Engine">
+            <type name="capacity" primitiveType="uint16"/>
+            <type name="numCylinders" primitiveType="uint8"/>
+            <type name="maxRpm" primitiveType="uint16" presence="constant">9000</type>
+            <type name="manufacturerCode" primitiveType="char" length="3"/>
+            <type name="fuel" primitiveType="char" presence="constant">Petrol</type>
+        </composite>
+        <enum name="BooleanType" encodingType="uint8">
+            <validValue name="F">0</validValue>
+            <validValue name="T">1</validValue>
+        </enum>
+        <enum name="Model" encodingType="char">
+            <validValue name="A">A</validValue>
+            <validValue name="B">B</validValue>
+            <validValue name="C">C</validValue>
+        </enum>
+        <set name="OptionalExtras" encodingType="uint8">
+            <choice name="sunRoof">0</choice>
+            <choice name="sportsPack">1</choice>
+            <choice name="cruiseControl">2</choice>
+        </set>
+    </types>
+
+    <sbe:message name="Car" id="1" description="Description of a basic Car">
+        <field name="serialNumber" id="1" type="uint32"/>
+        <field name="modelYear" id="2" type="ModelYear"/>
+        <field name="available" id="3" type="BooleanType"/>
+        <field name="code" id="4" type="Model"/>
+        <field name="someNumbers" id="5" type="someNumbers"/>
+        <field name="vehicleCode" id="6" type="VehicleCode"/>
+        <field name="extras" id="7" type="OptionalExtras"/>
+        <field name="engine" id="8" type="Engine"/>
+        <group name="fuelFigures" id="9" dimensionType="groupSizeEncoding">
+            <field name="speed" id="10" type="uint16"/>
+            <field name="mpg" id="11" type="float"/>
+        </group>
+        <group name="performanceFigures" id="12" dimensionType="groupSizeEncoding">
+            <field name="octaneRating" id="13" type="uint8"/>
+            <group name="acceleration" id="14" dimensionType="groupSizeEncoding">
+                <field name="mph" id="15" type="uint16"/>
+                <field name="seconds" id="16" type="float"/>
+            </group>
+        </group>
+        <data name="manufacturer" id="17" type="varStringEncoding"/>
+        <data name="model" id="18" type="varStringEncoding"/>
+    </sbe:message>
+</sbe:messageSchema>

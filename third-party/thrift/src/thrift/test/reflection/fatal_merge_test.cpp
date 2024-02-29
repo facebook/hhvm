@@ -16,7 +16,8 @@
 
 #include <folly/portability/GTest.h>
 
-#include <thrift/lib/cpp2/reflection/debug.h>
+#include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
+#include <thrift/lib/cpp2/debug_thrift_data_difference/diff.h>
 #include <thrift/lib/cpp2/reflection/merge.h>
 #include <thrift/lib/cpp2/reflection/pretty_print.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_merge_constants.h>
@@ -24,8 +25,8 @@
 #include <thrift/test/reflection/gen-cpp2/fatal_merge_types.h>
 
 using namespace apache::thrift::test;
-using apache::thrift::debug_equals;
-using apache::thrift::make_debug_output_callback;
+using facebook::thrift::debug_thrift_data_difference;
+using facebook::thrift::make_debug_output_callback;
 
 namespace {
 
@@ -38,18 +39,18 @@ class FatalMergeTest : public testing::Test {};
     const auto& example = fatal_merge_constants::constant();           \
     auto src = *example.src(), dst = *example.dst();                   \
     apache::thrift::merge_into(src, dst);                              \
-    EXPECT_TRUE(debug_equals(                                          \
+    EXPECT_TRUE(debug_thrift_data_difference(                          \
         *example.exp(), dst, make_debug_output_callback(LOG(ERROR)))); \
-    EXPECT_TRUE(debug_equals(                                          \
+    EXPECT_TRUE(debug_thrift_data_difference(                          \
         *example.src(), src, make_debug_output_callback(LOG(ERROR)))); \
   }                                                                    \
   TEST_F(FatalMergeTest, name##_move) {                                \
     const auto& example = fatal_merge_constants::constant();           \
     auto src = *example.src(), dst = *example.dst();                   \
     apache::thrift::merge_into(std::move(src), dst);                   \
-    EXPECT_TRUE(debug_equals(                                          \
+    EXPECT_TRUE(debug_thrift_data_difference(                          \
         *example.exp(), dst, make_debug_output_callback(LOG(ERROR)))); \
-    EXPECT_TRUE(debug_equals(                                          \
+    EXPECT_TRUE(debug_thrift_data_difference(                          \
         *example.nil(), src, make_debug_output_callback(LOG(ERROR)))); \
   }
 

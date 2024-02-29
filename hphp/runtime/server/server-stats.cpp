@@ -298,7 +298,8 @@ ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
     // hit/sec is probably more meaningful than hit itself.
     if (sec) values["hit/sec"] = ts.m_hits * PRECISION / sec;
   }
-  if (auto const server = HttpServer::Server->getPageServer()) {
+  if (HttpServer::Server && HttpServer::Server->getPageServer()) {
+    auto const server = HttpServer::Server->getPageServer();
     auto const load = server->getActiveWorker();
     if (wantAll || wantedKeys.find("load") != wantedKeys.end()) {
       values["load"] = load;

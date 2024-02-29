@@ -4072,10 +4072,7 @@ end = struct
           &&& simplify_subtype_help
                 ~sub_supportdyn
                 super'
-                (if is_tyvar super' then
-                  child
-                else
-                  Sd.liken ~super_like env child)
+                (Sd.liken ~super_like env child)
       end
       &&& simplify_subtype_variance_for_injective_loop_help
             cid

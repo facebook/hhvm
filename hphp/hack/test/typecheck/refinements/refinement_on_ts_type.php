@@ -30,7 +30,10 @@ abstract final class TypeBuilder {
 }
 
 function test1():void {
-  $sounds = myGetType(
+  // Without this type annotation we get an error downstream
+  // due to issues with array access checking under pessimisation
+  // T180835046
+  $sounds = myGetType<vec<dict<string,mixed>>>(
       "sounds",
       TypeBuilder::vec(
         TypeBuilder::dict(TypeBuilder::string(), TypeBuilder::mixed()),

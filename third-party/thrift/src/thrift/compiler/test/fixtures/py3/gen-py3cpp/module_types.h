@@ -205,12 +205,10 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -233,12 +231,10 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -261,12 +257,10 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -2737,12 +2731,10 @@ template <> struct TEnumTraits<::py3::simple::detail::AdaptedUnion::Type> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -2762,12 +2754,10 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);

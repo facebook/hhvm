@@ -345,12 +345,10 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -373,12 +371,10 @@ template <> struct TEnumTraits<::cpp2::TypedEnum> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -4998,12 +4994,10 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -5023,12 +5017,10 @@ template <> struct TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);

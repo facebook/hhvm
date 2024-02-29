@@ -88,12 +88,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -116,12 +114,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -144,12 +140,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -172,12 +166,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);
@@ -200,12 +192,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
   static bool findName(type value, folly::StringPiece* out) noexcept;
   static bool findValue(folly::StringPiece name, type* out) noexcept;
 
-#if FOLLY_HAS_STRING_VIEW
   static bool findName(type value, std::string_view* out) noexcept {
     folly::StringPiece outp;
     return findName(value, &outp) && ((*out = outp), true);
   }
-#endif
   static char const* findName(type value) noexcept {
     folly::StringPiece ret;
     (void)findName(value, &ret);

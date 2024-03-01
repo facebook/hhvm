@@ -63,14 +63,6 @@ pub mod client {
     pub use {{program:clients}}::*;
 }
 
-/// Mock clients for `{{program:name}}`.{{!
-}}{{#program:label}}
-// Deprecated: use `{{.}}-clients`{{/program:label}}
-pub mod mock {
-    #[doc(inline)]
-    pub use {{program:clients}}::mock::*;
-}
-
 /// Server traits for each service in `{{program:name}}`.{{!
 }}{{#program:label}}
 // Deprecated: use `{{.}}-services`{{/program:label}}

@@ -22,12 +22,6 @@ pub mod client {
     pub use ::::*;
 }
 
-/// Mock clients for `mod`.
-pub mod mock {
-    #[doc(inline)]
-    pub use ::::mock::*;
-}
-
 /// Server traits for each service in `mod`.
 pub mod server {
     #[doc(inline)]

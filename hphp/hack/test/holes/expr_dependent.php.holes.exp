@@ -130,7 +130,7 @@
                             { fb_ast =
                               [([17:23-37],
                                 (Return
-                                   (Some ((void), [17:23-37],
+                                   (Some ((~void), [17:23-37],
                                           (Call
                                              { func =
                                                ((~(function(T::TX $x): void)), [17:23-33],

@@ -1,8 +1,8 @@
 {
   "type_counter": {
     "obj_get_receiver.php": {
-      "num_like_types": 8,
-      "num_non_like_types": 16,
+      "num_like_types": 9,
+      "num_non_like_types": 15,
       "num_mixed": 0,
       "num_supportdyn_of_mixed": 0,
       "num_dynamic": 0,

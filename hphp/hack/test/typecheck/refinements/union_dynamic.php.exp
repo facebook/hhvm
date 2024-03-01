@@ -1,7 +1,13 @@
 File "union_dynamic.php", line 15, characters 3-13:
   ~S<int>
 File "union_dynamic.php", line 17, characters 3-13:
-  int
+  ~int
+File "union_dynamic.php", line 18, characters 10-23:
+Some elements in this collection are incompatible (Typing[4110])
+  File "union_dynamic.php", line 8, characters 50-52:
+  Expected `int`
+  File "union_dynamic.php", line 5, characters 19-21:
+  But got `dynamic`
 File "union_dynamic.php", line 25, characters 17-34:
 Invalid argument (Typing[4110])
   File "union_dynamic.php", line 8, characters 21-27:

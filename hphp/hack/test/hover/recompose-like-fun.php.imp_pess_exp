@@ -1,1 +1,1 @@
-(function(int $x): (~E & arraykey))
+(function(int $x): ~E)

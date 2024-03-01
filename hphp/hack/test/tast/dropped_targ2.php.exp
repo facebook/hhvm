@@ -62,7 +62,7 @@
               (If (((bool), [11:7-20], (Is (((~?classname<C>), [11:7-9], (Lvar ([11:7-9], $c))), ([11:13-20], Hnonnull)))),
                  [([12:5-20],
                    (Expr
-                      ((void), [12:5-19],
+                      ((~void), [12:5-19],
                        (Call
                           { func = ((~(function<reify T>(): void)), [12:5-12], (Class_const (((~C), [12:5-7], (CIexpr ((~classname<C>), [12:5-7], (Lvar ([12:5-7], $c))))), ([12:9-12], "bar"))));
                             targs = [((int), ([12:13-16], (Hprim Tint)))]; 

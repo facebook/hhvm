@@ -76,7 +76,7 @@
          { fb_ast =
            [([10:3-19],
              (Expr
-                ((void), [10:3-18],
+                ((~void), [10:3-18],
                  (Call
                     { func =
                       ((~(function<T>(): void)), [10:3-11],
@@ -85,7 +85,7 @@
                       args = []; unpacked_arg = None }))));
              ([11:3-19],
               (Expr
-                 ((void), [11:3-18],
+                 ((~void), [11:3-18],
                   (Call
                      { func =
                        ((~(function<T>(): void)), [11:3-11],

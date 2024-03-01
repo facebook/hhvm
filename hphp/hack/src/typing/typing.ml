@@ -6891,7 +6891,9 @@ end = struct
           in
           let ret =
             match dynamic_func with
-            | Some _ when used_dynamic -> MakeType.locl_like r2 ft.ft_ret
+            | Some Like_function -> MakeType.locl_like r2 ft.ft_ret
+            | Some Supportdyn_function when used_dynamic ->
+              MakeType.locl_like r2 ft.ft_ret
             | _ -> ft.ft_ret
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
@@ -7046,17 +7048,25 @@ end = struct
                 el
                 unpacked_element
             | _ ->
-              call
-                ~expected
-                ~nullsafe
-                ~in_await
-                ?dynamic_func:(Some Supportdyn_function)
-                ~expr_pos
-                ~recv_pos
-                env
-                ty
-                el
-                unpacked_element
+              let (env, (tel, typed_unpack_element, ret, should_forget_fakes)) =
+                call
+                  ~expected
+                  ~nullsafe
+                  ~in_await
+                  ?dynamic_func:(Some Supportdyn_function)
+                  ~expr_pos
+                  ~recv_pos
+                  env
+                  ty
+                  el
+                  unpacked_element
+              in
+              let ret =
+                match dynamic_func with
+                | Some Like_function -> MakeType.locl_like (get_reason ret) ret
+                | _ -> ret
+              in
+              (env, (tel, typed_unpack_element, ret, should_forget_fakes))
           end
         | _ ->
           if not (TUtils.is_tyvar_error env efty) then

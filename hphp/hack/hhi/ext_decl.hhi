@@ -304,6 +304,11 @@ namespace HH {
     public static function parsePath(string $path)[]: FileDecls;
 
     /*
+     * Get the hash of the current repo options config (that may affect parsing)
+     */
+    public static function getRepoOptionsHash()[]: string;
+
+    /*
      * Parse a type expression into a nested shape.
      *
      * @param string $type_expression - the type expression to parse

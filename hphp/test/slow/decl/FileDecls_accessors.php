@@ -130,4 +130,7 @@ function main(): void {
   var_dump($instance->getFileAttribute('MyFileAttribute'));
   var_dump($instance->getFileAttribute('missing'));
   var_dump($instance->getFileAttribute(''));
+
+  echo "=== Repo options hash\n";
+  var_dump(strlen(HH\FileDecls::getRepoOptionsHash()) > 30 ? 'Some Hash' : 'Hash Missing');
 }

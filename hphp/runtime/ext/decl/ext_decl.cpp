@@ -749,6 +749,11 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   return obj;
 }
 
+String HHVM_STATIC_METHOD(FileDecls, getRepoOptionsHash) {
+  auto opts = *g_context->getRepoOptionsForRequest();
+  return String(opts.flags().cacheKeySha1().toString());
+}
+
 /*
  * Parses the provided text and returns a new instance of FileDecls.
  */
@@ -1089,6 +1094,8 @@ struct DeclExtension final : Extension {
   }
 
   void moduleRegisterNative() override {
+    HHVM_STATIC_MALIAS(
+        HH\\FileDecls, getRepoOptionsHash, FileDecls, getRepoOptionsHash);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parseText, FileDecls, parseText);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parsePath, FileDecls, parsePath);
     HHVM_STATIC_MALIAS(

@@ -400,3 +400,5 @@ dict(2) {
 }
 NULL
 NULL
+=== Repo options hash
+string(9) "Some Hash"

@@ -318,6 +318,12 @@ namespace HH {
     public static function parseTypeExpression(string $type_expression)[]: ?ExtDeclTypeStructure;
 
     /*
+     * Get the hash of the current repo options config (that may affect parsing)
+     */
+    <<__Native>>
+    public static function getRepoOptionsHash()[]: string;
+
+    /*
      * If there has been any error in parsing, the instance will throw
      * on query operations. This method checks the error state.
      *

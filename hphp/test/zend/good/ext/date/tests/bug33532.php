@@ -1,5 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
+date_default_timezone_set('UTC');
 setlocale(LC_ALL, 'C');
 
 print "TZ has NOT been set\n";

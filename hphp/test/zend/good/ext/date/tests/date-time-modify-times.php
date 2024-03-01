@@ -1,4 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
+date_default_timezone_set('Europe/London');
 $tests = dict[
     '2010-12-15 19:42:45 UTC' => vec[
         'october 23:00', // October 23rd, with a broken time

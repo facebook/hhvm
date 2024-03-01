@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function entrypoint_msgfmt_format_simple_types_numeric_strings(): void {
+  date_default_timezone_set('Atlantic/Azores');
   ini_set("intl.error_level", E_WARNING);
   //ini_set("intl.default_locale", "nl");
 

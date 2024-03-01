@@ -148,6 +148,113 @@ vec(1) {
     }
   }
 }
+vec(3) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(9) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "_"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "i"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "_"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(9) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(2) "_0"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "i"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(2) "_0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(9) {
+      ["index"]=>
+      int(2)
+      ["name"]=>
+      string(2) "_1"
+      ["type"]=>
+      string(7) "HH\bool"
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(true)
+      ["function"]=>
+      string(1) "i"
+      ["type_hint_nullable"]=>
+      bool(false)
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(2) "_1"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(false)
+      ["builtin"]=>
+      bool(true)
+    }
+  }
+}
 dict(1) {
   [0]=>
   bool(true)
@@ -160,6 +267,14 @@ dict(2) {
 }
 dict(1) {
   [0]=>
+  bool(false)
+}
+dict(3) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(false)
+  [2]=>
   bool(false)
 }
 string(%d) "Function [ <user> function f ] {
@@ -184,6 +299,16 @@ string(%d) "Function [ <user> function h ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> HH\bool $a ]
+  }
+}
+"
+string(%d) "Function [ <user> function i ] {
+  @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
+
+  - Parameters [3] {
+    Parameter #0 [ <required> HH\bool $_ ]
+    Parameter #1 [ <required> HH\bool $_0 ]
+    Parameter #2 [ <required> HH\bool $_1 ]
   }
 }
 "

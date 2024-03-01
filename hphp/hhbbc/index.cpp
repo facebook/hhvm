@@ -16701,6 +16701,17 @@ void make_local(IndexData& index) {
       }
     }
   );
+
+  // Canonicalize the initial return types computed from the
+  // InitTypesJob. Since we now have all the class information
+  // available, we can put the types into canonical form.
+  parallel::for_each(
+    index.funcInfo,
+    [&] (FuncInfo& finfo) {
+      if (!finfo.func) return;
+      finfo.returnTy = unserialize_classes(std::move(finfo.returnTy));
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

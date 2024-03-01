@@ -5889,6 +5889,285 @@ Type promote_classish(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+// The COWer subclasses allow for traversing specializations while
+// potentially COWing the types. We can avoid COWing the type (and all
+// of it's parent types) until we know we're going to make a change.
+
+struct COWer {
+  virtual Type& operator()() = 0;
+  virtual const Type& noCOW() const = 0;
+};
+
+struct WaitHandleCOWer : public COWer {
+  WaitHandleCOWer(COWer& parent, const DWaitHandle& h)
+    : parent{parent}, current{&h} {}
+  const DWaitHandle& get() const { return *current; }
+  DWaitHandle& getAndCOW() {
+    if (!cowed) {
+      auto& t = parent();
+      assertx(t.m_dataTag == DataTag::WaitHandle);
+      cowed = t.m_data.dwh.mutate();
+      current = cowed;
+    }
+    return *cowed;
+  }
+  Type& operator()() { return getAndCOW().inner; }
+  const Type& noCOW() const { return get().inner; }
+  COWer& parent;
+  DWaitHandle* cowed{nullptr};
+  const DWaitHandle* current;
+};
+
+struct ArrLikePackedNCOWer : public COWer {
+  ArrLikePackedNCOWer(COWer& parent, const DArrLikePackedN& h)
+    : parent{parent}, current{&h} {}
+  const DArrLikePackedN& get() const { return *current; }
+  DArrLikePackedN& getAndCOW() {
+    if (!cowed) {
+      auto& t = parent();
+      assertx(t.m_dataTag == DataTag::ArrLikePackedN);
+      cowed = t.m_data.packedn.mutate();
+      current = cowed;
+    }
+    return *cowed;
+  }
+  Type& operator()() { return getAndCOW().type; }
+  const Type& noCOW() const { return get().type; }
+  COWer& parent;
+  DArrLikePackedN* cowed{nullptr};
+  const DArrLikePackedN* current;
+};
+
+struct ArrLikePackedCOWer : public COWer {
+  ArrLikePackedCOWer(COWer& parent, const DArrLikePacked& h)
+    : parent{parent}, current{&h} {}
+  const DArrLikePacked& get() const { return *current; }
+  DArrLikePacked& getAndCOW() {
+    if (!cowed) {
+      auto& t = parent();
+      assertx(t.m_dataTag == DataTag::ArrLikePacked);
+      cowed = t.m_data.packed.mutate();
+      current = cowed;
+    }
+    return *cowed;
+  }
+  Type& operator()() { return getAndCOW().elems[idx]; }
+  const Type& noCOW() const { return currentElem(); }
+
+  const Type& currentElem() const { return get().elems[idx]; }
+  bool nextElem() {
+    assertx(idx < get().elems.size());
+    return ++idx < get().elems.size();
+  }
+
+  COWer& parent;
+  DArrLikePacked* cowed{nullptr};
+  const DArrLikePacked* current;
+  size_t idx{0};
+};
+
+struct ArrLikeMapNCOWer: public COWer {
+  ArrLikeMapNCOWer(COWer& parent, const DArrLikeMapN& h)
+    : parent{parent}, current{&h} {}
+  const DArrLikeMapN& get() const { return *current; }
+  DArrLikeMapN& getAndCOW() {
+    if (!cowed) {
+      auto& t = parent();
+      assertx(t.m_dataTag == DataTag::ArrLikeMapN);
+      cowed = t.m_data.mapn.mutate();
+      current = cowed;
+    }
+    return *cowed;
+  }
+  Type& operator()() { return isKey ? getAndCOW().key : getAndCOW().val; }
+  const Type& noCOW() const { return keyOrValue(); }
+
+  const Type& keyOrValue() const { return isKey ? get().key : get().val; }
+  void toValue() { assertx(isKey); isKey = false; }
+
+  COWer& parent;
+  DArrLikeMapN* cowed{nullptr};
+  const DArrLikeMapN* current;
+  bool isKey{true};
+};
+
+struct ArrLikeMapCOWer : public COWer {
+  ArrLikeMapCOWer(COWer& parent, const DArrLikeMap& h)
+    : parent{parent}, current{&h} { iter = begin(current->map); }
+  const DArrLikeMap& get() const { return *current; }
+  DArrLikeMap& getAndCOW() {
+    if (!cowed) {
+      auto& t = parent();
+      assertx(t.m_dataTag == DataTag::ArrLikeMap);
+      cowed = t.m_data.map.mutate();
+      current = cowed;
+      iter = begin(cowed->map);
+      for (size_t i = 0; i < idx; ++i) ++iter;
+    }
+    return *cowed;
+  }
+  Type& operator()() {
+    auto& m = getAndCOW();
+    if (iter != end(m.map)) return const_cast<Type&>(iter->second.val);
+    return isOptKey ? m.optKey : m.optVal;
+  }
+  const Type& noCOW() const {
+    auto const& m = get();
+    if (iter != end(m.map)) return iter->second.val;
+    return isOptKey ? m.optKey : m.optVal;
+  }
+
+  const Type& currentElem() const {
+    assertx(iter != end(get().map));
+    return iter->second.val;
+  }
+  bool nextElem() {
+    assertx(iter != end(get().map));
+    ++idx;
+    return ++iter != end(get().map);
+  }
+
+  const Type& optKeyOrValue() const {
+    return isOptKey ? get().optKey : get().optVal;
+  }
+  void toOptVal() {
+    assertx(iter == end(get().map));
+    assertx(isOptKey);
+    isOptKey = false;
+  }
+
+  COWer& parent;
+  DArrLikeMap* cowed{nullptr};
+  const DArrLikeMap* current;
+  size_t idx{0};
+  MapElems::iterator iter;
+  bool isOptKey{true};
+};
+
+struct TypeCOWer : public COWer {
+  explicit TypeCOWer(Type& t) : t{t} {}
+  Type& operator()() { return t; }
+  const Type& noCOW() const { return t; }
+  Type& t;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+void unserialize_classes_impl(const Type& t, COWer& parent) {
+  SCOPE_EXIT { parent.noCOW().checkInvariants(); };
+
+  auto const onDCls = [&] (const DCls& dcls, bool isObj) {
+    auto newT = [&] () -> Optional<Type> {
+      if (!dcls.isIsect()) return std::nullopt;
+      auto out = TInitCell;
+      for (auto const& i : dcls.isect()) {
+        out &= isObj
+          ? subObj(i)
+          : subCls(i, dcls.containsNonRegular());
+      }
+      return out;
+    }();
+
+    if (!newT) return;
+    auto& p = parent();
+    if (newT->is(BBottom)) {
+      p = isObj ? remove_obj(std::move(p)) : remove_cls(std::move(p));
+    } else {
+      auto const bits = p.m_bits;
+      auto const mark = p.m_legacyMark;
+      p = setctx(std::move(*newT), dcls.isCtx());
+      p.m_bits = bits;
+      p.m_legacyMark = mark;
+    }
+  };
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
+    case DataTag::ArrLikeVal:
+      // These can never contain objects or classes.
+      break;
+    case DataTag::WaitHandle: {
+      WaitHandleCOWer next{parent, *t.m_data.dwh};
+      unserialize_classes_impl(next.get().inner, next);
+      assertx(!next.get().cls.isIsect());
+      break;
+    }
+    case DataTag::ArrLikePacked: {
+      ArrLikePackedCOWer next{parent, *t.m_data.packed};
+      do {
+        unserialize_classes_impl(next.currentElem(), next);
+        if (next.currentElem().is(BBottom)) {
+          auto& p = parent();
+          p = remove_bits(std::move(p), BArrLikeN);
+          break;
+        }
+      } while (next.nextElem());
+      break;
+    }
+    case DataTag::ArrLikePackedN: {
+      ArrLikePackedNCOWer next{parent, *t.m_data.packedn};
+      unserialize_classes_impl(next.get().type, next);
+      if (next.get().type.is(BBottom)) {
+        auto& p = parent();
+        p = remove_bits(std::move(p), BArrLikeN);
+      }
+      break;
+    }
+    case DataTag::ArrLikeMap: {
+      ArrLikeMapCOWer next{parent, *t.m_data.map};
+      auto isBottom = false;
+      do {
+        unserialize_classes_impl(next.currentElem(), next);
+        if (next.currentElem().is(BBottom)) {
+          auto& p = parent();
+          p = remove_bits(std::move(p), BArrLikeN);
+          isBottom = true;
+          break;
+        }
+      } while(next.nextElem());
+      if (!isBottom) {
+        assertx(next.optKeyOrValue().is(BBottom) ||
+                next.optKeyOrValue().subtypeOf(BArrKey));
+        assertx(!next.optKeyOrValue().couldBe(BCls | BObj));
+        next.toOptVal();
+        unserialize_classes_impl(next.optKeyOrValue(), next);
+      }
+      break;
+    }
+    case DataTag::ArrLikeMapN: {
+      ArrLikeMapNCOWer next{parent, *t.m_data.mapn};
+      assertx(next.keyOrValue().subtypeOf(BArrKey));
+      assertx(!next.keyOrValue().couldBe(BCls | BObj));
+      next.toValue();
+      unserialize_classes_impl(next.keyOrValue(), next);
+      if (next.keyOrValue().is(BBottom)) {
+        auto& p = parent();
+        p = remove_bits(std::move(p), BArrLikeN);
+      }
+      break;
+    }
+    case DataTag::Obj:
+      onDCls(t.m_data.dobj, true);
+      break;
+    case DataTag::Cls:
+      onDCls(t.m_data.dcls, false);
+      break;
+  }
+}
+
+Type unserialize_classes(Type t) {
+  TypeCOWer cower{t};
+  unserialize_classes_impl(t, cower);
+  return t;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 IterTypes iter_types(const Type& iterable) {
   // Only array types and objects can be iterated. Everything else raises a
   // warning and jumps out of the loop.

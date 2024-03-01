@@ -575,7 +575,7 @@ fn sem_diff_method<'arena, 'a>(
     Ok(())
 }
 
-fn sem_diff_rule<'arena>(path: &CodePath<'_>, a: &Rule<'arena>, b: &Rule<'arena>) -> Result<()> {
+fn sem_diff_rule(path: &CodePath<'_>, a: &Rule, b: &Rule) -> Result<()> {
     let Rule {
         kind: a_kind,
         name: a_name,
@@ -590,11 +590,7 @@ fn sem_diff_rule<'arena>(path: &CodePath<'_>, a: &Rule<'arena>, b: &Rule<'arena>
     Ok(())
 }
 
-fn sem_diff_module<'arena>(
-    path: &CodePath<'_>,
-    a: &Module<'arena>,
-    b: &Module<'arena>,
-) -> Result<()> {
+fn sem_diff_module(path: &CodePath<'_>, a: &Module, b: &Module) -> Result<()> {
     let Module {
         attributes: a_attributes,
         name: a_name,

@@ -5,7 +5,6 @@
 use env::emitter::Emitter;
 use error::Result;
 use ffi::Maybe;
-use ffi::Str;
 use hhbc::Module;
 use hhbc::ModuleName;
 use hhbc::Rule;
@@ -15,7 +14,7 @@ use oxidized::ast;
 
 use crate::emit_attribute;
 
-fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::MdNameKind) -> Rule<'arena> {
+fn emit_rule(rule: &ast::MdNameKind) -> Rule {
     match rule {
         ast::MdNameKind::MDNameGlobal(_) => Rule {
             kind: RuleKind::Global,
@@ -23,22 +22,21 @@ fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::MdNameKind) -> Ru
         },
         ast::MdNameKind::MDNamePrefix(id) => Rule {
             kind: RuleKind::Prefix,
-            name: Maybe::Just(Str::new_str(alloc, &id.1)),
+            name: Maybe::Just(hhbc::intern(&id.1)),
         },
         ast::MdNameKind::MDNameExact(id) => Rule {
             kind: RuleKind::Exact,
-            name: Maybe::Just(Str::new_str(alloc, &id.1)),
+            name: Maybe::Just(hhbc::intern(&id.1)),
         },
     }
 }
 
-pub fn emit_module<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn emit_module<'a, 'decl>(
+    emitter: &mut Emitter<'_, 'decl>,
     ast_module: &'a ast::ModuleDef,
-) -> Result<Module<'arena>> {
+) -> Result<Module> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
-    let name = ModuleName::from_raw_string(alloc, &ast_module.name.1);
+    let name = ModuleName::intern(&ast_module.name.1);
     let span = Span::from_pos(&ast_module.span);
     let doc_comment = ast_module.doc_comment.clone();
 
@@ -53,26 +51,25 @@ pub fn emit_module<'a, 'arena, 'decl>(
             ast_module
                 .exports
                 .as_ref()
-                .map(|v| Vec::from_iter(v.iter().map(|r| emit_rule(alloc, r))).into()),
+                .map(|v| Vec::from_iter(v.iter().map(emit_rule)).into()),
         ),
         imports: Maybe::from(
             ast_module
                 .imports
                 .as_ref()
-                .map(|v| Vec::from_iter(v.iter().map(|r| emit_rule(alloc, r))).into()),
+                .map(|v| Vec::from_iter(v.iter().map(emit_rule)).into()),
         ),
     })
 }
 
-pub fn emit_modules_from_program<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn emit_modules_from_program<'a, 'decl>(
+    emitter: &mut Emitter<'_, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<Module<'arena>>> {
+) -> Result<Vec<Module>> {
     ast.iter()
         .filter_map(|def| {
             if let ast::Def::Module(md) = def {
-                Some(emit_module(alloc, emitter, md))
+                Some(emit_module(emitter, md))
             } else {
                 None
             }
@@ -80,13 +77,10 @@ pub fn emit_modules_from_program<'a, 'arena, 'decl>(
         .collect()
 }
 
-pub fn emit_module_use_from_program<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    prog: &[ast::Def],
-) -> Maybe<ModuleName<'arena>> {
+pub fn emit_module_use_from_program(prog: &[ast::Def]) -> Maybe<ModuleName> {
     for node in prog.iter() {
         if let ast::Def::SetModule(s) = node {
-            return Maybe::Just(ModuleName::new(Str::new_str(e.alloc, &s.1)));
+            return Maybe::Just(ModuleName::intern(&s.1));
         }
     }
     Maybe::Nothing

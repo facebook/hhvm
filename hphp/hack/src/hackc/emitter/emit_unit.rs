@@ -170,7 +170,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
-    let modules = emit_modules_from_program(emitter.alloc, emitter, prog)?;
+    let modules = emit_modules_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default(emitter.alloc, namespace);
@@ -179,7 +179,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
     let adata = emitter.adata_state.take_adata();
-    let module_use = emit_module_use_from_program(emitter, prog);
+    let module_use = emit_module_use_from_program(prog);
     let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;
 

@@ -94,8 +94,8 @@ struct UnitBuilder<'a> {
     func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
     funcs: Vec<hhbc::Function<'a>>,
     include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
-    module_use: Option<ModuleName<'a>>,
-    modules: Vec<hhbc::Module<'a>>,
+    module_use: Option<ModuleName>,
+    modules: Vec<hhbc::Module>,
     type_constants: Vec<hhbc::TypeConstant>,
     typedefs: Vec<hhbc::Typedef<'a>>,
 }
@@ -213,7 +213,7 @@ impl<'a> UnitBuilder<'a> {
                 assemble_file_attributes(alloc, token_iter, &mut self.file_attributes)?;
             }
             b".module_use" => {
-                self.module_use = Some(assemble_module_use(alloc, token_iter)?);
+                self.module_use = Some(assemble_module_use(token_iter)?);
             }
             b".module" => {
                 self.modules.push(assemble_module(alloc, token_iter)?);
@@ -239,14 +239,11 @@ fn ensure_single_defn<T>(v: &Option<T>, tok: &Token<'_>) -> Result<()> {
 /// Ex:
 /// .module m0 (64, 64) {
 /// }
-fn assemble_module<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Module<'arena>> {
+fn assemble_module(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Module> {
     parse!(token_iter,
            ".module"
            <attr:assemble_special_and_user_attrs(alloc)>
-           <name:assemble_module_name(alloc)>
+           <name:assemble_module_name()>
            <span:assemble_span>
            "{"
            <doc_comment:assemble_doc_comment>
@@ -270,15 +267,11 @@ fn assemble_module<'arena>(
 
 /// Ex:
 /// .module_use "(module_use)";
-fn assemble_module_use<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<ModuleName<'arena>> {
+fn assemble_module_use(token_iter: &mut Lexer<'_>) -> Result<ModuleName> {
     parse!(token_iter, ".module_use" <name:string> ";");
-    let name = ModuleName::new(Str::new_slice(
-        alloc,
-        escaper::unquote_slice(name.as_bytes()),
-    ));
+    let name = ModuleName::intern(std::str::from_utf8(escaper::unquote_slice(
+        name.as_bytes(),
+    ))?);
     Ok(name)
 }
 
@@ -632,12 +625,9 @@ fn assemble_class_name<'arena>(
     Ok(hhbc::ClassName::new(id.into_ffi_str(alloc)))
 }
 
-fn assemble_module_name<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::ModuleName<'arena>> {
+fn assemble_module_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ModuleName> {
     parse!(token_iter, <id:id>);
-    Ok(hhbc::ModuleName::new(id.into_ffi_str(alloc)))
+    Ok(hhbc::ModuleName::intern(id.as_str()?))
 }
 
 pub(crate) fn assemble_prop_name_from_str(token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName> {

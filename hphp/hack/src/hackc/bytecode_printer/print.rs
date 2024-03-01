@@ -605,7 +605,7 @@ fn print_class_def<'arena>(
     newline(w)
 }
 
-fn print_rules(w: &mut dyn Write, rules: &[Rule<'_>]) -> Result<()> {
+fn print_rules(w: &mut dyn Write, rules: &[Rule]) -> Result<()> {
     let mut first = true;
 
     for rule in rules.iter() {
@@ -620,10 +620,10 @@ fn print_rules(w: &mut dyn Write, rules: &[Rule<'_>]) -> Result<()> {
                 w.write_all(b"global")?;
             }
             RuleKind::Prefix => {
-                write_bytes!(w, "prefix({})", rule.name.unwrap())?;
+                write_bytes!(w, "prefix({})", rule.name.unwrap().as_str())?;
             }
             RuleKind::Exact => {
-                write_bytes!(w, "exact({})", rule.name.unwrap())?;
+                write_bytes!(w, "exact({})", rule.name.unwrap().as_str())?;
             }
         }
     }
@@ -631,7 +631,7 @@ fn print_rules(w: &mut dyn Write, rules: &[Rule<'_>]) -> Result<()> {
     Ok(())
 }
 
-fn print_named_rules(w: &mut dyn Write, name: &str, rules: Maybe<&Vector<Rule<'_>>>) -> Result<()> {
+fn print_named_rules(w: &mut dyn Write, name: &str, rules: Maybe<&Vector<Rule>>) -> Result<()> {
     if let Just(v) = rules {
         newline(w)?;
         write!(w, ".{} [", name)?;
@@ -641,11 +641,7 @@ fn print_named_rules(w: &mut dyn Write, name: &str, rules: Maybe<&Vector<Rule<'_
     Ok(())
 }
 
-fn print_module_def<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    module_def: &Module<'arena>,
-) -> Result<()> {
+fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -> Result<()> {
     newline(w)?;
     w.write_all(b".module ")?;
     print_special_and_user_attrs(
@@ -814,7 +810,7 @@ fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute])
     newline(w)
 }
 
-fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<ModuleName<'_>>) -> Result<()> {
+fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<ModuleName>) -> Result<()> {
     if let Just(m) = m_opt {
         newline(w)?;
         write_bytes!(w, ".module_use \"{}\";", m.as_bstr())?;

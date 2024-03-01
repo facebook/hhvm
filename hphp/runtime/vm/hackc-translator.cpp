@@ -215,6 +215,11 @@ std::string toString(const Vector<uint8_t>& str) {
   return std::string{(const char*)str.data, str.len};
 }
 
+std::string toString(BytesId id) {
+  auto const b = deref_bytes(id);
+  return std::string{(const char*)b.data(), b.size()};
+}
+
 folly::StringPiece toStringPiece(const Str& str) {
   assertx(str.data != nullptr);
   return folly::StringPiece{(const char*)str.data, str.len};
@@ -1406,7 +1411,7 @@ void translateModuleUse(TranslationState& ts, const Optional<ModuleName>& name) 
   ts.ue->m_moduleName = toStaticString(name.value()._0);
 }
 
-void translateRuleName(VMCompactVector<LowStringPtr>& names, Str name) {
+void translateRuleName(VMCompactVector<LowStringPtr>& names, StringId name) {
   std::string name_ = toString(name);
   std::vector<std::string> str_names;
   folly::split('.', name_, str_names);
@@ -1429,7 +1434,7 @@ Optional<HPHP::Module::RuleSet> translateRules(const Vector<hhbc::Rule>& rules) 
         HPHP::Module::RuleSet::NameRule rule;
         rule.prefix = true;
         maybeThen(r.name,
-          [&](Str& s) {translateRuleName(rule.names, s);}
+          [&](StringId s) {translateRuleName(rule.names, s);}
         );
         result.name_rules.push_back(rule);
         break;
@@ -1438,7 +1443,7 @@ Optional<HPHP::Module::RuleSet> translateRules(const Vector<hhbc::Rule>& rules) 
         HPHP::Module::RuleSet::NameRule rule;
         rule.prefix = false;
         maybeThen(r.name,
-          [&](Str& s) {translateRuleName(rule.names, s);}
+          [&](StringId s) {translateRuleName(rule.names, s);}
         );
         result.name_rules.push_back(rule);
         break;

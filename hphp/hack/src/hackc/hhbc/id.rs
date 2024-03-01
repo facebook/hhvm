@@ -210,9 +210,9 @@ impl<'arena> ClassName<'arena> {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
-pub struct ModuleName<'arena>(Str<'arena>);
+pub struct ModuleName(StringId);
 
-impl_id!(ModuleName);
+impl_intern_id!(ModuleName);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]

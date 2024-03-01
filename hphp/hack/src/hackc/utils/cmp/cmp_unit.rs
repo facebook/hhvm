@@ -70,9 +70,9 @@ impl MapName for hhbc::Method<'_> {
     }
 }
 
-impl MapName for hhbc::Module<'_> {
+impl MapName for hhbc::Module {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -635,7 +635,7 @@ fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result {
+fn cmp_rule(a: &Rule, b: &Rule) -> Result {
     let Rule {
         kind: a_kind,
         name: a_name,
@@ -650,7 +650,7 @@ fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result {
+fn cmp_module(a: &Module, b: &Module) -> Result {
     let Module {
         attributes: a_attributes,
         name: a_name,

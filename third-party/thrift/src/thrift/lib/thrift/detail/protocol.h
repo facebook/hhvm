@@ -186,15 +186,8 @@ struct std::hash<apache::thrift::protocol::detail::Value> {
     if (auto hash = apache::thrift::protocol::detail::hash_value(s)) {
       return *hash;
     }
-
-    // TODO(dokwon): Remove specifying op::StdHasher and use default op::hash
-    // after op::StdHasherDeprecated migration.
-    auto accumulator = apache::thrift::op::makeDeterministicAccumulator<
-        apache::thrift::op::StdHasher>();
-    apache::thrift::op::hash<apache::thrift::type::union_t<
+    return apache::thrift::op::hash<apache::thrift::type::union_t<
         apache::thrift::protocol::detail::detail::Value>>(
-        apache::thrift::protocol::detail::ValueAdapter::toThrift(s),
-        accumulator);
-    return std::move(accumulator.result()).getResult();
+        apache::thrift::protocol::detail::ValueAdapter::toThrift(s));
   }
 };

@@ -49,9 +49,13 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
+        try:
+            py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.interactions.module.thrift_metadata

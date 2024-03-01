@@ -229,8 +229,12 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructNestedAnnotation, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructNestedAnnotation, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructNestedAnnotation, self)
 @__cython.auto_pickle(False)
 cdef class SecretStruct(thrift.py3.types.Struct):
     def __init__(SecretStruct self, **kwargs):
@@ -354,8 +358,12 @@ cdef class SecretStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.SecretStruct, self)
 @__cython.auto_pickle(False)
 cdef class std_deque_std_string__List__string(thrift.py3.types.List):
     def __init__(self, items=None):

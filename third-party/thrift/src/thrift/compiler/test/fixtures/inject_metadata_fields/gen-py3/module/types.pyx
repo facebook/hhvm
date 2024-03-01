@@ -176,8 +176,12 @@ cdef class Fields(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedToEmptyStruct self, **kwargs):
@@ -292,8 +296,12 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedToStruct self, **kwargs):
@@ -417,8 +425,12 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     def __init__(FieldsInjectedWithIncludedStruct self, **kwargs):
@@ -564,5 +576,9 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)

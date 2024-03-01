@@ -85,9 +85,13 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Internship, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Internship, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Internship, self)
 
 
 class Range(metaclass=_fbthrift_python_types.StructMeta):
@@ -135,9 +139,13 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Range, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Range, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Range, self)
 
 
 class struct1(metaclass=_fbthrift_python_types.StructMeta):
@@ -185,9 +193,13 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.struct1, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.struct1, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.struct1, self)
 
 
 class struct2(metaclass=_fbthrift_python_types.StructMeta):
@@ -253,9 +265,13 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.struct2, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.struct2, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.struct2, self)
 
 
 class struct3(metaclass=_fbthrift_python_types.StructMeta):
@@ -312,9 +328,13 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.struct3, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.struct3, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.struct3, self)
 
 
 class struct4(metaclass=_fbthrift_python_types.StructMeta):
@@ -371,9 +391,13 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.struct4, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.struct4, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.struct4, self)
 
 
 class union1(metaclass=_fbthrift_python_types.UnionMeta):
@@ -421,9 +445,13 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.union1, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.union1, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.union1, self)
 
 
 class union2(metaclass=_fbthrift_python_types.UnionMeta):
@@ -489,9 +517,13 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.union2, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.union2, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.union2, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata

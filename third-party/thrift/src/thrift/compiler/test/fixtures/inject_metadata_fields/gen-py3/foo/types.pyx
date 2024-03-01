@@ -196,5 +196,9 @@ cdef class Fields(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("foo.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        try:
+            py_deprecated_types = importlib.import_module("foo.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("foo.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)

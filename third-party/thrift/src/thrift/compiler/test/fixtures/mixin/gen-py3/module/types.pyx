@@ -174,8 +174,12 @@ cdef class Mixin1(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin1, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin1, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin1, self)
 @__cython.auto_pickle(False)
 cdef class Mixin2(thrift.py3.types.Struct):
     def __init__(Mixin2 self, **kwargs):
@@ -311,8 +315,12 @@ cdef class Mixin2(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin2, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin2, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin2, self)
 @__cython.auto_pickle(False)
 cdef class Mixin3Base(thrift.py3.types.Struct):
     def __init__(Mixin3Base self, **kwargs):
@@ -427,8 +435,12 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin3Base, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Mixin3Base, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin3Base, self)
 @__cython.auto_pickle(False)
 cdef class Foo(thrift.py3.types.Struct):
     def __init__(Foo self, **kwargs):
@@ -601,6 +613,10 @@ cdef class Foo(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
 Mixin3 = Mixin3Base

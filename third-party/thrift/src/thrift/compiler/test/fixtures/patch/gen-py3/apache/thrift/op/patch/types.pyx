@@ -162,8 +162,12 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratePatch, self)
+        try:
+            py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratePatch, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("apache_thrift_asyncio.patch.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.GeneratePatch, self)
 @__cython.auto_pickle(False)
 cdef class AssignOnlyPatch(thrift.py3.types.Struct):
     def __init__(AssignOnlyPatch self, **kwargs):
@@ -262,6 +266,10 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.AssignOnlyPatch, self)
+        try:
+            py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AssignOnlyPatch, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("apache_thrift_asyncio.patch.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AssignOnlyPatch, self)
 FieldId = int

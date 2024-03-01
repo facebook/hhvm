@@ -49,9 +49,13 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("hsmodule.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.HsFoo, self)
+        try:
+            py_deprecated_types = importlib.import_module("hsmodule.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.HsFoo, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("hsmodule.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.HsFoo, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import python_module_root.my.namespacing.test.hsmodule.thrift_metadata

@@ -51,9 +51,13 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
 
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -92,9 +96,13 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
 
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -142,9 +150,13 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
 
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -210,9 +222,13 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata

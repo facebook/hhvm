@@ -74,9 +74,13 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("a.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("a.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("a.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import a.thrift_metadata

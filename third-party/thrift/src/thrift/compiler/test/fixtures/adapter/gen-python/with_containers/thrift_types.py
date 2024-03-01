@@ -59,9 +59,13 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("with_containers.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_AnnotationWithContainers, self)
+        try:
+            py_deprecated_types = importlib.import_module("with_containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_AnnotationWithContainers, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("with_containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_AnnotationWithContainers, self)
 
 
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
@@ -103,9 +107,13 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("with_containers.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_MyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("with_containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_MyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("with_containers.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_MyStruct, self)
 
 
 MyStruct = my.AdaptedType[_fbthrift_unadapted_MyStruct]

@@ -168,8 +168,12 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Fiery, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Fiery, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Fiery, self)
 @__cython.auto_pickle(False)
 cdef class Serious(thrift.py3.exceptions.GeneratedError):
     def __init__(Serious self, *args, **kwargs):
@@ -280,8 +284,12 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Serious, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Serious, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Serious, self)
 @__cython.auto_pickle(False)
 cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
     def __init__(ComplexFieldNames self, *args, **kwargs):
@@ -399,8 +407,12 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexFieldNames, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexFieldNames, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexFieldNames, self)
 @__cython.auto_pickle(False)
 cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
     def __init__(CustomFieldNames self, *args, **kwargs):
@@ -518,8 +530,12 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFieldNames, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFieldNames, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFieldNames, self)
 @__cython.auto_pickle(False)
 cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
     def __init__(ExceptionWithPrimitiveField self, *args, **kwargs):
@@ -637,8 +653,12 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithPrimitiveField, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithPrimitiveField, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithPrimitiveField, self)
 @__cython.auto_pickle(False)
 cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError):
     def __init__(ExceptionWithStructuredAnnotation self, *args, **kwargs):
@@ -756,8 +776,12 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithStructuredAnnotation, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithStructuredAnnotation, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithStructuredAnnotation, self)
 @__cython.auto_pickle(False)
 cdef class Banal(thrift.py3.exceptions.GeneratedError):
     def __init__(Banal self, *args, **kwargs):
@@ -854,5 +878,9 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Banal, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Banal, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Banal, self)

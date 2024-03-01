@@ -143,6 +143,8 @@ class python_mstch_program : public mstch_program {
             {"program:module_path", &python_mstch_program::module_path},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
+            {"program:py_asyncio_module_path",
+             &python_mstch_program::py_asyncio_module_path},
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
@@ -191,6 +193,14 @@ class python_mstch_program : public mstch_program {
 
   mstch::node py_deprecated_module_path() {
     std::string module_path = program_->get_namespace("py");
+    if (module_path.empty()) {
+      return program_->name();
+    }
+    return module_path;
+  }
+
+  mstch::node py_asyncio_module_path() {
+    std::string module_path = program_->get_namespace("py.asyncio");
     if (module_path.empty()) {
       return program_->name();
     }

@@ -176,8 +176,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("matching_struct_names.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("matching_struct_names.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("matching_struct_names.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 @__cython.auto_pickle(False)
 cdef class Combo(thrift.py3.types.Struct):
     def __init__(Combo self, **kwargs):
@@ -327,8 +331,12 @@ cdef class Combo(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("matching_struct_names.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Combo, self)
+        try:
+            py_deprecated_types = importlib.import_module("matching_struct_names.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Combo, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("matching_struct_names.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Combo, self)
 @__cython.auto_pickle(False)
 cdef class List__MyStruct(thrift.py3.types.List):
     def __init__(self, items=None):

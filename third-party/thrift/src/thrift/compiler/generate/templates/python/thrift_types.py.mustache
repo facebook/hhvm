@@ -93,9 +93,13 @@ class {{> structs/unadapted_name}}(metaclass={{!
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+        try:
+            py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
 

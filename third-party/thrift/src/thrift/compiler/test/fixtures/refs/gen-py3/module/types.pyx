@@ -403,8 +403,12 @@ cdef class MyUnion(thrift.py3.types.Union):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
 
 
 @__cython.auto_pickle(False)
@@ -549,8 +553,12 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.NonTriviallyDestructibleUnion, self)
 @__cython.auto_pickle(False)
 cdef class MyField(thrift.py3.types.Struct):
     def __init__(MyField self, **kwargs):
@@ -764,8 +772,12 @@ cdef class MyField(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyField, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyField, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyField, self)
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
@@ -907,8 +919,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 @__cython.auto_pickle(False)
 cdef class StructWithUnion(thrift.py3.types.Struct):
     def __init__(StructWithUnion self, **kwargs):
@@ -1049,8 +1065,12 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithUnion, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithUnion, self)
 @__cython.auto_pickle(False)
 cdef class RecursiveStruct(thrift.py3.types.Struct):
     def __init__(RecursiveStruct self, **kwargs):
@@ -1169,8 +1189,12 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.RecursiveStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.RecursiveStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.RecursiveStruct, self)
 @__cython.auto_pickle(False)
 cdef class StructWithContainers(thrift.py3.types.Struct):
     def __init__(StructWithContainers self, **kwargs):
@@ -1348,8 +1372,12 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithContainers, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithContainers, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithContainers, self)
 @__cython.auto_pickle(False)
 cdef class StructWithSharedConst(thrift.py3.types.Struct):
     def __init__(StructWithSharedConst self, **kwargs):
@@ -1491,8 +1519,12 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithSharedConst, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithSharedConst, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithSharedConst, self)
 @__cython.auto_pickle(False)
 cdef class Empty(thrift.py3.types.Struct):
     def __init__(Empty self, **kwargs):
@@ -1591,8 +1623,12 @@ cdef class Empty(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Empty, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRef(thrift.py3.types.Struct):
     def __init__(StructWithRef self, **kwargs):
@@ -1734,8 +1770,12 @@ cdef class StructWithRef(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRef, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRef, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithRef, self)
 @__cython.auto_pickle(False)
 cdef class StructWithBox(thrift.py3.types.Struct):
     def __init__(StructWithBox self, **kwargs):
@@ -1878,8 +1918,12 @@ cdef class StructWithBox(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithBox, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithBox, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithBox, self)
 @__cython.auto_pickle(False)
 cdef class StructWithInternBox(thrift.py3.types.Struct):
     def __init__(StructWithInternBox self, **kwargs):
@@ -2007,8 +2051,12 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithInternBox, self)
 @__cython.auto_pickle(False)
 cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
     def __init__(StructWithTerseInternBox self, **kwargs):
@@ -2134,8 +2182,12 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithTerseInternBox, self)
 @__cython.auto_pickle(False)
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def __init__(AdaptedStructWithInternBox self, **kwargs):
@@ -2263,8 +2315,12 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedStructWithInternBox, self)
 @__cython.auto_pickle(False)
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     def __init__(AdaptedStructWithTerseInternBox self, **kwargs):
@@ -2390,8 +2446,12 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedStructWithTerseInternBox, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeUnique self, **kwargs):
@@ -2533,8 +2593,12 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeUnique, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeUnique, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithRefTypeUnique, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeShared self, **kwargs):
@@ -2676,8 +2740,12 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeShared, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeShared, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithRefTypeShared, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeSharedConst self, **kwargs):
@@ -2819,8 +2887,12 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeSharedConst, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeSharedConst, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithRefTypeSharedConst, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
     def __init__(StructWithRefAndAnnotCppNoexceptMoveCtor self, **kwargs):
@@ -2938,8 +3010,12 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
 @__cython.auto_pickle(False)
 cdef class StructWithString(thrift.py3.types.Struct):
     def __init__(StructWithString self, **kwargs):
@@ -3105,8 +3181,12 @@ cdef class StructWithString(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithString, self)
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithString, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithString, self)
 @__cython.auto_pickle(False)
 cdef class List__RecursiveStruct(thrift.py3.types.List):
     def __init__(self, items=None):

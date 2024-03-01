@@ -76,9 +76,13 @@ class SerializedStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedStruct, self)
 
 
 class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -126,9 +130,13 @@ class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedUnion, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedUnion, self)
 
 
 class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -185,9 +193,13 @@ class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedError, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedError, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedError, self)
 
 
 class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -253,9 +265,13 @@ class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalStruct, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalStruct, self)
 
 
 class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -303,9 +319,13 @@ class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalUnion, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalUnion, self)
 
 
 class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -362,9 +382,13 @@ class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalError, self)
+        try:
+            py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalError, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalError, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.serialized_dep.thrift_metadata

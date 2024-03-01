@@ -161,6 +161,8 @@ class py3_mstch_program : public mstch_program {
             {"program:cpp_gen_path", &py3_mstch_program::getCppGenPath},
             {"program:py_deprecated_module_path",
              &py3_mstch_program::py_deprecated_module_path},
+            {"program:py_asyncio_module_path",
+             &py3_mstch_program::py_asyncio_module_path},
             {"program:filtered_structs", &py3_mstch_program::filtered_objects},
             {"program:filtered_typedefs",
              &py3_mstch_program::filtered_typedefs},
@@ -271,6 +273,14 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node py_deprecated_module_path() {
     std::string module_path = program_->get_namespace("py");
+    if (module_path.empty()) {
+      return program_->name();
+    }
+    return module_path;
+  }
+
+  mstch::node py_asyncio_module_path() {
+    std::string module_path = program_->get_namespace("py.asyncio");
     if (module_path.empty()) {
       return program_->name();
     }

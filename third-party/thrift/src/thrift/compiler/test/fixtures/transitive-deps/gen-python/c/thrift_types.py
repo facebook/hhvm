@@ -49,9 +49,13 @@ class C(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("c.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.C, self)
+        try:
+            py_deprecated_types = importlib.import_module("c.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.C, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("c.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.C, self)
 
 
 class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -81,9 +85,13 @@ class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_py_deprecated(self):
         import importlib
-        py_deprecated_types = importlib.import_module("c.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.E, self)
+        try:
+            py_deprecated_types = importlib.import_module("c.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.E, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("c.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.E, self)
 
 # This unfortunately has to be down here to prevent circular imports
 import c.thrift_metadata

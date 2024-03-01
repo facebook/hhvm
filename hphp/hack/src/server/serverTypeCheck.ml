@@ -149,7 +149,7 @@ let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
       List.fold
         info.FileInfo.ids.FileInfo.classes
         ~init:SSet.empty
-        ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
+        ~f:(fun acc id -> SSet.add acc id.FileInfo.name)
   in
   let old_classes =
     match Naming_table.get_file_info old_naming_table path with
@@ -158,7 +158,7 @@ let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
       List.fold
         info.FileInfo.ids.FileInfo.classes
         ~init:SSet.empty
-        ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
+        ~f:(fun acc id -> SSet.add acc id.FileInfo.name)
   in
   SSet.union new_classes old_classes
 

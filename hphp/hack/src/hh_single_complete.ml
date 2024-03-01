@@ -879,7 +879,7 @@ let decl_and_run_mode
         let file_info = Naming_table.get_file_info naming_table file in
         Option.iter file_info ~f:(fun file_info ->
             let ids_to_strings ids =
-              List.map ids ~f:(fun (_, name, _) -> name)
+              List.map ids ~f:(fun id -> id.FileInfo.name)
             in
             let { FileInfo.funs; classes; typedefs; consts; modules } =
               file_info.FileInfo.ids

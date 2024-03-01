@@ -41,23 +41,31 @@ fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
     for &(name, decl, hash) in file.iter() {
         let hash = Int64::from(hash.as_u64() as i64);
         match decl {
-            Decl::Class(x) => info
-                .ids
-                .classes
-                .push(Id(pos(x.name.0), name.into(), Some(hash))),
-            Decl::Fun(x) => info.ids.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Typedef(x) => info
-                .ids
-                .typedefs
-                .push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Const(x) => info
-                .ids
-                .consts
-                .push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Module(x) => info
-                .ids
-                .modules
-                .push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Class(x) => info.ids.classes.push(Id {
+                pos: pos(x.name.0),
+                name: name.into(),
+                decl_hash: Some(hash),
+            }),
+            Decl::Fun(x) => info.ids.funs.push(Id {
+                pos: pos(x.pos),
+                name: name.into(),
+                decl_hash: Some(hash),
+            }),
+            Decl::Typedef(x) => info.ids.typedefs.push(Id {
+                pos: pos(x.pos),
+                name: name.into(),
+                decl_hash: Some(hash),
+            }),
+            Decl::Const(x) => info.ids.consts.push(Id {
+                pos: pos(x.pos),
+                name: name.into(),
+                decl_hash: Some(hash),
+            }),
+            Decl::Module(x) => info.ids.modules.push(Id {
+                pos: pos(x.pos),
+                name: name.into(),
+                decl_hash: Some(hash),
+            }),
         }
     }
     // Match OCaml ordering

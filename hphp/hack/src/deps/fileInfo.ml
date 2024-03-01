@@ -109,9 +109,12 @@ type pos =
 (** An id contains a pos, name and a optional decl hash. The decl hash is None
  * only in the case when we didn't compute it for performance reasons
  *)
-type id = pos * string * Int64.t option [@@deriving eq, show]
-
-let id_name (_, x, _) = x
+type id = {
+  pos: pos;
+  name: string;
+  decl_hash: Int64.t option;
+}
+[@@deriving eq, show]
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
@@ -156,7 +159,9 @@ let empty_t =
     comments = Some [];
   }
 
-let pos_full (p, name, hash) = (Full p, name, hash)
+let pos_full (p, name, decl_hash) =
+  let pos = Full p in
+  { pos : pos; name; decl_hash }
 
 let get_pos_filename = function
   | Full p -> Pos.filename p
@@ -215,7 +220,7 @@ let empty_names =
 (*****************************************************************************)
 
 let name_set_of_idl idl =
-  List.fold_left idl ~f:(fun acc (_, x, _) -> SSet.add x acc) ~init:SSet.empty
+  List.fold_left idl ~f:(fun acc id -> SSet.add id.name acc) ~init:SSet.empty
 
 let ids_to_names (ids : ids) : names =
   let { funs; classes; typedefs; consts; modules } = ids in
@@ -254,22 +259,24 @@ let from_saved fn saved =
   let { s_names; s_mode; s_position_free_decl_hash } = saved in
   let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
-    List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x, None))
+    List.map (SSet.elements sn_funs) ~f:(fun x ->
+        { pos = File (Fun, fn); name = x; decl_hash = None })
   in
   let classes =
     List.map (SSet.elements sn_classes) ~f:(fun x ->
-        (File (Class, fn), x, None))
+        { pos = File (Class, fn); name = x; decl_hash = None })
   in
   let typedefs =
     List.map (SSet.elements sn_types) ~f:(fun x ->
-        (File (Typedef, fn), x, None))
+        { pos = File (Typedef, fn); name = x; decl_hash = None })
   in
   let consts =
-    List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x, None))
+    List.map (SSet.elements sn_consts) ~f:(fun x ->
+        { pos = File (Const, fn); name = x; decl_hash = None })
   in
   let modules =
     List.map (SSet.elements sn_modules) ~f:(fun m ->
-        (File (Module, fn), m, None))
+        { pos = File (Module, fn); name = m; decl_hash = None })
   in
   {
     file_mode = s_mode;
@@ -299,11 +306,13 @@ let merge_names t_names1 t_names2 =
 
 let ids_to_string (ids : ids) : string =
   let { classes; typedefs; consts; modules; funs } = ids in
-  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) funs in
-  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) classes in
-  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) typedefs in
-  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) consts in
-  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) modules in
+  let funs = List.map ~f:(fun id -> { id with decl_hash = None }) funs in
+  let classes = List.map ~f:(fun id -> { id with decl_hash = None }) classes in
+  let typedefs =
+    List.map ~f:(fun id -> { id with decl_hash = None }) typedefs
+  in
+  let consts = List.map ~f:(fun id -> { id with decl_hash = None }) consts in
+  let modules = List.map ~f:(fun id -> { id with decl_hash = None }) modules in
   [
     ("funs", funs);
     ("classes", classes);
@@ -316,9 +325,9 @@ let ids_to_string (ids : ids) : string =
          Printf.sprintf
            "%s: %s %s"
            kind
-           (List.map l ~f:(fun (_, x, _) -> x) |> String.concat ~sep:",")
-           (List.map l ~f:(fun (_, _, hash) ->
-                Int64.to_string (Option.value hash ~default:Int64.zero))
+           (List.map l ~f:(fun id -> id.name) |> String.concat ~sep:",")
+           (List.map l ~f:(fun id ->
+                Int64.to_string (Option.value id.decl_hash ~default:Int64.zero))
            |> String.concat ~sep:","))
   |> String.concat ~sep:";"
 

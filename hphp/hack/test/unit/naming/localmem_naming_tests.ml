@@ -373,8 +373,8 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
     Option.(
       new_ids
       >>| (fun info -> info.FileInfo.classes)
-      >>= List.find ~f:(fun (_, name, _) -> String.equal name "\\:my:xhp:cls")
-      >>| fun (_, n, _) -> n)
+      >>= List.find ~f:(fun id -> String.equal id.FileInfo.name "\\:my:xhp:cls")
+      >>| fun id -> id.FileInfo.name)
     "xhp_name_mangling: expected new file info to contain `\\:my:xhp:cls`";
   true
 

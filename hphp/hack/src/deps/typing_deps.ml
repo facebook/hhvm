@@ -13,6 +13,7 @@ module Hashtbl = Stdlib.Hashtbl
 module Mode = Typing_deps_mode
 open Typing_deps_mode
 open Utils
+open FileInfo
 
 let worker_id : int option ref = ref None
 
@@ -839,7 +840,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       consts
       ~f:
         begin
-          (fun acc (_, const_id, _) -> Dep.make (Dep.GConst const_id) :: acc)
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.GConst id.name) :: acc)
         end
       ~init:[]
   in
@@ -848,7 +849,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       funs
       ~f:
         begin
-          (fun acc (_, fun_id, _) -> Dep.make (Dep.Fun fun_id) :: acc)
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Fun id.name) :: acc)
         end
       ~init:defs
   in
@@ -857,7 +858,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       classes
       ~f:
         begin
-          (fun acc (_, class_id, _) -> Dep.make (Dep.Type class_id) :: acc)
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -866,7 +867,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       typedefs
       ~f:
         begin
-          (fun acc (_, type_id, _) -> Dep.make (Dep.Type type_id) :: acc)
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -875,7 +876,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       modules
       ~f:
         begin
-          (fun acc (_, type_id, _) -> Dep.make (Dep.Module type_id) :: acc)
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Module id.name) :: acc)
         end
       ~init:defs
   in

@@ -141,8 +141,10 @@ let should_report_duplicate
     ~(id : FileInfo.id)
     ~(canonical_id : FileInfo.id) : bool =
   let open FileInfo in
-  let (p, name, _) = id in
-  let (pc, canonical, _) = canonical_id in
+  let p = id.pos in
+  let name = id.name in
+  let pc = canonical_id.pos in
+  let canonical = canonical_id.name in
   (* helper, for the various paths below which want to log a bug *)
   let bug ~(desc : string) : unit =
     let () =
@@ -211,43 +213,56 @@ let should_report_duplicate
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let new_fun_skip_if_already_bound ctx fn (_p, name, _) =
-    match Naming_provider.get_fun_canon_name ctx name with
+  let new_fun_skip_if_already_bound ctx fn id =
+    match Naming_provider.get_fun_canon_name ctx id.FileInfo.name with
     | Some _ -> ()
     | None ->
       let backend = Provider_context.get_backend ctx in
-      Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
+      Naming_provider.add_fun
+        backend
+        id.FileInfo.name
+        (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_type_skip_if_already_bound ctx fn ~kind (_p, name, _) =
+  let new_type_skip_if_already_bound ctx fn ~kind id =
     let name_type = Naming_types.type_kind_to_name_type kind in
-    match Naming_provider.get_type_canon_name ctx name with
+    match Naming_provider.get_type_canon_name ctx id.FileInfo.name with
     | Some _ -> ()
     | None ->
       let backend = Provider_context.get_backend ctx in
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_provider.add_type backend name (FileInfo.File (name_type, fn)) kind
+      Naming_provider.add_type
+        backend
+        id.FileInfo.name
+        (FileInfo.File (name_type, fn))
+        kind
 
-  let new_global_const_skip_if_already_bound ctx fn (_p, name, _) =
+  let new_global_const_skip_if_already_bound ctx fn id =
     let backend = Provider_context.get_backend ctx in
-    Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
+    Naming_provider.add_const
+      backend
+      id.FileInfo.name
+      (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun_error_if_already_bound
       (ctx : Provider_context.t)
       (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
-    let (p, name, _) = id in
+    let p = id.FileInfo.pos in
+    let name = id.FileInfo.name in
     match Naming_provider.get_fun_canon_name ctx name with
     | Some canonical ->
-      let pc = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
+      let pos = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
+      let name = canonical in
+      let decl_hash = None in
       let is_error =
         should_report_duplicate
           ctx
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, canonical, None)
+          ~canonical_id:FileInfo.{ pos; name; decl_hash }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -261,17 +276,20 @@ module Env = struct
       ~(kind : Naming_types.kind_of_type)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
-    let (p, name, _) = id in
+    let p = id.FileInfo.pos in
+    let name = id.FileInfo.name in
     match Naming_provider.get_type_canon_name ctx name with
     | Some canonical ->
-      let pc = Option.value_exn (Naming_provider.get_type_pos ctx canonical) in
+      let pos = Option.value_exn (Naming_provider.get_type_pos ctx canonical) in
+      let name = canonical in
+      let decl_hash = None in
       let is_error =
         should_report_duplicate
           ctx
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, canonical, None)
+          ~canonical_id:FileInfo.{ pos; name; decl_hash }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -284,16 +302,18 @@ module Env = struct
       (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
-    let (p, name, _) = id in
+    let p = id.FileInfo.pos in
+    let name = id.FileInfo.name in
     match Naming_provider.get_const_pos ctx name with
-    | Some pc ->
+    | Some pos ->
+      let decl_hash = None in
       let is_error =
         should_report_duplicate
           ctx
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, name, None)
+          ~canonical_id:FileInfo.{ pos; name; decl_hash }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -301,11 +321,11 @@ module Env = struct
       Naming_provider.add_const backend name p;
       (p :: current_file_symbols_acc, is_okay_acc)
 
-  let new_module_skip_if_already_bound ctx fn (_p, name, _) =
+  let new_module_skip_if_already_bound ctx fn id =
     let backend = Provider_context.get_backend ctx in
     Naming_provider.add_module
       backend
-      name
+      id.FileInfo.name
       (FileInfo.File (FileInfo.Module, fn))
 
   let new_module_error_if_already_bound
@@ -313,16 +333,18 @@ module Env = struct
       (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
-    let (p, name, _) = id in
+    let p = id.FileInfo.pos in
+    let name = id.FileInfo.name in
     match Naming_provider.get_module_pos ctx name with
-    | Some pc ->
+    | Some pos ->
+      let decl_hash = None in
       let is_error =
         should_report_duplicate
           ctx
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, name, None)
+          ~canonical_id:FileInfo.{ pos; name; decl_hash }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -339,14 +361,15 @@ let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_module_batch backend modules
 
 let remove_decls_using_file_info backend ids =
+  let id_name id = id.FileInfo.name in
   let { FileInfo.funs; classes; typedefs; consts; modules } = ids in
   remove_decls
     ~backend
-    ~funs:(List.map ~f:FileInfo.id_name funs)
-    ~classes:(List.map ~f:FileInfo.id_name classes)
-    ~typedefs:(List.map ~f:FileInfo.id_name typedefs)
-    ~consts:(List.map ~f:FileInfo.id_name consts)
-    ~modules:(List.map ~f:FileInfo.id_name modules)
+    ~funs:(List.map ~f:id_name funs)
+    ~classes:(List.map ~f:id_name classes)
+    ~typedefs:(List.map ~f:id_name typedefs)
+    ~consts:(List.map ~f:id_name consts)
+    ~modules:(List.map ~f:id_name modules)
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -420,8 +443,8 @@ let add_files_to_rename failed defl defs_in_env =
   List.fold_left
     ~f:
       begin
-        fun failed (_, def, _) ->
-          match defs_in_env def with
+        fun failed id ->
+          match defs_in_env id.FileInfo.name with
           | None -> failed
           | Some previous_definition_position ->
             let filename = Pos.filename previous_definition_position in

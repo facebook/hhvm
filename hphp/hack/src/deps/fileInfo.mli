@@ -89,9 +89,12 @@ type pos =
   | File of name_type * Relative_path.t
 [@@deriving eq, show]
 
-type id = pos * string * Int64.t option [@@deriving eq, show]
-
-val id_name : id -> string
+type id = {
+  pos: pos;
+  name: string;
+  decl_hash: Int64.t option;
+}
+[@@deriving eq, show]
 
 val pos_full : Pos.t * string * Int64.t option -> id
 

@@ -213,7 +213,11 @@ pub enum Pos {
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
-pub struct Id(pub Pos, pub String, pub Option<Int64>);
+pub struct Id {
+    pub pos: Pos,
+    pub name: String,
+    pub decl_hash: Option<Int64>,
+}
 
 #[derive(
     Clone,

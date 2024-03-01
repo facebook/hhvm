@@ -512,19 +512,19 @@ let update_reverse_entries_helper
         in
         Naming_provider.remove_type_batch
           backend
-          (classes |> List.map ~f:(fun (_, x, _) -> x));
+          (classes |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_type_batch
           backend
-          (typedefs |> List.map ~f:(fun (_, x, _) -> x));
+          (typedefs |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_fun_batch
           backend
-          (funs |> List.map ~f:(fun (_, x, _) -> x));
+          (funs |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_const_batch
           backend
-          (consts |> List.map ~f:(fun (_, x, _) -> x));
+          (consts |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_module_batch
           backend
-          (modules |> List.map ~f:(fun (_, x, _) -> x))
+          (modules |> List.map ~f:(fun id -> id.FileInfo.name))
       | None -> ())
     changed_ids;
 
@@ -537,20 +537,24 @@ let update_reverse_entries_helper
           fi.FileInfo.ids
         in
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_class backend name pos)
+          ~f:(fun id ->
+            Naming_provider.add_class backend id.FileInfo.name id.FileInfo.pos)
           classes;
         List.iter
-          ~f:(fun (pos, name, _) ->
-            Naming_provider.add_typedef backend name pos)
+          ~f:(fun id ->
+            Naming_provider.add_typedef backend id.FileInfo.name id.FileInfo.pos)
           typedefs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_fun backend name pos)
+          ~f:(fun id ->
+            Naming_provider.add_fun backend id.FileInfo.name id.FileInfo.pos)
           funs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_const backend name pos)
+          ~f:(fun id ->
+            Naming_provider.add_const backend id.FileInfo.name id.FileInfo.pos)
           consts;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_module backend name pos)
+          ~f:(fun id ->
+            Naming_provider.add_module backend id.FileInfo.name id.FileInfo.pos)
           modules
       | None -> ())
     changed_ids

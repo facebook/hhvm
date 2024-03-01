@@ -22,7 +22,7 @@ let remove_defs_from_reverse_naming_table
             position_free_decl_hash = _;
           } ->
         (* we use [snd] to strip away positions *)
-        let snd (_, x, _) = x in
+        let snd id = id.FileInfo.name in
         Naming_global.remove_decls
           ~backend:(Provider_backend.get ())
           ~funs:(List.map funs ~f:snd)

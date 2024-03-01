@@ -106,8 +106,8 @@ let find_child_classes ctx target_class_name naming_table files =
         let { FileInfo.ids = { FileInfo.classes; _ }; _ } =
           Naming_table.get_file_info_exn naming_table fn
         in
-        List.fold_left classes ~init:acc ~f:(fun acc (_, cid, _) ->
-            add_if_extends_class ctx target_class_name cid acc)
+        List.fold_left classes ~init:acc ~f:(fun acc id ->
+            add_if_extends_class ctx target_class_name id.FileInfo.name acc)
       with
       | Naming_table.File_info_not_found -> acc)
 

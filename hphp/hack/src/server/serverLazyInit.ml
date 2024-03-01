@@ -394,7 +394,7 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
                 comments = _;
               } ->
             let backend = Provider_context.get_backend ctx in
-            let snd (_, x, _) = x in
+            let snd id = id.FileInfo.name in
             Naming_provider.remove_type_batch
               backend
               (classes |> List.map ~f:snd);

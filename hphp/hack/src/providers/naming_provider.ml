@@ -54,9 +54,9 @@ let find_symbol_in_context
              ~entry
          in
          let symbols = get_entry_symbols ids in
-         List.find_map symbols ~f:(fun ((pos, name, _), kind) ->
-             if is_symbol name then
-               Some (pos, kind)
+         List.find_map symbols ~f:(fun (id, kind) ->
+             if is_symbol id.FileInfo.name then
+               Some (id.FileInfo.pos, kind)
              else
                None))
   |> Relative_path.Map.choose_opt
@@ -882,7 +882,7 @@ let update
     ~(old_ids : FileInfo.ids option)
     ~(new_ids : FileInfo.ids option) : unit =
   let open FileInfo in
-  let strip_positions symbols = List.map symbols ~f:(fun (_, x, _) -> x) in
+  let strip_positions symbols = List.map symbols ~f:(fun id -> id.name) in
   match backend with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Rust_provider_backend _
@@ -902,12 +902,11 @@ let update
        we have to use the file_info we're given to avoid races. *)
     Option.iter new_ids ~f:(fun new_ids ->
         let { classes; typedefs; funs; consts; modules } = new_ids in
-        List.iter funs ~f:(fun (pos, name, _) -> add_fun backend name pos);
-        List.iter classes ~f:(fun (pos, name, _) -> add_class backend name pos);
-        List.iter typedefs ~f:(fun (pos, name, _) ->
-            add_typedef backend name pos);
-        List.iter consts ~f:(fun (pos, name, _) -> add_const backend name pos);
-        List.iter modules ~f:(fun (pos, name, _) -> add_module backend name pos));
+        List.iter funs ~f:(fun id -> add_fun backend id.name id.pos);
+        List.iter classes ~f:(fun id -> add_class backend id.name id.pos);
+        List.iter typedefs ~f:(fun id -> add_typedef backend id.name id.pos);
+        List.iter consts ~f:(fun id -> add_const backend id.name id.pos);
+        List.iter modules ~f:(fun id -> add_module backend id.name id.pos));
     ()
   | Provider_backend.Local_memory
       {

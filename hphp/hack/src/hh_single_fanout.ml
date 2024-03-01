@@ -85,11 +85,8 @@ let update_reverse_naming_table
       Naming_global.ndecl_file_skip_if_already_bound ctx file ids;
       let { FileInfo.funs; classes; typedefs; consts; modules } = ids in
       let add_symbols names make_dep symbols_to_files =
-        List.fold
-          names
-          ~init:symbols_to_files
-          ~f:(fun symbols_to_files (_, name, _) ->
-            SymbolMap.add (make_dep name) file symbols_to_files)
+        List.fold names ~init:symbols_to_files ~f:(fun symbols_to_files id ->
+            SymbolMap.add (make_dep id.FileInfo.name) file symbols_to_files)
       in
       symbols_to_files
       |> add_symbols funs (fun name -> Typing_deps.Dep.Fun name)

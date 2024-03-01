@@ -782,8 +782,8 @@ let hhi_funs (naming_table : Naming_table.t) : string list =
   |> List.map ~f:(fun fn ->
          match Naming_table.get_file_info naming_table fn with
          | Some info ->
-           List.map info.FileInfo.ids.FileInfo.funs ~f:(fun (_, name, _) ->
-               name)
+           List.map info.FileInfo.ids.FileInfo.funs ~f:(fun id ->
+               id.FileInfo.name)
          | None -> [])
   |> List.concat
   |> List.sort ~compare:String.compare

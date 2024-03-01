@@ -15,22 +15,22 @@ let invalidate_shallow_and_some_folded_decls
   let open Provider_backend in
   let open Provider_backend.Decl_cache_entry in
   let { funs; consts; classes; typedefs; modules } = ids in
-  List.iter consts ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
-  List.iter funs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
-  List.iter typedefs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
-  List.iter modules ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
-  List.iter classes ~f:(fun (_, name, _) ->
+  List.iter consts ~f:(fun id ->
+      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl id.name));
+  List.iter funs ~f:(fun id ->
+      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl id.name));
+  List.iter typedefs ~f:(fun id ->
+      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl id.name));
+  List.iter modules ~f:(fun id ->
+      Decl_cache.remove local_memory.decl_cache ~key:(Module_decl id.name));
+  List.iter classes ~f:(fun id ->
       Shallow_decl_cache.remove
         local_memory.shallow_decl_cache
-        ~key:(Shallow_decl_cache_entry.Shallow_class_decl name);
-      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl name);
+        ~key:(Shallow_decl_cache_entry.Shallow_class_decl id.name);
+      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl id.name);
       Folded_class_cache.remove
         local_memory.folded_class_cache
-        ~key:(Folded_class_cache_entry.Folded_class_decl name));
+        ~key:(Folded_class_cache_entry.Folded_class_decl id.name));
   ()
 
 (** This is a leftover function, because we haven't yet migrated to
@@ -50,7 +50,7 @@ let combine_old_and_new_symbols (changes : FileInfo.change list) :
     FileInfo.names =
   (* Helper for merging [FileInfo.ids] list-of-ids into [FileInfo.names] set-of-names *)
   let merge_ids (acc : FileInfo.names) (change : FileInfo.ids) =
-    let f set (_pos, name, _hash) = SSet.add name set in
+    let f set id = SSet.add id.FileInfo.name set in
     let open FileInfo in
     {
       n_funs = List.fold change.funs ~init:acc.n_funs ~f;

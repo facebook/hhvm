@@ -325,10 +325,11 @@ module FileInfoTable = struct
       | Some file_decls_hash -> Sqlite3.Data.INT file_decls_hash
       | None -> Sqlite3.Data.NULL
     in
-    let names_to_data_type names =
+    let names_to_data_type ids =
       let open Core in
+      let open FileInfo in
       let names =
-        String.concat ~sep:"|" (List.map names ~f:(fun (_, x, _) -> x))
+        String.concat ~sep:"|" (List.map ids ~f:(fun id -> id.name))
       in
       match String.length names with
       | 0 -> Sqlite3.Data.NULL
@@ -362,7 +363,8 @@ module FileInfoTable = struct
       | Sqlite3.Data.TEXT s ->
         Core.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
-              (FileInfo.File (name_type, path), name, None)))
+              let pos = FileInfo.File (name_type, path) in
+              FileInfo.{ pos; name; decl_hash = None }))
       | Sqlite3.Data.NULL -> []
       | _ -> failwith "Unexpected column type when retrieving names"
     in
@@ -662,11 +664,9 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
     | Some id -> id
     | None -> failwith "Could not get last inserted row ID"
   in
-  let insert
-      ~name_kind
-      ~dep_ctor
-      (symbols_inserted, errors, checksum)
-      (_pos, name, decl_hash) =
+  let insert ~name_kind ~dep_ctor (symbols_inserted, errors, checksum) file_info
+      =
+    let { FileInfo.pos = _; name; decl_hash } = file_info in
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64

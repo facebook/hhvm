@@ -118,7 +118,7 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
     List.fold defs ~init:SMap.empty ~f:(fun acc (id, full_ast) ->
         typecheck ctx ~full_ast
         |> Option.fold ~init:acc ~f:(fun acc tast ->
-               SMap.add (FileInfo.id_name id) tast acc))
+               SMap.add id.FileInfo.name tast acc))
   in
   Errors.do_with_context ~drop_fixmed fn (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
@@ -147,4 +147,4 @@ let calc_errors_and_tast_for
   Errors.do_with_context ~drop_fixmed fn (fun () ->
       typecheck ctx ~full_ast
       |> Option.fold ~init:SMap.empty ~f:(fun acc tast ->
-             SMap.add (FileInfo.id_name id) tast acc))
+             SMap.add id.FileInfo.name tast acc))

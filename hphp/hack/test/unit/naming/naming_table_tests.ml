@@ -305,6 +305,7 @@ let test_local_changes () =
 
       let a_file = Relative_path.from_root ~suffix:"a.php" in
       let a_pos = FileInfo.File (FileInfo.Const, a_file) in
+      let decl_hash = None in
       let a_file_info =
         FileInfo.
           {
@@ -312,7 +313,8 @@ let test_local_changes () =
             ids =
               {
                 FileInfo.empty_ids with
-                FileInfo.consts = [(a_pos, a_name, None)];
+                FileInfo.consts =
+                  [FileInfo.{ pos = a_pos; name = a_name; decl_hash }];
               };
             position_free_decl_hash = Some (Int64.of_int 1234567);
           }
@@ -798,10 +800,15 @@ let test_naming_table_query_by_dep_hash () =
               FileInfo.empty_ids with
               FileInfo.classes =
                 [
-                  ( FileInfo.File
-                      (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
-                    "\\Baz",
-                    None );
+                  FileInfo.
+                    {
+                      pos =
+                        FileInfo.File
+                          ( FileInfo.Class,
+                            Relative_path.from_root ~suffix:"bar.php" );
+                      name = "\\Baz";
+                      decl_hash = None;
+                    };
                 ];
             };
         }

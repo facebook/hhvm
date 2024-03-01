@@ -1811,17 +1811,15 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else (
-          List.iter
-            fileinfo.FileInfo.ids.FileInfo.classes
-            ~f:(fun (_p, class_, _) ->
+          List.iter fileinfo.FileInfo.ids.FileInfo.classes ~f:(fun id ->
               Printf.printf
                 "Ancestors of %s and their overridden methods:\n"
-                class_;
+                id.FileInfo.name;
               let ancestors =
                 (* Might raise {!Naming_table.File_info_not_found} *)
                 MethodJumps.get_inheritance
                   ctx
-                  class_
+                  id.FileInfo.name
                   ~filter:No_filter
                   ~find_children:false
                   naming_table
@@ -1832,17 +1830,15 @@ let handle_mode
                 ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
-          List.iter
-            fileinfo.FileInfo.ids.FileInfo.classes
-            ~f:(fun (_p, class_, _) ->
+          List.iter fileinfo.FileInfo.ids.FileInfo.classes ~f:(fun id ->
               Printf.printf
                 "Children of %s and the methods they override:\n"
-                class_;
+                id.FileInfo.name;
               let children =
                 (* Might raise {!Naming_table.File_info_not_found} *)
                 MethodJumps.get_inheritance
                   ctx
-                  class_
+                  id.FileInfo.name
                   ~filter:No_filter
                   ~find_children:true
                   naming_table
@@ -2429,7 +2425,7 @@ let decl_and_run_mode
           in
           Option.iter file_info ~f:(fun file_info ->
               let ids_to_strings ids =
-                List.map ids ~f:(fun (_, name, _) -> name)
+                List.map ids ~f:(fun id -> id.FileInfo.name)
               in
               let { FileInfo.funs; classes; typedefs; consts; modules } =
                 file_info.FileInfo.ids

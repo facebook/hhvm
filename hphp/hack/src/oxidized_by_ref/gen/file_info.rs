@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d0c9a080ed8da359ef4d329b3f04e87>>
+// @generated SignedSource<<81cc5dbb5e3be98f32671449311856f0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -173,11 +173,14 @@ arena_deserializer::impl_deserialize_in_arena!(Pos<'arena>);
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
-pub struct Id<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Pos<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a str,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Option<&'a Int64>,
-);
+pub struct Id<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub pos: Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub name: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub decl_hash: Option<&'a Int64>,
+}
 impl<'a> TrivialDrop for Id<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Id<'arena>);
 

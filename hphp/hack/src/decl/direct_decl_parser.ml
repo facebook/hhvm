@@ -51,19 +51,30 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
         let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
         match decl with
         | Shallow_decl_defs.Class c ->
-          let info = (pos (fst c.Shallow_decl_defs.sc_name), name, Some hash) in
+          let pos = pos (fst c.Shallow_decl_defs.sc_name) in
+          let decl_hash = Some hash in
+          let info = FileInfo.{ pos; name; decl_hash } in
           FileInfo.{ acc with classes = info :: acc.classes }
         | Shallow_decl_defs.Fun f ->
-          let info = (pos f.Typing_defs.fe_pos, name, Some hash) in
+          let pos = pos f.Typing_defs.fe_pos in
+          let decl_hash = Some hash in
+          let info = FileInfo.{ pos; name; decl_hash } in
           FileInfo.{ acc with funs = info :: acc.funs }
         | Shallow_decl_defs.Typedef tf ->
-          let info = (pos tf.Typing_defs.td_pos, name, Some hash) in
+          let pos = pos tf.Typing_defs.td_pos in
+
+          let decl_hash = Some hash in
+          let info = FileInfo.{ pos; name; decl_hash } in
           FileInfo.{ acc with typedefs = info :: acc.typedefs }
         | Shallow_decl_defs.Const c ->
-          let info = (pos c.Typing_defs.cd_pos, name, Some hash) in
+          let pos = pos c.Typing_defs.cd_pos in
+          let decl_hash = Some hash in
+          let info = FileInfo.{ pos; name; decl_hash } in
           FileInfo.{ acc with consts = info :: acc.consts }
         | Shallow_decl_defs.Module m ->
-          let info = (pos m.Typing_defs.mdt_pos, name, Some hash) in
+          let pos = pos m.Typing_defs.mdt_pos in
+          let decl_hash = Some hash in
+          let info = FileInfo.{ pos; name; decl_hash } in
           FileInfo.{ acc with modules = info :: acc.modules })
   in
   { FileInfo.ids; position_free_decl_hash; file_mode; comments = None }

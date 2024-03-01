@@ -40,7 +40,8 @@ let test () =
     | None -> SSet.empty
     | Some info ->
       SSet.of_list
-      @@ List.map info.FileInfo.ids.FileInfo.classes ~f:(fun (_, x, _) -> x)
+      @@ List.map info.FileInfo.ids.FileInfo.classes ~f:(fun id ->
+             id.FileInfo.name)
   in
   let dependent_classes =
     Decl_redecl_service.get_descendant_classes

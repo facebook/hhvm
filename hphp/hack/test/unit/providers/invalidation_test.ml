@@ -17,8 +17,18 @@ let change_class path name =
   FileInfo.
     {
       path;
-      old_ids = Some { empty_ids with classes = [(Full Pos.none, name, None)] };
-      new_ids = Some { empty_ids with classes = [(Full Pos.none, name, None)] };
+      old_ids =
+        Some
+          {
+            empty_ids with
+            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+          };
+      new_ids =
+        Some
+          {
+            empty_ids with
+            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+          };
       new_pfh_hash = None;
     }
 

@@ -114,23 +114,6 @@ TEST(StdHasherTest, checkCombineDouble) {
   EXPECT_NE(previousResult, hasher.getResult());
 }
 
-TEST(StdHasherDeprecatedTest, checkCombineIOBuf) {
-  StdHasherDeprecated hasher;
-  auto previousResult = hasher.getResult();
-  auto bufA = folly::IOBuf::wrapBuffer(folly::range("abc"));
-  hasher.combine(*bufA);
-  EXPECT_NE(previousResult, hasher.getResult());
-  previousResult = hasher.getResult();
-  auto hasherCopy = hasher;
-  auto bufB = folly::IOBuf::wrapBuffer(folly::range("def"));
-  hasherCopy.combine(*bufA);
-  hasherCopy.combine(*bufB);
-  EXPECT_NE(hasherCopy.getResult(), hasher.getResult());
-  bufA->prependChain(std::move(bufB));
-  hasher.combine(*bufA);
-  EXPECT_EQ(hasherCopy.getResult(), hasher.getResult());
-}
-
 TEST(StdHasherTest, checkCombineIOBuf) {
   StdHasher hasher1, hasher2;
   auto bufA = folly::IOBuf::wrapBuffer("abc", 3);

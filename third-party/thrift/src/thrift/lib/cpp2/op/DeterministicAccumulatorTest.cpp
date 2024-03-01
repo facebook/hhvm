@@ -35,8 +35,8 @@
 namespace apache::thrift::op {
 namespace {
 
-struct MoveOnlyHahser : StdHasherDeprecated {
-  using StdHasherDeprecated::StdHasherDeprecated;
+struct MoveOnlyHahser : StdHasher {
+  using StdHasher::StdHasher;
   explicit MoveOnlyHahser() noexcept = default;
   MoveOnlyHahser(const MoveOnlyHahser&) = delete;
   MoveOnlyHahser(MoveOnlyHahser&&) noexcept = default;

@@ -60,15 +60,6 @@ class StdHasher {
   size_t result_ = 0;
 };
 
-struct StdHasherDeprecated : StdHasher {
-  using StdHasher::combine;
-  void combine(const folly::IOBuf& value) {
-    for (const auto& buf : value) {
-      combine(buf);
-    }
-  }
-};
-
 } // namespace op
 } // namespace thrift
 } // namespace apache

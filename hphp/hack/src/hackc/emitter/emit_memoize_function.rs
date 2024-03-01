@@ -66,8 +66,8 @@ pub(crate) fn get_attrs_for_fun(
 
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    original_id: hhbc::FunctionName<'arena>,
-    renamed_id: &hhbc::FunctionName<'arena>,
+    original_id: hhbc::FunctionName,
+    renamed_id: hhbc::FunctionName,
     deprecation_info: Option<&[TypedValue]>,
     fd: &'a ast::FunDef,
 ) -> Result<Function<'arena>> {
@@ -111,7 +111,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         deprecation_info,
         &params,
         &f.params,
-        *renamed_id,
+        renamed_id,
         f.fun_kind.is_fasync(),
         is_reified,
         should_emit_implicit_context,
@@ -150,7 +150,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
-    renamed_id: hhbc::FunctionName<'arena>,
+    renamed_id: hhbc::FunctionName,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
@@ -191,7 +191,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
-    renamed_id: hhbc::FunctionName<'arena>,
+    renamed_id: hhbc::FunctionName,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
@@ -252,7 +252,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     } else {
         // Last unnamed local slot
         let local = Local::new(first_unnamed_idx + param_count + add_reified);
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+        emit_memoize_helpers::get_implicit_context_memo_key(local)
     };
     let first_unnamed_local = Local::new(first_unnamed_idx);
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
@@ -285,7 +285,6 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
         emit_memoize_helpers::with_possible_ic(
-            alloc,
             e.label_gen_mut(),
             ic_stash_local,
             instr::f_call_func_d(fcall_args, renamed_id),
@@ -312,7 +311,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     deprecation_info: Option<&[TypedValue]>,
-    renamed_id: hhbc::FunctionName<'arena>,
+    renamed_id: hhbc::FunctionName,
     is_async: bool,
     should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
@@ -352,7 +351,6 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         instr::null_uninit(),
         instr::null_uninit(),
         emit_memoize_helpers::with_possible_ic(
-            alloc,
             e.label_gen_mut(),
             ic_stash_local,
             instr::f_call_func_d(fcall_args, renamed_id),

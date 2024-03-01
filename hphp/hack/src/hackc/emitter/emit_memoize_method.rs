@@ -343,7 +343,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     } else {
         // Last unnamed local slot
         let local = Local::new(first_unnamed_idx + param_count + add_reified);
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+        emit_memoize_helpers::get_implicit_context_memo_key(local)
     };
     let first_unnamed_local = Local::new(first_unnamed_idx);
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
@@ -392,7 +392,6 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
         emit_memoize_helpers::with_possible_ic(
-            alloc,
             emitter.label_gen_mut(),
             ic_stash_local,
             if args.method.static_ {
@@ -489,7 +488,6 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         },
         instr::null_uninit(),
         emit_memoize_helpers::with_possible_ic(
-            alloc,
             emitter.label_gen_mut(),
             ic_stash_local,
             if args.method.static_ {

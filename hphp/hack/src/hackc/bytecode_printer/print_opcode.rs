@@ -217,8 +217,8 @@ fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {
     write!(w, "{}", float::to_string(d.to_f64()))
 }
 
-fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
-    print_quoted_ffi_str(w, &id.as_ffi_str())
+fn print_function_name(w: &mut dyn Write, id: &FunctionName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
 fn print_iter_args(

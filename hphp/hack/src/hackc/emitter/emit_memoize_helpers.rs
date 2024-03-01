@@ -59,17 +59,13 @@ pub fn check_memoize_possible<Ex, En>(
     Ok(())
 }
 
-pub fn get_implicit_context_memo_key<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    local: Local,
-) -> InstrSeq<'arena> {
+pub fn get_implicit_context_memo_key<'arena>(local: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
         instr::null_uninit(),
         instr::null_uninit(),
         instr::f_call_func_d(
             FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
-            hhbc::FunctionName::from_raw_string(
-                alloc,
+            hhbc::FunctionName::intern(
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
             ),
         ),
@@ -78,7 +74,7 @@ pub fn get_implicit_context_memo_key<'arena>(
     ])
 }
 
-fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
+fn ic_set<'arena>(local: Local, soft: bool) -> InstrSeq<'arena> {
     if soft {
         InstrSeq::gather(vec![
             instr::cns_e(hhbc::ConstName::intern(
@@ -96,8 +92,7 @@ fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> Ins
             instr::null_uninit(),
             instr::f_call_func_d(
                 FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
-                hhbc::FunctionName::from_raw_string(
-                    alloc,
+                hhbc::FunctionName::intern(
                     "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",
                 ),
             ),
@@ -124,7 +119,6 @@ pub fn ic_restore<'arena>(
 }
 
 pub fn with_possible_ic<'arena>(
-    alloc: &'arena bumpalo::Bump,
     label_gen: &mut LabelGen,
     local: Local,
     instrs: InstrSeq<'arena>,
@@ -132,7 +126,7 @@ pub fn with_possible_ic<'arena>(
 ) -> InstrSeq<'arena> {
     if let Some(soft) = should_make_ic_inaccessible {
         InstrSeq::gather(vec![
-            ic_set(alloc, local, soft),
+            ic_set(local, soft),
             create_try_catch(
                 label_gen,
                 None,

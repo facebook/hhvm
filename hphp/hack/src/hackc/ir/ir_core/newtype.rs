@@ -97,7 +97,7 @@ pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHas
 
 interned_hhbc_intern_id!(ModuleId, ModuleName);
 interned_hhbc_intern_id!(ConstId, ConstName);
-interned_hhbc_id!(FunctionId, FunctionName);
+interned_hhbc_intern_id!(FunctionId, FunctionName);
 
 const __FACTORY: &str = "__factory";
 pub const _86CINIT: &str = "86cinit";

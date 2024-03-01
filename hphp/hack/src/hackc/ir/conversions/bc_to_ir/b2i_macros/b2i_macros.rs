@@ -279,7 +279,7 @@ fn parse_convert_simple(
             ImmType::OA(n) if *n == "ConstName" => {
                 convert(quote_spanned!(span=> ir::ConstId::from_hhbc(*#imm, #strings) ));
             }
-            ImmType::OAL(n) if *n == "FunctionName" => {
+            ImmType::OA(n) if *n == "FunctionName" => {
                 convert(quote_spanned!(span=> ir::FunctionId::from_hhbc(*#imm, #strings) ));
             }
             ImmType::OAL(n) if *n == "MethodName" => {

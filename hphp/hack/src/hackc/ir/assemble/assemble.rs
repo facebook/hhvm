@@ -179,7 +179,7 @@ impl<'a> UnitParser<'a> {
         self.unit
             .symbol_refs
             .functions
-            .push(FunctionName::from_bytes(self.alloc, &id));
+            .push(FunctionName::intern(std::str::from_utf8(&id)?));
         Ok(())
     }
 

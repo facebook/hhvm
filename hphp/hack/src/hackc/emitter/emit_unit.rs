@@ -194,8 +194,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
                 }
             }
             for fun in &symbol_refs.functions {
-                if let Err(e) = p.func_decl(fun.unsafe_as_str()) {
-                    record_error(fun.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                if let Err(e) = p.func_decl(fun.as_str()) {
+                    record_error(fun.as_str().into(), e, &mut missing_syms, &mut error_syms);
                 }
             }
             for cls in &symbol_refs.classes {

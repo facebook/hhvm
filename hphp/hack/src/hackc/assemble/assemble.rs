@@ -91,7 +91,7 @@ struct UnitBuilder<'a> {
     constants: Vec<hhbc::Constant>,
     fatal: Option<hhbc::Fatal>,
     file_attributes: Vec<hhbc::Attribute>,
-    func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
+    func_refs: Option<Vec<hhbc::FunctionName>>,
     funcs: Vec<hhbc::Function<'a>>,
     include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
     module_use: Option<ModuleName>,
@@ -151,7 +151,7 @@ impl<'a> UnitBuilder<'a> {
                     alloc,
                     token_iter,
                     ".function_refs",
-                    assemble_function_name,
+                    |t, _| assemble_function_name(t),
                 )?);
             }
             b".class_refs" => {
@@ -676,22 +676,19 @@ fn assemble_const_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ConstName> {
     Ok(hhbc::ConstName::intern(id.as_str()?))
 }
 
-fn assemble_function_name<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::FunctionName<'arena>> {
-    let nm = if token_iter.peek_is_str(Token::is_number, "86") {
+fn assemble_function_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::FunctionName> {
+    let name = if token_iter.peek_is_str(Token::is_number, "86") {
         // Only functions that can start with #s start with
         // 86 and are compiler added ones
         let under86 = token_iter.expect_with(Token::into_number)?;
         let name = token_iter.expect_with(Token::into_identifier)?;
         let mut under86 = under86.to_vec();
         under86.extend_from_slice(name);
-        Str::new_slice(alloc, &under86)
+        hhbc::intern(std::str::from_utf8(&under86)?)
     } else {
-        token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc)
+        hhbc::intern(token_iter.expect(Token::is_identifier)?.as_str()?)
     };
-    Ok(hhbc::FunctionName::new(nm))
+    Ok(hhbc::FunctionName::new(name))
 }
 
 /// Ex:
@@ -1083,7 +1080,7 @@ fn assemble_function<'arena>(
     let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     // Assemble_name
 
-    let name = assemble_function_name(token_iter, alloc)?;
+    let name = assemble_function_name(token_iter)?;
     // Will store decls in this order: params, decl_vars, unnamed
     let mut decl_map = DeclMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
@@ -1114,7 +1111,7 @@ fn assemble_function<'arena>(
 /// Also, MEMOIZE_IMPL appears in the function name. Example:
 /// .function {} [ "__Memoize"("""v:1:{s:9:\"KeyedByIC\";}""") "__Reified"("""v:4:{i:1;i:0;i:0;i:0;}""")] (4,10) <"" N > memo$memoize_impl($a, $b)
 fn assemble_function_flags(
-    name: hhbc::FunctionName<'_>,
+    name: hhbc::FunctionName,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::FunctionFlags> {
     let mut flag = hhbc::FunctionFlags::empty();

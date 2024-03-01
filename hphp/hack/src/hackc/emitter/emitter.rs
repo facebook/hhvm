@@ -237,7 +237,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn add_function_ref(&mut self, s: FunctionName<'arena>) {
+    pub fn add_function_ref(&mut self, s: FunctionName) {
         if !s.is_empty() {
             self.symbol_refs_state.functions.insert(s);
         }
@@ -273,7 +273,7 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
 struct SymbolRefsState<'arena> {
     includes: IncludePathSet<'arena>,
     constants: BTreeSet<ConstName>,
-    functions: BTreeSet<FunctionName<'arena>>,
+    functions: BTreeSet<FunctionName>,
     classes: BTreeSet<ClassName<'arena>>,
 }
 

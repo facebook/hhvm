@@ -61,9 +61,10 @@ impl<'a> StringCache<'a> {
         hhbc::MethodName::new(s)
     }
 
-    pub fn lookup_function_name(&self, id: ir::FunctionId) -> hhbc::FunctionName<'a> {
-        let s = self.lookup_ffi_str(id.id);
-        hhbc::FunctionName::new(s)
+    pub fn lookup_function_name(&self, id: ir::FunctionId) -> hhbc::FunctionName {
+        hhbc::FunctionName::intern(
+            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 function name"),
+        )
     }
 
     pub fn lookup_prop_name(&self, id: ir::PropId) -> hhbc::PropName {

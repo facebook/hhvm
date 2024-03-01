@@ -30,7 +30,7 @@ pub(crate) fn convert_function<'a>(
     src: &Function<'a>,
     unit_state: &UnitState,
 ) {
-    trace!("--- convert_function {}", src.name.unsafe_as_str());
+    trace!("--- convert_function {}", src.name.as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(

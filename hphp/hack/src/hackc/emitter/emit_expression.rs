@@ -1745,9 +1745,8 @@ fn emit_call<'a, 'arena, 'decl>(
     async_eager_label: Option<Label>,
     readonly_return: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
-        let fid = hhbc::FunctionName::<'arena>::from_ast_name(alloc, s);
+        let fid = hhbc::FunctionName::from_ast_name(s);
         e.add_function_ref(fid);
     }
     let readonly_this = match &expr.2 {
@@ -1766,8 +1765,8 @@ fn emit_call<'a, 'arena, 'decl>(
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
-            let fq = hhbc::FunctionName::<'arena>::from_ast_name(alloc, id);
-            let lower_fq_name = fq.unsafe_as_str();
+            let fq = hhbc::FunctionName::from_ast_name(id);
+            let lower_fq_name = fq.as_str();
             emit_special_function(e, env, pos, targs, args, uarg, lower_fq_name)
                 .transpose()
                 .unwrap_or_else(|| {
@@ -2045,7 +2044,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                         ]),
                                         InstrSeq::gather(vec![instr::f_call_func_d(
                                             fcall_args,
-                                            hhbc::FunctionName::<'arena>::from_ast_name(alloc, fid),
+                                            hhbc::FunctionName::from_ast_name(fid),
                                         )]),
                                     ))
                                 }
@@ -2240,15 +2239,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    hhbc::FunctionName::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
+                    hhbc::FunctionName::from_ast_name("__SystemLib\\min2")
                 }
                 "max" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    hhbc::FunctionName::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
+                    hhbc::FunctionName::from_ast_name("__SystemLib\\max2")
                 }
-                _ => hhbc::FunctionName::new(Str::new_str(
-                    alloc,
-                    string_utils::strip_global_ns(&id.1),
-                )),
+                _ => hhbc::FunctionName::from_ast_name(&id.1),
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
@@ -2257,13 +2253,20 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             ))
         }
         Expr_::String(s) => {
-            // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
-            let fq_id = hhbc::FunctionName::new(Str::new_str(alloc, s.to_string().as_str()));
-            let generics = emit_generics(e, env, &mut fcall_args)?;
-            Ok((
-                InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
-                InstrSeq::gather(vec![generics, instr::f_call_func_d(fcall_args, fq_id)]),
-            ))
+            match std::str::from_utf8(s) {
+                Ok(s) => {
+                    let fq_id = hhbc::FunctionName::intern(s);
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
+                    Ok((
+                        InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
+                        InstrSeq::gather(vec![generics, instr::f_call_func_d(fcall_args, fq_id)]),
+                    ))
+                }
+                Err(_) => {
+                    // Calling a non-utf8 string literal as a function; use general case.
+                    emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt)
+                }
+            }
         }
         _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
     }
@@ -2606,21 +2609,20 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 // `inout` is dropped here, but it should be impossible to have an expression
                 // like: `foo(inout "literal")`
                 [(_, Expr(_, _, Expr_::String(ref func_name)))] => {
-                    Ok(Some(instr::resolve_meth_caller(hhbc::FunctionName::new(
-                        Str::new_str(
-                            alloc,
-                            string_utils::strip_global_ns(
-                                // FIXME: This is not safe--string literals are binary strings.
-                                // There's no guarantee that they're valid UTF-8.
-                                unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
-                            ),
-                        ),
-                    ))))
+                    match std::str::from_utf8(func_name) {
+                        Ok(func_name) => {
+                            Ok(Some(instr::resolve_meth_caller(hhbc::FunctionName::intern(
+                                string_utils::strip_global_ns(func_name)
+                            ))))
+                        }
+                        Err(_) => {
+                            // func_name string literal is not utf8 so it cannot be a valid
+                            // function name.
+                            Err(Error::fatal_runtime(pos, "Constant string expected in fun()"))
+                        }
+                    }
                 }
-                _ => Err(Error::fatal_runtime(
-                    pos,
-                    "Constant string expected in fun()",
-                )),
+                _ => Err(Error::fatal_runtime(pos, "Constant string expected in fun()")),
             }
         }
         ("__SystemLib\\__debugger_is_uninit", _) => {
@@ -2940,18 +2942,15 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
     targs: &[ast::Targ],
     fname: &str,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let fname = string_utils::strip_global_ns(fname);
     if has_non_tparam_generics_targs(env, targs) {
         let generics = emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))?;
         Ok(InstrSeq::gather(vec![
             generics,
-            instr::resolve_r_func(hhbc::FunctionName::new(Str::new_str(alloc, fname))),
+            instr::resolve_r_func(hhbc::FunctionName::intern(fname)),
         ]))
     } else {
-        Ok(instr::resolve_func(hhbc::FunctionName::new(Str::new_str(
-            alloc, fname,
-        ))))
+        Ok(instr::resolve_func(hhbc::FunctionName::intern(fname)))
     }
 }
 
@@ -3695,7 +3694,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             instr::c_get_l(ts_local),
             instr::f_call_func_d(
                 FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
-                hhbc::FunctionName::from_raw_string(env.arena, "count"),
+                hhbc::FunctionName::intern("count"),
             ),
             instr::int(0),
             instr::eq(),

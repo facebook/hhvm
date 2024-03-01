@@ -152,6 +152,23 @@ macro_rules! impl_add_suffix {
     };
 }
 
+macro_rules! impl_intern_add_suffix {
+    ($type: ident) => {
+        impl $type {
+            fn from_str_with_suffix(prefix: &str, suffix: &str) -> $type {
+                let mut r = String::with_capacity(prefix.len() + suffix.len());
+                r.push_str(prefix);
+                r.push_str(suffix);
+                $type::intern(&r)
+            }
+
+            pub fn add_suffix(id: &Self, suffix: &str) -> Self {
+                $type::from_str_with_suffix(id.0.as_str(), suffix)
+            }
+        }
+    };
+}
+
 /// Conventionally this is "A_" followed by an integer
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
@@ -255,24 +272,24 @@ impl<'arena> MethodName<'arena> {
 
 #[derive(Copy, Clone, Eq, Hash, Serialize)]
 #[repr(C)]
-pub struct FunctionName<'arena>(Str<'arena>);
+pub struct FunctionName(StringId);
 
-impl_id!(FunctionName);
-impl_add_suffix!(FunctionName);
+impl_intern_id!(FunctionName);
+impl_intern_add_suffix!(FunctionName);
 
-impl<'arena> FunctionName<'arena> {
-    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionName<'arena> {
-        FunctionName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
+impl FunctionName {
+    pub fn from_ast_name(s: &str) -> Self {
+        Self::intern(hhbc_string_utils::strip_global_ns(s))
     }
 }
 
-impl<'arena> PartialEq for FunctionName<'arena> {
+impl PartialEq for FunctionName {
     fn eq(&self, other: &Self) -> bool {
-        self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
+        self.as_str().eq_ignore_ascii_case(other.as_str())
     }
 }
 
-impl<'arena> Ord for FunctionName<'arena> {
+impl Ord for FunctionName {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         if self.eq(other) {
             return std::cmp::Ordering::Equal;
@@ -281,7 +298,7 @@ impl<'arena> Ord for FunctionName<'arena> {
     }
 }
 
-impl<'arena> PartialOrd for FunctionName<'arena> {
+impl PartialOrd for FunctionName {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
@@ -316,10 +333,9 @@ mod tests {
 
     #[test]
     fn test_add_suffix() {
-        let alloc = bumpalo::Bump::new();
-        let id = FunctionName::new(ffi::Str::new_str(&alloc, "Some"));
-        let id = FunctionName::add_suffix(&alloc, &id, "Func");
-        assert_eq!("SomeFunc", id.unsafe_as_str());
+        let id = FunctionName::intern("Some");
+        let id = FunctionName::add_suffix(&id, "Func");
+        assert_eq!("SomeFunc", id.as_str());
     }
 
     #[test]
@@ -331,23 +347,21 @@ mod tests {
 
     #[test]
     fn test_eq_function_name() {
-        let alloc = bumpalo::Bump::new();
-        let id1 = FunctionName::from_ast_name(&alloc, "foo2$memoize_impl");
-        let id2 = FunctionName::from_ast_name(&alloc, "Foo2$memoize_impl");
+        let id1 = FunctionName::from_ast_name("foo2$memoize_impl");
+        let id2 = FunctionName::from_ast_name("Foo2$memoize_impl");
         assert_eq!(id1, id2);
     }
 
     #[test]
     fn test_ord_function_name() {
-        let alloc = bumpalo::Bump::new();
         let mut ids = BTreeSet::new();
-        ids.insert(FunctionName::from_ast_name(&alloc, "foo"));
-        ids.insert(FunctionName::from_ast_name(&alloc, "Foo"));
-        ids.insert(FunctionName::from_ast_name(&alloc, "foo2"));
-        ids.insert(FunctionName::from_ast_name(&alloc, "Bar"));
-        ids.insert(FunctionName::from_ast_name(&alloc, "bar"));
+        ids.insert(FunctionName::from_ast_name("foo"));
+        ids.insert(FunctionName::from_ast_name("Foo"));
+        ids.insert(FunctionName::from_ast_name("foo2"));
+        ids.insert(FunctionName::from_ast_name("Bar"));
+        ids.insert(FunctionName::from_ast_name("bar"));
         let expected = ["Bar", "foo", "foo2"];
-        let ids: Vec<&str> = ids.into_iter().map(|id| id.unsafe_as_str()).collect();
+        let ids: Vec<&str> = ids.into_iter().map(|id| id.as_str()).collect();
         assert_eq!(expected, ids.as_slice());
     }
 }

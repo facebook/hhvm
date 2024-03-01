@@ -60,7 +60,7 @@ impl MapName for hhbc::CtxConstant {
 
 impl MapName for hhbc::Function<'_> {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 

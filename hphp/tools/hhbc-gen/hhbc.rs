@@ -266,7 +266,7 @@ mod fixups {
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "FCallFuncD" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("FunctionName")),
+                replace_imm("str2", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "FCallObjMethodD" => vec![
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
@@ -307,10 +307,10 @@ mod fixups {
                 replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveFunc" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "ResolveMethCaller" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "ResolveRClsMethod" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("MethodName")),
@@ -323,7 +323,7 @@ mod fixups {
                 replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
             ],
             "ResolveRFunc" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "RetM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),

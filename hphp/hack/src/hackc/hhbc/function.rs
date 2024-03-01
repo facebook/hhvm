@@ -19,7 +19,7 @@ use crate::Span;
 #[repr(C)]
 pub struct Function<'arena> {
     pub attributes: Vector<Attribute>,
-    pub name: FunctionName<'arena>,
+    pub name: FunctionName,
     pub body: Body<'arena>,
 
     pub span: Span,

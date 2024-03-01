@@ -8,7 +8,6 @@ use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use error::Result;
-use ffi::Str;
 use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::Function;
@@ -34,7 +33,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let alloc = e.alloc;
     let f = &fd.fun;
-    let original_id = FunctionName::from_ast_name(alloc, &fd.name.1);
+    let original_id = FunctionName::from_ast_name(&fd.name.1);
     let mut flags = FunctionFlags::empty();
     flags.set(
         FunctionFlags::ASYNC,
@@ -47,7 +46,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let renamed_id = {
         if memoized {
-            FunctionName::add_suffix(alloc, &original_id, emit_memoize_helpers::MEMOIZE_SUFFIX)
+            FunctionName::add_suffix(&original_id, emit_memoize_helpers::MEMOIZE_SUFFIX)
         } else {
             original_id
         }
@@ -152,7 +151,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         Some(emit_memoize_function::emit_wrapper_function(
             e,
             original_id,
-            &renamed_id,
+            renamed_id,
             deprecation_info,
             fd,
         )?)
@@ -164,7 +163,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized, has_variadic);
     let normal_function = Function {
         attributes: user_attrs.into(),
-        name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
+        name: renamed_id,
         span: Span::from_pos(&f.span),
         coeffects,
         body,

@@ -283,7 +283,6 @@ fn emit_call<'a, 'arena, 'decl>(
     _pos: &Pos,
     c: &ast::CallExpr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     if let a::CallExpr {
         func: a::Expr(_, _, a::Expr_::Id(sid)),
         args,
@@ -291,8 +290,8 @@ fn emit_call<'a, 'arena, 'decl>(
         ..
     } = c
     {
-        let ft = hhbc::FunctionName::from_ast_name(alloc, &sid.1);
-        let fname = ft.unsafe_as_str();
+        let ft = hhbc::FunctionName::from_ast_name(&sid.1);
+        let fname = ft.as_str();
         if fname.eq_ignore_ascii_case("unset") {
             Ok(InstrSeq::gather(
                 args.iter()

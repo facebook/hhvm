@@ -594,7 +594,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     instr::int(error_code),
                     instr::f_call_func_d(
                         FCallArgs::new(FCallArgsFlags::default(), 1, 3, vec![], vec![], None, None),
-                        hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
+                        hhbc::FunctionName::intern("trigger_sampled_error"),
                     ),
                     instr::pop_c(),
                 ])

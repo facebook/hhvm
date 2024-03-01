@@ -9,7 +9,6 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Result;
 use ffi::Maybe;
-use ffi::Str;
 use hhbc::Coeffects;
 use hhbc::Constant;
 use hhbc::Function;
@@ -35,7 +34,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_name.as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
-    let original_name = hhbc::FunctionName::new(Str::new_str(alloc, &name));
+    let original_name = hhbc::FunctionName::intern(&name);
     let ret = constant.type_.as_ref();
     let return_type_info = ret
         .map(|h| {

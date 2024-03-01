@@ -261,14 +261,10 @@ impl AssembleImm<'_, hhbc::FloatBits> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::FunctionName<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap,
-    ) -> Result<hhbc::FunctionName<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::FunctionName> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<hhbc::FunctionName> {
         Ok(hhbc::FunctionName::new(
-            assemble::assemble_unescaped_unquoted_str(alloc, self)?,
+            assemble::assemble_unescaped_unquoted_intern_str(self)?,
         ))
     }
 }

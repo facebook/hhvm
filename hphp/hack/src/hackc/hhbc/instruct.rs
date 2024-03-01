@@ -8,6 +8,7 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::opcodes::Opcode;
+use crate::BytesId;
 use crate::FCallArgsFlags;
 use crate::PropName;
 use crate::ReadonlyOp;
@@ -221,10 +222,10 @@ impl std::default::Default for IterArgs {
 
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub enum MemberKey<'arena> {
+pub enum MemberKey {
     EC(StackIndex, ReadonlyOp),
     EL(Local, ReadonlyOp),
-    ET(Str<'arena>, ReadonlyOp),
+    ET(BytesId, ReadonlyOp),
     EI(i64, ReadonlyOp),
     PC(StackIndex, ReadonlyOp),
     PL(Local, ReadonlyOp),

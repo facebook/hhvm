@@ -358,12 +358,8 @@ impl AssembleImm<'_, hhbc::LocalRange> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::MemberKey<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        decl_map: &DeclMap,
-    ) -> Result<hhbc::MemberKey<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::MemberKey> for Lexer<'_> {
+    fn assemble_imm(&mut self, alloc: &'arena Bump, decl_map: &DeclMap) -> Result<hhbc::MemberKey> {
         // EC: stackIndex readOnlyOp | EL: local readOnlyOp | ET: string readOnlyOp | EI: int readOnlyOp
         // PC: stackIndex readOnlyOp | PL: local readOnlyOp | PT: propName readOnlyOp | QT: propName readOnlyOp
         let tok = self.expect_token()?;
@@ -385,13 +381,10 @@ impl<'arena> AssembleImm<'arena, hhbc::MemberKey<'arena>> for Lexer<'_> {
             b"ET" => {
                 self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::ET(
-                    Str::new_slice(
-                        alloc,
-                        &escaper::unescape_literal_bytes_into_vec_bytes(
-                            // In bp, print_quoted_str also escapes the string
-                            escaper::unquote_slice(self.expect_with(Token::into_str_literal)?),
-                        )?,
-                    ),
+                    hhbc::intern_bytes(escaper::unescape_literal_bytes_into_vec_bytes(
+                        // In bp, print_quoted_str also escapes the string
+                        escaper::unquote_slice(self.expect_with(Token::into_str_literal)?),
+                    )?),
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }

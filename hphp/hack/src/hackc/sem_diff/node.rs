@@ -67,23 +67,23 @@ pub(crate) enum BaseOp {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) struct IntermediateOp<'a> {
-    pub key: MemberKey<'a>,
+pub(crate) struct IntermediateOp {
+    pub key: MemberKey,
     pub mode: MOpMode,
     pub src_loc: Rc<SrcLoc>,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) enum FinalOp<'a> {
-    IncDecM(MemberKey<'a>, IncDecOp, Rc<SrcLoc>),
-    QueryM(MemberKey<'a>, QueryMOp, Rc<SrcLoc>),
-    SetM(MemberKey<'a>, Rc<SrcLoc>),
+pub(crate) enum FinalOp {
+    IncDecM(MemberKey, IncDecOp, Rc<SrcLoc>),
+    QueryM(MemberKey, QueryMOp, Rc<SrcLoc>),
+    SetM(MemberKey, Rc<SrcLoc>),
     SetRangeM(u32, SetRangeOp, Rc<SrcLoc>),
-    SetOpM(MemberKey<'a>, SetOpOp, Rc<SrcLoc>),
-    UnsetM(MemberKey<'a>, Rc<SrcLoc>),
+    SetOpM(MemberKey, SetOpOp, Rc<SrcLoc>),
+    UnsetM(MemberKey, Rc<SrcLoc>),
 }
 
-impl FinalOp<'_> {
+impl FinalOp {
     pub(crate) fn is_write(&self) -> bool {
         match self {
             FinalOp::QueryM { .. } => false,
@@ -107,16 +107,16 @@ impl FinalOp<'_> {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) struct MemberOp<'a> {
+pub(crate) struct MemberOp {
     pub(crate) base_op: BaseOp,
-    pub(crate) intermediate_ops: Vec<IntermediateOp<'a>>,
-    pub(crate) final_op: FinalOp<'a>,
+    pub(crate) intermediate_ops: Vec<IntermediateOp>,
+    pub(crate) final_op: FinalOp,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum NodeInstr<'arena> {
     Opcode(Opcode<'arena>),
-    MemberOp(MemberOp<'arena>),
+    MemberOp(MemberOp),
 }
 
 impl Targets for NodeInstr<'_> {

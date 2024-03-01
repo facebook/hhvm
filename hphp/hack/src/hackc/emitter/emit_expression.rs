@@ -2283,7 +2283,7 @@ fn get_reified_var_cexpr<'a, 'arena>(
         instr::query_m(
             1,
             QueryMOp::CGet,
-            MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
+            MemberKey::ET(hhbc::intern_bytes("classname".as_bytes()), ReadonlyOp::Any),
         ),
     ]))
 }
@@ -3927,7 +3927,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
     prop: &ast::Expr,
     null_coalesce_assignment: bool,
     readonly_op: ReadonlyOp,
-) -> Result<(MemberKey<'arena>, InstrSeq<'arena>, StackIndex)> {
+) -> Result<(MemberKey, InstrSeq<'arena>, StackIndex)> {
     let mk = match &prop.2 {
         ast::Expr_::Id(id) => {
             let ast_defs::Id(pos, name) = &**id;
@@ -4101,7 +4101,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                 get_elem_member_key(e, env, cls_stack_size, elem, null_coalesce_assignment)?;
             let mut querym_n_unpopped = None;
             let mut make_final =
-                |total_stack_size: StackIndex, memberkey: MemberKey<'arena>| -> InstrSeq<'_> {
+                |total_stack_size: StackIndex, memberkey: MemberKey| -> InstrSeq<'_> {
                     if no_final {
                         instr::empty()
                     } else if null_coalesce_assignment {
@@ -4306,7 +4306,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
     stack_index: StackIndex,
     elem: Option<&ast::Expr>,
     null_coalesce_assignment: bool,
-) -> Result<(MemberKey<'arena>, InstrSeq<'arena>)> {
+) -> Result<(MemberKey, InstrSeq<'arena>)> {
     use ast::ClassId_ as CI_;
     use ast::Expr;
     use ast::Expr_;
@@ -4338,13 +4338,10 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 ))),
             },
             // Special case for literal string
-            Expr_::String(s) => {
-                // FIXME: This is not safe--string literals are binary strings.
-                // There's no guarantee that they're valid UTF-8.
-                let s = unsafe { std::str::from_utf8_unchecked(s.as_slice()) };
-                let s = bumpalo::collections::String::from_str_in(s, alloc).into_bump_str();
-                Ok((MemberKey::ET(Str::from(s), ReadonlyOp::Any), instr::empty()))
-            }
+            Expr_::String(s) => Ok((
+                MemberKey::ET(hhbc::intern_bytes(s.as_slice()), ReadonlyOp::Any),
+                instr::empty(),
+            )),
             // Special case for class name
             Expr_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(e, env, &(x.0), &(x.1).1) =>
@@ -4361,10 +4358,9 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         ));
                     }
                 };
-                let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname)
-                    .unsafe_as_str();
+                let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname);
                 Ok((
-                    MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
+                    MemberKey::ET(hhbc::intern_bytes(fq_id.as_bytes()), ReadonlyOp::Any),
                     instr::raise_class_string_conversion_notice(),
                 ))
             }
@@ -6031,7 +6027,7 @@ pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local) -> InstrSe
 fn emit_final_member_op<'arena>(
     stack_size: StackIndex,
     op: LValOp,
-    mk: MemberKey<'arena>,
+    mk: MemberKey,
 ) -> InstrSeq<'arena> {
     use LValOp as L;
     match op {

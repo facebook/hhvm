@@ -739,7 +739,7 @@ fn print_data<'a, 'b>(blocks: &[Block<'a, 'b>], data: &[BlockData]) {
     }
 }
 
-fn adj_mkey<'a>(mkey: &MemberKey<'a>) -> MemberKey<'a> {
+fn adj_mkey(mkey: &MemberKey) -> MemberKey {
     match mkey {
         MemberKey::EC(stk, rop) => MemberKey::EC(stk + 1, *rop),
         MemberKey::PC(stk, rop) => MemberKey::PC(stk + 1, *rop),

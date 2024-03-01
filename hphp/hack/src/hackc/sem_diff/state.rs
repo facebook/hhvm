@@ -573,7 +573,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_dim(
         &mut self,
         inputs: &mut Vec<Input<'arena>>,
-    ) -> Result<Option<node::IntermediateOp<'arena>>> {
+    ) -> Result<Option<node::IntermediateOp>> {
         // Loop because we may have to skip intermediate SrcLoc.
         loop {
             let instr = self.instr();
@@ -597,7 +597,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         }
     }
 
-    fn step_final(&mut self, inputs: &mut Vec<Input<'arena>>) -> Result<node::FinalOp<'arena>> {
+    fn step_final(&mut self, inputs: &mut Vec<Input<'arena>>) -> Result<node::FinalOp> {
         let instr = self
             .instr()
             .ok_or_else(|| anyhow!("Early end in MemberOp sequence"))?;
@@ -780,8 +780,8 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn push_member_key_inputs(
         &mut self,
         inputs: &mut Vec<Input<'arena>>,
-        member_key: &MemberKey<'arena>,
-    ) -> Result<MemberKey<'arena>> {
+        member_key: &MemberKey,
+    ) -> Result<MemberKey> {
         match *member_key {
             MemberKey::EI(..)
             | MemberKey::ET(..)
@@ -1527,7 +1527,7 @@ fn apply_inc_dec_op(inc_dec_op: IncDecOp, pre_value: Value, post_value: Value) -
     }
 }
 
-fn clean_member_key<'a>(key: &MemberKey<'a>) -> MemberKey<'a> {
+fn clean_member_key(key: &MemberKey) -> MemberKey {
     match *key {
         MemberKey::EI(..)
         | MemberKey::ET(..)

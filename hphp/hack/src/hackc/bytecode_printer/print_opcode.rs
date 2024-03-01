@@ -114,7 +114,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         print_iter_args(w, iter_args, self.local_names)
     }
 
-    fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey<'_>) -> Result<()> {
+    fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey) -> Result<()> {
         print_member_key(w, member_key, self.local_names)
     }
 
@@ -252,7 +252,7 @@ fn print_local_range(w: &mut dyn Write, locrange: &LocalRange) -> Result<()> {
     write!(w, "L:{}+{}", locrange.start, locrange.len)
 }
 
-fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[StringId]) -> Result<()> {
+fn print_member_key(w: &mut dyn Write, mk: &MemberKey, local_names: &[StringId]) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {
@@ -269,7 +269,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[String
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            print_quoted_ffi_str(w, s)?;
+            print_quoted_bytes(w, s.as_bytes())?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }

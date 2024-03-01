@@ -902,7 +902,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         locals: &mut impl Iterator<Item = LocalId>,
         key: &instr::MemberKey,
         readonly: ir::ReadonlyOp,
-    ) -> hhbc::MemberKey<'a> {
+    ) -> hhbc::MemberKey {
         match *key {
             instr::MemberKey::EC => {
                 *stack_index -= 1;
@@ -915,7 +915,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 hhbc::MemberKey::EL(local, readonly)
             }
             instr::MemberKey::ET(name) => {
-                let name = self.strings.lookup_ffi_str(name);
+                let name = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(name));
                 hhbc::MemberKey::ET(name, readonly)
             }
             instr::MemberKey::PC => {

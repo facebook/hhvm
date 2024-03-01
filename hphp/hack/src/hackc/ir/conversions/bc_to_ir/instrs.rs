@@ -449,9 +449,9 @@ fn member_key_stack_count(k: &MemberKey) -> usize {
     }
 }
 
-fn convert_member_key<'a, 'b>(
-    ctx: &mut Context<'a, 'b>,
-    key: &hhbc::MemberKey<'a>,
+fn convert_member_key(
+    ctx: &mut Context<'_, '_>,
+    key: &hhbc::MemberKey,
 ) -> (
     instr::MemberKey,
     ir::ReadonlyOp,
@@ -469,7 +469,7 @@ fn convert_member_key<'a, 'b>(
             (instr::MemberKey::EL, readonly, None, Some(lid))
         }
         hhbc::MemberKey::ET(s, readonly) => {
-            let id = ctx.intern_ffi_str(s);
+            let id = ctx.intern_bytes_id(s);
             (instr::MemberKey::ET(id), readonly, None, None)
         }
         hhbc::MemberKey::PC(idx, readonly) => {

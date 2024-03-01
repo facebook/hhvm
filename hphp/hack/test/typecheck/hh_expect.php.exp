@@ -18,7 +18,7 @@ File "hh_expect.php", line 12, characters 33-34:
 Invalid argument (Typing[4110])
   File "hh_expect.php", line 12, characters 24-30:
   Expected `nothing`
-  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
     via this generic `T`
   File "hh_expect.php", line 3, characters 12-14:
   But got `int`
@@ -26,7 +26,7 @@ File "hh_expect.php", line 13, characters 32-33:
 Invalid argument (Typing[4110])
   File "hh_expect.php", line 13, characters 24-29:
   Expected `string`
-  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
     via this generic `T`
   File "hh_expect.php", line 3, characters 12-14:
   But got `int`

@@ -1,0 +1,8 @@
+File "assign.php", line 18, characters 34-35:
+Invalid argument (Typing[4110])
+  File "assign.php", line 18, characters 24-31:
+  Expected `arraykey`
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+    via this generic `T`
+  File "assign.php", line 15, characters 11-18:
+  But got `dynamic`

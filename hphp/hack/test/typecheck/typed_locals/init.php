@@ -1,6 +1,7 @@
 <?hh
 <<file: __EnableUnstableFeatures('typed_local_variables')>>
 
+<<__NoAutoLikes>>
 function g<T1 as arraykey, T2>(T2 $b): dict<T1, vec<T2>> {
   return dict[];
 }

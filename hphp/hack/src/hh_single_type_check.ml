@@ -108,7 +108,7 @@ let magic_builtins =
       ^ "namespace {\n"
       ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
       ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
-      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
       ^ "<<__NoAutoDynamic>> function hh_show_env()[]:void {}\n"
       ^ "<<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}\n"
       ^ "<<__NoAutoDynamic>> function hh_force_solve()[]:void {}"

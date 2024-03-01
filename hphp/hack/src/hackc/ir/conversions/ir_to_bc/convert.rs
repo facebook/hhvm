@@ -136,11 +136,8 @@ pub(crate) fn convert_attributes(
                     .into_iter()
                     .map(|arg| convert_typed_value(&arg, strings)),
             );
-            hhbc::Attribute::new(
-                std::str::from_utf8(&strings.interner.lookup_bytes(attr.name.id))
-                    .expect("non-utf8 attribute name"),
-                arguments,
-            )
+            // XXX attribute names are class names
+            hhbc::Attribute::new(strings.lookup_class_name(attr.name).as_str(), arguments)
         })
         .collect()
 }

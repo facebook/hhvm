@@ -14,10 +14,10 @@ use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_type_constant;
 
-pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    prog: &'a [ast::Def],
-) -> Result<Vec<Typedef<'arena>>> {
+pub fn emit_typedefs_from_program(
+    e: &mut Emitter<'_, '_>,
+    prog: &[ast::Def],
+) -> Result<Vec<Typedef>> {
     prog.iter()
         .filter_map(|def| {
             def.as_typedef().and_then(|td| {
@@ -31,11 +31,8 @@ pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
         .collect()
 }
 
-fn emit_typedef<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    typedef: &'a ast::Typedef,
-) -> Result<Typedef<'arena>> {
-    let name = ClassName::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
+fn emit_typedef(emitter: &mut Emitter<'_, '_>, typedef: &ast::Typedef) -> Result<Typedef> {
+    let name = ClassName::from_ast_name_and_mangle(&typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
     let type_info_union_res = emit_type_hint::hint_to_type_info_union(

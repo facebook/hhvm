@@ -99,7 +99,7 @@ fn is_prim_or_resolved_classname(kind: TypeStructureKind) -> bool {
     )
 }
 
-fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -> (String, bool) {
+fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
     use oxidized::ast_defs::Id;
     match sf {
         ShapeFieldName::SFlitInt((_, s)) => (s.to_string(), false),
@@ -112,8 +112,8 @@ fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -
             )
         }
         ShapeFieldName::SFclassConst(Id(_, cname), (_, s)) => {
-            let id = hhbc::ClassName::from_ast_name_and_mangle(alloc, cname);
-            (format!("{}::{}", id.unsafe_as_str(), s), true)
+            let id = hhbc::ClassName::from_ast_name_and_mangle(cname);
+            (format!("{}::{}", id.as_str(), s), true)
         }
     }
 }
@@ -126,7 +126,7 @@ fn shape_field_to_entry<'arena>(
     type_refinement_in_hint: TypeRefinementInHint,
     sfi: &ShapeFieldInfo,
 ) -> Result<DictEntry> {
-    let (name, is_class_const) = shape_field_name(alloc, &sfi.name);
+    let (name, is_class_const) = shape_field_name(&sfi.name);
     let mut r = vec![];
     if is_class_const {
         r.push(encode_entry("is_cls_cns", TypedValue::Bool(true)));
@@ -185,14 +185,10 @@ fn type_constant_access_list(ids: &[aast::Sid]) -> TypedValue {
     TypedValue::vec(ids)
 }
 
-fn resolve_classname(
-    alloc: &bumpalo::Bump,
-    tparams: &[&str],
-    mut s: String,
-) -> (Option<DictEntry>, String) {
+fn resolve_classname(tparams: &[&str], mut s: String) -> (Option<DictEntry>, String) {
     let kind = ts_kind(tparams, &s);
     let name_key = if kind != TypeStructureKind::T_typevar {
-        s = hhbc::ClassName::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string();
+        s = hhbc::ClassName::from_ast_name_and_mangle(s.as_str()).into_string();
         "classname"
     } else {
         "name"
@@ -262,11 +258,11 @@ fn encode_kind(kind: TypeStructureKind) -> DictEntry {
     encode_entry("kind", TypedValue::Int(kind.repr as i64))
 }
 
-fn encode_root_name(alloc: &bumpalo::Bump, s: &str) -> DictEntry {
+fn encode_root_name(s: &str) -> DictEntry {
     let s = if s == "this" {
         string_utils::prefix_namespace("HH", s)
     } else {
-        hhbc::ClassName::from_ast_name_and_mangle(alloc, s).unsafe_into_string()
+        hhbc::ClassName::from_ast_name_and_mangle(s).into_string()
     };
     encode_entry("root_name", TypedValue::intern_string(&s))
 }
@@ -314,7 +310,7 @@ fn hint_to_type_constant_list(
                 }
                 _ => hints,
             };
-            let (classname, s_res) = resolve_classname(alloc, tparams, name.to_owned());
+            let (classname, s_res) = resolve_classname(tparams, name.to_owned());
             let mut r = vec![];
             if s_res.eq_ignore_ascii_case("tuple") || s_res.eq_ignore_ascii_case("shape") {
                 r.push(encode_kind(TypeStructureKind::T_unresolved));
@@ -339,7 +335,7 @@ fn hint_to_type_constant_list(
             r
         }
         Hint_::Hwildcard => {
-            let (classname, _s_res) = resolve_classname(alloc, &[], "_".to_owned());
+            let (classname, _s_res) = resolve_classname(&[], "_".to_owned());
             let mut r = vec![];
             r.push(encode_kind(TypeStructureKind::T_typevar));
             if let Some(c) = classname {
@@ -370,7 +366,7 @@ fn hint_to_type_constant_list(
             Some((root_id, hs)) if hs.is_empty() => {
                 vec![
                     encode_kind(TypeStructureKind::T_typeaccess),
-                    encode_root_name(alloc, &root_id.1),
+                    encode_root_name(&root_id.1),
                     encode_entry("access_list", type_constant_access_list(ids)),
                 ]
             }

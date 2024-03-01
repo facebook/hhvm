@@ -42,7 +42,7 @@ impl MapName for hhbc::Adata {
 
 impl MapName for hhbc::Class<'_> {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -82,9 +82,9 @@ impl MapName for hhbc::Property {
     }
 }
 
-impl MapName for hhbc::Typedef<'_> {
+impl MapName for hhbc::Typedef {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -94,9 +94,9 @@ impl MapName for hhbc::TypeConstant {
     }
 }
 
-impl MapName for hhbc::Requirement<'_> {
+impl MapName for hhbc::Requirement {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -787,7 +787,7 @@ fn cmp_typedef_typeinfo(a: &TypeInfo, b: &TypeInfo) -> Result {
     Ok(())
 }
 
-fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result {
+fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
     let Typedef {
         name: a_name,
         attributes: a_attributes,

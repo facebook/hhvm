@@ -9,6 +9,8 @@ use env::Env;
 use error::Error;
 use error::Result;
 use hack_macros::hack_expr;
+use hhbc::string_id;
+use hhbc::ClassName;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::IsTypeOp;
@@ -955,11 +957,10 @@ fn emit_catch<'a, 'arena, 'decl>(
     end_label: Label,
     ast::Catch(catch_ty, catch_lid, catch_block): &ast::Catch,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
-    let class_id = hhbc::ClassName::from_ast_name_and_mangle(alloc, &catch_ty.1);
+    let class_id = ClassName::from_ast_name_and_mangle(&catch_ty.1);
     let ast::Lid(_pos, catch_local_id) = catch_lid;
     Ok(InstrSeq::gather(vec![
         instr::dup(),
@@ -1280,7 +1281,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
         let iter_init = InstrSeq::gather(vec![
             instr_collection,
             instr::dup(),
-            instr::instance_of_d(hhbc::ClassName::from_raw_string(alloc, "HH\\AsyncIterator")),
+            instr::instance_of_d(ClassName::new(string_id!("HH\\AsyncIterator"))),
             instr::jmp_nz(input_is_async_iterator_label),
             emit_fatal::emit_fatal_runtime(
                 alloc,

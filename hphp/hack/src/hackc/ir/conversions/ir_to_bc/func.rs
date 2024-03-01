@@ -105,7 +105,7 @@ pub(crate) fn convert_func<'a>(
     let shadowed_tparams = Vec::from_iter(
         func.shadowed_tparams
             .iter()
-            .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
+            .map(|name| ffi::Str::from(strings.lookup_class_name(*name).as_str())),
     );
 
     let body_instrs = body_instrs.to_vec();

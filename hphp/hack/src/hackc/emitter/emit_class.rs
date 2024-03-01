@@ -13,6 +13,7 @@ use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Str;
+use hhbc::string_id;
 use hhbc::Class;
 use hhbc::ClassName;
 use hhbc::Coeffects;
@@ -63,10 +64,10 @@ use crate::xhp_attribute::XhpAttribute;
 
 fn add_symbol_refs<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    base: Option<&ClassName<'arena>>,
-    implements: &[ClassName<'arena>],
-    uses: &[ClassName<'arena>],
-    requirements: &[hhbc::Requirement<'arena>],
+    base: Option<&ClassName>,
+    implements: &[ClassName],
+    uses: &[ClassName],
+    requirements: &[hhbc::Requirement],
 ) {
     base.iter().for_each(|&x| emitter.add_class_ref(*x));
     implements.iter().for_each(|x| emitter.add_class_ref(*x));
@@ -135,52 +136,37 @@ fn make_86method<'arena, 'decl>(
     })
 }
 
-fn from_extends<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn from_extends(
     is_enum: bool,
     is_enum_class: bool,
     is_abstract: bool,
     extends: &[ast::Hint],
-) -> Option<ClassName<'arena>> {
+) -> Option<ClassName> {
     if is_enum {
         // Do not use special_names:: as there's a prefix \ which breaks HHVM
         if is_enum_class {
             if is_abstract {
-                Some(ClassName::from_raw_string(
-                    alloc,
-                    "HH\\BuiltinAbstractEnumClass",
-                ))
+                Some(ClassName::new(string_id!("HH\\BuiltinAbstractEnumClass")))
             } else {
-                Some(ClassName::from_raw_string(alloc, "HH\\BuiltinEnumClass"))
+                Some(ClassName::new(string_id!("HH\\BuiltinEnumClass")))
             }
         } else {
-            Some(ClassName::from_raw_string(alloc, "HH\\BuiltinEnum"))
+            Some(ClassName::new(string_id!("HH\\BuiltinEnum")))
         }
     } else {
-        extends
-            .first()
-            .map(|x| emit_type_hint::hint_to_class(alloc, x))
+        extends.first().map(emit_type_hint::hint_to_class)
     }
 }
 
-fn from_implements<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    implements: &[ast::Hint],
-) -> Vec<ClassName<'arena>> {
+fn from_implements(implements: &[ast::Hint]) -> Vec<ClassName> {
     implements
         .iter()
-        .map(|x| emit_type_hint::hint_to_class(alloc, x))
+        .map(emit_type_hint::hint_to_class)
         .collect()
 }
 
-fn from_includes<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    includes: &[ast::Hint],
-) -> Vec<ClassName<'arena>> {
-    includes
-        .iter()
-        .map(|x| emit_type_hint::hint_to_class(alloc, x))
-        .collect()
+fn from_includes(includes: &[ast::Hint]) -> Vec<ClassName> {
+    includes.iter().map(emit_type_hint::hint_to_class).collect()
 }
 
 fn from_type_constant<'a, 'arena, 'decl>(
@@ -321,15 +307,12 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
         .collect()
 }
 
-fn from_class_elt_requirements<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
-    class_: &'a ast::Class_,
-) -> Vec<Requirement<'arena>> {
+fn from_class_elt_requirements<'a>(class_: &'a ast::Class_) -> Vec<Requirement> {
     class_
         .reqs
         .iter()
         .map(|ClassReq(h, req_kind)| {
-            let name = emit_type_hint::hint_to_class(alloc, h);
+            let name = emit_type_hint::hint_to_class(h);
             let kind = match *req_kind {
                 RequireKind::RequireExtends => TraitReqKind::MustExtend,
                 RequireKind::RequireImplements => TraitReqKind::MustImplement,
@@ -541,11 +524,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
     // class_is_const, but for now class_is_const is the only thing that turns
     // it on.
     let no_dynamic_props = is_const;
-    let name = ClassName::from_ast_name_and_mangle(alloc, &ast_class.name.1);
+    let name = ClassName::from_ast_name_and_mangle(&ast_class.name.1);
     let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
     let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
-    let uses: Vec<ClassName<'arena>> = ast_class
+    let uses: Vec<ClassName> = ast_class
         .uses
         .iter()
         .filter_map(|Hint(pos, hint)| match hint.as_ref() {
@@ -553,10 +536,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
                 if is_interface {
                     Some(Err(Error::fatal_parse(pos, "Interfaces cannot use traits")))
                 } else {
-                    Some(Ok(ClassName::from_ast_name_and_mangle(
-                        alloc,
-                        name.as_str(),
-                    )))
+                    Some(Ok(ClassName::from_ast_name_and_mangle(name.as_str())))
                 }
             }
             _ => None,
@@ -609,7 +589,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         None
     } else {
         from_extends(
-            alloc,
             enum_type.is_some(),
             is_enum_class,
             is_abstract,
@@ -618,9 +597,8 @@ pub fn emit_class<'a, 'arena, 'decl>(
     };
 
     let base_is_closure = || {
-        base.as_ref().map_or(false, |cls| {
-            cls.unsafe_as_str().eq_ignore_ascii_case("closure")
-        })
+        base.as_ref()
+            .map_or(false, |cls| cls.as_str().eq_ignore_ascii_case("Closure"))
     };
     if !is_closure && base_is_closure() {
         return Err(Error::fatal_runtime(
@@ -633,11 +611,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
     } else {
         &ast_class.implements
     };
-    let implements = from_implements(alloc, implements);
+    let implements = from_implements(implements);
     let enum_includes = if ast_class.kind.is_cenum() || ast_class.kind.is_cenum_class() {
         match &ast_class.enum_ {
             None => vec![],
-            Some(enum_) => from_includes(alloc, &enum_.includes),
+            Some(enum_) => from_includes(&enum_.includes),
         }
     } else {
         vec![]
@@ -668,7 +646,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         from_class_elt_classvars(emitter, ast_class, is_const, &tparams, is_closure)?;
     let mut constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
-    let requirements = from_class_elt_requirements(alloc, ast_class);
+    let requirements = from_class_elt_requirements(ast_class);
 
     let pinit_method = make_init_method(
         alloc,

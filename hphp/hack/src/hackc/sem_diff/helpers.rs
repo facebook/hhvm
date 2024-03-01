@@ -13,7 +13,7 @@ pub(crate) trait MapName {
 
 impl MapName for hhbc::Class<'_> {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 
@@ -53,9 +53,9 @@ impl MapName for hhbc::Property {
     }
 }
 
-impl MapName for hhbc::Typedef<'_> {
+impl MapName for hhbc::Typedef {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 
@@ -65,9 +65,9 @@ impl MapName for hhbc::TypeConstant {
     }
 }
 
-impl MapName for hhbc::Requirement<'_> {
+impl MapName for hhbc::Requirement {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

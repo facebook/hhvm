@@ -20,10 +20,7 @@ pub fn typed_value_into_instr<'a>(e: &mut Emitter<'a, '_>, tv: TypedValue) -> Re
         TypedValue::Bool(false) => Ok(instr::false_()),
         TypedValue::Int(i) => Ok(instr::int(i)),
         TypedValue::String(s) => Ok(instr::string(e.alloc, s.as_bytes())),
-        TypedValue::LazyClass(s) => {
-            let classid = ClassName::from_ast_name_and_mangle(e.alloc, s);
-            Ok(instr::lazy_class(classid))
-        }
+        TypedValue::LazyClass(s) => Ok(instr::lazy_class(ClassName::from_ast_name_and_mangle(s))),
         TypedValue::Float(f) => Ok(instr::double(f)),
         TypedValue::Keyset(_) => {
             let arrayid = get_array_identifier(e, tv);

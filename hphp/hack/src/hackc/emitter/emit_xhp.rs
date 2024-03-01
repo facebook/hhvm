@@ -307,11 +307,10 @@ fn emit_xhp_attribute_array<'arena>(
         }
     }
     fn get_attribute_array_values<'arena>(
-        alloc: &'arena bumpalo::Bump,
         id: &str,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
-        let id = hhbc::ClassName::from_ast_name_and_mangle(alloc, id).unsafe_as_str();
+        let id = hhbc::ClassName::from_ast_name_and_mangle(id).as_str();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
         let class_name = match type_ {
@@ -328,9 +327,7 @@ fn emit_xhp_attribute_array<'arena>(
     ) -> Result<(Expr, Expr)> {
         match &*(hint.1) {
             Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(alloc, h, enum_opt),
-            Hint_::Happly(ast_defs::Id(_, id), _) => {
-                get_attribute_array_values(alloc, id, enum_opt)
-            }
+            Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
             _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),
@@ -347,10 +344,8 @@ fn emit_xhp_attribute_array<'arena>(
         };
         let (class_name, hint) = match &xa.type_ {
             // attribute declared with the var identifier - we treat it as mixed
-            None if enum_opt.is_none() => {
-                get_attribute_array_values(alloc, "\\HH\\mixed", enum_opt)
-            }
-            None => get_attribute_array_values(alloc, "enum", enum_opt),
+            None if enum_opt.is_none() => get_attribute_array_values("\\HH\\mixed", enum_opt),
+            None => get_attribute_array_values("enum", enum_opt),
             // As it turns out, if there is a type list, HHVM discards it
             Some(h) => extract_from_hint(alloc, h, enum_opt),
         }?;

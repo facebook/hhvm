@@ -45,6 +45,7 @@ pub use intern::string::StringId;
 pub use intern::string::StringIdIndexSet;
 pub use intern::string::StringIdMap;
 pub use intern::string::StringIdSet;
+pub use intern::string_id;
 pub use method::*;
 pub use module::*;
 pub use opcodes::*;

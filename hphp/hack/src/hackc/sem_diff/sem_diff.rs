@@ -672,11 +672,7 @@ fn sem_diff_symbol_refs<'arena>(
     Ok(())
 }
 
-fn sem_diff_typedef<'arena>(
-    path: &CodePath<'_>,
-    a: &Typedef<'arena>,
-    b: &Typedef<'arena>,
-) -> Result<()> {
+fn sem_diff_typedef(path: &CodePath<'_>, a: &Typedef, b: &Typedef) -> Result<()> {
     let Typedef {
         name: a_name,
         attributes: a_attributes,

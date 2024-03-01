@@ -8,6 +8,8 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
+use hhbc::string_id;
+use hhbc::ClassName;
 use hhbc::Constraint;
 use hhbc::StringId;
 use hhbc::TypeInfo;
@@ -33,19 +35,15 @@ pub enum Kind {
     UpperBound,
 }
 
-fn fmt_name_or_prim<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[&str],
-    name: &str,
-) -> Cow<'arena, str> {
+fn fmt_name_or_prim<'n>(tparams: &[&str], name: &'n str) -> Cow<'n, str> {
     if tparams.contains(&name) {
-        (alloc.alloc_str(name) as &str).into()
+        name.into()
     } else {
-        let id: hhbc::ClassName<'arena> = hhbc::ClassName::from_ast_name_and_mangle(alloc, name);
+        let id = ClassName::from_ast_name_and_mangle(name);
         if string_utils::is_xhp(string_utils::strip_ns(name)) {
-            id.unsafe_to_unmangled_str()
+            id.unmangled().into()
         } else {
-            id.unsafe_as_str().into()
+            id.as_str().into()
         }
     }
 }
@@ -74,7 +72,7 @@ pub fn fmt_hint<'arena>(
     let Hint(_, h) = hint;
     Ok(match h.as_ref() {
         Habstr(id, args) | Happly(Id(_, id), args) => {
-            let name = fmt_name_or_prim(alloc, tparams, id);
+            let name = fmt_name_or_prim(tparams, id);
             if args.is_empty() || strip_tparams {
                 name.to_string()
             } else {
@@ -94,7 +92,7 @@ pub fn fmt_hint<'arena>(
             if let Happly(Id(_, id), _) = hint.as_ref() {
                 format!(
                     "{}::{}",
-                    fmt_name_or_prim(alloc, tparams, id),
+                    fmt_name_or_prim(tparams, id),
                     accesses
                         .iter()
                         .map(|Id(_, s)| s.as_str())
@@ -129,7 +127,7 @@ pub fn fmt_hint<'arena>(
                 ShapeFieldName::SFlitInt((_, s)) => s.to_owned(),
                 ShapeFieldName::SFlitStr((_, s)) => format!("'{}'", s),
                 ShapeFieldName::SFclassConst(Id(_, cid), (_, s)) => {
-                    format!("{}::{}", fmt_name_or_prim(alloc, tparams, cid), s)
+                    format!("{}::{}", fmt_name_or_prim(tparams, cid), s)
                 }
             };
             let fmt_field = |field: &ShapeFieldInfo| {
@@ -151,7 +149,7 @@ pub fn fmt_hint<'arena>(
         Htuple(hints) => format!("({})", fmt_hints(alloc, tparams, hints)?),
         Hlike(t) => format!("~{}", fmt_hint(alloc, tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(alloc, tparams, false, t)?),
-        h => fmt_name_or_prim(alloc, tparams, hint_to_string(h)).into(),
+        h => fmt_name_or_prim(tparams, hint_to_string(h)).into(),
     })
 }
 
@@ -332,7 +330,7 @@ fn type_application_helper(tparams: &[&str], kind: &Kind, name: &str) -> Result<
             flags: TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
         })
     } else {
-        let name = hhbc::ClassName::mangle(name);
+        let name = ClassName::mangle(name);
         Ok(Constraint {
             name: Just(name),
             flags: TypeConstraintFlags::NoFlags,
@@ -479,12 +477,12 @@ pub fn hint_to_type_info_union(
     Ok(result)
 }
 
-pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> hhbc::ClassName<'arena> {
+pub fn hint_to_class(hint: &Hint) -> ClassName {
     let Hint(_, h) = hint;
     if let Happly(Id(_, name), _) = &**h {
-        hhbc::ClassName::from_ast_name_and_mangle(alloc, name)
+        ClassName::from_ast_name_and_mangle(name)
     } else {
-        hhbc::ClassName::from_raw_string(alloc, "__type_is_not_class__")
+        ClassName::new(string_id!("__type_is_not_class__"))
     }
 }
 

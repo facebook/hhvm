@@ -15,8 +15,8 @@ use crate::TypedValue;
 
 #[derive(Clone, Debug, Serialize)]
 #[repr(C)]
-pub struct Typedef<'arena> {
-    pub name: ClassName<'arena>,
+pub struct Typedef {
+    pub name: ClassName,
     pub attributes: Vector<Attribute>,
     pub type_info_union: Vector<TypeInfo>,
     pub type_structure: TypedValue,

@@ -97,7 +97,7 @@ pub(crate) fn convert(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> Maybe<Typ
     }
 }
 
-pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) -> hhbc::Typedef<'a> {
+pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache<'_>) -> hhbc::Typedef {
     let ir::Typedef {
         name,
         attributes,

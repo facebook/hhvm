@@ -273,7 +273,7 @@ fn parse_convert_simple(
         let strings = quote_spanned!(span=> ctx.strings);
 
         match ty {
-            ImmType::OAL(n) if *n == "ClassName" => {
+            ImmType::OA(n) if *n == "ClassName" => {
                 convert(quote_spanned!(span=> ir::ClassId::from_hhbc(*#imm, #strings) ));
             }
             ImmType::OA(n) if *n == "ConstName" => {

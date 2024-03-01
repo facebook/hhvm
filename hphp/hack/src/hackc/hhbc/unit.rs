@@ -27,7 +27,7 @@ pub struct Unit<'arena> {
     pub functions: Vector<Function<'arena>>,
     pub classes: Vector<Class<'arena>>,
     pub modules: Vector<Module>,
-    pub typedefs: Vector<Typedef<'arena>>,
+    pub typedefs: Vector<Typedef>,
     pub file_attributes: Vector<Attribute>,
     pub module_use: Maybe<ModuleName>,
     pub symbol_refs: SymbolRefs<'arena>,

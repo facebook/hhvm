@@ -276,7 +276,7 @@ pub mod instr {
     pub fn f_call_cls_method_d<'a>(
         fcall_args: FCallArgs,
         method: MethodName<'a>,
-        class: ClassName<'a>,
+        class: ClassName,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodD(
             fcall_args, class, method,

@@ -212,14 +212,10 @@ impl<'arena> AssembleImm<'arena, hhbc::AdataId> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::ClassName<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap,
-    ) -> Result<hhbc::ClassName<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::ClassName> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<hhbc::ClassName> {
         Ok(hhbc::ClassName::new(
-            assemble::assemble_unescaped_unquoted_str(alloc, self)?,
+            assemble::assemble_unescaped_unquoted_intern_str(self)?,
         ))
     }
 }

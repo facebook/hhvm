@@ -108,11 +108,11 @@ fn rewrite_xml_<'arena, 'decl>(
         pos.clone(),
         Expr_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
-    let renamed_id = hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &id.1);
+    let renamed_id = hhbc::ClassName::from_ast_name_and_mangle(&id.1);
     let cid = ClassId(
         (),
         pos.clone(),
-        ClassId_::CI(Id(id.0.clone(), renamed_id.unsafe_as_str().into())),
+        ClassId_::CI(Id(id.0.clone(), renamed_id.as_str().into())),
     );
 
     e.add_class_ref(renamed_id);

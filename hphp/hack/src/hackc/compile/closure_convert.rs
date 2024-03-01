@@ -1180,16 +1180,14 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                             .and_then(Expr::as_id)
                             .map_or(false, |id| !is_selflike_keyword(id)) =>
                         {
-                            let alloc = bumpalo::Bump::new();
                             let id = cid.as_ciexpr().unwrap().as_id().unwrap();
                             let mangled_class_name =
-                                hhbc::ClassName::from_ast_name_and_mangle(&alloc, id.as_ref());
-                            let mangled_class_name = mangled_class_name.unsafe_as_str();
+                                hhbc::ClassName::from_ast_name_and_mangle(id.as_ref());
                             Ok(self.convert_meth_caller_to_func_ptr(
                                 scope,
                                 pos,
                                 pc,
-                                mangled_class_name,
+                                mangled_class_name.as_str(),
                                 pf,
                                 // FIXME: This is not safe--string literals are binary
                                 // strings. There's no guarantee that they're valid UTF-8.

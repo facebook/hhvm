@@ -842,7 +842,7 @@ void handleFCA(TranslationState& ts, const hhbc::FCallArgs& fca) {
   }
 }
 
-Str getStrfromSA(const ClassName& c) {
+StringId getStrfromSA(const ClassName& c) {
   return c._0;
 }
 StringId getStrfromSA(const FunctionName& f) {

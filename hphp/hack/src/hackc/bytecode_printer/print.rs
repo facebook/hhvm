@@ -254,7 +254,7 @@ fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata) -> Re
     ctx.newline(w)
 }
 
-fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef<'_>) -> Result<()> {
+fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef) -> Result<()> {
     newline(w)?;
     w.write_all(if td.case_type {
         b".case_type "
@@ -338,7 +338,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -
     newline(w)
 }
 
-fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement<'_>) -> Result<()> {
+fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
     match r.kind {
@@ -480,14 +480,14 @@ fn print_uses<'arena>(w: &mut dyn Write, c: &Class<'arena>) -> Result<()> {
     }
 }
 
-fn print_implements(w: &mut dyn Write, implements: &[ClassName<'_>]) -> Result<()> {
+fn print_implements(w: &mut dyn Write, implements: &[ClassName]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
     }
     write_bytes!(w, " implements ({})", fmt_separated(" ", implements))
 }
 
-fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName<'_>]) -> Result<()> {
+fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
@@ -546,11 +546,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_
     })
 }
 
-fn print_class_def<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    class_def: &Class<'arena>,
-) -> Result<()> {
+fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
@@ -570,7 +566,7 @@ fn print_class_def<'arena>(
         class_def
             .base
             .as_ref()
-            .map(|x: &ClassName<'arena>| x.unsafe_as_str())
+            .map(|x: &ClassName| x.as_str())
             .into(),
     )?;
     print_implements(w, class_def.implements.as_ref())?;

@@ -18,9 +18,11 @@ use error::Error;
 use error::Result;
 use ffi::Str;
 use hash::HashSet;
+use hhbc::string_id;
 use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
 use hhbc::ClassGetCMode;
+use hhbc::ClassName;
 use hhbc::CollectionType;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -436,8 +438,8 @@ pub fn emit_nameof<'a, 'arena, 'decl>(
     let cexpr = ClassExpr::class_id_to_class_expr(emitter, &env.scope, false, true, class_id);
     match cexpr {
         ClassExpr::Id(ast_defs::Id(_, cname)) => {
-            let classid = hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname);
-            Ok(instr::string_lit(classid.as_ffi_str()))
+            let classid = ClassName::from_ast_name_and_mangle(cname);
+            Ok(instr::string_lit(Str::new(classid.as_str().as_bytes())))
         }
         ClassExpr::Special(_) => Ok(InstrSeq::gather(vec![
             emit_load_class_ref(emitter, env, &class_id.1, cexpr)?,
@@ -855,10 +857,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
                 })
                 .collect::<Result<Vec<_>>>()?,
         ),
-        instr::create_cl(
-            ids.len() as u32,
-            hhbc::ClassName::from_raw_string(e.alloc, closure_class_name),
-        ),
+        instr::create_cl(ids.len() as u32, ClassName::intern(closure_class_name)),
     ]))
 }
 
@@ -928,7 +927,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                     None,
                 ),
                 hhbc::MethodName::from_raw_string(alloc, "fromDict"),
-                hhbc::ClassName::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
+                ClassName::new(string_id!("HH\\AwaitAllWaitHandle")),
             ),
             instr::await_(),
             instr::label(async_eager_label),
@@ -2083,7 +2082,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                    let cid = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                    let cid = ClassName::from_ast_name_and_mangle(cname);
                     e.add_class_ref(cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
@@ -2162,7 +2161,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         ]),
                         InstrSeq::gather(vec![
                             instr::push_l(tmp),
-                            emit_known_class_id(alloc, e, &cid),
+                            emit_known_class_id(e, &cid),
                             instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
@@ -2836,23 +2835,18 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     method_name: MethodName<'arena>,
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     let has_generics = has_non_tparam_generics_targs(env, targs);
     let emit_generics = |e| -> Result<InstrSeq<'arena>> {
         emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
     };
     Ok(match cexpr {
-        ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolve_cls_method_d(
-            hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
-            method_name,
-        ),
+        ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => {
+            instr::resolve_cls_method_d(ClassName::from_ast_name_and_mangle(name), method_name)
+        }
         ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
             emit_generics(e)?,
-            instr::resolve_r_cls_method_d(
-                hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
-                method_name,
-            ),
+            instr::resolve_r_cls_method_d(ClassName::from_ast_name_and_mangle(name), method_name),
         ]),
         ClassExpr::Special(clsref) if !has_generics => {
             instr::resolve_cls_method_s(clsref, method_name)
@@ -3482,11 +3476,10 @@ fn emit_reified_type<'a, 'arena>(
 }
 
 fn emit_known_class_id<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
-    let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
+    let cid = ClassName::from_ast_name_and_mangle(&id.1);
     e.add_class_ref(cid);
     instr::resolve_class(cid)
 }
@@ -3497,7 +3490,6 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
     pos: &Pos,
     cexpr: ClassExpr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let instrs = match cexpr {
         ClassExpr::Special(clsref) => match clsref {
             SpecialClsRef::SelfCls => instr::self_cls(),
@@ -3505,7 +3497,7 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
             SpecialClsRef::ParentCls => instr::parent_cls(),
             _ => unreachable!(),
         },
-        ClassExpr::Id(id) => emit_known_class_id(alloc, e, &id),
+        ClassExpr::Id(id) => emit_known_class_id(e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),
             emit_expr(e, env, &expr)?,
@@ -3520,11 +3512,11 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
     Ok(emit_pos_then(pos, instrs))
 }
 
-enum NewObjOpInfo<'a, 'arena> {
+enum NewObjOpInfo<'a> {
     /// true => top of stack contains type structure
     /// false => top of stack contains class
     NewObj(bool),
-    NewObjD(&'a hhbc::ClassName<'arena>, Option<&'a Vec<ast::Targ>>),
+    NewObjD(&'a ClassName, Option<&'a Vec<ast::Targ>>),
     NewObjS(hhbc::SpecialClsRef),
 }
 
@@ -3541,7 +3533,6 @@ fn emit_new<'a, 'arena, 'decl>(
     ),
     is_reflection_class_builtin: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let resolve_self = match &cid.2.as_ciexpr() {
         Some(ci_expr) => match ci_expr.as_id() {
             Some(ast_defs::Id(_, n)) if string_utils::is_self(n) => env
@@ -3581,7 +3572,7 @@ fn emit_new<'a, 'arena, 'decl>(
     } else {
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                let id = ClassName::from_ast_name_and_mangle(cname);
                 e.add_class_ref(id);
                 let targs = if has_non_tparam_generics_targs(env, targs) {
                     Some(targs)
@@ -3647,7 +3638,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    op: NewObjOpInfo<'b, 'arena>,
+    op: NewObjOpInfo<'b>,
 ) -> Result<InstrSeq<'arena>> {
     use string_utils::reified::INIT_METH_NAME;
 
@@ -4307,7 +4298,6 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
     use ast::ClassId_ as CI_;
     use ast::Expr;
     use ast::Expr_;
-    let alloc = env.arena;
     match elem {
         // ELement missing (so it's array append)
         None => Ok((MemberKey::W, instr::empty())),
@@ -4355,7 +4345,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         ));
                     }
                 };
-                let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname);
+                let fq_id = ClassName::from_ast_name_and_mangle(cname);
                 Ok((
                     MemberKey::ET(hhbc::intern_bytes(fq_id.as_bytes()), ReadonlyOp::Any),
                     instr::raise_class_string_conversion_notice(),
@@ -4529,11 +4519,10 @@ fn emit_class_const<'a, 'arena, 'decl>(
     cid: &ast::ClassId,
     id: &ast_defs::Pstring,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
-            let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &name);
+            let cid = ClassName::from_ast_name_and_mangle(name);
             Ok(if string_utils::is_class(&id.1) {
                 emit_pos_then(&pos, instr::lazy_class(cid))
             } else {

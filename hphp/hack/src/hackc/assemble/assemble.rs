@@ -85,7 +85,7 @@ fn assemble_from_toks<'arena>(
 #[derive(Default)]
 struct UnitBuilder<'a> {
     adatas: Vec<hhbc::Adata>,
-    class_refs: Option<Vec<hhbc::ClassName<'a>>>,
+    class_refs: Option<Vec<hhbc::ClassName>>,
     classes: Vec<hhbc::Class<'a>>,
     constant_refs: Option<Vec<hhbc::ConstName>>,
     constants: Vec<hhbc::Constant>,
@@ -97,7 +97,7 @@ struct UnitBuilder<'a> {
     module_use: Option<ModuleName>,
     modules: Vec<hhbc::Module>,
     type_constants: Vec<hhbc::TypeConstant>,
-    typedefs: Vec<hhbc::Typedef<'a>>,
+    typedefs: Vec<hhbc::Typedef>,
 }
 
 impl<'a> UnitBuilder<'a> {
@@ -156,12 +156,9 @@ impl<'a> UnitBuilder<'a> {
             }
             b".class_refs" => {
                 ensure_single_defn(&self.class_refs, tok)?;
-                self.class_refs = Some(assemble_refs(
-                    alloc,
-                    token_iter,
-                    ".class_refs",
-                    assemble_class_name,
-                )?);
+                self.class_refs = Some(assemble_refs(alloc, token_iter, ".class_refs", |t, _| {
+                    assemble_class_name(t)
+                })?);
             }
             b".constant_refs" => {
                 ensure_single_defn(&self.constant_refs, tok)?;
@@ -290,11 +287,11 @@ fn assemble_file_attributes(
 /// Ex:
 /// .alias ShapeKeyEscaping = <"HH\\darray"> (3,6) """D:2:{s:4:\"kind\";i:14;s:6:\"fields\";D:2:{s:11:\"Whomst'd've\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:1;}}s:25:\"Whomst\\u{0027}d\\u{0027}ve\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:4;}}}}""";
 /// Note that in BCP, TypeDef's typeinfo's user_type is not printed. What's between <> is the typeinfo's constraint's name.
-fn assemble_typedef<'arena>(
-    alloc: &'arena Bump,
+fn assemble_typedef(
+    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
     case_type: bool,
-) -> Result<hhbc::Typedef<'arena>> {
+) -> Result<hhbc::Typedef> {
     if case_type {
         parse!(token_iter, ".case_type");
     } else {
@@ -302,7 +299,7 @@ fn assemble_typedef<'arena>(
     }
     parse!(token_iter,
            <attrs:assemble_special_and_user_attrs(alloc)>
-           <name:assemble_class_name(alloc)>
+           <name:assemble_class_name()>
            "="
            <type_info_union:assemble_type_info_union()>
            <span:assemble_span>
@@ -327,14 +324,14 @@ fn assemble_class<'arena>(
     parse!(token_iter, ".class"
        <upper_bounds:assemble_upper_bounds()>
        <attr:assemble_special_and_user_attrs(alloc)>
-       <name:assemble_class_name(alloc)>
+       <name:assemble_class_name()>
        <span:assemble_span>
-       <base:assemble_base(alloc)>
-       <implements:assemble_imp_or_enum_includes(alloc, "implements")>
-       <enum_includes:assemble_imp_or_enum_includes(alloc, "enum_includes")>
+       <base:assemble_base()>
+       <implements:assemble_imp_or_enum_includes("implements")>
+       <enum_includes:assemble_imp_or_enum_includes("enum_includes")>
        "{"
        <doc_comment:assemble_doc_comment>
-       <uses:assemble_uses(alloc)>
+       <uses:assemble_uses()>
        <enum_type:assemble_enum_ty()>
     );
     let (flags, attributes) = attr;
@@ -347,7 +344,7 @@ fn assemble_class<'arena>(
     let mut type_constants = Vec::new();
     while let Some(tok @ Token::Decl(txt, _)) = token_iter.peek() {
         match *txt {
-            b".require" => requirements.push(assemble_requirement(alloc, token_iter)?),
+            b".require" => requirements.push(assemble_requirement(token_iter)?),
             b".ctx" => ctx_constants.push(assemble_ctx_constant(token_iter)?),
             b".property" => properties.push(assemble_property(alloc, token_iter)?),
             b".method" => methods.push(assemble_method(alloc, token_iter)?),
@@ -423,11 +420,8 @@ fn assemble_ctx_constant(token_iter: &mut Lexer<'_>) -> Result<hhbc::CtxConstant
 
 /// Ex:
 /// .require extends <C>;
-fn assemble_requirement<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Requirement<'arena>> {
-    parse!(token_iter, ".require" <tok:id> "<" <name:assemble_class_name(alloc)> ">" ";");
+fn assemble_requirement(token_iter: &mut Lexer<'_>) -> Result<hhbc::Requirement> {
+    parse!(token_iter, ".require" <tok:id> "<" <name:assemble_class_name()> ">" ";");
     let kind = match tok.into_identifier()? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
@@ -617,12 +611,9 @@ fn assemble_property_initial_value(
     ]))
 }
 
-fn assemble_class_name<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::ClassName<'arena>> {
+fn assemble_class_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ClassName> {
     parse!(token_iter, <id:id>);
-    Ok(hhbc::ClassName::new(id.into_ffi_str(alloc)))
+    Ok(hhbc::ClassName::intern(id.as_str()?))
 }
 
 fn assemble_module_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ModuleName> {
@@ -694,12 +685,9 @@ fn assemble_function_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::FunctionNa
 /// Ex:
 /// extends C
 /// There is only one base per Class
-fn assemble_base<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Maybe<hhbc::ClassName<'arena>>> {
+fn assemble_base(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::ClassName>> {
     Ok(parse!(token_iter, [
-      "extends": "extends" <cn:assemble_class_name(alloc)> { Maybe::Just(cn) } ;
+      "extends": "extends" <cn:assemble_class_name()> { Maybe::Just(cn) } ;
       else: { Maybe::Nothing } ;
     ]))
 }
@@ -707,16 +695,15 @@ fn assemble_base<'arena>(
 /// Ex:
 /// implements (Fooable Barable)
 /// enum_includes (Fooable Barable)
-fn assemble_imp_or_enum_includes<'arena>(
+fn assemble_imp_or_enum_includes(
     token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
     imp_or_inc: &str,
-) -> Result<Vec<hhbc::ClassName<'arena>>> {
+) -> Result<Vec<hhbc::ClassName>> {
     let mut classes = Vec::new();
     if token_iter.next_is_str(Token::is_identifier, imp_or_inc) {
         token_iter.expect(Token::is_open_paren)?;
         while !token_iter.peek_is(Token::is_close_paren) {
-            classes.push(assemble_class_name(token_iter, alloc)?);
+            classes.push(assemble_class_name(token_iter)?);
         }
         token_iter.expect(Token::is_close_paren)?;
     }
@@ -732,12 +719,9 @@ fn assemble_doc_comment(token_iter: &mut Lexer<'_>) -> Result<Maybe<Vector<u8>>>
 }
 
 /// Ex: .use TNonScalar;
-fn assemble_uses<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Vec<hhbc::ClassName<'arena>>> {
+fn assemble_uses(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::ClassName>> {
     let classes = parse!(token_iter, [
-        ".use": ".use" <classes:assemble_class_name(alloc)*> ";" { classes } ;
+        ".use": ".use" <classes:assemble_class_name()*> ";" { classes } ;
         else: { Vec::new() } ;
     ]);
     Ok(classes)

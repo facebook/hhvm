@@ -43,11 +43,11 @@ use crate::emit_method;
 use crate::emit_param;
 
 /// Precomputed information required for generation of memoized methods
-pub struct MemoizeInfo<'arena> {
+pub struct MemoizeInfo {
     /// True if the enclosing class is a trait
     is_trait: bool,
     /// Enclosing class name
-    class_name: hhbc::ClassName<'arena>,
+    class_name: hhbc::ClassName,
 }
 
 fn is_memoize(method: &ast::Method_) -> bool {
@@ -64,11 +64,11 @@ fn is_memoize_lsb(method: &ast::Method_) -> bool {
         .any(|a| user_attributes::MEMOIZE_LSB == a.name.1)
 }
 
-pub fn make_info<'arena>(
+pub fn make_info(
     class: &ast::Class_,
-    class_name: hhbc::ClassName<'arena>,
+    class_name: hhbc::ClassName,
     methods: &[ast::Method_],
-) -> Result<MemoizeInfo<'arena>> {
+) -> Result<MemoizeInfo> {
     for m in methods.iter() {
         // check methods
         if is_memoize(m) {
@@ -84,7 +84,7 @@ pub fn make_info<'arena>(
                     pos,
                     format!(
                         "Abstract method {}::{} cannot be memoized",
-                        class_name.unsafe_as_str(),
+                        class_name.as_str(),
                         &m.name.1,
                     ),
                 ));
@@ -102,7 +102,7 @@ pub fn make_info<'arena>(
 pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    info: &MemoizeInfo<'arena>,
+    info: &MemoizeInfo,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
 ) -> Result<Vec<Method<'arena>>> {
@@ -124,7 +124,7 @@ pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
 fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    info: &MemoizeInfo<'arena>,
+    info: &MemoizeInfo,
     class: &'a ast::Class_,
     method: &'a ast::Method_,
 ) -> Result<Method<'arena>> {
@@ -559,7 +559,7 @@ fn call_cls_method<'a, 'arena>(
 }
 
 struct Args<'r, 'ast, 'arena> {
-    pub info: &'r MemoizeInfo<'arena>,
+    pub info: &'r MemoizeInfo,
     pub method: &'r ast::Method_,
     pub scope: &'r Scope<'ast>,
     pub deprecation_info: Option<&'r [TypedValue]>,

@@ -57,7 +57,7 @@ pub fn from_ast(e: &mut Emitter<'_, '_>, attr: &a::UserAttribute) -> Result<Attr
         // don't do anything to builtin attributes
         &attr.name.1
     } else {
-        hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
+        hhbc::ClassName::from_ast_name_and_mangle(&attr.name.1).as_str()
     };
     Ok(Attribute::new(fully_qualified_id, arguments))
 }

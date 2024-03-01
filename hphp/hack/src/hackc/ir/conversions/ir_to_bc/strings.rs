@@ -39,9 +39,10 @@ impl<'a> StringCache<'a> {
         )?))
     }
 
-    pub fn lookup_class_name(&self, id: ir::ClassId) -> hhbc::ClassName<'a> {
-        let s = self.lookup_ffi_str(id.id);
-        hhbc::ClassName::new(s)
+    pub fn lookup_class_name(&self, id: ir::ClassId) -> hhbc::ClassName {
+        hhbc::ClassName::intern(
+            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 class name"),
+        )
     }
 
     pub fn lookup_module_name(&self, id: ir::ModuleId) -> hhbc::ModuleName {

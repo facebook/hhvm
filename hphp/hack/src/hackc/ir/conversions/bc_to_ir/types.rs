@@ -101,7 +101,7 @@ fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
 }
 
 pub(crate) fn convert_typedef<'a>(
-    td: &hhbc::Typedef<'a>,
+    td: &hhbc::Typedef,
     filename: ir::Filename,
     strings: &StringInterner,
 ) -> ir::Typedef {

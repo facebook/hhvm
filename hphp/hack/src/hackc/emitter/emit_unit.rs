@@ -199,8 +199,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
                 }
             }
             for cls in &symbol_refs.classes {
-                if let Err(e) = p.type_decl(cls.unsafe_as_str(), 0) {
-                    record_error(cls.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                if let Err(e) = p.type_decl(cls.as_str(), 0) {
+                    record_error(cls.as_str().into(), e, &mut missing_syms, &mut error_syms);
                 }
             }
         }
@@ -208,15 +208,15 @@ fn emit_unit_<'a, 'arena, 'decl>(
             let mut q = VecDeque::new();
             classes.iter().for_each(|c| {
                 if let Just(b) = c.base {
-                    q.push_back((b.unsafe_into_string(), 0u64));
+                    q.push_back((b.into_string(), 0u64));
                 }
                 c.uses
                     .iter()
                     .chain(c.implements.iter())
-                    .for_each(|i| q.push_back((i.unsafe_into_string(), 0u64)));
+                    .for_each(|i| q.push_back((i.into_string(), 0u64)));
                 c.requirements
                     .iter()
-                    .for_each(|r| q.push_back((r.name.unsafe_into_string(), 0u64)));
+                    .for_each(|r| q.push_back((r.name.into_string(), 0u64)));
             });
             let error_func = |sym: &String, e: decl_provider::Error| {
                 let s = Str::new_str(emitter.alloc, sym.as_str());

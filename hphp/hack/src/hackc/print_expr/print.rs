@@ -276,9 +276,8 @@ fn print_expr(
         }
 
         if env.is_some() {
-            let alloc = bumpalo::Bump::new();
-            let class_id = ClassName::from_ast_name_and_mangle(&alloc, id);
-            let id = class_id.unsafe_as_str();
+            let class_id = ClassName::from_ast_name_and_mangle(id);
+            let id = class_id.as_str();
             get(should_format, is_class_constant, id)
                 .into_owned()
                 .into()
@@ -427,11 +426,7 @@ fn print_expr(
                             lstrip(
                                 &adjust_id(
                                     env,
-                                    ClassName::from_ast_name_and_mangle(
-                                        &bumpalo::Bump::new(),
-                                        cname,
-                                    )
-                                    .unsafe_as_str(),
+                                    ClassName::from_ast_name_and_mangle(cname).as_str(),
                                 ),
                                 "\\",
                             )

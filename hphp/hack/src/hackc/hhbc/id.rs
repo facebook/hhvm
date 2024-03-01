@@ -205,19 +205,13 @@ impl std::fmt::Display for AdataId {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
-pub struct ClassName<'arena>(Str<'arena>);
+pub struct ClassName(StringId);
 
-impl_id!(ClassName);
+impl_intern_id!(ClassName);
 
-impl<'arena> ClassName<'arena> {
-    pub fn from_ast_name_and_mangle(
-        alloc: &'arena bumpalo::Bump,
-        s: impl std::convert::Into<std::string::String>,
-    ) -> Self {
-        ClassName(Str::new_str(
-            alloc,
-            hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into())),
-        ))
+impl ClassName {
+    pub fn from_ast_name_and_mangle(s: impl std::convert::Into<std::string::String>) -> Self {
+        Self(Self::mangle(s))
     }
 
     pub fn mangle(s: impl std::convert::Into<std::string::String>) -> StringId {
@@ -226,8 +220,8 @@ impl<'arena> ClassName<'arena> {
         ))
     }
 
-    pub fn unsafe_to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
-        std::borrow::Cow::from(hhbc_string_utils::unmangle(self.unsafe_as_str().into()))
+    pub fn unmangled(&self) -> String {
+        hhbc_string_utils::unmangle(self.as_str().into())
     }
 }
 
@@ -324,11 +318,7 @@ mod tests {
 
     #[test]
     fn test_from_unsafe_as_str() {
-        let alloc = bumpalo::Bump::new();
-        assert_eq!(
-            "Foo",
-            ClassName::from_raw_string(&alloc, "Foo").unsafe_as_str()
-        );
+        assert_eq!("Foo", ClassName::intern("Foo").as_str());
     }
 
     #[test]

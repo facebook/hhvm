@@ -142,7 +142,7 @@ impl<'a> UnitParser<'a> {
         self.unit
             .symbol_refs
             .classes
-            .push(ClassName::from_bytes(self.alloc, &id));
+            .push(ClassName::intern(std::str::from_utf8(&id)?));
         Ok(())
     }
 

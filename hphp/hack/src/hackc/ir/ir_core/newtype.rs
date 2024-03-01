@@ -92,7 +92,7 @@ macro_rules! interned_hhbc_intern_id {
     };
 }
 
-interned_hhbc_id!(ClassId, ClassName);
+interned_hhbc_intern_id!(ClassId, ClassName);
 pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHasher<u32>>;
 
 interned_hhbc_intern_id!(ModuleId, ModuleName);

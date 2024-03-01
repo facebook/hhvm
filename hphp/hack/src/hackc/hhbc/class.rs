@@ -29,8 +29,8 @@ pub enum TraitReqKind {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct Requirement<'arena> {
-    pub name: ClassName<'arena>,
+pub struct Requirement {
+    pub name: ClassName,
     pub kind: TraitReqKind,
 }
 
@@ -38,19 +38,19 @@ pub struct Requirement<'arena> {
 #[repr(C)]
 pub struct Class<'arena> {
     pub attributes: Vector<Attribute>,
-    pub base: Maybe<ClassName<'arena>>,
-    pub implements: Vector<ClassName<'arena>>,
-    pub enum_includes: Vector<ClassName<'arena>>,
-    pub name: ClassName<'arena>,
+    pub base: Maybe<ClassName>,
+    pub implements: Vector<ClassName>,
+    pub enum_includes: Vector<ClassName>,
+    pub name: ClassName,
     pub span: Span,
-    pub uses: Vector<ClassName<'arena>>,
+    pub uses: Vector<ClassName>,
     pub enum_type: Maybe<TypeInfo>,
     pub methods: Vector<Method<'arena>>,
     pub properties: Vector<Property>,
     pub constants: Vector<Constant>,
     pub type_constants: Vector<TypeConstant>,
     pub ctx_constants: Vector<CtxConstant>,
-    pub requirements: Vector<Requirement<'arena>>,
+    pub requirements: Vector<Requirement>,
     pub upper_bounds: Vector<UpperBound>,
     pub doc_comment: Maybe<Vector<u8>>,
     pub flags: Attr,

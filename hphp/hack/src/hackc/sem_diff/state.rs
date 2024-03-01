@@ -656,14 +656,14 @@ impl<'arena, 'a> State<'arena, 'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         num_params: NumParams,
-        classname: &ClassName<'arena>,
+        classname: &ClassName,
     ) -> Result<()> {
         let mut inputs = self
             .stack_pop_n(num_params as usize)?
             .into_iter()
             .map(|v| self.reffy(v))
             .collect_vec();
-        inputs.push(Input::Class(classname.unsafe_into_string()));
+        inputs.push(Input::Class(classname.into_string()));
         let instr = NodeInstr::Opcode(Opcode::CreateCl(num_params, classname.clone()));
         let output = builder.compute_value(&instr, 0, &inputs);
         self.stack_push(output);

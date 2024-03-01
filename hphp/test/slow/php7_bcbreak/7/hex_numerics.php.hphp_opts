@@ -1,1 +1,2 @@
 --inputs=__DIR__/../5/hex_numerics.php
+-vRuntime.PHP7.NoHexNumerics=true

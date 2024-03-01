@@ -397,6 +397,7 @@ Variant HHVM_FUNCTION(apc_delete,
 
 bool HHVM_FUNCTION(apc_clear_cache, const String& /*cache_type*/ /* = "" */) {
   if (!apcExtension::Enable) return false;
+  if (RuntimeOption::ServerExecutionMode()) return false;
   return apc_store().clear();
 }
 

@@ -37,7 +37,7 @@ pub struct Unit<'a> {
     /// ```
     /// class MyClass { ... }
     /// ```
-    pub classes: Vec<Class<'a>>,
+    pub classes: Vec<Class>,
 
     /// The list of top-level constants.
     ///
@@ -60,7 +60,7 @@ pub struct Unit<'a> {
     /// ```
     /// function my_fn(int $a, int $b) { ... }
     /// ```
-    pub functions: Vec<Function<'a>>,
+    pub functions: Vec<Function>,
 
     /// If the Unit failed to parse or compile this defines the error that
     /// should be reported and the rest of the Unit will be empty.

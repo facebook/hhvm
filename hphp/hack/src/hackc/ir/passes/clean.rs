@@ -25,7 +25,7 @@ use print::FmtRawVid;
 /// - remove common JmpArgs parameters
 /// - renumber Instrs
 /// - remove unreferenced Instrs.
-pub fn run<'a>(func: &mut Func<'a>) {
+pub fn run(func: &mut Func) {
     // Start with RPO which will DCE as a side-effect.
     crate::rpo_sort(func);
     // Remove unnecessary block params.
@@ -40,7 +40,7 @@ pub fn run<'a>(func: &mut Func<'a>) {
 
 /// Go through the blocks. Any blocks that are connected by a singular edge are
 /// merged.
-fn merge_simple_jumps(func: &mut Func<'_>) {
+fn merge_simple_jumps(func: &mut Func) {
     let predecessors = analysis::compute_predecessor_blocks(
         func,
         PredecessorFlags {
@@ -100,7 +100,7 @@ fn merge_simple_jumps(func: &mut Func<'_>) {
 /// Go through a Func and for any BlockParam that is passed the same value from
 /// all callers snap the value through to the passed value and remove the
 /// BlockParam.
-fn remove_common_args(func: &mut Func<'_>) {
+fn remove_common_args(func: &mut Func) {
     // TODO: This algorithm could be a lot smarter about when it needs to
     // reprocess a block.
 
@@ -268,7 +268,7 @@ enum CommonArgs {
 }
 
 fn compute_common_args(
-    func: &Func<'_>,
+    func: &Func,
     remap: &mut IdVec<InstrId, ValueId>,
     bid: BlockId,
     predecessors: &Predecessors,
@@ -381,7 +381,7 @@ fn lookup(remap: &mut IdVec<InstrId, ValueId>, vid: ValueId) -> ValueId {
     }
 }
 
-fn renumber(func: &mut Func<'_>) {
+fn renumber(func: &mut Func) {
     let mut remap: ValueIdMap<ValueId> = ValueIdMap::default();
     let mut src_instrs = std::mem::take(&mut func.instrs);
     let mut dst_instrs: IdVec<InstrId, Instr> = IdVec::with_capacity(func.instrs_len());

@@ -16,7 +16,7 @@ use crate::ValueId;
 
 /// A constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum Constant<'a> {
+pub enum Constant {
     Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
@@ -27,14 +27,14 @@ pub enum Constant<'a> {
     Int(i64),
     LazyClass(ClassId),
     Method,
-    Named(ConstName<'a>),
+    Named(ConstName),
     NewCol(CollectionType),
     Null,
     String(UnitBytesId),
     Uninit,
 }
 
-impl HasOperands for Constant<'_> {
+impl HasOperands for Constant {
     fn operands(&self) -> &[ValueId] {
         // By definition constants don't have operands.
         &[]

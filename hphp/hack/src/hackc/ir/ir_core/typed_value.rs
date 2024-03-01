@@ -67,7 +67,7 @@ impl TypedValue {
     }
 }
 
-impl<'a> From<TypedValue> for Constant<'a> {
+impl From<TypedValue> for Constant {
     fn from(tv: TypedValue) -> Self {
         match tv {
             TypedValue::Bool(b) => Constant::Bool(b),

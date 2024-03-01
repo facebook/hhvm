@@ -99,7 +99,7 @@ fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>)
     }
 }
 
-pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
+pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Class {
     if !class.ctx_constants.is_empty() {
         textual_todo! {
             trace!("TODO: class.ctx_constants");
@@ -257,7 +257,7 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
     class
 }
 
-fn create_default_closure_constructor<'a>(class: &mut Class<'a>, strings: Arc<StringInterner>) {
+fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInterner>) {
     let name = MethodId::constructor(&strings);
 
     let func = FuncBuilder::build_func(Arc::clone(&strings), |fb| {
@@ -295,8 +295,8 @@ fn create_default_closure_constructor<'a>(class: &mut Class<'a>, strings: Arc<St
     class.methods.push(method);
 }
 
-fn create_method_if_missing<'a>(
-    class: &mut Class<'a>,
+fn create_method_if_missing(
+    class: &mut Class,
     name: MethodId,
     is_static: IsStatic,
     strings: Arc<StringInterner>,

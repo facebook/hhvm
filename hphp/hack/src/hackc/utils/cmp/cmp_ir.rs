@@ -103,8 +103,8 @@ fn cmp_cc_this(a: &CcThis, b: &CcThis) -> Result {
 }
 
 fn cmp_class(
-    (a, a_strings): (&Class<'_>, &StringInterner),
-    (b, b_strings): (&Class<'_>, &StringInterner),
+    (a, a_strings): (&Class, &StringInterner),
+    (b, b_strings): (&Class, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -271,8 +271,8 @@ fn cmp_coeffects(a: &Coeffects, b: &Coeffects) -> Result {
 }
 
 fn cmp_constant(
-    (a_const, a_strings): (&Constant<'_>, &StringInterner),
-    (b_const, b_strings): (&Constant<'_>, &StringInterner),
+    (a_const, a_strings): (&Constant, &StringInterner),
+    (b_const, b_strings): (&Constant, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -376,8 +376,8 @@ fn cmp_fatal(
 }
 
 fn cmp_func(
-    (a, a_strings): (&Func<'_>, &StringInterner),
-    (b, b_strings): (&Func<'_>, &StringInterner),
+    (a, a_strings): (&Func, &StringInterner),
+    (b, b_strings): (&Func, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -465,8 +465,8 @@ fn cmp_func(
 }
 
 fn cmp_function(
-    (a, a_strings): (&Function<'_>, &StringInterner),
-    (b, b_strings): (&Function<'_>, &StringInterner),
+    (a, a_strings): (&Function, &StringInterner),
+    (b, b_strings): (&Function, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -539,8 +539,8 @@ fn cmp_id(
 }
 
 fn cmp_instr(
-    (a_instr, a_func, a_strings): (&Instr, &Func<'_>, &StringInterner),
-    (b_instr, b_func, b_strings): (&Instr, &Func<'_>, &StringInterner),
+    (a_instr, a_func, a_strings): (&Instr, &Func, &StringInterner),
+    (b_instr, b_func, b_strings): (&Instr, &Func, &StringInterner),
 ) -> Result {
     use ir::instr::HasLoc;
     use ir::instr::HasLocals;
@@ -557,8 +557,8 @@ fn cmp_instr(
     .qualified("discriminant")?;
 
     fn cmp_instr_(
-        (a_instr, a_func, a_strings): (&Instr, &Func<'_>, &StringInterner),
-        (b_instr, b_func, b_strings): (&Instr, &Func<'_>, &StringInterner),
+        (a_instr, a_func, a_strings): (&Instr, &Func, &StringInterner),
+        (b_instr, b_func, b_strings): (&Instr, &Func, &StringInterner),
     ) -> Result {
         cmp_eq(a_instr.operands().len(), b_instr.operands().len()).qualified("operands.len")?;
         cmp_slice(
@@ -636,8 +636,8 @@ fn cmp_local(
 }
 
 fn cmp_operand(
-    (a, a_func, a_strings): (ValueId, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (ValueId, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (ValueId, &Func, &StringInterner),
+    (b, b_func, b_strings): (ValueId, &Func, &StringInterner),
 ) -> Result {
     use FullInstrId as I;
     match (a.full(), b.full()) {
@@ -758,8 +758,8 @@ fn cmp_instr_call(
 }
 
 fn cmp_instr_hhbc(
-    (a, a_func, a_strings): (&Hhbc, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (&Hhbc, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (&Hhbc, &Func, &StringInterner),
+    (b, b_func, b_strings): (&Hhbc, &Func, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -1059,8 +1059,8 @@ fn cmp_instr_hhbc(
 }
 
 fn cmp_instr_member_op(
-    (a, a_func, a_strings): (&MemberOp, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (&MemberOp, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (&MemberOp, &Func, &StringInterner),
+    (b, b_func, b_strings): (&MemberOp, &Func, &StringInterner),
 ) -> Result {
     let MemberOp {
         base_op: a_base_op,
@@ -1097,8 +1097,8 @@ fn cmp_instr_member_op(
 }
 
 fn cmp_instr_member_op_base(
-    (a, a_func, a_strings): (&BaseOp, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (&BaseOp, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (&BaseOp, &Func, &StringInterner),
+    (b, b_func, b_strings): (&BaseOp, &Func, &StringInterner),
 ) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
@@ -1147,8 +1147,8 @@ fn cmp_instr_member_op_base(
 }
 
 fn cmp_instr_member_op_intermediate(
-    (a, a_func, a_strings): (&IntermediateOp, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (&IntermediateOp, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (&IntermediateOp, &Func, &StringInterner),
+    (b, b_func, b_strings): (&IntermediateOp, &Func, &StringInterner),
 ) -> Result {
     let IntermediateOp {
         key: a_key,
@@ -1172,8 +1172,8 @@ fn cmp_instr_member_op_intermediate(
 }
 
 fn cmp_instr_member_op_final(
-    (a, a_func, a_strings): (&FinalOp, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (&FinalOp, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (&FinalOp, &Func, &StringInterner),
+    (b, b_func, b_strings): (&FinalOp, &Func, &StringInterner),
 ) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
@@ -1392,8 +1392,8 @@ fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
 }
 
 fn cmp_loc_id(
-    (a, a_func, a_strings): (LocId, &Func<'_>, &StringInterner),
-    (b, b_func, b_strings): (LocId, &Func<'_>, &StringInterner),
+    (a, a_func, a_strings): (LocId, &Func, &StringInterner),
+    (b, b_func, b_strings): (LocId, &Func, &StringInterner),
 ) -> Result {
     let a_src_loc = a_func.get_loc(a);
     let b_src_loc = b_func.get_loc(b);
@@ -1405,8 +1405,8 @@ fn cmp_loc_id(
 }
 
 fn cmp_method(
-    (a, a_strings): (&Method<'_>, &StringInterner),
-    (b, b_strings): (&Method<'_>, &StringInterner),
+    (a, a_strings): (&Method, &StringInterner),
+    (b, b_strings): (&Method, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -1972,7 +1972,7 @@ mod mapping {
         }
     }
 
-    impl MapName for (&Class<'_>, &StringInterner) {
+    impl MapName for (&Class, &StringInterner) {
         fn get_name(&self) -> String {
             self.0.name.as_bstr(self.1).to_string()
         }
@@ -1984,7 +1984,7 @@ mod mapping {
         }
     }
 
-    impl MapName for (&Function<'_>, &StringInterner) {
+    impl MapName for (&Function, &StringInterner) {
         fn get_name(&self) -> String {
             self.0.name.as_bstr(self.1).to_string()
         }
@@ -1996,7 +1996,7 @@ mod mapping {
         }
     }
 
-    impl MapName for (&Method<'_>, &StringInterner) {
+    impl MapName for (&Method, &StringInterner) {
         fn get_name(&self) -> String {
             self.0.name.as_bstr(self.1).to_string()
         }

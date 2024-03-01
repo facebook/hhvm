@@ -65,7 +65,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) fn write_function(
     txf: &mut TextualFile<'_>,
     state: &mut UnitState,
-    function: ir::Function<'_>,
+    function: ir::Function,
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
@@ -201,14 +201,14 @@ pub(crate) fn lower_and_write_func(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     this_ty: textual::Ty,
-    func: ir::Func<'_>,
+    func: ir::Func,
     func_info: FuncInfo<'_>,
 ) -> Result {
     fn lower_and_write_func_(
         txf: &mut TextualFile<'_>,
         unit_state: &mut UnitState,
         this_ty: textual::Ty,
-        func: ir::Func<'_>,
+        func: ir::Func,
         mut func_info: FuncInfo<'_>,
     ) -> Result {
         let func = lower::lower_func(func, &mut func_info, Arc::clone(&unit_state.strings));
@@ -246,11 +246,11 @@ fn is_wrapper_attribute(classid: &ClassId, strings: &StringInterner) -> bool {
 /// Given a Func that has default parameters make a version of the function with
 /// those parameters stripped out (one version is returned with each successive
 /// parameter removed).
-fn split_default_func<'a>(
-    orig_func: &Func<'a>,
+fn split_default_func(
+    orig_func: &Func,
     func_info: &FuncInfo<'_>,
     strings: &StringInterner,
-) -> Option<Vec<Func<'a>>> {
+) -> Option<Vec<Func>> {
     let mut result = Vec::new();
     let loc = orig_func.loc_id;
 
@@ -362,7 +362,7 @@ fn write_func(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     this_ty: textual::Ty,
-    mut func: ir::Func<'_>,
+    mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let strings = Arc::clone(&unit_state.strings);
@@ -472,7 +472,7 @@ pub(crate) fn write_func_decl(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     this_ty: textual::Ty,
-    mut func: ir::Func<'_>,
+    mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let params = std::mem::take(&mut func.params);
@@ -1263,7 +1263,7 @@ fn write_inc_dec_l(
 
 pub(crate) struct FuncState<'a, 'b, 'c> {
     pub(crate) fb: &'a mut textual::FuncBuilder<'b, 'c>,
-    pub(crate) func: &'a ir::Func<'a>,
+    pub(crate) func: &'a ir::Func,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     func_info: Arc<FuncInfo<'a>>,
     pub(crate) strings: Arc<StringInterner>,
@@ -1273,7 +1273,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     fn new(
         fb: &'a mut textual::FuncBuilder<'b, 'c>,
         strings: Arc<StringInterner>,
-        func: &'a ir::Func<'a>,
+        func: &'a ir::Func,
         func_info: Arc<FuncInfo<'a>>,
     ) -> Self {
         Self {
@@ -1459,7 +1459,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 ///
 /// This inserts the needed 'assert_true' and 'assert_false' statements but
 /// leaves the original JmpOp as a marker for where to jump to.
-fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
+fn rewrite_jmp_ops(mut func: ir::Func) -> ir::Func {
     for bid in func.block_ids() {
         match *func.terminator(bid) {
             Terminator::JmpOp {
@@ -1560,7 +1560,7 @@ pub(crate) struct FunctionInfo {
 pub(crate) struct MethodInfo<'a> {
     pub(crate) name: MethodId,
     pub(crate) attrs: ir::Attr,
-    pub(crate) class: &'a ir::Class<'a>,
+    pub(crate) class: &'a ir::Class,
     pub(crate) is_static: IsStatic,
     pub(crate) flags: MethodFlags,
 }
@@ -1605,10 +1605,7 @@ pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Re
     }
 }
 
-pub(crate) fn lookup_constant<'a, 'b>(
-    func: &'a Func<'b>,
-    mut vid: ValueId,
-) -> Option<&'a ir::Constant<'b>> {
+pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Constant> {
     use ir::FullInstrId;
     loop {
         match vid.full() {
@@ -1638,7 +1635,7 @@ pub(crate) fn lookup_constant<'a, 'b>(
     }
 }
 
-pub(crate) fn lookup_constant_string(func: &Func<'_>, vid: ValueId) -> Option<ir::UnitBytesId> {
+pub(crate) fn lookup_constant_string(func: &Func, vid: ValueId) -> Option<ir::UnitBytesId> {
     match lookup_constant(func, vid) {
         Some(Constant::String(id)) => Some(*id),
         _ => None,

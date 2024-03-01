@@ -9,13 +9,13 @@ use newtype::IdVec;
 
 /// Compute the Block post-order for a Func. In the returned Vec a BlockId will
 /// appear after all of its successors.
-pub fn compute_po(func: &Func<'_>) -> Vec<BlockId> {
+pub fn compute_po(func: &Func) -> Vec<BlockId> {
     compute_general_po(func, |edges| edges.split_last())
 }
 
 /// Compute the Block reverse-post-order for a Func. In the retuned Vec a
 /// BlockId will appear before any of its successors.
-pub fn compute_rpo(func: &Func<'_>) -> Vec<BlockId> {
+pub fn compute_rpo(func: &Func) -> Vec<BlockId> {
     let mut po = compute_general_po(func, |edges| edges.split_last());
     po.reverse();
     po
@@ -25,7 +25,7 @@ pub fn compute_rpo(func: &Func<'_>) -> Vec<BlockId> {
 /// the opposite order that ordinary rpo does.  This is useful for
 /// varying rpo traversal order when doing a fixed point computation
 /// such as dominators to avoid quadratic corner cases.
-pub fn compute_rrpo(func: &Func<'_>) -> Vec<BlockId> {
+pub fn compute_rrpo(func: &Func) -> Vec<BlockId> {
     // Note that we're spliting by first whereas compute_rpo() splits by last...
     let mut po = compute_general_po(func, |edges| edges.split_first());
     po.reverse();
@@ -33,7 +33,7 @@ pub fn compute_rrpo(func: &Func<'_>) -> Vec<BlockId> {
 }
 
 fn compute_general_po(
-    func: &Func<'_>,
+    func: &Func,
     splitter: impl Fn(&[BlockId]) -> Option<(&BlockId, &[BlockId])>,
 ) -> Vec<BlockId> {
     let blocks = &func.blocks;
@@ -58,7 +58,7 @@ fn compute_general_po(
     fn mark_block<'a>(
         stack: &mut Vec<(BlockId, &'a [BlockId], BlockId)>,
         already_pushed: &mut [bool],
-        func: &'a Func<'a>,
+        func: &'a Func,
         bid: BlockId,
     ) {
         let edges = func.edges(bid);
@@ -68,7 +68,7 @@ fn compute_general_po(
     }
 
     fn process_child<'a>(
-        func: &'a Func<'_>,
+        func: &'a Func,
         stack: &mut Vec<(BlockId, &'a [BlockId], BlockId)>,
         already_pushed: &mut IdVec<BlockId, bool>,
         bid: BlockId,

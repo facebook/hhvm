@@ -22,7 +22,7 @@ use log::trace;
 
 /// Write the complex constants to the start of the entry block (and 'default'
 /// handling blocks) and remap their uses to the emitted values.
-pub(crate) fn write_constants(builder: &mut FuncBuilder<'_>) {
+pub(crate) fn write_constants(builder: &mut FuncBuilder) {
     // Rewrite some types of constants.
     for c in builder.func.constants.iter_mut() {
         match c {
@@ -43,7 +43,7 @@ pub(crate) fn write_constants(builder: &mut FuncBuilder<'_>) {
 /// Follow the blocks successors around but stopping at an 'enter'. We stop at
 /// enter under the assumption that default blocks enter into the entry path -
 /// so those will be handled separately.
-fn follow_block_successors(func: &Func<'_>, bid: BlockId) -> Vec<BlockId> {
+fn follow_block_successors(func: &Func, bid: BlockId) -> Vec<BlockId> {
     let mut result = Vec::new();
     let mut processed = BlockIdSet::default();
     let mut pending = vec![bid];
@@ -77,7 +77,7 @@ fn follow_block_successors(func: &Func<'_>, bid: BlockId) -> Vec<BlockId> {
 }
 
 /// Compute the set of constants that are visible starting from `bid`.
-fn compute_live_constants(func: &Func<'_>, bids: &Vec<BlockId>) -> ConstantIdSet {
+fn compute_live_constants(func: &Func, bids: &Vec<BlockId>) -> ConstantIdSet {
     let mut visible = ConstantIdSet::default();
     for &bid in bids {
         let block = func.block(bid);
@@ -92,13 +92,13 @@ fn compute_live_constants(func: &Func<'_>, bids: &Vec<BlockId>) -> ConstantIdSet
     visible
 }
 
-fn remap_constants(func: &mut Func<'_>, bids: &Vec<BlockId>, remap: ValueIdMap<ValueId>) {
+fn remap_constants(func: &mut Func, bids: &Vec<BlockId>, remap: ValueIdMap<ValueId>) {
     for &bid in bids {
         func.remap_block_vids(bid, &remap);
     }
 }
 
-fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
+fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
     // Allocate a new block, fill it with constants, append the old InstrIds,
     // swap the old and new blocks and then clear the new block.
 
@@ -139,7 +139,7 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
 /// sorted before being written. Right now arrays can't refer to other arrays so
 /// they don't need to be sorted relative to each other.
 fn sort_and_filter_constants(
-    func: &Func<'_>,
+    func: &Func,
     constants: ConstantIdSet,
     string_intern: &StringInterner,
 ) -> Vec<ConstantId> {
@@ -182,7 +182,7 @@ fn sort_and_filter_constants(
     result
 }
 
-fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> (ValueId, bool) {
+fn write_constant(builder: &mut FuncBuilder, cid: ConstantId) -> (ValueId, bool) {
     let constant = builder.func.constant(cid);
     trace!("    Const {cid}: {constant:?}");
     match constant {

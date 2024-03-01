@@ -16,8 +16,8 @@ use crate::ConstName;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Constant<'arena> {
-    pub name: ConstName<'arena>,
+pub struct Constant {
+    pub name: ConstName,
     pub value: Maybe<TypedValue>,
     pub attrs: Attr,
 }

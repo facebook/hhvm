@@ -17,7 +17,7 @@ pub type Predecessors = BlockIdMap<BlockIdSet>;
 ///
 /// The result is guaranteed to have an entry for every known block, even if it
 /// has no predecessors.
-pub fn compute_predecessor_blocks(func: &Func<'_>, flags: PredecessorFlags) -> Predecessors {
+pub fn compute_predecessor_blocks(func: &Func, flags: PredecessorFlags) -> Predecessors {
     let mut predecessors: Predecessors = Default::default();
 
     if flags.mark_entry_blocks {
@@ -64,7 +64,7 @@ impl Default for PredecessorCatchMode {
 }
 
 impl PredecessorCatchMode {
-    fn mark(self, predecessors: &mut Predecessors, func: &Func<'_>, mut src: BlockId) {
+    fn mark(self, predecessors: &mut Predecessors, func: &Func, mut src: BlockId) {
         if self == PredecessorCatchMode::Ignore {
             return;
         }
@@ -97,7 +97,7 @@ fn mark_edge(predecessors: &mut Predecessors, src: BlockId, dst: BlockId) {
 
 /// Compute the number of incoming control-flow edges to each block. If there are no
 /// critical edges, this is also the number of predecessor blocks.
-pub fn compute_num_predecessors(func: &Func<'_>, flags: PredecessorFlags) -> IdVec<BlockId, u32> {
+pub fn compute_num_predecessors(func: &Func, flags: PredecessorFlags) -> IdVec<BlockId, u32> {
     let mut counts = IdVec::new_from_vec(vec![0; func.blocks.len()]);
 
     if flags.mark_entry_blocks {

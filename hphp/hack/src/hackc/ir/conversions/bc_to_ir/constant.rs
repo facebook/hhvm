@@ -8,10 +8,7 @@ use ir::StringInterner;
 
 use crate::convert;
 
-pub(crate) fn convert_constant<'a>(
-    constant: &Constant<'a>,
-    strings: &StringInterner,
-) -> ir::HackConstant {
+pub(crate) fn convert_constant(constant: &Constant, strings: &StringInterner) -> ir::HackConstant {
     let Constant {
         name,
         ref value,

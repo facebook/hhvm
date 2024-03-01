@@ -205,7 +205,7 @@ impl TryCatchId {
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
 #[derive(Clone, Debug, Default)]
-pub struct Func<'a> {
+pub struct Func {
     pub attributes: Vec<Attribute>,
     pub attrs: Attr,
     pub blocks: IdVec<BlockId, Block>,
@@ -215,7 +215,7 @@ pub struct Func<'a> {
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub constants: IdVec<ConstantId, Constant<'a>>,
+    pub constants: IdVec<ConstantId, Constant>,
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
     pub params: Vec<Param>,
@@ -227,11 +227,11 @@ pub struct Func<'a> {
     pub tparams: ClassIdMap<TParamBounds>,
 }
 
-impl<'a> Func<'a> {
+impl Func {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
 
-    pub fn alloc_constant(&mut self, constant: Constant<'a>) -> ConstantId {
+    pub fn alloc_constant(&mut self, constant: Constant) -> ConstantId {
         let cid = ConstantId::from_usize(self.constants.len());
         self.constants.push(constant);
         cid
@@ -287,7 +287,7 @@ impl<'a> Func<'a> {
     }
 
     pub fn catch_target(&self, bid: BlockId) -> BlockId {
-        fn get_catch_frame<'b>(func: &'b Func<'_>, tcid: TryCatchId) -> Option<&'b ExFrame> {
+        fn get_catch_frame(func: &Func, tcid: TryCatchId) -> Option<&ExFrame> {
             match tcid {
                 TryCatchId::None => None,
                 TryCatchId::Try(exid) => Some(&func.ex_frames[&exid]),
@@ -306,7 +306,7 @@ impl<'a> Func<'a> {
         }
     }
 
-    pub fn constant(&self, cid: ConstantId) -> &Constant<'a> {
+    pub fn constant(&self, cid: ConstantId) -> &Constant {
         self.get_constant(cid).unwrap()
     }
 
@@ -328,7 +328,7 @@ impl<'a> Func<'a> {
         self.blocks.get(bid)
     }
 
-    pub fn get_constant(&self, cid: ConstantId) -> Option<&Constant<'a>> {
+    pub fn get_constant(&self, cid: ConstantId) -> Option<&Constant> {
         self.constants.get(cid)
     }
 
@@ -453,17 +453,17 @@ impl<'a> Func<'a> {
 
 /// A top-level Hack function.
 #[derive(Debug)]
-pub struct Function<'a> {
+pub struct Function {
     pub flags: FunctionFlags,
     pub name: FunctionId,
-    pub func: Func<'a>,
+    pub func: Func,
 }
 
 /// A Hack method contained within a Class.
 #[derive(Debug)]
-pub struct Method<'a> {
+pub struct Method {
     pub flags: MethodFlags,
-    pub func: Func<'a>,
+    pub func: Func,
     pub name: MethodId,
     pub visibility: Visibility,
 }

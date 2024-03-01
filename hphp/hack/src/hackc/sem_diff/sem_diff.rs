@@ -405,7 +405,7 @@ fn sem_diff_class<'arena, 'a>(
     Ok(())
 }
 
-fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
+fn sem_diff_constant(path: &CodePath<'_>, a: &Constant, b: &Constant) -> Result<()> {
     let Constant {
         name: a_name,
         value: a_value,

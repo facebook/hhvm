@@ -35,7 +35,7 @@ use crate::ex_frame::ExFrame;
 use crate::strings::StringCache;
 
 pub(crate) fn emit_func<'a>(
-    func: &ir::Func<'a>,
+    func: &ir::Func,
     labeler: &mut Labeler,
     strings: &StringCache<'a>,
     adata_cache: &mut AdataCache,
@@ -107,7 +107,7 @@ pub(crate) struct Labeler {
 }
 
 impl Labeler {
-    pub(crate) fn new(func: &ir::Func<'_>) -> Self {
+    pub(crate) fn new(func: &ir::Func) -> Self {
         let mut labeler = Self {
             bid_to_label: Default::default(),
             label_to_bid: Default::default(),
@@ -120,7 +120,7 @@ impl Labeler {
     // Go through the blocks and for any with well-known names assign those
     // names now. If we don't do this on init then we're liable to accidentally
     // use a name that we'll need later on.
-    fn prealloc_labels(&mut self, func: &ir::Func<'_>) {
+    fn prealloc_labels(&mut self, func: &ir::Func) {
         fn pname_to_label(pname: &str) -> Option<hhbc::Label> {
             if let Some(label) = pname.strip_prefix('L') {
                 label.parse::<u32>().ok().map(hhbc::Label)
@@ -167,7 +167,7 @@ impl Labeler {
     }
 }
 
-fn compute_block_entry_edges(func: &ir::Func<'_>) -> BlockIdMap<usize> {
+fn compute_block_entry_edges(func: &ir::Func) -> BlockIdMap<usize> {
     let mut edges = BlockIdMap::default();
     for param in &func.params {
         if let Some(dv) = param.default_value.as_ref() {
@@ -186,7 +186,7 @@ fn compute_block_entry_edges(func: &ir::Func<'_>) -> BlockIdMap<usize> {
 pub(crate) struct InstrEmitter<'a, 'b> {
     // How many blocks jump to this one?
     block_entry_edges: BlockIdMap<usize>,
-    func: &'b ir::Func<'a>,
+    func: &'b ir::Func,
     instrs: Vec<Instruct<'a>>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
@@ -210,7 +210,7 @@ fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bo
 
 impl<'a, 'b> InstrEmitter<'a, 'b> {
     fn new(
-        func: &'b ir::Func<'a>,
+        func: &'b ir::Func,
         labeler: &'b mut Labeler,
         strings: &'b StringCache<'a>,
         adata_id_map: &'b AdataIdMap,
@@ -229,7 +229,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         }
     }
 
-    fn prealloc_locals(func: &'b ir::Func<'a>) -> HashMap<LocalId, hhbc::Local> {
+    fn prealloc_locals(func: &'b ir::Func) -> HashMap<LocalId, hhbc::Local> {
         let mut next_local_idx = 0;
 
         // The parameters are required to be the first named locals. We can't

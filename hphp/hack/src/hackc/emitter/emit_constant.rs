@@ -32,8 +32,8 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     init: Option<InstrSeq<'arena>>,
 ) -> Result<Option<Function<'arena>>> {
     let alloc = env.arena;
-    let const_name = hhbc::ConstName::from_ast_name(alloc, &constant.name.1);
-    let (ns, name) = utils::split_ns_from_name(const_name.unsafe_as_str());
+    let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
+    let (ns, name) = utils::split_ns_from_name(const_name.as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
     let original_name = hhbc::FunctionName::new(Str::new_str(alloc, &name));
     let ret = constant.type_.as_ref();
@@ -90,7 +90,7 @@ fn emit_constant<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     constant: &'a ast::Gconst,
-) -> Result<(Constant<'arena>, Option<Function<'arena>>)> {
+) -> Result<(Constant, Option<Function<'arena>>)> {
     let (c, init) = from_ast(e, env, &constant.name, false, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, init)?;
     Ok((c, f))
@@ -100,7 +100,7 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     defs: &'a [ast::Def],
-) -> Result<(Vec<Constant<'arena>>, Vec<Function<'arena>>)> {
+) -> Result<(Vec<Constant>, Vec<Function<'arena>>)> {
     let const_tuples = defs
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))
@@ -115,8 +115,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     id: &'a ast::Id,
     is_abstract: bool,
     expr: Option<&ast::Expr>,
-) -> Result<(Constant<'arena>, Option<InstrSeq<'arena>>)> {
-    let alloc = env.arena;
+) -> Result<(Constant, Option<InstrSeq<'arena>>)> {
     let (value, initializer_instrs) = match expr {
         None => (None, None),
         Some(init) => match constant_folder::expr_to_typed_value(emitter, &env.scope, init) {
@@ -132,7 +131,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrAbstract, is_abstract);
 
     let constant = Constant {
-        name: hhbc::ConstName::from_ast_name(alloc, id.name()),
+        name: hhbc::ConstName::from_ast_name(id.name()),
         value: Maybe::from(value),
         attrs,
     };

@@ -16,7 +16,7 @@ use newtype::IdVec;
 
 /// Attempt to merge simple blocks together. Returns true if the Func was
 /// changed.
-pub fn run(func: &mut Func<'_>) -> bool {
+pub fn run(func: &mut Func) -> bool {
     let mut changed = false;
 
     let mut predecessors = analysis::compute_num_predecessors(
@@ -83,7 +83,7 @@ fn params_eq(a: &[InstrId], b: &[ValueId]) -> bool {
 }
 
 fn forward_edge(
-    func: &Func<'_>,
+    func: &Func,
     mut bid: BlockId,
     mut predecessor_successors: u32,
     predecessors: &IdVec<BlockId, u32>,

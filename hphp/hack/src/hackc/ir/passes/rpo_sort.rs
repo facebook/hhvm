@@ -14,7 +14,7 @@ use newtype::IdVec;
 /// RPO has the nice property that an Instr's operands will always be "earlier" in the ordering.
 ///
 /// Note that blocks unreachable from the entry block will be discarded.
-pub fn rpo_sort(func: &mut Func<'_>) {
+pub fn rpo_sort(func: &mut Func) {
     let rpo = compute_rpo(func);
 
     if block_order_matches(func, &rpo) {
@@ -123,7 +123,7 @@ where
 }
 
 /// Are the Blocks in func already in the order specified by rpo?
-fn block_order_matches<'a>(func: &Func<'a>, order: &[BlockId]) -> bool {
+fn block_order_matches(func: &Func, order: &[BlockId]) -> bool {
     // See if the ordering is the no-op ordering [0, 1, 2, 3, blocks.len()).
     order.len() == func.blocks.len()
         && order.iter().enumerate().all(|(i, &b)| {
@@ -347,7 +347,7 @@ mod tests {
             let (mut rfunc, _) = testutils::build_test_func(&rblocks);
             rpo_sort(&mut rfunc);
 
-            fn bname<'a>(func: &'a Func<'_>, bid: BlockId) -> &'a str {
+            fn bname<'a>(func: &'a Func, bid: BlockId) -> &'a str {
                 func.blocks[bid]
                     .pname_hint
                     .as_ref()

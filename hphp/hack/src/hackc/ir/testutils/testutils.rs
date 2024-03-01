@@ -19,16 +19,13 @@ use ir_core::StringInterner;
 use ir_core::ValueId;
 
 /// Given a simple CFG description, create a Func that matches it.
-pub fn build_test_func<'a>(testcase: &[Block]) -> (Func<'a>, Arc<StringInterner>) {
+pub fn build_test_func(testcase: &[Block]) -> (Func, Arc<StringInterner>) {
     let strings = Arc::new(StringInterner::default());
     let func = build_test_func_with_strings(testcase, Arc::clone(&strings));
     (func, strings)
 }
 
-pub fn build_test_func_with_strings<'a>(
-    testcase: &[Block],
-    strings: Arc<StringInterner>,
-) -> Func<'a> {
+pub fn build_test_func_with_strings(testcase: &[Block], strings: Arc<StringInterner>) -> Func {
     // Create a function whose CFG matches testcase.
 
     FuncBuilder::build_func(strings, |fb| {
@@ -96,7 +93,7 @@ impl Block {
 
     fn emit(
         &self,
-        fb: &mut FuncBuilder<'_>,
+        fb: &mut FuncBuilder,
         name_to_bid: &HashMap<String, BlockId>,
         name_to_vid: &mut HashMap<String, ValueId>,
     ) {
@@ -230,7 +227,7 @@ impl Block {
 }
 
 /// Structurally compare two Funcs.
-pub fn assert_func_struct_eq<'a>(func_a: &Func<'a>, func_b: &Func<'a>, strings: &StringInterner) {
+pub fn assert_func_struct_eq(func_a: &Func, func_b: &Func, strings: &StringInterner) {
     if let Err(e) = cmp_func_struct_eq(func_a, func_b) {
         panic!(
             "Function mismatch: {}\n{}\n{}",
@@ -251,7 +248,7 @@ macro_rules! cmp_eq {
     };
 }
 
-fn cmp_func_struct_eq<'a>(func_a: &Func<'a>, func_b: &Func<'a>) -> Result<(), String> {
+fn cmp_func_struct_eq(func_a: &Func, func_b: &Func) -> Result<(), String> {
     let mut block_eq: HashSet<(BlockId, BlockId)> = HashSet::default();
 
     let mut pending_cmp: Vec<(BlockId, BlockId)> = vec![(Func::ENTRY_BID, Func::ENTRY_BID)];
@@ -292,10 +289,10 @@ fn cmp_func_struct_eq<'a>(func_a: &Func<'a>, func_b: &Func<'a>) -> Result<(), St
     Ok(())
 }
 
-fn cmp_block_struct_eq<'a>(
-    func_a: &Func<'a>,
+fn cmp_block_struct_eq(
+    func_a: &Func,
     bid_a: BlockId,
-    func_b: &Func<'a>,
+    func_b: &Func,
     bid_b: BlockId,
 ) -> Result<(), String> {
     let block_a = func_a.block(bid_a);

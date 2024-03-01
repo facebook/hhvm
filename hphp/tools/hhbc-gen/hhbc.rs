@@ -242,14 +242,14 @@ mod fixups {
                 replace_imm("str1", ImmType::SA, ImmType::OA("PropName")),
             ],
             "ClsCns" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName"))
+                replace_imm("str1", ImmType::SA, ImmType::OA("ConstName"))
             ],
             "ClsCnsD" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("ConstName")),
                 replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName"))
             ],
             "CnsE" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("ConstName")),
             ],
             "CreateCl" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("NumParams")),

@@ -27,7 +27,7 @@ use crate::FunctionName;
 #[repr(C)]
 pub struct SymbolRefs<'arena> {
     pub includes: Vector<IncludePath<'arena>>,
-    pub constants: Vector<ConstName<'arena>>,
+    pub constants: Vector<ConstName>,
     pub functions: Vector<FunctionName<'arena>>,
     pub classes: Vector<ClassName<'arena>>,
 }

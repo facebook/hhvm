@@ -7,7 +7,7 @@ use ir::BlockId;
 use ir::TryCatchId;
 
 /// Collect the Func's Blocks into the tree represented by the exception frames.
-pub(crate) fn collect_tc_sections(func: &ir::Func<'_>) -> Vec<BlockIdOrExFrame> {
+pub(crate) fn collect_tc_sections(func: &ir::Func) -> Vec<BlockIdOrExFrame> {
     let mut root: ExFrame = ExFrame::default();
 
     for bid in func.block_ids() {
@@ -60,16 +60,12 @@ impl ExFrame {
             .map_or(BlockId::NONE, |bof| bof.bid())
     }
 
-    fn sort(&mut self, func: &ir::Func<'_>) {
+    fn sort(&mut self, func: &ir::Func) {
         self.try_bids.sort_by(|a, b| Self::sort_fn(func, a, b));
         self.catch_bids.sort_by(|a, b| Self::sort_fn(func, a, b));
     }
 
-    fn sort_fn(
-        _func: &ir::Func<'_>,
-        a: &BlockIdOrExFrame,
-        b: &BlockIdOrExFrame,
-    ) -> std::cmp::Ordering {
+    fn sort_fn(_func: &ir::Func, a: &BlockIdOrExFrame, b: &BlockIdOrExFrame) -> std::cmp::Ordering {
         let a_bid = a.bid();
         let b_bid = b.bid();
         if a_bid == ir::Func::ENTRY_BID || b_bid == ir::Func::ENTRY_BID {
@@ -106,7 +102,7 @@ fn insert_frame<'c>(
 
 fn find_or_insert_frame<'c>(
     root: &'c mut ExFrame,
-    func: &ir::Func<'_>,
+    func: &ir::Func,
     exid: ir::ExFrameId,
 ) -> &'c mut ExFrame {
     let parent_tcid: TryCatchId = func.ex_frames[&exid].parent;
@@ -120,7 +116,7 @@ fn find_or_insert_frame<'c>(
 
 fn get_frame<'c>(
     root: &'c mut ExFrame,
-    func: &ir::Func<'_>,
+    func: &ir::Func,
     tcid: TryCatchId,
 ) -> &'c mut Vec<BlockIdOrExFrame> {
     match tcid {
@@ -144,7 +140,7 @@ mod test {
 
     use super::*;
 
-    fn make_test_func<'a>(
+    fn make_test_func(
         blocks: Vec<(/* bid */ usize, /* tcid */ Option<&'static str>)>,
         ex_frames: Vec<(
             /* exid */ usize,
@@ -153,7 +149,7 @@ mod test {
                 /* catch_bid */ usize,
             ),
         )>,
-    ) -> ir::Func<'a> {
+    ) -> ir::Func {
         let mut func = ir::Func::default();
 
         fn conv_tcid(tcid: &str) -> TryCatchId {

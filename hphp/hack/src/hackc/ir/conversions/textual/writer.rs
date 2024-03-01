@@ -108,12 +108,12 @@ fn check_fatal(path: &Path, fatal: Option<&ir::Fatal>) -> Result<()> {
     Ok(())
 }
 
-enum Thing<'a> {
-    Class(ir::Class<'a>),
-    Func(ir::Function<'a>),
+enum Thing {
+    Class(ir::Class),
+    Func(ir::Function),
 }
 
-impl Thing<'_> {
+impl Thing {
     fn line(&self) -> usize {
         match self {
             Thing::Class(c) => c.src_loc.line_begin as usize,
@@ -135,7 +135,7 @@ impl Thing<'_> {
         }
     }
 
-    fn cmp(a: &Thing<'_>, b: &Thing<'_>, strings: &ir::StringInterner) -> Ordering {
+    fn cmp(a: &Thing, b: &Thing, strings: &ir::StringInterner) -> Ordering {
         // Start with source line
         a.line()
             .cmp(&b.line())

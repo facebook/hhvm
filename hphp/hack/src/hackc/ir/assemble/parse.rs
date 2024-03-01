@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use bumpalo::Bump;
 use ir_core::func::DefaultValue;
 use ir_core::ArrayKey;
 use ir_core::AsTypeStructExceptionKind;
@@ -328,10 +327,7 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
     })
 }
 
-pub(crate) fn parse_constant<'a>(
-    tokenizer: &mut Tokenizer<'_>,
-    alloc: &'a Bump,
-) -> Result<Constant<'a>> {
+pub(crate) fn parse_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> {
     Ok(match tokenizer.expect_any_token()? {
         t @ Token::QuotedString(..) => {
             let id = tokenizer.strings.intern_bytes(t.unescaped_string()?);
@@ -344,7 +340,7 @@ pub(crate) fn parse_constant<'a>(
             }
             "constant" => {
                 parse!(tokenizer, "(" <value:parse_user_id> ")");
-                Constant::Named(ConstName::from_bytes(alloc, &value.0))
+                Constant::Named(ConstName::intern(std::str::from_utf8(&value.0)?))
             }
             "dir" => Constant::Dir,
             "false" => Constant::Bool(false),

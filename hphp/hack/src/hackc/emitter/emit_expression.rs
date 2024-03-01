@@ -615,9 +615,7 @@ fn emit_id<'a, 'arena, 'decl>(
         )),
         pseudo_consts::EXIT => emit_exit(emitter, env, None),
         _ => {
-            // panic!("TODO: uncomment after D19350786 lands")
-            // let cid: ConstId = hhbc::ConstName::from_ast_name(&s);
-            let cid = hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
+            let cid = hhbc::ConstName::from_ast_name(s);
             emitter.add_constant_ref(cid.clone());
             Ok(emit_pos_then(
                 p,
@@ -4541,10 +4539,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 emit_pos_then(&pos, instr::lazy_class(cid))
             } else {
                 e.add_class_ref(cid.clone());
-                // TODO(hrust) enabel `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
-                // `from_ast_name` should be able to accpet Cow<str>
-                let const_id =
-                    hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
+                let const_id = hhbc::ConstName::from_ast_name(&id.1);
                 emit_pos_then(&pos, instr::cls_cns_d(const_id, cid))
             })
         }
@@ -4552,10 +4547,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
             let load_const = if string_utils::is_class(&id.1) {
                 instr::lazy_class_from_class()
             } else {
-                // TODO(hrust) enable `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
-                // `from_ast_name` should be able to accpet Cow<str>
-                let const_id =
-                    hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
+                let const_id = hhbc::ConstName::from_ast_name(&id.1);
                 instr::cls_cns(const_id)
             };
             Ok(InstrSeq::gather(vec![

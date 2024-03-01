@@ -189,8 +189,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
     if let Some(p) = &emitter.decl_provider {
         if emitter.options().hhbc.stress_shallow_decl_deps {
             for cns in &symbol_refs.constants {
-                if let Err(e) = p.const_decl(cns.unsafe_as_str()) {
-                    record_error(cns.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                if let Err(e) = p.const_decl(cns.as_str()) {
+                    record_error(cns.as_str().into(), e, &mut missing_syms, &mut error_syms);
                 }
             }
             for fun in &symbol_refs.functions {

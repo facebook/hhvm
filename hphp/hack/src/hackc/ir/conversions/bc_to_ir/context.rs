@@ -54,7 +54,7 @@ pub(crate) struct Context<'a, 'b> {
     /// Source instructions from the bytecode
     pub(crate) instrs: &'b [Instruct<'a>],
     pub(crate) addr_to_seq: AddrMap<Sequence>,
-    pub(crate) builder: FuncBuilder<'a>,
+    pub(crate) builder: FuncBuilder,
     bid_to_addr: BlockIdMap<Addr>,
     pub(crate) filename: ir::Filename,
     pub(crate) label_to_addr: LabelMap<Addr>,
@@ -71,7 +71,7 @@ impl<'a, 'b> Context<'a, 'b> {
     pub(crate) fn new(
         unit: &'b mut ir::Unit<'a>,
         filename: ir::Filename,
-        func: ir::Func<'a>,
+        func: ir::Func,
         instrs: &'b [Instruct<'a>],
         unit_state: &'b UnitState,
     ) -> Self {
@@ -135,7 +135,7 @@ impl<'a, 'b> Context<'a, 'b> {
         self.builder.emit(i)
     }
 
-    pub(crate) fn emit_constant(&mut self, constant: ir::Constant<'a>) -> ir::ValueId {
+    pub(crate) fn emit_constant(&mut self, constant: ir::Constant) -> ir::ValueId {
         self.builder.emit_constant(constant)
     }
 
@@ -147,7 +147,7 @@ impl<'a, 'b> Context<'a, 'b> {
     }
 
     /// Emit a Constant and push its return onto the stack.
-    pub(crate) fn emit_push_constant(&mut self, lc: ir::Constant<'a>) -> ir::ValueId {
+    pub(crate) fn emit_push_constant(&mut self, lc: ir::Constant) -> ir::ValueId {
         let vid = self.emit_constant(lc);
         self.push(vid);
         vid
@@ -262,7 +262,7 @@ impl MemberOpBuilder {
 }
 
 pub(crate) fn add_loc(
-    builder: &mut FuncBuilder<'_>,
+    builder: &mut FuncBuilder,
     filename: ir::Filename,
     loc: &hhbc::SrcLoc,
 ) -> LocId {

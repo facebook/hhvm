@@ -21,7 +21,7 @@ use crate::Visibility;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
-pub struct Class<'a> {
+pub struct Class {
     /// Class attributes.
     pub attributes: Vec<Attribute>,
 
@@ -51,7 +51,7 @@ pub struct Class<'a> {
     pub implements: Vec<ClassId>,
 
     /// The methods defined in this class.
-    pub methods: Vec<Method<'a>>,
+    pub methods: Vec<Method>,
 
     pub name: ClassId,
     pub properties: Vec<Property>,
@@ -65,7 +65,7 @@ pub struct Class<'a> {
     pub uses: Vec<ClassId>,
 }
 
-impl<'a> Class<'a> {
+impl Class {
     pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property> {
         self.properties.iter().find(|prop| prop.name == pid)
     }

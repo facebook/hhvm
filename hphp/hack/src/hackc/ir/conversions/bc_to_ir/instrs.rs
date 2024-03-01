@@ -809,9 +809,9 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
     use ir::Constant;
     let loc = ctx.loc;
 
-    enum Action<'a> {
+    enum Action {
         Emit(Instr),
-        Constant(Constant<'a>),
+        Constant(Constant),
         None,
         Push(Instr),
         Terminal(Terminator),

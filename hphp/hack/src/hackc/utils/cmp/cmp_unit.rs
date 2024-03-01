@@ -46,9 +46,9 @@ impl MapName for hhbc::Class<'_> {
     }
 }
 
-impl MapName for hhbc::Constant<'_> {
+impl MapName for hhbc::Constant {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -484,7 +484,7 @@ fn cmp_initial_value(a: &Maybe<TypedValue>, b: &Maybe<TypedValue>) -> Result {
     }
 }
 
-fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result {
+fn cmp_constant(a: &Constant, b: &Constant) -> Result {
     let Constant {
         name: a_name,
         value: a_value,

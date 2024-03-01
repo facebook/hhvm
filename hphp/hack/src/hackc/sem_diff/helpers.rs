@@ -17,9 +17,9 @@ impl MapName for hhbc::Class<'_> {
     }
 }
 
-impl MapName for hhbc::Constant<'_> {
+impl MapName for hhbc::Constant {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

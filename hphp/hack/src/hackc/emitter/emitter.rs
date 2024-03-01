@@ -225,7 +225,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         };
     }
 
-    pub fn add_constant_ref(&mut self, s: ConstName<'arena>) {
+    pub fn add_constant_ref(&mut self, s: ConstName) {
         if !s.is_empty() {
             self.symbol_refs_state.constants.insert(s);
         }
@@ -272,7 +272,7 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
 #[derive(Clone, Debug, Default)]
 struct SymbolRefsState<'arena> {
     includes: IncludePathSet<'arena>,
-    constants: BTreeSet<ConstName<'arena>>,
+    constants: BTreeSet<ConstName>,
     functions: BTreeSet<FunctionName<'arena>>,
     classes: BTreeSet<ClassName<'arena>>,
 }

@@ -26,11 +26,11 @@ use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 use crate::lower::class::THIS_AS_PROPERTY;
 
-pub(crate) fn lower_func<'a>(
-    mut func: Func<'a>,
+pub(crate) fn lower_func(
+    mut func: Func,
     func_info: &mut FuncInfo<'_>,
     strings: Arc<StringInterner>,
-) -> Func<'a> {
+) -> Func {
     trace!(
         "{} Before Lower: {}",
         func_info.name_id().display(&strings),
@@ -98,7 +98,7 @@ pub(crate) fn lower_func<'a>(
     func
 }
 
-fn add_reified_parameter(func: &mut Func<'_>, strings: &StringInterner) {
+fn add_reified_parameter(func: &mut Func, strings: &StringInterner) {
     func.params.push(ir::Param {
         name: strings.intern_str(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
         is_variadic: false,
@@ -116,7 +116,7 @@ fn add_reified_parameter(func: &mut Func<'_>, strings: &StringInterner) {
     });
 }
 
-fn call_base_func(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>, loc: LocId) {
+fn call_base_func(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>, loc: LocId) {
     if method_info.class.base.is_some() {
         let clsref = SpecialClsRef::ParentCls;
         let method = method_info.name;
@@ -124,7 +124,7 @@ fn call_base_func(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>, l
     }
 }
 
-fn rewrite_86pinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) {
+fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     // In HHVM 86pinit is only used to initialize "complex" properties (and
     // doesn't exist if there aren't any). For textual we change that to use it
     // to initialize all properties and be guaranteed to exist.
@@ -154,7 +154,7 @@ fn rewrite_86pinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) 
     builder.cur_block_mut().iids.extend(saved);
 }
 
-fn rewrite_86sinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) {
+fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     // In HHVM 86sinit is only used to initialize "complex" static properties
     // (and doesn't exist if there aren't any). For textual we change that to
     // use it to initialize all properties and be guaranteed to exist.  We also
@@ -227,7 +227,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) 
     builder.cur_block_mut().iids.extend(saved);
 }
 
-fn load_closure_vars(func: &mut Func<'_>, method_info: &MethodInfo<'_>, strings: &StringInterner) {
+fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, strings: &StringInterner) {
     let mut instrs = Vec::new();
 
     let loc = func.loc_id;

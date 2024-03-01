@@ -209,8 +209,8 @@ fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {
     print_quoted_ffi_str(w, &id.as_ffi_str())
 }
 
-fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
-    print_quoted_ffi_str(w, &id.as_ffi_str())
+fn print_const_name(w: &mut dyn Write, id: &ConstName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
 fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {

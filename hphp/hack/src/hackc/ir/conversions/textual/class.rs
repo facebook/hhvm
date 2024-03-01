@@ -43,7 +43,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) fn write_class(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
-    class: ir::Class<'_>,
+    class: ir::Class,
 ) -> Result {
     trace!("Convert Class {}", class.name.as_bstr(&unit_state.strings));
 
@@ -72,19 +72,15 @@ impl IsStatic {
     }
 }
 
-struct ClassState<'a, 'b, 'c> {
-    class: ir::Class<'c>,
+struct ClassState<'a, 'b> {
+    class: ir::Class,
     needs_factory: bool,
     txf: &'a mut TextualFile<'b>,
     unit_state: &'a mut UnitState,
 }
 
-impl<'a, 'b, 'c> ClassState<'a, 'b, 'c> {
-    fn new(
-        txf: &'a mut TextualFile<'b>,
-        unit_state: &'a mut UnitState,
-        class: ir::Class<'c>,
-    ) -> Self {
+impl<'a, 'b> ClassState<'a, 'b> {
+    fn new(txf: &'a mut TextualFile<'b>, unit_state: &'a mut UnitState, class: ir::Class) -> Self {
         let needs_factory = !class.flags.is_interface()
             && !class.flags.is_trait()
             && !class.flags.is_enum()
@@ -98,7 +94,7 @@ impl<'a, 'b, 'c> ClassState<'a, 'b, 'c> {
     }
 }
 
-impl ClassState<'_, '_, '_> {
+impl ClassState<'_, '_> {
     fn write_class(&mut self) -> Result {
         self.write_type(IsStatic::Static)?;
         self.write_type(IsStatic::NonStatic)?;
@@ -289,7 +285,7 @@ impl ClassState<'_, '_, '_> {
         )
     }
 
-    fn write_method(&mut self, method: ir::Method<'_>) -> Result {
+    fn write_method(&mut self, method: ir::Method) -> Result {
         trace!(
             "Convert Method {}::{}",
             self.class.name.as_bstr(&self.unit_state.strings),
@@ -346,7 +342,7 @@ pub(crate) fn class_ty(class: ir::ClassId, is_static: IsStatic) -> textual::Ty {
     }
 }
 
-fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
+fn compute_base(class: &ir::Class) -> Option<ir::ClassId> {
     if class.flags.is_trait() {
         // Traits express bases through a 'require extends'.
         let req = class
@@ -359,7 +355,7 @@ fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     }
 }
 
-fn cmp_method(a: &ir::Method<'_>, b: &ir::Method<'_>, strings: &ir::StringInterner) -> Ordering {
+fn cmp_method(a: &ir::Method, b: &ir::Method, strings: &ir::StringInterner) -> Ordering {
     let line_a = a.func.locs[a.func.loc_id].line_begin as usize;
     let line_b = b.func.locs[b.func.loc_id].line_begin as usize;
     line_a

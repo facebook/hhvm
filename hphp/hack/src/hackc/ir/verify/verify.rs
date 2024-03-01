@@ -63,18 +63,18 @@ macro_rules! check_failed {
     }}
 }
 
-struct VerifyFunc<'a, 'b> {
+struct VerifyFunc<'b> {
     // Mapping of what InstrIds dominate each Block.
     dominated_iids: BlockIdMap<InstrIdSet>,
-    func: &'b Func<'a>,
+    func: &'b Func,
     #[allow(dead_code)]
     flags: &'b Flags,
     predecessors: Predecessors,
     strings: &'b StringInterner,
 }
 
-impl<'a, 'b> VerifyFunc<'a, 'b> {
-    fn new(func: &'b Func<'a>, flags: &'b Flags, strings: &'b StringInterner) -> Self {
+impl<'b> VerifyFunc<'b> {
+    fn new(func: &'b Func, flags: &'b Flags, strings: &'b StringInterner) -> Self {
         // Catch unwind so we can print the function before continuing the
         // panic.
         let predecessors = std::panic::catch_unwind(|| {
@@ -104,7 +104,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
 
     fn report_func_error(
         why: &str,
-        func: &Func<'_>,
+        func: &Func,
         predecessors: Option<&Predecessors>,
         dominated_iids: Option<&BlockIdMap<InstrIdSet>>,
         strings: &StringInterner,
@@ -550,7 +550,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
     }
 }
 
-pub fn verify_func(func: &Func<'_>, flags: &Flags, strings: &StringInterner) {
+pub fn verify_func(func: &Func, flags: &Flags, strings: &StringInterner) {
     let mut verify = VerifyFunc::new(func, flags, strings);
     verify.verify_func_body();
 }

@@ -135,7 +135,7 @@ impl Display for FmtEscapedString<'_> {
 
 /// Return a set of live InstrIds, used to decide which printed instructions
 /// need to print their SSA variable names.
-pub(crate) fn compute_live_instrs(func: &Func<'_>, verbose: bool) -> InstrIdSet {
+pub(crate) fn compute_live_instrs(func: &Func, verbose: bool) -> InstrIdSet {
     if verbose {
         return func.body_iids().collect();
     }

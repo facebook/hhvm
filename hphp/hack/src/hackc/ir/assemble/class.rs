@@ -32,16 +32,16 @@ use crate::parse::parse_user_id;
 use crate::parse::parse_visibility;
 use crate::tokenizer::Tokenizer;
 
-pub(crate) struct ClassParser<'a> {
-    class: Class<'a>,
+pub(crate) struct ClassParser {
+    class: Class,
     strings: Arc<StringInterner>,
 }
 
-impl<'a> ClassParser<'a> {
+impl ClassParser {
     pub(crate) fn parse(
         tokenizer: &mut Tokenizer<'_>,
-        unit_state: &mut crate::assemble::UnitParser<'a>,
-    ) -> Result<Class<'a>> {
+        unit_state: &mut crate::assemble::UnitParser<'_>,
+    ) -> Result<Class> {
         parse!(tokenizer, <name:parse_user_id> <flags:parse_attr> "{" "\n");
 
         let name = ClassId::from_bytes(&name.0, &unit_state.unit.strings);

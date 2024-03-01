@@ -80,7 +80,7 @@ impl std::fmt::Debug for LiveInstrs {
 }
 
 impl LiveInstrs {
-    pub fn compute(func: &Func<'_>) -> Self {
+    pub fn compute(func: &Func) -> Self {
         let mut live = LiveInstrs {
             instr_last_use: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
             instrs_dead_at: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
@@ -129,7 +129,7 @@ impl LiveInstrs {
         live
     }
 
-    fn compute_referenced(&mut self, func: &Func<'_>, bid: BlockId) {
+    fn compute_referenced(&mut self, func: &Func, bid: BlockId) {
         // Nothing in self is valid here.
         let block_info = &mut self.blocks[bid];
         block_info.referenced = func
@@ -154,7 +154,7 @@ impl LiveInstrs {
     fn compute_exit(
         &mut self,
         work: &mut VecDeque<BlockId>,
-        func: &Func<'_>,
+        func: &Func,
         predecessor_blocks: &BlockIdMap<BlockIdSet>,
         bid: BlockId,
     ) {
@@ -186,7 +186,7 @@ impl LiveInstrs {
         //   back onto the work list.
     }
 
-    fn expand_entry(&mut self, func: &Func<'_>, bid: BlockId) {
+    fn expand_entry(&mut self, func: &Func, bid: BlockId) {
         let exit = self.blocks[bid].exit.clone();
         for &edge in func.edges(bid) {
             self.blocks[edge].entry.extend(exit.iter().copied());
@@ -198,7 +198,7 @@ impl LiveInstrs {
         }
     }
 
-    fn compute_instr_use_by_block(&mut self, func: &Func<'_>, bid: BlockId) {
+    fn compute_instr_use_by_block(&mut self, func: &Func, bid: BlockId) {
         // At this point:
         // - LiveBlockInfo is correct for all blocks.
 

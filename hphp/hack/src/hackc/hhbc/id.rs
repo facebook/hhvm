@@ -119,6 +119,12 @@ macro_rules! impl_intern_id {
                 write!(f, "{}({})", module_path!(), self.as_str())
             }
         }
+
+        impl std::fmt::Display for $type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                self.0.fmt(f)
+            }
+        }
     };
 }
 
@@ -283,13 +289,13 @@ impl<'arena> PartialOrd for FunctionName<'arena> {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
-pub struct ConstName<'arena>(Str<'arena>);
+pub struct ConstName(StringId);
 
-impl_id!(ConstName);
+impl_intern_id!(ConstName);
 
-impl<'arena> ConstName<'arena> {
-    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstName<'arena> {
-        ConstName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
+impl ConstName {
+    pub fn from_ast_name(s: &str) -> ConstName {
+        ConstName::intern(hhbc_string_utils::strip_global_ns(s))
     }
 }
 

@@ -34,12 +34,12 @@ use crate::ReadonlyOp;
 use crate::StringInterner;
 use crate::ValueId;
 
-pub struct FuncBuilder<'a> {
-    pub func: Func<'a>,
+pub struct FuncBuilder {
+    pub func: Func,
     pub strings: Arc<StringInterner>,
     cur_bid: BlockId,
     pub loc_lookup: HashMap<SrcLoc, LocId>,
-    pub constant_lookup: HashMap<Constant<'a>, ConstantId>,
+    pub constant_lookup: HashMap<Constant, ConstantId>,
     block_rewrite_stopped: bool,
     changed: bool,
 
@@ -56,10 +56,10 @@ pub struct FuncBuilder<'a> {
     replacements: InstrIdMap<ValueId>,
 }
 
-impl<'a> FuncBuilder<'a> {
-    pub fn build_func<F>(strings: Arc<StringInterner>, f: F) -> Func<'a>
+impl FuncBuilder {
+    pub fn build_func<F>(strings: Arc<StringInterner>, f: F) -> Func
     where
-        F: FnOnce(&mut FuncBuilder<'a>),
+        F: FnOnce(&mut FuncBuilder),
     {
         let mut builder = FuncBuilder::with_func(Func::default(), strings);
         builder.cur_bid = builder.alloc_bid();
@@ -71,8 +71,8 @@ impl<'a> FuncBuilder<'a> {
     /// strings will be created (in an RPO pass which just re-orders blocks, for
     /// example) then it can create and pass in a
     /// StringInterner::read_only().
-    pub fn with_func(func: Func<'a>, strings: Arc<StringInterner>) -> Self {
-        let constant_lookup: HashMap<Constant<'a>, ConstantId> = func
+    pub fn with_func(func: Func, strings: Arc<StringInterner>) -> Self {
+        let constant_lookup: HashMap<Constant, ConstantId> = func
             .constants
             .iter()
             .enumerate()
@@ -99,9 +99,9 @@ impl<'a> FuncBuilder<'a> {
     }
 
     /// Similar to with_func() but borrows the Func instead of owning it.
-    pub fn borrow_func<F, R>(borrowed: &mut Func<'a>, strings: Arc<StringInterner>, f: F) -> R
+    pub fn borrow_func<F, R>(borrowed: &mut Func, strings: Arc<StringInterner>, f: F) -> R
     where
-        F: FnOnce(&mut FuncBuilder<'a>) -> R,
+        F: FnOnce(&mut FuncBuilder) -> R,
     {
         let func = std::mem::take(borrowed);
         let mut builder = FuncBuilder::with_func(func, strings);
@@ -114,9 +114,9 @@ impl<'a> FuncBuilder<'a> {
     /// StringInterner. A temporary StringInterner is used and checked when the
     /// handler returns. If any strings were interned during the call a panic is
     /// raised.
-    pub fn borrow_func_no_strings<F, R>(borrowed: &mut Func<'a>, f: F) -> R
+    pub fn borrow_func_no_strings<F, R>(borrowed: &mut Func, f: F) -> R
     where
-        F: FnOnce(&mut FuncBuilder<'a>) -> R,
+        F: FnOnce(&mut FuncBuilder) -> R,
     {
         let tmp_strings = Arc::new(StringInterner::read_only());
         Self::borrow_func(borrowed, tmp_strings, f)
@@ -179,7 +179,7 @@ impl<'a> FuncBuilder<'a> {
         ValueId::from_instr(iid)
     }
 
-    pub fn emit_constant(&mut self, constant: Constant<'a>) -> ValueId {
+    pub fn emit_constant(&mut self, constant: Constant) -> ValueId {
         let lit_id = self
             .constant_lookup
             .entry(constant)
@@ -187,7 +187,7 @@ impl<'a> FuncBuilder<'a> {
         ValueId::from_constant(*lit_id)
     }
 
-    pub fn finish(self) -> Func<'a> {
+    pub fn finish(self) -> Func {
         let mut func = self.func;
         while !func.blocks.is_empty() {
             let bid = BlockId::from_usize(func.blocks.len() - 1);
@@ -401,11 +401,11 @@ pub trait TransformInstr {
     ///
     /// - Any other instr is recorded in func.instrs[iid] and iid is appended to
     ///   the current block being built up.
-    fn apply<'a>(
+    fn apply(
         &mut self,
         iid: InstrId,
         instr: Instr,
-        builder: &mut FuncBuilder<'a>,
+        builder: &mut FuncBuilder,
         state: &mut TransformState,
     ) -> Instr;
 }
@@ -512,7 +512,7 @@ impl MemberOpBuilder {
         })
     }
 
-    pub fn emit_isset_ec(self, builder: &mut FuncBuilder<'_>, key: ValueId) -> ValueId {
+    pub fn emit_isset_ec(self, builder: &mut FuncBuilder, key: ValueId) -> ValueId {
         let mop = self.isset_ec(key);
         builder.emit(Instr::MemberOp(mop))
     }
@@ -528,7 +528,7 @@ impl MemberOpBuilder {
         })
     }
 
-    pub fn emit_query_ec(self, builder: &mut FuncBuilder<'_>, key: ValueId) -> ValueId {
+    pub fn emit_query_ec(self, builder: &mut FuncBuilder, key: ValueId) -> ValueId {
         let mop = self.query_ec(key);
         builder.emit(Instr::MemberOp(mop))
     }
@@ -543,7 +543,7 @@ impl MemberOpBuilder {
         })
     }
 
-    pub fn emit_query_pt(self, builder: &mut FuncBuilder<'_>, key: PropId) -> ValueId {
+    pub fn emit_query_pt(self, builder: &mut FuncBuilder, key: PropId) -> ValueId {
         let mop = self.query_pt(key);
         builder.emit(Instr::MemberOp(mop))
     }
@@ -556,12 +556,7 @@ impl MemberOpBuilder {
         self.final_op(FinalOp::SetM { key, readonly, loc })
     }
 
-    pub fn emit_set_m_pt(
-        self,
-        builder: &mut FuncBuilder<'_>,
-        key: PropId,
-        value: ValueId,
-    ) -> ValueId {
+    pub fn emit_set_m_pt(self, builder: &mut FuncBuilder, key: PropId, value: ValueId) -> ValueId {
         let mop = self.set_m_pt(key, value);
         builder.emit(Instr::MemberOp(mop))
     }

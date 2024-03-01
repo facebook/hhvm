@@ -97,7 +97,7 @@ fn convert_body<'a>(
     coeffects: &hhbc::Coeffects,
     src_loc: ir::SrcLoc,
     unit_state: &UnitState,
-) -> ir::Func<'a> {
+) -> ir::Func {
     let Body {
         ref body_instrs,
         ref decl_vars,

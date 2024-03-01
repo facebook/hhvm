@@ -56,7 +56,7 @@ use crate::func::FuncInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: &FuncInfo<'_>) {
+pub(crate) fn lower_instrs(builder: &mut FuncBuilder, func_info: &FuncInfo<'_>) {
     let mut lowerer = LowerInstrs {
         changed: false,
         func_info,
@@ -82,7 +82,7 @@ struct LowerInstrs<'a> {
 }
 
 impl LowerInstrs<'_> {
-    fn c_get_g(&self, builder: &mut FuncBuilder<'_>, vid: ValueId, _loc: LocId) -> Option<Instr> {
+    fn c_get_g(&self, builder: &mut FuncBuilder, vid: ValueId, _loc: LocId) -> Option<Instr> {
         // A lot of times the name for the global comes from a static
         // string name - see if we can dig it up and turn this into a
         // Textual::LoadGlobal.
@@ -180,7 +180,7 @@ impl LowerInstrs<'_> {
         Some(builtin)
     }
 
-    fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
+    fn handle_with_builtin(&self, builder: &mut FuncBuilder, instr: &Instr) -> Option<Instr> {
         let loc = instr.loc_id();
         match instr {
             Instr::Hhbc(hhbc) => {
@@ -209,11 +209,7 @@ impl LowerInstrs<'_> {
         }
     }
 
-    fn handle_member_op(
-        &self,
-        builder: &mut FuncBuilder<'_>,
-        member_op: &MemberOp,
-    ) -> Option<Instr> {
+    fn handle_member_op(&self, builder: &mut FuncBuilder, member_op: &MemberOp) -> Option<Instr> {
         use ir::instr::BaseOp;
 
         match member_op.base_op {
@@ -244,14 +240,14 @@ impl LowerInstrs<'_> {
         None
     }
 
-    fn check_prop(&self, builder: &mut FuncBuilder<'_>, _pid: PropId, _loc: LocId) -> Instr {
+    fn check_prop(&self, builder: &mut FuncBuilder, _pid: PropId, _loc: LocId) -> Instr {
         // CheckProp checks to see if the prop has already been initialized - we'll just always say "no".
         Instr::copy(builder.emit_constant(Constant::Bool(false)))
     }
 
     fn init_prop(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         vid: ValueId,
         pid: PropId,
         _op: InitPropOp,
@@ -264,7 +260,7 @@ impl LowerInstrs<'_> {
 
     fn iter_init(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         args: IteratorArgs,
         container: ValueId,
     ) -> Instr {
@@ -301,7 +297,7 @@ impl LowerInstrs<'_> {
         )
     }
 
-    fn iter_next(&self, builder: &mut FuncBuilder<'_>, args: IteratorArgs) -> Instr {
+    fn iter_next(&self, builder: &mut FuncBuilder, args: IteratorArgs) -> Instr {
         // iterator ^0 next jmp to b2 else b1 with $index
         // ->
         // %n = hack::iter_next(&iter0, /* key */ null, &$index)
@@ -331,11 +327,7 @@ impl LowerInstrs<'_> {
         )
     }
 
-    fn get_locals<'s>(
-        builder: &mut FuncBuilder<'s>,
-        locals: &[LocalId],
-        loc: LocId,
-    ) -> Vec<ValueId> {
+    fn get_locals(builder: &mut FuncBuilder, locals: &[LocalId], loc: LocId) -> Vec<ValueId> {
         locals
             .iter()
             .map(|lid| builder.emit(Instr::Hhbc(Hhbc::CGetL(*lid, loc))))
@@ -344,7 +336,7 @@ impl LowerInstrs<'_> {
 
     fn compute_memo_ops(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         locals: &[LocalId],
         loc: LocId,
     ) -> Vec<ValueId> {
@@ -381,7 +373,7 @@ impl LowerInstrs<'_> {
         ops
     }
 
-    fn memo_get(&self, builder: &mut FuncBuilder<'_>, memo_get: MemoGet) -> Instr {
+    fn memo_get(&self, builder: &mut FuncBuilder, memo_get: MemoGet) -> Instr {
         // memo_get([$a, $b], b1, b2)
         // ->
         // global NAME
@@ -409,7 +401,7 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
-    fn memo_get_eager(&self, builder: &mut FuncBuilder<'_>, mge: MemoGetEager) -> Instr {
+    fn memo_get_eager(&self, builder: &mut FuncBuilder, mge: MemoGetEager) -> Instr {
         // MemoGetEager is the async version of MemoGet.  Ignore the async edge
         // and just treat it as a MemoGet.
         self.memo_get(
@@ -420,7 +412,7 @@ impl LowerInstrs<'_> {
 
     fn memo_set(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         vid: ValueId,
         locals: &[LocalId],
         loc: LocId,
@@ -432,7 +424,7 @@ impl LowerInstrs<'_> {
 
     fn memo_set_eager(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         vid: ValueId,
         locals: &[LocalId],
         loc: LocId,
@@ -444,7 +436,7 @@ impl LowerInstrs<'_> {
 
     fn verify_out_type(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         obj: ValueId,
         lid: LocalId,
         loc: LocId,
@@ -461,7 +453,7 @@ impl LowerInstrs<'_> {
 
     fn verify_param_type_ts(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         lid: LocalId,
         ts: ValueId,
         loc: LocId,
@@ -472,7 +464,7 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
-    fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, obj: ValueId, loc: LocId) -> Instr {
+    fn verify_ret_type_c(&self, builder: &mut FuncBuilder, obj: ValueId, loc: LocId) -> Instr {
         let return_type = builder.func.return_type.enforced.clone();
         if return_type
             .modifiers
@@ -491,7 +483,7 @@ impl LowerInstrs<'_> {
 
     fn verify_ret_type_ts(
         &self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         obj: ValueId,
         ts: ValueId,
         loc: LocId,
@@ -503,7 +495,7 @@ impl LowerInstrs<'_> {
 
     fn emit_special_cls_ref(
         &mut self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         clsref: SpecialClsRef,
         loc: LocId,
     ) -> ValueId {
@@ -517,7 +509,7 @@ impl LowerInstrs<'_> {
 
     fn set_s(
         &mut self,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         field: ValueId,
         class: ValueId,
         vid: ValueId,
@@ -562,7 +554,7 @@ impl TransformInstr for LowerInstrs<'_> {
         &mut self,
         iid: InstrId,
         instr: Instr,
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         state: &mut TransformState,
     ) -> Instr {
         use hack::Builtin;
@@ -877,7 +869,7 @@ impl TransformInstr for LowerInstrs<'_> {
 
 fn rewrite_nullsafe_call(
     original_iid: InstrId,
-    builder: &mut FuncBuilder<'_>,
+    builder: &mut FuncBuilder,
     mut call: Call,
     state: &mut TransformState,
 ) -> Instr {
@@ -971,7 +963,7 @@ fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
 /// class name and for `is null`/`is nonnull` checks. This transformation detects such _constant_
 /// type-checks and rewrites them using a simpler form.
 fn rewrite_constant_type_check(
-    builder: &mut FuncBuilder<'_>,
+    builder: &mut FuncBuilder,
     obj: ValueId,
     typestruct: ValueId,
     loc: LocId,

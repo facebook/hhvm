@@ -87,8 +87,8 @@ struct UnitBuilder<'a> {
     adatas: Vec<hhbc::Adata>,
     class_refs: Option<Vec<hhbc::ClassName<'a>>>,
     classes: Vec<hhbc::Class<'a>>,
-    constant_refs: Option<Vec<hhbc::ConstName<'a>>>,
-    constants: Vec<hhbc::Constant<'a>>,
+    constant_refs: Option<Vec<hhbc::ConstName>>,
+    constants: Vec<hhbc::Constant>,
     fatal: Option<hhbc::Fatal>,
     file_attributes: Vec<hhbc::Attribute>,
     func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
@@ -169,7 +169,7 @@ impl<'a> UnitBuilder<'a> {
                     alloc,
                     token_iter,
                     ".constant_refs",
-                    assemble_const_name,
+                    |t, _| assemble_const_name(t),
                 )?);
             }
             b".includes" => {
@@ -440,7 +440,7 @@ fn assemble_requirement<'arena>(
 fn assemble_const_or_type_const<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    consts: &mut Vec<hhbc::Constant<'arena>>,
+    consts: &mut Vec<hhbc::Constant>,
     type_consts: &mut Vec<hhbc::TypeConstant>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".const")?;
@@ -465,7 +465,7 @@ fn assemble_const_or_type_const<'arena>(
         });
     } else {
         //const
-        let name = hhbc::ConstName::new(ffi::Str::new_slice(alloc, name.as_bytes()));
+        let name = hhbc::ConstName::intern(name);
         let value = if token_iter.next_is(Token::is_equal) {
             if token_iter.next_is_str(Token::is_identifier, "uninit") {
                 Maybe::Just(hhbc::TypedValue::Uninit)
@@ -671,12 +671,9 @@ fn assemble_method_name<'arena>(
     Ok(hhbc::MethodName::new(nm))
 }
 
-fn assemble_const_name<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::ConstName<'arena>> {
+fn assemble_const_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ConstName> {
     parse!(token_iter, <id:id>);
-    Ok(hhbc::ConstName::new(id.into_ffi_str(alloc)))
+    Ok(hhbc::ConstName::intern(id.as_str()?))
 }
 
 fn assemble_function_name<'arena>(

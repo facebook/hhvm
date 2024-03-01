@@ -56,7 +56,7 @@ pub trait FuncBuilderEx {
     fn emit_is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> ValueId;
 }
 
-impl<'a> FuncBuilderEx for FuncBuilder<'a> {
+impl FuncBuilderEx for FuncBuilder {
     fn emit_if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self)) {
         let join_bid = self.alloc_bid_based_on_cur();
         let true_bid = self.alloc_bid_based_on_cur();
@@ -175,7 +175,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
             fn is_type_op2(
                 op1: IsTypeOp,
                 op2: IsTypeOp,
-                builder: &mut FuncBuilder<'_>,
+                builder: &mut FuncBuilder,
                 vid: ValueId,
                 loc: LocId,
             ) -> Instr {

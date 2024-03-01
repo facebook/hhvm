@@ -34,7 +34,7 @@ pub(crate) trait FuncBuilderEx {
     }
 }
 
-impl<'a> FuncBuilderEx for FuncBuilder<'a> {
+impl FuncBuilderEx for FuncBuilder {
     fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr {
         let target = Cow::Borrowed(builtin.as_str());
         let values = args.to_vec().into_boxed_slice();

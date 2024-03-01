@@ -151,7 +151,7 @@ impl<'a> UnitParser<'a> {
         self.unit
             .symbol_refs
             .constants
-            .push(ConstName::from_bytes(self.alloc, &id));
+            .push(ConstName::intern(std::str::from_utf8(&id)?));
         Ok(())
     }
 

@@ -45,7 +45,7 @@ pub(crate) struct Sequence {
 
 impl Sequence {
     pub(crate) fn compute(
-        builder: &mut FuncBuilder<'_>,
+        builder: &mut FuncBuilder,
         filename: ir::Filename,
         body_instrs: &[Instruct<'_>],
     ) -> (LabelMap<Addr>, BlockIdMap<Addr>, AddrMap<Sequence>) {
@@ -67,16 +67,16 @@ pub(crate) enum SequenceKind {
     Catch,
 }
 
-struct SeqBuilder<'a, 'b> {
+struct SeqBuilder<'b> {
     sequences: Vec<(Addr, Sequence)>,
-    builder: &'b mut FuncBuilder<'a>,
+    builder: &'b mut FuncBuilder,
     filename: ir::Filename,
     seq_addr: Addr,
     next_exid: ExFrameId,
     tc_stack: Vec<TryCatchId>,
 }
 
-impl SeqBuilder<'_, '_> {
+impl SeqBuilder<'_> {
     fn add(
         &mut self,
         kind: SequenceKind,

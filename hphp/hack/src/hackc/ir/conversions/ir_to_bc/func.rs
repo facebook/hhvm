@@ -32,7 +32,7 @@ use crate::strings::StringCache;
 /// onto the stack before the jump and popping them off the stack in receiving
 /// block.
 pub(crate) fn convert_func<'a>(
-    mut func: ir::Func<'a>,
+    mut func: ir::Func,
     strings: &StringCache<'a>,
     adata: &mut AdataCache,
 ) -> hhbc::Body<'a> {
@@ -128,7 +128,7 @@ pub(crate) fn convert_func<'a>(
 
 pub(crate) fn convert_function<'a>(
     unit: &mut UnitBuilder<'a>,
-    mut function: ir::Function<'a>,
+    mut function: ir::Function,
     strings: &StringCache<'a>,
 ) {
     trace!(
@@ -154,7 +154,7 @@ pub(crate) fn convert_function<'a>(
 }
 
 pub(crate) fn convert_method<'a>(
-    mut method: ir::Method<'a>,
+    mut method: ir::Method,
     strings: &StringCache<'a>,
     adata: &mut AdataCache,
 ) -> Method<'a> {

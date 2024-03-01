@@ -152,7 +152,7 @@ struct MakeSSA<'a> {
 }
 
 impl<'a> MakeSSA<'a> {
-    fn new(func: &Func<'_>, strings: &'a StringInterner) -> MakeSSA<'a> {
+    fn new(func: &Func, strings: &'a StringInterner) -> MakeSSA<'a> {
         let predecessors = compute_predecessor_blocks(
             func,
             PredecessorFlags {
@@ -170,14 +170,14 @@ impl<'a> MakeSSA<'a> {
         }
     }
 
-    fn run(&mut self, func: &mut Func<'_>) {
+    fn run(&mut self, func: &mut Func) {
         self.analyze_dataflow(func);
         self.create_params(func);
         self.rewrite_instrs(func);
     }
 
     // Steps (1) and (2).
-    fn analyze_dataflow(&mut self, func: &Func<'_>) {
+    fn analyze_dataflow(&mut self, func: &Func) {
         // Stack of dataflow information to propagate, in lieu of recursion.
         // BlockId needs the value of Declare's InstrId on entry because
         // Get wants it (directly or indirectly).
@@ -247,7 +247,7 @@ impl<'a> MakeSSA<'a> {
     }
 
     // Step (3).
-    fn create_params(&mut self, func: &mut Func<'_>) {
+    fn create_params(&mut self, func: &mut Func) {
         // Guarantee each var live at block entry has a value we can use.
         //
         // In loops this will sometimes create degenerate Params, which
@@ -334,7 +334,7 @@ impl<'a> MakeSSA<'a> {
     }
 
     // Step (4).
-    fn rewrite_instrs(&mut self, func: &mut Func<'_>) {
+    fn rewrite_instrs(&mut self, func: &mut Func) {
         FuncBuilder::borrow_func_no_strings(func, |rw| {
             for bid in rw.func.block_ids() {
                 let info = &mut self.block_info[bid];
@@ -360,7 +360,7 @@ impl<'a> TransformInstr for MakeSSA<'a> {
         &mut self,
         _iid: InstrId,
         i: Instr,
-        rw: &mut FuncBuilder<'_>,
+        rw: &mut FuncBuilder,
         _state: &mut TransformState,
     ) -> Instr {
         let bid = rw.cur_bid();
@@ -430,13 +430,13 @@ fn note_live(
     }
 }
 
-pub(crate) fn is_ssa(func: &Func<'_>) -> bool {
+pub(crate) fn is_ssa(func: &Func) -> bool {
     !func
         .body_instrs()
         .any(|i| matches!(i, Instr::Special(Special::Tmp(..))))
 }
 
-pub fn run(func: &mut Func<'_>, strings: &StringInterner) -> bool {
+pub fn run(func: &mut Func, strings: &StringInterner) -> bool {
     if is_ssa(func) {
         false
     } else {

@@ -182,7 +182,7 @@ impl Display for FmtBareThisOp {
     }
 }
 
-pub struct FmtBid<'a>(pub &'a Func<'a>, pub BlockId, /* verbose */ pub bool);
+pub struct FmtBid<'a>(pub &'a Func, pub BlockId, /* verbose */ pub bool);
 
 impl Display for FmtBid<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -283,7 +283,7 @@ impl Display for FmtFloat {
     }
 }
 
-pub(crate) struct FmtFuncParams<'a>(pub &'a Func<'a>, pub &'a StringInterner);
+pub(crate) struct FmtFuncParams<'a>(pub &'a Func, pub &'a StringInterner);
 
 impl Display for FmtFuncParams<'_> {
     fn fmt(&self, w: &mut Formatter<'_>) -> Result {
@@ -348,9 +348,9 @@ impl Display for FmtIdentifierId<'_> {
     }
 }
 
-pub(crate) struct FmtConstant<'a, 'b>(pub(crate) &'b Constant<'a>, pub &'b StringInterner);
+pub(crate) struct FmtConstant<'a>(pub(crate) &'a Constant, pub &'a StringInterner);
 
-impl Display for FmtConstant<'_, '_> {
+impl Display for FmtConstant<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtConstant(constant, strings) = self;
         match constant {
@@ -380,7 +380,7 @@ impl Display for FmtConstant<'_, '_> {
 }
 
 pub struct FmtVid<'a>(
-    pub &'a Func<'a>,
+    pub &'a Func,
     pub ValueId,
     /* verbose */ pub bool,
     pub &'a StringInterner,
@@ -460,9 +460,9 @@ impl Display for FmtInitPropOp {
     }
 }
 
-pub struct FmtInstr<'a, 'b>(pub &'b Func<'a>, pub &'b StringInterner, pub InstrId);
+pub struct FmtInstr<'a>(pub &'a Func, pub &'a StringInterner, pub InstrId);
 
-impl Display for FmtInstr<'_, '_> {
+impl Display for FmtInstr<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtInstr(func, strings, iid) = self;
         let instr = func.get_instr(*iid).unwrap();
@@ -530,7 +530,7 @@ impl Display for FmtLids<'_> {
 }
 
 pub(crate) struct FmtConstantId<'a>(
-    pub(crate) &'a Func<'a>,
+    pub(crate) &'a Func,
     pub(crate) ConstantId,
     pub(crate) &'a StringInterner,
 );
@@ -570,7 +570,7 @@ impl Display for FmtFullLoc<'_> {
     }
 }
 
-pub struct FmtLocId<'a>(pub &'a Func<'a>, pub LocId);
+pub struct FmtLocId<'a>(pub &'a Func, pub LocId);
 
 impl Display for FmtLocId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

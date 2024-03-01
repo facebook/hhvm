@@ -851,7 +851,7 @@ Str getStrfromSA(const FunctionName& f) {
 Str getStrfromSA(const MethodName& m) {
   return m._0;
 }
-Str getStrfromSA(const ConstName& c) {
+StringId getStrfromSA(const ConstName& c) {
   return c._0;
 }
 StringId getStrfromSA(const PropName& p) {

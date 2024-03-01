@@ -14,7 +14,7 @@ use ir_core::Instr;
 ///
 /// Purposely leaves the HasAsyncEagerOffset flag set so later code can
 /// determine that this was originally an async call.
-pub fn unasync(func: &mut Func<'_>) {
+pub fn unasync(func: &mut Func) {
     // Go through the blocks and rewrite:
     //
     //     call_async(params) to lazy, eager
@@ -52,7 +52,7 @@ pub fn unasync(func: &mut Func<'_>) {
     }
 }
 
-fn rewrite_async_call(builder: &mut FuncBuilder<'_>, call: Call, [_lazy, eager]: [BlockId; 2]) {
+fn rewrite_async_call(builder: &mut FuncBuilder, call: Call, [_lazy, eager]: [BlockId; 2]) {
     let loc = call.loc;
     let vid = builder.emit(Instr::call(call));
     builder.emit(Instr::Terminator(Terminator::JmpArgs(

@@ -31,16 +31,16 @@ pub use util::FmtSep;
 
 // This isn't used by the print crate but is useful for code that wants to print
 // a Func for debugging purposes.
-pub struct DisplayFunc<'a, 'b> {
-    pub func: &'b Func<'a>,
+pub struct DisplayFunc<'b> {
+    pub func: &'b Func,
     /* verbose */ pub verbose: bool,
     pub strings: &'b StringInterner,
     pub f_pre_block: Option<&'b dyn Fn(&mut dyn fmt::Write, BlockId) -> fmt::Result>,
     pub f_pre_instr: Option<&'b dyn Fn(&mut dyn fmt::Write, InstrId) -> fmt::Result>,
 }
 
-impl<'a, 'b> DisplayFunc<'a, 'b> {
-    pub fn new(func: &'b Func<'a>, verbose: bool, strings: &'b StringInterner) -> Self {
+impl<'b> DisplayFunc<'b> {
+    pub fn new(func: &'b Func, verbose: bool, strings: &'b StringInterner) -> Self {
         DisplayFunc {
             func,
             verbose,
@@ -51,7 +51,7 @@ impl<'a, 'b> DisplayFunc<'a, 'b> {
     }
 }
 
-impl fmt::Display for DisplayFunc<'_, '_> {
+impl fmt::Display for DisplayFunc<'_> {
     fn fmt(&self, w: &mut fmt::Formatter<'_>) -> fmt::Result {
         let DisplayFunc {
             func,

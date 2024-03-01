@@ -38,7 +38,7 @@ impl Block {
 
     /// A well-formed Block is always terminated. This is only useful when
     /// building a Block.
-    pub fn is_terminated(&self, func: &Func<'_>) -> bool {
+    pub fn is_terminated(&self, func: &Func) -> bool {
         if let Some(&iid) = self.iids.last() {
             func.instr(iid).is_terminal()
         } else {

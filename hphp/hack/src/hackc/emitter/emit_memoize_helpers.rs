@@ -81,8 +81,7 @@ pub fn get_implicit_context_memo_key<'arena>(
 fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
     if soft {
         InstrSeq::gather(vec![
-            instr::cns_e(hhbc::ConstName::from_raw_string(
-                alloc,
+            instr::cns_e(hhbc::ConstName::intern(
                 "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE",
             )),
             instr::null(),

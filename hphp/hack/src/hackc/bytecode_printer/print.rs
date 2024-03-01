@@ -196,15 +196,15 @@ fn print_symbol_ref_regions<'arena>(
     w: &mut dyn Write,
     symbol_refs: &SymbolRefs<'arena>,
 ) -> Result<()> {
-    fn print_region<'a, T: 'a, F>(
+    fn print_region<'a, T, F>(
         ctx: &Context<'_>,
         w: &mut dyn Write,
         name: &str,
-        refs: impl IntoIterator<Item = &'a T>,
+        refs: impl IntoIterator<Item = T>,
         f: F,
     ) -> Result<()>
     where
-        F: Fn(&'a T) -> &'a [u8],
+        F: Fn(T) -> &'a [u8],
     {
         let mut iter = refs.into_iter();
         if let Some(first) = iter.next() {
@@ -432,7 +432,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> 
     }
 }
 
-fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant<'_>) -> Result<()> {
+fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
     print_special_and_user_attrs(ctx, w, &[], &AttrContext::Constant, &c.attrs)?;

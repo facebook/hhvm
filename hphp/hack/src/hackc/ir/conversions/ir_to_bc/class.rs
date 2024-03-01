@@ -12,7 +12,7 @@ use crate::types;
 
 pub(crate) fn convert_class<'a>(
     unit: &mut UnitBuilder<'a>,
-    class: ir::Class<'a>,
+    class: ir::Class,
     strings: &StringCache<'a>,
 ) {
     let ir::Class {

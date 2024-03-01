@@ -8,7 +8,6 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
-use bumpalo::Bump;
 use ir_core::func::ExFrame;
 use ir_core::instr;
 use ir_core::instr::BaseOp;
@@ -153,24 +152,23 @@ impl Default for ClassState {
     }
 }
 
-pub(crate) struct FunctionParser<'a, 'b> {
-    alloc: &'a Bump,
+pub(crate) struct FunctionParser<'b> {
     // A local cache for the (Block x (InstrId, Instr)) state.  BlockId::NONE
     // (where we put the non-block instrs like params) is guaranteed to be
     // blocks[0].
     blocks: Vec<BlockInfo>,
-    builder: FuncBuilder<'a>,
+    builder: FuncBuilder,
     class_state: Option<&'b mut ClassState>,
     cur_loc: LocId,
     flags: FunctionFlags,
 }
 
-impl<'a, 'b> FunctionParser<'a, 'b> {
+impl<'b> FunctionParser<'b> {
     pub(crate) fn parse(
         tokenizer: &mut Tokenizer<'_>,
-        unit_state: &mut crate::assemble::UnitParser<'a>,
+        unit_state: &mut crate::assemble::UnitParser<'_>,
         mut class_state: Option<&'b mut ClassState>,
-    ) -> Result<Function<'a>> {
+    ) -> Result<Function> {
         parse!(tokenizer, <name:parse_func_id>);
 
         let tparams = if tokenizer.next_is_identifier("<")? {
@@ -233,7 +231,6 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
         }];
 
         let mut state = FunctionParser {
-            alloc: unit_state.alloc,
             blocks,
             builder,
             class_state,
@@ -348,7 +345,7 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
     }
 }
 
-impl FunctionParser<'_, '_> {
+impl FunctionParser<'_> {
     fn iid(&self, tokenizer: &mut Tokenizer<'_>) -> Result<InstrId> {
         match tokenizer.expect_any_token()? {
             Token::Identifier(s, _) if s.starts_with('%') => {
@@ -399,7 +396,7 @@ impl FunctionParser<'_, '_> {
                 Ok(ValueId::from_instr(parse_instr_id(tokenizer)?))
             }
             Some(_) => {
-                let c = parse_constant(tokenizer, self.alloc)?;
+                let c = parse_constant(tokenizer)?;
                 let id = self.builder.emit_constant(c);
                 Ok(id)
             }
@@ -458,7 +455,7 @@ struct Arg {
     vid: ValueId,
 }
 
-impl FunctionParser<'_, '_> {
+impl FunctionParser<'_> {
     fn parse_call(
         &mut self,
         tokenizer: &mut Tokenizer<'_>,
@@ -843,7 +840,7 @@ impl FunctionParser<'_, '_> {
     }
 }
 
-impl FunctionParser<'_, '_> {
+impl FunctionParser<'_> {
     fn parse_member_op(
         &mut self,
         tokenizer: &mut Tokenizer<'_>,
@@ -1094,7 +1091,7 @@ impl FunctionParser<'_, '_> {
     }
 }
 
-impl FunctionParser<'_, '_> {
+impl FunctionParser<'_> {
     fn parse_attr(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let attr = parse_attribute(tokenizer)?;
         self.builder.func.attributes.push(attr);
@@ -1197,7 +1194,7 @@ impl FunctionParser<'_, '_> {
     }
 
     fn parse_const(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <idx:parse_constant_id> "=" <value:parse_constant(self.alloc)>);
+        parse!(tokenizer, <idx:parse_constant_id> "=" <value:parse_constant()>);
 
         if self.builder.func.constants.len() <= idx.as_usize() {
             self.builder

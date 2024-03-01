@@ -305,7 +305,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey, local_names: &[StringId])
     }
 }
 
-fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
+fn print_method_name(w: &mut dyn Write, id: &MethodName) -> Result<()> {
     print_quoted_bytes(w, id.as_bytes())
 }
 

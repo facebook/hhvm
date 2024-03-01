@@ -490,7 +490,7 @@ fn assemble_method<'arena>(
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
-    let name = assemble_method_name(alloc, token_iter)?;
+    let name = assemble_method_name(token_iter)?;
     let mut decl_map = DeclMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
@@ -644,22 +644,19 @@ fn assemble_prop_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName> {
     Ok(hhbc::PropName::new(name))
 }
 
-fn assemble_method_name<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::MethodName<'arena>> {
-    let nm = if token_iter.peek_is_str(Token::is_number, "86") {
+fn assemble_method_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodName> {
+    let name = if token_iter.peek_is_str(Token::is_number, "86") {
         // Only methods that can start with #s start with
         // 86 and are compiler added ones
         let under86 = token_iter.expect_with(Token::into_number)?;
         let name = token_iter.expect_with(Token::into_identifier)?;
         let mut under86 = under86.to_vec();
         under86.extend_from_slice(name);
-        Str::new_slice(alloc, &under86)
+        hhbc::intern(std::str::from_utf8(&under86)?)
     } else {
-        token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc)
+        hhbc::intern(token_iter.expect(Token::is_identifier)?.as_str()?)
     };
-    Ok(hhbc::MethodName::new(nm))
+    Ok(hhbc::MethodName::new(name))
 }
 
 fn assemble_const_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ConstName> {

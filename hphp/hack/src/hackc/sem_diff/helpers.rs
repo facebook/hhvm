@@ -37,7 +37,7 @@ impl MapName for hhbc::Function<'_> {
 
 impl MapName for hhbc::Method<'_> {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

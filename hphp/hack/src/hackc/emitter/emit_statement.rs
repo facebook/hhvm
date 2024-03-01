@@ -19,6 +19,7 @@ use hhbc::Label;
 use hhbc::Local;
 use hhbc::MOpMode;
 use hhbc::MemberKey;
+use hhbc::MethodName;
 use hhbc::QueryMOp;
 use hhbc::ReadonlyOp;
 use hhbc::SetRangeOp;
@@ -474,7 +475,6 @@ fn emit_using<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     using: &ast::UsingStmt,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let block_pos = block_pos(&using.block)?;
     if using.exprs.1.len() > 1 {
         emit_stmts(
@@ -573,14 +573,11 @@ fn emit_using<'a, 'arena, 'decl>(
                 } else {
                     (instr::pop_c(), None)
                 };
-                let fn_name = hhbc::MethodName::from_raw_string(
-                    alloc,
-                    if has_await {
-                        "__disposeAsync"
-                    } else {
-                        "__dispose"
-                    },
-                );
+                let fn_name = MethodName::new(if has_await {
+                    string_id!("__disposeAsync")
+                } else {
+                    string_id!("__dispose")
+                });
                 InstrSeq::gather(vec![
                     instr::c_get_l(local),
                     instr::null_uninit(),
@@ -1277,7 +1274,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
         let exit_label = e.label_gen_mut().next_regular();
         let pop_and_exit_label = e.label_gen_mut().next_regular();
         let async_eager_label = e.label_gen_mut().next_regular();
-        let next_meth = hhbc::MethodName::from_raw_string(alloc, "next");
+        let next_meth = MethodName::new(string_id!("next"));
         let iter_init = InstrSeq::gather(vec![
             instr_collection,
             instr::dup(),

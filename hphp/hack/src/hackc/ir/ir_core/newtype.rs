@@ -10,47 +10,6 @@ use parking_lot::MappedRwLockReadGuard;
 use crate::string_intern::StringInterner;
 use crate::UnitBytesId;
 
-macro_rules! interned_hhbc_id {
-    ($name: ident, $hhbc: ident) => {
-        #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-        pub struct $name {
-            pub id: UnitBytesId,
-        }
-
-        impl $name {
-            pub fn new(id: UnitBytesId) -> Self {
-                Self { id }
-            }
-
-            pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &StringInterner) -> Self {
-                Self::new(strings.intern_bytes(id.as_bytes()))
-            }
-
-            pub fn from_str(name: &str, strings: &StringInterner) -> Self {
-                Self::new(strings.intern_str(name))
-            }
-
-            pub fn from_bytes(name: &[u8], strings: &StringInterner) -> Self {
-                Self::new(strings.intern_bytes(name))
-            }
-
-            pub fn as_bytes<'a>(
-                self,
-                strings: &'a StringInterner,
-            ) -> MappedRwLockReadGuard<'a, [u8]> {
-                strings.lookup_bytes(self.id)
-            }
-
-            pub fn as_bstr<'a>(
-                self,
-                strings: &'a StringInterner,
-            ) -> MappedRwLockReadGuard<'a, BStr> {
-                strings.lookup_bstr(self.id)
-            }
-        }
-    };
-}
-
 macro_rules! interned_hhbc_intern_id {
     ($name: ident, $hhbc: ident) => {
         #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -104,7 +63,7 @@ pub const _86CINIT: &str = "86cinit";
 pub const _86PINIT: &str = "86pinit";
 pub const _86SINIT: &str = "86sinit";
 
-interned_hhbc_id!(MethodId, MethodName);
+interned_hhbc_intern_id!(MethodId, MethodName);
 impl MethodId {
     pub fn _86cinit(strings: &StringInterner) -> Self {
         Self::from_str(_86CINIT, strings)

@@ -54,8 +54,6 @@ pub enum ImmType {
     ARR(Box<ImmType>),
     /// BA2 is a [Label; 2] pair.
     BA2,
-    /// OAL is an OA with a lifetime attached.
-    OAL(&'static str),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -256,20 +254,20 @@ mod fixups {
                 replace_imm("str2", ImmType::SA, ImmType::OA("ClassName")),
             ],
             "FCallClsMethodM" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str4", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "FCallClsMethodD" => vec![
                 replace_imm("str2", ImmType::SA, ImmType::OA("ClassName")),
-                replace_imm("str3", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str3", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "FCallClsMethodSD" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str4", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "FCallFuncD" => vec![
                 replace_imm("str2", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "FCallObjMethodD" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str4", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "IncDecM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
@@ -297,14 +295,14 @@ mod fixups {
                 replace_imm("str1", ImmType::SA, ImmType::OA("ClassName")),
             ],
             "ResolveClsMethod" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveClsMethodD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OA("ClassName")),
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveClsMethodS" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveFunc" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),
@@ -313,14 +311,14 @@ mod fixups {
                 replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),
             ],
             "ResolveRClsMethod" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveRClsMethodD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OA("ClassName")),
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveRClsMethodS" => vec![
-                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodName")),
+                replace_imm("str2", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "ResolveRFunc" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OA("FunctionName")),

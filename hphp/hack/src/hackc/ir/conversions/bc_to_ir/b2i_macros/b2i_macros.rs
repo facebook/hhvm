@@ -282,11 +282,8 @@ fn parse_convert_simple(
             ImmType::OA(n) if *n == "FunctionName" => {
                 convert(quote_spanned!(span=> ir::FunctionId::from_hhbc(*#imm, #strings) ));
             }
-            ImmType::OAL(n) if *n == "MethodName" => {
+            ImmType::OA(n) if *n == "MethodName" => {
                 convert(quote_spanned!(span=> ir::MethodId::from_hhbc(*#imm, #strings) ));
-            }
-            ImmType::OAL(n) if *n == "ParamName" => {
-                convert(quote_spanned!(span=> ir::ParamId::from_hhbc(#imm, #strings) ));
             }
             ImmType::OA(n) if *n == "PropName" => {
                 convert(quote_spanned!(span=> ir::PropId::from_hhbc(*#imm, #strings) ));
@@ -306,7 +303,6 @@ fn parse_convert_simple(
             | ImmType::KA
             | ImmType::NA
             | ImmType::OA(_)
-            | ImmType::OAL(_)
             | ImmType::RATA
             | ImmType::SA
             | ImmType::SLA

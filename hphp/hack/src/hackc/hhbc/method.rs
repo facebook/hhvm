@@ -20,7 +20,7 @@ use crate::Visibility;
 pub struct Method<'arena> {
     pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
-    pub name: MethodName<'arena>,
+    pub name: MethodName,
     pub body: Body<'arena>,
     pub span: Span,
     pub coeffects: Coeffects,

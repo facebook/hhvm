@@ -226,7 +226,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::LAR => quote!(print_local_range(w, #name)?;),
         ImmType::NA => panic!("NA is not expected"),
         ImmType::NLA => quote!(self.print_local(w, #name)?;),
-        ImmType::OA(ty) | ImmType::OAL(ty) => {
+        ImmType::OA(ty) => {
             use convert_case::Case;
             use convert_case::Casing;
             let handler = Ident::new(
@@ -265,7 +265,7 @@ fn convert_call_arg(name: &str, imm: &ImmType) -> TokenStream {
         | ImmType::SLA
         | ImmType::VSA => name.to_token_stream(),
 
-        ImmType::ARR(_) | ImmType::BLA | ImmType::OA(_) | ImmType::OAL(_) => {
+        ImmType::ARR(_) | ImmType::BLA | ImmType::OA(_) => {
             quote!(#name.as_ref())
         }
 
@@ -392,10 +392,6 @@ mod tests {
                             }
                             Opcode::TestOA(subop1) => {
                                 w.write_all(b"TestOA ")?;
-                                print_oa_sub_type(w, subop1)?;
-                            }
-                            Opcode::TestOAL(subop1) => {
-                                w.write_all(b"TestOAL ")?;
                                 print_oa_sub_type(w, subop1)?;
                             }
                             Opcode::TestRATA(rat) => {

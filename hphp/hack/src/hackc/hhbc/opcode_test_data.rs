@@ -164,13 +164,6 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             flags: InstrFlags::NF,
         },
         OpcodeData {
-            name: "TestOAL",
-            immediates: vec![("subop1", ImmType::OAL("OaSubType"))],
-            inputs: Inputs::NOV,
-            outputs: Outputs::NOV,
-            flags: InstrFlags::NF,
-        },
-        OpcodeData {
             name: "TestRATA",
             immediates: vec![("rat", ImmType::RATA)],
             inputs: Inputs::NOV,

@@ -281,12 +281,11 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let name = {
         if is_memoize {
             hhbc::MethodName::from_ast_name_and_suffix(
-                emitter.alloc,
                 &method.name.1,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             )
         } else {
-            hhbc::MethodName::from_ast_name(emitter.alloc, &method.name.1)
+            hhbc::MethodName::from_ast_name(&method.name.1)
         }
     };
     let span = if is_native_opcode_impl {

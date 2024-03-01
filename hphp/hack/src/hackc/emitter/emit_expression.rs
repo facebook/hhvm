@@ -85,6 +85,7 @@ use string_utils::reified::ReifiedTparam;
 
 use super::TypeRefinementInHint;
 use crate::emit_adata;
+use crate::emit_class::REIFIED_INIT_METH_NAME;
 use crate::emit_class::REIFIED_PROP_NAME;
 use crate::emit_fatal;
 use crate::emit_type_constant;
@@ -909,7 +910,6 @@ fn inline_gena_call<'a, 'arena, 'decl>(
     let async_eager_label = emitter.label_gen_mut().next_regular();
 
     scope::with_unnamed_local(emitter, |e, arr_local| {
-        let alloc = e.alloc;
         let before = InstrSeq::gather(vec![load_arr, instr::cast_dict(), instr::pop_l(arr_local)]);
 
         let inner = InstrSeq::gather(vec![
@@ -926,7 +926,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                     Some(async_eager_label),
                     None,
                 ),
-                hhbc::MethodName::from_raw_string(alloc, "fromDict"),
+                MethodName::new(string_id!("fromDict")),
                 ClassName::new(string_id!("HH\\AwaitAllWaitHandle")),
             ),
             instr::await_(),
@@ -1930,7 +1930,6 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     let ast::Expr(_, pos, expr_) = expr;
     use ast::Expr;
     use ast::Expr_;
-    let alloc = env.arena;
     let emit_generics = |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs| {
         let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
         if does_not_have_non_tparam_generics {
@@ -1981,8 +1980,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                            id,
                            null_flavor: &ast::OgNullFlavor,
                            mut fcall_args| {
-                let name =
-                    hhbc::MethodName::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+                let name = MethodName::intern(string_utils::strip_global_ns(id));
                 let obj = emit_object_expr(e, env, obj)?;
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
@@ -2077,8 +2075,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         Expr_::ClassConst(cls_const) => {
             let (cid, (_, id)) = &**cls_const;
             let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
-            let method_name =
-                hhbc::MethodName::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+            let method_name = MethodName::intern(string_utils::strip_global_ns(id));
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
@@ -2832,7 +2829,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     cid: &ast::ClassId,
-    method_name: MethodName<'arena>,
+    method_name: MethodName,
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
@@ -2911,18 +2908,14 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
     fpid: &ast::FunctionPtrId,
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let instrs = match fpid {
         // This is a function name. Equivalent to HH\fun('str')
         ast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name())?,
         // class_meth
         ast::FunctionPtrId::FPClassConst(cid, method_name) => {
             // TODO(hrust) should accept
-            //   `let method_name = hhbc::MethodName::from_ast_name(&(cc.1).1);`
-            let method_name = hhbc::MethodName::new(Str::new_str(
-                alloc,
-                string_utils::strip_global_ns(&method_name.1),
-            ));
+            //   `let method_name = MethodName::from_ast_name(&(cc.1).1);`
+            let method_name = MethodName::intern(string_utils::strip_global_ns(&method_name.1));
             emit_class_meth_native(e, env, pos, cid, method_name, targs)?
         }
     };
@@ -3640,8 +3633,6 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
     pos: &Pos,
     op: NewObjOpInfo<'b>,
 ) -> Result<InstrSeq<'arena>> {
-    use string_utils::reified::INIT_METH_NAME;
-
     let call_reified_init = |obj, ts| -> InstrSeq<'_> {
         InstrSeq::gather(vec![
             obj,
@@ -3649,7 +3640,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             ts,
             instr::f_call_obj_method_d(
                 FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
-                hhbc::MethodName::from_raw_string(env.arena, INIT_METH_NAME),
+                *REIFIED_INIT_METH_NAME,
             ),
             instr::pop_c(),
         ])

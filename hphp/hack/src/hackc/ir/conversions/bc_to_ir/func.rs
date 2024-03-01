@@ -62,7 +62,7 @@ pub(crate) fn convert_method<'a>(
     src: &Method<'a>,
     unit_state: &UnitState,
 ) {
-    trace!("--- convert_method {}", src.name.unsafe_as_str());
+    trace!("--- convert_method {}", src.name.as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(

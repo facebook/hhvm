@@ -183,8 +183,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 | ImmType::OA(_)
                 | ImmType::RATA
                 | ImmType::SA
-                | ImmType::VSA
-                | ImmType::OAL(_) => false,
+                | ImmType::VSA => false,
             }
         }
 
@@ -416,8 +415,7 @@ pub fn emit_impl_locals(input: TokenStream, opcodes: &[OpcodeData]) -> Result<To
                 | ImmType::RATA
                 | ImmType::SA
                 | ImmType::SLA
-                | ImmType::VSA
-                | ImmType::OAL(_) => {
+                | ImmType::VSA => {
                     match_parts.push(quote!(_));
                 }
             }
@@ -479,10 +477,6 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::OA(ty) => {
             let ty = Ident::new(ty, Span::call_site());
             quote!(#ty)
-        }
-        ImmType::OAL(ty) => {
-            let ty = Ident::new(ty, Span::call_site());
-            quote!(#ty<#lifetime>)
         }
         ImmType::RATA => quote!(RepoAuthType<#lifetime>),
         ImmType::SA => quote!(Str<#lifetime>),
@@ -764,7 +758,6 @@ mod tests {
                     TestLAR(LocalRange),
                     TestNLA(Local),
                     TestOA(OaSubType),
-                    TestOAL(OaSubType<'a>),
                     TestRATA(RepoAuthType<'a>),
                     TestSA(Str<'a>),
                     TestSLA(Vector<SwitchLabel>),
@@ -794,7 +787,6 @@ mod tests {
                             MyOps::TestLAR(..) => "TestLAR",
                             MyOps::TestNLA(..) => "TestNLA",
                             MyOps::TestOA(..) => "TestOA",
-                            MyOps::TestOAL(..) => "TestOAL",
                             MyOps::TestRATA(..) => "TestRATA",
                             MyOps::TestSA(..) => "TestSA",
                             MyOps::TestSLA(..) => "TestSLA",
@@ -824,11 +816,10 @@ mod tests {
                             MyOps::TestLAR(..) => 18usize,
                             MyOps::TestNLA(..) => 19usize,
                             MyOps::TestOA(..) => 20usize,
-                            MyOps::TestOAL(..) => 21usize,
-                            MyOps::TestRATA(..) => 22usize,
-                            MyOps::TestSA(..) => 23usize,
-                            MyOps::TestSLA(..) => 24usize,
-                            MyOps::TestVSA(..) => 25usize,
+                            MyOps::TestRATA(..) => 21usize,
+                            MyOps::TestSA(..) => 22usize,
+                            MyOps::TestSLA(..) => 23usize,
+                            MyOps::TestVSA(..) => 24usize,
                         }
                     }
                     pub fn num_inputs(&self) -> usize {
@@ -854,7 +845,6 @@ mod tests {
                             MyOps::TestLAR(..) => 0,
                             MyOps::TestNLA(..) => 0,
                             MyOps::TestOA(..) => 0,
-                            MyOps::TestOAL(..) => 0,
                             MyOps::TestRATA(..) => 0,
                             MyOps::TestSA(..) => 0,
                             MyOps::TestSLA(..) => 0,
@@ -884,7 +874,6 @@ mod tests {
                             MyOps::TestLAR(..) => 0,
                             MyOps::TestNLA(..) => 0,
                             MyOps::TestOA(..) => 0,
-                            MyOps::TestOAL(..) => 0,
                             MyOps::TestRATA(..) => 0,
                             MyOps::TestSA(..) => 0,
                             MyOps::TestSLA(..) => 0,
@@ -904,7 +893,7 @@ mod tests {
                     TestOneImm => test_oneimm,
                     TestTwoImm => test_twoimm,
                     TestBLA | TestFCA | TestARR | TestDA | TestBA2 | TestBA |
-                    TestIA | TestITA | TestNLA | TestOAL | TestLA | TestRATA |
+                    TestIA | TestITA | TestNLA | TestLA | TestRATA |
                     TestSLA | TestILA | TestIVA | TestKA | TestI64A | TestSA |
                     TestOA | TestVSA | TestThreeImm => {}
                 ),

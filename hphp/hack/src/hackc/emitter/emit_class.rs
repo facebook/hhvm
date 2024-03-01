@@ -12,7 +12,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Str;
 use hhbc::string_id;
 use hhbc::Class;
 use hhbc::ClassName;
@@ -25,6 +24,7 @@ use hhbc::FatalOp;
 use hhbc::Local;
 use hhbc::Method;
 use hhbc::MethodFlags;
+use hhbc::MethodName;
 use hhbc::Param;
 use hhbc::PropName;
 use hhbc::Property;
@@ -80,7 +80,7 @@ fn add_symbol_refs<'arena, 'decl>(
 fn make_86method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    name: hhbc::MethodName<'arena>,
+    name: MethodName,
     params: Vec<Param>,
     is_static: bool,
     visibility: Visibility,
@@ -362,6 +362,8 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
     emit_adata::typed_value_into_instr(e, tv)
 }
 
+pub(crate) static REIFIED_INIT_METH_NAME: hhbc::Lazy<MethodName> =
+    hhbc::Lazy::new(|| MethodName::intern(string_utils::reified::INIT_METH_NAME));
 pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
     hhbc::Lazy::new(|| PropName::intern(string_utils::reified::PROP_NAME));
 
@@ -372,9 +374,6 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     ast_class: &'a ast::Class_,
     init_meth_param_local: Local,
 ) -> Result<InstrSeq<'arena>> {
-    use string_utils::reified::INIT_METH_NAME;
-
-    let alloc = env.arena;
     let check_length = InstrSeq::gather(vec![
         instr::c_get_l(init_meth_param_local),
         instr::check_cls_reified_generic_mismatch(),
@@ -403,7 +402,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
             instr::f_call_cls_method_sd(
                 FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 SpecialClsRef::ParentCls,
-                hhbc::MethodName::from_raw_string(alloc, INIT_METH_NAME),
+                *REIFIED_INIT_METH_NAME,
             ),
             instr::pop_c(),
         ]);
@@ -449,7 +448,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         Ok(Some(make_86method(
             alloc,
             emitter,
-            hhbc::MethodName::new(Str::new_str(alloc, string_utils::reified::INIT_METH_NAME)),
+            *REIFIED_INIT_METH_NAME,
             params,
             false, // is_static
             Visibility::Public,
@@ -487,7 +486,7 @@ fn make_init_method<'arena, 'decl>(
         Ok(Some(make_86method(
             alloc,
             emitter,
-            hhbc::MethodName::new(Str::new_str(alloc, name)),
+            MethodName::intern(name),
             vec![],
             true, // is_static
             Visibility::Private,
@@ -733,7 +732,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         Some(make_86method(
             alloc,
             emitter,
-            hhbc::MethodName::new(Str::new_str(alloc, "86cinit")),
+            MethodName::new(string_id!("86cinit")),
             params,
             true, /* is_static */
             Visibility::Private,

@@ -51,6 +51,15 @@ class TestWebRoot implements IDisposable {
     $this->webRoot = Sweeper::mkdtemp('hhvm-multipart-XXXXXX');
     $testData = file_get_contents(__DIR__."/../multipart/$testName");
 
+    // Special support for tests that require a regexp that matches
+    // the domain name of the requests
+    if (strpos($testData, '{DOMAIN_REGEXP}') !== false) {
+      $parts = preg_split("/[\.]/", getHostName());
+      $domainName = $parts[count($parts)-2].'.'.$parts[count($parts)-1];
+      $hostNamePattern = '\'.*\.'.preg_quote($domainName).'$\'';
+      $testData = str_replace('{DOMAIN_REGEXP}', $hostNamePattern, $testData);
+    }
+
     $matches = preg_split(
       '|\n// (FILE: [a-zA-Z0-9_/.-]+)(?: (VERSION: [0-9]+))?\n|',
       $testData,

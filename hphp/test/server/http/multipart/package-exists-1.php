@@ -17,7 +17,7 @@ uses = ["*"]
 
 [deployments.my-prod]
 packages = ["foo", "default"]
-domains = ['.*\.facebook\.com$', '.*\.fbinfra\.net$']
+domains = [{DOMAIN_REGEXP}]
 
 
 // FILE: module_page.php

@@ -103,13 +103,6 @@ struct ServiceRequestInfo {
 using ServiceRequestInfoMap =
     folly::F14ValueMap<std::string, ServiceRequestInfo>;
 
-// InterceptedData will is the type returned by TypedInterceptors. Currently
-// the max size is 128 bytes. This was chosen to fulfill the current requirement
-// of the usecase of TypedInterceptors. Incrementing this value should be done
-// carefully, as it adds extra padding on each intercepted request.
-using InterceptedData =
-    apache::thrift::util::TypeErasedValue<128, alignof(std::max_align_t)>;
-
 // The base class for generated code that contains information about a service.
 // Each service generates a subclass of this.
 class ServiceInfoHolder {
@@ -884,8 +877,6 @@ class RequestParams {
   folly::EventBase* eventBase_{nullptr};
 };
 
-class TypedInterceptorBase;
-
 /**
  * Base-class for user-implemented service handlers. This serves as a channel
  * user code to be notified by ThriftServer and respond to events (via
@@ -947,8 +938,6 @@ class ServiceHandlerBase {
   void shutdownServer();
 
   virtual ~ServiceHandlerBase() = default;
-
-  virtual size_t getNumTypedInterceptors() const { return 0; }
 
  protected:
 #if FOLLY_HAS_COROUTINES
@@ -1152,27 +1141,6 @@ class ServerInterface : public virtual AsyncProcessorFactory,
    * NOTE: This method will be removed soon. Do not call it directly.
    */
   void setNameOverride(std::string name) { nameOverride_ = std::move(name); }
-};
-
-/**
- * Base class for all generated TypedInterceptor types. The methods generated
- * within such interfaces will be based on the ServerHandler's interface method.
- * For each intercepted method foo in ServerHandler, we will have before_foo and
- * after_foo in the associated TypedInterceptor.
- */
-class TypedInterceptorBase {
- public:
-  /**
-   * This function must be implemented by the classes that inherit from
-   * TypedInterceptorBase. The returned string will be used by thrift
-   * server to generate a unique token used to store data read from the
-   * interceptor and store it into the request context.
-   * The returned storage id will be matched against the storage id returned by
-   * TProcessorEventHandler. Storage Ids should be unique across all typed
-   * interceptors.
-   */
-  virtual std::string getStorageId() const = 0;
-  virtual ~TypedInterceptorBase() = default;
 };
 
 /**

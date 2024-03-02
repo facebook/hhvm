@@ -233,9 +233,6 @@ class ServiceHandler;
 template <class ServiceTag>
 class Client;
 
-template <class ServiceTag>
-class TypedInterceptor;
-
 } // namespace thrift
 } // namespace apache
 

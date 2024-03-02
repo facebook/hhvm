@@ -153,8 +153,6 @@ class ServerConfigsMock : public ServerConfigs {
     return taskTimeout_;
   }
 
-  size_t getNumTypedInterceptors() const override { return 0; }
-
  public:
   uint64_t maxResponseSize_{0};
   std::chrono::milliseconds queueTimeout_{std::chrono::milliseconds(500)};

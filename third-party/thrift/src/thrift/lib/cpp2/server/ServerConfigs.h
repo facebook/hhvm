@@ -234,8 +234,6 @@ class ServerConfigs {
 
   virtual std::chrono::milliseconds getTaskExpireTime() const = 0;
 
-  virtual size_t getNumTypedInterceptors() const = 0;
-
   virtual const std::vector<std::shared_ptr<TProcessorEventHandler>>&
   getLegacyEventHandlers() const {
     static const std::vector<std::shared_ptr<TProcessorEventHandler>> kEmpty;

@@ -12,7 +12,7 @@ path = "../../dep/dep.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bytemuck = { version = "1.12.3", features = ["derive", "min_const_generics"] }
+bytemuck = { version = "1.14", features = ["derive", "min_const_generics"] }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 typing_deps_hash = { version = "0.0.0", path = "../../../deps/cargo/typing_deps_hash" }

@@ -1,33 +1,18 @@
-/*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
 /* Generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_COMPRESSIONALGORITHM_CXX_H_
 #define _APACHE_THRIFT_SBE_COMPRESSIONALGORITHM_CXX_H_
 
 #if !defined(__STDC_LIMIT_MACROS)
-#define __STDC_LIMIT_MACROS 1
+#  define __STDC_LIMIT_MACROS 1
 #endif
 
 #include <cstdint>
 #include <iomanip>
 #include <limits>
 #include <ostream>
-#include <sstream>
 #include <stdexcept>
+#include <sstream>
 #include <string>
 
 #define SBE_NULLVALUE_INT8 (std::numeric_limits<std::int8_t>::min)()
@@ -43,56 +28,53 @@ namespace apache {
 namespace thrift {
 namespace sbe {
 
-class CompressionAlgorithm {
- public:
-  enum Value {
-    NONE = static_cast<std::uint8_t>(0),
-    ZLIB = static_cast<std::uint8_t>(1),
-    ZSTD = static_cast<std::uint8_t>(2),
-    NULL_VALUE = static_cast<std::uint8_t>(255)
-  };
+class CompressionAlgorithm
+{
+public:
+    enum Value
+    {
+        NONE = static_cast<std::uint8_t>(0),
+        ZLIB = static_cast<std::uint8_t>(1),
+        ZSTD = static_cast<std::uint8_t>(2),
+        NULL_VALUE = static_cast<std::uint8_t>(255)
+    };
 
-  static CompressionAlgorithm::Value get(const std::uint8_t value) {
-    switch (value) {
-      case static_cast<std::uint8_t>(0):
-        return NONE;
-      case static_cast<std::uint8_t>(1):
-        return ZLIB;
-      case static_cast<std::uint8_t>(2):
-        return ZSTD;
-      case static_cast<std::uint8_t>(255):
-        return NULL_VALUE;
+    static CompressionAlgorithm::Value get(const std::uint8_t value)
+    {
+        switch (value)
+        {
+            case static_cast<std::uint8_t>(0): return NONE;
+            case static_cast<std::uint8_t>(1): return ZLIB;
+            case static_cast<std::uint8_t>(2): return ZSTD;
+            case static_cast<std::uint8_t>(255): return NULL_VALUE;
+        }
+
+        throw std::runtime_error("unknown value for enum CompressionAlgorithm [E103]");
     }
 
-    throw std::runtime_error(
-        "unknown value for enum CompressionAlgorithm [E103]");
-  }
+    static const char *c_str(const CompressionAlgorithm::Value value)
+    {
+        switch (value)
+        {
+            case NONE: return "NONE";
+            case ZLIB: return "ZLIB";
+            case ZSTD: return "ZSTD";
+            case NULL_VALUE: return "NULL_VALUE";
+        }
 
-  static const char* c_str(const CompressionAlgorithm::Value value) {
-    switch (value) {
-      case NONE:
-        return "NONE";
-      case ZLIB:
-        return "ZLIB";
-      case ZSTD:
-        return "ZSTD";
-      case NULL_VALUE:
-        return "NULL_VALUE";
+        throw std::runtime_error("unknown value for enum CompressionAlgorithm [E103]:");
     }
 
-    throw std::runtime_error(
-        "unknown value for enum CompressionAlgorithm [E103]:");
-  }
-
-  template <typename CharT, typename Traits>
-  friend std::basic_ostream<CharT, Traits>& operator<<(
-      std::basic_ostream<CharT, Traits>& os, CompressionAlgorithm::Value m) {
-    return os << CompressionAlgorithm::c_str(m);
-  }
+    template<typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> & operator << (
+        std::basic_ostream<CharT, Traits> &os, CompressionAlgorithm::Value m)
+    {
+        return os << CompressionAlgorithm::c_str(m);
+    }
 };
 
-} // namespace sbe
-} // namespace thrift
-} // namespace apache
+}
+}
+}
 
 #endif

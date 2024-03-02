@@ -1,33 +1,18 @@
-/*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
 /* Generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_BOOLEANTYPE_CXX_H_
 #define _APACHE_THRIFT_SBE_BOOLEANTYPE_CXX_H_
 
 #if !defined(__STDC_LIMIT_MACROS)
-#define __STDC_LIMIT_MACROS 1
+#  define __STDC_LIMIT_MACROS 1
 #endif
 
 #include <cstdint>
 #include <iomanip>
 #include <limits>
 #include <ostream>
-#include <sstream>
 #include <stdexcept>
+#include <sstream>
 #include <string>
 
 #define SBE_NULLVALUE_INT8 (std::numeric_limits<std::int8_t>::min)()
@@ -43,49 +28,50 @@ namespace apache {
 namespace thrift {
 namespace sbe {
 
-class BooleanType {
- public:
-  enum Value {
-    FALSE = static_cast<std::uint8_t>(0),
-    TRUE = static_cast<std::uint8_t>(1),
-    NULL_VALUE = static_cast<std::uint8_t>(255)
-  };
+class BooleanType
+{
+public:
+    enum Value
+    {
+        FALSE = static_cast<std::uint8_t>(0),
+        TRUE = static_cast<std::uint8_t>(1),
+        NULL_VALUE = static_cast<std::uint8_t>(255)
+    };
 
-  static BooleanType::Value get(const std::uint8_t value) {
-    switch (value) {
-      case static_cast<std::uint8_t>(0):
-        return FALSE;
-      case static_cast<std::uint8_t>(1):
-        return TRUE;
-      case static_cast<std::uint8_t>(255):
-        return NULL_VALUE;
+    static BooleanType::Value get(const std::uint8_t value)
+    {
+        switch (value)
+        {
+            case static_cast<std::uint8_t>(0): return FALSE;
+            case static_cast<std::uint8_t>(1): return TRUE;
+            case static_cast<std::uint8_t>(255): return NULL_VALUE;
+        }
+
+        throw std::runtime_error("unknown value for enum BooleanType [E103]");
     }
 
-    throw std::runtime_error("unknown value for enum BooleanType [E103]");
-  }
+    static const char *c_str(const BooleanType::Value value)
+    {
+        switch (value)
+        {
+            case FALSE: return "FALSE";
+            case TRUE: return "TRUE";
+            case NULL_VALUE: return "NULL_VALUE";
+        }
 
-  static const char* c_str(const BooleanType::Value value) {
-    switch (value) {
-      case FALSE:
-        return "FALSE";
-      case TRUE:
-        return "TRUE";
-      case NULL_VALUE:
-        return "NULL_VALUE";
+        throw std::runtime_error("unknown value for enum BooleanType [E103]:");
     }
 
-    throw std::runtime_error("unknown value for enum BooleanType [E103]:");
-  }
-
-  template <typename CharT, typename Traits>
-  friend std::basic_ostream<CharT, Traits>& operator<<(
-      std::basic_ostream<CharT, Traits>& os, BooleanType::Value m) {
-    return os << BooleanType::c_str(m);
-  }
+    template<typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> & operator << (
+        std::basic_ostream<CharT, Traits> &os, BooleanType::Value m)
+    {
+        return os << BooleanType::c_str(m);
+    }
 };
 
-} // namespace sbe
-} // namespace thrift
-} // namespace apache
+}
+}
+}
 
 #endif

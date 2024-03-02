@@ -9,6 +9,7 @@ use assemble_opcode_macro::assemble_imm_for_enum;
 use bumpalo::Bump;
 use ffi::Str;
 use ffi::Vector;
+use hhbc::StringId;
 
 use crate::assemble;
 use crate::assemble::DeclMap;
@@ -467,6 +468,12 @@ impl AssembleImm<'_, hhbc::StackIndex> for Lexer<'_> {
 impl<'arena> AssembleImm<'arena, Str<'arena>> for Lexer<'_> {
     fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap) -> Result<Str<'arena>> {
         assemble::assemble_unescaped_unquoted_str(alloc, self)
+    }
+}
+
+impl<'arena> AssembleImm<'arena, StringId> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<StringId> {
+        assemble::assemble_unescaped_unquoted_intern_str(self)
     }
 }
 

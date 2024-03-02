@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
 
@@ -16,7 +15,7 @@ use crate::SrcLoc;
 use crate::StringId;
 
 /// see runtime/base/repo-auth-type.h
-pub type RepoAuthType<'arena> = Str<'arena>;
+pub type RepoAuthType = StringId;
 
 pub type StackIndex = u32;
 pub type ClassNum = u32;

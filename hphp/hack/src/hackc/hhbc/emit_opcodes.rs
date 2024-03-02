@@ -478,7 +478,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
             let ty = Ident::new(ty, Span::call_site());
             quote!(#ty)
         }
-        ImmType::RATA => quote!(RepoAuthType<#lifetime>),
+        ImmType::RATA => quote!(RepoAuthType),
         ImmType::SA => quote!(Str<#lifetime>),
         ImmType::SLA => quote!(Vector<SwitchLabel>),
         ImmType::VSA => quote!(Vector<Str<#lifetime>>),
@@ -758,7 +758,7 @@ mod tests {
                     TestLAR(LocalRange),
                     TestNLA(Local),
                     TestOA(OaSubType),
-                    TestRATA(RepoAuthType<'a>),
+                    TestRATA(RepoAuthType),
                     TestSA(Str<'a>),
                     TestSLA(Vector<SwitchLabel>),
                     TestVSA(Vector<Str<'a>>),

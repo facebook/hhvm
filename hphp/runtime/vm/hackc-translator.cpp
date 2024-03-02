@@ -225,6 +225,11 @@ folly::StringPiece toStringPiece(const Str& str) {
   return folly::StringPiece{(const char*)str.data, str.len};
 }
 
+folly::StringPiece toStringPiece(BytesId id) {
+  auto const b = deref_bytes(id);
+  return folly::StringPiece{(const char*)b.data(), b.size()};
+}
+
 StringData* toStaticString(const Str& str, uint32_t start = 0) {
   assertx(start <= str.len);
   return makeStaticString((char*)str.data + start, str.len - start);

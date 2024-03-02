@@ -235,7 +235,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
             );
             quote!(#handler(w, #name)?;)
         }
-        ImmType::RATA => quote!(print_str(w, #name)?;),
+        ImmType::RATA => quote!(print_string_id(w, #name)?;),
         ImmType::SA => quote!(print_quoted_ffi_str(w, #name)?;),
         ImmType::SLA => quote!(print_switch_labels(w, #name)?;),
         ImmType::VSA => quote!(print_shape_fields(w, #name)?;),
@@ -396,7 +396,7 @@ mod tests {
                             }
                             Opcode::TestRATA(rat) => {
                                 w.write_all(b"TestRATA ")?;
-                                print_str(w, rat)?;
+                                print_string_id(w, rat)?;
                             }
                             Opcode::TestSA(str1) => {
                                 w.write_all(b"TestSA ")?;

@@ -341,9 +341,8 @@ fn print_shape_fields(w: &mut dyn Write, keys: &[ffi::Str<'_>]) -> Result<()> {
     w.write_all(b">")
 }
 
-fn print_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
-    use bstr::ByteSlice;
-    w.write_all(s.as_bytes())
+fn print_string_id(w: &mut dyn Write, s: &StringId) -> Result<()> {
+    w.write_all(s.as_str().as_bytes())
 }
 
 impl<'a, 'b> PrintOpcodeTypes for PrintOpcode<'a, 'b> {

@@ -542,7 +542,25 @@
         }
       }
     },
-    "GenerateTypedInterceptor" : {
+    "ProcessInEbThreadUnsafe" : {
+      "lineno" : 352,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 352,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 354,
+          "column" : 34
+        }
+      }
+    },
+    "RuntimeAnnotation" : {
       "lineno" : 359,
       "is_exception" : false,
       "is_union" : false,
@@ -555,43 +573,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 362,
-          "column" : 35
-        }
-      }
-    },
-    "ProcessInEbThreadUnsafe" : {
-      "lineno" : 375,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 375,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 377,
-          "column" : 34
-        }
-      }
-    },
-    "RuntimeAnnotation" : {
-      "lineno" : 382,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 382,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 383,
+          "line" : 360,
           "column" : 28
         }
       }

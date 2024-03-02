@@ -88,8 +88,6 @@ inline constexpr auto kCppEnumTypeUri =
     "facebook.com/thrift/annotation/cpp/EnumType";
 inline constexpr auto kCppFieldInterceptorUri =
     "facebook.com/thrift/annotation/cpp/FieldInterceptor";
-inline constexpr auto kCppGenerateTypedInterceptor =
-    "facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor";
 inline constexpr auto kCppLazyUri = "facebook.com/thrift/annotation/cpp/Lazy";
 inline constexpr auto kCppMinimizePaddingUri =
     "facebook.com/thrift/annotation/cpp/MinimizePadding";

@@ -690,8 +690,6 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::service_schema_name},
             {"service:has_service_schema",
              &cpp_mstch_service::has_service_schema},
-            {"service:cpp_typed_interceptor?",
-             &cpp_mstch_service::generate_typed_interceptor},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
         });
 
@@ -792,25 +790,6 @@ class cpp_mstch_service : public mstch_service {
     }
     return name;
   }
-  mstch::node generate_typed_interceptor() {
-    if (service_->find_structured_annotation_or_null(
-            kCppGenerateTypedInterceptor)) {
-      return true;
-    }
-    for (const auto* function : get_functions()) {
-      if (function->find_structured_annotation_or_null(
-              kCppGenerateTypedInterceptor)) {
-        return true;
-      }
-    }
-    for (const auto* interaction : interactions_) {
-      if (interaction->find_structured_annotation_or_null(
-              kCppGenerateTypedInterceptor)) {
-        return true;
-      }
-    }
-    return false;
-  }
 
  private:
   const std::vector<t_function*>& get_functions() const override {
@@ -866,8 +845,6 @@ class cpp_mstch_function : public mstch_function {
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:created_interaction",
              &cpp_mstch_function::created_interaction},
-            {"function:cpp_typed_interceptor?",
-             &cpp_mstch_function::generate_typed_interceptor},
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
             {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
@@ -898,15 +875,6 @@ class cpp_mstch_function : public mstch_function {
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
         !function_->interaction() && !function_->sink_or_stream();
-  }
-  mstch::node generate_typed_interceptor() {
-    // Functions that are an interaction constructor, don't create an RPC. hence
-    // we don't generate interceptors for them.
-    return !function_->is_interaction_constructor() &&
-        (function_->find_structured_annotation_or_null(
-             kCppGenerateTypedInterceptor) ||
-         interface_->find_structured_annotation_or_null(
-             kCppGenerateTypedInterceptor));
   }
 
   mstch::node prefixed_name() {
@@ -2582,12 +2550,6 @@ void t_mstch_cpp2_generator::generate_inline_services(
               });
         });
   };
-  auto any_service = [&](auto&& predicate) -> bool {
-    return std::any_of(
-        services.cbegin(), services.cend(), [&](const t_service* service) {
-          return predicate(service);
-        });
-  };
 
   mstch::map context = {
       {"program", cached_program(get_program())},
@@ -2599,15 +2561,6 @@ void t_mstch_cpp2_generator::generate_inline_services(
        any_service_has_any_function([](const t_function& func) {
          return func.is_interaction_constructor() || func.interaction();
        })},
-      {"any_interceptors?",
-       any_service_has_any_function([](const t_function& func) {
-         return func.find_structured_annotation_or_null(
-             kCppGenerateTypedInterceptor);
-       }) ||
-           any_service([](const t_service* service) {
-             return service->find_structured_annotation_or_null(
-                 kCppGenerateTypedInterceptor);
-           })},
       {"services", std::move(mstch_services)},
   };
   const auto& module_name = get_program()->name();

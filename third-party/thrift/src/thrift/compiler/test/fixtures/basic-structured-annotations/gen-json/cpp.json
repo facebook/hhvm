@@ -612,31 +612,8 @@
         }
       }
     },
-    "GenerateTypedInterceptor" : {
-      "lineno" : 359,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Service" : {  },
-        "scope.Interaction" : {  },
-        "scope.Function" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 359,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 362,
-          "column" : 35
-        }
-      }
-    },
     "ProcessInEbThreadUnsafe" : {
-      "lineno" : 375,
+      "lineno" : 352,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -648,17 +625,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 375,
+          "line" : 352,
           "column" : 1
         },
         "end" : {
-          "line" : 377,
+          "line" : 354,
           "column" : 34
         }
       }
     },
     "RuntimeAnnotation" : {
-      "lineno" : 382,
+      "lineno" : 359,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -669,11 +646,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 382,
+          "line" : 359,
           "column" : 1
         },
         "end" : {
-          "line" : 383,
+          "line" : 360,
           "column" : 28
         }
       }

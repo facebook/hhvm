@@ -2560,99 +2560,6 @@ func (x *Frozen2RequiresCompleteContainerParams) String() string {
     return sb.String()
 }
 
-type GenerateTypedInterceptor struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &GenerateTypedInterceptor{}
-
-func NewGenerateTypedInterceptor() *GenerateTypedInterceptor {
-    return (&GenerateTypedInterceptor{})
-}
-
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGenerateTypedInterceptor().Set<FieldNameFoo>().Set<FieldNameBar>()
-type GenerateTypedInterceptorBuilder struct {
-    obj *GenerateTypedInterceptor
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGenerateTypedInterceptor().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewGenerateTypedInterceptorBuilder() *GenerateTypedInterceptorBuilder {
-    return &GenerateTypedInterceptorBuilder{
-        obj: NewGenerateTypedInterceptor(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewGenerateTypedInterceptor().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *GenerateTypedInterceptorBuilder) Emit() *GenerateTypedInterceptor {
-    var objCopy GenerateTypedInterceptor = *x.obj
-    return &objCopy
-}
-
-func (x *GenerateTypedInterceptor) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("GenerateTypedInterceptor"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *GenerateTypedInterceptor) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *GenerateTypedInterceptor) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("GenerateTypedInterceptor({")
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 type ProcessInEbThreadUnsafe struct {
 }
 // Compile time interface enforcer
@@ -2859,7 +2766,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumType", func() any { return NewEnumType() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2Exclude", func() any { return NewFrozen2Exclude() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams", func() any { return NewFrozen2RequiresCompleteContainerParams() })
-    registry.RegisterType("facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor", func() any { return NewGenerateTypedInterceptor() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe", func() any { return NewProcessInEbThreadUnsafe() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/RuntimeAnnotation", func() any { return NewRuntimeAnnotation() })
 

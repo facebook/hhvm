@@ -192,9 +192,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("cpp.Frozen2RequiresCompleteContainerParams").
     SetIsUnion(false),
     metadata.NewThriftStruct().
-    SetName("cpp.GenerateTypedInterceptor").
-    SetIsUnion(false),
-    metadata.NewThriftStruct().
     SetName("cpp.ProcessInEbThreadUnsafe").
     SetIsUnion(false),
     metadata.NewThriftStruct().

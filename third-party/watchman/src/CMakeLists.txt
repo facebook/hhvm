@@ -757,6 +757,7 @@ add_custom_target(check
 if(Python3_Interpreter_FOUND)
   if (WIN32)
     add_executable(susres watchman/winbuild/susres.cpp)
+    target_link_libraries(susres third_party_deps)
     add_custom_target(make_susres ALL DEPENDS susres)
   endif()
 

@@ -591,7 +591,7 @@ TEST_F(KeySplitRouteTest, NoAllSyncSetKeyParse) {
   size_t numReplicas = 10;
   testCreate(numReplicas, false);
   auto keyParseRouteConfig = getRoutingConfig(3);
-  auto rh = makeKeyParseRoute<MemcacheRouterInfo>(
+  auto rh = createKeyParseRoute<MemcacheRouterInfo>(
       rh_, folly::parseJson(keyParseRouteConfig));
   mockFiberContext();
   std::string key = "abc:d:e:f:g";
@@ -626,7 +626,7 @@ TEST_F(KeySplitRouteTest, GetKeyParse) {
     constexpr folly::StringPiece key = "abc:d:e:f";
     testCreate(numReplicas, j == 0);
     auto keyParseRouteConfig = getRoutingConfig(3);
-    auto rh = makeKeyParseRoute<MemcacheRouterInfo>(
+    auto rh = createKeyParseRoute<MemcacheRouterInfo>(
         rh_, folly::parseJson(keyParseRouteConfig));
     mockFiberContext();
 

@@ -94,7 +94,7 @@ class KeyParseRoute {
 KeyParseRouteSettings parseKeyParseRouteSettings(const folly::dynamic& json);
 
 template <class RouterInfo>
-typename RouterInfo::RouteHandlePtr makeKeyParseRoute(
+typename RouterInfo::RouteHandlePtr createKeyParseRoute(
     typename RouterInfo::RouteHandlePtr rh,
     const folly::dynamic& json) {
   auto settings = parseKeyParseRouteSettings(json);
@@ -108,7 +108,7 @@ typename RouterInfo::RouteHandlePtr makeKeyParseRoute(
     const folly::dynamic& json) {
   checkLogic(json.isObject(), "KeyParseRoute is not an object");
   checkLogic(json.count("target"), "KeyParseRoute: Missing target parameter");
-  return makeKeyParseRoute<RouterInfo>(factory.create(json["target"]), json);
+  return createKeyParseRoute<RouterInfo>(factory.create(json["target"]), json);
 }
 
 } // namespace facebook::memcache::mcrouter

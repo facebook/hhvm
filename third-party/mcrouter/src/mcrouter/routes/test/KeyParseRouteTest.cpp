@@ -48,7 +48,7 @@ auto getRoutingConfig(size_t numParts, std::string delimiter = ":") {
 TEST(KeyParseRouteTest, basicTest) {
   auto [srHandleVec, mockSrHandle] = getMockSrHandle();
   auto keyParseRouteConfig = getRoutingConfig(3);
-  auto rh = makeKeyParseRoute<MemcacheRouterInfo>(
+  auto rh = createKeyParseRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(keyParseRouteConfig));
   mockFiberContext();
   rh->route(McGetRequest("get:Request:part3:part4"));
@@ -114,7 +114,7 @@ TEST(KeyParseRouteTest, keyParseWithBucketRoute) {
   auto keyParseRouteConfig = getRoutingConfig(3);
   auto json = folly::parseJson(keyParseRouteConfig);
 
-  auto keyParseRh = makeKeyParseRoute<MemcacheRouterInfo>(rh, json);
+  auto keyParseRh = createKeyParseRoute<MemcacheRouterInfo>(rh, json);
   ASSERT_TRUE(keyParseRh);
   mockFiberContext();
   keyParseRh->route(McGetRequest("cache:is:key:to:scaling")); // bucketId == 80

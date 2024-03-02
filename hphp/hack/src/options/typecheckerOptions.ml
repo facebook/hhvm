@@ -61,6 +61,9 @@ let experimental_always_pessimise_return = "always_pessimise_return"
 let experimental_consider_type_const_enforceable =
   "experimental_consider_type_const_enforceable"
 
+(** Resolve the this type inside enum classes using the proper context *)
+let experimental_sound_enum_class_type_const = "sound_enum_class_this_type"
+
 let experimental_all =
   List.fold_right
     ~f:SSet.add
@@ -73,6 +76,7 @@ let experimental_all =
       experimental_supportdynamic_type_hint;
       experimental_always_pessimise_return;
       experimental_consider_type_const_enforceable;
+      experimental_sound_enum_class_type_const;
     ]
 
 let experimental_from_flags ~disallow_static_memoized =

@@ -395,17 +395,20 @@ endif()
 
 
 if(Python3_Development_FOUND)
-  set(PYOUT "${CMAKE_CURRENT_BINARY_DIR}/build/pytimestamp")
+  set(PYOUT "${CMAKE_CURRENT_BINARY_DIR}/pywatchman")
   set(SETUP_PY "${CMAKE_CURRENT_SOURCE_DIR}/watchman/python/setup.py")
+  set(PYWATCHMAN_BASE ${CMAKE_CURRENT_SOURCE_DIR}/watchman/python)
   file(GLOB PYWATCHMAN_PY_SRCS "watchman/python/pywatchman/*.py")
+  file(MAKE_DIRECTORY ${PYOUT})
   add_custom_command(
     COMMENT "Building pywatchman"
     OUTPUT ${PYOUT}
     DEPENDS ${PYWATCHMAN_PY_SRCS} "watchman/python/pywatchman/bser.c"
+    WORKING_DIRECTORY ${PYWATCHMAN_BASE}
     COMMAND ${CMAKE_COMMAND} -E env
       CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
       CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
-      ${Python3_EXECUTABLE} ${SETUP_PY} build
+      ${Python3_EXECUTABLE} ${SETUP_PY} build --build-base ${PYOUT}
     COMMAND ${CMAKE_COMMAND} -E touch ${PYOUT}
   )
   add_custom_target(pybuild ALL DEPENDS ${PYOUT})
@@ -415,6 +418,7 @@ if(Python3_Development_FOUND)
         CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         ${Python3_EXECUTABLE} ${SETUP_PY} install
         --root $ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}
+      WORKING_DIRECTORY ${PYWATCHMAN_BASE}
       RESULT_VARIABLE STATUS)
     if (NOT STATUS STREQUAL 0)
       message(FATAL_ERROR \"pywatchman install failed\")

@@ -1,0 +1,41 @@
+[project]
+name = "pywatchman"
+version = "2.0.0"
+authors = [
+    { name = "Meta Source Control Team", email = "sourcecontrol-dev@fb.com" },
+]
+description = "Watchman client for Python"
+license = { file = "LICENSE" }
+readme = "../README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: System :: Filesystems",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+keywords = [
+    "watchman",
+    "inotify",
+    "fsevents",
+    "kevent",
+    "kqueue",
+    "portfs",
+    "filesystem",
+    "watcher",
+]
+
+[project.urls]
+Homepage = "https://github.com/facebook/watchman"
+Issues = "https://github.com/facebook/watchman/issues"
+
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel>=0.37.0"]
+build-backend = "setuptools.build_meta"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
@@ -42,9 +42,7 @@
 #include <thrift/compiler/generate/t_concat_generator.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 class t_name_generator {
@@ -77,7 +75,7 @@ class t_result_struct final : public t_structured {
   t_result_struct(
       t_program* program, std::string name, std::string result_return_type)
       : t_structured(program, std::move(name)),
-        result_return_type{result_return_type} {}
+        result_return_type{std::move(result_return_type)} {}
 
   std::string getResultReturnType() const { return result_return_type; }
 
@@ -2850,7 +2848,7 @@ bool t_hack_generator::is_valid_hack_type(const t_type* type) {
   if (!type->is_container()) {
     return true;
   }
-  const t_type* ktype;
+  const t_type* ktype = nullptr;
   if (type->is_map()) {
     ktype = static_cast<const t_map*>(type)->get_key_type();
   } else {
@@ -3027,7 +3025,7 @@ void t_hack_generator::generate_php_type_spec_shape_elt_helper(
     uint32_t depth) {
   indent(out) << "'" << field_name << "' => ";
   if (depth >= min_depth_for_unsafe_cast_) {
-    out << "\\HH\\FIXME\\UNSAFE_CAST<mixed, \\HH_FIXME\\NON_DENOTABLE_TYPE>(";
+    out << R"(\HH\FIXME\UNSAFE_CAST<mixed, \HH_FIXME\NON_DENOTABLE_TYPE>()";
   }
   out << "shape(\n";
   indent_up();
@@ -3201,7 +3199,7 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
           << ", true), static::class),\n";
     }
   } else if (t->is_map() || t->is_list()) {
-    const t_type* val_type;
+    const t_type* val_type = nullptr;
     if (t->is_map()) {
       val_type = static_cast<const t_map*>(t)->get_val_type();
     } else {
@@ -3350,7 +3348,7 @@ void t_hack_generator::generate_shape_from_hack_array_lambda(
   indent(out);
   out << "($" << tmp << ") ==> $" << tmp;
 
-  const t_type* val_type;
+  const t_type* val_type = nullptr;
   if (t->is_map()) {
     val_type = static_cast<const t_map*>(t)->get_val_type();
   } else {
@@ -3544,7 +3542,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
             val << ",\n";
           }
         } else {
-          const t_type* val_type;
+          const t_type* val_type = nullptr;
           if (t->is_map()) {
             val_type = static_cast<const t_map*>(t)->get_val_type();
           } else {
@@ -3652,7 +3650,7 @@ bool t_hack_generator::
     std::string suffix = "";
     std::string container_type = "";
     bool stringify_map_keys = false;
-    const t_type* val_type;
+    const t_type* val_type = nullptr;
 
     if (ttype->is_map()) {
       container_type = "Dict\\";
@@ -3793,7 +3791,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     }
     std::string container_prefix = "";
     bool use_to_darray_conv = false;
-    const t_type* val_type;
+    const t_type* val_type = nullptr;
 
     if (ttype->is_map()) {
       container_prefix = "Dict\\";
@@ -5414,7 +5412,7 @@ void t_hack_generator::
   }
   auto name = field.name();
 
-  bool is_async;
+  bool is_async = false;
   std::string source_str;
   if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
     is_async = false;
@@ -6652,7 +6650,7 @@ std::string t_hack_generator::type_to_typehint(
 
   ttype = ttype->get_true_type();
   if (ttype->is_base_type()) {
-    switch (((t_base_type*)ttype)->get_base()) {
+    switch ((dynamic_cast<const t_base_type*>(ttype))->get_base()) {
       case t_base_type::TYPE_VOID:
         return "void";
       case t_base_type::TYPE_STRING:
@@ -7083,7 +7081,7 @@ void t_hack_generator::_generate_sendImpl_arg(
     t_name_generator& namer,
     const std::string& var,
     const t_type* t) {
-  const t_type* val_type;
+  const t_type* val_type = nullptr;
   if (strict_types_ || !t->is_container()) {
     out << var;
     return;
@@ -7711,6 +7709,4 @@ THRIFT_REGISTER_GENERATOR(
     "    enum_transparenttype Use transparent typing for Hack enums: 'enum "
     "FooBar: int as int'.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

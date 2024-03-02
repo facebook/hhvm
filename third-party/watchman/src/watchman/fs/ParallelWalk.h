@@ -16,7 +16,7 @@
 
 namespace watchman {
 
-// Consider eden/fs/utils/PathFuncs.h, if builds.
+// Consider eden/common/utils/PathFuncs.h, if builds.
 using PathComponent = folly::fbstring;
 using AbsolutePath = folly::fbstring;
 

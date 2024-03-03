@@ -98,7 +98,8 @@ class LspTestSpec:
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
         """For example .ignore_notifications(method="textDocument/publishDiagnostics") --
         normally an unexpected notification from the LSP server would result in test failure,
-        but this directive means that unexpected notifications with this exact method name do not."""
+        but this directive means that unexpected notifications with this exact method name do not.
+        """
         ignored_notification_methods = set(self._ignored_notification_methods)
         ignored_notification_methods.add(method)
         return self._update(ignored_notification_methods=ignored_notification_methods)
@@ -310,7 +311,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 
     def _get_json_commands(
         self,
-        variables: VariableMap
+        variables: VariableMap,
         # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
     ) -> Tuple[Sequence[Json], "_LspIdMap"]:
         """Transforms this test spec into something the LSP command processor

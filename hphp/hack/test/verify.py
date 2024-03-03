@@ -307,7 +307,6 @@ def run_test_program(
     check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
 ) -> List[Result]:
-
     """
     Run the program and return a list of results.
     """

@@ -95,8 +95,8 @@ class TestTypeErrorAtPos(TestCase[TypeErrorAtPosDriver]):
             ("return_and_fn_arg.php", [(5, 10), (5, 21)]),
         ]
 
-        for (file_name, positions) in cases:
-            for (row_num, col_num) in positions:
+        for file_name, positions in cases:
+            for row_num, col_num in positions:
                 with self.subTest(msg=f"{file_name}:{row_num}:{col_num}"):
                     self.test_driver.assert_expected_error_matches_extracted_error(
                         file_name, row_num, col_num

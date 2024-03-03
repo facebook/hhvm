@@ -30,6 +30,7 @@ import sys
 ROOT = "."
 HACKC = "hackc"
 
+
 # From the current "// TEST-CHECK..." remove "// CHECK..." lines.
 def strip_existing_check(input, idx):
     old = []

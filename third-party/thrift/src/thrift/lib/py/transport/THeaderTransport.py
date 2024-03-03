@@ -457,9 +457,9 @@ class THeaderTransport(TTransportBase, CReadableTransport):
 
         if self.__first_request:
             self.__first_request = False
-            self.__write_headers[
-                self.CLIENT_METADATA_HEADER
-            ] = '{"agent":"THeaderTransport.py"}'
+            self.__write_headers[self.CLIENT_METADATA_HEADER] = (
+                '{"agent":"THeaderTransport.py"}'
+            )
 
         info_data = StringIO()
 

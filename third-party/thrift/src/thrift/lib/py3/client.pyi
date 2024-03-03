@@ -78,6 +78,6 @@ def install_proxy_factory(
 ) -> None: ...
 
 # pyre-ignore[3] : it may return anything
-def get_proxy_factory() -> Optional[
-    Callable[[Type[Client]], Callable[[Client], Any]]
-]: ...
+def get_proxy_factory() -> (
+    Optional[Callable[[Type[Client]], Callable[[Client], Any]]]
+): ...

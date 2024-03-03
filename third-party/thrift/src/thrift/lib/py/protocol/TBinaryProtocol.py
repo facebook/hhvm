@@ -21,7 +21,6 @@ from struct import pack, unpack
 
 
 class TBinaryProtocol(TProtocolBase):
-
     """Binary implementation of the Thrift protocol driver."""
 
     # For simpler THeaderTransport
@@ -250,7 +249,6 @@ class TBinaryProtocolFactory:
 
 
 class TBinaryProtocolAccelerated(TBinaryProtocol):
-
     """C-Accelerated version of TBinaryProtocol.
 
     This class does not override any of TBinaryProtocol's methods,

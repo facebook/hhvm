@@ -96,7 +96,7 @@ class TestDirName(WatchmanTestCase.WatchmanTestCase):
             ["1", 4, []],
         ]
 
-        for (dirname, depth, expect) in tests:
+        for dirname, depth, expect in tests:
             if depth is None:
                 # equivalent to `depth ge 0`
                 term = ["dirname", dirname]

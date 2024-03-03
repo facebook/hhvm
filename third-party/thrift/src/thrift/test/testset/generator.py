@@ -531,9 +531,9 @@ def gen_adapted_typedefs_transform(
             )
         else:
             if has_custom_default(values[key]):
-                adapted_typedefs[
-                    f"adapted_typedef_{key}"
-                ] = f"adapted_typedef_{remove_custom_default(values[key])}{{{get_custom_default(values[key])}}}"
+                adapted_typedefs[f"adapted_typedef_{key}"] = (
+                    f"adapted_typedef_{remove_custom_default(values[key])}{{{get_custom_default(values[key])}}}"
+                )
             else:
                 adapted_typedefs[f"adapted_typedef_{key}"] = f"adapted_typedef_{key}"
     return adapted_typedefs

@@ -65,9 +65,11 @@ class AbstractTest:
             newmap={1: 2, 2: 3},
             newstring="Hola!",
             # json cannot serialize bytes in python 3
-            newunicodestring="any\x7f\xff".encode("utf-8")
-            if sys.version_info[0] < 3
-            else "any\x7f\xff",
+            newunicodestring=(
+                "any\x7f\xff".encode("utf-8")
+                if sys.version_info[0] < 3
+                else "any\x7f\xff"
+            ),
             newbool=True,
             end_in_both=54321,
         )

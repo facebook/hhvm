@@ -110,7 +110,6 @@ class TServerEventHandler:
 
 
 class TServer:
-
     """Base interface for a server, which must have a serve method."""
 
     """ constructors for all servers:

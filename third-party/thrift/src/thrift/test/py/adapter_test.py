@@ -74,7 +74,7 @@ class AdapterTest(unittest.TestCase):
             ),
         }
         for protocol in PROTOCOLS:
-            for (name, (foo, foo_without_adapters)) in INPUTS.items():
+            for name, (foo, foo_without_adapters) in INPUTS.items():
                 with self.subTest(case=name, protocol=type(protocol).__name__):
                     serialized = Serializer.serialize(protocol, foo)
                     deserialized = Serializer.deserialize(protocol, serialized, Foo())

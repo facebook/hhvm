@@ -575,7 +575,7 @@ def expand_matrix(test_class) -> None:
         except unittest.SkipTest:
             pass
 
-    for (transport, encoding, parallel, split, suffix) in matrix:
+    for transport, encoding, parallel, split, suffix in matrix:
         make_class(transport, encoding, suffix, parallel == "parallel", split)
 
     return None

@@ -123,7 +123,6 @@ class TServerInterface:
 
 
 class TProcessor:
-
     """Base class for processor, which works on two streams."""
 
     def __init__(self):
@@ -246,7 +245,6 @@ class TProcessor:
 
 
 class TException(Exception):
-
     """Base class for all thrift exceptions."""
 
     # BaseException.message is deprecated in Python v[2.6,3.0)
@@ -266,7 +264,6 @@ class TException(Exception):
 
 
 class TApplicationException(TException):
-
     """Application level thrift exceptions."""
 
     UNKNOWN = 0

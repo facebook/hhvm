@@ -387,6 +387,7 @@ else:
 
 tls = threading.local()
 
+
 # Manage printing from concurrent threads
 # http://stackoverflow.com/a/3030755/149111
 class ThreadSafeFile:

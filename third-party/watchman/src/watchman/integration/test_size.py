@@ -35,7 +35,7 @@ class TestSizeExpr(WatchmanTestCase.WatchmanTestCase):
             ["lt", 3, ["empty"]],
         ]
 
-        for (op, operand, expect) in tests:
+        for op, operand, expect in tests:
             res = self.watchmanCommand(
                 "query", root, {"expression": ["size", op, operand], "fields": ["name"]}
             )

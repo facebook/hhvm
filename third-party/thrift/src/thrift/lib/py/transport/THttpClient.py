@@ -28,7 +28,6 @@ from thrift.transport.TTransport import TTransportBase, TTransportException
 
 
 class THttpClient(TTransportBase):
-
     """Http implementation of TTransport base."""
 
     def __init__(self, uri_or_host, port=None, path=None, ssl_context=None):

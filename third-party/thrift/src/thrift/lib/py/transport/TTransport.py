@@ -23,7 +23,6 @@ from thrift.util.BytesStrIO import BytesStrIO as StringIO
 
 
 class TTransportException(TException):
-
     """Custom Transport Exception class"""
 
     UNKNOWN = 0
@@ -41,7 +40,6 @@ class TTransportException(TException):
 
 
 class TTransportBase(object):
-
     """Base class for Thrift transport layer."""
 
     def isOpen(self):
@@ -110,7 +108,6 @@ class CReadableTransport:
 
 
 class TServerTransportBase:
-
     """Base class for Thrift server transports."""
 
     def listen(self):
@@ -124,7 +121,6 @@ class TServerTransportBase:
 
 
 class TTransportFactoryBase:
-
     """Base class for a Transport Factory"""
 
     def getTransport(self, trans):
@@ -132,7 +128,6 @@ class TTransportFactoryBase:
 
 
 class TBufferedTransportFactory:
-
     """Factory transport that builds buffered transports"""
 
     def getTransport(self, trans):
@@ -141,7 +136,6 @@ class TBufferedTransportFactory:
 
 
 class TBufferedTransport(TTransportBase, CReadableTransport):
-
     """Class that wraps another transport and buffers its I/O.
 
     The implementation uses a (configurable) fixed-size read buffer
@@ -267,7 +261,6 @@ class TMemoryBuffer(TTransportBase, CReadableTransport):
 
 
 class TFramedTransportFactory:
-
     """Factory transport that builds framed transports"""
 
     def getTransport(self, trans):
@@ -276,7 +269,6 @@ class TFramedTransportFactory:
 
 
 class TFramedTransport(TTransportBase, CReadableTransport):
-
     """Class that wraps another transport and frames its I/O when writing."""
 
     def __init__(

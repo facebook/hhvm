@@ -24,7 +24,6 @@ from thrift.transport.THeaderTransport import CLIENT_TYPE, THeaderTransport
 
 
 class THeaderProtocolAccelerate:
-
     """Base class for pass through header protocols"""
 
     def get_protocol_id(self):
@@ -32,7 +31,6 @@ class THeaderProtocolAccelerate:
 
 
 class THeaderProtocol(TProtocolBase, THeaderProtocolAccelerate):
-
     """Pass through header protocol (transport can set)"""
 
     T_BINARY_PROTOCOL = 0

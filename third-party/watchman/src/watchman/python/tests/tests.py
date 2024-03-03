@@ -131,7 +131,7 @@ def expand_bser_mods(test_class):
     caller_scope = inspect.currentframe().f_back.f_locals
 
     flavors = [(bser, "Bser"), (pybser, "PyBser")]
-    for (mod, suffix) in flavors:
+    for mod, suffix in flavors:
 
         def make_class(mod, suffix):
             subclass_name = test_class.__name__ + suffix

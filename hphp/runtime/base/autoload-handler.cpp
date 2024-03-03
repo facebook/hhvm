@@ -214,19 +214,19 @@ const StaticString
   s_line("line");
 
 Optional<AutoloadMap::FileResult> AutoloadHandler::getFile(
-  const String& clsName, AutoloadMap::KindOf kind) {
+  const String& name, AutoloadMap::KindOf kind) {
   assertx(m_map);
   // Always normalize name before autoloading
-  return m_map->getFile(kind, normalizeNS(clsName));
+  return m_map->getFile(kind, normalizeNS(name));
 }
 
 template <class T>
 bool
-AutoloadHandler::loadFromMapImpl(const String& clsName,
+AutoloadHandler::loadFromMapImpl(const String& name,
                                  AutoloadMap::KindOf kind,
                                  const T &checkExists,
                                  Variant& err) {
-  auto fileRes = getFile(clsName, kind);
+  auto fileRes = getFile(name, kind);
   if (!fileRes) {
     return false;
   }
@@ -287,12 +287,12 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
 
 template <class T>
 bool
-AutoloadHandler::loadFromMap(const String& clsName,
+AutoloadHandler::loadFromMap(const String& name,
                              AutoloadMap::KindOf kind,
                              const T &checkExists) {
   assertx(m_map);
   Variant err{Variant::NullInit()};
-  return loadFromMapImpl(clsName, kind, checkExists, err);
+  return loadFromMapImpl(name, kind, checkExists, err);
 }
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {

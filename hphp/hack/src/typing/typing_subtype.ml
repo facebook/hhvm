@@ -726,14 +726,6 @@ end = struct
       env
       ty_sub
       ty_super =
-    (* let default ~sub_supportdyn env =
-         mk_issubtype_prop
-           ~sub_supportdyn
-           ~coerce:subtype_env.Subtype_env.coerce
-           env
-           ty_sub
-           ty_super
-       in *)
     let (env, ty_super) = Env.expand_internal_type env ty_super in
     let (env, ty_sub) = Env.expand_internal_type env ty_sub in
     (* We further refine the default subtype case for rules that apply to all

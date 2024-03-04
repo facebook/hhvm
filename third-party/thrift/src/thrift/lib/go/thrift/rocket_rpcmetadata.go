@@ -26,6 +26,7 @@ type requestRPCMetadata struct {
 	TypeID  MessageType
 	ProtoID ProtocolID
 	Zstd    bool
+	Other   map[string]string
 }
 
 // serializeRequestRPCMetadata sets the given arguments into a RequestRpcMetadata struct and serializes it into bytes
@@ -65,6 +66,7 @@ func newRequestRPCMetadata(request *RequestRpcMetadata) (*requestRPCMetadata, er
 		TypeID:  typeID,
 		ProtoID: protoID,
 		Zstd:    zstd,
+		Other:   request.OtherMetadata,
 	}, nil
 }
 
@@ -85,6 +87,7 @@ func newRPCMetadataRequest(request *requestRPCMetadata) (*RequestRpcMetadata, er
 		compression := CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
 	}
+	metadata.OtherMetadata = request.Other
 	return metadata, nil
 }
 

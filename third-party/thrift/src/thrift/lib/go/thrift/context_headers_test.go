@@ -18,12 +18,13 @@ package thrift
 
 import (
 	"context"
+	"net"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSomeHeaders(t *testing.T) {
+func TestHeaderProtocolSomeHeaders(t *testing.T) {
 	ctx := context.Background()
 	want := map[string]string{"key1": "value1", "key2": "value2"}
 	var err error
@@ -33,16 +34,48 @@ func TestSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
-	if err := setRequestHeaders(ctx, transport); err != nil {
+	protocol := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
+	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
-	got := transport.getRequestHeaders()
+	got := protocol.Headers()
+	assert.Equal(t, want, got)
+}
+
+type mockRocketSocket struct {
+	*MemoryBuffer
+}
+
+func (m *mockRocketSocket) Conn() net.Conn { return nil }
+
+func TestRocketProtocolSomeHeaders(t *testing.T) {
+	ctx := context.Background()
+	want := map[string]string{"key1": "value1", "key2": "value2"}
+	var err error
+	for key, value := range want {
+		ctx, err = AddHeader(ctx, key, value)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	protocol := NewRocketProtocol(NewRocketTransport(&mockRocketSocket{}))
+	if err := setRequestHeaders(ctx, protocol); err != nil {
+		t.Fatal(err)
+	}
+	got := protocol.(requestHeaders).getRequestHeaders()
 	assert.Equal(t, want, got)
 }
 
 // somewhere we are still passing context as nil, so we need to support this for now
-func TestSetNilHeaders(t *testing.T) {
+func TestRocketProtocolSetNilHeaders(t *testing.T) {
+	transport := NewRocketProtocol(NewRocketTransport(&mockRocketSocket{}))
+	if err := setRequestHeaders(nil, transport); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// somewhere we are still passing context as nil, so we need to support this for now
+func TestHeaderProtocolSetNilHeaders(t *testing.T) {
 	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
 	if err := setRequestHeaders(nil, transport); err != nil {
 		t.Fatal(err)

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net"
 
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
@@ -42,8 +43,17 @@ func (p *rocketTransportFactory) GetTransport(socket Transport) Transport {
 	return NewRocketTransport(tsocket)
 }
 
+// rocketSocket is a minimal interface for thrift.Socket
+type rocketSocket interface {
+	Conn() net.Conn
+	IsOpen() bool
+	Open() error
+	Close() error
+	Flush() error
+}
+
 type rocketTransport struct {
-	socket *Socket
+	socket rocketSocket
 
 	// rsocket client state
 	ctx    context.Context
@@ -62,8 +72,8 @@ type rocketTransport struct {
 	protoID ProtocolID
 }
 
-// NewRocketTransport creates a new transport with defaults.
-func NewRocketTransport(socket *Socket) Transport {
+// NewRocketTransport creates a new transport given a thrift.Socket.
+func NewRocketTransport(socket rocketSocket) Transport {
 	t := &rocketTransport{
 		socket:  socket,
 		protoID: ProtocolIDCompact,

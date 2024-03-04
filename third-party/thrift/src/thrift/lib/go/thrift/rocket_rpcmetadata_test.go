@@ -28,6 +28,7 @@ func TestRequestRPCMetadata(t *testing.T) {
 		TypeID:  CALL,
 		ProtoID: ProtocolIDCompact,
 		Zstd:    true,
+		Other:   map[string]string{"header": "1"},
 	}
 	data, err := serializeRequestRPCMetadata(want)
 	require.NoError(t, err)

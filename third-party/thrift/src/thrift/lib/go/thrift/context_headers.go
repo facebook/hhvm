@@ -65,7 +65,6 @@ func setRequestHeaders(ctx context.Context, protocol Protocol) error {
 	}
 	p, ok := protocol.(requestHeaders)
 	if !ok {
-		// TODO(T173277635): Support Rocket Transport
 		return NewTransportException(NOT_IMPLEMENTED, fmt.Sprintf("requestHeaders not implemented for transport type %T", protocol))
 	}
 	for k, v := range headersMap {

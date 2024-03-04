@@ -91,17 +91,59 @@ func (p *rocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqi
 	}
 	p.seqID = seqid
 
-	p.reqMetadata = &requestRPCMetadata{
-		Name:    name,
-		TypeID:  typeID,
-		ProtoID: p.protoID,
-		Zstd:    true,
+	if p.reqMetadata == nil {
+		p.reqMetadata = &requestRPCMetadata{}
 	}
+	p.reqMetadata.Name = name
+	p.reqMetadata.TypeID = typeID
+	p.reqMetadata.ProtoID = p.protoID
+	p.reqMetadata.Zstd = true
 	return nil
 }
 
 func (p *rocketProtocol) WriteMessageEnd() error {
 	return nil
+}
+
+func (p *rocketProtocol) Flush() (err error) {
+	metadataBytes, err := serializeRequestRPCMetadata(p.reqMetadata)
+	if err != nil {
+		return err
+	}
+	// serializer in the protocol field was writing to the transport's memory buffer.
+	dataBytes := p.trans.wbuf.Bytes()
+	if p.reqMetadata.Zstd {
+		dataBytes, err = compressZstd(dataBytes)
+		if err != nil {
+			return err
+		}
+	}
+
+	request := payload.New(dataBytes, metadataBytes)
+	p.responseChan = make(chan payload.Payload, 1)
+	p.errChan = make(chan error, 1)
+	if !p.trans.IsOpen() {
+		if err := p.trans.Open(); err != nil {
+			return err
+		}
+	}
+	p.trans.client.RequestResponse(request).Subscribe(p.trans.ctx, rx.OnNext(
+		func(response payload.Payload) error {
+			metadata, _ := response.Metadata()
+			data := response.Data()
+			newPayload := payload.New(data, metadata)
+			p.responseChan <- newPayload
+			return nil
+		}),
+		rx.OnError(func(e error) {
+			p.errChan <- e
+		}),
+		rx.OnComplete(func() {
+			close(p.responseChan)
+			close(p.errChan)
+		}))
+
+	return NewProtocolException(p.trans.Flush())
 }
 
 func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
@@ -153,48 +195,8 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 }
 
 func (p *rocketProtocol) ReadMessageEnd() error {
+	p.reqMetadata = nil
 	return nil
-}
-
-func (p *rocketProtocol) Flush() (err error) {
-	metadataBytes, err := serializeRequestRPCMetadata(p.reqMetadata)
-	if err != nil {
-		return err
-	}
-	// serializer in the protocol field was writing to the transport's memory buffer.
-	dataBytes := p.trans.wbuf.Bytes()
-	if p.reqMetadata.Zstd {
-		dataBytes, err = compressZstd(dataBytes)
-		if err != nil {
-			return err
-		}
-	}
-
-	request := payload.New(dataBytes, metadataBytes)
-	p.responseChan = make(chan payload.Payload, 1)
-	p.errChan = make(chan error, 1)
-	if !p.trans.IsOpen() {
-		if err := p.trans.Open(); err != nil {
-			return err
-		}
-	}
-	p.trans.client.RequestResponse(request).Subscribe(p.trans.ctx, rx.OnNext(
-		func(response payload.Payload) error {
-			metadata, _ := response.Metadata()
-			data := response.Data()
-			newPayload := payload.New(data, metadata)
-			p.responseChan <- newPayload
-			return nil
-		}),
-		rx.OnError(func(e error) {
-			p.errChan <- e
-		}),
-		rx.OnComplete(func() {
-			close(p.responseChan)
-			close(p.errChan)
-		}))
-
-	return NewProtocolException(p.trans.Flush())
 }
 
 func (p *rocketProtocol) Skip(fieldType Type) (err error) {
@@ -204,6 +206,20 @@ func (p *rocketProtocol) Skip(fieldType Type) (err error) {
 // Deprecated: Transport is a deprecated method
 func (p *rocketProtocol) Transport() Transport {
 	return nil
+}
+
+func (p *rocketProtocol) setRequestHeader(key, value string) {
+	if p.reqMetadata == nil {
+		p.reqMetadata = &requestRPCMetadata{}
+	}
+	if p.reqMetadata.Other == nil {
+		p.reqMetadata.Other = make(map[string]string)
+	}
+	p.reqMetadata.Other[key] = value
+}
+
+func (p *rocketProtocol) getRequestHeaders() map[string]string {
+	return p.reqMetadata.Other
 }
 
 func (p *rocketProtocol) Close() error {

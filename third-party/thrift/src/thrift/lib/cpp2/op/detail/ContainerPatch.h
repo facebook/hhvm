@@ -277,7 +277,7 @@ template <typename Patch>
 class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, MapPatch>;
   using T = typename Base::value_type;
-  using P = folly::remove_cvref_t<decltype(*std::declval<Patch>().patch())>;
+  using P = get_native_type<Patch, ident::patch>;
   using VP = typename P::mapped_type;
 
  public:
@@ -345,9 +345,10 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   FOLLY_NODISCARD VP& patchByKey(K&& key) {
     ensurePatchable();
     if (data_.remove()->count(key)) {
-      // We are going to delete key, thus patchByKey is no-op and we return a
-      // dummy patch.
-      return dummy_;
+      // We are going to delete key, thus patchByKey is no-op and we just return
+      // a dummy patch for optimization.
+      dummy_.resize(1);
+      return dummy_[0];
     }
     return isKeyModified(key) ? data_.patch()->operator[](key)
                               : data_.patchPrior()->operator[](key);
@@ -469,7 +470,10 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::data_;
   using Base::hasAssign;
 
-  VP dummy_;
+  // Used to return a dummy patch that can be discarded.
+  // We use std::vector here since VP might be an incomplete type,
+  // e.g., struct Foo { 1: map<i32, Foo> foos; }
+  std::vector<VP> dummy_;
 };
 
 } // namespace detail

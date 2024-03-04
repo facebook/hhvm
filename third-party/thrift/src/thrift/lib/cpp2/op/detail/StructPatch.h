@@ -161,7 +161,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   using Base::operator=;
   using Base::assign;
   /// Corresponding FieldPatch of this struct patch.
-  using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
+  using patch_type = get_native_type<Patch, ident::patch>;
 
   BaseEnsurePatch(const BaseEnsurePatch&) = default;
   BaseEnsurePatch(BaseEnsurePatch&&) noexcept = default;
@@ -495,7 +495,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using Base::assign;
   using Base::Base;
   using Base::operator=;
-  using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
+  using patch_type = get_native_type<Patch, ident::patch>;
 
   void clear() {
     Base::clear();

@@ -30,6 +30,9 @@
 
 namespace apache {
 namespace thrift {
+namespace ident {
+struct patch;
+}
 namespace op {
 
 class bad_patch_access : public std::runtime_error {
@@ -44,7 +47,8 @@ namespace detail {
 /// - Patch: The Thrift struct representation for the patch.
 /// - Derived: The leaf type deriving from this class.
 template <typename Patch, typename Derived>
-class BasePatch : public type::detail::EqWrap<Derived, Patch> {
+class BasePatch
+    : public type::detail::EqWrap<Derived, Patch, type::struct_t<Patch>> {
   using Base = type::detail::EqWrap<Derived, Patch>;
 
  public:

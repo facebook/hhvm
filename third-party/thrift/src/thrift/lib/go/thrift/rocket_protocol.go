@@ -33,6 +33,8 @@ type rocketProtocol struct {
 	reqMetadata  *requestRPCMetadata
 	respMetadata *ResponseRpcMetadata
 	seqID        int32
+
+	persistentHeaders map[string]string
 }
 
 type rocketProtocolFactory struct{}
@@ -49,7 +51,8 @@ func (p *rocketProtocolFactory) GetProtocol(trans Transport) Protocol {
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
 func NewRocketProtocol(trans Transport) Protocol {
 	p := &rocketProtocol{
-		protoID: ProtocolIDCompact,
+		protoID:           ProtocolIDCompact,
+		persistentHeaders: make(map[string]string),
 	}
 	switch t := trans.(type) {
 	case *rocketTransport:
@@ -106,6 +109,9 @@ func (p *rocketProtocol) WriteMessageEnd() error {
 }
 
 func (p *rocketProtocol) Flush() (err error) {
+	for k, v := range p.persistentHeaders {
+		p.reqMetadata.Other[k] = v
+	}
 	metadataBytes, err := serializeRequestRPCMetadata(p.reqMetadata)
 	if err != nil {
 		return err
@@ -206,6 +212,23 @@ func (p *rocketProtocol) Skip(fieldType Type) (err error) {
 // Deprecated: Transport is a deprecated method
 func (p *rocketProtocol) Transport() Transport {
 	return nil
+}
+
+func (p *rocketProtocol) SetPersistentHeader(key, value string) {
+	p.persistentHeaders[key] = value
+}
+
+func (p *rocketProtocol) GetPersistentHeader(key string) (string, bool) {
+	v, ok := p.persistentHeaders[key]
+	return v, ok
+}
+
+func (p *rocketProtocol) GetPersistentHeaders() map[string]string {
+	return p.persistentHeaders
+}
+
+func (p *rocketProtocol) ClearPersistentHeaders() {
+	p.persistentHeaders = make(map[string]string)
 }
 
 func (p *rocketProtocol) setRequestHeader(key, value string) {

@@ -481,7 +481,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::RATA => quote!(RepoAuthType),
         ImmType::SA => quote!(Str<#lifetime>),
         ImmType::SLA => quote!(Vector<SwitchLabel>),
-        ImmType::VSA => quote!(Vector<Str<#lifetime>>),
+        ImmType::VSA => quote!(Vector<crate::BytesId>),
     }
 }
 
@@ -761,7 +761,7 @@ mod tests {
                     TestRATA(RepoAuthType),
                     TestSA(Str<'a>),
                     TestSLA(Vector<SwitchLabel>),
-                    TestVSA(Vector<Str<'a>>),
+                    TestVSA(Vector<crate::BytesId>),
                 }
                 impl<'a> MyOps<'a> {
                     pub fn variant_name(&self) -> &'static str {

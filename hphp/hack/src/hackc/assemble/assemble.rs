@@ -18,6 +18,7 @@ use bumpalo::Bump;
 use ffi::Maybe;
 use ffi::Str;
 use ffi::Vector;
+use hhbc::BytesId;
 use hhbc::ModuleName;
 use hhbc::StringId;
 use hhbc::StringIdMap;
@@ -1833,6 +1834,15 @@ pub(crate) fn assemble_unescaped_unquoted_intern_str(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
     Ok(hhbc::intern(std::str::from_utf8(&st)?))
+}
+
+pub(crate) fn assemble_unescaped_unquoted_intern_bytes(
+    token_iter: &mut Lexer<'_>,
+) -> Result<BytesId> {
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(
+        token_iter.expect_with(Token::into_unquoted_str_literal)?,
+    )?;
+    Ok(hhbc::intern_bytes(st.as_ref()))
 }
 
 pub(crate) fn assemble_unescaped_unquoted_str<'arena>(

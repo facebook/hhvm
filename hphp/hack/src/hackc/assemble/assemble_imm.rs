@@ -9,6 +9,7 @@ use assemble_opcode_macro::assemble_imm_for_enum;
 use bumpalo::Bump;
 use ffi::Str;
 use ffi::Vector;
+use hhbc::BytesId;
 use hhbc::StringId;
 
 use crate::assemble;
@@ -452,6 +453,18 @@ impl<'arena> AssembleImm<'arena, Vector<Str<'arena>>> for Lexer<'_> {
         let mut d = Vec::new();
         while !self.peek_is(Token::is_gt) {
             d.push(assemble::assemble_unescaped_unquoted_str(alloc, self)?);
+        }
+        self.expect(Token::is_gt)?;
+        Ok(d.into())
+    }
+}
+
+impl<'arena> AssembleImm<'arena, Vector<BytesId>> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<Vector<BytesId>> {
+        self.expect(Token::is_lt)?;
+        let mut d = Vec::new();
+        while !self.peek_is(Token::is_gt) {
+            d.push(assemble::assemble_unescaped_unquoted_intern_bytes(self)?);
         }
         self.expect(Token::is_gt)?;
         Ok(d.into())

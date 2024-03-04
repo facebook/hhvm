@@ -580,7 +580,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
             Hhbc::NewPair(..) => Opcode::NewPair,
             Hhbc::NewStructDict(ref keys, _, _) => {
-                let keys = Vec::from_iter(keys.iter().map(|key| self.strings.lookup_ffi_str(*key)));
+                let keys = Vec::from_iter(
+                    keys.iter()
+                        .map(|key| hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*key))),
+                );
                 Opcode::NewStructDict(keys.into())
             }
             Hhbc::NewVec(ref vids, _) => Opcode::NewVec(vids.len() as u32),

@@ -13,6 +13,7 @@ use hash::HashSet;
 use hhbc::AdataId;
 use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
+use hhbc::BytesId;
 use hhbc::ClassGetCMode;
 use hhbc::ClassName;
 use hhbc::CollectionType;
@@ -330,13 +331,13 @@ fn print_quoted_bytes(w: &mut dyn Write, s: &[u8]) -> Result<()> {
     w.write_all(b"\"")
 }
 
-fn print_shape_fields(w: &mut dyn Write, keys: &[ffi::Str<'_>]) -> Result<()> {
+fn print_shape_fields(w: &mut dyn Write, keys: &[BytesId]) -> Result<()> {
     w.write_all(b"<")?;
     for (i, key) in keys.iter().enumerate() {
         if i != 0 {
             w.write_all(b" ")?;
         }
-        print_quoted_ffi_str(w, key)?;
+        print_quoted_bytes(w, key.as_bytes())?;
     }
     w.write_all(b">")
 }

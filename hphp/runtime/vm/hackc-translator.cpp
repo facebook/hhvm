@@ -754,7 +754,7 @@ void handleITA(TranslationState& ts, const hhbc::IterArgs& ita) {
   encodeIterArgs(*ts.fe, ia);
 }
 
-void handleVSA(TranslationState& ts, const Vector<Str>& arr) {
+void handleVSA(TranslationState& ts, const Vector<BytesId>& arr) {
   ts.fe->emitIVA(arr.len);
   auto strings = range(arr);
   for (auto const& s : strings) {

@@ -19,17 +19,5 @@ pub use ::::consts as consts;
 
 #[doc(inline)]
 pub use ::::services as services;
-
-/// Client implementation for each service in `module`.
-pub mod client {
-    #[doc(inline)]
-    pub use ::::*;
-}
-
-/// Server traits for each service in `module`.
-pub mod server {
-    #[doc(inline)]
-    pub use ::::*;
-}
 #[doc(inline)]
 pub use ::::errors as errors;

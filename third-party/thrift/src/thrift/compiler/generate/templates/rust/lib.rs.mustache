@@ -54,22 +54,6 @@ pub use {{program:types}}::consts as consts;
 
 #[doc(inline)]
 pub use {{program:types}}::services as services;
-
-/// Client implementation for each service in `{{program:name}}`.{{!
-}}{{#program:label}}
-// Deprecated: use `{{.}}-clients`{{/program:label}}
-pub mod client {
-    #[doc(inline)]
-    pub use {{program:clients}}::*;
-}
-
-/// Server traits for each service in `{{program:name}}`.{{!
-}}{{#program:label}}
-// Deprecated: use `{{.}}-services`{{/program:label}}
-pub mod server {
-    #[doc(inline)]
-    pub use {{program:servers}}::*;
-}
 {{/program:services?}}
 #[doc(inline)]
 pub use {{program:types}}::errors as errors;

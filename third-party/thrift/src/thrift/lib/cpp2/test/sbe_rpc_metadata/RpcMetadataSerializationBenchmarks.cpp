@@ -30,6 +30,7 @@
 #include <folly/init/Init.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/sbe/MessageWrapper.h>
 #include <thrift/lib/cpp2/test/sbe_rpc_metadata/gen-cpp2/wrapper_types.h>
@@ -265,12 +266,14 @@ BENCHMARK(TCompactRpcMetadataRequestDeserBaseline) {
   do_TCompactRpcMetadataRequestDeserBaseline();
 }
 
-void do_SBERpcMetadataRequestDeserBaseline() {
+void do_SBERpcMetadataRequestDeserBaseline(const void* buf, size_t length) {
   auto other =
       sbe::MessageWrapper<sbe::RequestRpcMetadata, sbe::MessageHeader>();
-  other.wrapForDecode(*baseRequestMetadata);
-  folly::doNotOptimizeAway(other->protocol());
-  folly::doNotOptimizeAway(other->kind());
+  other.wrapForDecode(const_cast<void*>(buf), length);
+  // folly::doNotOptimizeAway(other->protocol());
+  CHECK_EQ(other->protocol(), sbe::ProtocolId::COMPACT);
+  // folly::doNotOptimizeAway(other->kind());
+  CHECK_EQ(other->kind(), sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
 #if __SBE_DEBUG_MODE == 1
   auto n = other->otherMetadata().hasNext();
@@ -279,13 +282,17 @@ void do_SBERpcMetadataRequestDeserBaseline() {
   folly::doNotOptimizeAway(other->otherMetadata().hasNext());
 #endif
 
-  folly::doNotOptimizeAway(other->getNameAsStringView());
+  // folly::doNotOptimizeAway(other->getNameAsStringView());
+  CHECK_EQ(other->getNameAsStringView(), name);
   folly::doNotOptimizeAway(other->getInteractionMetadataAsStringView());
   folly::doNotOptimizeAway(other->getOptionalMetdataAsStringView());
 }
+void do_SBERpcMetadataRequestDeserBaseline(folly::IOBuf& buf) {
+  do_SBERpcMetadataRequestDeserBaseline(buf.writableData(), buf.capacity());
+}
 
 BENCHMARK_RELATIVE(SBERpcMetadataRequestDeserBaseline) {
-  do_SBERpcMetadataRequestDeserBaseline();
+  do_SBERpcMetadataRequestDeserBaseline(*baseRequestMetadata);
 }
 
 void do_TCompactRpcMetadataResponseSerializationBaseline() {
@@ -364,7 +371,7 @@ BENCHMARK(TCompactServerRoundTripBaseline) {
 }
 
 BENCHMARK_RELATIVE(SBEServerRoundTripBaseline) {
-  do_SBERpcMetadataRequestDeserBaseline();
+  do_SBERpcMetadataRequestDeserBaseline(*baseRequestMetadata);
   do_SBERpcMetadataResponseSerializationBaseline();
 }
 
@@ -638,6 +645,141 @@ BENCHMARK_RELATIVE(TestWrapping_TCompact) {
 
 BENCHMARK_RELATIVE(TestWrapping_TBinary) {
   do_ThriftWrapperSerialize<BinaryProtocolWriter>();
+}
+
+BENCHMARK_DRAW_LINE();
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void do_ThriftWrapperDeserialize(uint iters) {
+  std::unique_ptr<folly::IOBuf> buf;
+  {
+    folly::BenchmarkSuspender susp;
+    do_SBERpcMetadataRequestSerializationBaseline();
+    benchmarks::Wrapper wrapper{};
+    wrapper.data() = messageBuffer->clone();
+    thriftIOBufQueue.reset();
+    serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+    buf = thriftIOBufQueue.move();
+    CHECK(!buf->isChained());
+  }
+  for (uint i = 0; i < iters; ++i) {
+    benchmarks::Wrapper wrapper =
+        deserialize_with_protocol_reader<benchmarks::Wrapper, ProtocolReader>(
+            buf);
+    do_SBERpcMetadataRequestDeserBaseline(**wrapper.data());
+  }
+}
+
+typedef apache::thrift::ThriftPresult<
+    true,
+    apache::thrift::FieldData<
+        0,
+        ::apache::thrift::type_class::binary,
+        std::unique_ptr<folly::IOBuf>*>>
+    binary_presult;
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void do_ThriftWrapperDeserializePResult(uint iters) {
+  std::unique_ptr<folly::IOBuf> buf;
+  {
+    folly::BenchmarkSuspender susp;
+    do_SBERpcMetadataRequestSerializationBaseline();
+    binary_presult wrapper{};
+    wrapper.template get<0>().value = &messageBuffer;
+    wrapper.setIsSet(0, true);
+    thriftIOBufQueue.reset();
+    serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+    buf = thriftIOBufQueue.move();
+    CHECK(!buf->isChained());
+  }
+  for (uint i = 0; i < iters; ++i) {
+    std::unique_ptr<folly::IOBuf> data;
+    binary_presult wrapper;
+    wrapper.template get<0>().value = &data;
+    ProtocolReader reader;
+    reader.setInput(folly::io::Cursor(buf.get()));
+    wrapper.read(&reader);
+    do_SBERpcMetadataRequestDeserBaseline(*data);
+  }
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
+void do_ThriftWrapperDeserializeHacky(uint iters) {
+  std::unique_ptr<folly::IOBuf> buf;
+  {
+    folly::BenchmarkSuspender susp;
+    benchmarks::Wrapper wrapper;
+    do_SBERpcMetadataRequestSerializationBaseline();
+    wrapper.data() = messageBuffer->clone();
+    thriftIOBufQueue.reset();
+    serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+    buf = thriftIOBufQueue.move();
+    CHECK(!buf->isChained());
+  }
+  std::string name;
+  TType fieldType;
+  int16_t fieldId;
+  int32_t size;
+  for (uint i = 0; i < iters; ++i) {
+    ProtocolReader reader;
+    reader.setInput(folly::io::Cursor(buf.get()));
+    // For compact, this is necessary to read the right field id.
+    reader.readStructBegin(name);
+    reader.readFieldBegin(name, fieldType, fieldId);
+    CHECK_EQ(fieldType, TType::T_STRING);
+    CHECK_EQ(fieldId, 1);
+    if constexpr (std::is_same_v<ProtocolReader, CompactProtocolReader>) {
+      util::readVarint(
+          const_cast<folly::io::Cursor&>(reader.getCursor()), size);
+    } else {
+      reader.readI32(size);
+    }
+    CHECK_EQ(size, reader.getCursor().length() - 1);
+    do_SBERpcMetadataRequestDeserBaseline(
+        reader.getCursor().data(),
+        // The stop marker is one byte in both protocols.
+        reader.getCursor().length() - 1);
+  }
+}
+
+BENCHMARK(TestWrapping_SbeBaseline_Deserialize, iters) {
+  std::unique_ptr<folly::IOBuf> buf;
+  {
+    folly::BenchmarkSuspender susp;
+    do_SBERpcMetadataRequestSerializationBaseline();
+    buf = messageBuffer->clone();
+    CHECK(!buf->isChained());
+  }
+  for (uint i = 0; i < iters; ++i) {
+    do_SBERpcMetadataRequestDeserBaseline(*buf);
+  }
+}
+BENCHMARK_RELATIVE(TestWrapping_TCompact_Deserialize, iters) {
+  do_ThriftWrapperDeserialize<CompactProtocolWriter, CompactProtocolReader>(
+      iters);
+}
+BENCHMARK_RELATIVE(TestWrapping_TBinary_Deserialize, iters) {
+  do_ThriftWrapperDeserialize<BinaryProtocolWriter, BinaryProtocolReader>(
+      iters);
+}
+BENCHMARK_RELATIVE(TestWrapping_TCompact_DeserializePResult, iters) {
+  do_ThriftWrapperDeserializePResult<
+      CompactProtocolWriter,
+      CompactProtocolReader>(iters);
+}
+BENCHMARK_RELATIVE(TestWrapping_TBinary_DeserializePResult, iters) {
+  do_ThriftWrapperDeserializePResult<
+      BinaryProtocolWriter,
+      BinaryProtocolReader>(iters);
+}
+BENCHMARK_RELATIVE(TestWrapping_TCompact_DeserializeHacky, iters) {
+  do_ThriftWrapperDeserializeHacky<
+      CompactProtocolWriter,
+      CompactProtocolReader>(iters);
+}
+BENCHMARK_RELATIVE(TestWrapping_TBinary_DeserializeHacky, iters) {
+  do_ThriftWrapperDeserializeHacky<BinaryProtocolWriter, BinaryProtocolReader>(
+      iters);
 }
 
 } // namespace apache::thrift::benchmark

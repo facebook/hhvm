@@ -2082,6 +2082,7 @@ module Json = struct
                  ft_flags = Typing_defs_flags.Fun.default;
                  ft_cross_package = None;
                })
+        | "nothing" -> ty (Tunion [])
         | _ ->
           deserialization_error
             ~message:

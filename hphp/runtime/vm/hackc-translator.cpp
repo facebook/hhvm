@@ -363,8 +363,8 @@ void translateUserAttributes(const Vector<hhbc::Attribute>& attributes,
   };
 }
 
-void translateSymbolInfo(const Vector<Str>& missing, const Vector<Str>& error,
-                         UnitEmitter& ue) {
+void translateSymbolInfo(const Vector<StringId>& missing,
+    const Vector<StringId>& error, UnitEmitter& ue) {
   Trace::Indent indent;
   for (auto const& m : range(missing)) {
     ue.m_missingSyms.emplace_back(toStaticString(m));

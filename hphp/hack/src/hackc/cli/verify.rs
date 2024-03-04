@@ -423,7 +423,7 @@ fn compile_php_file<'a, 'arena>(
     single_file_opts: &'a SingleFileOpts,
     profile: &mut compile::Profile,
     for_ir: bool,
-) -> Result<(compile::NativeEnv, hhbc::Unit<'arena>)> {
+) -> Result<(compile::NativeEnv, hhbc::Unit)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
     let mut env = crate::compile::native_env(filepath, single_file_opts)

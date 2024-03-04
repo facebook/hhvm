@@ -552,7 +552,7 @@ pub struct DeclsHolder {
 // This is accessed in test_ffi.cpp; hence repr(C)
 #[derive(Debug)]
 #[repr(C)]
-pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
+pub struct UnitWrapper(Unit, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 impl ffi::NativeEnv {

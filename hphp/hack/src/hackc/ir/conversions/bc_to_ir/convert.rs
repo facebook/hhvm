@@ -17,10 +17,7 @@ use ir::StringInterner;
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the bytecode to IR
 /// when converting functions and methods (see `convert_body` in func.rs).
-///
-/// NOTE: hhbc::Unit has to be by-ref because it unfortunately contains a bunch
-/// of ffi::Slice<T> which cannot own T.
-pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit {
+pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
     use std::os::unix::ffi::OsStrExt;
     let strings = Arc::new(ir::StringInterner::default());
 

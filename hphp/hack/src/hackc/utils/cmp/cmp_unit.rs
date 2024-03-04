@@ -818,7 +818,7 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
     Ok(())
 }
 
-fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
+fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
         adata: a_adata,
         functions: a_functions,
@@ -886,6 +886,6 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
 
 /// Fancy version of `PartialEq::eq(a, b)` which also tries to report exactly
 /// where the mismatch occurred.
-pub fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result {
+pub fn cmp_hack_c_unit(a: &Unit, b: &Unit) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }

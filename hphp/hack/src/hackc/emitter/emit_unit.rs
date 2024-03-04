@@ -33,7 +33,6 @@ mod try_finally_rewriter;
 mod xhp_attribute;
 
 use std::borrow::Borrow;
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::sync::Arc;
 
@@ -52,9 +51,9 @@ use error::Error;
 use error::ErrorKind;
 use error::Result;
 use ffi::Maybe::*;
-use ffi::Str;
 use hhbc::Fatal;
 use hhbc::FatalOp;
+use hhbc::StringId;
 use hhbc::Unit;
 use oxidized::ast;
 use oxidized::namespace_env;
@@ -65,11 +64,7 @@ use oxidized_by_ref::typing_defs_core::Exact;
 // PUBLIC INTERFACE (ENTRY POINTS)
 
 /// This is the entry point from hh_single_compile & fuzzer
-pub fn emit_fatal_unit<'arena>(
-    op: FatalOp,
-    pos: Pos,
-    msg: impl Into<String>,
-) -> Result<Unit<'arena>> {
+pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<Unit> {
     Ok(Unit {
         fatal: Just(Fatal {
             op,
@@ -98,7 +93,7 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,
-) -> Result<Unit<'arena>> {
+) -> Result<Unit> {
     let result = emit_unit_(emitter, namespace, tast, invalid_utf8_offset);
     match result {
         Err(e) => match e.into_kind() {
@@ -109,11 +104,11 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     }
 }
 
-fn record_error<'arena>(
-    sym: Str<'arena>,
+fn record_error(
+    sym: StringId,
     e: decl_provider::Error,
-    missing: &mut Vec<Str<'arena>>,
-    error: &mut Vec<Str<'arena>>,
+    missing: &mut Vec<StringId>,
+    error: &mut Vec<StringId>,
 ) {
     match e {
         decl_provider::Error::NotFound => {
@@ -125,17 +120,18 @@ fn record_error<'arena>(
     }
 }
 
-fn scan_types<'decl, F>(p: &dyn DeclProvider<'decl>, q: &mut VecDeque<(String, u64)>, mut efunc: F)
-where
-    F: FnMut(&String, decl_provider::Error),
+fn scan_types<'decl, F>(
+    p: &dyn DeclProvider<'decl>,
+    q: &mut VecDeque<(StringId, u64)>,
+    mut efunc: F,
+) where
+    F: FnMut(StringId, decl_provider::Error),
 {
     use typing_defs::Ty_;
-    let mut seen = HashSet::new();
-    q.iter().for_each(|(s, _i)| {
-        seen.insert(s.clone());
-    });
+    let mut seen = hhbc::StringIdSet::default();
+    seen.extend(q.iter().map(|(s, _)| *s));
     while let Some((name, idx)) = q.pop_front() {
-        match p.type_decl(&name, idx) {
+        match p.type_decl(name.as_str(), idx) {
             Ok(TypeDecl::Class(class_decl)) => {
                 class_decl
                     .extends
@@ -147,16 +143,15 @@ where
                     .chain(class_decl.uses.iter())
                     .for_each(|ty| {
                         if let Ty_::Tclass(((_, cn), Exact::Exact, _ty_args)) = ty.1 {
-                            if seen.insert(cn.to_string()) {
-                                q.push_back((cn.to_string(), idx + 1))
+                            let cn = hhbc::intern(*cn);
+                            if seen.insert(cn) {
+                                q.push_back((cn, idx + 1))
                             }
                         }
                     });
             }
             Ok(TypeDecl::Typedef(_)) => {}
-            Err(e) => {
-                efunc(&name, e);
-            }
+            Err(e) => efunc(name, e),
         }
     }
 }
@@ -166,7 +161,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,
-) -> Result<Unit<'arena>> {
+) -> Result<Unit> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
@@ -190,17 +185,17 @@ fn emit_unit_<'a, 'arena, 'decl>(
         if emitter.options().hhbc.stress_shallow_decl_deps {
             for cns in &symbol_refs.constants {
                 if let Err(e) = p.const_decl(cns.as_str()) {
-                    record_error(cns.as_str().into(), e, &mut missing_syms, &mut error_syms);
+                    record_error(cns.as_string_id(), e, &mut missing_syms, &mut error_syms);
                 }
             }
             for fun in &symbol_refs.functions {
                 if let Err(e) = p.func_decl(fun.as_str()) {
-                    record_error(fun.as_str().into(), e, &mut missing_syms, &mut error_syms);
+                    record_error(fun.as_string_id(), e, &mut missing_syms, &mut error_syms);
                 }
             }
             for cls in &symbol_refs.classes {
                 if let Err(e) = p.type_decl(cls.as_str(), 0) {
-                    record_error(cls.as_str().into(), e, &mut missing_syms, &mut error_syms);
+                    record_error(cls.as_string_id(), e, &mut missing_syms, &mut error_syms);
                 }
             }
         }
@@ -208,21 +203,23 @@ fn emit_unit_<'a, 'arena, 'decl>(
             let mut q = VecDeque::new();
             classes.iter().for_each(|c| {
                 if let Just(b) = c.base {
-                    q.push_back((b.into_string(), 0u64));
+                    q.push_back((b.as_string_id(), 0u64));
                 }
                 c.uses
                     .iter()
                     .chain(c.implements.iter())
-                    .for_each(|i| q.push_back((i.into_string(), 0u64)));
+                    .for_each(|i| q.push_back((i.as_string_id(), 0u64)));
                 c.requirements
                     .iter()
-                    .for_each(|r| q.push_back((r.name.into_string(), 0u64)));
+                    .for_each(|r| q.push_back((r.name.as_string_id(), 0u64)));
             });
-            let error_func = |sym: &String, e: decl_provider::Error| {
-                let s = Str::new_str(emitter.alloc, sym.as_str());
-                record_error(s, e, &mut missing_syms, &mut error_syms);
-            };
-            scan_types(p.borrow(), &mut q, error_func);
+            scan_types(
+                p.borrow(),
+                &mut q,
+                |sym: StringId, e: decl_provider::Error| {
+                    record_error(sym, e, &mut missing_syms, &mut error_syms);
+                },
+            );
         }
     }
 

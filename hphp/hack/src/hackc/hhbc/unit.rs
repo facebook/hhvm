@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
 
@@ -17,12 +16,13 @@ use crate::Function;
 use crate::Module;
 use crate::ModuleName;
 use crate::SrcLoc;
+use crate::StringId;
 use crate::SymbolRefs;
 use crate::Typedef;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Unit<'arena> {
+pub struct Unit {
     pub adata: Vector<Adata>,
     pub functions: Vector<Function>,
     pub classes: Vector<Class>,
@@ -33,8 +33,8 @@ pub struct Unit<'arena> {
     pub symbol_refs: SymbolRefs,
     pub constants: Vector<Constant>,
     pub fatal: Maybe<Fatal>,
-    pub missing_symbols: Vector<Str<'arena>>,
-    pub error_symbols: Vector<Str<'arena>>,
+    pub missing_symbols: Vector<StringId>,
+    pub error_symbols: Vector<StringId>,
     // TODO(T120858428): Remove this field once non-utf8 is banned from the
     // parser.
     pub valid_utf8: bool,

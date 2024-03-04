@@ -35,16 +35,13 @@ use crate::token::Token;
 pub(crate) type DeclMap = StringIdMap<u32>;
 
 /// Assembles the hhas within f to a hhbc::Unit
-pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
+pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
     assemble_from_bytes(alloc, &s)
 }
 
 /// Assembles the hhas represented by the slice of bytes input
-pub fn assemble_from_bytes<'arena>(
-    alloc: &'arena Bump,
-    s: &[u8],
-) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
+pub fn assemble_from_bytes<'arena>(alloc: &'arena Bump, s: &[u8]) -> Result<(hhbc::Unit, PathBuf)> {
     let mut lex = Lexer::from_slice(s, Line(1));
     let unit = assemble_from_toks(alloc, &mut lex)?;
     trace!("ASM UNIT: {unit:?}");
@@ -71,7 +68,7 @@ pub fn assemble_single_instruction<'arena>(
 fn assemble_from_toks<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
+) -> Result<(hhbc::Unit, PathBuf)> {
     // First token should be the filepath
     let fp = assemble_filepath(token_iter)?;
 
@@ -102,7 +99,7 @@ struct UnitBuilder {
 }
 
 impl UnitBuilder {
-    fn into_unit<'a>(self) -> hhbc::Unit<'a> {
+    fn into_unit(self) -> hhbc::Unit {
         hhbc::Unit {
             adata: self.adatas.into(),
             functions: self.funcs.into(),

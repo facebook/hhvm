@@ -226,7 +226,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
     invalid_utf8_offset: Option<usize>,
-) -> Result<Unit<'arena>, Error> {
+) -> Result<Unit, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
     let result = rewrite_program::rewrite_program(emitter, ast, Arc::clone(&namespace_env));
@@ -254,7 +254,7 @@ pub fn unit_from_text<'arena, 'decl>(
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
-) -> Result<Unit<'arena>> {
+) -> Result<Unit> {
     unit_from_text_with_opts(
         alloc,
         source_text,
@@ -272,7 +272,7 @@ pub fn unit_from_text_with_opts<'arena, 'decl>(
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
     opts: &elab::CodegenOpts,
-) -> Result<Unit<'arena>> {
+) -> Result<Unit> {
     let mut emitter = create_emitter(native_env, decl_provider, alloc);
     emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile, opts)
 }
@@ -280,7 +280,7 @@ pub fn unit_from_text_with_opts<'arena, 'decl>(
 pub fn unit_to_string(
     native_env: &NativeEnv,
     writer: &mut dyn std::io::Write,
-    program: &Unit<'_>,
+    program: &Unit,
     profile: &mut Profile,
 ) -> Result<()> {
     if native_env.flags.dump_ir {
@@ -317,7 +317,7 @@ fn emit_unit_from_ast<'arena, 'decl>(
     namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
     invalid_utf8_offset: Option<usize>,
-) -> Result<Unit<'arena>, Error> {
+) -> Result<Unit, Error> {
     emit_unit(emitter, namespace, ast, invalid_utf8_offset)
 }
 
@@ -339,7 +339,7 @@ fn emit_unit_from_text<'arena, 'decl>(
     source_text: SourceText<'_>,
     profile: &mut Profile,
     opts: &elab::CodegenOpts,
-) -> Result<Unit<'arena>> {
+) -> Result<Unit> {
     profile.log_enabled = emitter.options().log_extern_compiler_perf();
     let type_directed = emitter.decl_provider.is_some();
 
@@ -398,7 +398,7 @@ fn emit_unit_from_text<'arena, 'decl>(
     }
 }
 
-fn emit_fatal_naming_phase_error<'arena>(err: &NamingPhaseError) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_naming_phase_error(err: &NamingPhaseError) -> Result<Unit, Error> {
     match err {
         NamingPhaseError::Naming(err) => emit_fatal_naming_error(err),
         NamingPhaseError::NastCheck(err) => emit_fatal_nast_check_error(err),
@@ -409,7 +409,7 @@ fn emit_fatal_naming_phase_error<'arena>(err: &NamingPhaseError) -> Result<Unit<
     }
 }
 
-fn emit_fatal_naming_error<'arena>(err: &NamingError) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
     match err {
         NamingError::UnsupportedTraitUseAs(_) => todo!(),
         NamingError::UnsupportedInsteadOf(_) => todo!(),
@@ -527,7 +527,7 @@ fn emit_fatal_naming_error<'arena>(err: &NamingError) -> Result<Unit<'arena>, Er
     }
 }
 
-fn emit_fatal_nast_check_error<'arena>(err: &NastCheckError) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
     match err {
         NastCheckError::RepeatedRecordFieldName { .. } => todo!(),
         NastCheckError::DynamicallyCallableReified(_) => todo!(),
@@ -600,9 +600,7 @@ fn emit_fatal_nast_check_error<'arena>(err: &NastCheckError) -> Result<Unit<'are
     }
 }
 
-fn emit_fatal_experimental_feature_error<'arena>(
-    err: &ExperimentalFeature,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_experimental_feature_error(err: &ExperimentalFeature) -> Result<Unit, Error> {
     match err {
         ExperimentalFeature::LikeType(_) => todo!(),
         ExperimentalFeature::Supportdyn(_) => todo!(),
@@ -611,7 +609,7 @@ fn emit_fatal_experimental_feature_error<'arena>(
     }
 }
 
-fn emit_fatal_parsing_error<'arena>(err: &ParsingError) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_parsing_error(err: &ParsingError) -> Result<Unit, Error> {
     match err {
         ParsingError::FixmeFormat(_) => todo!(),
         ParsingError::HhIgnoreComment(_) => todo!(),
@@ -625,11 +623,7 @@ fn emit_fatal_parsing_error<'arena>(err: &ParsingError) -> Result<Unit<'arena>, 
     }
 }
 
-fn emit_fatal<'arena>(
-    fatal_op: FatalOp,
-    pos: Pos,
-    msg: impl Into<String>,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal(fatal_op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<Unit, Error> {
     emit_unit::emit_fatal_unit(fatal_op, pos, msg)
 }
 

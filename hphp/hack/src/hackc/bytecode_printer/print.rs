@@ -87,7 +87,7 @@ macro_rules! write_if {
     };
 }
 
-fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
+fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.path(); // consider: should we also show prefix?
@@ -134,7 +134,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
+fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> {
     if let Just(Fatal {
         op,
         loc:
@@ -1175,7 +1175,7 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
 pub fn external_print_unit(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    prog: &Unit<'_>,
+    prog: &Unit,
 ) -> std::result::Result<(), Error> {
     print_unit(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;

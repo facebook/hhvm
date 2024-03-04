@@ -1577,7 +1577,6 @@ dependencies = [
 name = "emit_type_hint"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "error",
  "ffi",
  "hhbc",
@@ -3878,7 +3877,6 @@ dependencies = [
  "anyhow",
  "ast_scope",
  "bstr",
- "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
  "error",

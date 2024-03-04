@@ -78,7 +78,6 @@ bitflags! {
 }
 
 pub fn emit_body<'b, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
@@ -94,7 +93,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
     emitter.iterator_mut().reset();
 
     let return_type_info = make_return_type_info(
-        alloc,
         args.flags.contains(Flags::SKIP_AWAITABLE),
         args.flags.contains(Flags::NATIVE),
         args.ret,
@@ -104,7 +102,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
     let params = make_params(emitter, &mut tp_names, args.ast_params, &scope, args.flags)?;
 
     let upper_bounds = emit_generics_upper_bounds(
-        alloc,
         args.immediate_tparams,
         args.class_tparam_names,
         args.flags.contains(Flags::SKIP_AWAITABLE),
@@ -292,7 +289,6 @@ fn make_decl_vars<'a, 'arena, 'decl>(
 }
 
 pub fn emit_return_type_info(
-    alloc: &bumpalo::Bump,
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
@@ -300,7 +296,6 @@ pub fn emit_return_type_info(
     match ret {
         None => Ok(TypeInfo::empty()),
         Some(hint) => emit_type_hint::hint_to_type_info(
-            alloc,
             &emit_type_hint::Kind::Return,
             skip_awaitable,
             false, // nullable
@@ -311,13 +306,12 @@ pub fn emit_return_type_info(
 }
 
 fn make_return_type_info(
-    alloc: &bumpalo::Bump,
     skip_awaitable: bool,
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
 ) -> Result<TypeInfo> {
-    let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
+    let return_type_info = emit_return_type_info(tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
             emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)
@@ -665,7 +659,6 @@ fn emit_verify_out(params: &[(Param, Option<(Label, ast::Expr)>)]) -> (usize, In
 }
 
 pub fn emit_generics_upper_bounds(
-    alloc: &bumpalo::Bump,
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
@@ -675,7 +668,6 @@ pub fn emit_generics_upper_bounds(
             let mut tparam_names = get_tp_names(immediate_tparams);
             tparam_names.extend_from_slice(class_tparam_names);
             emit_type_hint::hint_to_type_info(
-                alloc,
                 &emit_type_hint::Kind::UpperBound,
                 skip_awaitable,
                 false, // nullable

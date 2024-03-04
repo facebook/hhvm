@@ -34,8 +34,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params);
-    let return_type_info =
-        emit_body::emit_return_type_info(emitter.alloc, tparams.as_slice(), false, ret);
+    let return_type_info = emit_body::emit_return_type_info(tparams.as_slice(), false, ret);
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {

@@ -31,7 +31,6 @@ pub fn emit_function<'a, 'arena, 'decl>(
     use ast_defs::FunKind;
     use hhbc::FunctionFlags;
 
-    let alloc = e.alloc;
     let f = &fd.fun;
     let original_id = FunctionName::from_ast_name(&fd.name.1);
     let mut flags = FunctionFlags::empty();
@@ -125,7 +124,6 @@ pub fn emit_function<'a, 'arena, 'decl>(
         );
 
         emit_body::emit_body(
-            alloc,
             e,
             Arc::clone(&fd.namespace),
             ast_body,

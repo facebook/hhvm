@@ -321,15 +321,10 @@ fn from_class_elt_requirements<'a>(class_: &'a ast::Class_) -> Vec<Requirement> 
         .collect()
 }
 
-fn from_enum_type(alloc: &bumpalo::Bump, opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
+fn from_enum_type(opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
     use hhbc::Constraint;
     opt.map(|e| {
-        let type_info_user_type = Just(hhbc::intern(emit_type_hint::fmt_hint(
-            alloc,
-            &[],
-            true,
-            &e.base,
-        )?));
+        let type_info_user_type = Just(hhbc::intern(emit_type_hint::fmt_hint(&[], true, &e.base)?));
         let type_info_type_constraint = Constraint::new(Nothing, TypeConstraintFlags::ExtendedHint);
         Ok(TypeInfo::new(
             type_info_user_type,
@@ -540,7 +535,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .collect();
 
     let enum_type = if ast_class.kind.is_cenum() || ast_class.kind.is_cenum_class() {
-        from_enum_type(alloc, ast_class.enum_.as_ref())?
+        from_enum_type(ast_class.enum_.as_ref())?
     } else {
         None
     };
@@ -757,7 +752,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .iter()
         .map(|x| from_ctx_constant(x))
         .collect::<Result<Vec<CtxConstant>>>()?;
-    let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
+    let upper_bounds = emit_body::emit_generics_upper_bounds(&ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {
         properties.push(emit_xhp::properties_for_cache(

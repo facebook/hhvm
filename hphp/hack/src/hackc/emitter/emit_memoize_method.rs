@@ -209,7 +209,6 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
 ) -> Result<Body> {
-    let alloc = emitter.alloc;
     let mut tparams: Vec<&str> = args
         .scope
         .get_tparams()
@@ -217,7 +216,6 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
         .map(|tp| tp.name.1.as_str())
         .collect();
     let return_type_info = emit_body::emit_return_type_info(
-        alloc,
         &tparams[..],
         args.flags.contains(Flags::IS_ASYNC),
         args.ret,

@@ -63,12 +63,7 @@ pub fn prim_to_string(prim: &Tprim) -> &'static str {
     }
 }
 
-pub fn fmt_hint<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[&str],
-    strip_tparams: bool,
-    hint: &Hint,
-) -> Result<String> {
+pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<String> {
     let Hint(_, h) = hint;
     Ok(match h.as_ref() {
         Habstr(id, args) | Happly(Id(_, id), args) => {
@@ -76,7 +71,7 @@ pub fn fmt_hint<'arena>(
             if args.is_empty() || strip_tparams {
                 name.to_string()
             } else {
-                format!("{}<{}>", name, fmt_hints(alloc, tparams, args)?)
+                format!("{}<{}>", name, fmt_hints(tparams, args)?)
             }
         }
         Hwildcard => "_".into(),
@@ -84,8 +79,8 @@ pub fn fmt_hint<'arena>(
             // TODO(mqian): Implement for inout parameters
             format!(
                 "(function ({}): {})",
-                fmt_hints(alloc, tparams, &hf.param_tys)?,
-                fmt_hint(alloc, tparams, false, &hf.return_ty)?
+                fmt_hints(tparams, &hf.param_tys)?,
+                fmt_hint(tparams, false, &hf.return_ty)?
             )
         }
         Haccess(Hint(_, hint), accesses) => {
@@ -110,15 +105,15 @@ pub fn fmt_hint<'arena>(
             if let Hsoft(t) = h.as_ref() {
                 // Follow HHVM order: soft -> option
                 // Can we fix this eventually?
-                format!("@?{}", fmt_hint(alloc, tparams, false, t)?)
+                format!("@?{}", fmt_hint(tparams, false, t)?)
             } else {
-                format!("?{}", fmt_hint(alloc, tparams, false, hint)?)
+                format!("?{}", fmt_hint(tparams, false, hint)?)
             }
         }
         Hrefinement(hint, _) => {
             // NOTE: refinements are already banned in type structures
             // and in other cases they should be invisible to the HHVM, so unpack hint
-            fmt_hint(alloc, tparams, strip_tparams, hint)?
+            fmt_hint(tparams, strip_tparams, hint)?
         }
         // No guarantee that this is in the correct order when using map instead of list
         //  TODO: Check whether shape fields need to retain order *)
@@ -136,7 +131,7 @@ pub fn fmt_hint<'arena>(
                     "{}{}=>{}",
                     prefix,
                     fmt_field_name(&field.name),
-                    fmt_hint(alloc, tparams, false, &field.hint)?
+                    fmt_hint(tparams, false, &field.hint)?
                 ))
             };
             let shape_fields = field_map
@@ -146,9 +141,9 @@ pub fn fmt_hint<'arena>(
                 .map(|v| v.join(", "))?;
             string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields))
         }
-        Htuple(hints) => format!("({})", fmt_hints(alloc, tparams, hints)?),
-        Hlike(t) => format!("~{}", fmt_hint(alloc, tparams, false, t)?),
-        Hsoft(t) => format!("@{}", fmt_hint(alloc, tparams, false, t)?),
+        Htuple(hints) => format!("({})", fmt_hints(tparams, hints)?),
+        Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
+        Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
         h => fmt_name_or_prim(tparams, hint_to_string(h)).into(),
     })
 }
@@ -165,14 +160,10 @@ fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
     }
 }
 
-fn fmt_hints<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[&str],
-    hints: &[Hint],
-) -> Result<String> {
+fn fmt_hints(tparams: &[&str], hints: &[Hint]) -> Result<String> {
     hints
         .iter()
-        .map(|h| fmt_hint(alloc, tparams, false, h))
+        .map(|h| fmt_hint(tparams, false, h))
         .collect::<Result<Vec<_>>>()
         .map(|v| v.join(", "))
 }
@@ -195,7 +186,6 @@ fn can_be_nullable(hint: &Hint_) -> bool {
 }
 
 fn hint_to_type_constraint(
-    alloc: &bumpalo::Bump,
     kind: &Kind,
     tparams: &[&str],
     skipawaitable: bool,
@@ -213,20 +203,19 @@ fn hint_to_type_constraint(
         Hshape(_) => Constraint::intern("HH\\darray", TypeConstraintFlags::ExtendedHint),
         Htuple(_) => Constraint::intern("HH\\varray", TypeConstraintFlags::ExtendedHint),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
-            alloc,
             kind,
             tparams,
             skipawaitable,
             t,
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
-        Hlike(h) => hint_to_type_constraint(alloc, kind, tparams, skipawaitable, h)?,
+        Hlike(h) => hint_to_type_constraint(kind, tparams, skipawaitable, h)?,
         Hoption(t) => {
             if let Happly(Id(_, s), hs) = &*(t.1) {
                 if skipawaitable && is_awaitable(s) {
                     match &hs[..] {
                         [] => return Ok(Constraint::default()),
-                        [h] => return hint_to_type_constraint(alloc, kind, tparams, false, h),
+                        [h] => return hint_to_type_constraint(kind, tparams, false, h),
                         _ => {}
                     }
                 }
@@ -235,7 +224,6 @@ fn hint_to_type_constraint(
                     if skipawaitable && is_awaitable(s) {
                         if let [h] = &hs[..] {
                             return make_tc_with_flags_if_non_empty_flags(
-                                alloc,
                                 kind,
                                 tparams,
                                 skipawaitable,
@@ -247,7 +235,6 @@ fn hint_to_type_constraint(
                 }
             }
             make_tc_with_flags_if_non_empty_flags(
-                alloc,
                 kind,
                 tparams,
                 skipawaitable,
@@ -272,11 +259,11 @@ fn hint_to_type_constraint(
                         Happly(Id(_, id), hs) if id == "\\HH\\void" && hs.is_empty() => {
                             Ok(Constraint::default())
                         }
-                        _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
+                        _ => hint_to_type_constraint(kind, tparams, false, &hs[0]),
                     };
                 }
                 [h] if s == typehints::POISON_MARKER || s == typehints::HH_FUNCTIONREF => {
-                    return hint_to_type_constraint(alloc, kind, tparams, false, h);
+                    return hint_to_type_constraint(kind, tparams, false, h);
                 }
                 _ => {}
             };
@@ -286,7 +273,7 @@ fn hint_to_type_constraint(
         Hrefinement(hint, _) => {
             // NOTE: refinements are already banned in type structures
             // and in other cases they should be invisible to the HHVM, so unpack hint
-            hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?
+            hint_to_type_constraint(kind, tparams, skipawaitable, hint)?
         }
         h => type_application_helper(tparams, kind, hint_to_string(h))?,
     })
@@ -301,14 +288,13 @@ fn is_typedef(kind: &Kind) -> bool {
 }
 
 fn make_tc_with_flags_if_non_empty_flags(
-    alloc: &bumpalo::Bump,
     kind: &Kind,
     tparams: &[&str],
     skipawaitable: bool,
     hint: &Hint,
     flags: TypeConstraintFlags,
 ) -> Result<Constraint> {
-    let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, u16::from(&tc.flags)) {
         (Nothing, 0) => tc,
         _ => Constraint {
@@ -356,13 +342,12 @@ fn try_add_nullable(
 }
 
 fn make_type_info(
-    alloc: &bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
     tc_name: Maybe<StringId>,
     tc_flags: TypeConstraintFlags,
 ) -> Result<TypeInfo> {
-    let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
+    let type_info_user_type = fmt_hint(tparams, false, h)?;
     let type_info_type_constraint = Constraint::new(tc_name, tc_flags);
     Ok(TypeInfo::new(
         Just(hhbc::intern(type_info_user_type)),
@@ -371,7 +356,6 @@ fn make_type_info(
 }
 
 fn param_hint_to_type_info(
-    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
@@ -391,9 +375,8 @@ fn param_hint_to_type_info(
         Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
         _ => true,
     };
-    let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     make_type_info(
-        alloc,
         tparams,
         hint,
         tc.name,
@@ -410,7 +393,6 @@ fn param_hint_to_type_info(
 }
 
 pub fn hint_to_type_info(
-    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
@@ -418,9 +400,9 @@ pub fn hint_to_type_info(
     hint: &Hint,
 ) -> Result<TypeInfo> {
     if let Kind::Param = kind {
-        return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
+        return param_hint_to_type_info(kind, skipawaitable, nullable, tparams, hint);
     };
-    let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
+    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     let flags = match kind {
         Kind::Return | Kind::Property if tc.name.is_just() => {
             TypeConstraintFlags::ExtendedHint | tc.flags
@@ -429,7 +411,6 @@ pub fn hint_to_type_info(
         _ => tc.flags,
     };
     make_type_info(
-        alloc,
         tparams,
         hint,
         tc.name,
@@ -443,7 +424,6 @@ pub fn hint_to_type_info(
 
 // Used from emit_typedef for potential case types
 pub fn hint_to_type_info_union(
-    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
@@ -456,7 +436,6 @@ pub fn hint_to_type_info_union(
         Hunion(hints) => {
             for hint in hints {
                 result.push(hint_to_type_info(
-                    alloc,
                     kind,
                     skipawaitable,
                     nullable,
@@ -466,7 +445,6 @@ pub fn hint_to_type_info_union(
             }
         }
         _ => result.push(hint_to_type_info(
-            alloc,
             kind,
             skipawaitable,
             nullable,

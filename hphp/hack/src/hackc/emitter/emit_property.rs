@@ -53,7 +53,6 @@ pub fn from_ast<'a>(
     class_is_closure: bool,
     args: FromAstArgs<'_>,
 ) -> Result<PropAndInit> {
-    let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid = hhbc::PropName::from_ast_name(cv_name);
     let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;
@@ -80,7 +79,6 @@ pub fn from_ast<'a>(
     let type_info = match args.typehint.as_ref() {
         None => TypeInfo::empty(),
         Some(th) => emit_type_hint::hint_to_type_info(
-            alloc,
             &emit_type_hint::Kind::Property,
             false,
             false,

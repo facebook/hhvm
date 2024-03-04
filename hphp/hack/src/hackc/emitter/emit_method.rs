@@ -257,7 +257,6 @@ pub fn from_ast<'a, 'arena, 'decl>(
             coeffects.has_coeffects_local(),
         );
         emit_body::emit_body(
-            emitter.alloc,
             emitter,
             namespace,
             ast_body_block,

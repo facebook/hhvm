@@ -120,7 +120,6 @@ fn from_ast<'a, 'arena, 'decl>(
         };
         if let Some(h) = param_type_hint {
             Some(hint_to_type_info(
-                emitter.alloc,
                 &Kind::Param,
                 false,
                 false, /* meaning only set nullable based on given hint */

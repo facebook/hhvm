@@ -30,7 +30,6 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     constant: &'a ast::Gconst,
     init: Option<InstrSeq>,
 ) -> Result<Option<Function>> {
-    let alloc = e.alloc;
     let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_name.as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
@@ -39,7 +38,6 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     let return_type_info = ret
         .map(|h| {
             emit_type_hint::hint_to_type_info(
-                alloc,
                 &Kind::Return,
                 false, /* skipawaitable */
                 false, /* nullable */

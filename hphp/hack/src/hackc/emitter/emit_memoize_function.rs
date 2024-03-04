@@ -71,7 +71,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue]>,
     fd: &'a ast::FunDef,
 ) -> Result<Function> {
-    let alloc = emitter.alloc;
     let f = &fd.fun;
     emit_memoize_helpers::check_memoize_possible(&(fd.name).0, &f.params, false)?;
     let scope = Scope::with_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
@@ -84,7 +83,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
     let return_type_info = emit_body::emit_return_type_info(
-        alloc,
         &tparams,
         f.fun_kind.is_fasync(), /* skip_awaitable */
         f.ret.1.as_ref(),

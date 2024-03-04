@@ -36,7 +36,6 @@ fn emit_typedef(emitter: &mut Emitter<'_, '_>, typedef: &ast::Typedef) -> Result
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
     let type_info_union_res = emit_type_hint::hint_to_type_info_union(
-        emitter.alloc,
         &emit_type_hint::Kind::TypeDef,
         false,
         typedef.kind.1.is_hoption(),

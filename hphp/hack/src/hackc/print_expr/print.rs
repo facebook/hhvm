@@ -929,8 +929,7 @@ fn print_bop(w: &mut dyn Write, bop: &ast_defs::Bop) -> Result<()> {
 }
 
 fn print_hint(w: &mut dyn Write, ns: bool, hint: &ast::Hint) -> Result<()> {
-    let alloc = bumpalo::Bump::new();
-    let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e.kind() {
+    let h = emit_type_hint::fmt_hint(&[], false, hint).map_err(|e| match e.kind() {
         ErrorKind::Unrecoverable(s) => Error::fail(s),
         _ => Error::fail("Error printing hint"),
     })?;

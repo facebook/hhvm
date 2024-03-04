@@ -458,7 +458,8 @@ module SymbolTable = struct
         canon_hash INTEGER NOT NULL,
         decl_hash INTEGER NOT NULL,
         flags INTEGER NOT NULL,
-        file_info_id INTEGER NOT NULL
+        file_info_id INTEGER NOT NULL,
+        sort_text TEXT
       );
     "
       table_name
@@ -490,8 +491,9 @@ module SymbolTable = struct
         canon_hash,
         decl_hash,
         flags,
-        file_info_id)
-      VALUES (?, ?, ?, ?, ?);
+        file_info_id,
+        sort_text)
+      VALUES (?, ?, ?, ?, ?, ?);
     "
       table_name
 
@@ -529,8 +531,15 @@ module SymbolTable = struct
 
   (** Note: name parameter is used solely for debugging; it's only the hash and canon_hash that get inserted. *)
   let insert
-      db stmt_cache ~name ~hash ~canon_hash ~name_kind ~file_info_id ~decl_hash
-      : (unit, insertion_error) result =
+      db
+      stmt_cache
+      ~name
+      ~hash
+      ~canon_hash
+      ~name_kind
+      ~file_info_id
+      ~decl_hash
+      ~sort_text : (unit, insertion_error) result =
     insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     let flags = name_kind |> Naming_types.name_kind_to_enum |> Int64.of_int in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
@@ -539,6 +548,7 @@ module SymbolTable = struct
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 6 (Sqlite3.Data.TEXT sort_text) |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
 
   let get db stmt_cache dep stmt =
@@ -671,6 +681,8 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64
     in
+    (* sort_text is just name for now! Will update with fetching the sort_text next *)
+    let sort_text = name in
     let canon_hash =
       name
       |> to_canon_name_key
@@ -691,6 +703,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
         ~canon_hash
         ~file_info_id
         ~decl_hash
+        ~sort_text
     with
     | Ok () -> (symbols_inserted + 1, errors, checksum)
     | Error error -> (symbols_inserted, error :: errors, checksum)

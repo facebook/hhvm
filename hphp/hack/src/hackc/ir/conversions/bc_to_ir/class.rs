@@ -10,7 +10,7 @@ use itertools::Itertools;
 use crate::convert;
 use crate::types;
 
-pub(crate) fn convert_class<'a>(unit: &mut ir::Unit, filename: ir::Filename, cls: &Class<'a>) {
+pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &Class) {
     let constants = cls
         .constants
         .as_ref()

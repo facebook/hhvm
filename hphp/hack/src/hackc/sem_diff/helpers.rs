@@ -11,7 +11,7 @@ pub(crate) trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::Class<'_> {
+impl MapName for hhbc::Class {
     fn get_name(&self) -> &str {
         self.name.as_str()
     }
@@ -29,13 +29,13 @@ impl MapName for hhbc::CtxConstant {
     }
 }
 
-impl MapName for hhbc::Function<'_> {
+impl MapName for hhbc::Function {
     fn get_name(&self) -> &str {
         self.name.as_str()
     }
 }
 
-impl MapName for hhbc::Method<'_> {
+impl MapName for hhbc::Method {
     fn get_name(&self) -> &str {
         self.name.as_str()
     }

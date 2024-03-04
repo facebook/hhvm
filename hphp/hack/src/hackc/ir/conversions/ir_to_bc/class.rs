@@ -11,7 +11,7 @@ use crate::strings::StringCache;
 use crate::types;
 
 pub(crate) fn convert_class<'a>(
-    unit: &mut UnitBuilder<'a>,
+    unit: &mut UnitBuilder,
     class: ir::Class,
     strings: &StringCache<'a>,
 ) {

@@ -27,7 +27,7 @@ use crate::types;
 pub(crate) fn convert_function<'a>(
     unit: &mut ir::Unit,
     filename: ir::Filename,
-    src: &Function<'a>,
+    src: &Function,
     unit_state: &UnitState,
 ) {
     trace!("--- convert_function {}", src.name.as_str());
@@ -59,7 +59,7 @@ pub(crate) fn convert_method<'a>(
     unit: &mut ir::Unit,
     filename: ir::Filename,
     clsidx: usize,
-    src: &Method<'a>,
+    src: &Method,
     unit_state: &UnitState,
 ) {
     trace!("--- convert_method {}", src.name.as_str());
@@ -91,7 +91,7 @@ pub(crate) fn convert_method<'a>(
 fn convert_body<'a>(
     unit: &mut ir::Unit,
     filename: ir::Filename,
-    body: &Body<'a>,
+    body: &Body,
     attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
     coeffects: &hhbc::Coeffects,
@@ -128,7 +128,7 @@ fn convert_body<'a>(
     let shadowed_tparams: Vec<ir::ClassId> = shadowed_tparams
         .iter()
         .map(|name| {
-            let id = unit.strings.intern_bytes(name.as_ref());
+            let id = unit.strings.intern_str(name.as_str());
             ir::ClassId::new(id)
         })
         .collect();

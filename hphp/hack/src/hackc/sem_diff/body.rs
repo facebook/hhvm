@@ -47,9 +47,9 @@ use crate::work_queue::WorkQueue;
 /// return an Err (see `Sequence::compare()`).
 pub(crate) fn compare_bodies<'arena, 'a>(
     path: &CodePath<'_>,
-    body_a: &'arena hhbc::Body<'arena>,
+    body_a: &'arena hhbc::Body,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    body_b: &'arena hhbc::Body<'arena>,
+    body_b: &'arena hhbc::Body,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
@@ -99,16 +99,16 @@ pub(crate) fn compare_bodies<'arena, 'a>(
     Ok(())
 }
 
-pub(crate) struct Body<'arena> {
-    pub(crate) hhbc_body: &'arena hhbc::Body<'arena>,
+pub(crate) struct Body<'a> {
+    pub(crate) hhbc_body: &'a hhbc::Body,
     pub(crate) label_to_ip: HashMap<Label, InstrPtr>,
     /// Mapping from InstrPtr to the InstrPtr of its catch block.
     try_catch: HashMap<InstrPtr, InstrPtr>,
     ip_to_loc: IdVec<InstrPtr, Rc<SrcLoc>>,
 }
 
-impl<'arena> Body<'arena> {
-    fn new(hhbc_body: &'arena hhbc::Body<'arena>) -> Self {
+impl<'a> Body<'a> {
+    fn new(hhbc_body: &'a hhbc::Body) -> Self {
         let (label_to_ip, ip_to_loc) = Self::compute_per_instr_info(hhbc_body);
         let try_catch = Self::compute_try_catch(hhbc_body);
         Body {
@@ -138,7 +138,7 @@ impl<'arena> Body<'arena> {
     }
 
     fn compute_per_instr_info(
-        hhbc_body: &'arena hhbc::Body<'arena>,
+        hhbc_body: &'a hhbc::Body,
     ) -> (HashMap<Label, InstrPtr>, IdVec<InstrPtr, Rc<SrcLoc>>) {
         let mut label_to_ip = HashMap::default();
         let mut ip_to_loc = Vec::with_capacity(hhbc_body.body_instrs.len());
@@ -157,7 +157,7 @@ impl<'arena> Body<'arena> {
     }
 
     /// Compute a mapping from InstrPtrs to their catch target.
-    fn compute_try_catch(hhbc_body: &'arena hhbc::Body<'arena>) -> HashMap<InstrPtr, InstrPtr> {
+    fn compute_try_catch(hhbc_body: &'a hhbc::Body) -> HashMap<InstrPtr, InstrPtr> {
         let mut cur: Vec<InstrPtr> = Vec::new();
         let mut mapping: HashMap<InstrPtr, InstrPtr> = HashMap::default();
 
@@ -186,9 +186,9 @@ impl<'arena> Body<'arena> {
     }
 }
 
-fn body_instrs<'arena>(
-    hhbc_body: &'arena hhbc::Body<'arena>,
-) -> impl DoubleEndedIterator<Item = (InstrPtr, &'arena Instruct)> {
+fn body_instrs<'a>(
+    hhbc_body: &'a hhbc::Body,
+) -> impl DoubleEndedIterator<Item = (InstrPtr, &'a Instruct)> {
     hhbc_body.body_instrs.iter().enumerate().map(|(i, instr)| {
         let ip = InstrPtr::from_usize(i);
         (ip, instr)

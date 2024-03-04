@@ -80,13 +80,13 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit) -> hhbc::Unit<'
     unit
 }
 
-pub(crate) struct UnitBuilder<'a> {
+pub(crate) struct UnitBuilder {
     pub adata_cache: AdataCache,
-    pub functions: Vec<hhbc::Function<'a>>,
-    pub classes: Vec<hhbc::Class<'a>>,
+    pub functions: Vec<hhbc::Function>,
+    pub classes: Vec<hhbc::Class>,
 }
 
-impl<'a> UnitBuilder<'a> {
+impl UnitBuilder {
     fn new() -> Self {
         Self {
             adata_cache: AdataCache::new(),
@@ -95,7 +95,7 @@ impl<'a> UnitBuilder<'a> {
         }
     }
 
-    fn finish(self) -> hhbc::Unit<'a> {
+    fn finish<'a>(self) -> hhbc::Unit<'a> {
         hhbc::Unit {
             adata: self.adata_cache.finish().into(),
             functions: self.functions.into(),

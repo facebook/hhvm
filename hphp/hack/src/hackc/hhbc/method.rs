@@ -17,11 +17,11 @@ use crate::Visibility;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Method<'arena> {
+pub struct Method {
     pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
     pub name: MethodName,
-    pub body: Body<'arena>,
+    pub body: Body,
     pub span: Span,
     pub coeffects: Coeffects,
     pub flags: MethodFlags,
@@ -39,7 +39,7 @@ bitflags! {
     }
 }
 
-impl Method<'_> {
+impl Method {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(MethodFlags::IS_CLOSURE_BODY)
     }

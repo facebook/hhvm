@@ -106,10 +106,6 @@ impl<'a> Token<'a> {
         Ok(std::str::from_utf8(self.as_bytes())?)
     }
 
-    pub(crate) fn into_ffi_str<'arena>(&self, alloc: &'arena bumpalo::Bump) -> ffi::Str<'arena> {
-        ffi::Str::new_slice(alloc, self.as_bytes())
-    }
-
     /// Only str_literal and triple_str_literal can be parsed into a new tokenizer.
     /// To create a new tokenizer that still has accurate error reporting, we want to pass the line
     /// So `into_str_literal_and_line` and `into_triple_str_literal_and_line` return a Result of bytes rep and line # or bail

@@ -26,7 +26,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     name: &ast::Sid,
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs);
     let mut tparams = scope
         .get_tparams()

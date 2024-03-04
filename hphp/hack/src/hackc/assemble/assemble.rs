@@ -84,16 +84,16 @@ fn assemble_from_toks<'arena>(
 }
 
 #[derive(Default)]
-struct UnitBuilder<'a> {
+struct UnitBuilder {
     adatas: Vec<hhbc::Adata>,
     class_refs: Option<Vec<hhbc::ClassName>>,
-    classes: Vec<hhbc::Class<'a>>,
+    classes: Vec<hhbc::Class>,
     constant_refs: Option<Vec<hhbc::ConstName>>,
     constants: Vec<hhbc::Constant>,
     fatal: Option<hhbc::Fatal>,
     file_attributes: Vec<hhbc::Attribute>,
     func_refs: Option<Vec<hhbc::FunctionName>>,
-    funcs: Vec<hhbc::Function<'a>>,
+    funcs: Vec<hhbc::Function>,
     include_refs: Option<Vec<hhbc::IncludePath>>,
     module_use: Option<ModuleName>,
     modules: Vec<hhbc::Module>,
@@ -101,8 +101,8 @@ struct UnitBuilder<'a> {
     typedefs: Vec<hhbc::Typedef>,
 }
 
-impl<'a> UnitBuilder<'a> {
-    fn into_unit(self) -> hhbc::Unit<'a> {
+impl UnitBuilder {
+    fn into_unit<'a>(self) -> hhbc::Unit<'a> {
         hhbc::Unit {
             adata: self.adatas.into(),
             functions: self.funcs.into(),
@@ -126,7 +126,7 @@ impl<'a> UnitBuilder<'a> {
         }
     }
 
-    fn assemble_decl(&mut self, alloc: &'a Bump, token_iter: &mut Lexer<'_>) -> Result<()> {
+    fn assemble_decl(&mut self, alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<()> {
         let tok = token_iter.peek().unwrap();
 
         if !tok.is_decl() {
@@ -313,10 +313,7 @@ fn assemble_typedef(
     })
 }
 
-fn assemble_class<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Class<'arena>> {
+fn assemble_class<'arena>(alloc: &'arena Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Class> {
     parse!(token_iter, ".class"
        <upper_bounds:assemble_upper_bounds()>
        <attr:assemble_special_and_user_attrs(alloc)>
@@ -478,10 +475,10 @@ fn assemble_const_or_type_const<'arena>(
 fn assemble_method<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Method<'arena>> {
+) -> Result<hhbc::Method> {
     let method_tok = token_iter.peek().copied();
     token_iter.expect_str(Token::is_decl, ".method")?;
-    let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
+    let shadowed_tparams = assemble_shadowed_tparams(token_iter)?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
@@ -516,14 +513,13 @@ fn assemble_method<'arena>(
     Ok(met)
 }
 
-fn assemble_shadowed_tparams<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Vec<Str<'arena>>> {
+fn assemble_shadowed_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<StringId>> {
     token_iter.expect(Token::is_open_curly)?;
     let mut stp = Vec::new();
     while token_iter.peek_is(Token::is_identifier) {
-        stp.push(token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc));
+        stp.push(hhbc::intern(
+            token_iter.expect(Token::is_identifier)?.as_str()?,
+        ));
         if !token_iter.peek_is(Token::is_close_curly) {
             token_iter.expect(Token::is_comma)?;
         }
@@ -1045,7 +1041,7 @@ where
 fn assemble_function<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Function<'arena>> {
+) -> Result<hhbc::Function> {
     token_iter.expect_str(Token::is_decl, ".function")?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
@@ -1405,9 +1401,9 @@ fn assemble_body<'arena>(
     decl_map: &mut DeclMap,
     params: Vec<hhbc::Param>,
     return_type_info: Maybe<hhbc::TypeInfo>,
-    shadowed_tparams: Vec<Str<'arena>>,
+    shadowed_tparams: Vec<StringId>,
     upper_bounds: Vec<hhbc::UpperBound>,
-) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects)> {
+) -> Result<(hhbc::Body, hhbc::Coeffects)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
     let mut decl_vars = Vec::new();

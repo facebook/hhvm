@@ -12,7 +12,6 @@ use std::write;
 use bstr::ByteSlice;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Str;
 use ffi::Vector;
 use hash::HashSet;
 use hhbc::Adata;
@@ -295,7 +294,7 @@ where
     })
 }
 
-fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -> Result<()> {
+fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
@@ -448,7 +447,7 @@ fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant) -> Result<
     w.write_all(b";")
 }
 
-fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class<'_>) -> Result<()> {
+fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write_all(b".enum_ty ")?;
@@ -470,7 +469,7 @@ fn print_doc_comment<'arena>(
     Ok(())
 }
 
-fn print_uses<'arena>(w: &mut dyn Write, c: &Class<'arena>) -> Result<()> {
+fn print_uses(w: &mut dyn Write, c: &Class) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
@@ -494,14 +493,15 @@ fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName]) -> Result
     write_bytes!(w, " enum_includes ({})", fmt_separated(" ", enum_includes))
 }
 
-fn print_shadowed_tparams<'arena>(
-    w: &mut dyn Write,
-    shadowed_tparams: impl AsRef<[Str<'arena>]>,
-) -> Result<()> {
-    write_bytes!(w, "{{{}}}", fmt_separated(", ", shadowed_tparams.as_ref()))
+fn print_shadowed_tparams(w: &mut dyn Write, shadowed_tparams: &[StringId]) -> Result<()> {
+    write_bytes!(
+        w,
+        "{{{}}}",
+        fmt_separated(", ", shadowed_tparams.iter().map(|s| s.as_str()))
+    )
 }
 
-fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_>) -> Result<()> {
+fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
@@ -546,7 +546,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_
     })
 }
 
-fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class<'_>) -> Result<()> {
+fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
@@ -825,7 +825,7 @@ fn is_bareword_char(c: &u8) -> bool {
 fn print_body(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    body: &Body<'_>,
+    body: &Body,
     coeffects: &Coeffects,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {

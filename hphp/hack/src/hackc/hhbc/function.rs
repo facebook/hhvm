@@ -17,10 +17,10 @@ use crate::Span;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Function<'arena> {
+pub struct Function {
     pub attributes: Vector<Attribute>,
     pub name: FunctionName,
-    pub body: Body<'arena>,
+    pub body: Body,
 
     pub span: Span,
     pub coeffects: Coeffects,
@@ -39,7 +39,7 @@ bitflags! {
     }
 }
 
-impl<'arena> Function<'arena> {
+impl Function {
     pub fn is_async(&self) -> bool {
         self.flags.contains(FunctionFlags::ASYNC)
     }
@@ -56,7 +56,7 @@ impl<'arena> Function<'arena> {
         self.flags.contains(FunctionFlags::MEMOIZE_IMPL)
     }
 
-    pub fn with_body<F, T>(&mut self, body: Body<'arena>, f: F) -> T
+    pub fn with_body<F, T>(&mut self, body: Body, f: F) -> T
     where
         F: FnOnce() -> T,
     {

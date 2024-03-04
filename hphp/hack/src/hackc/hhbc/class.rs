@@ -36,7 +36,7 @@ pub struct Requirement {
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Class<'arena> {
+pub struct Class {
     pub attributes: Vector<Attribute>,
     pub base: Maybe<ClassName>,
     pub implements: Vector<ClassName>,
@@ -45,7 +45,7 @@ pub struct Class<'arena> {
     pub span: Span,
     pub uses: Vector<ClassName>,
     pub enum_type: Maybe<TypeInfo>,
-    pub methods: Vector<Method<'arena>>,
+    pub methods: Vector<Method>,
     pub properties: Vector<Property>,
     pub constants: Vector<Constant>,
     pub type_constants: Vector<TypeConstant>,
@@ -56,7 +56,7 @@ pub struct Class<'arena> {
     pub flags: Attr,
 }
 
-impl<'arena> Class<'arena> {
+impl Class {
     pub fn is_closure(&self) -> bool {
         self.methods.as_ref().iter().any(|x| x.is_closure_body())
     }

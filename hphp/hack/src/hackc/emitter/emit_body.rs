@@ -15,7 +15,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Str;
 use hash::HashSet;
 use hhbc::Body;
 use hhbc::FCallArgs;
@@ -86,7 +85,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     return_value: InstrSeq,
     scope: Scope<'_>,
     args: Args<'_>,
-) -> Result<(Body<'arena>, bool, bool)> {
+) -> Result<(Body, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
     let (is_generator, is_pair_generator) = generator::is_function_generator(body);
@@ -159,7 +158,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
     )?;
     Ok((
         make_body(
-            alloc,
             emitter,
             body_instrs,
             decl_vars,
@@ -351,7 +349,6 @@ fn make_params<'a, 'arena, 'decl>(
 }
 
 pub fn make_body<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     mut body_instrs: InstrSeq,
     decl_vars: Vec<StringId>,
@@ -363,7 +360,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a>>,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     if emitter.options().compiler_flags.relabel {
         label_rewriter::relabel_function(&mut params, &mut body_instrs);
     }
@@ -415,12 +412,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         upper_bounds: upper_bounds.into(),
-        shadowed_tparams: Vec::from_iter(
-            shadowed_tparams
-                .into_iter()
-                .map(|s| Str::new_str(alloc, &s)),
-        )
-        .into(),
+        shadowed_tparams: shadowed_tparams.into_iter().map(hhbc::intern).collect(),
         params: params.into(),
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment

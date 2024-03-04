@@ -105,7 +105,7 @@ pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
     info: &MemoizeInfo,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
-) -> Result<Vec<Method<'arena>>> {
+) -> Result<Vec<Method>> {
     // Wrapper methods may not have iterators
     emitter.iterator_mut().reset();
 
@@ -127,7 +127,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     info: &MemoizeInfo,
     class: &'a ast::Class_,
     method: &'a ast::Method_,
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     let ret = if method.name.1 == members::__CONSTRUCT {
         None
     } else {
@@ -208,7 +208,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     let alloc = emitter.alloc;
     let mut tparams: Vec<&str> = args
         .scope
@@ -234,7 +234,7 @@ fn emit<'a, 'arena, 'decl>(
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
     args: &Args<'_, 'a>,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     let pos = &args.method.span;
     let (instrs, decl_vars) = make_memoize_method_code(emitter, env, pos, &hhas_params, args)?;
     let instrs = emit_pos_then(pos, instrs);
@@ -514,9 +514,8 @@ fn make_wrapper<'a, 'arena, 'decl>(
     decl_vars: Vec<StringId>,
     return_type_info: TypeInfo,
     args: &Args<'_, 'a>,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     emit_body::make_body(
-        emitter.alloc,
         emitter,
         instrs,
         decl_vars,

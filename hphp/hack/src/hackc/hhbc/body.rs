@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
 
@@ -16,7 +15,7 @@ use crate::UpperBound;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Body<'arena> {
+pub struct Body {
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Vector<Instruct>,
     pub decl_vars: Vector<StringId>,
@@ -24,7 +23,7 @@ pub struct Body<'arena> {
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vector<UpperBound>,
-    pub shadowed_tparams: Vector<Str<'arena>>,
+    pub shadowed_tparams: Vector<StringId>,
     pub params: Vector<Param>,
     pub return_type_info: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,

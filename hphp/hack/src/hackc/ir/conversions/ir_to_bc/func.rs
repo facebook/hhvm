@@ -35,7 +35,7 @@ pub(crate) fn convert_func<'a>(
     mut func: ir::Func,
     strings: &StringCache<'a>,
     adata: &mut AdataCache,
-) -> hhbc::Body<'a> {
+) -> hhbc::Body {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
@@ -105,7 +105,7 @@ pub(crate) fn convert_func<'a>(
     let shadowed_tparams = Vec::from_iter(
         func.shadowed_tparams
             .iter()
-            .map(|name| ffi::Str::from(strings.lookup_class_name(*name).as_str())),
+            .map(|name| strings.lookup_class_name(*name).as_string_id()),
     );
 
     let body_instrs = body_instrs.to_vec();
@@ -127,7 +127,7 @@ pub(crate) fn convert_func<'a>(
 }
 
 pub(crate) fn convert_function<'a>(
-    unit: &mut UnitBuilder<'a>,
+    unit: &mut UnitBuilder,
     mut function: ir::Function,
     strings: &StringCache<'a>,
 ) {
@@ -157,7 +157,7 @@ pub(crate) fn convert_method<'a>(
     mut method: ir::Method,
     strings: &StringCache<'a>,
     adata: &mut AdataCache,
-) -> Method<'a> {
+) -> Method {
     trace!("convert_method {}", method.name.as_bstr(&strings.interner));
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;

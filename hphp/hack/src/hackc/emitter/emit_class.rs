@@ -78,7 +78,6 @@ fn add_symbol_refs<'arena, 'decl>(
 }
 
 fn make_86method<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     name: MethodName,
     params: Vec<Param>,
@@ -88,7 +87,7 @@ fn make_86method<'arena, 'decl>(
     span: Span,
     coeffects: Coeffects,
     instrs: InstrSeq,
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
 
@@ -110,7 +109,6 @@ fn make_86method<'arena, 'decl>(
     let method_env = None;
 
     let body = emit_body::make_body(
-        alloc,
         emitter,
         instrs,
         method_decl_vars,
@@ -414,10 +412,9 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
-) -> Result<Option<Method<'arena>>> {
+) -> Result<Option<Method>> {
     use hhbc::Constraint;
 
-    let alloc = emitter.alloc;
     let num_reified = ast_class
         .tparams
         .iter()
@@ -446,7 +443,6 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             emit_reified_init_body(emitter, env, num_reified, ast_class, param_local)?;
         let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         Ok(Some(make_86method(
-            alloc,
             emitter,
             *REIFIED_INIT_METH_NAME,
             params,
@@ -461,13 +457,12 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
 }
 
 fn make_init_method<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     properties: &mut [PropAndInit],
     filter: impl Fn(&Property) -> bool,
     name: &'static str,
     span: Span,
-) -> Result<Option<Method<'arena>>> {
+) -> Result<Option<Method>> {
     let mut has_inits = false;
     let instrs = InstrSeq::gather(
         properties
@@ -484,7 +479,6 @@ fn make_init_method<'arena, 'decl>(
     if has_inits {
         let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::ret_c()]);
         Ok(Some(make_86method(
-            alloc,
             emitter,
             MethodName::intern(name),
             vec![],
@@ -504,7 +498,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
-) -> Result<Class<'arena>> {
+) -> Result<Class> {
     let mut env = Env::make_class_env(ast_class);
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");
@@ -620,7 +614,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         vec![]
     };
     let span = Span::from_pos(&ast_class.span);
-    let mut additional_methods: Vec<Method<'arena>> = vec![];
+    let mut additional_methods: Vec<Method> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.push(emit_xhp::from_category_declaration(
             emitter, ast_class, &cats,
@@ -648,7 +642,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let requirements = from_class_elt_requirements(ast_class);
 
     let pinit_method = make_init_method(
-        alloc,
         emitter,
         &mut properties,
         |p| !p.flags.is_static(),
@@ -656,7 +649,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         span,
     )?;
     let sinit_method = make_init_method(
-        alloc,
         emitter,
         &mut properties,
         |p| p.flags.is_static() && !p.flags.is_lsb(),
@@ -664,7 +656,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         span,
     )?;
     let linit_method = make_init_method(
-        alloc,
         emitter,
         &mut properties,
         |p| p.flags.is_static() && p.flags.is_lsb(),
@@ -729,7 +720,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         ]);
 
         Some(make_86method(
-            alloc,
             emitter,
             MethodName::new(string_id!("86cinit")),
             params,
@@ -843,7 +833,7 @@ pub fn emit_classes_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<Class<'arena>>> {
+) -> Result<Vec<Class>> {
     ast.iter()
         .filter_map(|class| {
             if let ast::Def::Class(cd) = class {

@@ -40,7 +40,7 @@ impl MapName for hhbc::Adata {
     }
 }
 
-impl MapName for hhbc::Class<'_> {
+impl MapName for hhbc::Class {
     fn get_name(&self) -> String {
         self.name.into_string()
     }
@@ -58,13 +58,13 @@ impl MapName for hhbc::CtxConstant {
     }
 }
 
-impl MapName for hhbc::Function<'_> {
+impl MapName for hhbc::Function {
     fn get_name(&self) -> String {
         self.name.into_string()
     }
 }
 
-impl MapName for hhbc::Method<'_> {
+impl MapName for hhbc::Method {
     fn get_name(&self) -> String {
         self.name.into_string()
     }
@@ -124,7 +124,7 @@ fn cmp_attributes(a: &[Attribute], b: &[Attribute]) -> Result {
     cmp_set_t(a, b)
 }
 
-fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result {
+fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
         body_instrs: a_body_instrs,
         decl_vars: a_decl_vars,
@@ -370,7 +370,7 @@ fn cmp_param(a: &Param, b: &Param) -> Result {
     Ok(())
 }
 
-fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result {
+fn cmp_class(a: &Class, b: &Class) -> Result {
     let Class {
         attributes: a_attributes,
         base: a_base,
@@ -572,7 +572,7 @@ fn cmp_coeffects(a: &hhbc::Coeffects, b: &hhbc::Coeffects) -> Result {
     Ok(())
 }
 
-fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result {
+fn cmp_function(a: &Function, b: &Function) -> Result {
     let Function {
         attributes: a_attributes,
         name: a_name,
@@ -603,7 +603,7 @@ fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result {
+fn cmp_method(a: &Method, b: &Method) -> Result {
     let Method {
         attributes: a_attributes,
         visibility: a_visibility,

@@ -27,7 +27,7 @@ use crate::emit_param;
 pub fn emit_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     fd: &'a ast::FunDef,
-) -> Result<Vec<Function<'arena>>> {
+) -> Result<Vec<Function>> {
     use ast_defs::FunKind;
     use hhbc::FunctionFlags;
 
@@ -181,7 +181,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 pub fn emit_functions_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<Function<'arena>>> {
+) -> Result<Vec<Function>> {
     Ok(ast
         .iter()
         .filter_map(|d| d.as_fun().map(|f| emit_function(e, f)))

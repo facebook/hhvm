@@ -70,7 +70,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     renamed_id: hhbc::FunctionName,
     deprecation_info: Option<&[TypedValue]>,
     fd: &'a ast::FunDef,
-) -> Result<Function<'arena>> {
+) -> Result<Function> {
     let alloc = emitter.alloc;
     let f = &fd.fun;
     emit_memoize_helpers::check_memoize_possible(&(fd.name).0, &f.params, false)?;
@@ -377,9 +377,8 @@ fn make_wrapper_body<'a, 'arena, 'decl>(
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     body_instrs: InstrSeq,
-) -> Result<Body<'arena>> {
+) -> Result<Body> {
     emit_body::make_body(
-        emitter.alloc,
         emitter,
         body_instrs,
         decl_vars,

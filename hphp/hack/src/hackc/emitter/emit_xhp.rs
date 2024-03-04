@@ -50,7 +50,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     class: &'a Class_,
     xal: &[XhpAttribute<'_>],
     xual: &[Hint],
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     let mut args = vec![(
         ParamKind::Pnormal,
         hack_expr!("parent::__xhpAttributeDeclaration()"),
@@ -102,7 +102,7 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
     let body = Block(vec![Stmt(
         (*pos).clone(),
@@ -125,7 +125,7 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     let category_arr = mk_expr(get_category_array(categories));
     let body = Block(vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))]);
     from_xhp_attribute_declaration_method(
@@ -389,7 +389,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     static_: bool,
     visibility: Visibility,
     fb_ast: Block,
-) -> Result<Method<'arena>> {
+) -> Result<Method> {
     let meth = Method_ {
         span: pos.clone().unwrap_or(Pos::NONE),
         annotation: (),

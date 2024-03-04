@@ -29,7 +29,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
     init: Option<InstrSeq>,
-) -> Result<Option<Function<'arena>>> {
+) -> Result<Option<Function>> {
     let alloc = e.alloc;
     let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_name.as_str());
@@ -55,7 +55,6 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
         };
         let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::ret_c()]);
         let body = emit_body::make_body(
-            alloc,
             e,
             instrs,
             vec![],
@@ -89,7 +88,7 @@ fn emit_constant<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
-) -> Result<(Constant, Option<Function<'arena>>)> {
+) -> Result<(Constant, Option<Function>)> {
     let (c, init) = from_ast(e, env, &constant.name, false, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, init)?;
     Ok((c, f))
@@ -99,7 +98,7 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     defs: &'a [ast::Def],
-) -> Result<(Vec<Constant>, Vec<Function<'arena>>)> {
+) -> Result<(Vec<Constant>, Vec<Function>)> {
     let const_tuples = defs
         .iter()
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))

@@ -256,6 +256,14 @@ trait T0 {
     /* HH_FIXME[4074] This isn't valid Hack but actually occurs in www */
     parent::test_const();
   }
+
+  // TEST-CHECK-BAL: define T0.with_optional_argument
+  // CHECK: define T0.with_optional_argument($this: *T0, $opt: *HackInt, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK:   ret null
+  // CHECK: }
+  public function with_optional_argument(int $opt=0): void {
+  }
 }
 
 trait T1 {

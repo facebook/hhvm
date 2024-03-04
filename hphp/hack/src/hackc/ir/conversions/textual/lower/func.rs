@@ -54,6 +54,10 @@ pub(crate) fn lower_func(
         add_reified_parameter(&mut func, &strings);
     }
 
+    if func_info.declared_in_trait() {
+        add_self_trait_parameter(&mut func, &strings);
+    }
+
     // Start by 'unasync'ing the Func.
     ir::passes::unasync(&mut func);
     trace!(
@@ -112,6 +116,21 @@ fn add_reified_parameter(func: &mut Func, strings: &StringInterner) {
                 modifiers: ir::TypeConstraintFlags::NoFlags,
             },
         },
+        default_value: None,
+    });
+}
+
+fn add_self_trait_parameter(func: &mut Func, strings: &StringInterner) {
+    // We insert a `self` parameter so infer's analysis can
+    // do its job. We don't use `$` so we are sure we don't clash with
+    // existing Hack user defined variables.
+    func.params.push(ir::Param {
+        name: strings.intern_str("self"),
+        is_variadic: false,
+        is_inout: false,
+        is_readonly: false,
+        user_attributes: vec![],
+        ty: ir::TypeInfo::empty(),
         default_value: None,
     });
 }

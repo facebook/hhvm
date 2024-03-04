@@ -112,8 +112,6 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         }
     }
 
-    let classish_is_trait = class.is_trait();
-
     if class.flags.is_closure_class() {
         // We want closure classes to always contain a 'this' but in HHVM it's
         // implicit so add a fake 'this' property. Unfortunately we have no good
@@ -145,21 +143,6 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         if method.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
             // We want closure bodies to be 'instance' but hackc marks it as 'static'.
             method.func.attrs -= Attr::AttrStatic;
-        }
-        if classish_is_trait {
-            // Let's insert a `self` parameter so infer's analysis can
-            // do its job. We don't use `$` so we are sure we don't clash with
-            // existing Hack user defined variables.
-            let self_param = Param {
-                name: strings.intern_str("self"),
-                is_variadic: false,
-                is_inout: false,
-                is_readonly: false,
-                user_attributes: vec![],
-                ty: TypeInfo::empty(),
-                default_value: None,
-            };
-            method.func.params.push(self_param);
         }
     }
 

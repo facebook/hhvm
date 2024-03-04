@@ -30,7 +30,7 @@ pub struct Fatal {
 
 /// Unit represents a single parsed file.
 #[derive(Debug, Default)]
-pub struct Unit<'a> {
+pub struct Unit {
     /// The list of classes defined in this Unit. This also includes enums which
     /// are transformed into classes internally.
     ///
@@ -82,7 +82,7 @@ pub struct Unit<'a> {
     //
     // NB: We really should be able to generate this from the IR itself instead
     // of relying on a separate table.
-    pub symbol_refs: SymbolRefs<'a>,
+    pub symbol_refs: SymbolRefs,
 
     /// The list of top-level typedefs or aliases defined in this Unit.
     ///

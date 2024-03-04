@@ -627,11 +627,7 @@ fn sem_diff_module(path: &CodePath<'_>, a: &Module, b: &Module) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_symbol_refs<'arena>(
-    path: &CodePath<'_>,
-    a: &SymbolRefs<'arena>,
-    b: &SymbolRefs<'arena>,
-) -> Result<()> {
+fn sem_diff_symbol_refs(path: &CodePath<'_>, a: &SymbolRefs, b: &SymbolRefs) -> Result<()> {
     let SymbolRefs {
         includes: a_includes,
         constants: a_constants,

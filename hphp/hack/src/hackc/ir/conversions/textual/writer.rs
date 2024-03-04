@@ -26,7 +26,7 @@ const UNIT_END_MARKER: &str = "TEXTUAL UNIT END";
 pub fn textual_writer(
     w: &mut dyn std::io::Write,
     path: &Path,
-    unit: ir::Unit<'_>,
+    unit: ir::Unit,
     no_builtins: bool,
     hide_static_coeffects: bool,
     enable_var_cache: bool,

@@ -13,7 +13,6 @@ path = "../../lib.rs"
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 emit_opcodes_macro = { version = "0.0.0", path = "../emit_opcodes_macro" }
 ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }

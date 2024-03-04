@@ -109,7 +109,7 @@ impl MapName for hhbc::UpperBound {
 /// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
 /// T126391106: bytecode_printer drops information
 /// T126543346: Difficult to verify IncludeRootRelative
-fn cmp_includes(a: &[hhbc::IncludePath<'_>], b: &[hhbc::IncludePath<'_>]) -> Result {
+fn cmp_includes(a: &[hhbc::IncludePath], b: &[hhbc::IncludePath]) -> Result {
     for bv in b.iter() {
         if !a.iter().any(|av| cmp_include(av, bv).is_ok()) {
             bail!("{:?} has no matching includes", bv);
@@ -689,12 +689,12 @@ fn cmp_module(a: &Module, b: &Module) -> Result {
 
 /// Compares two include paths. a can be a relative path and b an aboslute path as long as
 /// a is the end of b
-fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result {
+fn cmp_include(a: &hhbc::IncludePath, b: &hhbc::IncludePath) -> Result {
     if a != b {
         match (a, b) {
             (hhbc::IncludePath::SearchPathRelative(a_bs), hhbc::IncludePath::Absolute(b_bs)) => {
-                let a_bs = a_bs.as_bstr();
-                let b_bs = b_bs.as_bstr();
+                let a_bs = a_bs.as_bytes();
+                let b_bs = b_bs.as_bytes();
                 if b_bs.ends_with(a_bs) {
                     Ok(())
                 } else {
@@ -711,7 +711,7 @@ fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result {
     }
 }
 
-fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result {
+fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
     let SymbolRefs {
         includes: a_includes,
         constants: a_constants,

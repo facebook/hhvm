@@ -138,7 +138,7 @@ fn build_ir<'a, 'arena>(
     path: &'a Path,
     content: &[u8],
     opts: &'a Opts,
-) -> Result<ir::Unit<'arena>> {
+) -> Result<ir::Unit> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(Arc::new(filepath.clone()), content);
     let mut env = crate::compile::native_env(filepath, &opts.single_file_opts)?;

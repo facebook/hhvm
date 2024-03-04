@@ -94,7 +94,7 @@ struct UnitBuilder<'a> {
     file_attributes: Vec<hhbc::Attribute>,
     func_refs: Option<Vec<hhbc::FunctionName>>,
     funcs: Vec<hhbc::Function<'a>>,
-    include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
+    include_refs: Option<Vec<hhbc::IncludePath>>,
     module_use: Option<ModuleName>,
     modules: Vec<hhbc::Module>,
     type_constants: Vec<hhbc::TypeConstant>,
@@ -172,19 +172,14 @@ impl<'a> UnitBuilder<'a> {
             }
             b".includes" => {
                 ensure_single_defn(&self.include_refs, tok)?;
-                self.include_refs = Some(assemble_refs(
-                    alloc,
-                    token_iter,
-                    ".includes",
-                    |t, alloc| {
-                        let path_str = if t.peek_is(Token::is_decl) {
-                            t.expect(Token::is_decl)?.into_ffi_str(alloc)
-                        } else {
-                            t.expect(Token::is_identifier)?.into_ffi_str(alloc)
-                        };
-                        Ok(hhbc::IncludePath::Absolute(path_str))
-                    },
-                )?)
+                self.include_refs = Some(assemble_refs(alloc, token_iter, ".includes", |t, _| {
+                    let path_str = if t.peek_is(Token::is_decl) {
+                        t.expect(Token::is_decl)?.as_bytes()
+                    } else {
+                        t.expect(Token::is_identifier)?.as_bytes()
+                    };
+                    Ok(hhbc::IncludePath::Absolute(hhbc::intern_bytes(path_str)))
+                })?)
             }
             b".alias" => {
                 self.typedefs

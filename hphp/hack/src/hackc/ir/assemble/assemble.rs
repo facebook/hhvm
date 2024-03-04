@@ -9,7 +9,6 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
-use bumpalo::Bump;
 use ir_core::ClassId;
 use ir_core::ClassName;
 use ir_core::ConstName;
@@ -42,55 +41,43 @@ use crate::parse::parse_typed_value;
 use crate::parse::parse_user_id;
 use crate::tokenizer::Tokenizer;
 
-pub fn unit_from_path<'a>(
-    path: &Path,
-    strings: Arc<StringInterner>,
-    alloc: &'a Bump,
-) -> Result<Unit<'a>> {
+pub fn unit_from_path(path: &Path, strings: Arc<StringInterner>) -> Result<Unit> {
     use std::fs::File;
     let mut file = File::open(path)?;
-    read_unit(&mut file, &format!("{}", path.display()), strings, alloc)
+    read_unit(&mut file, &format!("{}", path.display()), strings)
 }
 
-pub fn unit_from_string<'a>(
-    input: &str,
-    strings: Arc<StringInterner>,
-    alloc: &'a Bump,
-) -> Result<Unit<'a>> {
+pub fn unit_from_string(input: &str, strings: Arc<StringInterner>) -> Result<Unit> {
     let mut input = input.as_bytes();
-    read_unit(&mut input, "<string>", strings, alloc)
+    read_unit(&mut input, "<string>", strings)
 }
 
 pub fn read_unit<'a>(
     read: &mut dyn Read,
     filename: &str,
     strings: Arc<StringInterner>,
-    alloc: &'a Bump,
-) -> Result<Unit<'a>> {
+) -> Result<Unit> {
     let mut tokenizer = Tokenizer::new(read, filename, strings);
-
-    let unit = UnitParser::parse(&mut tokenizer, alloc)?;
+    let unit = UnitParser::parse(&mut tokenizer)?;
     Ok(unit)
 }
 
-pub(crate) struct UnitParser<'a> {
-    pub(crate) alloc: &'a Bump,
-    pub(crate) unit: Unit<'a>,
+pub(crate) struct UnitParser {
+    pub(crate) unit: Unit,
     pub(crate) src_loc: Option<SrcLoc>,
 }
 
-impl<'a> UnitParser<'a> {
+impl UnitParser {
     pub(crate) fn get_cur_src_loc(&self) -> SrcLoc {
         self.src_loc.as_ref().cloned().unwrap_or_default()
     }
 }
 
-impl<'a> UnitParser<'a> {
-    fn parse(tokenizer: &mut Tokenizer<'_>, alloc: &'a Bump) -> Result<Unit<'a>> {
+impl UnitParser {
+    fn parse(tokenizer: &mut Tokenizer<'_>) -> Result<Unit> {
         let strings = Arc::clone(&tokenizer.strings);
 
         let mut state = UnitParser {
-            alloc,
             unit: Unit {
                 strings,
                 ..Default::default()
@@ -185,27 +172,17 @@ impl<'a> UnitParser<'a> {
 
     fn parse_include_ref(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let incref = if tokenizer.next_is_identifier("relative")? {
-            let a = tokenizer
-                .expect_any_string()?
-                .unescaped_bump_str(self.alloc)?;
+            let a = ir_core::intern_bytes(tokenizer.expect_any_string()?.unescaped_string()?);
             IncludePath::SearchPathRelative(a)
         } else if tokenizer.next_is_identifier("rooted")? {
-            let a = tokenizer
-                .expect_any_string()?
-                .unescaped_bump_str(self.alloc)?;
-            let b = tokenizer
-                .expect_any_string()?
-                .unescaped_bump_str(self.alloc)?;
+            let a = ir_core::intern_bytes(tokenizer.expect_any_string()?.unescaped_string()?);
+            let b = ir_core::intern_bytes(tokenizer.expect_any_string()?.unescaped_string()?);
             IncludePath::IncludeRootRelative(a, b)
         } else if tokenizer.next_is_identifier("doc")? {
-            let a = tokenizer
-                .expect_any_string()?
-                .unescaped_bump_str(self.alloc)?;
+            let a = ir_core::intern_bytes(tokenizer.expect_any_string()?.unescaped_string()?);
             IncludePath::DocRootRelative(a)
         } else {
-            let a = tokenizer
-                .expect_any_string()?
-                .unescaped_bump_str(self.alloc)?;
+            let a = ir_core::intern_bytes(tokenizer.expect_any_string()?.unescaped_string()?);
             IncludePath::Absolute(a)
         };
         self.unit.symbol_refs.includes.push(incref);

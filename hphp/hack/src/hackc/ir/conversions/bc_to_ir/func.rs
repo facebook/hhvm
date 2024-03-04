@@ -25,7 +25,7 @@ use crate::types;
 
 /// Convert a hhbc::Function to an ir::Function
 pub(crate) fn convert_function<'a>(
-    unit: &mut ir::Unit<'a>,
+    unit: &mut ir::Unit,
     filename: ir::Filename,
     src: &Function<'a>,
     unit_state: &UnitState,
@@ -56,7 +56,7 @@ pub(crate) fn convert_function<'a>(
 
 /// Convert a hhbc::Method to an ir::Method
 pub(crate) fn convert_method<'a>(
-    unit: &mut ir::Unit<'a>,
+    unit: &mut ir::Unit,
     filename: ir::Filename,
     clsidx: usize,
     src: &Method<'a>,
@@ -89,7 +89,7 @@ pub(crate) fn convert_method<'a>(
 
 /// Convert a hhbc::Body to an ir::Func
 fn convert_body<'a>(
-    unit: &mut ir::Unit<'a>,
+    unit: &mut ir::Unit,
     filename: ir::Filename,
     body: &Body<'a>,
     attributes: &[hhbc::Attribute],

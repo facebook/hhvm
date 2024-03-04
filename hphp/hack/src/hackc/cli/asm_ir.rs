@@ -12,7 +12,6 @@ use std::sync::Arc;
 use ::assemble as _;
 use anyhow::anyhow;
 use anyhow::Result;
-use bumpalo::Bump;
 use clap::Args;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -48,9 +47,8 @@ pub fn run(opts: Opts) -> Result<()> {
 /// Assemble the hhas in a given file to a hhbc::Unit. Then use bytecode printer
 /// to write the hhas representation of that HCU to output.
 pub fn process_one_file(f: &Path, w: &SyncWrite) -> Result<()> {
-    let alloc = Bump::default();
     let strings = Arc::new(ir::StringInterner::default());
-    let unit = ir::assemble::unit_from_path(f, Arc::clone(&strings), &alloc)?;
+    let unit = ir::assemble::unit_from_path(f, Arc::clone(&strings))?;
     let mut output = String::new();
     match ir::print::print_unit(&mut output, &unit, false) {
         Err(e) => {

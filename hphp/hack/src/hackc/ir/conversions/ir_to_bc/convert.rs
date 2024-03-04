@@ -16,7 +16,7 @@ use crate::strings::StringCache;
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
-pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
+pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit) -> hhbc::Unit<'a> {
     let strings = StringCache::new(alloc, Arc::clone(&ir_unit.strings));
 
     let mut unit = UnitBuilder::new();
@@ -115,12 +115,12 @@ impl<'a> UnitBuilder<'a> {
     }
 }
 
-fn convert_symbol_refs<'a>(symbol_refs: &ir::SymbolRefs<'a>) -> hhbc::SymbolRefs<'a> {
+fn convert_symbol_refs(symbol_refs: &ir::SymbolRefs) -> hhbc::SymbolRefs {
     hhbc::SymbolRefs {
-        classes: symbol_refs.classes.clone().into(),
-        constants: symbol_refs.constants.clone().into(),
-        functions: symbol_refs.functions.clone().into(),
-        includes: symbol_refs.includes.clone().into(),
+        classes: symbol_refs.classes.clone(),
+        constants: symbol_refs.constants.clone(),
+        functions: symbol_refs.functions.clone(),
+        includes: symbol_refs.includes.clone(),
     }
 }
 

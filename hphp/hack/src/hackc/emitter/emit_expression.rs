@@ -5,9 +5,13 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::ffi::OsStr;
 use std::iter;
+use std::os::unix::ffi::OsStrExt;
 use std::str::FromStr;
 
+use bstr::BString;
+use bstr::ByteVec;
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
@@ -658,25 +662,26 @@ fn emit_yield<'a, 'arena, 'decl>(
     })
 }
 
-fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &ast::Expr) -> IncludePath<'arena> {
-    fn strip_backslash(s: &mut String) {
-        if s.starts_with('/') {
+fn parse_include(e: &ast::Expr) -> IncludePath {
+    fn strip_backslash(s: &mut BString) {
+        if let Some(b'/') = s.first() {
             *s = s[1..].into()
         }
     }
-    fn split_var_lit(e: &ast::Expr) -> (String, String) {
+    fn split_var_lit(e: &ast::Expr) -> (String, BString) {
         match &e.2 {
             ast::Expr_::Binop(x) if x.bop.is_dot() => {
                 let (v, l) = split_var_lit(&x.rhs);
                 if v.is_empty() {
-                    let (var, lit) = split_var_lit(&x.lhs);
-                    (var, format!("{}{}", lit, l))
+                    let (var, mut lit) = split_var_lit(&x.lhs);
+                    lit.push_str(l);
+                    (var, lit)
                 } else {
-                    (v, String::new())
+                    (v, Default::default())
                 }
             }
-            ast::Expr_::String(lit) => (String::new(), lit.to_string()),
-            _ => (text_of_expr(e), String::new()),
+            ast::Expr_::String(lit) => (String::new(), lit.clone()),
+            _ => (text_of_expr(e), Default::default()),
         }
     }
     let (mut var, mut lit) = split_var_lit(e);
@@ -685,14 +690,17 @@ fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &ast::Expr) -> Include
         strip_backslash(&mut lit);
     }
     if var.is_empty() {
-        if std::path::Path::new(lit.as_str()).is_relative() {
-            IncludePath::SearchPathRelative(Str::new_str(alloc, &lit))
+        if std::path::Path::new(OsStr::from_bytes(lit.as_ref())).is_relative() {
+            IncludePath::SearchPathRelative(hhbc::intern_bytes(lit.as_ref()))
         } else {
-            IncludePath::Absolute(Str::new_str(alloc, &lit))
+            IncludePath::Absolute(hhbc::intern_bytes(lit.as_ref()))
         }
     } else {
         strip_backslash(&mut lit);
-        IncludePath::IncludeRootRelative(Str::new_str(alloc, &var), Str::new_str(alloc, &lit))
+        IncludePath::IncludeRootRelative(
+            hhbc::intern_bytes(var.as_bytes()),
+            hhbc::intern_bytes(lit.as_ref()),
+        )
     }
 }
 
@@ -736,21 +744,16 @@ fn emit_import<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     use ast::ImportFlavor;
-    let alloc = env.arena; // Should this be emitter.alloc?
-    let inc = parse_include(alloc, expr);
+    let inc = parse_include(expr);
     let filepath = e.filepath.clone();
-    let resolved_inc = inc.resolve_include_roots(alloc, &e.options().hhvm.include_roots, &filepath);
+    let resolved_inc = inc.resolve_include_roots(&e.options().hhvm.include_roots, &filepath);
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
         ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::incl_once()),
         ImportFlavor::RequireOnce => match &resolved_inc {
             IncludePath::DocRootRelative(path) => {
-                let expr = ast::Expr(
-                    (),
-                    pos.clone(),
-                    ast::Expr_::String(path.unsafe_as_str().into()),
-                );
+                let expr = ast::Expr((), pos.clone(), ast::Expr_::String(path.as_bytes().into()));
                 (emit_expr(e, env, &expr)?, instr::req_doc())
             }
             _ => (emit_expr(e, env, expr)?, instr::req_once()),

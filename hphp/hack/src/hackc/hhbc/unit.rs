@@ -30,7 +30,7 @@ pub struct Unit<'arena> {
     pub typedefs: Vector<Typedef>,
     pub file_attributes: Vector<Attribute>,
     pub module_use: Maybe<ModuleName>,
-    pub symbol_refs: SymbolRefs<'arena>,
+    pub symbol_refs: SymbolRefs,
     pub constants: Vector<Constant>,
     pub fatal: Maybe<Fatal>,
     pub missing_symbols: Vector<Str<'arena>>,

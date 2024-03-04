@@ -69,7 +69,7 @@ pub(crate) struct Context<'a, 'b> {
 
 impl<'a, 'b> Context<'a, 'b> {
     pub(crate) fn new(
-        unit: &'b mut ir::Unit<'a>,
+        unit: &'b mut ir::Unit,
         filename: ir::Filename,
         func: ir::Func,
         instrs: &'b [Instruct<'a>],

@@ -253,8 +253,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bstr",
- "bumpalo",
- "ffi",
  "hash",
  "ir_core",
  "itertools 0.11.0",
@@ -2446,7 +2444,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.4.0",
  "bstr",
- "bumpalo",
  "emit_opcodes_macro",
  "ffi",
  "hhbc_string_utils",

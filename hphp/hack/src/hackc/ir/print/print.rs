@@ -1971,7 +1971,7 @@ fn print_property(w: &mut dyn Write, property: &Property, strings: &StringIntern
     writeln!(w)
 }
 
-fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs<'_>) -> Result {
+fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs) -> Result {
     let SymbolRefs {
         classes,
         constants,
@@ -1994,12 +1994,21 @@ fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs<'_>) -> Result {
     for v in includes {
         write!(w, ".include_ref ")?;
         match v {
-            IncludePath::Absolute(path) => write!(w, "{}", FmtQuotedStr(path))?,
-            IncludePath::SearchPathRelative(path) => write!(w, "relative {}", FmtQuotedStr(path))?,
-            IncludePath::IncludeRootRelative(root, path) => {
-                write!(w, "rooted {} {}", FmtQuotedStr(root), FmtQuotedStr(path))?
+            IncludePath::Absolute(path) => {
+                write!(w, "{}", FmtQuotedStr(&Str::new(path.as_bytes())))?
             }
-            IncludePath::DocRootRelative(path) => write!(w, "doc {}", FmtQuotedStr(path))?,
+            IncludePath::SearchPathRelative(path) => {
+                write!(w, "relative {}", FmtQuotedStr(&Str::new(path.as_bytes())))?
+            }
+            IncludePath::IncludeRootRelative(root, path) => write!(
+                w,
+                "rooted {} {}",
+                FmtQuotedStr(&Str::new(root.as_bytes())),
+                FmtQuotedStr(&Str::new(path.as_bytes()))
+            )?,
+            IncludePath::DocRootRelative(path) => {
+                write!(w, "doc {}", FmtQuotedStr(&Str::new(path.as_bytes())))?
+            }
         }
         writeln!(w)?;
     }
@@ -2227,7 +2236,7 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
     )
 }
 
-pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
+pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
     let strings = &unit.strings;
 
     for attr in &unit.file_attributes {

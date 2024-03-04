@@ -175,10 +175,10 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
     Ok(())
 }
 
-fn print_include_region(w: &mut dyn Write, includes: &[IncludePath<'_>]) -> Result<()> {
-    fn print_include(w: &mut dyn Write, inc: &IncludePath<'_>) -> Result<()> {
+fn print_include_region(w: &mut dyn Write, includes: &[IncludePath]) -> Result<()> {
+    fn print_include(w: &mut dyn Write, inc: &IncludePath) -> Result<()> {
         let (s1, s2) = inc.extract_str();
-        write!(w, "\n  {}{}", s1, s2)?;
+        write_bytes!(w, "\n  {}{}", s1, s2)?;
         Ok(())
     }
     if !includes.is_empty() {
@@ -191,10 +191,10 @@ fn print_include_region(w: &mut dyn Write, includes: &[IncludePath<'_>]) -> Resu
     Ok(())
 }
 
-fn print_symbol_ref_regions<'arena>(
+fn print_symbol_ref_regions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    symbol_refs: &SymbolRefs<'arena>,
+    symbol_refs: &SymbolRefs,
 ) -> Result<()> {
     fn print_region<'a, T, F>(
         ctx: &Context<'_>,

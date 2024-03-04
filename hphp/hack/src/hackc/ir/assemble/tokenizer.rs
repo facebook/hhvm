@@ -14,7 +14,6 @@ use std::sync::OnceLock;
 
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Str;
 use hash::HashSet;
 use ir_core::StringInterner;
 use log::trace;
@@ -531,11 +530,6 @@ impl Token {
             Token::QuotedString(..) => Ok(Cow::Owned(self.unescaped_string()?)),
             _ => bail!("Identifier expected, not {self}"),
         }
-    }
-
-    pub fn unescaped_bump_str<'a>(&self, alloc: &'a bumpalo::Bump) -> Result<Str<'a>> {
-        let s = self.unescaped_string()?;
-        Ok(Str::new_slice(alloc, &s))
     }
 }
 

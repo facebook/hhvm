@@ -166,7 +166,7 @@ pub(crate) struct FunctionParser<'b> {
 impl<'b> FunctionParser<'b> {
     pub(crate) fn parse(
         tokenizer: &mut Tokenizer<'_>,
-        unit_state: &mut crate::assemble::UnitParser<'_>,
+        unit_state: &mut crate::assemble::UnitParser,
         mut class_state: Option<&'b mut ClassState>,
     ) -> Result<Function> {
         parse!(tokenizer, <name:parse_func_id>);

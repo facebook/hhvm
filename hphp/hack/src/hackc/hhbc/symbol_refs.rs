@@ -10,11 +10,11 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
 use bstr::BString;
-use ffi::Str;
 use ffi::Vector;
 use relative_path::RelativePath;
 use serde::Serialize;
 
+use crate::BytesId;
 use crate::ClassName;
 use crate::ConstName;
 use crate::FunctionName;
@@ -25,63 +25,61 @@ use crate::FunctionName;
 /// a dedicated lookup function corresponding to each.
 #[derive(Default, Clone, Debug, Serialize)]
 #[repr(C)]
-pub struct SymbolRefs<'arena> {
-    pub includes: Vector<IncludePath<'arena>>,
+pub struct SymbolRefs {
+    pub includes: Vector<IncludePath>,
     pub constants: Vector<ConstName>,
     pub functions: Vector<FunctionName>,
     pub classes: Vector<ClassName>,
 }
 
-/// NOTE(hrust): order matters (hhbc_hhas write includes in sorted order)
-pub type IncludePathSet<'arena> = BTreeSet<IncludePath<'arena>>;
+/// NOTE: order matters (hhbc_hhas write includes in sorted order)
+pub type IncludePathSet = BTreeSet<IncludePath>;
 
 #[derive(Clone, Debug, Eq, Serialize)]
 #[repr(C)]
-pub enum IncludePath<'arena> {
-    Absolute(Str<'arena>),                         // /foo/bar/baz.php
-    SearchPathRelative(Str<'arena>),               // foo/bar/baz.php
-    IncludeRootRelative(Str<'arena>, Str<'arena>), // $_SERVER['PHP_ROOT'] . "foo/bar/baz.php"
-    DocRootRelative(Str<'arena>),
+pub enum IncludePath {
+    Absolute(BytesId),                     // /foo/bar/baz.php
+    SearchPathRelative(BytesId),           // foo/bar/baz.php
+    IncludeRootRelative(BytesId, BytesId), // $_SERVER['PHP_ROOT'] . "foo/bar/baz.php"
+    DocRootRelative(BytesId),
 }
 
-impl<'arena> Ord for IncludePath<'arena> {
+impl Ord for IncludePath {
     fn cmp(&self, other: &Self) -> Ordering {
         self.extract_str().cmp(&other.extract_str())
     }
 }
 
-impl<'arena> PartialOrd for IncludePath<'arena> {
+impl PartialOrd for IncludePath {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'arena> PartialEq for IncludePath<'arena> {
+impl PartialEq for IncludePath {
     fn eq(&self, other: &Self) -> bool {
         self.extract_str().eq(&other.extract_str())
     }
 }
 
-impl<'arena> IncludePath<'arena> {
+impl IncludePath {
     pub fn resolve_include_roots(
         self,
-        alloc: &'arena bumpalo::Bump,
         include_roots: &BTreeMap<BString, BString>,
         current_path: &RelativePath,
-    ) -> IncludePath<'arena> {
+    ) -> IncludePath {
         match self {
             IncludePath::IncludeRootRelative(var, lit) => {
-                match include_roots.get(var.as_bstr()) {
+                match include_roots.get(var.as_bytes()) {
                     Some(prefix) => {
                         let path =
                             Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&lit));
-                        let relative = path.is_relative();
-                        let path_str = Str::new_str(alloc, path.to_str().expect("non UTF-8 path"));
-                        return if relative {
+                        let path_str = crate::intern_bytes(path.as_os_str().as_bytes());
+                        if path.is_relative() {
                             IncludePath::DocRootRelative(path_str)
                         } else {
                             IncludePath::Absolute(path_str)
-                        };
+                        }
                     }
                     _ => self, // This should probably never happen
                 }
@@ -92,19 +90,19 @@ impl<'arena> IncludePath<'arena> {
                     .parent()
                     .unwrap_or_else(|| Path::new(""))
                     .join(OsStr::from_bytes(&p));
-                let path_from_cur_dirname = Str::new_str(alloc, pathbuf.to_str().unwrap());
+                let path_from_cur_dirname = crate::intern_bytes(pathbuf.as_os_str().as_bytes());
                 IncludePath::SearchPathRelative(path_from_cur_dirname)
             }
             _ => self,
         }
     }
 
-    pub fn extract_str(&self) -> (&str, &str) {
+    pub fn extract_str(&self) -> (&[u8], &[u8]) {
         match self {
             IncludePath::Absolute(s)
             | IncludePath::SearchPathRelative(s)
-            | IncludePath::DocRootRelative(s) => (s.unsafe_as_str(), ""),
-            IncludePath::IncludeRootRelative(s1, s2) => (s1.unsafe_as_str(), s2.unsafe_as_str()),
+            | IncludePath::DocRootRelative(s) => (s.as_bytes(), &[]),
+            IncludePath::IncludeRootRelative(s1, s2) => (s1.as_bytes(), s2.as_bytes()),
         }
     }
 }

@@ -20,7 +20,7 @@ use ir::StringInterner;
 ///
 /// NOTE: hhbc::Unit has to be by-ref because it unfortunately contains a bunch
 /// of ffi::Slice<T> which cannot own T.
-pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
+pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit {
     use std::os::unix::ffi::OsStrExt;
     let strings = Arc::new(ir::StringInterner::default());
 

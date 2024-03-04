@@ -29,7 +29,7 @@ use crate::CmpError;
 use crate::MapName;
 use crate::Result;
 
-pub fn cmp_ir(a: &Unit<'_>, b: &Unit<'_>) -> Result {
+pub fn cmp_ir(a: &Unit, b: &Unit) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }
 
@@ -1592,7 +1592,7 @@ fn cmp_src_loc(
     Ok(())
 }
 
-fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result {
+fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
     let SymbolRefs {
         classes: a_classes,
         constants: a_constants,
@@ -1862,7 +1862,7 @@ fn cmp_typedef(
     Ok(())
 }
 
-fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
+fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
         classes: a_classes,
         constants: a_constants,

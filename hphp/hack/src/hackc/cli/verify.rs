@@ -280,14 +280,13 @@ impl IrOpts {
         result.map_err(|err| VerifyError::SemanticUnitMismatchError(err.root_cause().to_string()))
     }
 
-    fn verify_print_roundtrip(&self, ir: &ir::Unit<'_>) -> Result<()> {
+    fn verify_print_roundtrip(&self, ir: &ir::Unit) -> Result<()> {
         let mut as_string = String::new();
         ir::print::print_unit(&mut as_string, ir, false)
             .map_err(|err| VerifyError::PrintError(err.to_string()))?;
-        let alloc2 = bumpalo::Bump::default();
         let strings2 = Arc::new(ir::StringInterner::default());
-        let ir2 = ir::assemble::unit_from_string(&as_string, Arc::clone(&strings2), &alloc2)
-            .map_err(|err| {
+        let ir2 =
+            ir::assemble::unit_from_string(&as_string, Arc::clone(&strings2)).map_err(|err| {
                 let mut err = err.root_cause().to_string();
                 let err = if let Some(idx) = err.find(':') {
                     err.split_off(idx)

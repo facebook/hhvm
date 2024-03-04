@@ -40,7 +40,7 @@ pub(crate) struct ClassParser {
 impl ClassParser {
     pub(crate) fn parse(
         tokenizer: &mut Tokenizer<'_>,
-        unit_state: &mut crate::assemble::UnitParser<'_>,
+        unit_state: &mut crate::assemble::UnitParser,
     ) -> Result<Class> {
         parse!(tokenizer, <name:parse_user_id> <flags:parse_attr> "{" "\n");
 

@@ -58,7 +58,7 @@ pub struct Emitter<'arena, 'decl> {
 
     pub adata_state: AdataState,
     pub statement_state_: Option<StatementState<'arena>>,
-    symbol_refs_state: SymbolRefsState<'arena>,
+    symbol_refs_state: SymbolRefsState,
 
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState>,
@@ -211,7 +211,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         self.global_state_.get_or_insert_with(GlobalState::init)
     }
 
-    pub fn add_include_ref(&mut self, inc: IncludePath<'arena>) {
+    pub fn add_include_ref(&mut self, inc: IncludePath) {
         match inc {
             IncludePath::SearchPathRelative(p)
             | IncludePath::DocRootRelative(p)
@@ -243,7 +243,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn finish_symbol_refs(&mut self) -> SymbolRefs<'arena> {
+    pub fn finish_symbol_refs(&mut self) -> SymbolRefs {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas()
     }
@@ -270,15 +270,15 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
 }
 
 #[derive(Clone, Debug, Default)]
-struct SymbolRefsState<'arena> {
-    includes: IncludePathSet<'arena>,
+struct SymbolRefsState {
+    includes: IncludePathSet,
     constants: BTreeSet<ConstName>,
     functions: BTreeSet<FunctionName>,
     classes: BTreeSet<ClassName>,
 }
 
-impl<'arena> SymbolRefsState<'arena> {
-    fn to_hhas(self) -> SymbolRefs<'arena> {
+impl SymbolRefsState {
+    fn to_hhas(self) -> SymbolRefs {
         SymbolRefs {
             includes: Vec::from_iter(self.includes).into(),
             constants: Vec::from_iter(self.constants).into(),

@@ -1409,7 +1409,7 @@ and obj_get_inner_intersection args env on_error id reason tys =
  * unresolved type.
  *
  *)
-let obj_get_with_mismatches
+let obj_get_with_mismatches_helper
     ~obj_pos
     ~is_method
     ~inst_meth
@@ -1511,21 +1511,135 @@ let obj_get_with_mismatches
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both
   and lval_err_opt = from_res lval_err
   and rval_err_opt = Option.bind ~f:from_res rval_err_opt in
-
   ((env, ty_err_opt), ty, lval_err_opt, rval_err_opt)
 
-(* Look up the type of the property or method id in the type receiver_ty of the
- * receiver and use the function k to postprocess the result.
- * Return any fresh type variables that were substituted for generic type
- * parameters in the type of the property or method.
- *
- * Essentially, if receiver_ty is a concrete type, e.g., class C, then k is applied
- * to the type of the property id in C; and if receiver_ty is an unresolved type,
- * e.g., a union of classes (C1 | ... | Cn), then k is applied to the type
- * of the property id in each Ci and the results are collected into an
- * unresolved type.
- *
- *)
+let obj_get_with_mismatches
+    ~obj_pos
+    ~is_method
+    ~inst_meth
+    ~meth_caller
+    ~nullsafe
+    ~coerce_from_ty
+    ~explicit_targs
+    ~class_id
+    ~member_id
+    ~on_error
+    ?parent_ty
+    env
+    receiver_ty =
+  let ((env0, ty_err_opt0), (fty0, tal0), lval_err_opt0, rval_err_opt0) =
+    obj_get_with_mismatches_helper
+      ~obj_pos
+      ~is_method
+      ~inst_meth
+      ~meth_caller
+      ~nullsafe
+      ~coerce_from_ty
+      ~explicit_targs
+      ~class_id
+      ~member_id
+      ~on_error
+      ?parent_ty
+      env
+      receiver_ty
+  in
+  if
+    Option.is_none ty_err_opt0
+    || (not is_method)
+    || not (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
+  then
+    ((env0, ty_err_opt0), (fty0, tal0), lval_err_opt0, rval_err_opt0)
+  else
+    (* Under Sound Dynamic, we might be calling through a receiver whose like-type
+     * instantiation doesn't satisfy where constraints on the method. For example,
+     * class ExpectObj<T> { public function foo() where T as Container<mixed> ...}
+     * might be called through ExpectObj<~vec<int>> for which ~vec<int> is not a
+     * subtype of Container<mixed>.
+     *
+     * But by first like-pushing to a supertype, i.e. ~ExpectObj<vec<int>>, we can
+     * type-check the call. We do this by attempting a subtype
+     *   ExpectObj<~vec<int>> <: ~ExpectObj<#0> <: suppordyn<dynamic>
+     * where #0 is a fresh type variable. Because we are calling through a like, we
+     * propagate this to the function type of the method.
+     *
+     * Compare SDT calling for top-level functions e.g.
+     *   function foo<T>(ExpectObj<T>) where T as Container<mixed>
+     *)
+    let rec freshen_receiver_ty_and_assert_subtype env ty =
+      let (env, ty) = Env.expand_type env ty in
+      let r = get_reason ty in
+      (* Now produce fresh type variables for type arguments *)
+      match get_node ty with
+      | Tclass (id, exact, tyargs) ->
+        let (env, freshened_tyargs) =
+          List.map_env env tyargs ~f:(fun env _ty ->
+              Env.fresh_type_invariant env obj_pos)
+        in
+        let freshened_receiver_ty =
+          mk (r, Tclass (id, exact, freshened_tyargs))
+        in
+        let like_receiver_ty = MakeType.locl_like r freshened_receiver_ty in
+        (* Perform the two subtype assertions mentioned in the comment above. We
+         * expect these to succeed because the type variables are unconstrained
+         *)
+        let (env, _ty_err3) =
+          Typing_ops.sub_type
+            obj_pos
+            Reason.URnone
+            env
+            freshened_receiver_ty
+            (MakeType.supportdyn r (MakeType.mixed r))
+            Typing_error.Callback.unify_error
+        in
+        let (env, _ty_err2) =
+          Typing_ops.sub_type
+            obj_pos
+            Reason.URnone
+            env
+            ty
+            like_receiver_ty
+            Typing_error.Callback.unify_error
+        in
+        (env, freshened_receiver_ty)
+      | Tunion tyl ->
+        let (env, tyl) =
+          List.map_env env tyl ~f:freshen_receiver_ty_and_assert_subtype
+        in
+        (env, mk (r, Tunion tyl))
+      | _ -> (env, ty)
+    in
+    (* First strip off top-level like, so we can see the class (or union of classes) underneath *)
+    let stripped_receiver_ty = Typing_utils.strip_dynamic env receiver_ty in
+    let (env, freshened_receiver_ty) =
+      freshen_receiver_ty_and_assert_subtype env stripped_receiver_ty
+    in
+    let ((env, ty_err_opt), (fty, tal), lval_err_opt, rval_err_opt) =
+      obj_get_with_mismatches_helper
+        ~obj_pos
+        ~is_method
+        ~inst_meth
+        ~meth_caller
+        ~nullsafe
+        ~coerce_from_ty
+        ~explicit_targs
+        ~class_id
+        ~member_id
+        ~on_error
+        ?parent_ty
+        env
+        freshened_receiver_ty
+    in
+    (* If calling through both non-like *and* like types had errors, pick the non-like
+     * type version because the messages are likely to be more comprehensible *)
+    if Option.is_some ty_err_opt then
+      ((env0, ty_err_opt0), (fty0, tal0), lval_err_opt0, rval_err_opt0)
+    else
+      (* Otherwise, use the result from the like-type receiver and add
+       * a like to the function type
+       *)
+      let fty = Typing_make_type.locl_like (get_reason fty) fty in
+      ((env, ty_err_opt), (fty, tal), lval_err_opt, rval_err_opt)
+
 let obj_get
     ~obj_pos
     ~is_method

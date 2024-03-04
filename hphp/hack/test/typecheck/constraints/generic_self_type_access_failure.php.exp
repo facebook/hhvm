@@ -8,11 +8,3 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `Box`
   File "generic_self_type_access_failure.php", line 18, characters 52-52:
   But got `T = TX::T`
-File "generic_self_type_access_failure.php", line 20, characters 11-11:
-A `where` type constraint is violated here (Typing[4323])
-  File "generic_self_type_access_failure.php", line 12, characters 28-28:
-  This is the method with `where` type constraints
-  File "generic_self_type_access_failure.php", line 13, characters 13-13:
-  No type constant `T` in `Intf`
-  File "generic_self_type_access_failure.php", line 5, characters 11-14:
-  Declaration of `Intf` is here

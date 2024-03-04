@@ -136,6 +136,7 @@ request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
 void EvaluateCommand::logToScuba(const std::string& code,
                                  bool success,
                                  const std::string& error,
+                                 const std::string& clientUser,
                                  const std::string& clientId,
                                  uint32_t sessionId,
                                  int64_t before,
@@ -149,6 +150,7 @@ void EvaluateCommand::logToScuba(const std::string& code,
   ent.setInt("num_lines", num_lines);
   ent.setInt("success", success);
   ent.setStr("error", error);
+  ent.setStr("client_user", clientUser);
   ent.setStr("client_id", clientId);
   ent.setInt("session_id", sessionId);
   ent.setInt("start_time", before);
@@ -206,7 +208,9 @@ bool EvaluateCommand::executeImpl(
       Cfg::Debugger::LogEvaluationCommands &&
       StructuredLog::enabled()) {
     logToScuba(rawExpression, !result.failed, result.error,
-               session->getClientId(), session->getSessionId(),
+               session->getClientUser(),
+               session->getClientId(),
+               session->getSessionId(),
                before, after, dummyRI->m_firstBpHit);
   }
 

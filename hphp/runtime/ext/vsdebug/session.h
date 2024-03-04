@@ -91,9 +91,16 @@ struct DebuggerSession final {
   std::string getDebuggerSessionAuth();
 
   void setClientId(const std::string& clientId) { m_clientId = clientId; }
-  std::string getClientId() const { return m_clientId; }
+  const std::string& getClientId() const { return m_clientId; }
 
   uint32_t getSessionId() const { return m_sessionId; }
+
+  void setClientUser(const std::string& clientUser) {
+    m_clientUser = clientUser;
+  }
+  const std::string& getClientUser() const {
+    return m_clientUser;
+  }
 
   int getCurrFrameId() const { return m_currFrameId; }
   void setCurrFrameId(int frameId) { m_currFrameId = frameId; }
@@ -157,6 +164,7 @@ private:
 
   std::string m_clientId;
   uint32_t m_sessionId;
+  std::string m_clientUser;
 };
 
 }

@@ -322,6 +322,9 @@ void Debugger::setClientConnected(
         );
         m_clientConnected.store(false, std::memory_order_release);
       }
+      if (clientInfo) {
+        m_session->setClientUser(clientInfo->clientUser);
+      }
 
       // When the client connects, break the entire program to get it into a
       // known state, set initial breakpoints and then wait for

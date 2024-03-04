@@ -52,7 +52,7 @@ use crate::reified_generics_helpers as RGH;
 static THIS: &str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
-pub struct Args<'a, 'arena> {
+pub struct Args<'a> {
     pub immediate_tparams: &'a Vec<ast::Tparam>,
     pub class_tparam_names: &'a [&'a str],
     pub ast_params: &'a Vec<ast::FunParam>,
@@ -60,7 +60,7 @@ pub struct Args<'a, 'arena> {
     pub pos: &'a Pos,
     pub deprecation_info: &'a Option<&'a [TypedValue]>,
     pub doc_comment: Option<DocComment>,
-    pub default_dropthrough: Option<InstrSeq<'arena>>,
+    pub default_dropthrough: Option<InstrSeq>,
     pub call_context: Option<StringId>,
     pub flags: Flags,
 }
@@ -83,9 +83,9 @@ pub fn emit_body<'b, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
-    return_value: InstrSeq<'arena>,
+    return_value: InstrSeq,
     scope: Scope<'_>,
-    args: Args<'_, 'arena>,
+    args: Args<'_>,
 ) -> Result<(Body<'arena>, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
@@ -188,7 +188,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     pos: &Pos,
     ast_params: &[ast::FunParam],
     flags: Flags,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
         instr::native_impl()
     } else {
@@ -229,8 +229,7 @@ fn make_header_content<'a, 'arena, 'decl>(
     pos: &Pos,
     ast_params: &[ast::FunParam],
     flags: Flags,
-) -> Result<InstrSeq<'arena>> {
-    let alloc = emitter.alloc;
+) -> Result<InstrSeq> {
     let method_prolog = if flags.contains(Flags::NATIVE) {
         instr::empty()
     } else {
@@ -238,7 +237,7 @@ fn make_header_content<'a, 'arena, 'decl>(
     };
 
     let deprecation_warning =
-        emit_deprecation_info(alloc, &env.scope, deprecation_info, emitter.systemlib())?;
+        emit_deprecation_info(&env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
         InstrSeq::gather(vec![instr::create_cont(), instr::pop_c()])
@@ -354,7 +353,7 @@ fn make_params<'a, 'arena, 'decl>(
 pub fn make_body<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    mut body_instrs: InstrSeq<'arena>,
+    mut body_instrs: InstrSeq,
     decl_vars: Vec<StringId>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
@@ -454,10 +453,8 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     tparams: &[ast::Tparam],
-) -> Result<InstrSeq<'arena>> {
-    let mut make_param_instr = |param: &Param,
-                                ast_param: &ast::FunParam|
-     -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
+    let mut make_param_instr = |param: &Param, ast_param: &ast::FunParam| -> Result<InstrSeq> {
         if param.is_variadic {
             Ok(instr::empty())
         } else {
@@ -517,12 +514,11 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     Ok(InstrSeq::gather(instrs))
 }
 
-pub fn emit_deprecation_info<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn emit_deprecation_info<'a>(
     scope: &Scope<'a>,
     deprecation_info: Option<&[TypedValue]>,
     is_systemlib: bool,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(match deprecation_info {
         None => instr::empty(),
         Some(args) => {
@@ -587,7 +583,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     instr::null_uninit(),
                     instr::null_uninit(),
                     trait_instrs,
-                    instr::string(alloc, deprecation_string),
+                    instr::string(deprecation_string),
                     concat_instruction,
                     instr::int(sampling_rate),
                     instr::int(error_code),
@@ -604,12 +600,12 @@ pub fn emit_deprecation_info<'a, 'arena>(
 
 fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    default_return_value: InstrSeq<'arena>,
+    default_return_value: InstrSeq,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     return_type_info: &TypeInfo,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
-    default_dropthrough: Option<InstrSeq<'arena>>,
+    default_dropthrough: Option<InstrSeq>,
     flags: Flags,
     is_generator: bool,
 ) {
@@ -644,10 +640,8 @@ fn set_emit_statement_state<'arena, 'decl>(
     )
 }
 
-fn emit_verify_out<'arena>(
-    params: &[(Param, Option<(Label, ast::Expr)>)],
-) -> (usize, InstrSeq<'arena>) {
-    let param_instrs: Vec<InstrSeq<'arena>> = params
+fn emit_verify_out(params: &[(Param, Option<(Label, ast::Expr)>)]) -> (usize, InstrSeq) {
+    let param_instrs: Vec<InstrSeq> = params
         .iter()
         .enumerate()
         .filter_map(|(i, (p, _))| {
@@ -756,7 +750,7 @@ pub fn get_tp_names_set(tparams: &[ast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 
-fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
+fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
     unimplemented!() // SF(2021-03-17): I found it like this.
 }
 

@@ -23,17 +23,17 @@ use priority_queue::PriorityQueue;
 use smallvec::smallvec;
 use smallvec::SmallVec;
 
-struct Block<'a, 'b> {
+struct Block<'b> {
     id: usize,
     rpo_id: Option<i32>,
-    instrs: &'b [Instruct<'a>],
+    instrs: &'b [Instruct],
     catch: Option<usize>,
     preds: Vec<usize>,
     succs: Vec<usize>,
 }
 
-impl<'a, 'b> Block<'a, 'b> {
-    fn new(id: usize, instrs: &'b [Instruct<'a>]) -> Self {
+impl<'b> Block<'b> {
+    fn new(id: usize, instrs: &'b [Instruct]) -> Self {
         Self {
             id,
             rpo_id: None,
@@ -75,7 +75,7 @@ impl Default for LocalAnalysis {
     }
 }
 
-fn analyze_locals<'a>(inst: &Instruct<'a>) -> LocalAnalysis {
+fn analyze_locals(inst: &Instruct) -> LocalAnalysis {
     match &inst {
         Instruct::Pseudo(_) => LocalAnalysis::default(),
         Instruct::Opcode(Opcode::PushL(loc)) => LocalAnalysis {
@@ -139,7 +139,7 @@ fn analyze_locals<'a>(inst: &Instruct<'a>) -> LocalAnalysis {
     }
 }
 
-fn instr_may_throw<'a>(inst: &Instruct<'a>) -> bool {
+fn instr_may_throw(inst: &Instruct) -> bool {
     match &inst {
         Instruct::Opcode(
             Opcode::PopL(_)
@@ -194,7 +194,7 @@ fn instr_may_throw<'a>(inst: &Instruct<'a>) -> bool {
 ///                     empty set if there is no catch for I or I does not throw
 ///
 /// ant = ant & ~(must_write(I) | must_unset(I)) | may_read(I) | ant_catch(I)
-fn update_ant<'a>(inst: &Instruct<'a>, ant: &mut BitSet, catch_ant: Option<&BitSet>) {
+fn update_ant(inst: &Instruct, ant: &mut BitSet, catch_ant: Option<&BitSet>) {
     let analysis = analyze_locals(inst);
     analysis
         .must_write
@@ -225,7 +225,7 @@ fn update_ant<'a>(inst: &Instruct<'a>, ant: &mut BitSet, catch_ant: Option<&BitS
 ///
 /// avl_catch = avl_catch & avl
 /// avl = (avl | must_write(I) | must_read(I)) & ~must_unset(I)
-fn update_avl<'a>(inst: &Instruct<'a>, avl: &mut BitSet, catch_avl: &mut Option<&mut BitSet>) {
+fn update_avl(inst: &Instruct, avl: &mut BitSet, catch_avl: &mut Option<&mut BitSet>) {
     match catch_avl {
         Some(ref mut s) if instr_may_throw(inst) => s.intersect_with(avl),
         _ => (),
@@ -308,11 +308,7 @@ impl BlockData {
     /// For I in block:
     ///   avl_catch = avl_catch & avl_out
     ///   avl_out = (avl_out | must_write(I) | must_read(I)) & ~must_unset(I)
-    fn update_avl<'a, 'b>(
-        &self,
-        block: &Block<'a, 'b>,
-        first: bool,
-    ) -> (Option<BitSet>, Option<BitSet>) {
+    fn update_avl(&self, block: &Block<'_>, first: bool) -> (Option<BitSet>, Option<BitSet>) {
         // new_avl: the avl bits exiting this block (avl_out)
         let mut new_avl = self.avl_in.clone();
 
@@ -348,11 +344,7 @@ impl BlockData {
     /// ant_in = ant_out
     /// For I in reverse(block):
     ///   ant_in = ant_in & ~(must_write(I) | must_unset(I)) | may_read(I) | ant_catch(I)
-    fn update_ant<'a, 'b>(
-        &self,
-        block: &Block<'a, 'b>,
-        ant_catch: Option<&BitSet>,
-    ) -> Option<BitSet> {
+    fn update_ant(&self, block: &Block<'_>, ant_catch: Option<&BitSet>) -> Option<BitSet> {
         let mut new_ant = self.ant_out.clone();
         block.instrs.iter().rev().for_each(|inst| {
             update_ant(inst, &mut new_ant, ant_catch);
@@ -372,11 +364,7 @@ impl BlockData {
     /// ant[Last(block)] = ant_out
     /// avl[Succ(I)] = (avl[I] | must_write(I) | must_read(I)) & ~must_unset(I)
     /// ant[Pred(I)] = ant[I] & ~(must_write(I) | must_unset(I)) | may_read(I) | ant_catch(I)
-    fn analyze_block<'a, 'b>(
-        &self,
-        block: &Block<'a, 'b>,
-        catch_ant: Option<&BitSet>,
-    ) -> BlockAnalysis {
+    fn analyze_block(&self, block: &Block<'_>, catch_ant: Option<&BitSet>) -> BlockAnalysis {
         let mut avl_bits = self.avl_in.clone();
         let mut ant_bits = self.ant_out.clone();
         let avl = block
@@ -405,7 +393,7 @@ impl BlockData {
     }
 }
 
-fn max_local<'a>(instrs: &[Instruct<'a>]) -> usize {
+fn max_local(instrs: &[Instruct]) -> usize {
     instrs
         .iter()
         .map(|i| match &i {
@@ -429,7 +417,7 @@ fn max_local<'a>(instrs: &[Instruct<'a>]) -> usize {
 /// control flow, labels, and the special TryCatch pseudo-instructions which
 /// mark regions covered by catch blocks and the catch blocks which they branch
 /// to for exception handling.
-fn make_cfg<'a, 'b>(instrs: &'b [Instruct<'a>]) -> Vec<Block<'a, 'b>> {
+fn make_cfg<'b>(instrs: &'b [Instruct]) -> Vec<Block<'b>> {
     let mut blocks = Vec::new();
     let mut label_map: HashMap<Label, usize> = HashMap::default();
     let mut start = 0;
@@ -559,7 +547,7 @@ fn make_cfg<'a, 'b>(instrs: &'b [Instruct<'a>]) -> Vec<Block<'a, 'b>> {
 
 /// Perform a reverse dataflow analysis computing the ant_in and ant_out states
 /// for each block in the CFG (See update_ant for dataflow equations)
-fn compute_ant<'a, 'b>(blocks: &[Block<'a, 'b>], data: &mut [BlockData]) {
+fn compute_ant<'b>(blocks: &[Block<'b>], data: &mut [BlockData]) {
     let mut pq = PriorityQueue::new();
     let mut in_q = BitSet::with_capacity(blocks.len());
 
@@ -595,7 +583,7 @@ fn compute_ant<'a, 'b>(blocks: &[Block<'a, 'b>], data: &mut [BlockData]) {
 
 /// Perform a forward dataflow analysis computing the avl_in and avl_out states
 /// for each block in the CFG (See update_avl for dataflow equations)
-fn compute_avl<'a, 'b>(blocks: &[Block<'a, 'b>], data: &mut [BlockData]) {
+fn compute_avl<'b>(blocks: &[Block<'b>], data: &mut [BlockData]) {
     let mut pq = PriorityQueue::new();
     let mut in_q = BitSet::with_capacity(blocks.len());
     let mut seen = BitSet::with_capacity(blocks.len());
@@ -669,11 +657,7 @@ fn compute_avl<'a, 'b>(blocks: &[Block<'a, 'b>], data: &mut [BlockData]) {
 ///     instruction is propagated into the catch block.
 ///   - For reverse dataflow state from the catch block is merged with the
 ///     current state following any instruction which may raise.
-fn make_block_data<'a, 'b>(
-    nparams: usize,
-    nlocals: usize,
-    blocks: &[Block<'a, 'b>],
-) -> Vec<BlockData> {
+fn make_block_data<'b>(nparams: usize, nlocals: usize, blocks: &[Block<'b>]) -> Vec<BlockData> {
     if blocks.is_empty() {
         return Vec::new();
     }
@@ -693,7 +677,7 @@ fn make_block_data<'a, 'b>(
     data
 }
 
-fn print_data<'a, 'b>(blocks: &[Block<'a, 'b>], data: &[BlockData]) {
+fn print_data<'b>(blocks: &[Block<'b>], data: &[BlockData]) {
     if false {
         let mut off: usize = 0;
         for (id, bd) in data.iter().enumerate() {
@@ -747,7 +731,7 @@ fn adj_mkey(mkey: &MemberKey) -> MemberKey {
     }
 }
 
-fn dim_local<'a>(instr: &Instruct<'a>) -> Option<Local> {
+fn dim_local(instr: &Instruct) -> Option<Local> {
     match &instr {
         Instruct::Opcode(Opcode::Dim(_, MemberKey::EL(loc, _) | MemberKey::PL(loc, _))) => {
             Some(*loc)
@@ -756,18 +740,18 @@ fn dim_local<'a>(instr: &Instruct<'a>) -> Option<Local> {
     }
 }
 
-fn optimize_locals<'a>(
-    instr: &Instruct<'a>,
+fn optimize_locals(
+    instr: &Instruct,
     avl: &BitSet,
     ant: &BitSet,
     adj_minstr: &mut bool,
     minstr_locals: &mut Vec<Local>,
-) -> Vec<Instruct<'a>> {
+) -> Vec<Instruct> {
     if let Some(loc) = dim_local(instr) {
         minstr_locals.push(loc);
     }
 
-    let mut add_unsets = |mut ret: Vec<Instruct<'a>>| {
+    let mut add_unsets = |mut ret: Vec<Instruct>| {
         let la = analyze_locals(instr);
         la.may_read
             .iter()
@@ -851,8 +835,8 @@ fn optimize_locals<'a>(
     }
 }
 
-fn mark_volatile_locals<'a, 'decl>(
-    emitter: &Emitter<'a, 'decl>,
+fn mark_volatile_locals(
+    emitter: &Emitter<'_, '_>,
     nparams: usize,
     decl_vars: &[StringId],
     nlocals: usize,
@@ -901,15 +885,15 @@ fn mark_volatile_locals<'a, 'decl>(
 ///   1. Hack.Lang.OptimizeLocalLifetimes - enables/disables the optimization
 ///   2. Hack.Lang.OptimizeParamLifetimes - causes parameter locals to not be
 ///      optimized ensuring they remain available for debug_backtrace
-fn optimize_lifetimes<'a, 'decl, 'b>(
-    emitter: &Emitter<'a, 'decl>,
-    blocks: &[Block<'a, 'b>],
+fn optimize_lifetimes<'b>(
+    emitter: &Emitter<'_, '_>,
+    blocks: &[Block<'b>],
     data: &[BlockData],
     size_hint: usize,
     nparams: usize,
     decl_vars: &[StringId],
     nlocals: usize,
-) -> Vec<Instruct<'a>> {
+) -> Vec<Instruct> {
     let volatile = mark_volatile_locals(emitter, nparams, decl_vars, nlocals);
     let mut v = Vec::with_capacity(size_hint);
     for (i, block) in blocks.iter().enumerate() {
@@ -920,7 +904,7 @@ fn optimize_lifetimes<'a, 'decl, 'b>(
             let analysis = data[i].analyze_block(block, catch_ant);
             let mut adj_minstr = false;
             let mut minstr_locals = Vec::new();
-            let instrs: Vec<Instruct<'a>> = block
+            let instrs: Vec<Instruct> = block
                 .instrs
                 .iter()
                 .enumerate()
@@ -942,12 +926,12 @@ fn optimize_lifetimes<'a, 'decl, 'b>(
     v
 }
 
-pub fn optimize_body<'a, 'decl>(
-    emitter: &Emitter<'a, 'decl>,
-    body: InstrSeq<'a>,
+pub fn optimize_body(
+    emitter: &Emitter<'_, '_>,
+    body: InstrSeq,
     nparams: usize,
     decl_vars: &[StringId],
-) -> Vec<Instruct<'a>> {
+) -> Vec<Instruct> {
     let body_instrs = body.to_vec();
     if !emitter.options().hhbc.optimize_local_lifetimes {
         return body_instrs;

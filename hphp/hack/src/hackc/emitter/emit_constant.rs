@@ -28,7 +28,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
-    init: Option<InstrSeq<'arena>>,
+    init: Option<InstrSeq>,
 ) -> Result<Option<Function<'arena>>> {
     let alloc = e.alloc;
     let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
@@ -114,7 +114,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     id: &'a ast::Id,
     is_abstract: bool,
     expr: Option<&ast::Expr>,
-) -> Result<(Constant, Option<InstrSeq<'arena>>)> {
+) -> Result<(Constant, Option<InstrSeq>)> {
     let (value, initializer_instrs) = match expr {
         None => (None, None),
         Some(init) => match constant_folder::expr_to_typed_value(emitter, &env.scope, init) {

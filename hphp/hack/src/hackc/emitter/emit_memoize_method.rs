@@ -255,7 +255,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
+) -> Result<(InstrSeq, Vec<StringId>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
@@ -273,8 +273,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
-    let alloc = emitter.alloc;
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
@@ -297,12 +296,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             .map(|(param, _)| param.name)
             .chain(decl_vars.iter().copied()),
     );
-    let deprecation_body = emit_body::emit_deprecation_info(
-        alloc,
-        args.scope,
-        args.deprecation_info,
-        emitter.systemlib(),
-    )?;
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
@@ -424,17 +419,12 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
 fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     args: &Args<'_, 'a>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
-    let alloc = emitter.alloc;
-    let deprecation_body = emit_body::emit_deprecation_info(
-        alloc,
-        args.scope,
-        args.deprecation_info,
-        emitter.systemlib(),
-    )?;
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
 
     let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
@@ -519,7 +509,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
 fn make_wrapper<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a>,
-    instrs: InstrSeq<'arena>,
+    instrs: InstrSeq,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     return_type_info: TypeInfo,
@@ -541,7 +531,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
     )
 }
 
-fn call_cls_method<'a, 'arena>(fcall_args: FCallArgs, args: &Args<'_, 'a>) -> InstrSeq<'arena> {
+fn call_cls_method<'a>(fcall_args: FCallArgs, args: &Args<'_, 'a>) -> InstrSeq {
     let method_id =
         hhbc::MethodName::add_suffix(args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {

@@ -23,7 +23,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     class: &'a Class_,
     class_is_const: bool,
     class_is_closure: bool,
-) -> Result<PropAndInit<'arena>> {
+) -> Result<PropAndInit> {
     let initial_value = Some(Expr((), Pos::NONE, Expr_::mk_null()));
     emit_property::from_ast(
         emitter,

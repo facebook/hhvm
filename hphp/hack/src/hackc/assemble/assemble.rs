@@ -57,7 +57,7 @@ pub fn assemble_single_instruction<'arena>(
     alloc: &'arena Bump,
     decl_map: &mut DeclMap,
     s: &[u8],
-) -> Result<hhbc::Instruct<'arena>> {
+) -> Result<hhbc::Instruct> {
     let mut lex = Lexer::from_slice(s, Line(1));
     let mut tcb_count = 0;
     assemble_instr(alloc, &mut lex, decl_map, &mut tcb_count)
@@ -1676,7 +1676,7 @@ fn assemble_opcode<'arena>(
     tok: &'_ [u8],
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
-) -> Result<hhbc::Instruct<'arena>> {
+) -> Result<hhbc::Instruct> {
     // This is filled in by the macro.
 }
 
@@ -1687,7 +1687,7 @@ fn assemble_instr<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
-) -> Result<hhbc::Instruct<'arena>> {
+) -> Result<hhbc::Instruct> {
     if let Some(mut sl_lexer) = token_iter.split_at_newline() {
         if sl_lexer.peek_is(Token::is_decl) {
             // Not all pseudos are decls, but all instruction decls are pseudos
@@ -1726,7 +1726,7 @@ fn assemble_instr<'arena>(
 
             match tb {
                 b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
-                b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
+                b"SSwitch" => assemble_sswitch(&mut sl_lexer),
                 tb => assemble_opcode(alloc, tb, &mut sl_lexer, decl_map),
             }
         } else {
@@ -1859,10 +1859,7 @@ fn assemble_unescaped_unquoted_triple_vec(token_iter: &mut Lexer<'_>) -> Result<
 
 /// Ex:
 /// SSwitch <"ARRAY7":L0 "ARRAY8":L1 "ARRAY9":L2 -:L3>
-fn assemble_sswitch<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_sswitch(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct> {
     let mut cases = Vec::new(); // Of Str<'arena>
     let mut targets = Vec::new(); // Of Labels
     token_iter.expect_str(Token::is_identifier, "SSwitch")?;
@@ -1872,9 +1869,9 @@ fn assemble_sswitch<'arena>(
         if token_iter.peek_is(Token::is_dash) {
             // Last item; printed as '-' but is "default"
             token_iter.next();
-            cases.push(Str::new_str(alloc, "default"));
+            cases.push(hhbc::intern_bytes("default".as_bytes()));
         } else {
-            cases.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
+            cases.push(assemble_unescaped_unquoted_intern_bytes(token_iter)?);
         }
         token_iter.expect(Token::is_colon)?;
         targets.push(assemble_label(token_iter)?);
@@ -1888,7 +1885,7 @@ fn assemble_sswitch<'arena>(
 
 /// Ex:
 /// MemoGetEager L0 L1 l:0+0
-fn assemble_memo_get_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_memo_get_eager(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct> {
     token_iter.expect_str(Token::is_identifier, "MemoGetEager")?;
     let lbl_slice = [assemble_label(token_iter)?, assemble_label(token_iter)?];
     let dum = hhbc::Dummy::DEFAULT;

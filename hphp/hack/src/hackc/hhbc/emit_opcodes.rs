@@ -16,15 +16,11 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use syn::ItemEnum;
-use syn::Lifetime;
 use syn::Result;
 use syn::Variant;
 
 pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
     let mut enum_def = syn::parse2::<ItemEnum>(input)?;
-    let generics = &enum_def.generics;
-
-    let lifetime = &generics.lifetimes().next().unwrap().lifetime;
 
     for opcode in opcodes {
         let name = Ident::new(opcode.name, Span::call_site());
@@ -38,7 +34,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                 if idx != 0 {
                     imms.push(Punct::new(',', Spacing::Alone).into());
                 }
-                let ty = convert_imm_type(ty, lifetime);
+                let ty = convert_imm_type(ty);
                 imms.extend(ty);
             }
 
@@ -143,7 +139,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
 }
 
 pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
-    // impl Targets for Instruct<'_> {
+    // impl Targets for Instruct {
     //   pub fn targets(&self) -> &[Label] {
     //     match self {
     //       ..
@@ -451,11 +447,11 @@ pub fn emit_impl_locals(input: TokenStream, opcodes: &[OpcodeData]) -> Result<To
     )
 }
 
-fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
+fn convert_imm_type(imm: &ImmType) -> TokenStream {
     match imm {
         ImmType::AA => quote!(AdataId),
         ImmType::ARR(sub) => {
-            let sub_ty = convert_imm_type(sub, lifetime);
+            let sub_ty = convert_imm_type(sub);
             quote!(Vector<#sub_ty>)
         }
         ImmType::BA => quote!(Label),
@@ -479,7 +475,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
             quote!(#ty)
         }
         ImmType::RATA => quote!(RepoAuthType),
-        ImmType::SA => quote!(Str<#lifetime>),
+        ImmType::SA => quote!(crate::BytesId),
         ImmType::SLA => quote!(Vector<SwitchLabel>),
         ImmType::VSA => quote!(Vector<crate::BytesId>),
     }
@@ -507,15 +503,15 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
 ///
 /// Expands into:
 ///
-///     pub fn my_a<'a>() -> InstrSeq<'a> {
+///     pub fn my_a() -> InstrSeq {
 ///         instr(Instruct::Opcode(Opcode::MyA))
 ///     }
 ///
-///     pub fn my_b<'a>(arg1: i64) -> InstrSeq<'a> {
+///     pub fn my_b(arg1: i64) -> InstrSeq {
 ///         instr(Instruct::Opcode(Opcode::MyB(arg1)))
 ///     }
 ///
-///     pub fn myc<'a>(arg1: i64, arg2: i64) -> InstrSeq<'a> {
+///     pub fn myc(arg1: i64, arg2: i64) -> InstrSeq {
 ///         instr(Instruct::Opcode(Opcode::MyC(arg1, arg2)))
 ///     }
 pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
@@ -671,7 +667,6 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
 
     let vis = quote!(pub);
     let enum_name = quote!(Opcode);
-    let lifetime: Lifetime = syn::parse2::<Lifetime>(quote!('a))?;
 
     let mut res: Vec<TokenStream> = Vec::new();
     for Helper {
@@ -685,7 +680,7 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
             .iter()
             .map(|(imm_name, imm_ty)| {
                 let imm_name = Ident::new(imm_name, Span::call_site());
-                let ty = convert_imm_type(imm_ty, &lifetime);
+                let ty = convert_imm_type(imm_ty);
                 quote!(#imm_name: #ty)
             })
             .collect();
@@ -707,7 +702,7 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
         };
 
         let func = quote!(
-            #vis fn #fn_name<#lifetime>(#(#params),*) -> InstrSeq<#lifetime> {
+            #vis fn #fn_name(#(#params),*) -> InstrSeq {
                 instr(Instruct::#enum_name(#enum_name::#opcode_name #args))
             }
         );
@@ -738,11 +733,11 @@ mod tests {
             quote!(
                 enum MyOps<'a> {
                     TestZeroImm,
-                    TestOneImm(Str<'a>),
-                    TestTwoImm(Str<'a>, Str<'a>),
-                    TestThreeImm(Str<'a>, Str<'a>, Str<'a>),
+                    TestOneImm(crate::BytesId),
+                    TestTwoImm(crate::BytesId, crate::BytesId),
+                    TestThreeImm(crate::BytesId, crate::BytesId, crate::BytesId),
                     TestAA(AdataId),
-                    TestARR(Vector<Str<'a>>),
+                    TestARR(Vector<crate::BytesId>),
                     TestBA(Label),
                     TestBA2([Label; 2]),
                     TestBLA(Vector<Label>),
@@ -759,7 +754,7 @@ mod tests {
                     TestNLA(Local),
                     TestOA(OaSubType),
                     TestRATA(RepoAuthType),
-                    TestSA(Str<'a>),
+                    TestSA(crate::BytesId),
                     TestSLA(Vector<SwitchLabel>),
                     TestVSA(Vector<crate::BytesId>),
                 }
@@ -900,19 +895,19 @@ mod tests {
                 &opcode_test_data::test_opcodes(),
             ),
             quote!(
-                pub fn test_aa<'a>(arr1: AdataId) -> InstrSeq<'a> {
+                pub fn test_aa(arr1: AdataId) -> InstrSeq {
                     instr(Instruct::Opcode(Opcode::TestAA(arr1)))
                 }
-                pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
+                pub fn test_lar(locrange: LocalRange) -> InstrSeq {
                     instr(Instruct::Opcode(Opcode::TestLAR(locrange)))
                 }
-                pub fn test_oneimm<'a>(str1: Str<'a>) -> InstrSeq<'a> {
+                pub fn test_oneimm(str1: crate::BytesId) -> InstrSeq {
                     instr(Instruct::Opcode(Opcode::TestOneImm(str1)))
                 }
-                pub fn test_twoimm<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
+                pub fn test_twoimm(str1: crate::BytesId, str2: crate::BytesId) -> InstrSeq {
                     instr(Instruct::Opcode(Opcode::TestTwoImm(str1, str2)))
                 }
-                pub fn test_zero_imm<'a>() -> InstrSeq<'a> {
+                pub fn test_zero_imm() -> InstrSeq {
                     instr(Instruct::Opcode(Opcode::TestZeroImm))
                 }
             ),

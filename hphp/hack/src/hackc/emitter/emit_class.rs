@@ -87,7 +87,7 @@ fn make_86method<'arena, 'decl>(
     is_abstract: bool,
     span: Span,
     coeffects: Coeffects,
-    instrs: InstrSeq<'arena>,
+    instrs: InstrSeq,
 ) -> Result<Method<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
@@ -248,7 +248,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
     class_is_const: bool,
     tparams: &[&str],
     is_closure: bool,
-) -> Result<Vec<PropAndInit<'arena>>> {
+) -> Result<Vec<PropAndInit>> {
     // TODO: we need to emit doc comments for each property,
     // not one per all properties on the same line
     // The doc comment is only for the first name in the list.
@@ -290,7 +290,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a>,
     class_: &'a ast::Class_,
-) -> Result<Vec<(Constant, Option<InstrSeq<'arena>>)>> {
+) -> Result<Vec<(Constant, Option<InstrSeq>)>> {
     use oxidized::aast::ClassConstKind;
     class_
         .consts
@@ -345,7 +345,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match &ast_class.extends[..] {
         [h, ..] => match h.1.as_happly() {
             Some((_, l)) if !l.is_empty() => {
@@ -373,7 +373,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     num_reified: usize,
     ast_class: &'a ast::Class_,
     init_meth_param_local: Local,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let check_length = InstrSeq::gather(vec![
         instr::c_get_l(init_meth_param_local),
         instr::check_cls_reified_generic_mismatch(),
@@ -463,7 +463,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
 fn make_init_method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    properties: &mut [PropAndInit<'arena>],
+    properties: &mut [PropAndInit],
     filter: impl Fn(&Property) -> bool,
     name: &'static str,
     span: Span,
@@ -696,10 +696,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
         let default_label = emitter.label_gen_mut().next_regular();
         let mut cases = Vec::with_capacity(initialized_constants.len() + 1);
         for (name, label, _) in &initialized_constants {
-            let pattern = alloc.alloc_slice_copy(name.as_str().as_bytes()) as &[u8];
-            cases.push((pattern, *label))
+            cases.push((hhbc::intern_bytes(name.as_bytes()), *label))
         }
-        cases.push((alloc.alloc_slice_copy(b"default"), default_label));
+        cases.push((hhbc::intern_bytes("default".as_bytes()), default_label));
         let pos = &ast_class.span;
         let instrs = InstrSeq::gather(vec![
             emit_pos::emit_pos(pos),
@@ -722,9 +721,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
             // default case for constant-not-found
             instr::label(default_label),
             emit_pos::emit_pos(pos),
-            instr::string(alloc, "Could not find initializer for "),
+            instr::string("Could not find initializer for "),
             instr::c_get_l(param_local),
-            instr::string(alloc, " in 86cinit"),
+            instr::string(" in 86cinit"),
             instr::concat_n(3),
             instr::fatal(FatalOp::Runtime),
         ]);

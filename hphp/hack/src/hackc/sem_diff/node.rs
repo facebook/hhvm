@@ -114,12 +114,12 @@ pub(crate) struct MemberOp {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub(crate) enum NodeInstr<'arena> {
-    Opcode(Opcode<'arena>),
+pub(crate) enum NodeInstr {
+    Opcode(Opcode),
     MemberOp(MemberOp),
 }
 
-impl Targets for NodeInstr<'_> {
+impl Targets for NodeInstr {
     fn targets(&self) -> &[Label] {
         match self {
             NodeInstr::MemberOp(_) => &[],
@@ -130,7 +130,7 @@ impl Targets for NodeInstr<'_> {
 
 #[derive(Debug)]
 pub(crate) struct Node<'arena> {
-    pub(crate) instr: NodeInstr<'arena>,
+    pub(crate) instr: NodeInstr,
     pub(crate) inputs: Box<[Input<'arena>]>,
     pub(crate) src_loc: Rc<SrcLoc>,
 }

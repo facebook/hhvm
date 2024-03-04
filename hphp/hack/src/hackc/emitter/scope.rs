@@ -19,13 +19,13 @@ use oxidized::local_id;
 /// blocks. If emit () registered any unnamed locals, the block will unset these
 /// temporaries at the end, and also be wrapped in a try/catch that will unset
 /// these unnamed locals upon exception.
-pub fn with_unnamed_temps<'arena, 'decl, F>(
-    e: &mut Emitter<'arena, 'decl>,
+pub fn with_unnamed_temps<'decl, F>(
+    e: &mut Emitter<'_, 'decl>,
     lids: &[Lid],
     emit: F,
-) -> Result<InstrSeq<'arena>>
+) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'arena, 'decl>) -> Result<InstrSeq<'arena>>,
+    F: FnOnce(&mut Emitter<'_, 'decl>) -> Result<InstrSeq>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -51,14 +51,9 @@ where
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
 /// inner block will be wrapped in a try/catch that will unset these unnamed
 /// locals upon exception.
-pub fn with_unnamed_locals<'arena, 'decl, F>(
-    e: &mut Emitter<'arena, 'decl>,
-    emit: F,
-) -> Result<InstrSeq<'arena>>
+pub fn with_unnamed_locals<F>(e: &mut Emitter<'_, '_>, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(
-        &mut Emitter<'arena, 'decl>,
-    ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
+    F: FnOnce(&mut Emitter<'_, '_>) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -87,14 +82,9 @@ where
 /// instruction blocks -- before, inner, after. If emit () registered any unnamed
 /// locals or iterators, the inner block will be wrapped in a try/catch that will
 /// unset these unnamed locals and free these iterators upon exception.
-pub fn with_unnamed_locals_and_iterators<'arena, 'decl, F>(
-    e: &mut Emitter<'arena, 'decl>,
-    emit: F,
-) -> Result<InstrSeq<'arena>>
+pub fn with_unnamed_locals_and_iterators<F>(e: &mut Emitter<'_, '_>, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(
-        &mut Emitter<'arena, 'decl>,
-    ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
+    F: FnOnce(&mut Emitter<'_, '_>) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -121,15 +111,9 @@ where
 
 /// An equivalent of with_unnamed_locals that allocates a single local and
 /// passes it to emit
-pub fn with_unnamed_local<'arena, 'decl, F>(
-    e: &mut Emitter<'arena, 'decl>,
-    emit: F,
-) -> Result<InstrSeq<'arena>>
+pub fn with_unnamed_local<F>(e: &mut Emitter<'_, '_>, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(
-        &mut Emitter<'arena, 'decl>,
-        Local,
-    ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
+    F: FnOnce(&mut Emitter<'_, '_>, Local) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
@@ -137,12 +121,9 @@ where
     })
 }
 
-pub fn stash_top_in_unnamed_local<'arena, 'decl, F>(
-    e: &mut Emitter<'arena, 'decl>,
-    emit: F,
-) -> Result<InstrSeq<'arena>>
+pub fn stash_top_in_unnamed_local<F>(e: &mut Emitter<'_, '_>, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'arena, 'decl>) -> Result<InstrSeq<'arena>>,
+    F: FnOnce(&mut Emitter<'_, '_>) -> Result<InstrSeq>,
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
@@ -150,7 +131,7 @@ where
     })
 }
 
-fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
+fn unset_unnamed_locals(start: Local, end: Local) -> InstrSeq {
     InstrSeq::gather(
         (start.idx..end.idx)
             .map(|idx| instr::unset_l(Local::new(idx as usize)))
@@ -158,11 +139,11 @@ fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     )
 }
 
-fn wrap_inner_in_try_catch<'arena>(
+fn wrap_inner_in_try_catch(
     label_gen: &mut LabelGen,
-    (before, inner, after): (InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>),
-    catch_instrs: InstrSeq<'arena>,
-) -> InstrSeq<'arena> {
+    (before, inner, after): (InstrSeq, InstrSeq, InstrSeq),
+    catch_instrs: InstrSeq,
+) -> InstrSeq {
     InstrSeq::gather(vec![
         before,
         create_try_catch(label_gen, None, false, inner, catch_instrs),
@@ -170,13 +151,13 @@ fn wrap_inner_in_try_catch<'arena>(
     ])
 }
 
-pub fn create_try_catch<'a>(
+pub fn create_try_catch(
     label_gen: &mut LabelGen,
     opt_done_label: Option<Label>,
     skip_throw: bool,
-    try_instrs: InstrSeq<'a>,
-    catch_instrs: InstrSeq<'a>,
-) -> InstrSeq<'a> {
+    try_instrs: InstrSeq,
+    catch_instrs: InstrSeq,
+) -> InstrSeq {
     let done_label = match opt_done_label {
         Some(l) => l,
         None => label_gen.next_regular(),

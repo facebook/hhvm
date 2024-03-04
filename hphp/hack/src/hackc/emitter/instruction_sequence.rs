@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc::BytesId;
 use hhbc::Instruct;
 use hhbc::Pseudo;
 
@@ -13,9 +14,9 @@ use hhbc::Pseudo;
 /// appending. So, we build a tree of instructions which can be
 /// flattened when complete.
 #[derive(Debug, Clone)]
-pub enum InstrSeq<'a> {
-    List(Vec<Instruct<'a>>),
-    Concat(Vec<InstrSeq<'a>>),
+pub enum InstrSeq {
+    List(Vec<Instruct>),
+    Concat(Vec<InstrSeq>),
 }
 
 // The following iterator implementations produce streams of instruction lists
@@ -39,14 +40,14 @@ pub enum InstrSeq<'a> {
 /// An iterator that owns an InstrSeq and produces a stream of owned lists
 /// of instructions: `Vec<Instruct>`.
 #[derive(Debug)]
-struct IntoListIter<'a> {
+struct IntoListIter {
     // Keeping top-of-stack in its own field for speed.
-    top: std::vec::IntoIter<InstrSeq<'a>>,
-    stack: Vec<std::vec::IntoIter<InstrSeq<'a>>>,
+    top: std::vec::IntoIter<InstrSeq>,
+    stack: Vec<std::vec::IntoIter<InstrSeq>>,
 }
 
-impl<'a> IntoListIter<'a> {
-    pub fn new(iseq: InstrSeq<'a>) -> Self {
+impl IntoListIter {
+    pub fn new(iseq: InstrSeq) -> Self {
         Self {
             top: match iseq {
                 InstrSeq::List(_) => vec![iseq].into_iter(),
@@ -57,8 +58,8 @@ impl<'a> IntoListIter<'a> {
     }
 }
 
-impl<'a> Iterator for IntoListIter<'a> {
-    type Item = Vec<Instruct<'a>>;
+impl Iterator for IntoListIter {
+    type Item = Vec<Instruct>;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.top.next() {
@@ -80,14 +81,14 @@ impl<'a> Iterator for IntoListIter<'a> {
 /// An iterator that borrows an InstrSeq and produces a stream of borrowed
 /// slices of instructions: `&[Instruct]`.
 #[derive(Debug)]
-struct ListIter<'i, 'a> {
+struct ListIter<'i> {
     // Keeping top-of-stack in its own field for speed.
-    top: std::slice::Iter<'i, InstrSeq<'a>>,
-    stack: Vec<std::slice::Iter<'i, InstrSeq<'a>>>,
+    top: std::slice::Iter<'i, InstrSeq>,
+    stack: Vec<std::slice::Iter<'i, InstrSeq>>,
 }
 
-impl<'i, 'a> ListIter<'i, 'a> {
-    fn new(iseq: &'i InstrSeq<'a>) -> Self {
+impl<'i> ListIter<'i> {
+    fn new(iseq: &'i InstrSeq) -> Self {
         Self {
             top: match iseq {
                 InstrSeq::List(_) => std::slice::from_ref(iseq).iter(),
@@ -98,8 +99,8 @@ impl<'i, 'a> ListIter<'i, 'a> {
     }
 }
 
-impl<'i, 'a> Iterator for ListIter<'i, 'a> {
-    type Item = &'i [Instruct<'a>];
+impl<'i> Iterator for ListIter<'i> {
+    type Item = &'i [Instruct];
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.top.next() {
@@ -123,13 +124,13 @@ impl<'i, 'a> Iterator for ListIter<'i, 'a> {
 /// Vec instead of a borrowed slice so sub-sequences of instructions can
 /// grow or shrink independently, for example by retain().
 #[derive(Debug)]
-struct ListIterMut<'i, 'a> {
-    top: std::slice::IterMut<'i, InstrSeq<'a>>,
-    stack: Vec<std::slice::IterMut<'i, InstrSeq<'a>>>,
+struct ListIterMut<'i> {
+    top: std::slice::IterMut<'i, InstrSeq>,
+    stack: Vec<std::slice::IterMut<'i, InstrSeq>>,
 }
 
-impl<'i, 'a> ListIterMut<'i, 'a> {
-    fn new(iseq: &'i mut InstrSeq<'a>) -> Self {
+impl<'i> ListIterMut<'i> {
+    fn new(iseq: &'i mut InstrSeq) -> Self {
         Self {
             top: match iseq {
                 InstrSeq::List(_) => std::slice::from_mut(iseq).iter_mut(),
@@ -140,8 +141,8 @@ impl<'i, 'a> ListIterMut<'i, 'a> {
     }
 }
 
-impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
-    type Item = &'i mut Vec<Instruct<'a>>;
+impl<'i> Iterator for ListIterMut<'i> {
+    type Item = &'i mut Vec<Instruct>;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.top.next() {
@@ -161,10 +162,10 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 }
 
 pub mod instr {
-    use ffi::Str;
     use hhbc::AdataId;
     use hhbc::AsTypeStructExceptionKind;
     use hhbc::BareThisOp;
+    use hhbc::BytesId;
     use hhbc::ClassGetCMode;
     use hhbc::ClassName;
     use hhbc::CollectionType;
@@ -226,118 +227,118 @@ pub mod instr {
         Yield => yield_,
     }
 
-    pub fn empty<'a>() -> InstrSeq<'a> {
+    pub fn empty() -> InstrSeq {
         InstrSeq::new_empty()
     }
 
-    pub fn instr<'a>(i: Instruct<'a>) -> InstrSeq<'a> {
+    pub fn instr(i: Instruct) -> InstrSeq {
         InstrSeq::List(vec![i])
     }
 
-    pub(crate) fn instrs<'a>(is: Vec<Instruct<'a>>) -> InstrSeq<'a> {
+    pub(crate) fn instrs(is: Vec<Instruct>) -> InstrSeq {
         InstrSeq::List(is)
     }
 
     // Special constructors for Opcode
 
-    pub fn cont_check_check<'a>() -> InstrSeq<'a> {
+    pub fn cont_check_check() -> InstrSeq {
         cont_check(ContCheckOp::CheckStarted)
     }
 
-    pub fn cont_check_ignore<'a>() -> InstrSeq<'a> {
+    pub fn cont_check_ignore() -> InstrSeq {
         cont_check(ContCheckOp::IgnoreStarted)
     }
 
-    pub fn dim_warn_pt<'a>(key: PropName, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
+    pub fn dim_warn_pt(key: PropName, readonly_op: ReadonlyOp) -> InstrSeq {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn f_call_cls_method<'a>(log: IsLogAsDynamicCallOp, fcall_args: FCallArgs) -> InstrSeq<'a> {
+    pub fn f_call_cls_method(log: IsLogAsDynamicCallOp, fcall_args: FCallArgs) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethod(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             log,
         )))
     }
 
-    pub fn f_call_cls_method_m<'a>(
+    pub fn f_call_cls_method_m(
         log: IsLogAsDynamicCallOp,
         fcall_args: FCallArgs,
         method: MethodName,
-    ) -> InstrSeq<'a> {
+    ) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodM(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             log,
             method,
         )))
     }
 
-    pub fn f_call_cls_method_d<'a>(
+    pub fn f_call_cls_method_d(
         fcall_args: FCallArgs,
         method: MethodName,
         class: ClassName,
-    ) -> InstrSeq<'a> {
+    ) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodD(
             fcall_args, class, method,
         )))
     }
 
-    pub fn f_call_cls_method_s<'a>(fcall_args: FCallArgs, clsref: SpecialClsRef) -> InstrSeq<'a> {
+    pub fn f_call_cls_method_s(fcall_args: FCallArgs, clsref: SpecialClsRef) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodS(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             clsref,
         )))
     }
 
-    pub fn f_call_cls_method_sd<'a>(
+    pub fn f_call_cls_method_sd(
         fcall_args: FCallArgs,
         clsref: SpecialClsRef,
         method: MethodName,
-    ) -> InstrSeq<'a> {
+    ) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodSD(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             clsref,
             method,
         )))
     }
 
-    pub fn f_call_ctor<'a>(fcall_args: FCallArgs) -> InstrSeq<'a> {
+    pub fn f_call_ctor(fcall_args: FCallArgs) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallCtor(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
         )))
     }
 
-    pub fn f_call_obj_method<'a>(fcall_args: FCallArgs, flavor: ObjMethodOp) -> InstrSeq<'a> {
+    pub fn f_call_obj_method(fcall_args: FCallArgs, flavor: ObjMethodOp) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallObjMethod(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             flavor,
         )))
     }
 
-    pub fn f_call_obj_method_d_<'a>(
+    pub fn f_call_obj_method_d_(
         fcall_args: FCallArgs,
         method: MethodName,
         flavor: ObjMethodOp,
-    ) -> InstrSeq<'a> {
+    ) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallObjMethodD(
             fcall_args,
-            Default::default(),
+            BytesId::EMPTY,
             flavor,
             method,
         )))
     }
 
-    pub fn f_call_obj_method_d<'a>(fcall_args: FCallArgs, method: MethodName) -> InstrSeq<'a> {
+    pub fn f_call_obj_method_d(fcall_args: FCallArgs, method: MethodName) -> InstrSeq {
         f_call_obj_method_d_(fcall_args, method, ObjMethodOp::NullThrows)
     }
 
-    pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
-        let mut vec: Vec<Instruct<'a>> = iters
+    pub fn iter_break(label: Label, iters: Vec<IterId>) -> InstrSeq {
+        let mut vec: Vec<Instruct> = iters
             .into_iter()
             .map(|i| Instruct::Opcode(Opcode::IterFree(i)))
             .collect();
@@ -345,7 +346,7 @@ pub mod instr {
         instrs(vec)
     }
 
-    pub fn memo_get_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
+    pub fn memo_get_eager(label1: Label, label2: Label, range: LocalRange) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::MemoGetEager(
             [label1, label2],
             // Need dummy immediate here to satisfy opcodes translator expectation of immediate
@@ -355,44 +356,40 @@ pub mod instr {
         )))
     }
 
-    pub fn new_struct_dict<'a>(keys: &[&'a [u8]]) -> InstrSeq<'a> {
+    pub fn new_struct_dict(keys: &[&[u8]]) -> InstrSeq {
         let keys: Vec<hhbc::BytesId> = keys.iter().map(|&s| hhbc::intern_bytes(s)).collect();
         instr(Instruct::Opcode(Opcode::NewStructDict(keys.into())))
     }
 
-    pub fn set_m_pt<'a>(
-        num_params: NumParams,
-        key: PropName,
-        readonly_op: ReadonlyOp,
-    ) -> InstrSeq<'a> {
+    pub fn set_m_pt(num_params: NumParams, key: PropName, readonly_op: ReadonlyOp) -> InstrSeq {
         set_m(num_params, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn silence_end<'a>(local: Local) -> InstrSeq<'a> {
+    pub fn silence_end(local: Local) -> InstrSeq {
         silence(local, SilenceOp::End)
     }
 
-    pub fn silence_start<'a>(local: Local) -> InstrSeq<'a> {
+    pub fn silence_start(local: Local) -> InstrSeq {
         silence(local, SilenceOp::Start)
     }
 
-    pub fn s_switch<'a>(cases: Vec<(&'a [u8], Label)>) -> InstrSeq<'a> {
+    pub fn s_switch(cases: Vec<(BytesId, Label)>) -> InstrSeq {
         let targets = Vec::from_iter(cases.iter().map(|(_, target)| *target)).into();
-        let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| Str::new(s))).into();
+        let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| s)).into();
         instr(Instruct::Opcode(Opcode::SSwitch(cases, targets)))
     }
 
-    /// Make a String instruction when the litstr is already arena allocated
-    pub fn string_lit<'a>(litstr: Str<'a>) -> InstrSeq<'a> {
+    /// Make a String instruction when the litstr is already interned
+    pub fn string_lit(litstr: BytesId) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::String(litstr)))
     }
 
-    /// Copy the given litstr to the arena, and make a String instruction
-    pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl AsRef<[u8]>) -> InstrSeq<'a> {
-        string_lit(Str::from(alloc.alloc_slice_copy(litstr.as_ref())))
+    /// Intern the given litstr, and make a String instruction
+    pub fn string(litstr: impl AsRef<[u8]>) -> InstrSeq {
+        string_lit(hhbc::intern_bytes(litstr.as_ref()))
     }
 
-    pub fn switch<'a>(targets: Vec<Label>) -> InstrSeq<'a> {
+    pub fn switch(targets: Vec<Label>) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::Switch(
             SwitchKind::Unbounded,
             0,
@@ -400,7 +397,7 @@ pub mod instr {
         )))
     }
 
-    pub fn await_all_list<'a>(unnamed_locals: Vec<Local>) -> InstrSeq<'a> {
+    pub fn await_all_list(unnamed_locals: Vec<Local>) -> InstrSeq {
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
             Some((head, tail)) => {
@@ -419,24 +416,24 @@ pub mod instr {
     }
 
     // Special constructors for Pseudo
-    pub fn break_<'a>() -> InstrSeq<'a> {
+    pub fn break_() -> InstrSeq {
         instr(Instruct::Pseudo(Pseudo::Break))
     }
 
-    pub fn continue_<'a>() -> InstrSeq<'a> {
+    pub fn continue_() -> InstrSeq {
         instr(Instruct::Pseudo(Pseudo::Continue))
     }
 
-    pub fn label<'a>(label: Label) -> InstrSeq<'a> {
+    pub fn label(label: Label) -> InstrSeq {
         instr(Instruct::Pseudo(Pseudo::Label(label)))
     }
 
-    pub fn srcloc<'a>(
+    pub fn srcloc(
         line_begin: isize,
         line_end: isize,
         col_begin: isize,
         col_end: isize,
-    ) -> InstrSeq<'a> {
+    ) -> InstrSeq {
         instr(Instruct::Pseudo(Pseudo::SrcLoc(SrcLoc {
             line_begin: line_begin as i32,
             line_end: line_end as i32,
@@ -446,14 +443,14 @@ pub mod instr {
     }
 }
 
-impl<'a> InstrSeq<'a> {
+impl InstrSeq {
     /// Produce an empty instruction sequence.
     pub fn new_empty() -> Self {
         InstrSeq::List(Vec::new())
     }
 
     /// Transitional version. We mean to write a `gather!` in the future.
-    pub fn gather(mut iss: Vec<InstrSeq<'a>>) -> Self {
+    pub fn gather(mut iss: Vec<InstrSeq>) -> Self {
         iss.retain(|iseq| match iseq {
             InstrSeq::List(s) if s.is_empty() => false,
             _ => true,
@@ -465,11 +462,11 @@ impl<'a> InstrSeq<'a> {
         }
     }
 
-    pub fn iter<'i>(&'i self) -> impl Iterator<Item = &'i Instruct<'a>> {
+    pub fn iter<'i>(&'i self) -> impl Iterator<Item = &'i Instruct> {
         ListIter::new(self).flatten()
     }
 
-    pub fn iter_mut<'i>(&'i mut self) -> impl Iterator<Item = &'i mut Instruct<'a>> {
+    pub fn iter_mut<'i>(&'i mut self) -> impl Iterator<Item = &'i mut Instruct> {
         ListIterMut::new(self).flatten()
     }
 
@@ -477,7 +474,7 @@ impl<'a> InstrSeq<'a> {
         ListIter::new(self).map(|s| s.len()).sum()
     }
 
-    fn compact_tail(v: &mut [Instruct<'a>], mut start: usize) -> usize {
+    fn compact_tail(v: &mut [Instruct], mut start: usize) -> usize {
         if start > 0 && Self::is_srcloc(&v[start - 1]) {
             // previous compacted range ends with a SrcLoc;
             // back up so we can compact it if eligible.
@@ -501,7 +498,7 @@ impl<'a> InstrSeq<'a> {
 
     /// Flatten self into a contiguous Vec of instructions, with SrcLocs compacted
     /// to only preserve the final SrcLoc in any consecutive sequence.
-    pub fn to_vec(self) -> Vec<Instruct<'a>> {
+    pub fn to_vec(self) -> Vec<Instruct> {
         let mut v = Vec::with_capacity(self.full_len());
         for list in IntoListIter::new(self) {
             let start = v.len();
@@ -513,12 +510,12 @@ impl<'a> InstrSeq<'a> {
     }
 
     /// Test whether `instruction` is of case `Pseudo::SrcLoc`.
-    fn is_srcloc(instruction: &Instruct<'a>) -> bool {
+    fn is_srcloc(instruction: &Instruct) -> bool {
         matches!(instruction, Instruct::Pseudo(Pseudo::SrcLoc(_)))
     }
 
     /// Return the first non-SrcLoc instruction.
-    pub fn first(&self) -> Option<&Instruct<'a>> {
+    pub fn first(&self) -> Option<&Instruct> {
         self.iter().find(|&i| !Self::is_srcloc(i))
     }
 
@@ -527,7 +524,7 @@ impl<'a> InstrSeq<'a> {
         self.iter().all(Self::is_srcloc)
     }
 
-    pub fn retain(&mut self, mut f: impl FnMut(&Instruct<'a>) -> bool) {
+    pub fn retain(&mut self, mut f: impl FnMut(&Instruct) -> bool) {
         for s in ListIterMut::new(self) {
             s.retain(&mut f)
         }
@@ -535,7 +532,7 @@ impl<'a> InstrSeq<'a> {
 
     pub fn retain_mut<F>(&mut self, mut f: F)
     where
-        F: FnMut(&mut Instruct<'a>) -> bool,
+        F: FnMut(&mut Instruct) -> bool,
     {
         for s in ListIterMut::new(self) {
             *s = std::mem::take(s)

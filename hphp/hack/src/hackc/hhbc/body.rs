@@ -18,7 +18,7 @@ use crate::UpperBound;
 #[repr(C)]
 pub struct Body<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().
-    pub body_instrs: Vector<Instruct<'arena>>,
+    pub body_instrs: Vector<Instruct>,
     pub decl_vars: Vector<StringId>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,

@@ -31,7 +31,7 @@ fn main() -> Result<()> {
         #[emit_opcodes_macro::emit_opcodes]
         #[derive(Clone, Debug, Targets)]
         #[repr(C)]
-        pub enum Opcode<'arena> {
+        pub enum Opcode {
             // This is filled in by the emit_opcodes macro.  It can be printed using the
             // "//hphp/hack/src/hackc/hhbc:dump-opcodes" binary.
         }

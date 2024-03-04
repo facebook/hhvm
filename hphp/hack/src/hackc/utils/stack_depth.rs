@@ -26,7 +26,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// Given an hhbc::Body compute the maximum stack needed when executing that
 /// body. In general dead code will not be tracked however all catch blocks are
 /// assumed to start out live.
-pub fn compute_stack_depth(params: &[Param], body_instrs: &[Instruct<'_>]) -> Result<usize> {
+pub fn compute_stack_depth(params: &[Param], body_instrs: &[Instruct]) -> Result<usize> {
     let mut csd = ComputeStackDepth {
         body_instrs,
         labels: Default::default(),
@@ -76,7 +76,7 @@ impl PendingWork {
 }
 
 struct ComputeStackDepth<'a> {
-    body_instrs: &'a [Instruct<'a>],
+    body_instrs: &'a [Instruct],
     labels: IdVec<Label, Addr>,
     work: VecDeque<PendingWork>,
     /// Mapping from handled label addresses to their depth at that
@@ -87,7 +87,7 @@ struct ComputeStackDepth<'a> {
 }
 
 impl ComputeStackDepth<'_> {
-    fn run(&mut self, params: &[Param], body_instrs: &[Instruct<'_>]) -> Result<()> {
+    fn run(&mut self, params: &[Param], body_instrs: &[Instruct]) -> Result<()> {
         debug!("ComputeStackDepth::run");
         self.precompute(body_instrs);
 
@@ -173,7 +173,7 @@ impl ComputeStackDepth<'_> {
     }
 
     /// Process an Instruct. Returns `true` if this Instruct ends the current block.
-    fn process_instruct(&mut self, addr: Addr, instr: &Instruct<'_>) -> Result<bool> {
+    fn process_instruct(&mut self, addr: Addr, instr: &Instruct) -> Result<bool> {
         let end_block = match instr {
             Instruct::Pseudo(
                 Pseudo::Break
@@ -255,7 +255,7 @@ impl ComputeStackDepth<'_> {
     }
 
     /// Precompute label addresses and catch addresses.
-    fn precompute(&mut self, body_instrs: &[Instruct<'_>]) {
+    fn precompute(&mut self, body_instrs: &[Instruct]) {
         for (idx, instr) in body_instrs.iter().enumerate() {
             let addr = Addr(idx as u32);
 
@@ -277,7 +277,7 @@ impl ComputeStackDepth<'_> {
     }
 }
 
-fn num_outputs(opcode: &Opcode<'_>, opcode_data: &OpcodeData) -> u32 {
+fn num_outputs(opcode: &Opcode, opcode_data: &OpcodeData) -> u32 {
     match &opcode_data.outputs {
         Outputs::NOV => 0,
         Outputs::Fixed(n) => n.len() as u32,
@@ -297,6 +297,6 @@ fn num_outputs(opcode: &Opcode<'_>, opcode_data: &OpcodeData) -> u32 {
     }
 }
 
-fn lookup_data_for_opcode(opcode: &Opcode<'_>) -> &'static OpcodeData {
+fn lookup_data_for_opcode(opcode: &Opcode) -> &'static OpcodeData {
     hhbc_gen::opcode_data().get(opcode.variant_index()).unwrap()
 }

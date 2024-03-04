@@ -232,7 +232,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
     Ok(())
 }
 
-fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result {
+fn cmp_fcall_instr(a: &Opcode, b: &Opcode) -> Result {
     match (a, b) {
         (hhbc::Opcode::FCallClsMethod(fa, a1, a2), hhbc::Opcode::FCallClsMethod(fb, b1, b2)) => {
             cmp_fcallargs(fa, fb)?;
@@ -302,7 +302,7 @@ fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result {
+fn cmp_instr(a: &Instruct, b: &Instruct) -> Result {
     if a == b {
         return Ok(());
     }

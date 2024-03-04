@@ -181,7 +181,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     env: &Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
-) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
+) -> Result<(InstrSeq, InstrSeq)> {
     let setters = params
         .iter()
         .enumerate()

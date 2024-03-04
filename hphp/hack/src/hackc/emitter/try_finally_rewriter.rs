@@ -27,19 +27,16 @@ use crate::emit_expression;
 use crate::emit_fatal;
 use crate::reified_generics_helpers as reified;
 
-type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
+type LabelMap<'i> = BTreeMap<jt::StateId, &'i Instruct>;
 
-pub(super) struct JumpInstructions<'a, 'arena>(LabelMap<'a, 'arena>);
-impl<'a, 'arena> JumpInstructions<'a, 'arena> {
+pub(super) struct JumpInstructions<'i>(LabelMap<'i>);
+impl<'i> JumpInstructions<'i> {
     pub(super) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
     /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
-    pub(super) fn collect(
-        instr_seq: &'a InstrSeq<'arena>,
-        jt_gen: &mut jt::Gen,
-    ) -> JumpInstructions<'a, 'arena> {
+    pub(super) fn collect(instr_seq: &'i InstrSeq, jt_gen: &mut jt::Gen) -> JumpInstructions<'i> {
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool) -> jt::StateId {
             use jt::ResolvedJumpTarget;
             match jt_gen.jump_targets().get_target(is_break) {
@@ -70,7 +67,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
 }
 
 /// Delete Ret*, Break, and Continue instructions from the try body
-pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'arena> {
+pub(super) fn cleanup_try_body(mut is: InstrSeq) -> InstrSeq {
     is.retain(|instr| {
         !matches!(
             instr,
@@ -81,7 +78,7 @@ pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'ar
     is
 }
 
-pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrSeq<'arena> {
+pub(super) fn emit_jump_to_label(l: Label, iters: Vec<IterId>) -> InstrSeq {
     if iters.is_empty() {
         instr::jmp(l)
     } else {
@@ -89,10 +86,7 @@ pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrS
     }
 }
 
-pub(super) fn emit_save_label_id<'arena>(
-    local_gen: &mut LocalGen,
-    id: jt::StateId,
-) -> InstrSeq<'arena> {
+pub(super) fn emit_save_label_id(local_gen: &mut LocalGen, id: jt::StateId) -> InstrSeq {
     InstrSeq::gather(vec![
         instr::int(id.0.into()),
         instr::set_l(*local_gen.get_label()),
@@ -100,11 +94,11 @@ pub(super) fn emit_save_label_id<'arena>(
     ])
 }
 
-pub(super) fn emit_return<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+pub(super) fn emit_return<'a>(
+    e: &mut Emitter<'_, '_>,
     in_finally_epilogue: bool,
     env: &mut Env<'a>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     // check if there are try/finally region
     let jt_gen = &env.jump_targets_gen;
     match jt_gen.jump_targets().get_closest_enclosing_finally_label() {
@@ -208,18 +202,17 @@ bitflags! {
     }
 }
 
-pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+pub(super) fn emit_break_or_continue<'a>(
+    e: &mut Emitter<'_, '_>,
     flags: EmitBreakOrContinueFlags,
     env: &mut Env<'a>,
     pos: &Pos,
-) -> InstrSeq<'arena> {
-    let alloc = e.alloc;
+) -> InstrSeq {
     let jt_gen = &mut env.jump_targets_gen;
     let in_finally_epilogue = flags.contains(EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE);
     let is_break = flags.contains(EmitBreakOrContinueFlags::IS_BREAK);
     match jt_gen.jump_targets().get_target(is_break) {
-        jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(alloc, pos),
+        jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(pos),
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
             let preamble = if in_finally_epilogue {
                 instr::unset_l(e.local_gen_mut().get_label().clone())
@@ -263,15 +256,15 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
-    jump_instrs: JumpInstructions<'b, 'arena>,
+    jump_instrs: JumpInstructions<'_>,
     finally_end: Label,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     fn emit_instr<'a, 'arena, 'decl>(
         e: &mut Emitter<'arena, 'decl>,
         env: &mut Env<'a>,
         pos: &Pos,
-        i: &Instruct<'arena>,
-    ) -> Result<InstrSeq<'arena>> {
+        i: &Instruct,
+    ) -> Result<InstrSeq> {
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };

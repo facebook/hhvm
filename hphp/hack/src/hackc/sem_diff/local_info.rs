@@ -28,7 +28,7 @@ impl LocalInfo {
         }
     }
 
-    pub(crate) fn for_opcode(opcode: &Opcode<'_>) -> LocalInfo {
+    pub(crate) fn for_opcode(opcode: &Opcode) -> LocalInfo {
         match opcode {
             Opcode::AwaitAll(range)
             | Opcode::MemoGet(_, range)
@@ -264,7 +264,7 @@ impl LocalInfo {
         }
     }
 
-    pub(crate) fn for_node(instr: &NodeInstr<'_>) -> LocalInfo {
+    pub(crate) fn for_node(instr: &NodeInstr) -> LocalInfo {
         match instr {
             NodeInstr::Opcode(opcode) => LocalInfo::for_opcode(opcode),
             NodeInstr::MemberOp(_) => LocalInfo::None,

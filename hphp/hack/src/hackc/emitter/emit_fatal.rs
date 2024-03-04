@@ -9,38 +9,22 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
 
-pub fn emit_fatal<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    op: FatalOp,
-    pos: &Pos,
-    msg: impl AsRef<str>,
-) -> InstrSeq<'arena> {
+pub fn emit_fatal(op: FatalOp, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
     InstrSeq::gather(vec![
         emit_pos(pos),
-        instr::string(alloc, msg.as_ref()),
+        instr::string(msg.as_ref()),
         instr::fatal(op),
     ])
 }
 
-pub fn emit_fatal_runtime<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    pos: &Pos,
-    msg: impl AsRef<str>,
-) -> InstrSeq<'arena> {
-    emit_fatal(alloc, FatalOp::Runtime, pos, msg)
+pub fn emit_fatal_runtime(pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
+    emit_fatal(FatalOp::Runtime, pos, msg)
 }
 
-pub fn emit_fatal_runtimeomitframe<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    pos: &Pos,
-    msg: impl AsRef<str>,
-) -> InstrSeq<'arena> {
-    emit_fatal(alloc, FatalOp::RuntimeOmitFrame, pos, msg)
+pub fn emit_fatal_runtimeomitframe(pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {
+    emit_fatal(FatalOp::RuntimeOmitFrame, pos, msg)
 }
 
-pub fn emit_fatal_for_break_continue<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    pos: &Pos,
-) -> InstrSeq<'arena> {
-    emit_fatal_runtime(alloc, pos, "Cannot break/continue")
+pub fn emit_fatal_for_break_continue(pos: &Pos) -> InstrSeq {
+    emit_fatal_runtime(pos, "Cannot break/continue")
 }

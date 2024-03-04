@@ -155,7 +155,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     is_reified: bool,
     should_emit_implicit_context: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let (fun, decl_vars) = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context
     {
         make_memoize_function_no_params_code(
@@ -196,8 +196,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     is_reified: bool,
     should_emit_implicit_context: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
-    let alloc = e.alloc;
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
@@ -219,7 +218,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     );
     let first_unnamed_idx = param_count + add_reified;
     let deprecation_body =
-        emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
+        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(e, env, pos, hhas_params)?;
@@ -314,13 +313,12 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     renamed_id: hhbc::FunctionName,
     is_async: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
-    let alloc = e.alloc;
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
     let eager_set = e.label_gen_mut().next_regular();
     let deprecation_body =
-        emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
+        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.systemlib())?;
     let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
         1,
@@ -378,7 +376,7 @@ fn make_wrapper_body<'a, 'arena, 'decl>(
     return_type_info: TypeInfo,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
-    body_instrs: InstrSeq<'arena>,
+    body_instrs: InstrSeq,
 ) -> Result<Body<'arena>> {
     emit_body::make_body(
         emitter.alloc,

@@ -6,9 +6,9 @@ use std::rc::Rc;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Str;
 use hash::HashMap;
 use hhbc::AdataId;
+use hhbc::BytesId;
 use hhbc::ClassName;
 use hhbc::Dummy;
 use hhbc::FCallArgs;
@@ -673,7 +673,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_constant(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        opcode: &Opcode<'arena>,
+        opcode: &Opcode,
     ) -> Result<()> {
         let clean_instr = NodeInstr::Opcode(clean_opcode(opcode));
         debug_assert_eq!(opcode.num_inputs(), 0);
@@ -706,7 +706,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_default_handler(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        opcode: &Opcode<'arena>,
+        opcode: &Opcode,
     ) -> Result<()> {
         // Start by computing the inputs for this opcode. For a 'default'
         // opcode we can handle stack and locals.
@@ -801,7 +801,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_fcall_handler(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        opcode: &Opcode<'arena>,
+        opcode: &Opcode,
     ) -> Result<()> {
         let data = crate::body::lookup_data_for_opcode(opcode);
 
@@ -1056,7 +1056,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_s_switch(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        cases: &[Str<'arena>],
+        cases: &[BytesId],
         targets: &[Label],
     ) {
         let value = self.stack_pop();
@@ -1118,7 +1118,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn seq_push(
         &self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        instr: NodeInstr<'arena>,
+        instr: NodeInstr,
         inputs: impl Into<Box<[Input<'arena>]>>,
     ) {
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
@@ -1128,7 +1128,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn seq_push_with_loc(
         &self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        instr: NodeInstr<'arena>,
+        instr: NodeInstr,
         inputs: impl Into<Box<[Input<'arena>]>>,
         src_loc: Rc<SrcLoc>,
     ) {
@@ -1144,11 +1144,11 @@ impl<'arena, 'a> State<'arena, 'a> {
         });
     }
 
-    pub(crate) fn instr(&self) -> Option<&'arena Instruct<'arena>> {
+    pub(crate) fn instr(&self) -> Option<&'arena Instruct> {
         self.instr_at(self.ip)
     }
 
-    pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'arena Instruct<'arena>> {
+    pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'arena Instruct> {
         ip.into_option().and_then(|ip| {
             let idx = ip.as_usize();
             self.body.hhbc_body.body_instrs.get(idx)
@@ -1223,12 +1223,7 @@ struct InstrSeqBuilder<'arena, 'a, 'b> {
 }
 
 impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
-    fn compute_value(
-        &mut self,
-        instr: &NodeInstr<'arena>,
-        idx: usize,
-        inputs: &[Input<'arena>],
-    ) -> Value {
+    fn compute_value(&mut self, instr: &NodeInstr, idx: usize, inputs: &[Input<'arena>]) -> Value {
         // The Instruct used to compute the value shouldn't have any
         // non-comparable bits: Local or Target
         for local in LocalInfo::for_node(instr).locals().iter() {
@@ -1241,7 +1236,7 @@ impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
             .compute_value(instr, idx, inputs.to_vec().into_boxed_slice())
     }
 
-    fn compute_constant(&mut self, instr: &NodeInstr<'arena>) -> Value {
+    fn compute_constant(&mut self, instr: &NodeInstr) -> Value {
         // The Instruct used to compute the value shouldn't have any
         // non-comparable bits: Local or Target
         for local in LocalInfo::for_node(instr).locals().iter() {
@@ -1269,7 +1264,7 @@ pub(crate) struct StateCollect<'arena, 'a> {
 ///   - Instructs that simply manipulate the stack and/or locals (PopC, SetL)
 ///     should return false.
 ///   - By default other Instructs should return true.
-fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
+fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
     match instr {
         // Constants
         NodeInstr::Opcode(
@@ -1547,7 +1542,7 @@ fn clean_member_key(key: &MemberKey) -> MemberKey {
     }
 }
 
-fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
+fn clean_opcode(opcode: &Opcode) -> Opcode {
     match *opcode {
         Opcode::ClsCnsL(_) => Opcode::ClsCnsL(Local::INVALID),
         Opcode::IsTypeL(_, op) => Opcode::IsTypeL(Local::INVALID, op),

@@ -53,7 +53,7 @@ impl<'arena> ValueBuilder<'arena> {
         Self::alloc_internal(&mut self.next_value_idx, false)
     }
 
-    pub(crate) fn compute_constant(&mut self, instr: &NodeInstr<'arena>) -> Value {
+    pub(crate) fn compute_constant(&mut self, instr: &NodeInstr) -> Value {
         // Instruct doesn't support `==`. :(
         let hash = compute_hash(instr);
         *self
@@ -64,7 +64,7 @@ impl<'arena> ValueBuilder<'arena> {
 
     pub(crate) fn compute_value(
         &mut self,
-        instr: &NodeInstr<'arena>,
+        instr: &NodeInstr,
         output_idx: usize,
         mut inputs: Box<[Input<'arena>]>,
     ) -> Value {

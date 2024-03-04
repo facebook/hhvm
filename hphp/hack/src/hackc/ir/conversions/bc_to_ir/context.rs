@@ -6,7 +6,6 @@
 use std::collections::VecDeque;
 use std::sync::Arc;
 
-use ffi::Str;
 use hash::HashMap;
 use hhbc::BytesId;
 use hhbc::Instruct;
@@ -48,11 +47,11 @@ impl Addr {
 }
 
 /// Context used during conversion of an HhasBody to an ir::Func.
-pub(crate) struct Context<'a, 'b> {
+pub(crate) struct Context<'b> {
     /// Conversion from hhbc::AdataId to the hhbc:TypedValue it represents.
     pub(crate) adata_lookup: &'b HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
     /// Source instructions from the bytecode
-    pub(crate) instrs: &'b [Instruct<'a>],
+    pub(crate) instrs: &'b [Instruct],
     pub(crate) addr_to_seq: AddrMap<Sequence>,
     pub(crate) builder: FuncBuilder,
     bid_to_addr: BlockIdMap<Addr>,
@@ -67,12 +66,12 @@ pub(crate) struct Context<'a, 'b> {
     work_queue_inserted: AddrIndexSet,
 }
 
-impl<'a, 'b> Context<'a, 'b> {
+impl<'b> Context<'b> {
     pub(crate) fn new(
         unit: &'b mut ir::Unit,
         filename: ir::Filename,
         func: ir::Func,
-        instrs: &'b [Instruct<'a>],
+        instrs: &'b [Instruct],
         unit_state: &'b UnitState,
     ) -> Self {
         let mut builder = FuncBuilder::with_func(func, Arc::clone(&unit.strings));
@@ -173,10 +172,6 @@ impl<'a, 'b> Context<'a, 'b> {
 
     pub(crate) fn intern_bytes_id(&mut self, s: BytesId) -> ir::UnitBytesId {
         self.strings.intern_bytes(s.as_bytes())
-    }
-
-    pub(crate) fn intern_ffi_str(&mut self, s: Str<'a>) -> ir::UnitBytesId {
-        self.strings.intern_bytes(s.as_ref())
     }
 
     pub(crate) fn pop(&mut self) -> ir::ValueId {

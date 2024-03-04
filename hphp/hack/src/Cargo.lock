@@ -2652,9 +2652,7 @@ dependencies = [
 name = "instruction_sequence"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "emit_opcodes_macro",
- "ffi",
  "hhbc",
  "pretty_assertions",
 ]

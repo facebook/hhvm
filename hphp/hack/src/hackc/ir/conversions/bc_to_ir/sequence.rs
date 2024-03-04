@@ -47,7 +47,7 @@ impl Sequence {
     pub(crate) fn compute(
         builder: &mut FuncBuilder,
         filename: ir::Filename,
-        body_instrs: &[Instruct<'_>],
+        body_instrs: &[Instruct],
     ) -> (LabelMap<Addr>, BlockIdMap<Addr>, AddrMap<Sequence>) {
         let seq_builder = SeqBuilder {
             sequences: Default::default(),
@@ -109,7 +109,7 @@ impl SeqBuilder<'_> {
 
     fn compute(
         mut self,
-        body_instrs: &[Instruct<'_>],
+        body_instrs: &[Instruct],
     ) -> (LabelMap<Addr>, BlockIdMap<Addr>, AddrMap<Sequence>) {
         let mut prev_addr: Addr = Addr::ENTRY;
         let mut label_to_addr: LabelMap<Addr> = Default::default();

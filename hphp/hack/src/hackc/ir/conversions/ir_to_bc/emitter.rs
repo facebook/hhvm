@@ -7,8 +7,8 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use ffi::Str;
 use hash::HashMap;
+use hhbc::BytesId;
 use hhbc::Dummy;
 use hhbc::Instruct;
 use hhbc::Opcode;
@@ -34,12 +34,12 @@ use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
 use crate::strings::StringCache;
 
-pub(crate) fn emit_func<'a>(
+pub(crate) fn emit_func(
     func: &ir::Func,
     labeler: &mut Labeler,
-    strings: &StringCache<'a>,
+    strings: &StringCache<'_>,
     adata_cache: &mut AdataCache,
-) -> (InstrSeq<'a>, Vec<StringId>) {
+) -> (InstrSeq, Vec<StringId>) {
     let adata_id_map = func
         .constants
         .iter()
@@ -187,7 +187,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     // How many blocks jump to this one?
     block_entry_edges: BlockIdMap<usize>,
     func: &'b ir::Func,
-    instrs: Vec<Instruct<'a>>,
+    instrs: Vec<Instruct>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
     strings: &'b StringCache<'a>,
@@ -282,7 +282,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         locals
     }
 
-    fn push_opcode(&mut self, opcode: Opcode<'a>) {
+    fn push_opcode(&mut self, opcode: Opcode) {
         self.instrs.push(Instruct::Opcode(opcode));
     }
 
@@ -328,7 +328,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 context,
             }
         };
-        let hint = Str::empty();
+        let hint = BytesId::EMPTY;
         let instr = match &call.detail {
             ir::instr::CallDetail::FCallClsMethod { log } => {
                 Opcode::FCallClsMethod(fcall_args, hint, *log)
@@ -718,7 +718,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Constant::Bool(true) => Opcode::True,
                 Constant::Dir => Opcode::Dir,
                 Constant::EnumClassLabel(v) => {
-                    let s = self.strings.lookup_ffi_str(*v);
+                    let s = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*v));
                     Opcode::EnumClassLabel(s)
                 }
                 Constant::Float(v) => Opcode::Double(*v),
@@ -734,7 +734,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Constant::NewCol(k) => Opcode::NewCol(*k),
                 Constant::Null => Opcode::Null,
                 Constant::String(v) => {
-                    let s = self.strings.lookup_ffi_str(*v);
+                    let s = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*v));
                     Opcode::String(s)
                 }
                 Constant::Uninit => Opcode::NullUninit,
@@ -758,7 +758,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         }
     }
 
-    fn emit_include_eval(&mut self, ie: &instr::IncludeEval) -> Opcode<'a> {
+    fn emit_include_eval(&mut self, ie: &instr::IncludeEval) -> Opcode {
         use instr::IncludeKind;
         match ie.kind {
             IncludeKind::Eval => Opcode::Eval,
@@ -1088,8 +1088,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 ..
             } => {
                 let cases =
-                    Vec::from_iter(cases.iter().map(|case| self.strings.lookup_ffi_str(*case)))
-                        .into();
+                    Vec::from_iter(cases.iter().map(|case| {
+                        hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*case))
+                    }))
+                    .into();
 
                 let targets = Vec::from_iter(
                     targets

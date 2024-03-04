@@ -377,14 +377,14 @@ pub trait Locals {
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
-pub enum Instruct<'arena> {
+pub enum Instruct {
     // HHVM opcodes.
-    Opcode(Opcode<'arena>),
+    Opcode(Opcode),
     // HHAS pseudo-instructions.
     Pseudo(Pseudo),
 }
 
-impl Instruct<'_> {
+impl Instruct {
     /// Return a slice of labels for the conditional branch targets of this instruction.
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets(&self) -> &[Label] {

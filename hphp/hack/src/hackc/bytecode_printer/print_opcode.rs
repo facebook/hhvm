@@ -8,7 +8,6 @@ use std::io::ErrorKind;
 use std::io::Result;
 use std::io::Write;
 
-use ffi::Str;
 use hash::HashSet;
 use hhbc::AdataId;
 use hhbc::AsTypeStructExceptionKind;
@@ -59,15 +58,15 @@ use crate::print;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
-pub struct PrintOpcode<'a, 'b> {
-    pub(crate) opcode: &'b Opcode<'a>,
+pub struct PrintOpcode<'b> {
+    pub(crate) opcode: &'b Opcode,
     pub(crate) dv_labels: &'b HashSet<Label>,
     pub(crate) local_names: &'b [StringId],
 }
 
-impl<'a, 'b> PrintOpcode<'a, 'b> {
+impl<'b> PrintOpcode<'b> {
     pub fn new(
-        opcode: &'b Opcode<'a>,
+        opcode: &'b Opcode,
         dv_labels: &'b HashSet<Label>,
         local_names: &'b [StringId],
     ) -> Self {
@@ -78,7 +77,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         }
     }
 
-    fn get_opcode(&self) -> &'b Opcode<'a> {
+    fn get_opcode(&self) -> &'b Opcode {
         self.opcode
     }
 
@@ -122,7 +121,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
     fn print_s_switch(
         &self,
         w: &mut dyn Write,
-        cases: &[Str<'_>],
+        cases: &[BytesId],
         targets: &[Label],
     ) -> Result<()> {
         if cases.len() != targets.len() {
@@ -145,7 +144,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
 
         w.write_all(b"SSwitch <")?;
         for (case, target) in iter {
-            print_quoted_ffi_str(w, case)?;
+            print_quoted_bytes(w, case.as_bytes())?;
             w.write_all(b":")?;
             self.print_label(w, target)?;
             w.write_all(b" ")?;
@@ -314,8 +313,8 @@ pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName) -> Result<()> {
     print_quoted_str(w, id.as_str())
 }
 
-fn print_quoted_ffi_str<'a>(w: &mut dyn Write, s: &Str<'a>) -> Result<()> {
-    print_quoted_bytes(w, s.as_ref())
+fn print_quoted_bytes_id(w: &mut dyn Write, s: &BytesId) -> Result<()> {
+    print_quoted_bytes(w, s.as_bytes())
 }
 
 fn print_quoted_str(w: &mut dyn Write, s: &str) -> Result<()> {
@@ -346,7 +345,7 @@ fn print_string_id(w: &mut dyn Write, s: &StringId) -> Result<()> {
     w.write_all(s.as_str().as_bytes())
 }
 
-impl<'a, 'b> PrintOpcodeTypes for PrintOpcode<'a, 'b> {
+impl<'b> PrintOpcodeTypes for PrintOpcode<'b> {
     type Write = dyn Write + 'b;
     type Error = Error;
 }

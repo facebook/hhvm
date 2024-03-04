@@ -17,7 +17,7 @@ use oxidized::ast;
 
 /// Create a mapping Label instructions to their position in the InstrSeq without
 /// the labels. In other words, all instructions get numbered except labels.
-fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Label, u32> {
+fn create_label_to_offset_map(instrseq: &InstrSeq) -> HashMap<Label, u32> {
     let mut index = 0;
     instrseq
         .iter()
@@ -34,7 +34,7 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<La
 fn create_label_ref_map(
     label_to_offset: &HashMap<Label, u32>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
-    body: &InstrSeq<'_>,
+    body: &InstrSeq,
 ) -> (HashSet<Label>, HashMap<u32, Label>) {
     let mut label_gen = LabelGen::new();
     let mut used = HashSet::default();
@@ -64,12 +64,12 @@ fn create_label_ref_map(
     (used, offset_to_label)
 }
 
-fn rewrite_params_and_body<'arena>(
+fn rewrite_params_and_body(
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
     params: &mut [(Param, Option<(Label, ast::Expr)>)],
-    body: &mut InstrSeq<'arena>,
+    body: &mut InstrSeq,
 ) {
     let relabel = |id: Label| {
         if id == Label::INVALID {
@@ -98,19 +98,13 @@ fn rewrite_params_and_body<'arena>(
     });
 }
 
-pub fn relabel_function(
-    params: &mut [(Param, Option<(Label, ast::Expr)>)],
-    body: &mut InstrSeq<'_>,
-) {
+pub fn relabel_function(params: &mut [(Param, Option<(Label, ast::Expr)>)], body: &mut InstrSeq) {
     let label_to_offset = create_label_to_offset_map(body);
     let (used, offset_to_label) = create_label_ref_map(&label_to_offset, params, body);
     rewrite_params_and_body(&label_to_offset, &used, &offset_to_label, params, body)
 }
 
-pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    block: &mut InstrSeq<'arena>,
-) {
+pub fn rewrite_with_fresh_regular_labels(emitter: &mut Emitter<'_, '_>, block: &mut InstrSeq) {
     let mut old_to_new = HashMap::default();
     for instr in block.iter() {
         if let Instruct::Pseudo(Pseudo::Label(label)) = instr {
@@ -130,7 +124,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
 ///
 /// If this turns out to be needed elsewhere it should probably be moved into the
 /// Targets trait.
-fn rewrite_labels<'a, F>(instr: &mut Instruct<'a>, f: F)
+fn rewrite_labels<F>(instr: &mut Instruct, f: F)
 where
     F: Fn(Label) -> Label,
 {

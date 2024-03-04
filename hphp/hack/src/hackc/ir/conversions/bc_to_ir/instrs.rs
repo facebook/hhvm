@@ -52,7 +52,7 @@ use crate::sequence::SequenceKind;
 ///
 /// The SSA pass is responsible for converting the SetVar and GetVar
 /// instructions into actual SSA form.
-pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
+pub(crate) fn convert_sequence(ctx: &mut Context<'_>, addr: Addr) {
     assert_eq!(ctx.stack.len(), 0);
     let seq = ctx.addr_to_seq[&addr].clone();
 
@@ -140,7 +140,7 @@ pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
 }
 
 #[allow(clippy::todo)]
-fn convert_base<'a, 'b>(ctx: &mut Context<'a, 'b>, base: &Opcode<'a>) {
+fn convert_base(ctx: &mut Context<'_>, base: &Opcode) {
     if let Some(mop) = ctx.member_op.as_ref() {
         panic!(
             "Unable to convert base {:?} with existing base {:?}",
@@ -196,13 +196,13 @@ fn convert_base<'a, 'b>(ctx: &mut Context<'a, 'b>, base: &Opcode<'a>) {
     });
 }
 
-fn collect_args<'a, 'b>(ctx: &mut Context<'a, 'b>, num_args: u32) -> Vec<ValueId> {
+fn collect_args(ctx: &mut Context<'_>, num_args: u32) -> Vec<ValueId> {
     let mut res: Vec<ValueId> = (0..num_args).map(|_| ctx.pop()).collect();
     res.reverse();
     res
 }
 
-fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
+fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
     let fcall_args = match call {
         Opcode::FCallClsMethod(fcall_args, ..)
         | Opcode::FCallClsMethodD(fcall_args, ..)
@@ -382,7 +382,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
     }
 }
 
-fn convert_dim<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) {
+fn convert_dim(ctx: &mut Context<'_>, opcode: &Opcode) {
     if ctx.member_op.as_mut().is_none() {
         panic!("Unable to convert dim {:?} without existing base", opcode);
     };
@@ -450,7 +450,7 @@ fn member_key_stack_count(k: &MemberKey) -> usize {
 }
 
 fn convert_member_key(
-    ctx: &mut Context<'_, '_>,
+    ctx: &mut Context<'_>,
     key: &hhbc::MemberKey,
 ) -> (
     instr::MemberKey,
@@ -492,7 +492,7 @@ fn convert_member_key(
     }
 }
 
-fn convert_final<'a, 'b>(ctx: &mut Context<'a, 'b>, fin: &Opcode<'a>) {
+fn convert_final(ctx: &mut Context<'_>, fin: &Opcode) {
     let mut member_op = if let Some(mop) = ctx.member_op.take() {
         mop
     } else {
@@ -657,7 +657,7 @@ fn convert_final<'a, 'b>(ctx: &mut Context<'a, 'b>, fin: &Opcode<'a>) {
     }
 }
 
-fn convert_include<'a, 'b>(ctx: &mut Context<'a, 'b>, ie: &Opcode<'a>) {
+fn convert_include(ctx: &mut Context<'_>, ie: &Opcode) {
     use instr::IncludeKind;
     let kind = match ie {
         Opcode::Eval => IncludeKind::Eval,
@@ -674,7 +674,7 @@ fn convert_include<'a, 'b>(ctx: &mut Context<'a, 'b>, ie: &Opcode<'a>) {
     ctx.emit_push(Instr::Hhbc(instr::Hhbc::IncludeEval(ie)));
 }
 
-fn convert_local<'a, 'b>(ctx: &mut Context<'a, 'b>, local: &hhbc::Local) -> LocalId {
+fn convert_local(ctx: &mut Context<'_>, local: &hhbc::Local) -> LocalId {
     if let Some(local) = ctx.named_local_lookup.get(local.as_usize()) {
         *local
     } else {
@@ -684,10 +684,7 @@ fn convert_local<'a, 'b>(ctx: &mut Context<'a, 'b>, local: &hhbc::Local) -> Loca
     }
 }
 
-fn convert_local_range<'a, 'b>(
-    ctx: &mut Context<'a, 'b>,
-    range: &hhbc::LocalRange,
-) -> Box<[LocalId]> {
+fn convert_local_range(ctx: &mut Context<'_>, range: &hhbc::LocalRange) -> Box<[LocalId]> {
     let mut locals = Vec::default();
     if range.start != hhbc::Local::INVALID && range.len != 0 {
         let size = range.len as usize;
@@ -700,7 +697,7 @@ fn convert_local_range<'a, 'b>(
     locals.into()
 }
 
-fn convert_iterator<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) {
+fn convert_iterator(ctx: &mut Context<'_>, opcode: &Opcode) {
     match *opcode {
         Opcode::IterInit(ref args, label) => {
             let hhbc::IterArgs {
@@ -743,7 +740,7 @@ fn convert_iterator<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) {
     }
 }
 
-fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) {
+fn convert_control_flow(ctx: &mut Context<'_>, opcode: &Opcode) {
     let loc = ctx.loc;
     match *opcode {
         Opcode::JmpNZ(label) | Opcode::JmpZ(label) => {
@@ -785,7 +782,10 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
         Opcode::SSwitch(ref cases, ref targets) => {
             let s1 = ctx.pop();
             let stack_size = ctx.spill_stack();
-            let cases = cases.iter().map(|case| ctx.intern_ffi_str(*case)).collect();
+            let cases = cases
+                .iter()
+                .map(|case| ctx.intern_bytes_id(*case))
+                .collect();
             let targets = targets
                 .iter()
                 .map(|label| ctx.target_from_label(*label, stack_size))
@@ -804,7 +804,7 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
 
 #[b2i_macros::bc_to_ir]
 #[allow(clippy::todo)]
-fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> bool {
+fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
     use instr::Hhbc;
     use ir::Constant;
     let loc = ctx.loc;
@@ -1209,7 +1209,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
     true
 }
 
-fn add_catch_work<'a, 'b>(ctx: &mut Context<'a, 'b>, mut tcid: TryCatchId) {
+fn add_catch_work(ctx: &mut Context<'_>, mut tcid: TryCatchId) {
     loop {
         match tcid {
             TryCatchId::None => {

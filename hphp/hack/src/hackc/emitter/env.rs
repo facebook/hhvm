@@ -61,13 +61,13 @@ impl<'s> Env<'s> {
         }
     }
 
-    pub fn with_allows_array_append<'a, F, R>(&mut self, alloc: &'a bumpalo::Bump, f: F) -> R
+    pub fn with_allows_array_append<F, R>(&mut self, f: F) -> R
     where
-        F: FnOnce(&'a bumpalo::Bump, &mut Self) -> R,
+        F: FnOnce(&mut Self) -> R,
     {
         let old = self.flags.contains(Flags::ALLOWS_ARRAY_APPEND);
         self.flags.set(Flags::ALLOWS_ARRAY_APPEND, true);
-        let r = f(alloc, self);
+        let r = f(self);
         self.flags.set(Flags::ALLOWS_ARRAY_APPEND, old);
         r
     }

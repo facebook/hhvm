@@ -149,10 +149,10 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
-    check: InstrSeq<'arena>,
+    check: InstrSeq,
     hint: &aast::Hint,
-    verify_instr: InstrSeq<'arena>,
-) -> Result<InstrSeq<'arena>> {
+    verify_instr: InstrSeq,
+) -> Result<InstrSeq> {
     let get_ts = |e, hint| Ok(emit_reified_arg(e, env, pos, false, hint)?.0);
     let aast::Hint(_, hint_) = hint;
     if let aast::Hint_::Hoption(ref hint) = **hint_ {

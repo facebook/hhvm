@@ -57,7 +57,7 @@ pub struct Emitter<'arena, 'decl> {
     pub alloc: &'arena bumpalo::Bump,
 
     pub adata_state: AdataState,
-    pub statement_state_: Option<StatementState<'arena>>,
+    pub statement_state_: Option<StatementState>,
     symbol_refs_state: SymbolRefsState,
 
     /// State is also frozen and set after closure conversion
@@ -194,12 +194,12 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         self.systemlib
     }
 
-    pub fn statement_state(&self) -> &StatementState<'arena> {
+    pub fn statement_state(&self) -> &StatementState {
         self.statement_state_
             .as_ref()
             .expect("uninit'd statement_state")
     }
-    pub fn statement_state_mut(&mut self) -> &mut StatementState<'arena> {
+    pub fn statement_state_mut(&mut self) -> &mut StatementState {
         self.statement_state_
             .get_or_insert_with(StatementState::init)
     }

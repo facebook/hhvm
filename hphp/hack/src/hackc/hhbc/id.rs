@@ -44,6 +44,10 @@ macro_rules! impl_intern_id {
                 self.0.as_str().as_bytes()
             }
 
+            pub fn as_bytes_id(&self) -> crate::BytesId {
+                self.0.as_bytes()
+            }
+
             pub fn intern(s: &str) -> $type {
                 $type(crate::intern(s))
             }

@@ -12,14 +12,14 @@ use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 
-pub fn typed_value_into_instr<'a>(e: &mut Emitter<'a, '_>, tv: TypedValue) -> Result<InstrSeq<'a>> {
+pub fn typed_value_into_instr(e: &mut Emitter<'_, '_>, tv: TypedValue) -> Result<InstrSeq> {
     match tv {
         TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
         TypedValue::Bool(true) => Ok(instr::true_()),
         TypedValue::Bool(false) => Ok(instr::false_()),
         TypedValue::Int(i) => Ok(instr::int(i)),
-        TypedValue::String(s) => Ok(instr::string(e.alloc, s.as_bytes())),
+        TypedValue::String(s) => Ok(instr::string_lit(s)),
         TypedValue::LazyClass(s) => Ok(instr::lazy_class(ClassName::from_ast_name_and_mangle(s))),
         TypedValue::Float(f) => Ok(instr::double(f)),
         TypedValue::Keyset(_) => {

@@ -17,7 +17,7 @@ use scope::create_try_catch;
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
-pub fn get_memo_key_list<'arena>(temp_local: Local, param_local: Local) -> Vec<InstrSeq<'arena>> {
+pub fn get_memo_key_list(temp_local: Local, param_local: Local) -> Vec<InstrSeq> {
     vec![
         instr::get_memo_key_l(param_local),
         instr::set_l(temp_local),
@@ -25,7 +25,7 @@ pub fn get_memo_key_list<'arena>(temp_local: Local, param_local: Local) -> Vec<I
     ]
 }
 
-pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: Local) -> InstrSeq<'arena> {
+pub fn param_code_sets(num_params: usize, first_unnamed: Local) -> InstrSeq {
     InstrSeq::gather(
         (0..num_params)
             .flat_map(|i| {
@@ -37,7 +37,7 @@ pub fn param_code_sets<'arena>(num_params: usize, first_unnamed: Local) -> Instr
     )
 }
 
-pub fn param_code_gets<'arena>(num_params: usize) -> InstrSeq<'arena> {
+pub fn param_code_gets(num_params: usize) -> InstrSeq {
     InstrSeq::gather(
         (0..num_params)
             .map(|i| instr::c_get_l(Local::new(i)))
@@ -59,7 +59,7 @@ pub fn check_memoize_possible<Ex, En>(
     Ok(())
 }
 
-pub fn get_implicit_context_memo_key<'arena>(local: Local) -> InstrSeq<'arena> {
+pub fn get_implicit_context_memo_key(local: Local) -> InstrSeq {
     InstrSeq::gather(vec![
         instr::null_uninit(),
         instr::null_uninit(),
@@ -74,7 +74,7 @@ pub fn get_implicit_context_memo_key<'arena>(local: Local) -> InstrSeq<'arena> {
     ])
 }
 
-fn ic_set<'arena>(local: Local, soft: bool) -> InstrSeq<'arena> {
+fn ic_set(local: Local, soft: bool) -> InstrSeq {
     if soft {
         InstrSeq::gather(vec![
             instr::cns_e(hhbc::ConstName::intern(
@@ -103,10 +103,7 @@ fn ic_set<'arena>(local: Local, soft: bool) -> InstrSeq<'arena> {
     }
 }
 
-pub fn ic_restore<'arena>(
-    local: Local,
-    should_make_ic_inaccessible: Option<bool>,
-) -> InstrSeq<'arena> {
+pub fn ic_restore(local: Local, should_make_ic_inaccessible: Option<bool>) -> InstrSeq {
     if should_make_ic_inaccessible.is_some() {
         InstrSeq::gather(vec![
             instr::c_get_l(local),
@@ -121,9 +118,9 @@ pub fn ic_restore<'arena>(
 pub fn with_possible_ic<'arena>(
     label_gen: &mut LabelGen,
     local: Local,
-    instrs: InstrSeq<'arena>,
+    instrs: InstrSeq,
     should_make_ic_inaccessible: Option<bool>,
-) -> InstrSeq<'arena> {
+) -> InstrSeq {
     if let Some(soft) = should_make_ic_inaccessible {
         InstrSeq::gather(vec![
             ic_set(local, soft),

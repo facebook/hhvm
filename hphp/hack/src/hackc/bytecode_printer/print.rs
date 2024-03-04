@@ -868,7 +868,7 @@ fn print_body(
 fn print_instructions<'a, 'b>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    instrs: &'b [Instruct<'a>],
+    instrs: &'b [Instruct],
     dv_labels: &'b HashSet<Label>,
     local_names: &'b [StringId],
 ) -> Result<()> {
@@ -968,7 +968,7 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo, dv_labels: &HashSet<Label>) -
 
 fn print_instr<'a, 'b>(
     w: &mut dyn Write,
-    instr: &'b Instruct<'a>,
+    instr: &'b Instruct,
     dv_labels: &'b HashSet<Label>,
     local_names: &'b [StringId],
 ) -> Result<()> {

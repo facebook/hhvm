@@ -40,19 +40,19 @@ pub struct FromAstArgs<'ast> {
 
 /// A Property and its initializer instructions
 #[derive(Debug)]
-pub struct PropAndInit<'a> {
+pub struct PropAndInit {
     pub prop: Property,
-    pub init: Option<InstrSeq<'a>>,
+    pub init: Option<InstrSeq>,
 }
 
-pub fn from_ast<'ast, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    class: &'ast ast::Class_,
+pub fn from_ast<'a>(
+    emitter: &mut Emitter<'_, '_>,
+    class: &'a ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
     class_is_closure: bool,
     args: FromAstArgs<'_>,
-) -> Result<PropAndInit<'arena>> {
+) -> Result<PropAndInit> {
     let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid = hhbc::PropName::from_ast_name(cv_name);

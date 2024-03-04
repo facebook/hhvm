@@ -44,7 +44,7 @@ impl IterGen {
         self.gen(IterKind::LIter(loc))
     }
 
-    pub fn free<'a>(&mut self, count: usize) -> InstrSeq<'a> {
+    pub fn free(&mut self, count: usize) -> InstrSeq {
         let total = self.iters.len();
         assert!(count <= total);
         InstrSeq::gather(

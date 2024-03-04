@@ -865,6 +865,9 @@ StringId getStrfromSA(const PropName& p) {
 Str getStrfromSA(const Str& s) {
   return s;
 }
+BytesId getStrfromSA(const BytesId s) {
+  return s;
+}
 
 template <typename T>
 void handleSA(TranslationState& ts, const T& str) {

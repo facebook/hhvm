@@ -66,11 +66,7 @@ impl<'arena> Sequence<'arena> {
     }
 }
 
-fn compare_instrs<'arena>(
-    path: &CodePath<'_>,
-    a: &NodeInstr<'arena>,
-    b: &NodeInstr<'arena>,
-) -> Result<()> {
+fn compare_instrs(path: &CodePath<'_>, a: &NodeInstr, b: &NodeInstr) -> Result<()> {
     // Note: If the thing that's different is a Label that's
     // actually okay because we track labels independently.
 
@@ -204,7 +200,7 @@ fn sem_diff_input(
 }
 
 /// Returns true if this is an instruction that could cause a COW.
-fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
+fn is_cow_instr(instr: &NodeInstr) -> bool {
     match instr {
         // Constants
         NodeInstr::Opcode(

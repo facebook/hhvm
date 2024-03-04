@@ -59,12 +59,12 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
     }
 
     Ok(quote!(
-        fn #name<'arena>(
-            alloc: &'arena Bump,
+        fn #name(
+            alloc: &Bump,
             tok: &'_ [u8],
             token_iter: &mut Lexer<'_>,
             decl_map: &StringIdMap<u32>,
-        ) -> Result<hhbc::Instruct<'arena>>{
+        ) -> Result<hhbc::Instruct>{
             match tok {
                 #(#body)*
                 t => bail!("unknown opcode: {:?}", t),

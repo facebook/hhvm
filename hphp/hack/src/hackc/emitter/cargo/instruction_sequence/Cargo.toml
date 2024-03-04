@@ -11,9 +11,7 @@ license = "MIT"
 path = "../../instruction_sequence.rs"
 
 [dependencies]
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 emit_opcodes_macro = { version = "0.0.0", path = "../../../hhbc/cargo/emit_opcodes_macro" }
-ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 
 [dev-dependencies]

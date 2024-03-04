@@ -9,16 +9,16 @@ use oxidized::aast;
 use oxidized::pos::Pos;
 
 #[derive(Debug)]
-pub struct StatementState<'arena> {
+pub struct StatementState {
     pub verify_return: Option<aast::Hint>,
-    pub default_return_value: InstrSeq<'arena>,
-    pub default_dropthrough: Option<InstrSeq<'arena>>,
-    pub verify_out: InstrSeq<'arena>,
+    pub default_return_value: InstrSeq,
+    pub default_dropthrough: Option<InstrSeq>,
+    pub verify_out: InstrSeq,
     pub function_pos: Pos,
     pub num_out: usize,
 }
 
-impl<'arena> StatementState<'arena> {
+impl StatementState {
     pub fn init() -> Self {
         StatementState {
             verify_return: None,

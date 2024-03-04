@@ -49,10 +49,7 @@ use crate::emit_fatal;
 use crate::try_finally_rewriter as tfr;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately
-pub(crate) fn set_state<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    state: StatementState<'arena>,
-) {
+pub(crate) fn set_state(e: &mut Emitter<'_, '_>, state: StatementState) {
     *e.statement_state_mut() = state;
 }
 
@@ -61,7 +58,7 @@ pub(crate) fn set_state<'arena, 'decl>(
 fn emit_return<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     tfr::emit_return(e, false, env)
 }
 
@@ -116,7 +113,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     stmt: &ast::Stmt,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let pos = &stmt.0;
     match &stmt.1 {
         a::Stmt_::YieldBreak => emit_yieldbreak(e, env, pos),
@@ -161,7 +158,7 @@ fn emit_await_<'a, 'arena, 'decl>(
     e_: &ast::Expr,
     _pos: &Pos,
     a: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![
         emit_await(e, env, &e_.1, a)?,
         instr::pop_c(),
@@ -174,7 +171,7 @@ fn emit_binop<'a, 'arena, 'decl>(
     e_: &ast::Expr,
     pos: &Pos,
     bop: &ast::Binop,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if let ast::Binop {
         bop: ast_defs::Bop::Eq(None),
         lhs,
@@ -222,7 +219,7 @@ fn emit_yieldbreak<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     _pos: &Pos,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?]))
 }
 
@@ -231,7 +228,7 @@ fn emit_try<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     x: &(ast::Block, Vec<ast::Catch>, ast::FinallyBlock),
     pos: &Pos,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let (try_block, catch_list, finally_block) = x;
     if catch_list.is_empty() {
         emit_try_finally(e, env, pos, try_block, finally_block)
@@ -247,7 +244,7 @@ fn emit_throw<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     x: &ast::Expr,
     pos: &Pos,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![
         emit_expr::emit_expr(e, env, x)?,
         emit_pos(pos),
@@ -260,7 +257,7 @@ fn emit_return_<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     r_opt: Option<&ast::Expr>,
     pos: &Pos,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match r_opt {
         Some(r) => {
             let ret = emit_return(e, env)?;
@@ -285,7 +282,7 @@ fn emit_call<'a, 'arena, 'decl>(
     e_: &ast::Expr,
     _pos: &Pos,
     c: &ast::CallExpr,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if let a::CallExpr {
         func: a::Expr(_, _, a::Expr_::Id(sid)),
         args,
@@ -318,7 +315,7 @@ fn emit_case<'c, 'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     case: &'c ast::Case,
     addbreak: bool,
-) -> Result<(InstrSeq<'arena>, (&'c ast::Expr, Label))> {
+) -> Result<(InstrSeq, (&'c ast::Expr, Label))> {
     let ast::Case(case_expr, body) = case;
 
     let label = e.label_gen_mut().next_regular();
@@ -333,7 +330,7 @@ fn emit_default_case<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     dfl: &ast::DefaultCase,
-) -> Result<(InstrSeq<'arena>, Label)> {
+) -> Result<(InstrSeq, Label)> {
     let ast::DefaultCase(_, body) = dfl;
 
     let label = e.label_gen_mut().next_regular();
@@ -348,7 +345,7 @@ fn emit_check_case<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     scrutinee_expr: &ast::Expr,
     (case_expr, case_handler_label): (&ast::Expr, Label),
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(if scrutinee_expr.2.is_lvar() {
         InstrSeq::gather(vec![
             emit_expr::emit_two_exprs(e, env, &case_expr.1, scrutinee_expr, case_expr)?,
@@ -376,7 +373,7 @@ fn emit_awaitall<'a, 'arena, 'decl>(
     pos: &Pos,
     el: &[(ast::Lid, ast::Expr)],
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match el {
         [] => Ok(instr::empty()),
         [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar, expr, block),
@@ -392,7 +389,7 @@ fn emit_block_awaitall_single<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match block {
         [a::Stmt(pos, a::Stmt_::Awaitall(box (init, block)))] => {
             let (lval, expr) = &init[0];
@@ -418,7 +415,7 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     lval: &ast::Lid,
     expr: &ast::Expr,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
     let load = instr::pop_l(e.local_gen().get_unnamed_for_tempname(&lval.1.1).clone());
     let body = emit_stmts(e, env, block)?;
@@ -431,7 +428,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
     pos: &Pos,
     el: &[(ast::Lid, ast::Expr)],
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let mut instrs = vec![];
     let mut locals = vec![];
     for (lvar, expr) in el.iter() {
@@ -474,7 +471,7 @@ fn emit_using<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     using: &ast::UsingStmt,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let block_pos = block_pos(&using.block)?;
     if using.exprs.1.len() > 1 {
         emit_stmts(
@@ -555,11 +552,11 @@ fn emit_using<'a, 'arena, 'decl>(
                 tfr::cleanup_try_body(body)
             };
 
-            let emit_finally = |e: &mut Emitter<'arena, 'decl>,
+            let emit_finally = |e: &mut Emitter<'_, '_>,
                                 local: Local,
                                 has_await: bool,
                                 is_block_scoped: bool|
-             -> InstrSeq<'arena> {
+             -> InstrSeq {
                 let (epilogue, async_eager_label) = if has_await {
                     let after_await = e.label_gen_mut().next_regular();
                     (
@@ -651,7 +648,7 @@ fn emit_cases<'a, 'arena, 'decl>(
     scrutinee_expr: &ast::Expr,
     cases: &[ast::Case],
     dfl: &Option<ast::DefaultCase>,
-) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, Label)> {
+) -> Result<(InstrSeq, InstrSeq, Label)> {
     let should_gen_break = |i: usize| -> bool { dfl.is_none() && (i + 1 == cases.len()) };
 
     let mut instr_cases = cases
@@ -681,8 +678,7 @@ fn emit_cases<'a, 'arena, 'decl>(
         }
     };
 
-    let (case_body_instrs, case_exprs): (Vec<InstrSeq<'arena>>, Vec<_>) =
-        instr_cases.into_iter().unzip();
+    let (case_body_instrs, case_exprs): (Vec<InstrSeq>, Vec<_>) = instr_cases.into_iter().unzip();
 
     let case_expr_instrs = case_exprs
         .into_iter()
@@ -703,7 +699,7 @@ fn emit_switch<'a, 'arena, 'decl>(
     scrutinee_expr: &ast::Expr,
     cl: &[ast::Case],
     dfl: &Option<ast::DefaultCase>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let (instr_init, instr_free) = if scrutinee_expr.2.is_lvar() {
         (instr::empty(), instr::empty())
     } else {
@@ -739,7 +735,7 @@ fn emit_try_catch_finally<'a, 'arena, 'decl>(
     r#try: &[ast::Stmt],
     catch: &[ast::Catch],
     finally: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let is_try_block_empty = false;
     let emit_try_block =
         |env: &mut Env<'a>, e: &mut Emitter<'arena, 'decl>, finally_start: Label| {
@@ -756,7 +752,7 @@ fn emit_try_finally<'a, 'arena, 'decl>(
     pos: &Pos,
     try_block: &[ast::Stmt],
     finally_block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let is_try_block_empty = is_empty_block(try_block);
     let emit_try_block =
         |env: &mut Env<'a>, e: &mut Emitter<'arena, 'decl>, finally_start: Label| {
@@ -778,7 +774,7 @@ fn emit_try_finally_<
     'a,
     'arena,
     'decl,
-    E: Fn(&mut Env<'a>, &mut Emitter<'arena, 'decl>, Label) -> Result<InstrSeq<'arena>>,
+    E: Fn(&mut Env<'a>, &mut Emitter<'arena, 'decl>, Label) -> Result<InstrSeq>,
 >(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
@@ -786,7 +782,7 @@ fn emit_try_finally_<
     emit_try_block: E,
     finally_block: &[ast::Stmt],
     is_try_block_empty: bool,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if is_try_block_empty {
         return env.do_in_finally_body(e, finally_block, emit_block);
     };
@@ -881,11 +877,11 @@ fn emit_try_finally_<
     ]))
 }
 
-fn make_finally_catch<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+fn make_finally_catch(
+    e: &mut Emitter<'_, '_>,
     exn_local: Local,
-    finally_body: InstrSeq<'arena>,
-) -> InstrSeq<'arena> {
+    finally_body: InstrSeq,
+) -> InstrSeq {
     let l2 = instr::unset_l(*e.local_gen_mut().get_retval());
     let l1 = instr::unset_l(*e.local_gen_mut().get_label());
     InstrSeq::gather(vec![
@@ -910,7 +906,7 @@ fn emit_try_catch<'a, 'arena, 'decl>(
     pos: &Pos,
     try_block: &[ast::Stmt],
     catch_list: &[ast::Catch],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     e.local_scope(|e| emit_try_catch_(e, env, pos, try_block, catch_list))
 }
 
@@ -920,7 +916,7 @@ fn emit_try_catch_<'a, 'arena, 'decl>(
     pos: &Pos,
     try_block: &[ast::Stmt],
     catch_list: &[ast::Catch],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if is_empty_block(try_block) {
         return Ok(instr::empty());
     };
@@ -953,7 +949,7 @@ fn emit_catch<'a, 'arena, 'decl>(
     pos: &Pos,
     end_label: Label,
     ast::Catch(catch_ty, catch_lid, catch_block): &ast::Catch,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
@@ -979,7 +975,7 @@ fn emit_foreach<'a, 'arena, 'decl>(
     collection: &ast::Expr,
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     use ast::AsExpr as A;
     e.local_scope(|e| match iterator {
         A::AsV(_) | A::AsKv(_, _) => emit_foreach_(e, env, pos, collection, iterator, block),
@@ -1199,7 +1195,7 @@ fn emit_foreach_<'a, 'arena, 'decl>(
     collection: &ast::Expr,
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let liter_local = check_l_iter(e, env, pos, collection, iterator, block)?;
     let collection_instrs = if liter_local.is_none() {
         emit_expr::emit_expr(e, env, collection)?
@@ -1265,10 +1261,9 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
     collection: &ast::Expr,
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let instr_collection = emit_expr::emit_expr(e, env, collection)?;
     scope::with_unnamed_local(e, |e, iter_temp_local| {
-        let alloc = e.alloc;
         let input_is_async_iterator_label = e.label_gen_mut().next_regular();
         let next_label = e.label_gen_mut().next_regular();
         let exit_label = e.label_gen_mut().next_regular();
@@ -1281,7 +1276,6 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
             instr::instance_of_d(ClassName::new(string_id!("HH\\AsyncIterator"))),
             instr::jmp_nz(input_is_async_iterator_label),
             emit_fatal::emit_fatal_runtime(
-                alloc,
                 pos,
                 "Unable to iterate non-AsyncIterator asynchronously",
             ),
@@ -1338,7 +1332,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     iterator: &ast::AsExpr,
-) -> Result<(Option<Local>, Local, InstrSeq<'arena>)> {
+) -> Result<(Option<Local>, Local, InstrSeq)> {
     use ast::AsExpr as A;
     fn get_id_of_simple_lvar_opt(lvar: &ast::Expr_) -> Result<Option<&str>> {
         if let Some(ast::Lid(pos, id)) = lvar.as_lvar() {
@@ -1415,7 +1409,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     lvalue: &ast::Expr,
     local: Local,
-) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
     match &lvalue.2 {
         ast::Expr_::Call(_) => Err(Error::fatal_parse(
             &lvalue.1,
@@ -1457,10 +1451,10 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
 fn emit_load_list_elements<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
-    path: Vec<InstrSeq<'arena>>,
+    path: Vec<InstrSeq>,
     es: &[ast::Expr],
-) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
-    let (preamble, load_value): (Vec<Vec<InstrSeq<'arena>>>, Vec<Vec<InstrSeq<'arena>>>) = es
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
+    let (preamble, load_value): (Vec<Vec<InstrSeq>>, Vec<Vec<InstrSeq>>) = es
         .iter()
         .enumerate()
         .map(|(i, x)| {
@@ -1484,10 +1478,10 @@ fn emit_load_list_elements<'a, 'arena, 'decl>(
 fn emit_load_list_element<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
-    mut path: Vec<InstrSeq<'arena>>,
+    mut path: Vec<InstrSeq>,
     i: usize,
     elem: &ast::Expr,
-) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
+) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
     let query_value = |path| {
         InstrSeq::gather(vec![
             InstrSeq::gather(path),
@@ -1537,7 +1531,7 @@ fn emit_foreach_await_key_value_storage<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     iterator: &ast::AsExpr,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     use ast::AsExpr as A;
 
     match iterator {
@@ -1560,7 +1554,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
     lvalue: &ast::Expr,
     indices: &[isize],
     keep_on_stack: bool,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     scope::with_unnamed_local(e, |e, local| {
         let (init, assign) = emit_expr::emit_lval_op_list(
             e,
@@ -1588,7 +1582,7 @@ fn emit_stmts<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     stl: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(
         stl.iter()
             .map(|s| emit_stmt(e, env, s))
@@ -1601,7 +1595,7 @@ fn emit_block_with_temps<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     lids: &Option<Vec<ast::Lid>>,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if let Some(lids) = lids {
         scope::with_unnamed_temps(emitter, lids, |e| emit_stmts(e, env, block))
     } else {
@@ -1613,7 +1607,7 @@ fn emit_block<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     emitter: &mut Emitter<'arena, 'decl>,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     emit_stmts(emitter, env, block)
 }
 
@@ -1622,7 +1616,7 @@ fn emit_do<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     body: &[ast::Stmt],
     cond: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
@@ -1641,7 +1635,7 @@ fn emit_while<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     cond: &ast::Expr,
     body: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
@@ -1674,7 +1668,7 @@ fn emit_for<'a, 'arena, 'decl>(
     e2: Option<&ast::Expr>,
     e3: &[ast::Expr],
     body: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
@@ -1684,7 +1678,7 @@ fn emit_for<'a, 'arena, 'decl>(
         jmpz: bool,
         label: Label,
         cond: Option<&ast::Expr>,
-    ) -> Result<InstrSeq<'arena>> {
+    ) -> Result<InstrSeq> {
         Ok(match cond {
             None => {
                 if jmpz {
@@ -1734,7 +1728,7 @@ fn emit_for<'a, 'arena, 'decl>(
 pub fn emit_dropthrough_return<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match e.statement_state().default_dropthrough.as_ref() {
         Some(instrs) => Ok(InstrSeq::clone(instrs)),
         None => {
@@ -1753,7 +1747,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     stmt: &ast::Stmt,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
         a::Stmt_::Block(box (None, stmts)) => emit_final_stmts(env, e, stmts),
@@ -1768,7 +1762,7 @@ pub fn emit_final_stmts<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     e: &mut Emitter<'arena, 'decl>,
     block: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match block {
         [] => emit_dropthrough_return(e, env),
         _ => {
@@ -1791,7 +1785,7 @@ pub fn emit_markup<'a, 'arena, 'decl>(
     env: &mut Env<'a>,
     (_, s): &ast::Pstring,
     check_for_hashbang: bool,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     let markup = if s.is_empty() {
         instr::empty()
     } else {
@@ -1822,7 +1816,7 @@ fn emit_break<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
-) -> InstrSeq<'arena> {
+) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::IS_BREAK, env, pos)
 }
@@ -1831,7 +1825,7 @@ fn emit_continue<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
-) -> InstrSeq<'arena> {
+) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::empty(), env, pos)
 }
@@ -1842,7 +1836,7 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
     pos: &Pos,
     lval: &ast::Expr,
     r: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     match lval.2.as_lvar() {
         Some(ast::Lid(_, id)) if !emit_expr::is_local_this(env, id) => Ok(InstrSeq::gather(vec![
             emit_expr::emit_await(e, env, pos, r)?,
@@ -1881,7 +1875,7 @@ fn emit_if<'a, 'arena, 'decl>(
     condition: &ast::Expr,
     consequence: &[ast::Stmt],
     alternative: &[ast::Stmt],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if alternative.is_empty() || (alternative.len() == 1 && alternative[0].1.is_noop()) {
         let done_label = e.label_gen_mut().next_regular();
         let consequence_instr = emit_stmts(e, env, consequence)?;
@@ -1916,7 +1910,7 @@ fn emit_declare_local<'a, 'arena, 'decl>(
     pos: &Pos,
     id: &ast::Lid,
     e_: &Option<ast::Expr>,
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if let Some(e_) = e_ {
         let bop = ast::Binop {
             bop: ast_defs::Bop::Eq(None),

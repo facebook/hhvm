@@ -188,13 +188,13 @@ impl<'arena> Body<'arena> {
 
 fn body_instrs<'arena>(
     hhbc_body: &'arena hhbc::Body<'arena>,
-) -> impl Iterator<Item = (InstrPtr, &'arena Instruct<'arena>)> + DoubleEndedIterator {
+) -> impl DoubleEndedIterator<Item = (InstrPtr, &'arena Instruct)> {
     hhbc_body.body_instrs.iter().enumerate().map(|(i, instr)| {
         let ip = InstrPtr::from_usize(i);
         (ip, instr)
     })
 }
 
-pub(crate) fn lookup_data_for_opcode(opcode: &Opcode<'_>) -> &'static OpcodeData {
+pub(crate) fn lookup_data_for_opcode(opcode: &Opcode) -> &'static OpcodeData {
     hhbc_gen::opcode_data().get(opcode.variant_index()).unwrap()
 }

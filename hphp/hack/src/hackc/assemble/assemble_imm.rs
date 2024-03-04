@@ -490,6 +490,12 @@ impl<'arena> AssembleImm<'arena, StringId> for Lexer<'_> {
     }
 }
 
+impl<'arena> AssembleImm<'arena, BytesId> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<BytesId> {
+        assemble::assemble_unescaped_unquoted_intern_bytes(self)
+    }
+}
+
 impl AssembleImm<'_, hhbc::SwitchKind> for Lexer<'_> {
     fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::SwitchKind> {
         let tok = self.expect_token()?;

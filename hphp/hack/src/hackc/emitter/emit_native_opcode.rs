@@ -68,7 +68,7 @@ fn emit_native_opcode_impl<'arena>(
     params: &[ast::FunParam],
     class_name: &str,
     class_user_attrs: &[ast::UserAttribute],
-) -> Result<InstrSeq<'arena>> {
+) -> Result<InstrSeq> {
     if let [ua] = class_user_attrs {
         if ua.name.1 == "__NativeData"
             && (class_name == "\\HH\\AsyncGenerator" || class_name == "\\Generator")
@@ -85,7 +85,7 @@ fn emit_native_opcode_impl<'arena>(
     ))
 }
 
-fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result<InstrSeq<'arena>> {
+fn emit_generator_method(name: &str, params: &[ast::FunParam]) -> Result<InstrSeq> {
     let instrs = match name {
         "send" => {
             let local = get_first_param_local(params)?;

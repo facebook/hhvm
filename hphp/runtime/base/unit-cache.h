@@ -136,6 +136,9 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
 Optional<SHA1> getHashForFile(const std::string& path,
                               const std::filesystem::path& root);
 
+Optional<std::string> getHashFromEden(const char* path,
+                                      Stream::Wrapper* wrapper);
+
 /*
  * Return the number of php files that are currently loaded in this process.
  * Exported for the admin request handler.

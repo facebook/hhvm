@@ -370,23 +370,6 @@ HashCache& getHashCache(const std::string& repo) {
   return *acc->second;
 }
 
-Optional<std::string> getHashFromEden(const char* path,
-                                      Stream::Wrapper* wrapper) {
-  assertx(RO::EvalUseEdenFS);
-  assertx(path);
-  if (wrapper) {
-    // We only allow normal file streams, which cannot re-enter
-    assertx(wrapper->isNormalFileStream());
-    auto const xattr = wrapper->getxattr(path, "user.sha1");
-    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
-    return xattr;
-  }
-  char xattr_buf[SHA1::kStrLen];
-  auto const ret = getxattr(path, "user.sha1", xattr_buf, sizeof(xattr_buf));
-  if (ret != sizeof(xattr_buf)) return std::nullopt;
-  return std::string{xattr_buf, sizeof(xattr_buf)};
-}
-
 Optional<String> loadFileContents(const char* path,
                                   Stream::Wrapper* wrapper) {
   std::string contents;
@@ -1550,6 +1533,23 @@ Optional<SHA1> getHashForFile(const std::string& path,
                               const std::filesystem::path& root) {
   auto wrapper = Stream::getWrapperFromURI(String{root.string()});
   return getHashForFile(path, wrapper, root);
+}
+
+Optional<std::string> getHashFromEden(const char* path,
+                                      Stream::Wrapper* wrapper) {
+  assertx(RO::EvalUseEdenFS);
+  assertx(path);
+  if (wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(wrapper->isNormalFileStream());
+    auto const xattr = wrapper->getxattr(path, "user.sha1");
+    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
+    return xattr;
+  }
+  char xattr_buf[SHA1::kStrLen];
+  auto const ret = getxattr(path, "user.sha1", xattr_buf, sizeof(xattr_buf));
+  if (ret != sizeof(xattr_buf)) return std::nullopt;
+  return std::string{xattr_buf, sizeof(xattr_buf)};
 }
 
 size_t numLoadedUnits() {

@@ -99,8 +99,7 @@ struct test_callback {
 
   template <typename T, typename Tag>
   void operator()(
-      Tag, T const*, T const*, folly::StringPiece path, folly::StringPiece)
-      const {
+      Tag, T const*, T const*, std::string_view path, std::string_view) const {
     out_.emplace_back(path.data(), path.size());
   }
 

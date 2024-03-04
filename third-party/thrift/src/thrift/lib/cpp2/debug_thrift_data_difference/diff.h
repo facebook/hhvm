@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <folly/Range.h>
 
@@ -35,32 +36,28 @@ namespace thrift {
  */
 template <typename Output>
 struct diff_output_callback {
-  diff_output_callback(
-      Output& out, folly::StringPiece lhs, folly::StringPiece rhs)
+  diff_output_callback(Output& out, std::string_view lhs, std::string_view rhs)
       : out_(out), lhs_(lhs), rhs_(rhs) {}
 
   template <typename Tag, typename T>
   void operator()(
-      Tag,
-      T const* lhs,
-      T const* rhs,
-      folly::StringPiece path,
-      folly::StringPiece) const {
+      Tag, T const* lhs, T const* rhs, std::string_view path, std::string_view)
+      const {
     out_ << path << ":\n";
     if (lhs) {
-      facebook::thrift::pretty_print<Tag>(out_, *lhs, "  ", lhs_.str());
+      facebook::thrift::pretty_print<Tag>(out_, *lhs, "  ", std::string(lhs_));
       out_ << "\n";
     }
     if (rhs) {
-      facebook::thrift::pretty_print<Tag>(out_, *rhs, "  ", rhs_.str());
+      facebook::thrift::pretty_print<Tag>(out_, *rhs, "  ", std::string(rhs_));
       out_ << "\n";
     }
   }
 
  private:
   Output& out_;
-  folly::StringPiece lhs_;
-  folly::StringPiece rhs_;
+  std::string_view lhs_;
+  std::string_view rhs_;
 };
 
 /**
@@ -85,9 +82,7 @@ struct diff_output_callback {
 
 template <typename Output>
 diff_output_callback<Output> make_diff_output_callback(
-    Output& output,
-    folly::StringPiece lhs = "- ",
-    folly::StringPiece rhs = "+ ") {
+    Output& output, std::string_view lhs = "- ", std::string_view rhs = "+ ") {
   return diff_output_callback<Output>(output, lhs, rhs);
 }
 

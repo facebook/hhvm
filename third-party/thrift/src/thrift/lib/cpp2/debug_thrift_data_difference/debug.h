@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <folly/Range.h>
 
@@ -42,8 +43,8 @@ namespace thrift {
  *  void operator ()(
  *    T const* lhs,
  *    T const* rhs,
- *    folly::StringPiece path,
- *    folly::StringPiece message
+ *    std::string_view path,
+ *    std::string_view message
  *  ) const;
  *
  *  lhs: the left-hand side mismatched field or nullptr if the field is not
@@ -81,7 +82,7 @@ bool debug_thrift_data_difference(
 template <typename Output>
 struct debug_output_callback {
   explicit debug_output_callback(
-      Output& out, folly::StringPiece lhs, folly::StringPiece rhs)
+      Output& out, std::string_view lhs, std::string_view rhs)
       : out_(out), lhs_(lhs), rhs_(rhs) {}
 
   template <typename Tag, typename T>
@@ -89,8 +90,8 @@ struct debug_output_callback {
       Tag,
       T const* lhs,
       T const* rhs,
-      folly::StringPiece path,
-      folly::StringPiece message) const {
+      std::string_view path,
+      std::string_view message) const {
     out_ << path << ": " << message;
     if (lhs) {
       out_ << "\n"
@@ -107,8 +108,8 @@ struct debug_output_callback {
 
  private:
   Output& out_;
-  folly::StringPiece lhs_;
-  folly::StringPiece rhs_;
+  std::string_view lhs_;
+  std::string_view rhs_;
 };
 
 /**
@@ -136,8 +137,8 @@ struct debug_output_callback {
 template <typename Output>
 debug_output_callback<Output> make_debug_output_callback(
     Output& output,
-    folly::StringPiece lhs = "lhs",
-    folly::StringPiece rhs = "rhs") {
+    std::string_view lhs = "lhs",
+    std::string_view rhs = "rhs") {
   return debug_output_callback<Output>(output, lhs, rhs);
 }
 

@@ -399,7 +399,9 @@ inline void BinaryProtocolReader::readMessageEnd() {}
 
 inline void BinaryProtocolReader::readStructBegin(std::string& name) {
   descend();
-  name = "";
+  if (!name.empty()) {
+    name.clear();
+  }
 }
 
 inline void BinaryProtocolReader::readStructEnd() {

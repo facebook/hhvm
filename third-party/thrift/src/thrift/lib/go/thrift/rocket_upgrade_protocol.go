@@ -21,35 +21,35 @@ import (
 )
 
 // upgradeProtocolFactory is a ProtocolFactory for a protocol that upgrades from Header to Rocket protocol.
-type upgradeProtocolFactory struct {
+type upgradeToRocketProtocolFactory struct {
 	headerProtocolFactory ProtocolFactory
 	rocketProtocolFactory ProtocolFactory
 }
 
-// NewUpgradeProtocolFactory creates a new upgradeProtocolFactory that upgrades from Header to Rocket protocol.
-func NewUpgradeProtocolFactory() ProtocolFactory {
-	return &upgradeProtocolFactory{
+// NewUpgradeToRocketProtocolFactory creates a new upgradeProtocolFactory that upgrades from Header to Rocket protocol.
+func NewUpgradeToRocketProtocolFactory() ProtocolFactory {
+	return &upgradeToRocketProtocolFactory{
 		headerProtocolFactory: NewHeaderProtocolFactory(),
 		rocketProtocolFactory: NewRocketProtocolFactory(),
 	}
 }
 
-func (p *upgradeProtocolFactory) GetProtocol(trans Transport) Protocol {
+func (p *upgradeToRocketProtocolFactory) GetProtocol(trans Transport) Protocol {
 	headerProtocol := p.headerProtocolFactory.GetProtocol(trans).(*HeaderProtocol)
 	rocketProtocol := p.rocketProtocolFactory.GetProtocol(trans).(*rocketProtocol)
-	return NewUpgradeProtocol(rocketProtocol, headerProtocol)
+	return NewUpgradeToRocketProtocol(rocketProtocol, headerProtocol)
 }
 
-type upgradeProtocol struct {
+type upgradeToRocketProtocol struct {
 	Protocol
 	rocketProtocol   Protocol
 	headerProtocol   Protocol
 	attemptedUpgrade bool
 }
 
-// NewUpgradeProtocol creates a protocol that upgrades from Header to Rocket protocol.
-func NewUpgradeProtocol(rocketProtocol Protocol, headerProtocol Protocol) Protocol {
-	return &upgradeProtocol{
+// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol.
+func NewUpgradeToRocketProtocol(rocketProtocol Protocol, headerProtocol Protocol) Protocol {
+	return &upgradeToRocketProtocol{
 		rocketProtocol: rocketProtocol,
 		headerProtocol: headerProtocol,
 	}
@@ -58,7 +58,7 @@ func NewUpgradeProtocol(rocketProtocol Protocol, headerProtocol Protocol) Protoc
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.
 // If this succeeds, we switch to the RocketProtocol and write the message using it.
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
-func (p *upgradeProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *upgradeToRocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	if !p.attemptedUpgrade {
 		if err := p.upgradeToRocket(); err != nil {
 			p.Protocol = p.headerProtocol
@@ -70,6 +70,6 @@ func (p *upgradeProtocol) WriteMessageBegin(name string, typeID MessageType, seq
 	return p.Protocol.WriteMessageBegin(name, typeID, seqid)
 }
 
-func (p *upgradeProtocol) upgradeToRocket() error {
+func (p *upgradeToRocketProtocol) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
 }

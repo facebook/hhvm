@@ -23,8 +23,6 @@ const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
-scope__clients = { package = "scope_clients", version = "0.0.1+unstable", path = "clients" }
-scope__services = { package = "scope_services", version = "0.0.1+unstable", path = "services" }
 scope__types = { package = "scope_types", version = "0.0.1+unstable", path = "types" }
 thiserror = "1.0.49"
 tracing = "0.1.40"

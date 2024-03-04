@@ -22,8 +22,6 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-java__clients = { package = "java_clients", version = "0.0.1+unstable", path = "clients" }
-java__services = { package = "java_services", version = "0.0.1+unstable", path = "services" }
 java__types = { package = "java_types", version = "0.0.1+unstable", path = "types" }
 ref-cast = "1.0.18"
 scope = { version = "0.0.1+unstable", path = "../scope" }

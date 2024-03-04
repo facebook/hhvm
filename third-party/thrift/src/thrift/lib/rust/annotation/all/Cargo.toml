@@ -16,8 +16,6 @@ doctest = false
 doc = false
 
 [dependencies]
-all__clients = { package = "all_clients", version = "0.0.1+unstable", path = "clients" }
-all__services = { package = "all_services", version = "0.0.1+unstable", path = "services" }
 all__types = { package = "all_types", version = "0.0.1+unstable", path = "types" }
 anyhow = "1.0.75"
 async-trait = "0.1.71"

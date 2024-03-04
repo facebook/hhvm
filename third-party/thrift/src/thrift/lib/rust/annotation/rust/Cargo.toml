@@ -23,8 +23,6 @@ const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
-rust__clients = { package = "rust_clients", version = "0.0.1+unstable", path = "clients" }
-rust__services = { package = "rust_services", version = "0.0.1+unstable", path = "services" }
 rust__types = { package = "rust_types", version = "0.0.1+unstable", path = "types" }
 scope = { version = "0.0.1+unstable", path = "../scope" }
 thiserror = "1.0.49"

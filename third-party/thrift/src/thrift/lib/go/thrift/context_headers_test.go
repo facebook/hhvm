@@ -42,6 +42,14 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+// somewhere we are still passing context as nil, so we need to support this for now
+func TestHeaderProtocolSetNilHeaders(t *testing.T) {
+	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
+	if err := setRequestHeaders(nil, transport); err != nil {
+		t.Fatal(err)
+	}
+}
+
 type mockRocketSocket struct {
 	*MemoryBuffer
 }
@@ -74,9 +82,33 @@ func TestRocketProtocolSetNilHeaders(t *testing.T) {
 	}
 }
 
+func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
+	ctx := context.Background()
+	want := map[string]string{"key1": "value1", "key2": "value2"}
+	var err error
+	for key, value := range want {
+		ctx, err = AddHeader(ctx, key, value)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	protocol := NewUpgradeToRocketProtocol(
+		NewRocketProtocol(NewRocketTransport(&mockRocketSocket{})),
+		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
+	)
+	if err := setRequestHeaders(ctx, protocol); err != nil {
+		t.Fatal(err)
+	}
+	got := protocol.(requestHeaders).getRequestHeaders()
+	assert.Equal(t, want, got)
+}
+
 // somewhere we are still passing context as nil, so we need to support this for now
-func TestHeaderProtocolSetNilHeaders(t *testing.T) {
-	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
+func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
+	transport := NewUpgradeToRocketProtocol(
+		NewRocketProtocol(NewRocketTransport(&mockRocketSocket{})),
+		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
+	)
 	if err := setRequestHeaders(nil, transport); err != nil {
 		t.Fatal(err)
 	}

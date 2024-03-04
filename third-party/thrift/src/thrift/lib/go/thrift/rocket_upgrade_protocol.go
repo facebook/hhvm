@@ -42,9 +42,8 @@ func (p *upgradeToRocketProtocolFactory) GetProtocol(trans Transport) Protocol {
 
 type upgradeToRocketProtocol struct {
 	Protocol
-	rocketProtocol   Protocol
-	headerProtocol   Protocol
-	attemptedUpgrade bool
+	rocketProtocol Protocol
+	headerProtocol Protocol
 }
 
 // NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol.
@@ -59,17 +58,37 @@ func NewUpgradeToRocketProtocol(rocketProtocol Protocol, headerProtocol Protocol
 // If this succeeds, we switch to the RocketProtocol and write the message using it.
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
 func (p *upgradeToRocketProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
-	if !p.attemptedUpgrade {
+	if p.Protocol == nil {
 		if err := p.upgradeToRocket(); err != nil {
 			p.Protocol = p.headerProtocol
 		} else {
 			p.Protocol = p.rocketProtocol
 		}
-		p.attemptedUpgrade = true
 	}
 	return p.Protocol.WriteMessageBegin(name, typeID, seqid)
 }
 
 func (p *upgradeToRocketProtocol) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
+}
+
+func (p *upgradeToRocketProtocol) setRequestHeader(key, value string) {
+	if p.Protocol == nil {
+		p.rocketProtocol.(requestHeaders).setRequestHeader(key, value)
+		p.headerProtocol.(requestHeaders).setRequestHeader(key, value)
+		return
+	}
+	p.Protocol.(requestHeaders).setRequestHeader(key, value)
+}
+
+func (p *upgradeToRocketProtocol) getRequestHeaders() map[string]string {
+	if p.Protocol == nil {
+		headers := p.headerProtocol.(requestHeaders).getRequestHeaders()
+		rocketHeaders := p.rocketProtocol.(requestHeaders).getRequestHeaders()
+		for k, v := range rocketHeaders {
+			headers[k] = v
+		}
+		return headers
+	}
+	return p.Protocol.(requestHeaders).getRequestHeaders()
 }

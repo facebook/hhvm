@@ -1405,22 +1405,17 @@ fn emit_struct_array<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq> {
     use ast::Expr;
     use ast::Expr_;
-    let alloc = e.alloc;
-    let (keys, value_instrs): (Vec<&'arena [u8]>, _) = fields
+    let (keys, value_instrs): (Vec<BString>, _) = fields
         .iter()
         .map(|f| match f {
             ast::Afield::AFkvalue(k, v) => match k {
-                Expr(_, _, Expr_::String(s)) => {
-                    Ok((alloc.alloc_slice_copy(s) as &[u8], emit_expr(e, env, v)?))
-                }
+                Expr(_, _, Expr_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
                 _ => {
                     let mut k = k.clone();
                     constant_folder::fold_expr(&mut k, &env.scope, e)
                         .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
                     match k {
-                        Expr(_, _, Expr_::String(s)) => {
-                            Ok((alloc.alloc_slice_copy(&s) as &[u8], emit_expr(e, env, v)?))
-                        }
+                        Expr(_, _, Expr_::String(s)) => Ok((s, emit_expr(e, env, v)?)),
                         _ => Err(Error::unrecoverable("Key must be a string")),
                     }
                 }
@@ -1430,6 +1425,7 @@ fn emit_struct_array<'a, 'arena, 'decl>(
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
+    let keys: Vec<&[u8]> = keys.iter().map(|s| &s as &[u8]).collect();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
         emit_pos(pos),

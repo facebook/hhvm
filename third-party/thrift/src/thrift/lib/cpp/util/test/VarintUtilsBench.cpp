@@ -114,6 +114,7 @@ void bench_read(size_t iters, Case) {
       rcursor = folly::io::Cursor(iobufQueue.front());
     }
     readVarint(rcursor, val);
+    folly::doNotOptimizeAway(val);
   }
 }
 

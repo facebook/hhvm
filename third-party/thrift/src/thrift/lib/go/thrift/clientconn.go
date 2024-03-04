@@ -63,7 +63,7 @@ func (cc *ClientConn) Close() error {
 func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, msgType MessageType) error {
 	cc.seqID++
 
-	if err := setHeaders(ctx, cc.oproto); err != nil {
+	if err := setRequestHeaders(ctx, cc.oproto); err != nil {
 		return err
 	}
 

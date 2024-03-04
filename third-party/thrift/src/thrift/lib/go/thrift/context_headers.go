@@ -43,14 +43,15 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 	return ctx, nil
 }
 
-type setHeader interface {
-	SetHeader(key, value string)
+type requestHeaders interface {
+	setRequestHeader(key, value string)
+	getRequestHeaders() map[string]string
 }
 
-// setHeaders sets the Headers in the protocol to send with the request.
+// setRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.
 // These Headers will be cleared with Flush, as they are not persistent.
-func setHeaders(ctx context.Context, protocol Protocol) error {
+func setRequestHeaders(ctx context.Context, protocol Protocol) error {
 	if ctx == nil {
 		return nil
 	}
@@ -62,13 +63,13 @@ func setHeaders(ctx context.Context, protocol Protocol) error {
 	if !ok {
 		return NewTransportException(INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
 	}
-	p, ok := protocol.(setHeader)
+	p, ok := protocol.(requestHeaders)
 	if !ok {
 		// TODO(T173277635): Support Rocket Transport
-		return NewTransportException(NOT_IMPLEMENTED, fmt.Sprintf("setHeaders not implemented for transport type %T", p))
+		return NewTransportException(NOT_IMPLEMENTED, fmt.Sprintf("requestHeaders not implemented for transport type %T", protocol))
 	}
 	for k, v := range headersMap {
-		p.SetHeader(k, v)
+		p.setRequestHeader(k, v)
 	}
 	return nil
 }

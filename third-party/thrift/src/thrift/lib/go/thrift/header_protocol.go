@@ -181,6 +181,14 @@ func (p *HeaderProtocol) Headers() map[string]string {
 	return p.trans.Headers()
 }
 
+func (p *HeaderProtocol) setRequestHeader(key, value string) {
+	p.trans.SetHeader(key, value)
+}
+
+func (p *HeaderProtocol) getRequestHeaders() map[string]string {
+	return p.trans.Headers()
+}
+
 func (p *HeaderProtocol) ClearHeaders() {
 	p.trans.ClearHeaders()
 }

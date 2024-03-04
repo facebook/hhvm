@@ -34,17 +34,17 @@ func TestSomeHeaders(t *testing.T) {
 		}
 	}
 	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
-	if err := setHeaders(ctx, transport); err != nil {
+	if err := setRequestHeaders(ctx, transport); err != nil {
 		t.Fatal(err)
 	}
-	got := transport.Headers()
+	got := transport.getRequestHeaders()
 	assert.Equal(t, want, got)
 }
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestSetNilHeaders(t *testing.T) {
 	transport := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
-	if err := setHeaders(nil, transport); err != nil {
+	if err := setRequestHeaders(nil, transport); err != nil {
 		t.Fatal(err)
 	}
 }

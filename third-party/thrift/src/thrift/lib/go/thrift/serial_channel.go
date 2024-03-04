@@ -42,7 +42,7 @@ func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IReq
 	c.seqID++
 	seqID := c.seqID
 
-	if err := setHeaders(ctx, c.protocol); err != nil {
+	if err := setRequestHeaders(ctx, c.protocol); err != nil {
 		return seqID, err
 	}
 

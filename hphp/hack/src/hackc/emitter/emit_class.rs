@@ -168,7 +168,6 @@ fn from_includes(includes: &[ast::Hint]) -> Vec<ClassName> {
 }
 
 fn from_type_constant<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<TypeConstant> {
@@ -185,7 +184,6 @@ fn from_type_constant<'a, 'arena, 'decl>(
             // TODO: Deal with the constraint
             // Type constants do not take type vars hence tparams:[]
             Some(emit_type_constant::hint_to_type_constant(
-                alloc,
                 emitter.options(),
                 &[],
                 &BTreeMap::new(),
@@ -490,7 +488,6 @@ fn make_init_method<'arena, 'decl>(
 }
 
 pub fn emit_class<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
 ) -> Result<Class> {
@@ -746,7 +743,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         ast_class.typeconsts.iter().partition(|x| x.is_ctx);
     let type_constants = tconsts
         .iter()
-        .map(|x| from_type_constant(alloc, emitter, x))
+        .map(|x| from_type_constant(emitter, x))
         .collect::<Result<Vec<_>>>()?;
     let ctx_constants = ctxconsts
         .iter()
@@ -825,14 +822,13 @@ pub fn emit_class<'a, 'arena, 'decl>(
 }
 
 pub fn emit_classes_from_program<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Class>> {
     ast.iter()
         .filter_map(|class| {
             if let ast::Def::Class(cd) = class {
-                Some(emit_class(alloc, emitter, cd))
+                Some(emit_class(emitter, cd))
             } else {
                 None
             }

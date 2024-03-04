@@ -164,7 +164,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
 ) -> Result<Unit> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
-    let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
+    let classes = emit_classes_from_program(emitter, prog)?;
     let modules = emit_modules_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {

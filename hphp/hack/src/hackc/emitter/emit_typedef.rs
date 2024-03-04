@@ -42,12 +42,8 @@ fn emit_typedef(emitter: &mut Emitter<'_, '_>, typedef: &ast::Typedef) -> Result
         &tparams,
         &typedef.kind,
     );
-    let type_structure_res = emit_type_constant::typedef_to_type_structure(
-        emitter.alloc,
-        emitter.options(),
-        &tparams,
-        typedef,
-    );
+    let type_structure_res =
+        emit_type_constant::typedef_to_type_structure(emitter.options(), &tparams, typedef);
 
     let span = Span::from_pos(&typedef.span);
     let mut attrs = Attr::AttrNone;

@@ -357,7 +357,6 @@ pub(crate) fn get_type_structure_for_hint<'arena, 'decl>(
         .map(|(i, n)| (*n, i as i64))
         .collect();
     let tv = emit_type_constant::hint_to_type_constant(
-        e.alloc,
         e.options(),
         tparams,
         &targ_map,

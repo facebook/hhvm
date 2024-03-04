@@ -119,7 +119,6 @@ fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
 }
 
 fn shape_field_to_entry<'arena>(
-    alloc: &'arena bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -136,20 +135,12 @@ fn shape_field_to_entry<'arena>(
     };
     r.push(encode_entry(
         "value",
-        hint_to_type_constant(
-            alloc,
-            opts,
-            tparams,
-            targ_map,
-            &sfi.hint,
-            type_refinement_in_hint,
-        )?,
+        hint_to_type_constant(opts, tparams, targ_map, &sfi.hint, type_refinement_in_hint)?,
     ));
-    Ok(encode_entry(alloc.alloc_str(&name), TypedValue::dict(r)))
+    Ok(encode_entry(&name, TypedValue::dict(r)))
 }
 
 fn shape_info_to_typed_value<'arena>(
-    alloc: &'arena bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -159,9 +150,7 @@ fn shape_info_to_typed_value<'arena>(
     let info = si
         .field_map
         .iter()
-        .map(|sfi| {
-            shape_field_to_entry(alloc, opts, tparams, targ_map, type_refinement_in_hint, sfi)
-        })
+        .map(|sfi| shape_field_to_entry(opts, tparams, targ_map, type_refinement_in_hint, sfi))
         .collect::<Result<Vec<_>>>()?;
     Ok(TypedValue::dict(info))
 }
@@ -202,7 +191,6 @@ fn resolve_classname(tparams: &[&str], mut s: String) -> (Option<DictEntry>, Str
 }
 
 fn get_generic_types(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -214,20 +202,12 @@ fn get_generic_types(
     } else {
         vec![encode_entry(
             "generic_types",
-            hints_to_type_constant(
-                alloc,
-                opts,
-                tparams,
-                targ_map,
-                type_refinement_in_hint,
-                hints,
-            )?,
+            hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, hints)?,
         )]
     })
 }
 
 fn get_union_types(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -236,14 +216,7 @@ fn get_union_types(
 ) -> Result<Vec<DictEntry>> {
     Ok(vec![encode_entry(
         "union_types",
-        hints_to_type_constant(
-            alloc,
-            opts,
-            tparams,
-            targ_map,
-            type_refinement_in_hint,
-            hints,
-        )?,
+        hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, hints)?,
     )])
 }
 
@@ -279,7 +252,6 @@ fn get_typevars(tparams: &[&str]) -> Vec<DictEntry> {
 }
 
 fn hint_to_type_constant_list(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -300,7 +272,6 @@ fn hint_to_type_constant_list(
             let hints = match &hints[..] {
                 [h] if name == typehints::POISON_MARKER || name == typehints::HH_FUNCTIONREF => {
                     return hint_to_type_constant_list(
-                        alloc,
                         opts,
                         tparams,
                         targ_map,
@@ -324,7 +295,6 @@ fn hint_to_type_constant_list(
                 || name.eq_ignore_ascii_case(classes::TYPE_NAME))
             {
                 r.append(&mut get_generic_types(
-                    alloc,
                     opts,
                     tparams,
                     targ_map,
@@ -351,14 +321,7 @@ fn hint_to_type_constant_list(
             r.push(encode_kind(TypeStructureKind::T_shape));
             r.push(encode_entry(
                 "fields",
-                shape_info_to_typed_value(
-                    alloc,
-                    opts,
-                    tparams,
-                    targ_map,
-                    type_refinement_in_hint,
-                    si,
-                )?,
+                shape_info_to_typed_value(opts, tparams, targ_map, type_refinement_in_hint, si)?,
             ));
             r
         }
@@ -380,8 +343,8 @@ fn hint_to_type_constant_list(
             let mut r = vec![];
             r.push(encode_kind(TypeStructureKind::T_fun));
             let single_hint = |name: &str, h| {
-                hint_to_type_constant(alloc, opts, tparams, targ_map, h, type_refinement_in_hint)
-                    .map(|tc| vec![encode_entry(alloc.alloc_str(name), tc)])
+                hint_to_type_constant(opts, tparams, targ_map, h, type_refinement_in_hint)
+                    .map(|tc| vec![encode_entry(name, tc)])
             };
             let mut return_type = single_hint("return_type", &hf.return_ty)?;
             let mut variadic_type = hf
@@ -391,7 +354,6 @@ fn hint_to_type_constant_list(
             let mut param_types = vec![encode_entry(
                 "param_types",
                 hints_to_type_constant(
-                    alloc,
                     opts,
                     tparams,
                     targ_map,
@@ -409,14 +371,7 @@ fn hint_to_type_constant_list(
             r.push(encode_kind(TypeStructureKind::T_tuple));
             r.push(encode_entry(
                 "elem_types",
-                hints_to_type_constant(
-                    alloc,
-                    opts,
-                    tparams,
-                    targ_map,
-                    type_refinement_in_hint,
-                    hints,
-                )?,
+                hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, hints)?,
             ));
             r
         }
@@ -424,7 +379,6 @@ fn hint_to_type_constant_list(
             let mut r = vec![];
             r.push(encode_entry("nullable", TypedValue::Bool(true)));
             r.append(&mut hint_to_type_constant_list(
-                alloc,
                 opts,
                 tparams,
                 targ_map,
@@ -437,7 +391,6 @@ fn hint_to_type_constant_list(
             let mut r = vec![];
             r.push(encode_entry("soft", TypedValue::Bool(true)));
             r.append(&mut hint_to_type_constant_list(
-                alloc,
                 opts,
                 tparams,
                 targ_map,
@@ -449,7 +402,6 @@ fn hint_to_type_constant_list(
         Hint_::Hlike(h) => {
             let mut r = vec![];
             r.append(&mut hint_to_type_constant_list(
-                alloc,
                 opts,
                 tparams,
                 targ_map,
@@ -468,7 +420,6 @@ fn hint_to_type_constant_list(
             let mut r = vec![];
             r.push(encode_kind(TypeStructureKind::T_union));
             r.append(&mut get_union_types(
-                alloc,
                 opts,
                 tparams,
                 targ_map,
@@ -486,7 +437,6 @@ fn hint_to_type_constant_list(
                 TypeRefinementInHint::Allowed => {
                     // check recursively (e.g.: Class<T1, T2> with { ... })
                     hint_to_type_constant_list(
-                        alloc,
                         opts,
                         tparams,
                         targ_map,
@@ -505,7 +455,6 @@ fn hint_to_type_constant_list(
 }
 
 pub(crate) fn typedef_to_type_structure(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     typedef: &ast::Typedef,
@@ -524,7 +473,6 @@ pub(crate) fn typedef_to_type_structure(
     };
 
     let mut tconsts = hint_to_type_constant_list(
-        alloc,
         opts,
         tparams,
         &BTreeMap::new(),
@@ -543,26 +491,18 @@ pub(crate) fn typedef_to_type_structure(
 }
 
 pub(crate) fn hint_to_type_constant(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: &Hint,
     type_refinement_in_hint: TypeRefinementInHint,
 ) -> Result<TypedValue> {
-    let tconsts = hint_to_type_constant_list(
-        alloc,
-        opts,
-        tparams,
-        targ_map,
-        type_refinement_in_hint,
-        hint,
-    )?;
+    let tconsts =
+        hint_to_type_constant_list(opts, tparams, targ_map, type_refinement_in_hint, hint)?;
     Ok(TypedValue::dict(tconsts))
 }
 
 fn hints_to_type_constant(
-    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -572,9 +512,7 @@ fn hints_to_type_constant(
     Ok(TypedValue::vec(
         hints
             .iter()
-            .map(|h| {
-                hint_to_type_constant(alloc, opts, tparams, targ_map, h, type_refinement_in_hint)
-            })
+            .map(|h| hint_to_type_constant(opts, tparams, targ_map, h, type_refinement_in_hint))
             .collect::<Result<Vec<_>>>()?,
     ))
 }

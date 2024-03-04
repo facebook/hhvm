@@ -1,3 +1,4 @@
+-- GIF image file (test.gif) --
 dict(7) {
   [0]=>
   int(120)
@@ -30,3 +31,56 @@ dict(7) {
   ["mime"]=>
   string(9) "image/gif"
 }
+
+-- AVIF image file (test.avif) --
+dict(5) {
+  [0]=>
+  int(120)
+  [1]=>
+  int(67)
+  [2]=>
+  int(19)
+  [3]=>
+  string(23) "width="120" height="67""
+  ["mime"]=>
+  string(10) "image/avif"
+}
+dict(5) {
+  [0]=>
+  int(120)
+  [1]=>
+  int(67)
+  [2]=>
+  int(19)
+  [3]=>
+  string(23) "width="120" height="67""
+  ["mime"]=>
+  string(10) "image/avif"
+}
+
+-- HEIC image file (test.heic) --
+dict(5) {
+  [0]=>
+  int(120)
+  [1]=>
+  int(67)
+  [2]=>
+  int(20)
+  [3]=>
+  string(23) "width="120" height="67""
+  ["mime"]=>
+  string(10) "image/heic"
+}
+dict(5) {
+  [0]=>
+  int(120)
+  [1]=>
+  int(67)
+  [2]=>
+  int(20)
+  [3]=>
+  string(23) "width="120" height="67""
+  ["mime"]=>
+  string(10) "image/heic"
+}
+===DONE===

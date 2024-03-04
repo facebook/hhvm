@@ -8,15 +8,17 @@
  *
  */
 
+const int IMAGETYPE_AVIF;
 const int IMAGETYPE_BMP;
 const int IMAGETYPE_COUNT;
 const int IMAGETYPE_GIF;
+const int IMAGETYPE_HEIC;
 const int IMAGETYPE_IFF;
 const int IMAGETYPE_JB2;
 const int IMAGETYPE_JP2;
 const int IMAGETYPE_JPC;
-const int IMAGETYPE_JPEG;
 const int IMAGETYPE_JPEG2000;
+const int IMAGETYPE_JPEG;
 const int IMAGETYPE_JPX;
 const int IMAGETYPE_PNG;
 const int IMAGETYPE_PSD;

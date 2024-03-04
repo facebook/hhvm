@@ -17,6 +17,8 @@
         "IMAGETYPE_WBMP"     => IMAGETYPE_WBMP,
         "IMAGETYPE_WEBP"     => IMAGETYPE_WEBP,
         "IMAGETYPE_JPEG2000" => IMAGETYPE_JPEG2000,
+        "IMAGETYPE_AVIF"     => IMAGETYPE_AVIF,
+        "IMAGETYPE_HEIC"     => IMAGETYPE_HEIC,
         "IMAGETYPE_XBM"      => IMAGETYPE_XBM
     ];
     foreach($constants as $name => $constant) {

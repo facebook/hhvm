@@ -33,6 +33,10 @@ $imagetype_filenames = dict[
       "IFF image file" => "test4pix.iff",
 
       "WEBP image file" => "200x100.webp",
+
+      "AVIF image file" => "200x100.avif",
+
+      "HEIC image file" => "200x100.heic",
 ];
 
 echo "*** Testing getimagesize() : basic functionality ***\n";

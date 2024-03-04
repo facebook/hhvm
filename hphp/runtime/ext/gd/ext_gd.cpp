@@ -42,8 +42,10 @@
 #include <zlib.h>
 #include <set>
 
+#include <folly/ScopeGuard.h>
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
+#include <libheif/heif.h>
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
@@ -421,6 +423,8 @@ typedef enum {
   IMAGE_FILETYPE_XBM,
   IMAGE_FILETYPE_ICO,
   IMAGE_FILETYPE_WEBP,
+  IMAGE_FILETYPE_AVIF,
+  IMAGE_FILETYPE_HEIC,
 
   IMAGE_FILETYPE_COUNT /* Must remain last */
 } image_filetype;
@@ -1508,6 +1512,111 @@ static struct gfxinfo *php_handle_webp(const req::ptr<File>& stream) {
   return result;
 }
 
+static int64_t heif_get_position(void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+  return stream->tell();
+}
+
+static int heif_read(void* data, size_t size, void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+
+  // Special handling as read doesn't like 0 passed in for size
+  if (size == 0) {
+    return heif_error_Ok;
+  }
+  // An attempt was made to use readImpl instead to avoid memcpy, but
+  // unfortunately, tell() returns wrong position if readImpl is used.
+  String result = stream->read(size);
+  if (result.length() != size) {
+    return 1; // Failure
+  }
+  memcpy(data, result.data(), size);
+  return heif_error_Ok;
+}
+
+static int heif_seek(int64_t position, void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+  if (!stream->seekable()) {
+    return 1; // Failure
+  }
+  if (stream->seek(position, SEEK_SET)) {
+    return heif_error_Ok;
+  }
+  return 1; // Failure
+}
+
+static heif_reader_grow_status heif_wait_for_file_size(
+    int64_t /*targetSize*/,
+    void* /*userdata*/) {
+  return heif_reader_grow_status_size_reached;
+}
+
+static heif_reader create_heif_reader() {
+  return heif_reader{
+    .reader_api_version = 1,
+    .get_position = &heif_get_position,
+    .read = &heif_read,
+    .seek = &heif_seek,
+    .wait_for_file_size = &heif_wait_for_file_size};
+}
+
+static struct gfxinfo *php_handle_heif(const req::ptr<File>& stream) {
+  struct gfxinfo *result = nullptr;
+
+  if (!stream->rewind()) {
+    return nullptr;
+  }
+
+  heif_context* ctx = heif_context_alloc();
+  SCOPE_EXIT {
+    heif_context_free(ctx);
+  };
+
+  heif_reader reader = create_heif_reader();
+  auto err = heif_context_read_from_reader(ctx, &reader, stream.get(), nullptr);
+  if (err.code != 0) {
+    raise_notice("Heif context read failed: %s", err.message);
+    return nullptr;
+  }
+
+  heif_image_handle* handle;
+  err = heif_context_get_primary_image_handle(ctx, &handle);
+  if (err.code != 0) {
+    // Unable to get image handle
+    raise_notice("Failed to get primary image handle: %s", err.message);
+    return nullptr;
+  }
+
+  SCOPE_EXIT {
+    heif_image_handle_release(handle);
+  };
+
+  result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+  CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
+
+  result->width = heif_image_handle_get_width(handle);
+  result->height = heif_image_handle_get_height(handle);
+  // It is easier to not set bits/channels because it will require actual
+  // decoding of the image bitstream to get the information using libheif.
+  result->bits = 0;
+  result->channels = 0;
+  return result;
+}
+
+static heif_brand2 php_get_heif(const req::ptr<File>& stream) {
+  if (!stream->rewind()) {
+    return heif_unknown_brand;
+  }
+
+  String fileType = stream->read(12);
+  if (fileType.length() != 12) {
+    return heif_unknown_brand;
+  }
+
+  return heif_read_main_brand(reinterpret_cast<const uint8_t*>(
+    fileType.c_str()), 12);
+}
+
 /* Convert internal image_type to mime type */
 static char *php_image_type_to_mime_type(int image_type) {
   switch( image_type) {
@@ -1541,6 +1650,10 @@ static char *php_image_type_to_mime_type(int image_type) {
     return "image/vnd.microsoft.icon";
   case IMAGE_FILETYPE_WEBP:
     return "image/webp";
+  case IMAGE_FILETYPE_AVIF:
+    return "image/avif";
+  case IMAGE_FILETYPE_HEIC:
+    return "image/heic";
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     return "application/octet-stream"; /* suppose binary format */
@@ -1627,6 +1740,12 @@ static int php_getimagetype(const req::ptr<File>& file) {
   }
 
   /* AFTER ALL ABOVE FAILED */
+  auto heifBrand = php_get_heif(file);
+  if (heifBrand == heif_brand2_heic || heifBrand == heif_brand2_heix) {
+    return IMAGE_FILETYPE_HEIC;
+  } else if (heifBrand == heif_brand2_avif) {
+    return IMAGE_FILETYPE_AVIF;
+  }
   if (php_get_wbmp(file, nullptr, 1)) {
     return IMAGE_FILETYPE_WBMP;
   }
@@ -1668,6 +1787,10 @@ String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype) {
       return "image/vnd.microsoft.icon";
     case IMAGE_FILETYPE_WEBP:
       return "image/webp";
+    case IMAGE_FILETYPE_AVIF:
+      return "image/avif";
+    case IMAGE_FILETYPE_HEIC:
+      return "image/heic";
     default:
     case IMAGE_FILETYPE_UNKNOWN:
       return "application/octet-stream"; /* suppose binary format */
@@ -1710,6 +1833,10 @@ Variant HHVM_FUNCTION(image_type_to_extension,
     return include_dot ? String(".ico") : String("ico");
   case IMAGE_FILETYPE_WEBP:
     return include_dot ? String(".webp") : String("webp");
+  case IMAGE_FILETYPE_AVIF:
+    return include_dot ? String(".avif") : String("avif");
+  case IMAGE_FILETYPE_HEIC:
+    return include_dot ? String(".heic") : String("heic");
   default:
     return false;
   }
@@ -1785,6 +1912,12 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
     break;
   case IMAGE_FILETYPE_WEBP:
     result = php_handle_webp(stream);
+    break;
+  case IMAGE_FILETYPE_AVIF:
+    result = php_handle_heif(stream);
+    break;
+  case IMAGE_FILETYPE_HEIC:
+    result = php_handle_heif(stream);
     break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:
@@ -8247,6 +8380,8 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMAGETYPE_XBM, IMAGE_FILETYPE_XBM);
     HHVM_RC_INT(IMAGETYPE_ICO, IMAGE_FILETYPE_ICO);
     HHVM_RC_INT(IMAGETYPE_WEBP, IMAGE_FILETYPE_WEBP);
+    HHVM_RC_INT(IMAGETYPE_AVIF, IMAGE_FILETYPE_AVIF);
+    HHVM_RC_INT(IMAGETYPE_HEIC, IMAGE_FILETYPE_HEIC);
     HHVM_RC_INT(IMAGETYPE_UNKNOWN, IMAGE_FILETYPE_UNKNOWN);
     HHVM_RC_INT(IMAGETYPE_COUNT, IMAGE_FILETYPE_COUNT);
     HHVM_RC_INT(IMAGETYPE_SWC, IMAGE_FILETYPE_SWC);

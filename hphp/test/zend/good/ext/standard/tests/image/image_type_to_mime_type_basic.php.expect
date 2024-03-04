@@ -16,6 +16,8 @@ string(9) "image/iff"
 string(18) "image/vnd.wap.wbmp"
 string(10) "image/webp"
 string(24) "application/octet-stream"
+string(10) "image/avif"
+string(10) "image/heic"
 string(9) "image/xbm"
 
 Done image_type_to_mime_type() test

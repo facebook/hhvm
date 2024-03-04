@@ -1,4 +1,30 @@
-dict(1) {
+dict(3) {
+  ["246x247.avif"]=>
+  dict(5) {
+    [0]=>
+    int(246)
+    [1]=>
+    int(247)
+    [2]=>
+    int(19)
+    [3]=>
+    string(24) "width="246" height="247""
+    ["mime"]=>
+    string(10) "image/avif"
+  }
+  ["246x247.heic"]=>
+  dict(5) {
+    [0]=>
+    int(246)
+    [1]=>
+    int(247)
+    [2]=>
+    int(20)
+    [3]=>
+    string(24) "width="246" height="247""
+    ["mime"]=>
+    string(10) "image/heic"
+  }
   ["246x247.png"]=>
   dict(6) {
     [0]=>

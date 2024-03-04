@@ -46,13 +46,19 @@ Constant: IMAGETYPE_WEBP
 Constant: IMAGETYPE_JPEG2000
 	With dot: .jpc
 	Without dot: jpc
+Constant: IMAGETYPE_AVIF
+	With dot: .avif
+	Without dot: avif
+Constant: IMAGETYPE_HEIC
+	With dot: .heic
+	Without dot: heic
 Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
 bool(false)
 
-Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 26
+Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 28
 bool(false)
 
-Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 28
+Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 30
 Done

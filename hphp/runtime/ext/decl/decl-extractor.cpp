@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/json/dynamic.h>
 #include <folly/logging/xlog.h>
@@ -110,9 +110,18 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
     const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
     bool enableExternExtractor) {
-  folly::CPUThreadPoolExecutor exec{
+  folly::IOThreadPoolExecutor exec{
       1, Facts::make_thread_factory("DeclExtractor")};
+  auto semiFuture =
+      decl_from_path_async(root, pathAndHash, exec, enableExternExtractor);
+  return std::move(semiFuture).get();
+}
 
+folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
+    const std::filesystem::path& root,
+    const Facts::PathAndOptionalHash& pathAndHash,
+    folly::IOThreadPoolExecutor& exec,
+    bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   auto extractor = makeExtractor(exec, enableExternExtractor);
@@ -122,7 +131,7 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
   Facts::PathAndOptionalHash absPathAndHash{path, pathAndHash.m_hash};
   return folly::via(
              &exec,
-             [&extractor, absPathAndHash]() {
+             [extractor = std::move(extractor), absPathAndHash]() {
                if (UNLIKELY(!absPathAndHash.m_hash)) {
                  // We don't know the file's hash yet, so we don't know
                  // which key to use to query memcache. We'll try to extract
@@ -158,8 +167,7 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
               auto declsHolder = decode_decls(declsBinary.value);
               return declsHolder;
             }
-          })
-      .get();
+          });
 }
 
 } // namespace Decl

@@ -1,0 +1,397 @@
+=== Methods
+vec(2) {
+  dict(4) {
+    ["name"]=>
+    string(9) "myMethod1"
+    ["signature_type"]=>
+    string(18) "(function(): void)"
+    ["visibility"]=>
+    string(7) "private"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(4) "void"
+    }
+  }
+  dict(4) {
+    ["name"]=>
+    string(9) "myMethod2"
+    ["signature_type"]=>
+    string(18) "(function(): void)"
+    ["visibility"]=>
+    string(6) "public"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(4) "void"
+    }
+  }
+}
+dict(4) {
+  ["name"]=>
+  string(9) "myMethod1"
+  ["signature_type"]=>
+  string(18) "(function(): void)"
+  ["visibility"]=>
+  string(7) "private"
+  ["signature"]=>
+  dict(1) {
+    ["return_type"]=>
+    string(4) "void"
+  }
+}
+NULL
+NULL
+=== Static methods
+vec(2) {
+  dict(4) {
+    ["name"]=>
+    string(10) "mySMethod1"
+    ["signature_type"]=>
+    string(18) "(function(): void)"
+    ["visibility"]=>
+    string(7) "private"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(4) "void"
+    }
+  }
+  dict(4) {
+    ["name"]=>
+    string(10) "mySMethod2"
+    ["signature_type"]=>
+    string(18) "(function(): void)"
+    ["visibility"]=>
+    string(6) "public"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(4) "void"
+    }
+  }
+}
+dict(4) {
+  ["name"]=>
+  string(10) "mySMethod1"
+  ["signature_type"]=>
+  string(18) "(function(): void)"
+  ["visibility"]=>
+  string(7) "private"
+  ["signature"]=>
+  dict(1) {
+    ["return_type"]=>
+    string(4) "void"
+  }
+}
+NULL
+NULL
+=== Consts
+vec(2) {
+  dict(3) {
+    ["name"]=>
+    string(9) "MY_CONST1"
+    ["type"]=>
+    string(6) "string"
+    ["value"]=>
+    string(5) "'abc'"
+  }
+  dict(3) {
+    ["name"]=>
+    string(9) "MY_CONST2"
+    ["type"]=>
+    string(3) "int"
+    ["value"]=>
+    string(1) "1"
+  }
+}
+dict(3) {
+  ["name"]=>
+  string(9) "MY_CONST1"
+  ["type"]=>
+  string(6) "string"
+  ["value"]=>
+  string(5) "'abc'"
+}
+NULL
+NULL
+=== Typeconsts
+vec(2) {
+  dict(2) {
+    ["name"]=>
+    string(12) "MyTypeAlias1"
+    ["kind"]=>
+    string(24) "HH\dict<string, MyClass>"
+  }
+  dict(2) {
+    ["name"]=>
+    string(12) "MyTypeAlias2"
+    ["kind"]=>
+    string(21) "HH\dict<int, MyClass>"
+  }
+}
+dict(2) {
+  ["name"]=>
+  string(12) "MyTypeAlias1"
+  ["kind"]=>
+  string(24) "HH\dict<string, MyClass>"
+}
+NULL
+NULL
+=== Properties
+vec(2) {
+  dict(3) {
+    ["name"]=>
+    string(16) "myInstanceField1"
+    ["type"]=>
+    string(4) "bool"
+    ["visibility"]=>
+    string(7) "private"
+  }
+  dict(3) {
+    ["name"]=>
+    string(16) "myInstanceField2"
+    ["type"]=>
+    string(4) "bool"
+    ["visibility"]=>
+    string(6) "public"
+  }
+}
+dict(3) {
+  ["name"]=>
+  string(16) "myInstanceField1"
+  ["type"]=>
+  string(4) "bool"
+  ["visibility"]=>
+  string(7) "private"
+}
+NULL
+NULL
+=== Static Properties
+vec(2) {
+  dict(3) {
+    ["name"]=>
+    string(15) "$myStaticField1"
+    ["type"]=>
+    string(3) "int"
+    ["visibility"]=>
+    string(7) "private"
+  }
+  dict(3) {
+    ["name"]=>
+    string(15) "$myStaticField2"
+    ["type"]=>
+    string(3) "int"
+    ["visibility"]=>
+    string(6) "public"
+  }
+}
+dict(3) {
+  ["name"]=>
+  string(15) "$myStaticField2"
+  ["type"]=>
+  string(3) "int"
+  ["visibility"]=>
+  string(6) "public"
+}
+dict(3) {
+  ["name"]=>
+  string(15) "$myStaticField2"
+  ["type"]=>
+  string(3) "int"
+  ["visibility"]=>
+  string(6) "public"
+}
+NULL
+NULL
+=== Attributes
+vec(2) {
+  dict(2) {
+    ["name"]=>
+    string(12) "MyAttribute2"
+    ["args"]=>
+    vec(2) {
+      string(1) "a"
+      string(1) "b"
+    }
+  }
+  dict(2) {
+    ["name"]=>
+    string(12) "MyAttribute1"
+    ["args"]=>
+    vec(2) {
+      string(1) "a"
+      string(1) "b"
+    }
+  }
+}
+dict(2) {
+  ["name"]=>
+  string(12) "MyAttribute1"
+  ["args"]=>
+  vec(2) {
+    string(1) "a"
+    string(1) "b"
+  }
+}
+NULL
+NULL
+=== File Consts
+vec(2) {
+  dict(3) {
+    ["name"]=>
+    string(16) "MY_GLOBAL_CONST2"
+    ["type"]=>
+    string(6) "string"
+    ["value"]=>
+    string(5) "'one'"
+  }
+  dict(3) {
+    ["name"]=>
+    string(16) "MY_GLOBAL_CONST1"
+    ["type"]=>
+    string(3) "int"
+    ["value"]=>
+    string(1) "1"
+  }
+}
+dict(3) {
+  ["name"]=>
+  string(16) "MY_GLOBAL_CONST1"
+  ["type"]=>
+  string(3) "int"
+  ["value"]=>
+  string(1) "1"
+}
+NULL
+NULL
+=== File Functions
+vec(2) {
+  dict(4) {
+    ["name"]=>
+    string(13) "myGlobalFunc2"
+    ["signature_type"]=>
+    string(17) "(function(): int)"
+    ["module"]=>
+    string(8) "myModule"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(3) "int"
+    }
+  }
+  dict(4) {
+    ["name"]=>
+    string(13) "myGlobalFunc1"
+    ["signature_type"]=>
+    string(18) "(function(): void)"
+    ["module"]=>
+    string(8) "myModule"
+    ["signature"]=>
+    dict(1) {
+      ["return_type"]=>
+      string(4) "void"
+    }
+  }
+}
+dict(4) {
+  ["name"]=>
+  string(13) "myGlobalFunc2"
+  ["signature_type"]=>
+  string(17) "(function(): int)"
+  ["module"]=>
+  string(8) "myModule"
+  ["signature"]=>
+  dict(1) {
+    ["return_type"]=>
+    string(3) "int"
+  }
+}
+NULL
+NULL
+=== File Modules
+vec(1) {
+  dict(1) {
+    ["name"]=>
+    string(13) "myModuleInner"
+  }
+}
+dict(1) {
+  ["name"]=>
+  string(13) "myModuleInner"
+}
+NULL
+NULL
+=== File Typedef
+vec(2) {
+  dict(4) {
+    ["name"]=>
+    string(13) "myGlobalType2"
+    ["type"]=>
+    string(14) "(float, float)"
+    ["visibility"]=>
+    string(6) "opaque"
+    ["module"]=>
+    string(8) "myModule"
+  }
+  dict(4) {
+    ["name"]=>
+    string(13) "myGlobalType1"
+    ["type"]=>
+    string(32) "shape('a' => int, 'b' => string)"
+    ["visibility"]=>
+    string(11) "transparent"
+    ["module"]=>
+    string(8) "myModule"
+  }
+}
+dict(4) {
+  ["name"]=>
+  string(13) "myGlobalType1"
+  ["type"]=>
+  string(32) "shape('a' => int, 'b' => string)"
+  ["visibility"]=>
+  string(11) "transparent"
+  ["module"]=>
+  string(8) "myModule"
+}
+NULL
+NULL
+=== File Attributes
+vec(1) {
+  dict(2) {
+    ["name"]=>
+    string(15) "MyFileAttribute"
+    ["args"]=>
+    vec(1) {
+      string(3) "123"
+    }
+  }
+}
+dict(2) {
+  ["name"]=>
+  string(15) "MyFileAttribute"
+  ["args"]=>
+  vec(1) {
+    string(3) "123"
+  }
+}
+NULL
+NULL
+=== Complex Attributes
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr1"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr2"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr3"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr4"
+}

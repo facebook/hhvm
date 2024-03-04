@@ -17,12 +17,13 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
-
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/decl/decl-extractor.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
@@ -682,9 +683,7 @@ static std::unique_ptr<FileDeclsCache> declCachePtr;
 */
 struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
   FileDecls() {}
-  FileDecls& operator=(const FileDecls& /*that_*/) {
-    throw_not_implemented("FileDecls::operator=");
-  }
+  FileDecls& operator=(const FileDecls& /*that_*/) = delete;
   ~FileDecls() {}
 
   void validateState() {
@@ -696,7 +695,43 @@ struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
 
   String error = empty_string();
   std::shared_ptr<rust::Box<hackc::DeclsHolder>> declsHolder;
+
+  void sweep() {
+    declsHolder.reset();
+  }
 };
+
+namespace {
+// Helper for async parsePath
+class MemcacheHitEvent : public AsioExternalThreadEvent {
+ public:
+  explicit MemcacheHitEvent(
+      folly::SemiFuture<rust::Box<hackc::DeclsHolder>>&& getFuture) {
+    std::move(getFuture)
+        .via(&folly::InlineExecutor::instance())
+        .thenValue([this](rust::Box<hackc::DeclsHolder>&& declsHolder) {
+          holderPtr_ = std::make_shared<rust::Box<hackc::DeclsHolder>>(
+              std::move(declsHolder));
+        })
+        .ensure([this]() { this->markAsFinished(); });
+  }
+
+ protected:
+  void unserialize(TypedValue& output) override {
+    if (holderPtr_ == nullptr) {
+      SystemLib::throwInvalidOperationExceptionObject(
+          "MemcacheHitEvent is in erroneous state");
+    }
+    Object obj{FileDecls::classof()};
+    auto data = Native::data<FileDecls>(obj);
+    data->declsHolder = holderPtr_;
+    tvCopy(make_tv<KindOfObject>(obj.detach()), output);
+  }
+
+ private:
+  std::shared_ptr<rust::Box<hackc::DeclsHolder>> holderPtr_;
+};
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // API
@@ -755,6 +790,38 @@ String HHVM_STATIC_METHOD(FileDecls, getRepoOptionsHash) {
 }
 
 /*
+ * Async version of parsePath.
+ */
+Object HHVM_STATIC_METHOD(FileDecls, genParsePath, const String& path) {
+  assertEnv();
+  std::filesystem::path filePath{path.data()};
+  if (!std::filesystem::exists(filePath)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        String("File not found ") + path.data());
+  };
+  auto root = getRepoRootForFile(path);
+  auto const [sha1, textOpt] = computeSHA1(filePath, root);
+  Facts::PathAndOptionalHash pathAndHash{
+      filePath, Optional<std::string>(sha1.toString())};
+  auto config = initDeclConfig(root);
+  folly::IOThreadPoolExecutor exec{
+      1, Facts::make_thread_factory("DeclExtractor")};
+  MemcacheHitEvent* event;
+  try {
+    auto declSemiFuture = Decl::decl_from_path_async(
+        root, pathAndHash, exec, s_extractorConfig.enableExternExtractor);
+    event = new MemcacheHitEvent(std::move(declSemiFuture));
+    return Object{event->getWaitHandle()};
+  } catch (...) {
+    if (event) {
+      event->abandon();
+    }
+    SystemLib::throwRuntimeExceptionObject(
+        std::string("Failed to fetch decls from Memcache or disk"));
+  }
+}
+
+/*
  * Parses the provided text and returns a new instance of FileDecls.
  */
 Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
@@ -769,7 +836,6 @@ Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
-
   return obj;
 }
 
@@ -1098,6 +1164,7 @@ struct DeclExtension final : Extension {
         HH\\FileDecls, getRepoOptionsHash, FileDecls, getRepoOptionsHash);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parseText, FileDecls, parseText);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parsePath, FileDecls, parsePath);
+    HHVM_STATIC_MALIAS(HH\\FileDecls, genParsePath, FileDecls, genParsePath);
     HHVM_STATIC_MALIAS(
         HH\\FileDecls, parseTypeExpression, FileDecls, parseTypeExpression);
     HHVM_MALIAS(HH\\FileDecls, getError, FileDecls, getError);

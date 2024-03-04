@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <folly/Try.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
@@ -70,6 +71,12 @@ std::string readFile(const std::string& filePath);
 rust::Box<hackc::DeclsHolder> decl_from_path(
     const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
+    bool enableExternExtractor);
+
+folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
+    const std::filesystem::path& root,
+    const Facts::PathAndOptionalHash& pathAndHash,
+    folly::IOThreadPoolExecutor& exec,
     bool enableExternExtractor);
 
 } // namespace Decl

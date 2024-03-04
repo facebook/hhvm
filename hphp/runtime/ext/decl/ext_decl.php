@@ -307,6 +307,16 @@ namespace HH {
     <<__Native>>
     public static function parsePath(string $path)[]: FileDecls;
 
+      /*
+     * Parse a source file. May use cached data. This is the same as
+     * parsePath, but provides an Awaitable API for Memcache.
+     *
+     * @param string $path - the relative path of the file to parse
+     * @return FileDecls - a queryable instance for the parsed data
+     */
+    <<__Native>>
+    public static function genParsePath(string $path)[]: Awaitable<FileDecls>;
+
     /*
      * Parse a type expression into a nested shape.
      *

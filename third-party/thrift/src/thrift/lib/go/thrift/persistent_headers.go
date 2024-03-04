@@ -27,3 +27,4 @@ type PersistentHeaders interface {
 
 var _ PersistentHeaders = &HeaderProtocol{}
 var _ PersistentHeaders = &rocketProtocol{}
+var _ PersistentHeaders = &upgradeToRocketProtocol{}

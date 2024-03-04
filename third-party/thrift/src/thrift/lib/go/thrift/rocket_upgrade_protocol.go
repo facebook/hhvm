@@ -72,6 +72,41 @@ func (p *upgradeToRocketProtocol) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
 }
 
+func (p *upgradeToRocketProtocol) SetPersistentHeader(key, value string) {
+	if p.Protocol == nil {
+		p.rocketProtocol.(PersistentHeaders).SetPersistentHeader(key, value)
+		p.headerProtocol.(PersistentHeaders).SetPersistentHeader(key, value)
+		return
+	}
+	p.Protocol.(PersistentHeaders).SetPersistentHeader(key, value)
+}
+
+func (p *upgradeToRocketProtocol) GetPersistentHeader(key string) (string, bool) {
+	v, ok := p.GetPersistentHeaders()[key]
+	return v, ok
+}
+
+func (p *upgradeToRocketProtocol) GetPersistentHeaders() map[string]string {
+	if p.Protocol == nil {
+		headers := p.headerProtocol.(PersistentHeaders).GetPersistentHeaders()
+		rocketHeaders := p.rocketProtocol.(PersistentHeaders).GetPersistentHeaders()
+		for k, v := range rocketHeaders {
+			headers[k] = v
+		}
+		return headers
+	}
+	return p.Protocol.(PersistentHeaders).GetPersistentHeaders()
+}
+
+func (p *upgradeToRocketProtocol) ClearPersistentHeaders() {
+	if p.Protocol == nil {
+		p.rocketProtocol.(PersistentHeaders).ClearPersistentHeaders()
+		p.headerProtocol.(PersistentHeaders).ClearPersistentHeaders()
+		return
+	}
+	p.Protocol.(PersistentHeaders).ClearPersistentHeaders()
+}
+
 func (p *upgradeToRocketProtocol) setRequestHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.(requestHeaders).setRequestHeader(key, value)

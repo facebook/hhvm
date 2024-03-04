@@ -157,12 +157,12 @@ func (p *HeaderProtocol) SetPersistentHeader(key, value string) {
 	p.trans.SetPersistentHeader(key, value)
 }
 
-func (p *HeaderProtocol) PersistentHeader(key string) (string, bool) {
-	return p.trans.PersistentHeader(key)
+func (p *HeaderProtocol) GetPersistentHeader(key string) (string, bool) {
+	return p.trans.GetPersistentHeader(key)
 }
 
-func (p *HeaderProtocol) PersistentHeaders() map[string]string {
-	return p.trans.PersistentHeaders()
+func (p *HeaderProtocol) GetPersistentHeaders() map[string]string {
+	return p.trans.GetPersistentHeaders()
 }
 
 func (p *HeaderProtocol) ClearPersistentHeaders() {

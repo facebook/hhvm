@@ -32,10 +32,10 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	}
 
 	proto1.SetPersistentHeader("preferred_cheese", "gouda")
-	if v, _ := proto1.PersistentHeader("preferred_cheese"); v != "gouda" {
+	if v, _ := proto1.GetPersistentHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to set persistent header")
 	}
-	if len(proto1.PersistentHeaders()) != 1 {
+	if len(proto1.GetPersistentHeaders()) != 1 {
 		t.Fatalf("wrong number of headers")
 	}
 

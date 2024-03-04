@@ -119,12 +119,12 @@ func (t *HeaderTransport) SetPersistentHeader(key, value string) {
 	t.persistentWriteInfoHeaders[key] = value
 }
 
-func (t *HeaderTransport) PersistentHeader(key string) (string, bool) {
+func (t *HeaderTransport) GetPersistentHeader(key string) (string, bool) {
 	v, ok := t.persistentWriteInfoHeaders[key]
 	return v, ok
 }
 
-func (t *HeaderTransport) PersistentHeaders() map[string]string {
+func (t *HeaderTransport) GetPersistentHeaders() map[string]string {
 	res := map[string]string{}
 	for k, v := range t.persistentWriteInfoHeaders {
 		res[k] = v

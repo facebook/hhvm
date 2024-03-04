@@ -174,11 +174,11 @@ func TestHeaderHeaders(t *testing.T) {
 	trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 	assertEq(t, 3, len(trans1.Headers()))
-	assertEq(t, 1, len(trans1.PersistentHeaders()))
+	assertEq(t, 1, len(trans1.GetPersistentHeaders()))
 
 	headerval, _ := trans1.Header("preferred_cheese")
 	assertEq(t, "cheddar", headerval)
-	headerval, _ = trans1.PersistentHeader("preferred_cheese")
+	headerval, _ = trans1.GetPersistentHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
 
 	_, err := trans1.Write([]byte("ASDF"))
@@ -193,7 +193,7 @@ func TestHeaderHeaders(t *testing.T) {
 	// Make sure we zero the headers
 	assertEq(t, 0, len(trans1.Headers()))
 	// But not the persistent ones
-	assertEq(t, 1, len(trans1.PersistentHeaders()))
+	assertEq(t, 1, len(trans1.GetPersistentHeaders()))
 
 	err = trans2.ResetProtocol()
 	if err != nil {
@@ -214,7 +214,7 @@ func TestHeaderHeaders(t *testing.T) {
 	assertEq(t, "", trans2.peerIdentity())
 
 	trans1.ClearPersistentHeaders()
-	assertEq(t, 0, len(trans1.PersistentHeaders()))
+	assertEq(t, 0, len(trans1.GetPersistentHeaders()))
 }
 
 func TestHeaderRWSmall(t *testing.T) {

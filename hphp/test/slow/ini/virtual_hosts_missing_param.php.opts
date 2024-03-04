@@ -1,0 +1,2 @@
+-vVirtualHost.mylibtest.PathTranslation="mylibtest/_bin"
+-vVirtualHost.mylibtest.ServerName="mylibtest.example.com"

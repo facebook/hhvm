@@ -8,6 +8,7 @@ class test {
   }
 }
 <<__EntryPoint>> function main(): void {
+error_reporting(0);
 $str = 'a:2:{i:0;O:4:"test":0:{}junk';
 var_dump(unserialize($str));
 }

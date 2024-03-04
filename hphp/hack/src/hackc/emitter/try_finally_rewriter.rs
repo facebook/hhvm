@@ -103,7 +103,7 @@ pub(super) fn emit_save_label_id<'arena>(
 pub(super) fn emit_return<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     in_finally_epilogue: bool,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
 ) -> Result<InstrSeq<'arena>> {
     // check if there are try/finally region
     let jt_gen = &env.jump_targets_gen;
@@ -211,10 +211,10 @@ bitflags! {
 pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     flags: EmitBreakOrContinueFlags,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
 ) -> InstrSeq<'arena> {
-    let alloc = env.arena;
+    let alloc = e.alloc;
     let jt_gen = &mut env.jump_targets_gen;
     let in_finally_epilogue = flags.contains(EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE);
     let is_break = flags.contains(EmitBreakOrContinueFlags::IS_BREAK);
@@ -261,14 +261,14 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
 
 pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     jump_instrs: JumpInstructions<'b, 'arena>,
     finally_end: Label,
 ) -> Result<InstrSeq<'arena>> {
     fn emit_instr<'a, 'arena, 'decl>(
         e: &mut Emitter<'arena, 'decl>,
-        env: &mut Env<'a, 'arena>,
+        env: &mut Env<'a>,
         pos: &Pos,
         i: &Instruct<'arena>,
     ) -> Result<InstrSeq<'arena>> {

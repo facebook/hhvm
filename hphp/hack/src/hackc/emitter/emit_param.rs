@@ -178,7 +178,7 @@ fn from_ast<'a, 'arena, 'decl>(
 
 pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {

@@ -101,7 +101,7 @@ pub fn make_info(
 
 pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
@@ -123,7 +123,7 @@ pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
 // This is cut-and-paste from emit_method, with special casing for wrappers
 fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
     method: &'a ast::Method_,
@@ -206,10 +206,10 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
 
 fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
 ) -> Result<Body<'arena>> {
-    let alloc = env.arena;
+    let alloc = emitter.alloc;
     let mut tparams: Vec<&str> = args
         .scope
         .get_tparams()
@@ -230,7 +230,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
 
 fn emit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
     args: &Args<'_, 'a>,
@@ -251,7 +251,7 @@ fn emit<'a, 'arena, 'decl>(
 
 fn make_memoize_method_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
@@ -269,12 +269,12 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
 // method is the already-renamed memoize method that must be wrapped
 fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
 ) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
-    let alloc = env.arena;
+    let alloc = emitter.alloc;
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
@@ -518,7 +518,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
 // Construct the wrapper function
 fn make_wrapper<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     instrs: InstrSeq<'arena>,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
@@ -526,7 +526,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
     args: &Args<'_, 'a>,
 ) -> Result<Body<'arena>> {
     emit_body::make_body(
-        env.arena,
+        emitter.alloc,
         emitter,
         instrs,
         decl_vars,

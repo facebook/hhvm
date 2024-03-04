@@ -288,7 +288,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
 
 fn from_class_elt_constants<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     class_: &'a ast::Class_,
 ) -> Result<Vec<(Constant, Option<InstrSeq<'arena>>)>> {
     use oxidized::aast::ClassConstKind;
@@ -343,7 +343,7 @@ fn from_enum_type(alloc: &bumpalo::Bump, opt: Option<&ast::Enum_>) -> Result<Opt
 
 fn emit_reified_extends_params<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq<'arena>> {
     match &ast_class.extends[..] {
@@ -369,7 +369,7 @@ pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
 
 fn emit_reified_init_body<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     num_reified: usize,
     ast_class: &'a ast::Class_,
     init_meth_param_local: Local,
@@ -412,12 +412,12 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
 
 fn emit_reified_init_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<Method<'arena>>> {
     use hhbc::Constraint;
 
-    let alloc = env.arena;
+    let alloc = emitter.alloc;
     let num_reified = ast_class
         .tparams
         .iter()
@@ -505,7 +505,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
 ) -> Result<Class<'arena>> {
-    let mut env = Env::make_class_env(alloc, ast_class);
+    let mut env = Env::make_class_env(ast_class);
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");
 

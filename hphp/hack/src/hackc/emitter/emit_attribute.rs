@@ -96,7 +96,7 @@ pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<Attribute> {
     Some(Attribute::new(name, arguments))
 }
 
-pub fn add_reified_parent_attribute(env: &Env<'_, '_>, extends: &[a::Hint]) -> Option<Attribute> {
+pub fn add_reified_parent_attribute(env: &Env<'_>, extends: &[a::Hint]) -> Option<Attribute> {
     if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
         if emit_expression::has_non_tparam_generics(env, hl) {
             return Some(Attribute::new("__HasReifiedParent", vec![]));

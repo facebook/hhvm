@@ -26,11 +26,11 @@ use crate::emit_expression;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     constant: &'a ast::Gconst,
     init: Option<InstrSeq<'arena>>,
 ) -> Result<Option<Function<'arena>>> {
-    let alloc = env.arena;
+    let alloc = e.alloc;
     let const_name = hhbc::ConstName::from_ast_name(&constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_name.as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
@@ -87,7 +87,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
 
 fn emit_constant<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     constant: &'a ast::Gconst,
 ) -> Result<(Constant, Option<Function<'arena>>)> {
     let (c, init) = from_ast(e, env, &constant.name, false, Some(&constant.value))?;
@@ -97,7 +97,7 @@ fn emit_constant<'a, 'arena, 'decl>(
 
 pub fn emit_constants_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     defs: &'a [ast::Def],
 ) -> Result<(Vec<Constant>, Vec<Function<'arena>>)> {
     let const_tuples = defs
@@ -110,7 +110,7 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
 
 pub fn from_ast<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     id: &'a ast::Id,
     is_abstract: bool,
     expr: Option<&ast::Expr>,

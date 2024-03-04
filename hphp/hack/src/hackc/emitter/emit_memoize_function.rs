@@ -103,7 +103,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         } else {
             None
         };
-    let mut env = Env::default(alloc, Arc::clone(&fd.namespace)).with_scope(scope);
+    let mut env = Env::default(Arc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
         &mut env,
@@ -145,7 +145,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 
 fn make_memoize_function_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -186,7 +186,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
 
 fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -309,7 +309,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
 
 fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName,
     is_async: bool,
@@ -374,7 +374,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 
 fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: Env<'a, 'arena>,
+    env: Env<'a>,
     return_type_info: TypeInfo,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,

@@ -37,9 +37,7 @@ impl ReificationLevel {
     }
 }
 
-pub(crate) fn get_erased_tparams<'a, 'arena>(
-    env: &'a Env<'a, 'arena>,
-) -> impl Iterator<Item = String> + 'a {
+pub(crate) fn get_erased_tparams<'a>(env: &'a Env<'a>) -> impl Iterator<Item = String> + 'a {
     env.scope.get_tparams().into_iter().filter_map(|tp| {
         if tp.reified != aast::ReifyKind::Reified {
             Some(tp.name.1.clone()) // TODO(hrust) figure out how to return &str
@@ -49,13 +47,10 @@ pub(crate) fn get_erased_tparams<'a, 'arena>(
     })
 }
 
-pub(crate) fn has_reified_type_constraint<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    h: &aast::Hint,
-) -> ReificationLevel {
+pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> ReificationLevel {
     use aast::Hint_;
     fn is_all_erased<'a>(
-        env: &'a Env<'_, '_>,
+        env: &'a Env<'_>,
         mut h_iter: impl Iterator<Item = &'a aast::Hint>,
     ) -> bool {
         let erased_tparams: HashSet<String> = get_erased_tparams(env).collect();
@@ -142,7 +137,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
     }
 }
 
-pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint) -> aast::Hint {
+pub(crate) fn convert_awaitable<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint {
     if env.scope.is_in_async() {
         remove_awaitable(h)
     } else {
@@ -152,7 +147,7 @@ pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint
 
 pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     check: InstrSeq<'arena>,
     hint: &aast::Hint,
@@ -175,15 +170,12 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     }
 }
 
-pub(crate) fn remove_erased_generics<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    h: aast::Hint,
-) -> aast::Hint {
+pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint {
     use aast::Hint;
     use aast::Hint_;
     use aast::NastShapeInfo;
     use aast::ShapeFieldInfo;
-    fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): Hint) -> Hint {
+    fn rec<'a>(env: &Env<'a>, Hint(pos, h_): Hint) -> Hint {
         let h_ = match *h_ {
             Hint_::Happly(Id(pos, id), hs) => {
                 if get_erased_tparams(env).any(|p| p == id) {
@@ -242,7 +234,7 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
 pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     emitter: &mut Emitter<'arena, 'decl>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {

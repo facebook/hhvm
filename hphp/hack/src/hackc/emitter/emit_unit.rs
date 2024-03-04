@@ -173,7 +173,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let modules = emit_modules_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
-        let mut env = Env::default(emitter.alloc, namespace);
+        let mut env = Env::default(namespace);
         emit_constants_from_program(emitter, &mut env, prog)?
     };
     functions.append(&mut const_inits);

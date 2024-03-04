@@ -119,7 +119,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
         body,
         args.flags,
     )?;
-    let mut env = make_env(alloc, namespace, scope, args.call_context);
+    let mut env = make_env(namespace, scope, args.call_context);
 
     set_emit_statement_state(
         emitter,
@@ -179,7 +179,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
 
 fn make_body_instrs<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     body: &[ast::Stmt],
@@ -221,7 +221,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
 
 fn make_header_content<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     is_generator: bool,
@@ -230,7 +230,7 @@ fn make_header_content<'a, 'arena, 'decl>(
     ast_params: &[ast::FunParam],
     flags: Flags,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = emitter.alloc;
     let method_prolog = if flags.contains(Flags::NATIVE) {
         instr::empty()
     } else {
@@ -329,13 +329,12 @@ fn make_return_type_info(
     return_type_info
 }
 
-pub fn make_env<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn make_env<'a>(
     namespace: Arc<namespace_env::Env>,
     scope: Scope<'a>,
     call_context: Option<StringId>,
-) -> Env<'a, 'arena> {
-    let mut env = Env::default(alloc, namespace);
+) -> Env<'a> {
+    let mut env = Env::default(namespace);
     env.call_context = call_context;
     env.scope = scope;
     env
@@ -364,7 +363,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
-    opt_env: Option<&Env<'a, 'arena>>,
+    opt_env: Option<&Env<'a>>,
 ) -> Result<Body<'arena>> {
     if emitter.options().compiler_flags.relabel {
         label_rewriter::relabel_function(&mut params, &mut body_instrs);
@@ -433,7 +432,7 @@ pub fn make_body<'a, 'arena, 'decl>(
 }
 
 pub fn has_type_constraint<'a, 'arena>(
-    env: &Env<'a, 'arena>,
+    env: &Env<'a>,
     ti: Option<&TypeInfo>,
     ast_param: &ast::FunParam,
 ) -> (RGH::ReificationLevel, Option<ast::Hint>) {
@@ -450,7 +449,7 @@ pub fn has_type_constraint<'a, 'arena>(
 
 pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],

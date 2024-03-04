@@ -50,11 +50,38 @@ func TestHeaderProtocolSetNilHeaders(t *testing.T) {
 	}
 }
 
-type mockRocketSocket struct {
-	*MemoryBuffer
+type pipe struct {
+	client net.Conn
+	server net.Conn
 }
 
-func (m *mockRocketSocket) Conn() net.Conn { return nil }
+func newPipe() *pipe {
+	client, server := net.Pipe()
+	return &pipe{
+		client: client,
+		server: server,
+	}
+}
+
+func (p *pipe) IsOpen() bool {
+	return true
+}
+
+func (p *pipe) Open() error {
+	return nil
+}
+
+func (p *pipe) Close() error {
+	return p.client.Close()
+}
+
+func (p *pipe) Flush() error {
+	return nil
+}
+
+func (p *pipe) Conn() net.Conn {
+	return p.client
+}
 
 func TestRocketProtocolSomeHeaders(t *testing.T) {
 	ctx := context.Background()
@@ -66,7 +93,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol := NewRocketProtocol(NewRocketTransport(&mockRocketSocket{}))
+	protocol := NewRocketProtocol(NewRocketTransport(newPipe()))
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +103,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestRocketProtocolSetNilHeaders(t *testing.T) {
-	transport := NewRocketProtocol(NewRocketTransport(&mockRocketSocket{}))
+	transport := NewRocketProtocol(NewRocketTransport(newPipe()))
 	if err := setRequestHeaders(nil, transport); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +120,7 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 		}
 	}
 	protocol := NewUpgradeToRocketProtocol(
-		NewRocketProtocol(NewRocketTransport(&mockRocketSocket{})),
+		NewRocketProtocol(NewRocketTransport(newPipe())),
 		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
 	)
 	if err := setRequestHeaders(ctx, protocol); err != nil {
@@ -106,7 +133,7 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
 	transport := NewUpgradeToRocketProtocol(
-		NewRocketProtocol(NewRocketTransport(&mockRocketSocket{})),
+		NewRocketProtocol(NewRocketTransport(newPipe())),
 		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
 	)
 	if err := setRequestHeaders(nil, transport); err != nil {

@@ -31,7 +31,7 @@ func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 }
 
 func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol := NewRocketProtocol(NewRocketTransport(&mockRocketSocket{}))
+	protocol := NewRocketProtocol(NewRocketTransport(newPipe()))
 	protocol.(PersistentHeaders).SetPersistentHeader("key", "value")
 	v, ok := protocol.(PersistentHeaders).GetPersistentHeader("key")
 	assert.True(t, ok)
@@ -40,7 +40,7 @@ func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
 
 func TestUpgradeToRocketProtocolSomePersistentHeaders(t *testing.T) {
 	protocol := NewUpgradeToRocketProtocol(
-		NewRocketProtocol(NewRocketTransport(&mockRocketSocket{})),
+		NewRocketProtocol(NewRocketTransport(newPipe())),
 		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
 	)
 	protocol.(PersistentHeaders).SetPersistentHeader("key", "value")

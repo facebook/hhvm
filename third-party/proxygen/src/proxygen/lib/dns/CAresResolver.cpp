@@ -611,9 +611,9 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
  public:
   SocketHandler(CAresResolver* resolver,
                 folly::EventBase* base,
-                int sock,
+                folly::NetworkSocket sock,
                 ares_channel channel)
-      : EventHandler(base, folly::NetworkSocket::fromFd(sock)),
+      : EventHandler(base, sock),
         resolver_(resolver),
         sock_(sock),
         channel_(channel) {
@@ -622,8 +622,10 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
   }
 
   void handlerReady(uint16_t events) noexcept override {
-    int rsock = (events & EventHandler::READ) ? sock_ : ARES_SOCKET_BAD;
-    int wsock = (events & EventHandler::WRITE) ? sock_ : ARES_SOCKET_BAD;
+    ares_socket_t rsock =
+        (events & EventHandler::READ) ? sock_.data : ARES_SOCKET_BAD;
+    ares_socket_t wsock =
+        (events & EventHandler::WRITE) ? sock_.data : ARES_SOCKET_BAD;
 
     DelayedDestruction::DestructorGuard dg(resolver_);
     ares_process_fd(channel_, rsock, wsock);
@@ -631,7 +633,7 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
 
  private:
   CAresResolver* resolver_;
-  int sock_;
+  folly::NetworkSocket sock_;
   ares_channel channel_;
 };
 
@@ -1054,7 +1056,8 @@ void CAresResolver::dnsSocketReady(void* data,
   // not already exist
   SocketHandler* shp = nullptr;
   if (it == self->socketHandlers_.end()) {
-    shp = new SocketHandler(self, self->base_, sock, self->channel_);
+    shp = new SocketHandler(
+        self, self->base_, folly::NetworkSocket(sock), self->channel_);
     self->socketHandlers_[sock].reset(shp);
   } else {
     shp = it->second.get();

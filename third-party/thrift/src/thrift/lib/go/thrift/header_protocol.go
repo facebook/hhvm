@@ -189,10 +189,6 @@ func (p *HeaderProtocol) getRequestHeaders() map[string]string {
 	return p.trans.Headers()
 }
 
-func (p *HeaderProtocol) ClearHeaders() {
-	p.trans.ClearHeaders()
-}
-
 func (p *HeaderProtocol) ReadHeader(key string) (string, bool) {
 	return p.trans.ReadHeader(key)
 }

@@ -155,7 +155,7 @@ func (t *HeaderTransport) Headers() map[string]string {
 	return res
 }
 
-func (t *HeaderTransport) ClearHeaders() {
+func (t *HeaderTransport) clearRequestHeaders() {
 	if len(t.writeInfoHeaders) != 0 {
 		t.writeInfoHeaders = map[string]string{}
 	}
@@ -483,7 +483,7 @@ func (t *HeaderTransport) Flush() error {
 	}
 
 	// Remove the non-persistent headers on flush
-	t.ClearHeaders()
+	t.clearRequestHeaders()
 
 	err = t.transport.Flush()
 

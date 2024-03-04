@@ -56,7 +56,8 @@ type fun_tparams_kind =
 
 type type_origin =
   | Missing_origin
-  | From_alias of string
+  | From_alias of
+      string * (Pos_or_decl.t option[@hash.ignore] [@ignore] [@opaque])
 [@@deriving eq, hash, ord, show]
 
 type pos_string = (Pos_or_decl.t[@hash.ignore]) * string

@@ -640,7 +640,7 @@ let rec array_get
                    });
           let (env, ty) = err_witness env p in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
-      | Tshape { s_fields = fdm; s_unknown_value; _ } ->
+      | Tshape { s_origin; s_fields = fdm; s_unknown_value; _ } ->
         let (_, p, _) = e2 in
         begin
           let (fld_opt, ty_err_opt) =
@@ -674,6 +674,11 @@ let rec array_get
             else begin
               match TShapeMap.find_opt field fdm with
               | None ->
+                let decl_pos =
+                  match s_origin with
+                  | From_alias (_, Some pos) -> pos
+                  | _ -> Reason.to_pos r
+                in
                 Typing_error_utils.add_typing_error
                   ~env
                   Typing_error.(
@@ -682,7 +687,7 @@ let rec array_get
                          {
                            pos = p;
                            name = TUtils.get_printable_shape_field_name field;
-                           decl_pos = Reason.to_pos r;
+                           decl_pos;
                          });
                 (* Even though this is an error, we can produce a sound type for the field *)
                 (env, (s_unknown_value, dflt_arr_res, Ok ty2))

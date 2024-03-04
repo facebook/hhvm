@@ -1,4 +1,4 @@
 File "shape_structural_subtyping_disallows_indexing_for_unknown_field.php", line 6, characters 10-12:
 This shape doesn't have a field `b` (Typing[4108])
-  File "shape_structural_subtyping_disallows_indexing_for_unknown_field.php", line 5, characters 14-35:
+  File "shape_structural_subtyping_disallows_indexing_for_unknown_field.php", line 3, characters 31-48:
   The shape is defined here

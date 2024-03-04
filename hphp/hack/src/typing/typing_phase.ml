@@ -212,7 +212,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     | Tapply ((_pos, cid), []) -> Some cid
     | _ -> None
   in
-  let set_origin_and_cache origin_opt final_env ty_err_opt lty =
+  let set_origin_and_cache origin_opt final_env ty_err_opt lty decl_pos_opt =
     (* When the type resulting from the localize call originates from a
      * decl type with a succinct unambiguous form (e.g., Cls or Cls::T) we
      * store a serialized version of the decl alias in an *origin* field
@@ -257,7 +257,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
             ( r,
               Tshape
                 {
-                  s_origin = From_alias origin;
+                  s_origin = From_alias (origin, decl_pos_opt);
                   s_unknown_value = shape_kind;
                   s_fields = shape_fields;
                 } )
@@ -469,7 +469,12 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               argl
               (Some typedef_info)
         in
-        let lty = set_origin_and_cache origin_opt env ty_err_opt lty in
+        let shp_def_pos =
+          Reason.to_pos @@ Typing_defs.get_reason typedef_info.td_type
+        in
+        let lty =
+          set_origin_and_cache origin_opt env ty_err_opt lty (Some shp_def_pos)
+        in
         ((env, ty_err_opt), lty)
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->
@@ -548,7 +553,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
        * the original location of the Taccess type
        *)
       let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-      let ty = set_origin_and_cache origin_opt env ty_err_opt ty in
+      let ty = set_origin_and_cache origin_opt env ty_err_opt ty None in
       let elaborate_reason expand_reason =
         let taccess_string =
           lazy (Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id)

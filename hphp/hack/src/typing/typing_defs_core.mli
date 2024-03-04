@@ -61,7 +61,7 @@ type type_origin =
   | Missing_origin
       (** When we do not have any origin for the type. It is always
           correct to use [Missing_origin]; so when in doubt, use it. *)
-  | From_alias of string
+  | From_alias of string * Pos_or_decl.t option
       (** A type with origin [From_alias orig] is equivalent to
            the expansion of the alias [orig]. *)
 [@@deriving eq, ord, show]

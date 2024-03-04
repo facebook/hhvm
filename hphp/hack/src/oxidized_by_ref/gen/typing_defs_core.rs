@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bcb54d5fe436c42b1659888d923aca89>>
+// @generated SignedSource<<b0c6798a7d49a7d7394ec62fea5fafe9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -81,7 +81,8 @@ pub enum TypeOrigin<'a> {
     MissingOrigin,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "From_alias")]
-    FromAlias(&'a str),
+    #[rust_to_ocaml(inline_tuple)]
+    FromAlias(&'a (&'a str, Option<&'a pos_or_decl::PosOrDecl<'a>>)),
 }
 impl<'a> TrivialDrop for TypeOrigin<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypeOrigin<'arena>);

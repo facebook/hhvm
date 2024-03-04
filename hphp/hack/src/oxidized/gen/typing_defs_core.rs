@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3a5fc48381b913695ed02638112c2b6f>>
+// @generated SignedSource<<193b3983ebd7a99287486a6eb0e92810>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -133,7 +133,7 @@ pub enum TypeOrigin {
     #[rust_to_ocaml(name = "Missing_origin")]
     MissingOrigin,
     #[rust_to_ocaml(name = "From_alias")]
-    FromAlias(String),
+    FromAlias(String, Option<pos_or_decl::PosOrDecl>),
 }
 
 #[derive(

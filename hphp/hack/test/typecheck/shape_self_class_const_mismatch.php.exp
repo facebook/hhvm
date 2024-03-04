@@ -1,4 +1,4 @@
 File "shape_self_class_const_mismatch.php", line 15, characters 19-32:
 This shape doesn't have a field `\OtherClass::KEY_NAME` (Typing[4108])
-  File "shape_self_class_const_mismatch.php", line 14, characters 27-33:
+  File "shape_self_class_const_mismatch.php", line 3, characters 16-46:
   The shape is defined here

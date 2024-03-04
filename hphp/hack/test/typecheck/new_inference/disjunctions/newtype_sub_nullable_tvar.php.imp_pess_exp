@@ -9,7 +9,7 @@ Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
   Expected `M`
   File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-  But got `?<expr#2> as B`
+  But got `?B`
 File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
@@ -21,7 +21,7 @@ Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
   Expected `B`
   File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-  But got `?<expr#2> as B`
+  But got `?B`
 File "newtype_sub_nullable_tvar.php--file2.php", line 43, characters 12-20:
 Invalid argument (Typing[4110])
   File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:

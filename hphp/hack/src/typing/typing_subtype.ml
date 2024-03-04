@@ -354,27 +354,39 @@ module Pretty : sig
     (Typing_defs.internal_type * Typing_defs.internal_type) option
 end = struct
   let strip_existential_help ty =
-    match deref ty with
-    | (_, Tdependent (_, ty)) -> Some ty
-    | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
-      Option.map ~f:(fun nm -> mk (r, Tgeneric (nm, tys)))
-      @@ DependentKind.strip_generic_dep_ty nm
-    | (r, Taccess (inner_ty, pos)) ->
-      let inner_ty_opt =
-        match deref inner_ty with
-        | (_, Tdependent (_, inner_ty)) ->
-          Some (mk (r, Taccess (inner_ty, pos)))
-        | (r_inner, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm
-          ->
-          Option.map ~f:(fun nm -> mk (r_inner, Tgeneric (nm, tys)))
-          @@ DependentKind.strip_generic_dep_ty nm
-        | _ -> None
+    let strip ty k =
+      match deref ty with
+      | (_, Tdependent (_, ty)) -> Some (k ty)
+      | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
+        Option.map ~f:(fun nm -> k @@ mk (r, Tgeneric (nm, tys)))
+        @@ DependentKind.strip_generic_dep_ty nm
+      | _ -> None
+    in
+    (* We only want to recurse to a fixed depth so have a flag here to control
+       recursion into unions and intersections *)
+    let rec strip_nested ty ~recurse =
+      match deref ty with
+      | (r, Taccess (inner_ty, pos)) ->
+        strip inner_ty (fun ty -> mk (r, Taccess (ty, pos)))
+      | (r, Toption inner_ty) -> strip inner_ty (fun ty -> mk (r, Toption ty))
+      | (r, Tunion ts) when recurse ->
+        strip_all ts (fun ts -> mk (r, Tunion ts))
+      | (r, Tintersection ts) when recurse ->
+        strip_all ts (fun ts -> mk (r, Tintersection ts))
+      | _ -> strip ty (fun ty -> ty)
+    and strip_all tys k =
+      let (tys_rev, stripped) =
+        List.fold_left tys ~init:([], false) ~f:(fun (tys, stripped) ty ->
+            match strip_nested ty ~recurse:false with
+            | None -> (ty :: tys, stripped)
+            | Some ty -> (ty :: tys, true))
       in
-
-      Option.map
-        ~f:(fun inner_ty -> mk (r, Taccess (inner_ty, pos)))
-        inner_ty_opt
-    | _ -> None
+      if stripped then
+        Some (k @@ List.rev tys_rev)
+      else
+        None
+    in
+    strip_nested ty ~recurse:true
 
   (* For reporting purposes we remove top-level existential types and
      existentials in type accesses when they don't occur on both subtype and

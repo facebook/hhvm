@@ -10,11 +10,7 @@ use crate::convert::UnitBuilder;
 use crate::strings::StringCache;
 use crate::types;
 
-pub(crate) fn convert_class<'a>(
-    unit: &mut UnitBuilder,
-    class: ir::Class,
-    strings: &StringCache<'a>,
-) {
+pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &StringCache) {
     let ir::Class {
         attributes,
         base,
@@ -116,7 +112,7 @@ pub(crate) fn convert_class<'a>(
     unit.classes.push(class);
 }
 
-fn convert_property<'a>(src: ir::Property, strings: &StringCache<'a>) -> hhbc::Property {
+fn convert_property(src: ir::Property, strings: &StringCache) -> hhbc::Property {
     hhbc::Property {
         name: strings.lookup_prop_name(src.name),
         flags: src.flags,
@@ -140,10 +136,7 @@ fn convert_ctx_constant(ctx: &ir::CtxConstant) -> hhbc::CtxConstant {
     }
 }
 
-fn convert_type_constant<'a>(
-    tc: ir::TypeConstant,
-    strings: &StringCache<'a>,
-) -> hhbc::TypeConstant {
+fn convert_type_constant(tc: ir::TypeConstant, strings: &StringCache) -> hhbc::TypeConstant {
     hhbc::TypeConstant {
         name: tc.name,
         initializer: tc

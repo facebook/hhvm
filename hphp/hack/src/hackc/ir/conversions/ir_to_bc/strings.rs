@@ -5,32 +5,16 @@
 
 use std::sync::Arc;
 
-use dashmap::DashMap;
-use ffi::Str;
 use ir::StringInterner;
 use ir::UnitBytesId;
 
-pub(crate) struct StringCache<'a> {
-    pub alloc: &'a bumpalo::Bump,
-    cache: DashMap<UnitBytesId, Str<'a>>,
+pub(crate) struct StringCache {
     pub interner: Arc<StringInterner>,
 }
 
-impl<'a> StringCache<'a> {
-    pub fn new(alloc: &'a bumpalo::Bump, interner: Arc<StringInterner>) -> Self {
-        let cache = DashMap::with_capacity(interner.len());
-        Self {
-            alloc,
-            cache,
-            interner,
-        }
-    }
-
-    pub fn lookup_ffi_str(&self, id: UnitBytesId) -> Str<'a> {
-        *self.cache.entry(id).or_insert_with(|| {
-            let s = self.interner.lookup_bstr(id);
-            Str::new_slice(self.alloc, &s)
-        })
+impl StringCache {
+    pub fn new(interner: Arc<StringInterner>) -> Self {
+        Self { interner }
     }
 
     pub fn intern(&self, id: UnitBytesId) -> Result<hhbc::StringId, std::str::Utf8Error> {

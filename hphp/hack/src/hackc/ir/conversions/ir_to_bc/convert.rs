@@ -16,8 +16,8 @@ use crate::strings::StringCache;
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
-pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit) -> hhbc::Unit {
-    let strings = StringCache::new(alloc, Arc::clone(&ir_unit.strings));
+pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
+    let strings = StringCache::new(Arc::clone(&ir_unit.strings));
 
     let mut unit = UnitBuilder::new();
 
@@ -126,7 +126,7 @@ fn convert_symbol_refs(symbol_refs: &ir::SymbolRefs) -> hhbc::SymbolRefs {
 
 pub(crate) fn convert_attributes(
     attrs: Vec<ir::Attribute>,
-    strings: &StringCache<'_>,
+    strings: &StringCache,
 ) -> Vec<hhbc::Attribute> {
     attrs
         .into_iter()
@@ -142,16 +142,15 @@ pub(crate) fn convert_attributes(
         .collect()
 }
 
-pub(crate) fn convert_typed_value(
-    tv: &ir::TypedValue,
-    strings: &StringCache<'_>,
-) -> hhbc::TypedValue {
+pub(crate) fn convert_typed_value(tv: &ir::TypedValue, strings: &StringCache) -> hhbc::TypedValue {
     match tv {
         ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
         ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
         ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
-        ir::TypedValue::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(*v)),
+        ir::TypedValue::String(v) => {
+            hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(*v))
+        }
         ir::TypedValue::LazyClass(v) => {
             hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
         }
@@ -173,12 +172,14 @@ pub(crate) fn convert_typed_value(
     }
 }
 
-pub(crate) fn convert_array_key(tv: &ir::ArrayKey, strings: &StringCache<'_>) -> hhbc::TypedValue {
+pub(crate) fn convert_array_key(tv: &ir::ArrayKey, strings: &StringCache) -> hhbc::TypedValue {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
         ir::ArrayKey::LazyClass(v) => {
             hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
         }
-        ir::ArrayKey::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(v)),
+        ir::ArrayKey::String(v) => {
+            hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(v))
+        }
     }
 }

@@ -11,7 +11,7 @@ use ir::TypeConstraintFlags;
 
 use crate::strings::StringCache;
 
-fn convert_type(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> TypeInfo {
+fn convert_type(ty: &ir::TypeInfo, strings: &StringCache) -> TypeInfo {
     let mut user_type = ty
         .user_type
         .map(|ut| strings.intern(ut).expect("non-utf8 user type"));
@@ -56,7 +56,7 @@ fn convert_type(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> TypeInfo {
     }
 }
 
-fn convert_types(tis: &[ir::TypeInfo], strings: &StringCache<'_>) -> Vec<TypeInfo> {
+fn convert_types(tis: &[ir::TypeInfo], strings: &StringCache) -> Vec<TypeInfo> {
     tis.iter().map(|ti| convert_type(ti, strings)).collect()
 }
 
@@ -89,7 +89,7 @@ fn base_type_string(ty: &ir::BaseType) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn convert(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> Maybe<TypeInfo> {
+pub(crate) fn convert(ty: &ir::TypeInfo, strings: &StringCache) -> Maybe<TypeInfo> {
     if ty.is_empty() {
         Maybe::Nothing
     } else {
@@ -97,7 +97,7 @@ pub(crate) fn convert(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> Maybe<Typ
     }
 }
 
-pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache<'_>) -> hhbc::Typedef {
+pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache) -> hhbc::Typedef {
     let ir::Typedef {
         name,
         attributes,

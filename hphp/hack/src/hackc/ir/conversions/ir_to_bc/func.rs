@@ -33,7 +33,7 @@ use crate::strings::StringCache;
 /// block.
 pub(crate) fn convert_func<'a>(
     mut func: ir::Func,
-    strings: &StringCache<'a>,
+    strings: &StringCache,
     adata: &mut AdataCache,
 ) -> hhbc::Body {
     // Compute liveness and implicit block parameters.
@@ -64,7 +64,7 @@ pub(crate) fn convert_func<'a>(
 
     let params = Vec::from_iter(func.params.into_iter().map(|param| {
         let name = hhbc::intern(
-            std::str::from_utf8(strings.lookup_ffi_str(param.name).as_ref())
+            std::str::from_utf8(&strings.interner.lookup_bytes(param.name))
                 .expect("non-utf8 param name"),
         );
         let user_attributes = convert::convert_attributes(param.user_attributes, strings);
@@ -129,7 +129,7 @@ pub(crate) fn convert_func<'a>(
 pub(crate) fn convert_function<'a>(
     unit: &mut UnitBuilder,
     mut function: ir::Function,
-    strings: &StringCache<'a>,
+    strings: &StringCache,
 ) {
     trace!(
         "convert_function {}",
@@ -155,7 +155,7 @@ pub(crate) fn convert_function<'a>(
 
 pub(crate) fn convert_method<'a>(
     mut method: ir::Method,
-    strings: &StringCache<'a>,
+    strings: &StringCache,
     adata: &mut AdataCache,
 ) -> Method {
     trace!("convert_method {}", method.name.as_bstr(&strings.interner));

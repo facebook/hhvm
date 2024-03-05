@@ -194,7 +194,6 @@ pub fn from_text<'decl>(
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<()> {
-    let alloc = bumpalo::Bump::new();
     let path = source_text.file_path().path().to_path_buf();
     let mut emitter = create_emitter(native_env, decl_provider);
     let mut unit = emit_unit_from_text(
@@ -211,12 +210,11 @@ pub fn from_text<'decl>(
         profile.bc_to_ir_t = bc_to_ir_t.elapsed();
 
         let ir_to_bc_t = Instant::now();
-        unit = ir_to_bc::ir_to_bc(&alloc, ir);
+        unit = ir_to_bc::ir_to_bc(ir);
         profile.ir_to_bc_t = ir_to_bc_t.elapsed();
     }
 
     unit_to_string(native_env, writer, &unit, profile)?;
-    profile.codegen_bytes = alloc.allocated_bytes() as u64;
     Ok(())
 }
 

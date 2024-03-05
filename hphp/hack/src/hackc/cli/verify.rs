@@ -237,7 +237,6 @@ impl IrOpts {
             true,
         )?;
 
-        let post_alloc = bumpalo::Bump::default();
         let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit, path));
 
         ir.strings.debug_for_each(|_id, s| {
@@ -248,7 +247,7 @@ impl IrOpts {
 
         self.verify_print_roundtrip(&ir)?;
 
-        let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(&post_alloc, ir));
+        let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(ir));
 
         let (result, verify_t) =
             Timing::time(path, || sem_diff::sem_diff_unit(&pre_unit, &post_unit));

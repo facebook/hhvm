@@ -44,7 +44,7 @@ use crate::strings::StringCache;
 /// In the future we should probably have a pass that attempts to move common
 /// pushes up to common locations (so if there's a common push in both targets
 /// of a branch, move the push before the branch).
-pub(crate) fn run(func: Func, strings: &StringCache<'_>) -> Func {
+pub(crate) fn run(func: Func, strings: &StringCache) -> Func {
     let liveness = analysis::LiveInstrs::compute(&func);
     trace!("LIVENESS: {liveness:?}");
 
@@ -79,15 +79,15 @@ struct BlockInput {
 
 /// Helper class to compute where we need to insert stack pushes and pops before
 /// we convert to bytecode.
-struct PushInserter<'a, 'b> {
+struct PushInserter<'b> {
     builder: FuncBuilder,
     liveness: analysis::LiveInstrs,
-    strings: &'b StringCache<'a>,
+    strings: &'b StringCache,
     next_temp_idx: usize,
     instr_ids: InstrIdMap<ir::LocalId>,
 }
 
-impl<'a, 'b> PushInserter<'a, 'b> {
+impl<'b> PushInserter<'b> {
     fn alloc_temp(&mut self, iid: InstrId) -> ir::LocalId {
         let temp = ir::LocalId::Unnamed(UnnamedLocalId::from_usize(self.next_temp_idx));
         self.next_temp_idx += 1;

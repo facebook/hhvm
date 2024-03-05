@@ -8,10 +8,7 @@ use hhbc::Constant;
 use crate::convert;
 use crate::strings::StringCache;
 
-pub(crate) fn convert_hack_constant(
-    constant: ir::HackConstant,
-    strings: &StringCache<'_>,
-) -> Constant {
+pub(crate) fn convert_hack_constant(constant: ir::HackConstant, strings: &StringCache) -> Constant {
     let ir::HackConstant { name, value, attrs } = constant;
 
     let value = value

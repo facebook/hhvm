@@ -37,7 +37,7 @@ use crate::strings::StringCache;
 pub(crate) fn emit_func(
     func: &ir::Func,
     labeler: &mut Labeler,
-    strings: &StringCache<'_>,
+    strings: &StringCache,
     adata_cache: &mut AdataCache,
 ) -> (InstrSeq, Vec<StringId>) {
     let adata_id_map = func
@@ -75,7 +75,7 @@ pub(crate) fn emit_func(
         .sorted_by_key(|(_, v)| *v)
         .filter_map(|(k, _)| match *k {
             LocalId::Named(name) => Some(ir::intern(
-                std::str::from_utf8(strings.lookup_ffi_str(name).as_ref())
+                std::str::from_utf8(&strings.interner.lookup_bytes(name))
                     .expect("non-utf8 local name"),
             )),
             LocalId::Unnamed(_) => None,
@@ -183,14 +183,14 @@ fn compute_block_entry_edges(func: &ir::Func) -> BlockIdMap<usize> {
     edges
 }
 
-pub(crate) struct InstrEmitter<'a, 'b> {
+pub(crate) struct InstrEmitter<'b> {
     // How many blocks jump to this one?
     block_entry_edges: BlockIdMap<usize>,
     func: &'b ir::Func,
     instrs: Vec<Instruct>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
-    strings: &'b StringCache<'a>,
+    strings: &'b StringCache,
     locals: HashMap<LocalId, hhbc::Local>,
     adata_id_map: &'b AdataIdMap,
 }
@@ -208,11 +208,11 @@ fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bo
     buf
 }
 
-impl<'a, 'b> InstrEmitter<'a, 'b> {
+impl<'b> InstrEmitter<'b> {
     fn new(
         func: &'b ir::Func,
         labeler: &'b mut Labeler,
-        strings: &'b StringCache<'a>,
+        strings: &'b StringCache,
         adata_id_map: &'b AdataIdMap,
     ) -> Self {
         let locals = Self::prealloc_locals(func);

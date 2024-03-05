@@ -803,7 +803,6 @@ dependencies = [
  "anyhow",
  "bc_to_ir",
  "bstr",
- "bumpalo",
  "bytecode_printer",
  "clap 4.4.12",
  "decl_provider",
@@ -2717,8 +2716,6 @@ dependencies = [
 name = "ir_to_bc"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
- "dashmap",
  "ffi",
  "hash",
  "hhbc",

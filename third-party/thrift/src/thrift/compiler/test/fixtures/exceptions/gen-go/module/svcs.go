@@ -93,21 +93,8 @@ func (c *RaiserClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use RaiserClient instead.
-type RaiserThreadsafeClient = RaiserClient
-
-// Deprecated: Use NewRaiserClientFromProtocol() instead.
-func NewRaiserThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *RaiserThreadsafeClient {
-    return NewRaiserClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserClient {
-  return NewRaiserClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewRaiserClientFromProtocol() instead.
-func NewRaiserThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserThreadsafeClient {
   return NewRaiserClientFromProtocol(pf.GetProtocol(t))
 }
 

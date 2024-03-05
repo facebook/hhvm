@@ -84,21 +84,8 @@ func (c *MyRootClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use MyRootClient instead.
-type MyRootThreadsafeClient = MyRootClient
-
-// Deprecated: Use NewMyRootClientFromProtocol() instead.
-func NewMyRootThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyRootThreadsafeClient {
-    return NewMyRootClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootClient {
-  return NewMyRootClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewMyRootClientFromProtocol() instead.
-func NewMyRootThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootThreadsafeClient {
   return NewMyRootClientFromProtocol(pf.GetProtocol(t))
 }
 
@@ -491,21 +478,8 @@ func (c *MyNodeClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use MyNodeClient instead.
-type MyNodeThreadsafeClient = MyNodeClient
-
-// Deprecated: Use NewMyNodeClientFromProtocol() instead.
-func NewMyNodeThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyNodeThreadsafeClient {
-    return NewMyNodeClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeClient {
-  return NewMyNodeClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewMyNodeClientFromProtocol() instead.
-func NewMyNodeThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeThreadsafeClient {
   return NewMyNodeClientFromProtocol(pf.GetProtocol(t))
 }
 
@@ -872,21 +846,8 @@ func (c *MyLeafClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use MyLeafClient instead.
-type MyLeafThreadsafeClient = MyLeafClient
-
-// Deprecated: Use NewMyLeafClientFromProtocol() instead.
-func NewMyLeafThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyLeafThreadsafeClient {
-    return NewMyLeafClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafClient {
-  return NewMyLeafClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewMyLeafClientFromProtocol() instead.
-func NewMyLeafThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafThreadsafeClient {
   return NewMyLeafClientFromProtocol(pf.GetProtocol(t))
 }
 

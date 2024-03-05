@@ -84,21 +84,8 @@ func (c *TestServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use TestServiceClient instead.
-type TestServiceThreadsafeClient = TestServiceClient
-
-// Deprecated: Use NewTestServiceClientFromProtocol() instead.
-func NewTestServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *TestServiceThreadsafeClient {
-    return NewTestServiceClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceClient {
-  return NewTestServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewTestServiceClientFromProtocol() instead.
-func NewTestServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceThreadsafeClient {
   return NewTestServiceClientFromProtocol(pf.GetProtocol(t))
 }
 

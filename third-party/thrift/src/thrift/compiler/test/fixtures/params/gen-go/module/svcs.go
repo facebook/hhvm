@@ -96,21 +96,8 @@ func (c *NestedContainersClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NestedContainersClient instead.
-type NestedContainersThreadsafeClient = NestedContainersClient
-
-// Deprecated: Use NewNestedContainersClientFromProtocol() instead.
-func NewNestedContainersThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *NestedContainersThreadsafeClient {
-    return NewNestedContainersClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewNestedContainersClientFromProtocol() instead.
 func NewNestedContainersClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersClient {
-  return NewNestedContainersClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewNestedContainersClientFromProtocol() instead.
-func NewNestedContainersThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersThreadsafeClient {
   return NewNestedContainersClientFromProtocol(pf.GetProtocol(t))
 }
 

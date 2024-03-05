@@ -84,21 +84,8 @@ func (c *ServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use ServiceClient instead.
-type ServiceThreadsafeClient = ServiceClient
-
-// Deprecated: Use NewServiceClientFromProtocol() instead.
-func NewServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *ServiceThreadsafeClient {
-    return NewServiceClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewServiceClientFromProtocol() instead.
 func NewServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *ServiceClient {
-  return NewServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewServiceClientFromProtocol() instead.
-func NewServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *ServiceThreadsafeClient {
   return NewServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
@@ -789,21 +776,8 @@ func (c *AdapterServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use AdapterServiceClient instead.
-type AdapterServiceThreadsafeClient = AdapterServiceClient
-
-// Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
-func NewAdapterServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *AdapterServiceThreadsafeClient {
-    return NewAdapterServiceClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
 func NewAdapterServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *AdapterServiceClient {
-  return NewAdapterServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
-func NewAdapterServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *AdapterServiceThreadsafeClient {
   return NewAdapterServiceClientFromProtocol(pf.GetProtocol(t))
 }
 

@@ -92,21 +92,8 @@ func (c *FinderClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use FinderClient instead.
-type FinderThreadsafeClient = FinderClient
-
-// Deprecated: Use NewFinderClientFromProtocol() instead.
-func NewFinderThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FinderThreadsafeClient {
-    return NewFinderClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderClient {
-  return NewFinderClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewFinderClientFromProtocol() instead.
-func NewFinderThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderThreadsafeClient {
   return NewFinderClientFromProtocol(pf.GetProtocol(t))
 }
 

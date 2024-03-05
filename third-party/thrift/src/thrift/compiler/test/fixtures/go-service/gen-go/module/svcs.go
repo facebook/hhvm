@@ -147,21 +147,8 @@ func (c *GetEntityClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use GetEntityClient instead.
-type GetEntityThreadsafeClient = GetEntityClient
-
-// Deprecated: Use NewGetEntityClientFromProtocol() instead.
-func NewGetEntityThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *GetEntityThreadsafeClient {
-    return NewGetEntityClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityClient {
-  return NewGetEntityClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewGetEntityClientFromProtocol() instead.
-func NewGetEntityThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityThreadsafeClient {
   return NewGetEntityClientFromProtocol(pf.GetProtocol(t))
 }
 

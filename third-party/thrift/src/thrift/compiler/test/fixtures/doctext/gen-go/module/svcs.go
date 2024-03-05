@@ -87,21 +87,8 @@ func (c *CClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use CClient instead.
-type CThreadsafeClient = CClient
-
-// Deprecated: Use NewCClientFromProtocol() instead.
-func NewCThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *CThreadsafeClient {
-    return NewCClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewCClientFromProtocol() instead.
 func NewCClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CClient {
-  return NewCClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewCClientFromProtocol() instead.
-func NewCThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CThreadsafeClient {
   return NewCClientFromProtocol(pf.GetProtocol(t))
 }
 

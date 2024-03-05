@@ -89,21 +89,8 @@ func (c *SomeServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use SomeServiceClient instead.
-type SomeServiceThreadsafeClient = SomeServiceClient
-
-// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
-func NewSomeServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *SomeServiceThreadsafeClient {
-    return NewSomeServiceClientFromProtocol(iprot)
-}
-
 // Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceClient {
-  return NewSomeServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
-func NewSomeServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceThreadsafeClient {
   return NewSomeServiceClientFromProtocol(pf.GetProtocol(t))
 }
 

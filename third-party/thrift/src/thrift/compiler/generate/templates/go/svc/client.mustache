@@ -83,21 +83,8 @@ func (c *{{service:go_name}}Client) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use {{service:go_name}}Client instead.
-type {{service:go_name}}ThreadsafeClient = {{service:go_name}}Client
-
-// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
-func New{{service:go_name}}ThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}ThreadsafeClient {
-    return New{{service:go_name}}ClientFromProtocol(iprot)
-}
-
 // Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
 func New{{service:go_name}}ClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}Client {
-  return New{{service:go_name}}ClientFromProtocol(pf.GetProtocol(t))
-}
-
-// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
-func New{{service:go_name}}ThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}ThreadsafeClient {
   return New{{service:go_name}}ClientFromProtocol(pf.GetProtocol(t))
 }
 

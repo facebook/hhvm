@@ -13,8 +13,16 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
+let logger_handlers =
+  [
+    ("tany", Tany_logger.create_handler);
+    ("nothing_property", Nothing_property_logger.create_handler);
+    ("fbid_igid_type", Fbid_igid_type_logger.create_handler);
+    ("type_driven_code_health", Type_driven_code_health_logger.create_handler);
+  ]
+
 (* Handlers that are enabled through 'log_levels' configuration. *)
-let logger_handlers ctx =
+let select_logger_handlers ctx =
   let tco = Provider_context.get_tcopt ctx in
   let log_levels = TypecheckerOptions.log_levels tco in
   let add_handler handlers (key, handler) =
@@ -22,19 +30,12 @@ let logger_handlers ctx =
     | Some level when level > 0 -> handler ctx :: handlers
     | _ -> handlers
   in
-  let key_handler_pairs =
-    [
-      ("tany", Tany_logger.create_handler);
-      ("nothing_property", Nothing_property_logger.create_handler);
-      ("fbid_igid_type", Fbid_igid_type_logger.create_handler);
-    ]
-  in
-  List.fold ~init:[] ~f:add_handler key_handler_pairs
+  List.fold ~init:[] ~f:add_handler logger_handlers
 
 let visitor ctx =
   (* Handlers that are not TAST checks to produce errors, but are used for
      telemetry that processes TASTs. *)
-  let irregular_handlers = logger_handlers ctx in
+  let irregular_handlers = select_logger_handlers ctx in
   let tcopt = Provider_context.get_tcopt ctx in
   let hierarchy_check handler =
     if TypecheckerOptions.skip_hierarchy_checks tcopt then

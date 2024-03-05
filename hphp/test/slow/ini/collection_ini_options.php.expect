@@ -15,9 +15,3 @@ vec(2) {
   string(9) "index.php"
   string(8) "test.php"
 }
-dict(2) {
-  ["PHP_ROOT"]=>
-  string(8) "/var/www"
-  ["TFBENV"]=>
-  string(1) "1"
-}

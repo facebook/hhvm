@@ -11,5 +11,4 @@ var_dump(ini_get("hhvm.server.allowed_directories"));
 sort_opt(ini_get("hhvm.static_file.extensions"));
 var_dump(ini_get("hhvm.server.forbidden_file_extensions"));
 var_dump(ini_get("hhvm.server.high_priority_end_points"));
-var_dump(ini_get("hhvm.server_variables"));
 }

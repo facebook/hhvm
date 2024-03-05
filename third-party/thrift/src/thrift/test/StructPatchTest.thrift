@@ -157,3 +157,8 @@ struct UniqueRefStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
   2: optional list<i32> opt_field;
 }
+
+union BinaryInUnion {
+  1: binary b;
+  2: string s;
+}

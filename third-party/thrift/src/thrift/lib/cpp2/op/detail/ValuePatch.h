@@ -473,8 +473,25 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
 
  public:
   using Base::apply;
+  using Base::assign;
   using Base::Base;
-  using Base::operator=;
+
+  void assign(std::string s) {
+    std::string* p = new std::string(std::move(s));
+    assign(folly::IOBuf(
+        folly::IOBuf::TAKE_OWNERSHIP,
+        p->data(),
+        p->size(),
+        [](void*, void* userData) {
+          delete static_cast<std::string*>(userData);
+        },
+        static_cast<void*>(p)));
+  }
+
+  template <typename T>
+  BinaryPatch& operator=(T&& other) {
+    return assign(std::forward<T>(other)), *this;
+  }
 
   /// Appends a binary string.
   template <typename... Args>
@@ -514,6 +531,12 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
     };
 
     return Base::customVisit(Visitor{val});
+  }
+
+  void apply(std::string& val) const {
+    folly::IOBuf buf;
+    apply(buf);
+    val = buf.moveToFbString().toStdString();
   }
 
  private:

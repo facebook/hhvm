@@ -1652,5 +1652,20 @@ TEST(StructPatchTest, AssignOnly) {
   }
 }
 
+TEST(StructPatchTest, BinaryInUnion) {
+  BinaryInUnion value;
+  value.b_ref().ensure();
+
+  BinaryInUnionPatch patch;
+  patch.patch<ident::b>() = folly::IOBuf::wrapBufferAsValue("123", 3);
+  patch.apply(value);
+  EXPECT_EQ(value.b_ref(), "123");
+
+  BinaryInUnionPatch patch2;
+  patch2.patch<ident::b>() = "456";
+  patch2.apply(value);
+  EXPECT_EQ(value.b_ref(), "456");
+}
+
 } // namespace
 } // namespace apache::thrift

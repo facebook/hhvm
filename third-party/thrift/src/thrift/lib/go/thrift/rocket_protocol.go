@@ -245,6 +245,21 @@ func (p *rocketProtocol) getRequestHeaders() map[string]string {
 	return p.reqMetadata.Other
 }
 
+func (p *rocketProtocol) GetResponseHeader(key string) (string, bool) {
+	if p.respMetadata == nil {
+		return "", false
+	}
+	value, ok := p.respMetadata.OtherMetadata[key]
+	return value, ok
+}
+
+func (p *rocketProtocol) GetResponseHeaders() map[string]string {
+	if p.respMetadata == nil {
+		return nil
+	}
+	return p.respMetadata.OtherMetadata
+}
+
 func (p *rocketProtocol) Close() error {
 	return p.trans.Close()
 }

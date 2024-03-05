@@ -25,6 +25,18 @@ type PersistentHeaders interface {
 	ClearPersistentHeaders()
 }
 
-var _ PersistentHeaders = &HeaderProtocol{}
-var _ PersistentHeaders = &rocketProtocol{}
-var _ PersistentHeaders = &upgradeToRocketProtocol{}
+// Compile time interface enforcer
+var _ PersistentHeaders = (*HeaderProtocol)(nil)
+var _ PersistentHeaders = (*rocketProtocol)(nil)
+var _ PersistentHeaders = (*upgradeToRocketProtocol)(nil)
+
+// ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
+type ResponseHeaderGetter interface {
+	GetResponseHeader(key string) (string, bool)
+	GetResponseHeaders() map[string]string
+}
+
+// Compile time interface enforcer
+var _ ResponseHeaderGetter = (*HeaderProtocol)(nil)
+var _ ResponseHeaderGetter = (*rocketProtocol)(nil)
+var _ ResponseHeaderGetter = (*upgradeToRocketProtocol)(nil)

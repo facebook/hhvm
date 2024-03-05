@@ -48,6 +48,11 @@ type requestHeaders interface {
 	getRequestHeaders() map[string]string
 }
 
+// Compile time interface enforcer
+var _ requestHeaders = (*HeaderProtocol)(nil)
+var _ requestHeaders = (*rocketProtocol)(nil)
+var _ requestHeaders = (*upgradeToRocketProtocol)(nil)
+
 // setRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.
 // These Headers will be cleared with Flush, as they are not persistent.

@@ -127,3 +127,20 @@ func (p *upgradeToRocketProtocol) getRequestHeaders() map[string]string {
 	}
 	return p.Protocol.(requestHeaders).getRequestHeaders()
 }
+
+func (p *upgradeToRocketProtocol) GetResponseHeader(key string) (string, bool) {
+	v, ok := p.GetResponseHeaders()[key]
+	return v, ok
+}
+
+func (p *upgradeToRocketProtocol) GetResponseHeaders() map[string]string {
+	if p.Protocol == nil {
+		headers := p.headerProtocol.(ResponseHeaderGetter).GetResponseHeaders()
+		rocketHeaders := p.rocketProtocol.(ResponseHeaderGetter).GetResponseHeaders()
+		for k, v := range rocketHeaders {
+			headers[k] = v
+		}
+		return headers
+	}
+	return p.Protocol.(ResponseHeaderGetter).GetResponseHeaders()
+}

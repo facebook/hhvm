@@ -16,7 +16,6 @@ use anyhow::Context;
 use anyhow::Result;
 use bumpalo::Bump;
 use ffi::Maybe;
-use ffi::Str;
 use ffi::Vector;
 use hhbc::BytesId;
 use hhbc::ModuleName;
@@ -1794,16 +1793,6 @@ pub(crate) fn assemble_unescaped_unquoted_intern_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
     Ok(hhbc::intern_bytes(st.as_ref()))
-}
-
-pub(crate) fn assemble_unescaped_unquoted_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Str<'arena>> {
-    let st = escaper::unescape_literal_bytes_into_vec_bytes(
-        token_iter.expect_with(Token::into_unquoted_str_literal)?,
-    )?;
-    Ok(Str::new_slice(alloc, &st))
 }
 
 fn assemble_unescaped_unquoted_triple_vec(token_iter: &mut Lexer<'_>) -> Result<Vector<u8>> {

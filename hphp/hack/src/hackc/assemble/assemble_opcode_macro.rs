@@ -44,7 +44,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             let imms = opcode
                 .immediates
                 .iter()
-                .map(|_| quote!(token_iter.assemble_imm(alloc, decl_map)?))
+                .map(|_| quote!(token_iter.assemble_imm(decl_map)?))
                 .collect_vec();
 
             quote!((#(#imms),*))
@@ -81,7 +81,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 /// turns into a handler for A, B, and C that looks something like:
 ///
 /// impl AssembleImm<'_, $ret_ty> for Lexer<'_> {
-///   fn assemble_imm(&mut self, _alloc: &'_ Bump, _decl_map: &DeclMap) -> Result<$ret_ty> {
+///   fn assemble_imm(&mut self, _decl_map: &DeclMap) -> Result<$ret_ty> {
 ///     use $ret_ty;
 ///     match self.expect(Token::into_identifier)? {
 ///       b"A" => E::A,
@@ -151,8 +151,8 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
     // do anything to ensure that this is exhaustive.
 
     let output = quote! {
-        impl AssembleImm<'_, #ret_ty> for Lexer<'_> {
-            fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<#ret_ty> {
+        impl AssembleImm<#ret_ty> for Lexer<'_> {
+            fn assemble_imm(&mut self, _: &DeclMap) -> Result<#ret_ty> {
                 use #ret_ty;
                 let tok = self.expect_token()?;
                 let id = tok.into_identifier()?;

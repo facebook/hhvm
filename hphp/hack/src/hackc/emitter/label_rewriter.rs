@@ -104,7 +104,7 @@ pub fn relabel_function(params: &mut [(Param, Option<(Label, ast::Expr)>)], body
     rewrite_params_and_body(&label_to_offset, &used, &offset_to_label, params, body)
 }
 
-pub fn rewrite_with_fresh_regular_labels(emitter: &mut Emitter<'_, '_>, block: &mut InstrSeq) {
+pub fn rewrite_with_fresh_regular_labels(emitter: &mut Emitter<'_>, block: &mut InstrSeq) {
     let mut old_to_new = HashMap::default();
     for instr in block.iter() {
         if let Instruct::Pseudo(Pseudo::Label(label)) = instr {

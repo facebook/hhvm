@@ -38,7 +38,7 @@ use crate::emit_memoize_helpers;
 use crate::emit_param;
 
 pub(crate) fn get_attrs_for_fun(
-    emitter: &mut Emitter<'_, '_>,
+    emitter: &mut Emitter<'_>,
     fd: &ast::FunDef,
     user_attrs: &[Attribute],
     is_memoize_impl: bool,
@@ -65,7 +65,7 @@ pub(crate) fn get_attrs_for_fun(
 }
 
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     original_id: hhbc::FunctionName,
     renamed_id: hhbc::FunctionName,
     deprecation_info: Option<&[TypedValue]>,
@@ -142,7 +142,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_function_code<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -183,7 +183,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -305,7 +305,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName,
@@ -369,7 +369,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 }
 
 fn make_wrapper_body<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     env: Env<'a>,
     return_type_info: TypeInfo,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,

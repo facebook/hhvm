@@ -26,7 +26,7 @@ pub enum ClassExpr {
 
 impl ClassExpr {
     fn get_original_class_name(
-        emitter: &Emitter<'_, '_>,
+        emitter: &Emitter<'_>,
         scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
@@ -60,7 +60,7 @@ impl ClassExpr {
     }
 
     fn get_original_parent_class_name(
-        emitter: &Emitter<'_, '_>,
+        emitter: &Emitter<'_>,
         scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
@@ -86,7 +86,7 @@ impl ClassExpr {
     }
 
     pub fn expr_to_class_expr(
-        emitter: &Emitter<'_, '_>,
+        emitter: &Emitter<'_>,
         scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
@@ -124,7 +124,7 @@ impl ClassExpr {
     }
 
     pub fn class_id_to_class_expr<'a, 'decl>(
-        emitter: &Emitter<'_, 'decl>,
+        emitter: &Emitter<'decl>,
         scope: &Scope<'a>,
         check_traits: bool,
         resolve_self: bool,

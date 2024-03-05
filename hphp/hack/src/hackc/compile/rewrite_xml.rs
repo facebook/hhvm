@@ -14,24 +14,20 @@ struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
     phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl ())>,
 }
 
-struct Ctx<'emitter, 'arena, 'decl> {
-    emitter: &'emitter mut Emitter<'arena, 'decl>,
+struct Ctx<'emitter, 'decl> {
+    emitter: &'emitter mut Emitter<'decl>,
 }
 
 impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
     for RewriteXmlVisitor<'emitter, 'arena, 'decl>
 {
-    type Params = AstParams<Ctx<'emitter, 'arena, 'decl>, Error>;
+    type Params = AstParams<Ctx<'emitter, 'decl>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(
-        &mut self,
-        c: &mut Ctx<'emitter, 'arena, 'decl>,
-        e: &'ast mut ast::Expr,
-    ) -> Result<()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'emitter, 'decl>, e: &'ast mut ast::Expr) -> Result<()> {
         let ast::Expr(_, pos, expr) = e;
         let emitter = &mut c.emitter;
         if let ast::Expr_::Xml(cs) = expr {
@@ -43,19 +39,19 @@ impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
 }
 
 pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
-    emitter: &'emitter mut Emitter<'arena, 'decl>,
+    emitter: &'emitter mut Emitter<'decl>,
     prog: &'p mut ast::Program,
 ) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
-    let mut c: Ctx<'emitter, 'arena, 'decl> = Ctx { emitter };
+    let mut c: Ctx<'emitter, 'decl> = Ctx { emitter };
 
     visit_mut(&mut xml_visitor, &mut c, prog)
 }
 
 fn rewrite_xml_<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {

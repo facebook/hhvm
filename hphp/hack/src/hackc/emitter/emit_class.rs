@@ -63,7 +63,7 @@ use crate::emit_xhp;
 use crate::xhp_attribute::XhpAttribute;
 
 fn add_symbol_refs<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     base: Option<&ClassName>,
     implements: &[ClassName],
     uses: &[ClassName],
@@ -78,7 +78,7 @@ fn add_symbol_refs<'arena, 'decl>(
 }
 
 fn make_86method<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     name: MethodName,
     params: Vec<Param>,
     is_static: bool,
@@ -168,7 +168,7 @@ fn from_includes(includes: &[ast::Hint]) -> Vec<ClassName> {
 }
 
 fn from_type_constant<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<TypeConstant> {
     use ast::ClassTypeconst;
@@ -239,7 +239,7 @@ fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<CtxConstant> {
 }
 
 fn from_class_elt_classvars<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     ast_class: &'a ast::Class_,
     class_is_const: bool,
     tparams: &[&str],
@@ -283,7 +283,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
 }
 
 fn from_class_elt_constants<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     env: &Env<'a>,
     class_: &'a ast::Class_,
 ) -> Result<Vec<(Constant, Option<InstrSeq>)>> {
@@ -333,7 +333,7 @@ fn from_enum_type(opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
 }
 
 fn emit_reified_extends_params<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq> {
@@ -359,7 +359,7 @@ pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
     hhbc::Lazy::new(|| PropName::intern(string_utils::reified::PROP_NAME));
 
 fn emit_reified_init_body<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &Env<'a>,
     num_reified: usize,
     ast_class: &'a ast::Class_,
@@ -402,7 +402,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
 }
 
 fn emit_reified_init_method<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<Method>> {
@@ -450,7 +450,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
 }
 
 fn make_init_method<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     properties: &mut [PropAndInit],
     filter: impl Fn(&Property) -> bool,
     name: &'static str,
@@ -488,7 +488,7 @@ fn make_init_method<'arena, 'decl>(
 }
 
 pub fn emit_class<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     ast_class: &'a ast::Class_,
 ) -> Result<Class> {
     let mut env = Env::make_class_env(ast_class);
@@ -822,7 +822,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 }
 
 pub fn emit_classes_from_program<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Class>> {
     ast.iter()

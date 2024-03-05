@@ -10,15 +10,12 @@ use oxidized::ast;
 
 use crate::emit_attribute::from_asts;
 
-fn emit_file_attributes(
-    e: &mut Emitter<'_, '_>,
-    fa: &ast::FileAttribute,
-) -> Result<Vec<Attribute>> {
+fn emit_file_attributes(e: &mut Emitter<'_>, fa: &ast::FileAttribute) -> Result<Vec<Attribute>> {
     from_asts(e, &fa.user_attributes[..])
 }
 
 pub fn emit_file_attributes_from_program(
-    e: &mut Emitter<'_, '_>,
+    e: &mut Emitter<'_>,
     prog: &[ast::Def],
 ) -> Result<Vec<Attribute>> {
     prog.iter()

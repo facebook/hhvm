@@ -13,7 +13,6 @@ path = "../../env.rs"
 [dependencies]
 ast_scope = { version = "0.0.0", path = "../ast_scope" }
 bitflags = { version = "2.4", features = ["serde"] }
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
 global_state = { version = "0.0.0", path = "../global_state" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }

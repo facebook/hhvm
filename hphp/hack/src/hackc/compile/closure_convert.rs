@@ -1675,7 +1675,7 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
 }
 
 pub fn convert_toplevel_prog<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     defs: &mut Vec<Def>,
     namespace_env: Arc<namespace_env::Env>,
 ) -> Result<()> {

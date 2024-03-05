@@ -1660,7 +1660,6 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bitflags 2.4.0",
- "bumpalo",
  "decl_provider",
  "global_state",
  "hash",

@@ -749,8 +749,6 @@ fn compile_unit_from_text(
     source_text: &[u8],
 ) -> Result<Box<UnitWrapper>, String> {
     let bump = bumpalo::Bump::new();
-    let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         std::sync::Arc::new(native_env.filepath.clone()),
@@ -774,15 +772,9 @@ fn compile_unit_from_text(
         &decl_allocator,
     );
 
-    compile::unit_from_text(
-        alloc,
-        text,
-        &native_env,
-        decl_provider,
-        &mut Default::default(),
-    )
-    .map(|unit| Box::new(UnitWrapper(unit, bump)))
-    .map_err(|e| e.to_string())
+    compile::unit_from_text(text, &native_env, decl_provider, &mut Default::default())
+        .map(|unit| Box::new(UnitWrapper(unit, bump)))
+        .map_err(|e| e.to_string())
 }
 
 fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {

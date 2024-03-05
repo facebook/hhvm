@@ -46,7 +46,7 @@ pub struct PropAndInit {
 }
 
 pub fn from_ast<'a>(
-    emitter: &mut Emitter<'_, '_>,
+    emitter: &mut Emitter<'_>,
     class: &'a ast::Class_,
     tparams: &[&str],
     class_is_const: bool,

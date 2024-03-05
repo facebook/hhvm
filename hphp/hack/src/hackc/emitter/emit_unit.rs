@@ -89,7 +89,7 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
 
 /// This is the entry point from hh_single_compile
 pub fn emit_unit<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,
@@ -157,7 +157,7 @@ fn scan_types<'decl, F>(
 }
 
 fn emit_unit_<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,

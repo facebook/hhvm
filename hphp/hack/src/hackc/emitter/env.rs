@@ -94,7 +94,7 @@ impl<'s> Env<'s> {
 
     pub fn do_in_loop_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         label_break: Label,
         label_continue: Label,
         iterator: Option<IterId>,
@@ -102,7 +102,7 @@ impl<'s> Env<'s> {
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen
             .with_loop(label_break, label_continue, iterator);
@@ -111,14 +111,14 @@ impl<'s> Env<'s> {
 
     pub fn do_in_switch_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         end_label: Label,
         cases: &[ast::Case],
         dfl: &Option<ast::DefaultCase>,
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Case], &Option<ast::DefaultCase>) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Case], &Option<ast::DefaultCase>) -> R,
     {
         self.jump_targets_gen.with_switch(end_label);
         self.run_and_release_ids(e, |env, e| f(env, e, cases, dfl))
@@ -126,14 +126,14 @@ impl<'s> Env<'s> {
 
     pub fn do_in_try_catch_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         finally_label: Label,
         try_block: &[ast::Stmt],
         catch_block: &[ast::Catch],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt], &[ast::Catch]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt], &[ast::Catch]) -> R,
     {
         self.jump_targets_gen.with_try_catch(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, try_block, catch_block))
@@ -141,13 +141,13 @@ impl<'s> Env<'s> {
 
     pub fn do_in_try_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         finally_label: Label,
         block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_try(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, block))
@@ -155,12 +155,12 @@ impl<'s> Env<'s> {
 
     pub fn do_in_finally_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_finally();
         self.run_and_release_ids(e, |env, e| f(env, e, block))
@@ -168,13 +168,13 @@ impl<'s> Env<'s> {
 
     pub fn do_in_using_body<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         finally_label: Label,
         block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_using(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, block))
@@ -182,20 +182,20 @@ impl<'s> Env<'s> {
 
     pub fn do_function<'a, 'decl, R, F>(
         &mut self,
-        e: &mut Emitter<'a, 'decl>,
+        e: &mut Emitter<'decl>,
         defs: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>, &[ast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_function();
         self.run_and_release_ids(e, |env, e| f(env, e, defs))
     }
 
-    fn run_and_release_ids<'a, 'decl, R, F>(&mut self, e: &mut Emitter<'a, 'decl>, f: F) -> R
+    fn run_and_release_ids<'a, 'decl, R, F>(&mut self, e: &mut Emitter<'decl>, f: F) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'a, 'decl>) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'decl>) -> R,
     {
         let res = f(self, e);
         self.jump_targets_gen.release_ids();

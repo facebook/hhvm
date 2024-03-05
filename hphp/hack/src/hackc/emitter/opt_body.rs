@@ -836,7 +836,7 @@ fn optimize_locals(
 }
 
 fn mark_volatile_locals(
-    emitter: &Emitter<'_, '_>,
+    emitter: &Emitter<'_>,
     nparams: usize,
     decl_vars: &[StringId],
     nlocals: usize,
@@ -886,7 +886,7 @@ fn mark_volatile_locals(
 ///   2. Hack.Lang.OptimizeParamLifetimes - causes parameter locals to not be
 ///      optimized ensuring they remain available for debug_backtrace
 fn optimize_lifetimes<'b>(
-    emitter: &Emitter<'_, '_>,
+    emitter: &Emitter<'_>,
     blocks: &[Block<'b>],
     data: &[BlockData],
     size_hint: usize,
@@ -927,7 +927,7 @@ fn optimize_lifetimes<'b>(
 }
 
 pub fn optimize_body(
-    emitter: &Emitter<'_, '_>,
+    emitter: &Emitter<'_>,
     body: InstrSeq,
     nparams: usize,
     decl_vars: &[StringId],

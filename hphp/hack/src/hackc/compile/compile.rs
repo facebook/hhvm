@@ -196,7 +196,7 @@ pub fn from_text<'decl>(
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
     let path = source_text.file_path().path().to_path_buf();
-    let mut emitter = create_emitter(native_env, decl_provider, &alloc);
+    let mut emitter = create_emitter(native_env, decl_provider);
     let mut unit = emit_unit_from_text(
         &mut emitter,
         &native_env.flags,
@@ -221,7 +221,7 @@ pub fn from_text<'decl>(
 }
 
 fn rewrite_and_emit<'p, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     namespace_env: Arc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
@@ -249,14 +249,12 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
 }
 
 pub fn unit_from_text<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<Unit> {
     unit_from_text_with_opts(
-        alloc,
         source_text,
         native_env,
         decl_provider,
@@ -266,14 +264,13 @@ pub fn unit_from_text<'arena, 'decl>(
 }
 
 pub fn unit_from_text_with_opts<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
     opts: &elab::CodegenOpts,
 ) -> Result<Unit> {
-    let mut emitter = create_emitter(native_env, decl_provider, alloc);
+    let mut emitter = create_emitter(native_env, decl_provider);
     emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile, opts)
 }
 
@@ -313,7 +310,7 @@ pub fn unit_to_string(
 }
 
 fn emit_unit_from_ast<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
     invalid_utf8_offset: Option<usize>,
@@ -321,7 +318,7 @@ fn emit_unit_from_ast<'arena, 'decl>(
     emit_unit(emitter, namespace, ast, invalid_utf8_offset)
 }
 
-fn create_namespace_env(emitter: &Emitter<'_, '_>) -> NamespaceEnv {
+fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
     NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
         true, /* is_codegen */
@@ -334,7 +331,7 @@ fn create_namespace_env(emitter: &Emitter<'_, '_>) -> NamespaceEnv {
 }
 
 fn emit_unit_from_text<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     flags: &EnvFlags,
     source_text: SourceText<'_>,
     profile: &mut Profile,
@@ -630,13 +627,11 @@ fn emit_fatal(fatal_op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<Uni
 fn create_emitter<'arena, 'decl>(
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
-    alloc: &'arena bumpalo::Bump,
-) -> Emitter<'arena, 'decl> {
+) -> Emitter<'decl> {
     Emitter::new(
         NativeEnv::to_options(native_env),
         native_env.flags.is_systemlib,
         native_env.flags.for_debugger_eval,
-        alloc,
         decl_provider,
         native_env.filepath.clone(),
     )
@@ -749,12 +744,10 @@ pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {
     use print_expr::Context;
 
     let opts = Options::default();
-    let alloc = bumpalo::Bump::new();
     let emitter = Emitter::new(
         opts,
         flags.is_systemlib,
         flags.for_debugger_eval,
-        &alloc,
         None,
         RelativePath::make(Prefix::Dummy, Default::default()),
     );

@@ -12,7 +12,7 @@ use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 
-pub fn typed_value_into_instr(e: &mut Emitter<'_, '_>, tv: TypedValue) -> Result<InstrSeq> {
+pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<InstrSeq> {
     match tv {
         TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
@@ -37,7 +37,7 @@ pub fn typed_value_into_instr(e: &mut Emitter<'_, '_>, tv: TypedValue) -> Result
     }
 }
 
-fn get_array_identifier(e: &mut Emitter<'_, '_>, tv: TypedValue) -> AdataId {
+fn get_array_identifier(e: &mut Emitter<'_>, tv: TypedValue) -> AdataId {
     if e.options().hhbc.array_provenance {
         e.adata_state.push(tv)
     } else {

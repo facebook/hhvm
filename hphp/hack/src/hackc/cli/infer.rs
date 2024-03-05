@@ -111,8 +111,7 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
     let content = fs::read(path)?;
 
     let action = || {
-        let pre_alloc = bumpalo::Bump::default();
-        build_ir(&pre_alloc, path, &content, opts).and_then(|unit| {
+        build_ir(path, &content, opts).and_then(|unit| {
             let mut output = Vec::new();
             textual::textual_writer(
                 &mut output,
@@ -133,12 +132,7 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
     }
 }
 
-fn build_ir<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
-    path: &'a Path,
-    content: &[u8],
-    opts: &'a Opts,
-) -> Result<ir::Unit> {
+fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Unit> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(Arc::new(filepath.clone()), content);
     let mut env = crate::compile::native_env(filepath, &opts.single_file_opts)?;
@@ -165,7 +159,6 @@ fn build_ir<'a, 'arena>(
         &decl_arena,
     );
     let unit = compile::unit_from_text_with_opts(
-        alloc,
         source_text,
         &env,
         decl_provider,

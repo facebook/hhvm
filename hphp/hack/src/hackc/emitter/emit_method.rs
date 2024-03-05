@@ -34,7 +34,7 @@ use crate::emit_native_opcode;
 use crate::emit_param;
 
 pub fn from_asts<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
 ) -> Result<Vec<Method>> {
@@ -45,7 +45,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
 }
 
 pub fn get_attrs_for_method(
-    emitter: &mut Emitter<'_, '_>,
+    emitter: &mut Emitter<'_>,
     method: &ast::Method_,
     user_attrs: &[Attribute],
     visibility: &ast::Visibility,
@@ -78,7 +78,7 @@ pub fn get_attrs_for_method(
 }
 
 pub fn from_ast<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     class: &'a ast::Class_,
     method_: impl Into<Cow<'a, ast::Method_>>,
 ) -> Result<Method> {

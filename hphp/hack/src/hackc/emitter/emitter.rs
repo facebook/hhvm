@@ -37,7 +37,7 @@ use crate::LabelGen;
 use crate::LocalGen;
 
 #[derive(Debug)]
-pub struct Emitter<'arena, 'decl> {
+pub struct Emitter<'decl> {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
 
@@ -54,8 +54,6 @@ pub struct Emitter<'arena, 'decl> {
 
     pub for_debugger_eval: bool,
 
-    pub alloc: &'arena bumpalo::Bump,
-
     pub adata_state: AdataState,
     pub statement_state_: Option<StatementState>,
     symbol_refs_state: SymbolRefsState,
@@ -71,22 +69,20 @@ pub struct Emitter<'arena, 'decl> {
     pub decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
 }
 
-impl<'arena, 'decl> Emitter<'arena, 'decl> {
+impl<'decl> Emitter<'decl> {
     pub fn new(
         opts: Options,
         systemlib: bool,
         for_debugger_eval: bool,
-        alloc: &'arena bumpalo::Bump,
         decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
         filepath: RelativePath,
-    ) -> Emitter<'arena, 'decl> {
+    ) -> Emitter<'decl> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
             decl_provider: decl_provider
                 .map(|p| Arc::new(MemoProvider::new(p)) as Arc<dyn DeclProvider<'decl> + 'decl>),
-            alloc,
 
             label_gen: LabelGen::new(),
             local_gen: LocalGen::new(),
@@ -249,7 +245,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
 }
 
-impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> {
+impl<'decl> print_expr::SpecialClassResolver for Emitter<'decl> {
     fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_>>, id: &'a str) -> Cow<'a, str> {
         let class_expr = ClassExpr::expr_to_class_expr(
             self,

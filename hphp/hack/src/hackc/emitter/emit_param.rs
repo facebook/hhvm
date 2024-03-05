@@ -40,7 +40,7 @@ pub fn has_variadic(params: &[Param]) -> bool {
 }
 
 pub fn from_asts<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -90,7 +90,7 @@ fn rename_params<'arena>(
 }
 
 fn from_ast<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -176,7 +176,7 @@ fn from_ast<'a, 'arena, 'decl>(
 }
 
 pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     env: &Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
@@ -217,19 +217,19 @@ struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'arena, 'decl> {
-    emitter: &'a mut Emitter<'arena, 'decl>,
+struct Ctx<'a, 'decl> {
+    emitter: &'a mut Emitter<'decl>,
     scope: &'a Scope<'a>,
 }
 
 impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {
-    type Params = AstParams<Ctx<'a, 'arena, 'decl>, ()>;
+    type Params = AstParams<Ctx<'a, 'decl>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'a, 'arena, 'decl>, p: &a::Expr) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a, 'decl>, p: &a::Expr) -> Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }

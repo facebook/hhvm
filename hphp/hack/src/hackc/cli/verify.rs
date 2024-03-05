@@ -132,10 +132,8 @@ struct AssembleOpts {
 
 impl AssembleOpts {
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
-        let pre_alloc = bumpalo::Bump::default();
         let mut compile_profile = compile::Profile::default();
         let (env, pre_unit) = compile_php_file(
-            &pre_alloc,
             path,
             content,
             &self.common.single_file_opts,
@@ -188,10 +186,8 @@ struct CompileOpts {
 
 impl CompileOpts {
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
-        let alloc = bumpalo::Bump::default();
         let mut compile_profile = compile::Profile::default();
         let (_env, unit) = compile_php_file(
-            &alloc,
             path,
             content,
             &self.common.single_file_opts,
@@ -233,10 +229,8 @@ struct IrOpts {
 
 impl IrOpts {
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
-        let pre_alloc = bumpalo::Bump::default();
         let mut compile_profile = compile::Profile::default();
         let (_env, pre_unit) = compile_php_file(
-            &pre_alloc,
             path,
             content,
             &self.common.single_file_opts,
@@ -318,10 +312,8 @@ impl InferOpts {
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         // For Infer verify we just make sure that the file can compile without
         // errors.
-        let alloc = bumpalo::Bump::default();
         let mut compile_profile = compile::Profile::default();
         let (_env, unit) = compile_php_file(
-            &alloc,
             path,
             content,
             &self.common.single_file_opts,
@@ -417,7 +409,6 @@ pub struct Opts {
 }
 
 fn compile_php_file<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
     path: &'a Path,
     content: Vec<u8>,
     single_file_opts: &'a SingleFileOpts,
@@ -443,7 +434,7 @@ fn compile_php_file<'a, 'arena>(
         env.hhbc_flags.optimize_local_iterators = false;
     }
 
-    let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, profile)
+    let unit = compile::unit_from_text(source_text, &env, decl_provider, profile)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     Ok((env, unit))
 }

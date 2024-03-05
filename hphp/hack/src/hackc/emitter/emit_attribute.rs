@@ -16,11 +16,11 @@ use oxidized::ast as a;
 
 use crate::emit_expression;
 
-pub fn from_asts(e: &mut Emitter<'_, '_>, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
+pub fn from_asts(e: &mut Emitter<'_>, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
     attrs.iter().map(|attr| from_ast(e, attr)).collect()
 }
 
-pub fn from_ast(e: &mut Emitter<'_, '_>, attr: &a::UserAttribute) -> Result<Attribute> {
+pub fn from_ast(e: &mut Emitter<'_>, attr: &a::UserAttribute) -> Result<Attribute> {
     let mut arguments: Vec<Expr<_, _>> = attr
         .params
         .iter()

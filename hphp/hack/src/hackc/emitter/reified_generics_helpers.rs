@@ -146,7 +146,7 @@ pub(crate) fn convert_awaitable<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint 
 }
 
 pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+    e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
     check: InstrSeq,
@@ -235,7 +235,7 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
 /// that has reified generics.
 pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
     env: &Env<'a>,
-    emitter: &mut Emitter<'arena, 'decl>,
+    emitter: &mut Emitter<'decl>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
     use aast::Hint_;

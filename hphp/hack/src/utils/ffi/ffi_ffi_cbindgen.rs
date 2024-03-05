@@ -7,10 +7,6 @@
 /// attempt to call this function will result in an intentional
 /// unresolved symbol at link time.
 #[no_mangle]
-pub extern "C" fn no_call_compile_only_USED_TYPES_ffi<'arena>(
-    _: Str<'arena>,
-    _: Maybe<i32>,
-    _: Vector<u8>,
-) {
+pub extern "C" fn no_call_compile_only_USED_TYPES_ffi<'arena>(_: Maybe<i32>, _: Vector<u8>) {
     unimplemented!()
 }

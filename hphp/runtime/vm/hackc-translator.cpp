@@ -127,12 +127,7 @@ struct TranslationState {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// hhbc::Slice helpers
-
-template <class T>
-folly::Range<const T*> range(Slice<T> const& s) {
-  return folly::range(s.data, s.data + s.len);
-}
+// hhbc::Vector helpers
 
 template <class T>
 folly::Range<const T*> range(Vector<T> const& s) {
@@ -205,11 +200,6 @@ Location::Range locationFromSrcLoc(const SrcLoc& srcloc) {
 ///////////////////////////////////////////////////////////////////////////////
 // hhbc::Str Helpers
 
-std::string toString(const Str& str) {
-  assertx(str.data != nullptr);
-  return std::string{(const char*)str.data, str.len};
-}
-
 std::string toString(const Vector<uint8_t>& str) {
   assertx(str.data != nullptr);
   return std::string{(const char*)str.data, str.len};
@@ -220,19 +210,9 @@ std::string toString(BytesId id) {
   return std::string{(const char*)b.data(), b.size()};
 }
 
-folly::StringPiece toStringPiece(const Str& str) {
-  assertx(str.data != nullptr);
-  return folly::StringPiece{(const char*)str.data, str.len};
-}
-
 folly::StringPiece toStringPiece(BytesId id) {
   auto const b = deref_bytes(id);
   return folly::StringPiece{(const char*)b.data(), b.size()};
-}
-
-StringData* toStaticString(const Str& str, uint32_t start = 0) {
-  assertx(start <= str.len);
-  return makeStaticString((char*)str.data + start, str.len - start);
 }
 
 StringData* toStaticString(const Vector<uint8_t>& str) {
@@ -242,11 +222,6 @@ StringData* toStaticString(const Vector<uint8_t>& str) {
 StringData* toStaticString(BytesId id, uint32_t start = 0) {
   auto const b = deref_bytes(id);
   return makeStaticString((char*)b.data() + start, b.size() - start);
-}
-
-// TODO(@voork): NamedLocals are still prefixed with '$'.
-StringData* toNamedLocalStaticString(const Str& str) {
-  return toStaticString(str, 1);
 }
 
 // TODO(@voork): NamedLocals are still prefixed with '$'.
@@ -861,9 +836,6 @@ StringId getStrfromSA(const ConstName& c) {
 }
 StringId getStrfromSA(const PropName& p) {
   return p._0;
-}
-Str getStrfromSA(const Str& s) {
-  return s;
 }
 BytesId getStrfromSA(const BytesId s) {
   return s;

@@ -1817,10 +1817,7 @@ checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
 name = "ffi"
 version = "0.0.0"
 dependencies = [
- "bstr",
- "bumpalo",
  "serde",
- "write_bytes",
 ]
 
 [[package]]

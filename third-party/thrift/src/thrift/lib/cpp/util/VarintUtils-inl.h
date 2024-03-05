@@ -234,10 +234,10 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   }
   // By reset data bits and toggle the continuation bits, the tailing zeros
   // should be intBytes*8-1
-  size_t intBytes =
-      (__builtin_ctzll(continuationBits ^ kContinuationBitMask) >> 3) + 1;
+  size_t maskShift = __builtin_ctzll(continuationBits ^ kContinuationBitMask);
+  size_t intBytes = (maskShift >> 3) + 1;
 
-  uint64_t mask = (1ULL << (8 * intBytes - 1)) - 1;
+  uint64_t mask = (1ULL << maskShift) - 1;
   // You might think it would make more sense to to the pext first and mask
   // afterwards (avoiding having two pexts in a single dependency chain at 3
   // cycles / pop); this seems not to be borne out in microbenchmarks. The

@@ -119,9 +119,9 @@ pub struct {{service:rust_name}}<'mock> {{>lib/block}}
     pub parent: {{service:client_package}}::mock::{{service:rust_name}}<'mock>,
     {{/service:extends}}
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     pub {{function:rust_name}}: r#impl::{{service:snake}}::{{function:rust_name}}<'mock>,
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
@@ -133,10 +133,10 @@ impl dyn super::client::{{service:rust_name}} {
             parent: <dyn {{service:client_package}}::{{service:rust_name}}>::mock(),
             {{/service:extends}}
             {{#service:rustFunctions}}
-            {{^function:starts_interaction?}}
+            {{^function:starts_interaction?}}{{^function:sink?}}
             {{function:rust_name}}: {{!
                 }}r#impl::{{service:snake}}::{{function:rust_name}}::unimplemented(),
-            {{/function:starts_interaction?}}
+            {{/function:sink?}}{{/function:starts_interaction?}}
             {{/service:rustFunctions}}
             _marker: ::std::marker::PhantomData,
         }
@@ -145,7 +145,7 @@ impl dyn super::client::{{service:rust_name}} {
 
 impl<'mock> super::client::{{service:rust_name}} for {{service:rust_name}}<'mock> {{>lib/block}}{{!
     }}{{#service:rustFunctions}}
-    {{^function:starts_interaction?}}{{^function:creates_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}{{^function:creates_interaction?}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
@@ -181,7 +181,7 @@ impl<'mock> super::client::{{service:rust_name}} for {{service:rust_name}}<'mock
     ) -> {{>lib/client_return_type}} {
         unimplemented!("Mocking interactions is not yet implemented");
     }{{!
-    }}{{/function:creates_interaction?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    }}{{/function:creates_interaction?}}{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
@@ -215,7 +215,7 @@ pub mod r#impl {{>lib/block}}{{!
     pub mod {{service:snake}} {{>lib/block}}{{!
 
         }}{{#service:rustFunctions}}
-        {{^function:starts_interaction?}}
+        {{^function:starts_interaction?}}{{^function:sink?}}
 
         pub struct {{function:rust_name}}<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
@@ -324,7 +324,7 @@ pub mod r#impl {{>lib/block}}{{!
                 }}| ::std::result::Result::Err(exception.clone().into()));
             }
         }{{!
-        }}{{/function:starts_interaction?}}{{!
+        }}{{/function:sink?}}{{/function:starts_interaction?}}{{!
         }}{{/service:rustFunctions}}
     }{{!
 }}{{/program:services}}

@@ -250,31 +250,41 @@ class MessageQueue {
    */
   template <class... Args>
   void blockingWrite(Args&&... args) noexcept {
-    queue_.blockingWrite(std::forward<Args>(args)...);
+    blockingWriteNoNotify(std::forward<Args>(args)...);
     if (notifier_.shouldNotify()) {
       doNotify();
     }
   }
 
   /**
-   * Similar to blockingWrite, except that it used the relaxed notification
+   * Similar to blockingWrite(), except that it used the relaxed notification
    * semantics. See Notifier class in this file for more details.
    */
   template <class... Args>
   void blockingWriteRelaxed(Args&&... args) noexcept {
-    queue_.blockingWrite(std::forward<Args>(args)...);
+    blockingWriteNoNotify(std::forward<Args>(args)...);
     if (notifier_.shouldNotifyRelaxed()) {
       doNotify();
     }
   }
 
   /**
-   * Similar to blockingWrite, except that it won't notify the EventBase thread.
-   * The caller will then be responsible for calling notifyRelaxed().
+   * Similar to blockingWrite(), except that it does not guarantee to notify the
+   * consumer thread. The caller is responsible for eventually calling
+   * notifyRelaxed().
    */
   template <class... Args>
   void blockingWriteNoNotify(Args&&... args) noexcept {
-    queue_.blockingWrite(std::forward<Args>(args)...);
+    if (!queue_.writeIfNotFull(std::forward<Args>(args)...)) {
+      // If we block here and the consumer is asleep, the caller has no chance
+      // to notify it, causing a deadlock. Force a notification in this case
+      // before blocking.
+      VLOG(2) << "MessageQueue full, forcing notification";
+      if (notifier_.shouldNotify()) {
+        doNotify();
+      }
+      queue_.blockingWrite(std::forward<Args>(args)...);
+    }
   }
 
   /**

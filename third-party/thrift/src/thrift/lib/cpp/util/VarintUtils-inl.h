@@ -134,12 +134,8 @@ FOLLY_ALWAYS_INLINE bool tryReadFirstTwoBytesU64(
   // maximum size an encoded varint can be.
   DCHECK((p[0] & 0x80) != 0);
   uint64_t hi = p[1];
-  if ((hi & 0x80) == 0) {
-    result = (hi << 7) | (p[0] & 0x7f);
-    return true;
-  }
   result = ((hi & 0x7F) << 7) | (p[0] & 0x7f);
-  return false;
+  return (hi & 0x80) == 0;
 }
 
 #if THRIFT_UTIL_VARINTUTILS_SIMD_DECODER

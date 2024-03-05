@@ -146,9 +146,8 @@ impl AssembleOpts {
         compile::unit_to_string(&env, &mut output, &pre_unit, &mut print_profile)
             .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
-        let post_alloc = bumpalo::Bump::default();
         let (asm_result, assemble_t) =
-            Timing::time(path, || assemble::assemble_from_bytes(&post_alloc, &output));
+            Timing::time(path, || assemble::assemble_from_bytes(&output));
         let (post_unit, _) = asm_result.map_err(|err| {
             VerifyError::AssembleError(truncate_pos_err(err.root_cause().to_string()))
         })?;

@@ -60,7 +60,6 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 
     Ok(quote!(
         fn #name(
-            alloc: &Bump,
             tok: &'_ [u8],
             token_iter: &mut Lexer<'_>,
             decl_map: &StringIdMap<u32>,

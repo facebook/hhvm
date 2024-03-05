@@ -14,7 +14,6 @@ use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Context;
 use anyhow::Result;
-use bumpalo::Bump;
 use ffi::Maybe;
 use ffi::Vector;
 use hhbc::BytesId;
@@ -34,29 +33,25 @@ use crate::token::Token;
 pub(crate) type DeclMap = StringIdMap<u32>;
 
 /// Assembles the hhas within f to a hhbc::Unit
-pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit, PathBuf)> {
+pub fn assemble(f: &Path) -> Result<(hhbc::Unit, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
-    assemble_from_bytes(alloc, &s)
+    assemble_from_bytes(&s)
 }
 
 /// Assembles the hhas represented by the slice of bytes input
-pub fn assemble_from_bytes<'arena>(alloc: &'arena Bump, s: &[u8]) -> Result<(hhbc::Unit, PathBuf)> {
+pub fn assemble_from_bytes(s: &[u8]) -> Result<(hhbc::Unit, PathBuf)> {
     let mut lex = Lexer::from_slice(s, Line(1));
-    let unit = assemble_from_toks(alloc, &mut lex)?;
+    let unit = assemble_from_toks(&mut lex)?;
     trace!("ASM UNIT: {unit:?}");
     Ok(unit)
 }
 
 /// Assembles a single bytecode. This is useful for dynamic analysis,
 /// where we want to assemble each bytecode as it is being executed.
-pub fn assemble_single_instruction<'arena>(
-    alloc: &'arena Bump,
-    decl_map: &mut DeclMap,
-    s: &[u8],
-) -> Result<hhbc::Instruct> {
+pub fn assemble_single_instruction(decl_map: &mut DeclMap, s: &[u8]) -> Result<hhbc::Instruct> {
     let mut lex = Lexer::from_slice(s, Line(1));
     let mut tcb_count = 0;
-    assemble_instr(alloc, &mut lex, decl_map, &mut tcb_count)
+    assemble_instr(&mut lex, decl_map, &mut tcb_count)
 }
 
 /// Assembles the HCU. Parses over the top level of the .hhas file
@@ -64,16 +59,13 @@ pub fn assemble_single_instruction<'arena>(
 /// .filepath <str_literal>
 /// (.function <...>)+
 /// (.function_refs <...>)+
-fn assemble_from_toks<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<(hhbc::Unit, PathBuf)> {
+fn assemble_from_toks(token_iter: &mut Lexer<'_>) -> Result<(hhbc::Unit, PathBuf)> {
     // First token should be the filepath
     let fp = assemble_filepath(token_iter)?;
 
     let mut unit = UnitBuilder::default();
     while !token_iter.is_empty() {
-        unit.assemble_decl(alloc, token_iter)?;
+        unit.assemble_decl(token_iter)?;
     }
 
     Ok((unit.into_unit(), fp))
@@ -122,7 +114,7 @@ impl UnitBuilder {
         }
     }
 
-    fn assemble_decl(&mut self, alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<()> {
+    fn assemble_decl(&mut self, token_iter: &mut Lexer<'_>) -> Result<()> {
         let tok = token_iter.peek().unwrap();
 
         if !tok.is_decl() {
@@ -137,10 +129,10 @@ impl UnitBuilder {
                 self.adatas.push(assemble_adata(token_iter)?);
             }
             b".function" => {
-                self.funcs.push(assemble_function(alloc, token_iter)?);
+                self.funcs.push(assemble_function(token_iter)?);
             }
             b".class" => {
-                self.classes.push(assemble_class(alloc, token_iter)?);
+                self.classes.push(assemble_class(token_iter)?);
             }
             b".function_refs" => {
                 ensure_single_defn(&self.func_refs, tok)?;
@@ -295,7 +287,7 @@ fn assemble_typedef(token_iter: &mut Lexer<'_>, case_type: bool) -> Result<hhbc:
     })
 }
 
-fn assemble_class<'arena>(alloc: &'arena Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Class> {
+fn assemble_class(token_iter: &mut Lexer<'_>) -> Result<hhbc::Class> {
     parse!(token_iter, ".class"
        <upper_bounds:assemble_upper_bounds()>
        <attr:assemble_special_and_user_attrs()>
@@ -322,7 +314,7 @@ fn assemble_class<'arena>(alloc: &'arena Bump, token_iter: &mut Lexer<'_>) -> Re
             b".require" => requirements.push(assemble_requirement(token_iter)?),
             b".ctx" => ctx_constants.push(assemble_ctx_constant(token_iter)?),
             b".property" => properties.push(assemble_property(token_iter)?),
-            b".method" => methods.push(assemble_method(alloc, token_iter)?),
+            b".method" => methods.push(assemble_method(token_iter)?),
             b".const" => {
                 assemble_const_or_type_const(token_iter, &mut constants, &mut type_constants)?
             }
@@ -450,10 +442,7 @@ fn assemble_const_or_type_const<'arena>(
 /// .method {}{} [public abstract] (15,15) <"" N > a(<"?HH\\varray" "HH\\varray" nullable extended_hint display_nullable> $a1 = DV1("""NULL"""), <"HH\\varray" "HH\\varray" > $a2 = DV2("""varray[]""")) {
 ///    ...
 /// }
-fn assemble_method<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Method> {
+fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     let method_tok = token_iter.peek().copied();
     token_iter.expect_str(Token::is_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(token_iter)?;
@@ -466,7 +455,6 @@ fn assemble_method<'arena>(
     let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (body, coeffects) = assemble_body(
-        alloc,
         token_iter,
         &mut decl_map,
         params,
@@ -1002,10 +990,7 @@ where
 
 /// A function def is composed of the following:
 /// .function {upper bounds} [special_and_user_attrs] (span) <type_info> name (params) flags? {body}
-fn assemble_function<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Function> {
+fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
     token_iter.expect_str(Token::is_decl, ".function")?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
@@ -1024,7 +1009,6 @@ fn assemble_function<'arena>(
     let flags = assemble_function_flags(name, token_iter)?;
     let shadowed_tparams = Default::default();
     let (body, coeffects) = assemble_body(
-        alloc,
         token_iter,
         &mut decl_map,
         params,
@@ -1348,7 +1332,6 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
 
 /// { (.doc ...)? (.ismemoizewrapper)? (.ismemoizewrapperlsb)? (.numiters)? (.declvars)? (instructions)* }
 fn assemble_body<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     params: Vec<hhbc::Param>,
@@ -1401,7 +1384,7 @@ fn assemble_body<'arena>(
     // we only stop parsing instructions once we see a is_close_curly and tcb_count is 0
     let mut tcb_count = 0;
     while tcb_count > 0 || !token_iter.peek_is(Token::is_close_curly) {
-        instrs.push(assemble_instr(alloc, token_iter, decl_map, &mut tcb_count)?);
+        instrs.push(assemble_instr(token_iter, decl_map, &mut tcb_count)?);
     }
     token_iter.expect(Token::is_close_curly)?;
     let stack_depth = stack_depth::compute_stack_depth(&params, &instrs)?;
@@ -1619,8 +1602,7 @@ fn assemble_decl_vars(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Res
 }
 
 #[assemble_opcode_macro::assemble_opcode]
-fn assemble_opcode<'arena>(
-    alloc: &'arena Bump,
+fn assemble_opcode(
     tok: &'_ [u8],
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
@@ -1631,7 +1613,6 @@ fn assemble_opcode<'arena>(
 /// Opcodes and Pseudos
 #[allow(clippy::todo)]
 fn assemble_instr<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
@@ -1675,7 +1656,7 @@ fn assemble_instr<'arena>(
             match tb {
                 b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
                 b"SSwitch" => assemble_sswitch(&mut sl_lexer),
-                tb => assemble_opcode(alloc, tb, &mut sl_lexer, decl_map),
+                tb => assemble_opcode(tb, &mut sl_lexer, decl_map),
             }
         } else {
             Err(sl_lexer.error("Function body line that's neither decl or identifier."))

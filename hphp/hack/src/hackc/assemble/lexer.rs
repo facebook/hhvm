@@ -591,8 +591,6 @@ fn parse_token(mut source: &[u8], line: Line) -> (Option<Token<'_>>, &[u8]) {
 
 #[cfg(test)]
 mod test {
-    use bumpalo::Bump;
-
     use super::*;
     use crate::assemble;
 
@@ -727,24 +725,21 @@ mod test {
     fn no_top_level_shouldnt_parse() {
         // Is there a better way, maybe to verify the string in the bail?
         let s = b".srloc 3:7,3:22";
-        let alloc = Bump::default();
-        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
+        assert!(assemble::assemble_from_bytes(s).is_ok())
     }
 
     #[test]
     #[should_panic]
     fn no_fpath_semicolon_shouldnt_parse() {
         let s = br#".filepath "aaaa""#;
-        let alloc = Bump::default();
-        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
+        assert!(assemble::assemble_from_bytes(s).is_ok())
     }
 
     #[test]
     #[should_panic]
     fn fpath_wo_file_shouldnt_parse() {
         let s = br#".filepath aaa"#;
-        let alloc = Bump::default();
-        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
+        assert!(assemble::assemble_from_bytes(s).is_ok())
     }
 
     #[test]

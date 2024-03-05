@@ -12,7 +12,6 @@ use std::path::PathBuf;
 use ::assemble as _;
 use anyhow::anyhow;
 use anyhow::Result;
-use bumpalo::Bump;
 use clap::Args;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -49,8 +48,7 @@ pub fn run(opts: Opts) -> Result<()> {
 /// Assemble the hhas in a given file to a hhbc::Unit. Then use bytecode printer
 /// to write the hhas representation of that HCU to output.
 pub fn process_one_file(f: &Path, w: &SyncWrite) -> Result<()> {
-    let alloc = Bump::default();
-    let (hcu, fp) = assemble::assemble(&alloc, f)?;
+    let (hcu, fp) = assemble::assemble(f)?;
     let filepath = RelativePath::make(relative_path::Prefix::Dummy, fp);
     let ctxt = bytecode_printer::Context::new(Some(&filepath), false);
     let mut output = Vec::new();

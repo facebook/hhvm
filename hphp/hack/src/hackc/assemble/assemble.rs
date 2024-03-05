@@ -1779,8 +1779,8 @@ fn assemble_unescaped_unquoted_triple_vec(token_iter: &mut Lexer<'_>) -> Result<
 /// Ex:
 /// SSwitch <"ARRAY7":L0 "ARRAY8":L1 "ARRAY9":L2 -:L3>
 fn assemble_sswitch(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct> {
-    let mut cases = Vec::new(); // Of Str<'arena>
-    let mut targets = Vec::new(); // Of Labels
+    let mut cases = Vec::new();
+    let mut targets = Vec::new();
     token_iter.expect_str(Token::is_identifier, "SSwitch")?;
     token_iter.expect(Token::is_lt)?;
     // The last case is printed as '-' but interior it is "default"

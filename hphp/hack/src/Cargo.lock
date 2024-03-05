@@ -3859,7 +3859,6 @@ dependencies = [
 name = "print"
 version = "0.0.0"
 dependencies = [
- "ffi",
  "ir_core",
 ]
 

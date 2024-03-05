@@ -11,5 +11,4 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-ffi = { version = "0.0.0", path = "../../../utils/ffi" }
 ir_core = { version = "0.0.0", path = "../ir_core" }

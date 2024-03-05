@@ -18,7 +18,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 
-use ffi::Str;
 use ir_core::instr::HasLoc;
 use ir_core::instr::Special;
 use ir_core::BareThisOp;
@@ -611,11 +610,11 @@ impl Display for FmtOptKeyValue<'_> {
     }
 }
 
-pub(crate) struct FmtQuotedStr<'a>(pub(crate) &'a Str<'a>);
+pub(crate) struct FmtQuotedStr<'a>(pub(crate) &'a [u8]);
 
 impl Display for FmtQuotedStr<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        FmtEscapedString(self.0.as_ref()).fmt(f)
+        FmtEscapedString(self.0).fmt(f)
     }
 }
 

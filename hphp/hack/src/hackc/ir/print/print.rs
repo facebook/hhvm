@@ -16,7 +16,6 @@ use std::fmt::Error;
 use std::fmt::Result;
 use std::fmt::Write;
 
-use ffi::Str;
 use ir_core::class::Property;
 use ir_core::instr::BaseOp;
 use ir_core::instr::FinalOp;
@@ -317,11 +316,7 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     )?;
 
     if let Some(doc_comment) = class.doc_comment.as_ref() {
-        writeln!(
-            w,
-            "  doc_comment {}",
-            FmtQuotedStr(&ffi::Str::new(doc_comment.as_ref()))
-        )?;
+        writeln!(w, "  doc_comment {}", FmtQuotedStr(doc_comment.as_ref()))?;
     }
 
     if let Some(base) = class.base {
@@ -434,7 +429,7 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects) -> Resul
         writeln!(
             w,
             ".coeffects_cc_param {index} {}",
-            FmtQuotedStr(&Str::new(ctx_name.as_str().as_bytes()))
+            FmtQuotedStr(ctx_name.as_str().as_bytes())
         )?;
     }
 
@@ -443,7 +438,7 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects) -> Resul
             w,
             ".coeffects_cc_this {}",
             FmtSep::comma(types.iter(), |f, v| {
-                FmtQuotedStr(&Str::new(v.as_str().as_bytes())).fmt(f)
+                FmtQuotedStr(v.as_str().as_bytes()).fmt(f)
             })
         )?;
     }
@@ -508,12 +503,7 @@ pub(crate) fn print_fatal(
         };
 
         print_top_level_loc(w, Some(loc), strings)?;
-        writeln!(
-            w,
-            ".fatal {} {}\n",
-            what,
-            FmtQuotedStr(&ffi::Str::new(message))
-        )?;
+        writeln!(w, ".fatal {} {}\n", what, FmtQuotedStr(message))?;
     }
     Ok(())
 }
@@ -527,11 +517,7 @@ pub(crate) fn print_func_body(
     f_pre_instr: Option<&dyn Fn(&mut dyn Write, InstrId) -> Result>,
 ) -> Result {
     if let Some(doc_comment) = func.doc_comment.as_ref() {
-        writeln!(
-            w,
-            "  .doc {}",
-            FmtQuotedStr(&ffi::Str::new(doc_comment.as_ref()))
-        )?;
+        writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment.as_ref()))?;
     }
     if func.num_iters != 0 {
         writeln!(w, "  .num_iters {}", func.num_iters)?;
@@ -1994,20 +1980,18 @@ fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs) -> Result {
     for v in includes {
         write!(w, ".include_ref ")?;
         match v {
-            IncludePath::Absolute(path) => {
-                write!(w, "{}", FmtQuotedStr(&Str::new(path.as_bytes())))?
-            }
+            IncludePath::Absolute(path) => write!(w, "{}", FmtQuotedStr(path.as_bytes()))?,
             IncludePath::SearchPathRelative(path) => {
-                write!(w, "relative {}", FmtQuotedStr(&Str::new(path.as_bytes())))?
+                write!(w, "relative {}", FmtQuotedStr(path.as_bytes()))?
             }
             IncludePath::IncludeRootRelative(root, path) => write!(
                 w,
                 "rooted {} {}",
-                FmtQuotedStr(&Str::new(root.as_bytes())),
-                FmtQuotedStr(&Str::new(path.as_bytes()))
+                FmtQuotedStr(root.as_bytes()),
+                FmtQuotedStr(path.as_bytes())
             )?,
             IncludePath::DocRootRelative(path) => {
-                write!(w, "doc {}", FmtQuotedStr(&Str::new(path.as_bytes())))?
+                write!(w, "doc {}", FmtQuotedStr(path.as_bytes()))?
             }
         }
         writeln!(w)?;
@@ -2196,11 +2180,7 @@ fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant, strings: &StringInt
     if tc.is_abstract {
         write!(w, "abstract ")?;
     }
-    write!(
-        w,
-        "{}",
-        FmtIdentifier(&Str::new(tc.name.as_str().as_bytes()))
-    )?;
+    write!(w, "{}", FmtIdentifier(tc.name.as_str().as_bytes()))?;
     if let Some(init) = &tc.initializer {
         write!(w, " = {}", FmtTypedValue(init, strings))?;
     }

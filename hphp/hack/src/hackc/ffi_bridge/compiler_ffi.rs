@@ -552,7 +552,7 @@ pub struct DeclsHolder {
 // This is accessed in test_ffi.cpp; hence repr(C)
 #[derive(Debug)]
 #[repr(C)]
-pub struct UnitWrapper(Unit, bumpalo::Bump);
+pub struct UnitWrapper(Unit);
 
 ///////////////////////////////////////////////////////////////////////////////////
 impl ffi::NativeEnv {
@@ -625,7 +625,7 @@ impl ffi::NativeEnv {
     }
 }
 
-fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
+fn hash_unit(UnitWrapper(unit): &UnitWrapper) -> [u8; 20] {
     use bincode::Options;
     let mut hasher = Sha1::new();
     let w = std::io::BufWriter::new(&mut hasher);
@@ -748,7 +748,6 @@ fn compile_unit_from_text(
     env: &ffi::NativeEnv,
     source_text: &[u8],
 ) -> Result<Box<UnitWrapper>, String> {
-    let bump = bumpalo::Bump::new();
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         std::sync::Arc::new(native_env.filepath.clone()),
@@ -773,7 +772,7 @@ fn compile_unit_from_text(
     );
 
     compile::unit_from_text(text, &native_env, decl_provider, &mut Default::default())
-        .map(|unit| Box::new(UnitWrapper(unit, bump)))
+        .map(|unit| Box::new(UnitWrapper(unit)))
         .map_err(|e| e.to_string())
 }
 

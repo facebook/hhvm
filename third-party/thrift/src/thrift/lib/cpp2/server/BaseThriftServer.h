@@ -1719,6 +1719,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
  public:
   void addModule(std::unique_ptr<ServerModule> module) {
+    CHECK(configMutable());
     auto name = module->getName();
     if (unprocessedModulesSpecification_.names.count(name)) {
       throw std::invalid_argument("Duplicate module name");

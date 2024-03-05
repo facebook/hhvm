@@ -24,6 +24,10 @@
 #include <folly/portability/Builtins.h>
 #include <thrift/lib/cpp2/type/Id.h>
 
+#if defined(__cpp_lib_bitops) && __cpp_lib_bitops >= 201907L
+#include <bit>
+#endif
+
 // We need 64-bit for __mm_extra_epi64 and _pext_u64. MSVC support seems to be
 // difficult to detect, so disable the BMI2 and SIMD versions entirely there.
 #if defined(__BMI2__) && FOLLY_X64 && !defined(_MSC_VER)
@@ -222,9 +226,15 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   // interested in for varint decoding purposes).
   uint64_t bits = folly::loadUnaligned<uint64_t>(p);
 
-  const uint64_t kContinuationBitMask = 0x8080808080808080ULL;
-  uint64_t continuationBits = bits & kContinuationBitMask;
-  if (continuationBits == kContinuationBitMask) {
+  const uint64_t kDataBitMask = 0x7F7F7F7F7F7F7F7FULL;
+  const uint64_t allDataBitsSet = bits | kDataBitMask;
+  const uint64_t oneInLowestUnsetContinuationBitWithTrailingBitsZero =
+      allDataBitsSet + 1;
+  // NOTE: by hoisting the increment of allDataBitsSet above this
+  // check, we can perform the check against zero rather than -1.
+  // This accelerates the check because the INC instruction will set
+  // ZF if the result is 0, netting a savings of one CMP instruction.
+  if (oneInLowestUnsetContinuationBitWithTrailingBitsZero == 0) {
     // The maximum bytes of int64 would be ceil(64/7)=10, as we had used
     // tryReadFirstTwoBytesU64 to read 2 bytes, there would be 8 bytes leftover
     // in maximum.
@@ -234,7 +244,21 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   }
   // By reset data bits and toggle the continuation bits, the tailing zeros
   // should be intBytes*8-1
-  size_t maskShift = __builtin_ctzll(continuationBits ^ kContinuationBitMask);
+#if defined(__cpp_lib_bitops) && __cpp_lib_bitsops >= 201907L
+  // __builtin_ctzll(0) is defined as UB, even though TZCNT does what we want in
+  // that case. std::countr_zero is the same thing without the UB.
+  size_t maskShift =
+      std::countr_zero(oneInLowestUnsetContinuationBitWithTrailingBitsZero);
+#else
+  // We settle for folly::findFirstSet and fix up the result if we have to.
+  size_t maskShift =
+      folly::findFirstSet(oneInLowestUnsetContinuationBitWithTrailingBitsZero);
+  if (maskShift == 0) {
+    maskShift = 64;
+  } else {
+    maskShift--;
+  }
+#endif
   size_t intBytes = (maskShift >> 3) + 1;
 
   uint64_t mask = (1ULL << maskShift) - 1;
@@ -242,7 +266,7 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   // afterwards (avoiding having two pexts in a single dependency chain at 3
   // cycles / pop); this seems not to be borne out in microbenchmarks. The
   // mask you need ends up being more complicated to compute.
-  uint64_t highBits = _pext_u64((bits & mask), 0x7F7F7F7F7F7F7F7FULL);
+  uint64_t highBits = _pext_u64((bits & mask), kDataBitMask);
   result |= (highBits << 14);
 
   value = result;

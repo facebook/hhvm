@@ -70,12 +70,18 @@ class ClientTests(unittest.TestCase):
         # Create a broken client
         client = TestingService()
         # This should not raise an exception
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             # pyre-fixme[1001]: `client.complex_action($parameter$first = "foo",
             #  $parameter$second = "bar", $parameter$third = 9, $parameter$fourth =
             #  "baz")` is never awaited.
             client.complex_action(first="foo", second="bar", third=9, fourth="baz")
 
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             # pyre-fixme[1001]: `client.complex_action("foo", "bar", 9, "baz")` is
             #  never awaited.
@@ -164,10 +170,16 @@ class ClientTests(unittest.TestCase):
     def test_rpc_container_autoboxing(self) -> None:
         client = TestingService()
 
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             # pyre-fixme[1001]: `client.takes_a_list([1, 2, 3])` is never awaited.
             client.takes_a_list([1, 2, 3])
 
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             # pyre-fixme[1001]: `client.takes_a_list(testing.types.I32List([1, 2,
             #  3]))` is never awaited.
@@ -198,6 +210,9 @@ class ClientTests(unittest.TestCase):
             # pyre-fixme[6]: Expected `Color` for 1st param but got `int`.
             loop.run_until_complete(client.pick_a_color(0))
 
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             loop.run_until_complete(client.pick_a_color(Color.red))
 
@@ -208,6 +223,9 @@ class ClientTests(unittest.TestCase):
         four = 2**63 - 1
         client = TestingService()
         loop = asyncio.get_event_loop()
+        # pyre-fixme[6]: For 1st argument expected `Union[Type[Variable[_E (bound to
+        #  BaseException)]], typing.Tuple[Type[Variable[_E (bound to BaseException)]],
+        #  ...]]` but got `Type[InvalidStateError]`.
         with self.assertRaises(asyncio.InvalidStateError):
             # means we passed type checks
             loop.run_until_complete(client.int_sizes(one, two, three, four))

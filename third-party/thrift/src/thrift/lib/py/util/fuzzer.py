@@ -31,7 +31,11 @@ import sys
 import time
 
 import six
+
+# pyre-fixme[21]: Could not find module `six.moves`.
 import six.moves as sm
+
+# pyre-fixme[21]: Could not find module `six.moves.urllib.parse`.
 from six.moves.urllib.parse import urlparse
 
 try:

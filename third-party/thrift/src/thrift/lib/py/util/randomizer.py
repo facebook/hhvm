@@ -25,6 +25,8 @@ import random
 import sys
 
 import six
+
+# pyre-fixme[21]: Could not find module `six.moves`.
 import six.moves as sm
 from thrift import Thrift
 from thrift.util.type_inspect import get_spec, ThriftPyTypeSpec

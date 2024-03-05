@@ -51,10 +51,11 @@ inline int fstrcmp(const char* s1, const char* s2) {
 inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
   auto minlen = std::min(s1.size(), s2.size());
   auto order = memcmp(s1.data(), s2.data(), minlen);
-  if (order == 0 || RO::EvalLogTsameCollisions >= 2) {
+  if (order == 0) {
     return s1.size() < s2.size() ? -1 :
            s1.size() > s2.size() ? 1 : 0;
   }
+  if (RO::EvalLogTsameCollisions >= 2) return order;
   order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
   if (order != 0 || RO::EvalLogTsameCollisions == 0) return order;
   return tstrcmp_log_slice(s1, s2);
@@ -63,10 +64,11 @@ inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
 inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
   auto minlen = std::min(s1.size(), s2.size());
   auto order = memcmp(s1.data(), s2.data(), minlen);
-  if (order == 0 || RO::EvalLogFsameCollisions >= 2) {
+  if (order == 0) {
     return s1.size() < s2.size() ? -1 :
            s1.size() > s2.size() ? 1 : 0;
   }
+  if (RO::EvalLogTsameCollisions >= 2) return order;
   order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
   if (order != 0 || RO::EvalLogFsameCollisions == 0) return order;
   return fstrcmp_log_slice(s1, s2);

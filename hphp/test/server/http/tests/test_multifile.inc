@@ -54,7 +54,7 @@ class TestWebRoot implements IDisposable {
     // Special support for tests that require a regexp that matches
     // the domain name of the requests
     if (strpos($testData, '{DOMAIN_REGEXP}') !== false) {
-      $parts = preg_split("/[\.]/", getHostName());
+      $parts = preg_split("/[\.]/", gethostname());
       $domainName = $parts[count($parts)-2].'.'.$parts[count($parts)-1];
       $hostNamePattern = '\'.*\.'.preg_quote($domainName).'$\'';
       $testData = str_replace('{DOMAIN_REGEXP}', $hostNamePattern, $testData);

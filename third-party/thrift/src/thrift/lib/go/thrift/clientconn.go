@@ -44,6 +44,15 @@ func NewClientConnWithProtocols(t Transport, iproto, oproto Protocol) ClientConn
 	}
 }
 
+// NewClientConnFromProtocol creates a new ClientConn object using a protocol
+func NewClientConnFromProtocol(proto Protocol) ClientConn {
+	return ClientConn{
+		transport: nil,
+		iproto:    proto,
+		oproto:    proto,
+	}
+}
+
 // IRequest represents a request to be sent to a thrift endpoint
 type IRequest interface {
 	Write(p Protocol) error

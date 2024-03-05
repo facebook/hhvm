@@ -1,3 +1,2 @@
 hack: hack:lazy_constants=1,arrays=1 src/module.thrift
-php: php:lazy_constants=1 src/module.thrift
 java: mstch_java src/module.thrift

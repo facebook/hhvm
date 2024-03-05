@@ -1,6 +1,5 @@
 android: android:annotate src/module.thrift
 java_deprecated: java_deprecated src/module.thrift
-php: php src/module.thrift
 hack: hack src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 go: mstch_go src/module.thrift

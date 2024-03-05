@@ -964,12 +964,12 @@ function hhvm_cmd(
   );
   $file_opts = read_opts_file("{$test}.opts");
 
-  $config = find_test_ext($test, 'ini');
-  invariant($config is nonnull, "%s", __METHOD__);
+  $config_ini = find_file_for_dir(dirname($test), 'config.ini');
+  invariant($config_ini is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
     $options,
     $test,
-    $config,
+    $config_ini,
     Status::getTestWorkingDir($test) . '/autoloadDB',
     $hdf,
     find_debug_config($test, 'hphpd.ini'),

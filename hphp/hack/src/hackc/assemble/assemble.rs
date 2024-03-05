@@ -135,7 +135,7 @@ impl UnitBuilder {
                 self.fatal = Some(assemble_fatal(token_iter)?);
             }
             b".adata" => {
-                self.adatas.push(assemble_adata(alloc, token_iter)?);
+                self.adatas.push(assemble_adata(token_iter)?);
             }
             b".function" => {
                 self.funcs.push(assemble_function(alloc, token_iter)?);
@@ -179,16 +179,13 @@ impl UnitBuilder {
                 })?)
             }
             b".alias" => {
-                self.typedefs
-                    .push(assemble_typedef(alloc, token_iter, false)?);
+                self.typedefs.push(assemble_typedef(token_iter, false)?);
             }
             b".case_type" => {
-                self.typedefs
-                    .push(assemble_typedef(alloc, token_iter, true)?);
+                self.typedefs.push(assemble_typedef(token_iter, true)?);
             }
             b".const" => {
                 assemble_const_or_type_const(
-                    alloc,
                     token_iter,
                     &mut self.constants,
                     &mut self.type_constants,
@@ -200,13 +197,13 @@ impl UnitBuilder {
                 );
             }
             b".file_attributes" => {
-                assemble_file_attributes(alloc, token_iter, &mut self.file_attributes)?;
+                assemble_file_attributes(token_iter, &mut self.file_attributes)?;
             }
             b".module_use" => {
                 self.module_use = Some(assemble_module_use(token_iter)?);
             }
             b".module" => {
-                self.modules.push(assemble_module(alloc, token_iter)?);
+                self.modules.push(assemble_module(token_iter)?);
             }
             _ => {
                 return Err(tok.error("Unknown top level declarationr"))?;
@@ -229,10 +226,10 @@ fn ensure_single_defn<T>(v: &Option<T>, tok: &Token<'_>) -> Result<()> {
 /// Ex:
 /// .module m0 (64, 64) {
 /// }
-fn assemble_module(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Module> {
+fn assemble_module(token_iter: &mut Lexer<'_>) -> Result<hhbc::Module> {
     parse!(token_iter,
            ".module"
-           <attr:assemble_special_and_user_attrs(alloc)>
+           <attr:assemble_special_and_user_attrs()>
            <name:assemble_module_name()>
            <span:assemble_span>
            "{"
@@ -268,11 +265,10 @@ fn assemble_module_use(token_iter: &mut Lexer<'_>) -> Result<ModuleName> {
 /// Ex:
 /// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
 fn assemble_file_attributes(
-    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
     file_attributes: &mut Vec<hhbc::Attribute>,
 ) -> Result<()> {
-    parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(alloc),*> "]" ";");
+    parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(),*> "]" ";");
     file_attributes.extend(attrs);
     Ok(())
 }
@@ -280,23 +276,19 @@ fn assemble_file_attributes(
 /// Ex:
 /// .alias ShapeKeyEscaping = <"HH\\darray"> (3,6) """D:2:{s:4:\"kind\";i:14;s:6:\"fields\";D:2:{s:11:\"Whomst'd've\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:1;}}s:25:\"Whomst\\u{0027}d\\u{0027}ve\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:4;}}}}""";
 /// Note that in BCP, TypeDef's typeinfo's user_type is not printed. What's between <> is the typeinfo's constraint's name.
-fn assemble_typedef(
-    alloc: &Bump,
-    token_iter: &mut Lexer<'_>,
-    case_type: bool,
-) -> Result<hhbc::Typedef> {
+fn assemble_typedef(token_iter: &mut Lexer<'_>, case_type: bool) -> Result<hhbc::Typedef> {
     if case_type {
         parse!(token_iter, ".case_type");
     } else {
         parse!(token_iter, ".alias");
     }
     parse!(token_iter,
-           <attrs:assemble_special_and_user_attrs(alloc)>
+           <attrs:assemble_special_and_user_attrs()>
            <name:assemble_class_name()>
            "="
            <type_info_union:assemble_type_info_union()>
            <span:assemble_span>
-           <type_structure:assemble_triple_quoted_typed_value(alloc)>
+           <type_structure:assemble_triple_quoted_typed_value()>
            ";");
     let (attrs, attributes) = attrs;
     Ok(hhbc::Typedef {
@@ -313,7 +305,7 @@ fn assemble_typedef(
 fn assemble_class<'arena>(alloc: &'arena Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Class> {
     parse!(token_iter, ".class"
        <upper_bounds:assemble_upper_bounds()>
-       <attr:assemble_special_and_user_attrs(alloc)>
+       <attr:assemble_special_and_user_attrs()>
        <name:assemble_class_name()>
        <span:assemble_span>
        <base:assemble_base()>
@@ -336,14 +328,11 @@ fn assemble_class<'arena>(alloc: &'arena Bump, token_iter: &mut Lexer<'_>) -> Re
         match *txt {
             b".require" => requirements.push(assemble_requirement(token_iter)?),
             b".ctx" => ctx_constants.push(assemble_ctx_constant(token_iter)?),
-            b".property" => properties.push(assemble_property(alloc, token_iter)?),
+            b".property" => properties.push(assemble_property(token_iter)?),
             b".method" => methods.push(assemble_method(alloc, token_iter)?),
-            b".const" => assemble_const_or_type_const(
-                alloc,
-                token_iter,
-                &mut constants,
-                &mut type_constants,
-            )?,
+            b".const" => {
+                assemble_const_or_type_const(token_iter, &mut constants, &mut type_constants)?
+            }
             _ => Err(tok.error("Unknown class-level identifier"))?,
         }
     }
@@ -422,7 +411,6 @@ fn assemble_requirement(token_iter: &mut Lexer<'_>) -> Result<hhbc::Requirement>
 }
 
 fn assemble_const_or_type_const<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     consts: &mut Vec<hhbc::Constant>,
     type_consts: &mut Vec<hhbc::TypeConstant>,
@@ -430,7 +418,7 @@ fn assemble_const_or_type_const<'arena>(
     token_iter.expect_str(Token::is_decl, ".const")?;
     let mut attrs = Attr::AttrNone;
     if token_iter.peek_is(Token::is_open_bracket) {
-        attrs = assemble_special_and_user_attrs(token_iter, alloc)?.0;
+        attrs = assemble_special_and_user_attrs(token_iter)?.0;
     }
     let name = token_iter.expect(Token::is_identifier)?;
     let name = name.as_str()?;
@@ -438,7 +426,7 @@ fn assemble_const_or_type_const<'arena>(
         //type const
         let is_abstract = token_iter.next_is_str(Token::is_identifier, "isAbstract");
         let initializer = if token_iter.next_is(Token::is_equal) {
-            Maybe::Just(assemble_triple_quoted_typed_value(token_iter, alloc)?)
+            Maybe::Just(assemble_triple_quoted_typed_value(token_iter)?)
         } else {
             Maybe::Nothing
         };
@@ -454,7 +442,7 @@ fn assemble_const_or_type_const<'arena>(
             if token_iter.next_is_str(Token::is_identifier, "uninit") {
                 Maybe::Just(hhbc::TypedValue::Uninit)
             } else {
-                Maybe::Just(assemble_triple_quoted_typed_value(token_iter, alloc)?)
+                Maybe::Just(assemble_triple_quoted_typed_value(token_iter)?)
             }
         } else {
             Maybe::Nothing
@@ -477,12 +465,12 @@ fn assemble_method<'arena>(
     token_iter.expect_str(Token::is_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(token_iter)?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
-    let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
+    let (attrs, attributes) = assemble_special_and_user_attrs(token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(token_iter)?;
     let mut decl_map = DeclMap::default();
-    let params = assemble_params(alloc, token_iter, &mut decl_map)?;
+    let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (body, coeffects) = assemble_body(
         alloc,
@@ -540,20 +528,20 @@ fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodFlags
     Ok(flag)
 }
 
-fn assemble_property(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Property> {
+fn assemble_property(token_iter: &mut Lexer<'_>) -> Result<hhbc::Property> {
     let prop_tok = token_iter.peek().copied();
     // A doc comment is just a triple string literal : """{}"""
     let mut doc_comment = Maybe::Nothing;
     parse!(token_iter,
            ".property"
-           <attrs:assemble_special_and_user_attrs(alloc)>
+           <attrs:assemble_special_and_user_attrs()>
            [triple_string: <dc:assemble_unescaped_unquoted_triple_vec> { doc_comment = Maybe::Just(dc); } ;
             else: { } ;
            ]
            <type_info:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef)>
            <name:assemble_prop_name()>
            "="
-           <initial_value:assemble_property_initial_value(alloc)>
+           <initial_value:assemble_property_initial_value()>
            ";"
     );
     let (flags, attributes) = attrs;
@@ -588,15 +576,12 @@ fn determine_visibility(attr: &hhvm_types_ffi::ffi::Attr) -> Result<hhbc::Visibi
 /// Initial values are printed slightly differently from typed values:
 /// while a TV prints uninit as "uninit", initial value is printed as "uninit;""
 /// for all other typed values, initial_value is printed nested in triple quotes.
-fn assemble_property_initial_value(
-    token_iter: &mut Lexer<'_>,
-    alloc: &Bump,
-) -> Result<Maybe<hhbc::TypedValue>> {
+fn assemble_property_initial_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::TypedValue>> {
     Ok(parse!(token_iter,
     [
         "uninit": "uninit" { Maybe::Just(hhbc::TypedValue::Uninit) } ;
         "\"\"\"N;\"\"\"": "\"\"\"N;\"\"\"" { Maybe::Nothing } ;
-        else: <v:assemble_triple_quoted_typed_value(alloc)> { Maybe::Just(v) } ;
+        else: <v:assemble_triple_quoted_typed_value()> { Maybe::Just(v) } ;
     ]))
 }
 
@@ -753,29 +738,26 @@ fn assemble_fatal(token_iter: &mut Lexer<'_>) -> Result<hhbc::Fatal> {
 /// A line of adata looks like:
 /// .adata id = """<tv>"""
 /// with tv being a typed value; see `assemble_typed_value` doc for what <tv> looks like.
-fn assemble_adata(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Adata> {
-    parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value(alloc)> ";");
+fn assemble_adata(token_iter: &mut Lexer<'_>) -> Result<hhbc::Adata> {
+    parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value()> ";");
     let id = hhbc::AdataId::parse(std::str::from_utf8(id.as_bytes())?)?;
     Ok(hhbc::Adata { id, value })
 }
 
 /// For use by initial value
-fn assemble_triple_quoted_typed_value(
-    token_iter: &mut Lexer<'_>,
-    alloc: &Bump,
-) -> Result<hhbc::TypedValue> {
+fn assemble_triple_quoted_typed_value(token_iter: &mut Lexer<'_>) -> Result<hhbc::TypedValue> {
     let (st, line) = token_iter.expect_with(Token::into_triple_str_literal_and_line)?;
     // Guaranteed st is encased by """ """
     let st = &st[3..st.len() - 3];
     let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
-    assemble_typed_value(alloc, &st, line)
+    assemble_typed_value(&st, line)
 }
 
 /// tv can look like:
 /// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
 /// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
-fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
-    fn deserialize(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
+fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
+    fn deserialize(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
         /// Returns s after ch if ch is the first character in s, else bails.
         fn expect<'a>(s: &'a [u8], ch: &'_ [u8]) -> Result<&'a [u8]> {
             s.strip_prefix(ch)
@@ -925,7 +907,6 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
         }
         /// v:vec.len():{(tv;)*} or k:keyset.len():{(tv;)*}
         fn deserialize_vec_or_keyset<'arena, 'a>(
-            alloc: &'arena Bump,
             src: &'a [u8],
             v_or_k: VecOrKeyset,
         ) -> Result<(&'a [u8], hhbc::TypedValue)> {
@@ -937,7 +918,7 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
             let mut tv;
             let mut tv_vec = Vec::new();
             for _ in 0..len {
-                (src, tv) = deserialize_tv(alloc, src)?;
+                (src, tv) = deserialize_tv(src)?;
                 tv_vec.push(tv);
             }
             let src = expect(src, b"}")?;
@@ -945,10 +926,7 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
         }
 
         /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
-        fn deserialize_dict<'arena, 'a>(
-            alloc: &'arena Bump,
-            src: &'a [u8],
-        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
+        fn deserialize_dict<'a>(src: &'a [u8]) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let src = expect(src, b"D")?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
@@ -958,18 +936,15 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
             let mut value;
             let mut tv_vec = Vec::new();
             for _ in 0..len {
-                (src, key) = deserialize_tv(alloc, src)?;
-                (src, value) = deserialize_tv(alloc, src)?;
+                (src, key) = deserialize_tv(src)?;
+                (src, value) = deserialize_tv(src)?;
                 tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
             Ok((src, hhbc::TypedValue::Dict(tv_vec.into())))
         }
 
-        fn deserialize_tv<'arena, 'a>(
-            alloc: &'arena Bump,
-            src: &'a [u8],
-        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
+        fn deserialize_tv<'a>(src: &'a [u8]) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let (src, tr) = match src[0] {
                 b'i' => deserialize_int(src).context("Assembling a TV int")?,
                 b'b' => deserialize_bool(src).context("Assembling a TV bool")?,
@@ -978,11 +953,11 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
                 b'u' => deserialize_uninit(src).context("Assembling a uninit")?,
                 b's' => deserialize_string_or_lazyclass(src, StringOrLazyClass::String)
                     .context("Assembling a TV string")?,
-                b'v' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Vec)
+                b'v' => deserialize_vec_or_keyset(src, VecOrKeyset::Vec)
                     .context("Assembling a TV vec")?,
-                b'k' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Keyset)
+                b'k' => deserialize_vec_or_keyset(src, VecOrKeyset::Keyset)
                     .context("Assembling a TV keyset")?,
-                b'D' => deserialize_dict(alloc, src).context("Assembling a TV dict")?,
+                b'D' => deserialize_dict(src).context("Assembling a TV dict")?,
                 b'l' => deserialize_string_or_lazyclass(src, StringOrLazyClass::LazyClass)
                     .context("Assembling a LazyClass")?,
                 _ => bail!("Unknown tv: {}", src[0]),
@@ -992,7 +967,7 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
 
         ensure!(!src.is_empty(), "Empty typed value. Line {}", line);
 
-        let (src, tv) = deserialize_tv(alloc, src).context(format!("Line {}", line))?;
+        let (src, tv) = deserialize_tv(src).context(format!("Line {}", line))?;
 
         ensure!(
             src.is_empty(),
@@ -1003,7 +978,7 @@ fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::Ty
 
         Ok(tv)
     }
-    deserialize(alloc, src, line)
+    deserialize(src, line)
 }
 
 /// Class refs look like:
@@ -1042,7 +1017,7 @@ fn assemble_function<'arena>(
     token_iter.expect_str(Token::is_decl, ".function")?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
-    let (attr, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
+    let (attr, attributes) = assemble_special_and_user_attrs(token_iter)?;
     let span = assemble_span(token_iter)?;
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
@@ -1053,7 +1028,7 @@ fn assemble_function<'arena>(
     let name = assemble_function_name(token_iter)?;
     // Will store decls in this order: params, decl_vars, unnamed
     let mut decl_map = DeclMap::default();
-    let params = assemble_params(alloc, token_iter, &mut decl_map)?;
+    let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
     let shadowed_tparams = Default::default();
     let (body, coeffects) = assemble_body(
@@ -1139,14 +1114,13 @@ fn assemble_upper_bound(token_iter: &mut Lexer<'_>) -> Result<hhbc::UpperBound> 
 /// Ex: [abstract final] This example lacks Attributes
 fn assemble_special_and_user_attrs(
     token_iter: &mut Lexer<'_>,
-    alloc: &Bump,
 ) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute>)> {
     let mut user_atts = Vec::new();
     let mut tr = hhvm_types_ffi::ffi::Attr::AttrNone;
     if token_iter.next_is(Token::is_open_bracket) {
         while !token_iter.peek_is(Token::is_close_bracket) {
             if token_iter.peek_is(Token::is_str_literal) {
-                user_atts.push(assemble_user_attr(token_iter, alloc)?)
+                user_atts.push(assemble_user_attr(token_iter)?)
             } else if token_iter.peek_is(Token::is_identifier) {
                 tr.add(assemble_hhvm_attr(token_iter)?);
             } else {
@@ -1214,24 +1188,21 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
 
 /// Attributes are printed as follows:
 /// "name"("""v:args.len:{args}""") where args are typed values.
-fn assemble_user_attr(token_iter: &mut Lexer<'_>, alloc: &Bump) -> Result<hhbc::Attribute> {
+fn assemble_user_attr(token_iter: &mut Lexer<'_>) -> Result<hhbc::Attribute> {
     let nm = escaper::unescape_literal_bytes_into_vec_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
     token_iter.expect(Token::is_open_paren)?;
-    let arguments = assemble_user_attr_args(alloc, token_iter)?;
+    let arguments = assemble_user_attr_args(token_iter)?;
     token_iter.expect(Token::is_close_paren)?;
     Ok(hhbc::Attribute::new(std::str::from_utf8(&nm)?, arguments))
 }
 
 /// Printed as follows (print_attributes in bcp)
 /// "v:args.len:{args}" where args are typed values
-fn assemble_user_attr_args(
-    alloc: &Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Vec<hhbc::TypedValue>> {
+fn assemble_user_attr_args(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::TypedValue>> {
     let tok = token_iter.peek().copied();
-    if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
+    if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter)? {
         Ok(vals.into())
     } else {
         Err(tok
@@ -1326,15 +1297,11 @@ fn assemble_type_constraint(
 }
 
 /// ((a, )*a) | () where a is a param
-fn assemble_params(
-    alloc: &Bump,
-    token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap,
-) -> Result<Vec<hhbc::Param>> {
+fn assemble_params(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<Vec<hhbc::Param>> {
     token_iter.expect(Token::is_open_paren)?;
     let mut params = Vec::new();
     while !token_iter.peek_is(Token::is_close_paren) {
-        params.push(assemble_param(alloc, token_iter, decl_map)?);
+        params.push(assemble_param(token_iter, decl_map)?);
         if !token_iter.peek_is(Token::is_close_paren) {
             token_iter.expect(Token::is_comma)?;
         }
@@ -1344,16 +1311,12 @@ fn assemble_params(
 }
 
 /// a: [user_attributes]? inout? readonly? ...?<type_info>?name (= default_value)?
-fn assemble_param(
-    alloc: &Bump,
-    token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap,
-) -> Result<hhbc::Param> {
+fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<hhbc::Param> {
     let mut ua_vec = Vec::new();
     if token_iter.peek_is(Token::is_open_bracket) {
         token_iter.expect(Token::is_open_bracket)?;
         while !token_iter.peek_is(Token::is_close_bracket) {
-            ua_vec.push(assemble_user_attr(token_iter, alloc)?);
+            ua_vec.push(assemble_user_attr(token_iter)?);
         }
         token_iter.expect(Token::is_close_bracket)?;
     }

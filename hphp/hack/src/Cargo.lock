@@ -752,7 +752,6 @@ checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
 name = "closure_convert"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "decl_vars",
  "env",
  "error",

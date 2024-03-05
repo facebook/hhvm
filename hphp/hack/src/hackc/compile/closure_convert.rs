@@ -843,8 +843,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     }
 }
 
-struct ClosureVisitor<'a, 'b, 'arena> {
-    alloc: &'arena bumpalo::Bump,
+struct ClosureVisitor<'a, 'b> {
     state: Option<State>,
     ro_state: &'a ReadOnlyState<'a>,
     // We need 'b to be a real lifetime so that our `type Params` can refer to
@@ -853,7 +852,7 @@ struct ClosureVisitor<'a, 'b, 'arena> {
     phantom: std::marker::PhantomData<&'b ()>,
 }
 
-impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, 'arena> {
+impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
     type Params = AstParams<Scope<'b>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -1097,7 +1096,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
     }
 }
 
-impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
+impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b> {
     /// Calls a function in the scope of a sub-Scope as a child of `scope`.
     fn with_subscope<'s, F, R>(
         &mut self,
@@ -1108,12 +1107,11 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     ) -> Result<(R, u32)>
     where
         'b: 's,
-        F: FnOnce(&mut ClosureVisitor<'a, 's, 'arena>, &mut Scope<'s>) -> Result<R>,
+        F: FnOnce(&mut ClosureVisitor<'a, 's>, &mut Scope<'s>) -> Result<R>,
     {
         let mut scope = scope.new_child(si, variables)?;
 
         let mut self_ = ClosureVisitor {
-            alloc: self.alloc,
             ro_state: self.ro_state,
             state: self.state.take(),
             phantom: Default::default(),
@@ -1692,7 +1690,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     let state = State::initial_state(namespace_env);
 
     let mut visitor = ClosureVisitor {
-        alloc: e.alloc,
         state: Some(state),
         ro_state: &ro_state,
         phantom: Default::default(),

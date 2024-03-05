@@ -144,31 +144,25 @@ impl UnitBuilder {
             }
             b".function_refs" => {
                 ensure_single_defn(&self.func_refs, tok)?;
-                self.func_refs = Some(assemble_refs(
-                    alloc,
-                    token_iter,
-                    ".function_refs",
-                    |t, _| assemble_function_name(t),
-                )?);
+                self.func_refs = Some(assemble_refs(token_iter, ".function_refs", |t| {
+                    assemble_function_name(t)
+                })?);
             }
             b".class_refs" => {
                 ensure_single_defn(&self.class_refs, tok)?;
-                self.class_refs = Some(assemble_refs(alloc, token_iter, ".class_refs", |t, _| {
+                self.class_refs = Some(assemble_refs(token_iter, ".class_refs", |t| {
                     assemble_class_name(t)
                 })?);
             }
             b".constant_refs" => {
                 ensure_single_defn(&self.constant_refs, tok)?;
-                self.constant_refs = Some(assemble_refs(
-                    alloc,
-                    token_iter,
-                    ".constant_refs",
-                    |t, _| assemble_const_name(t),
-                )?);
+                self.constant_refs = Some(assemble_refs(token_iter, ".constant_refs", |t| {
+                    assemble_const_name(t)
+                })?);
             }
             b".includes" => {
                 ensure_single_defn(&self.include_refs, tok)?;
-                self.include_refs = Some(assemble_refs(alloc, token_iter, ".includes", |t, _| {
+                self.include_refs = Some(assemble_refs(token_iter, ".includes", |t| {
                     let path_str = if t.peek_is(Token::is_decl) {
                         t.expect(Token::is_decl)?.as_bytes()
                     } else {
@@ -989,19 +983,18 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
 ///    (identifier)+
 /// }
 fn assemble_refs<'arena, 'a, T: 'arena, F>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     name_str: &str,
     assemble_name: F,
 ) -> Result<Vec<T>>
 where
-    F: Fn(&mut Lexer<'_>, &'arena Bump) -> Result<T>,
+    F: Fn(&mut Lexer<'_>) -> Result<T>,
 {
     token_iter.expect_str(Token::is_decl, name_str)?;
     token_iter.expect(Token::is_open_curly)?;
     let mut names = Vec::new();
     while !token_iter.peek_is(Token::is_close_curly) {
-        names.push(assemble_name(token_iter, alloc)?);
+        names.push(assemble_name(token_iter)?);
     }
     token_iter.expect(Token::is_close_curly)?;
     Ok(names)

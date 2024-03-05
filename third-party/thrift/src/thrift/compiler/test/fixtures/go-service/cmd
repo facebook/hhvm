@@ -1,2 +1,1 @@
-go_deprecated: go src/module.thrift
 go: mstch_go src/module.thrift

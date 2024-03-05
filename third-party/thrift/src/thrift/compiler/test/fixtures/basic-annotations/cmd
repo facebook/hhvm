@@ -1,4 +1,3 @@
-go_deprecated: go src/module.thrift
 android: android src/module.thrift
 java_deprecated: java_deprecated src/module.thrift
 hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift

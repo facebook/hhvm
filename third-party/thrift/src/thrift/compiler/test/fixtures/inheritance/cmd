@@ -1,4 +1,3 @@
-go_deprecated: go src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 go: mstch_go src/module.thrift
 rust: mstch_rust src/module.thrift

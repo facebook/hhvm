@@ -2,7 +2,6 @@ android: android src/module.thrift
 py: py src/module.thrift
 php: php:lazy_constants=1 src/module.thrift
 hack: hack:typedef,lazy_constants=1 src/module.thrift
-go_deprecated: go src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 go: mstch_go src/module.thrift
 rust: mstch_rust src/module.thrift

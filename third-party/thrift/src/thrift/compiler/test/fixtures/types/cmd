@@ -5,5 +5,4 @@ py3: mstch_py3 src/module.thrift
 python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 rust: mstch_rust src/module.thrift
-go_deprecated: go src/module.thrift
 py: py src/module.thrift

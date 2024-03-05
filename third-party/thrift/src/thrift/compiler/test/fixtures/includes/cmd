@@ -10,8 +10,6 @@ cpp2_service: mstch_cpp2 src/service.thrift
 cpp2_matching_module_name: mstch_cpp2 src/matching_module_name.thrift
 cpp2: mstch_cpp2 src/module.thrift
 cpp2_includes: mstch_cpp2 src/includes.thrift
-go_deprecated_service: go src/service.thrift
-go_deprecated_matching_names: go src/matching_names.thrift
 go_service: mstch_go src/service.thrift
 go_matching_names: mstch_go src/matching_names.thrift
 py3_service: mstch_py3 src/service.thrift

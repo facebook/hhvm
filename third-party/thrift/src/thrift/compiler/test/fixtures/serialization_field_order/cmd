@@ -1,5 +1,4 @@
 android: android src/module.thrift
-go_deprecated: go src/module.thrift
 hack: hack:json,shapes=1 src/module.thrift
 json: json src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift

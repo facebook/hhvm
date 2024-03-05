@@ -16,7 +16,6 @@ bit-set = "0.5"
 bit-vec = "0.6"
 bitflags = { version = "2.4", features = ["serde"] }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 constant_folder = { version = "0.0.0", path = "../constant_folder" }
 core_utils_rust = { version = "0.0.0", path = "../../../../utils/core" }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }

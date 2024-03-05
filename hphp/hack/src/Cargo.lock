@@ -1595,7 +1595,6 @@ dependencies = [
  "bit-vec",
  "bitflags 2.4.0",
  "bstr",
- "bumpalo",
  "constant_folder",
  "core_utils_rust",
  "decl_provider",

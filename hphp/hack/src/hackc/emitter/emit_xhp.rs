@@ -70,10 +70,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             }
         }
     }
-    args.push((
-        ParamKind::Pnormal,
-        emit_xhp_attribute_array(emitter.alloc, xal)?,
-    ));
+    args.push((ParamKind::Pnormal, emit_xhp_attribute_array(xal)?));
 
     let body = Block(hack_stmts!(
         r#"
@@ -276,10 +273,7 @@ fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
     }
 }
 
-fn emit_xhp_attribute_array<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    xal: &[XhpAttribute<'_>],
-) -> Result<Expr> {
+fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
     fn hint_to_num(id: &str) -> usize {
         match id {
             "HH\\string" => 1,
@@ -321,22 +315,18 @@ fn emit_xhp_attribute_array<'arena>(
         Ok((class_name, type_ident))
     }
     fn extract_from_hint<'arena>(
-        alloc: &'arena bumpalo::Bump,
         hint: &Hint,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
         match &*(hint.1) {
-            Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(alloc, h, enum_opt),
+            Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(h, enum_opt),
             Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
             _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),
         }
     }
-    fn inner_array<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        xa: &XhpAttribute<'_>,
-    ) -> Result<Vec<Expr>> {
+    fn inner_array(xa: &XhpAttribute<'_>) -> Result<Vec<Expr>> {
         let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
             Some(e) => e.clone(),
@@ -347,30 +337,27 @@ fn emit_xhp_attribute_array<'arena>(
             None if enum_opt.is_none() => get_attribute_array_values("\\HH\\mixed", enum_opt),
             None => get_attribute_array_values("enum", enum_opt),
             // As it turns out, if there is a type list, HHVM discards it
-            Some(h) => extract_from_hint(alloc, h, enum_opt),
+            Some(h) => extract_from_hint(h, enum_opt),
         }?;
         let is_required = mk_expr(Expr_::Int(
             (if xa.is_required() { "1" } else { "0" }).into(),
         ));
         Ok(vec![hint, class_name, expr, is_required])
     }
-    fn emit_xhp_attribute<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        xa: &XhpAttribute<'_>,
-    ) -> Result<Field> {
+    fn emit_xhp_attribute(xa: &XhpAttribute<'_>) -> Result<Field> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),
         ));
         let v = mk_expr(Expr_::ValCollection(Box::new((
             (Pos::NONE, VcKind::Vec),
             None,
-            inner_array(alloc, xa)?,
+            inner_array(xa)?,
         ))));
         Ok(Field(k, v))
     }
     let xal_arr = xal
         .iter()
-        .map(|x| emit_xhp_attribute(alloc, x))
+        .map(|x| emit_xhp_attribute(x))
         .collect::<Result<Vec<_>>>()?;
     Ok(mk_expr(Expr_::KeyValCollection(Box::new((
         (Pos::NONE, KvcKind::Dict),

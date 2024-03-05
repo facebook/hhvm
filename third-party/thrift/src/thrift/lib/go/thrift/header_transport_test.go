@@ -163,9 +163,9 @@ func TestHeaderHeaders(t *testing.T) {
 	trans2 := NewHeaderTransport(tmb)
 
 	// make sure we don't barf reading header with no frame
-	_, ok := trans1.ReadHeader("something")
+	_, ok := trans1.GetResponseHeader("something")
 	assertEq(t, false, ok)
-	assertEq(t, 0, len(trans1.ReadHeaders()))
+	assertEq(t, 0, len(trans1.GetResponseHeaders()))
 
 	trans1.SetIdentity("localhost")
 	trans1.SetHeader("thrift_protocol", "compact")
@@ -200,15 +200,15 @@ func TestHeaderHeaders(t *testing.T) {
 		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
 	}
 
-	headerval, _ = trans2.ReadHeader("thrift_protocol")
+	headerval, _ = trans2.GetResponseHeader("thrift_protocol")
 	assertEq(t, "compact", headerval)
-	headerval, _ = trans2.ReadHeader("thrift_transport")
+	headerval, _ = trans2.GetResponseHeader("thrift_transport")
 	assertEq(t, "header", headerval)
 	// make sure we prefer persistent headers
-	headerval, _ = trans2.ReadHeader("preferred_cheese")
+	headerval, _ = trans2.GetResponseHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
 	assertEq(t, "localhost", trans2.peerIdentity())
-	assertEq(t, 5, len(trans2.ReadHeaders()))
+	assertEq(t, 5, len(trans2.GetResponseHeaders()))
 
 	trans2.readHeader.headers[IDVersionHeader] = "invalid"
 	assertEq(t, "", trans2.peerIdentity())

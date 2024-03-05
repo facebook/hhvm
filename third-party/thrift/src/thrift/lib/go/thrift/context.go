@@ -121,5 +121,5 @@ func HeadersFromContext(ctx context.Context) map[string]string {
 		// A nil map behaves like an empty map for reading.
 		return nil
 	}
-	return t.ReadHeaders()
+	return t.GetResponseHeaders()
 }

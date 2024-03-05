@@ -189,12 +189,12 @@ func (p *HeaderProtocol) getRequestHeaders() map[string]string {
 	return p.trans.Headers()
 }
 
-func (p *HeaderProtocol) ReadHeader(key string) (string, bool) {
-	return p.trans.ReadHeader(key)
+func (p *HeaderProtocol) GetResponseHeader(key string) (string, bool) {
+	return p.trans.GetResponseHeader(key)
 }
 
-func (p *HeaderProtocol) ReadHeaders() map[string]string {
-	return p.trans.ReadHeaders()
+func (p *HeaderProtocol) GetResponseHeaders() map[string]string {
+	return p.trans.GetResponseHeaders()
 }
 
 func (p *HeaderProtocol) ProtocolID() ProtocolID {

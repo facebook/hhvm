@@ -53,7 +53,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to read message from proto1 in proto2")
 	}
 
-	if v, _ := proto2.ReadHeader("preferred_cheese"); v != "gouda" {
+	if v, _ := proto2.GetResponseHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to read header, got: %s", v)
 	}
 

@@ -107,8 +107,8 @@ func (t *HeaderTransport) SetIdentity(identity string) {
 }
 
 func (t *HeaderTransport) peerIdentity() string {
-	v, ok := t.ReadHeader(IdentityHeader)
-	vers, versok := t.ReadHeader(IDVersionHeader)
+	v, ok := t.GetResponseHeader(IdentityHeader)
+	vers, versok := t.GetResponseHeader(IDVersionHeader)
 	if ok && versok && vers == IDVersion {
 		return v
 	}
@@ -161,7 +161,7 @@ func (t *HeaderTransport) clearRequestHeaders() {
 	}
 }
 
-func (t *HeaderTransport) ReadHeader(key string) (string, bool) {
+func (t *HeaderTransport) GetResponseHeader(key string) (string, bool) {
 	if t.readHeader == nil {
 		return "", false
 	}
@@ -173,7 +173,7 @@ func (t *HeaderTransport) ReadHeader(key string) (string, bool) {
 	return v, ok
 }
 
-func (t *HeaderTransport) ReadHeaders() map[string]string {
+func (t *HeaderTransport) GetResponseHeaders() map[string]string {
 	res := map[string]string{}
 	if t.readHeader == nil {
 		return res

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import unittest
 
 from thrift.py.client.common import ClientType, Protocol

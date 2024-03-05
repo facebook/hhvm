@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import pickle
 import unittest
 from typing import cast, Type, TypeVar

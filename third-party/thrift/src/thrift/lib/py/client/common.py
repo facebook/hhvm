@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 from thrift.python.client.request_channel import (  # noqa: F401
     ClientType,  # noqa: F401
     RequestChannel,  # noqa: F401

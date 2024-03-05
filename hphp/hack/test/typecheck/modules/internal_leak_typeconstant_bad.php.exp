@@ -1,0 +1,52 @@
+File "internal_leak_typeconstant_bad.php--B.php", line 4, characters 18-18:
+Invalid argument (Typing[4110])
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 6, characters 32-39:
+  The type originated from here
+  File "internal_leak_typeconstant_bad.php--A.php", line 6, characters 32-39:
+    resulting from expanding the type constant `Base::TC`
+  File "internal_leak_typeconstant_bad.php--B.php", line 4, characters 18-18:
+  But got `int`
+File "internal_leak_typeconstant_bad.php--B.php", line 5, characters 18-18:
+Invalid argument (Typing[4110])
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 7, characters 32-39:
+  The type originated from here
+  File "internal_leak_typeconstant_bad.php--A.php", line 7, characters 32-39:
+    resulting from expanding the type constant `Base::TC`
+  File "internal_leak_typeconstant_bad.php--B.php", line 5, characters 18-18:
+  But got `int`
+File "internal_leak_typeconstant_bad.php--B.php", line 6, characters 18-18:
+Invalid argument (Typing[4110])
+  File "internal_leak_typeconstant_bad.php--A.php", line 4, characters 19-24:
+  Expected `string`
+  File "internal_leak_typeconstant_bad.php--A.php", line 8, characters 32-39:
+    resulting from expanding the type constant `Derived::TC`
+  File "internal_leak_typeconstant_bad.php--B.php", line 6, characters 18-18:
+  But got `int`
+File "internal_leak_typeconstant_bad.php--B.php", line 9, characters 18-19:
+Invalid argument (Typing[4110])
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
+  The type originated from here
+  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
+    resulting from expanding the type constant `Base::TC2`
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  But got `mixed` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 9, characters 34-41:
+  The type originated from here
+File "internal_leak_typeconstant_bad.php--B.php", line 9, characters 18-19:
+Invalid argument (Typing[4110])
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
+  The type originated from here
+  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
+    resulting from expanding the type constant `Base::TC2`
+  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
+  But got `nonnull` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_leak_typeconstant_bad.php--A.php", line 9, characters 34-41:
+  The type originated from here

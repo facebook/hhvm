@@ -832,6 +832,13 @@ and localize_class_instantiation
           Reason.Ropaque_type_from_module (Cls.pos class_info, callee_module, r)
         in
         let cstr = MakeType.mixed new_r in
+        (* If the class supports dynamic, reveal this in the newtype *)
+        let cstr =
+          if Cls.get_support_dynamic_type class_info then
+            MakeType.supportdyn new_r cstr
+          else
+            cstr
+        in
         ((env, err), mk (new_r, Tnewtype (name, [], cstr)))
 
 and localize_typedef_instantiation

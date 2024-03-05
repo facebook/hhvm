@@ -365,6 +365,11 @@ let update_class_name env id new_name = function
       id
       { abstr with name = new_name; names = name :: names }
 
+let is_opaque_internal ty =
+  match get_reason ty with
+  | Reason.Ropaque_type_from_module _ -> true
+  | _ -> false
+
 let rec expand ctx env root =
   let (env, root) = Env.expand_type env root in
   let err =
@@ -389,6 +394,17 @@ let rec expand ctx env root =
   else
     match get_node root with
     | Tany _ -> ((env, None), Exact root)
+    (* Deal with projection from a newtype that was generated from an internal access e.g.
+     *   internal class Base { const type TC = int; public static function foo(self::TC $_):void { } }
+     *   class Derived extends Base { }
+     *   function bar():void { Derived::foo("A"); }
+     * Generate another fake newtype by mangling the name using the projection syntax.
+     *)
+    | Tnewtype (name, _tyl, bound) when is_opaque_internal root ->
+      ( (env, None),
+        Exact
+          (mk (get_reason root, Tnewtype (name ^ "::" ^ snd ctx.id, [], bound)))
+      )
     | Tnewtype (name, _, ty) ->
       let ctx =
         let base = Some (Option.value ctx.base ~default:root) in

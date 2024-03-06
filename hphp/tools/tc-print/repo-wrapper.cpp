@@ -34,6 +34,7 @@ namespace HPHP { namespace jit {
 
 RepoWrapper::RepoWrapper(const char* repoSchema,
                          const std::string& repoFileName,
+                         Hdf& config,
                          const bool shouldPrint) {
   if (setenv("HHVM_RUNTIME_REPO_SCHEMA", repoSchema, 1 /* overwrite */)) {
     fprintf(stderr, "Could not set repo schema");
@@ -49,7 +50,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   g_context.getCheck();
 
   IniSetting::Map ini = IniSetting::Map::object;
-  Hdf config;
   RuntimeOption::Load(ini, config);
 
   hasRepo = !repoFileName.empty();

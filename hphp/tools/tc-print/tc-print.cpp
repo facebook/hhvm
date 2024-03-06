@@ -58,6 +58,7 @@ using namespace HPHP::jit;
 #define MAX_SYM_LEN       10240
 
 std::string     dumpDir("/tmp");
+std::string     configFile;
 std::string     profFileName;
 std::string     repoFileName;
 uint32_t        nTopTrans       = 0;
@@ -128,6 +129,7 @@ void usage() {
     "translations by density (count / size) of the selected perf event\n"
     "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
     "(default: /tmp)\n"
+    "    -c <CONFIG.HDF> : uses the specified config file\n"
     "    -F <FUNC_NAME>  : prints the translations for the given function\n"
     "    -f <FUNC_ID>    : prints the translations for the given "
     "<FUNC_ID>, sorted by start offset\n"
@@ -204,7 +206,7 @@ void parseOptions(int argc, char *argv[]) {
   opterr = 0;
   char* sortByArg = nullptr;
   while ((c = getopt(argc, argv,
-                     "hDd:F:f:G:g:ip:st:u:S:T:o:r:e:E:bB:v:k:a:A:n:jH:x"))
+                     "hDd:F:f:G:g:ip:st:u:S:T:o:r:e:E:bB:v:k:a:A:n:jH:xc:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -224,6 +226,9 @@ void parseOptions(int argc, char *argv[]) {
         exit(0);
       case 'd':
         dumpDir = optarg;
+        break;
+      case 'c':
+        configFile = optarg;
         break;
       case 'F':
         creationOrder = true;
@@ -1160,7 +1165,13 @@ int main(int argc, char *argv[]) {
                               g_transData->getMainBase(),
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
-  g_repo = new RepoWrapper(g_transData->getRepoSchema(), repoFileName, !useJSON);
+  Hdf config = !configFile.empty()
+    ? Hdf{configFile}
+    : Hdf{};
+  g_repo = new RepoWrapper(g_transData->getRepoSchema(),
+                           repoFileName,
+                           config,
+                           !useJSON);
   g_transData->loadTCData(g_repo);
   g_annotations = std::make_unique<AnnotationCache>(dumpDir);
 

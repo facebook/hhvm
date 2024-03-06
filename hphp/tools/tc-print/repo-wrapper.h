@@ -38,6 +38,7 @@ private:
 public:
   RepoWrapper(const char* repoSchema,
               const std::string& repoFileName,
+              Hdf& hdf,
               const bool shouldPrint = true);
   ~RepoWrapper();
 

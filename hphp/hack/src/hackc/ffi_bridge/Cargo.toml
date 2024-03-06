@@ -17,7 +17,7 @@ arena_deserializer = { version = "0.0.0", path = "../../utils/arena_deserializer
 bincode = "1.3.3"
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 compile = { version = "0.0.0", path = "../compile/cargo/compile" }
-cxx = "1.0.100"
+cxx = "1.0.118"
 decl_provider = { version = "0.0.0", path = "../decl_provider" }
 direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_decl_parser" }
 facts = { version = "0.0.0", path = "../facts/cargo/facts_rust" }
@@ -41,4 +41,4 @@ hex = "0.4.3"
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]
-cxx-build = "1.0.100"
+cxx-build = "1.0.118"

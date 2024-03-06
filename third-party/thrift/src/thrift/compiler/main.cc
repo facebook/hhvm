@@ -28,6 +28,10 @@
 
 using namespace apache::thrift::compiler;
 
+// Disable expensive malloc debugging features that cause up to 3x slowdown
+// when compiling .thrift files.
+const char* malloc_conf = "junk:false,debug_double_free_max_scan:0";
+
 int main(int argc, char** argv) {
   source_manager sm;
   auto result = compile({argv, argv + argc}, sm);

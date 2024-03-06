@@ -18,6 +18,12 @@ pub(crate) trait Mangle {
     fn mangle(&self, strings: &StringInterner) -> String;
 }
 
+fn is_textual_ident(name: &[u8]) -> bool {
+    name.first().map_or(false, |&x| x == b'n')
+        && name.len() > 1
+        && name[1..].iter().all(|&x| x.is_ascii_digit())
+}
+
 impl Mangle for [u8] {
     fn mangle(&self, _strings: &StringInterner) -> String {
         // Handle some reserved tokens.
@@ -42,6 +48,15 @@ impl Mangle for [u8] {
             b"type" => "type_".to_owned(),
             b"unreachable" => "unreachable_".to_owned(),
             b"void" => "void_".to_owned(),
+            _ if is_textual_ident(self) => {
+                // If the ident is of the form n<digits> we mangle it into mangled::n<digits>
+                // no collision expected because '::' is not a valid identifier Hack substring
+                // We also introduce '::' when removing Hack namespace separator '//' but they
+                // should not appear in Hack variables and fieldnames.
+                let mut res = String::from("mangled::");
+                res.push_str(std::str::from_utf8(self).unwrap());
+                res
+            }
             _ => {
                 // This mangling is terrible... but probably "good enough".
                 // If a digit is first then we prepend a '_'.

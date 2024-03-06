@@ -447,3 +447,16 @@ function cgets(): void {
 function sets(): void {
   C::$prop3 = source() as float;
 }
+
+// TEST-CHECK-BAL: type TestFieldNamesWithTextualIdents
+// CHECK: type TestFieldNamesWithTextualIdents = .kind="class" {
+// CHECK:   n: .public *HackInt;
+// CHECK:   n0n: .public *HackInt;
+// CHECK:   mangled::n10: .public *HackInt
+// CHECK: }
+class TestFieldNamesWithTextualIdents {
+
+  public function __construct(public int $n, public int $n0n, public int $n10) {
+  }
+
+}

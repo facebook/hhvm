@@ -14,8 +14,8 @@ namespace apache { namespace thrift {
 
 template <> struct TStructDataStorage<::cpp2::Fields> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -23,15 +23,15 @@ template <> struct TStructDataStorage<::cpp2::Fields> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -39,15 +39,15 @@ template <> struct TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::FieldsInjectedToStruct> {
   static constexpr const std::size_t fields_size = 2;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -55,15 +55,15 @@ template <> struct TStructDataStorage<::cpp2::FieldsInjectedToStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct> {
   static constexpr const std::size_t fields_size = 4;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -71,7 +71,7 @@ template <> struct TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct> 
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

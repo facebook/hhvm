@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Color>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Color>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Color>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Color>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -31,13 +31,13 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(folly::StringPiece 
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -406,13 +406,13 @@ void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::Baz::Type const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -2331,13 +2331,13 @@ void TccStructTraits<::facebook::thrift::test::ThriftAdaptTestUnion>::translateF
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::ThriftAdaptTestUnion::Type const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

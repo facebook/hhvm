@@ -33,10 +33,10 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_names = {{
-  "myEnum",
-  "myBigEnum",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_names = {{
+  "myEnum"sv,
+  "myBigEnum"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_ids = {{
   1,
@@ -46,9 +46,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = {{
-  "__fbthrift_field_myEnum",
-  "__fbthrift_field_myBigEnum",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = {{
+  "__fbthrift_field_myEnum"sv,
+  "__fbthrift_field_myBigEnum"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::isset_indexes = {{
   0,

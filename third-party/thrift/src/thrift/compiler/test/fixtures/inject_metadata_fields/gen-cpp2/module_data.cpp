@@ -33,9 +33,9 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Fields>::name = "Fields";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Fields>::fields_names = {{
-  "injected_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Fields>::name = "Fields";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::Fields>::fields_names = {{
+  "injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Fields>::fields_ids = {{
   100,
@@ -43,16 +43,16 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Field
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::Fields>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Fields>::storage_names = {{
-  "__fbthrift_field_injected_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::Fields>::storage_names = {{
+  "__fbthrift_field_injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Fields>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::name = "FieldsInjectedToEmptyStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::fields_names = {{
-  "injected_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::name = "FieldsInjectedToEmptyStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::fields_names = {{
+  "injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::fields_ids = {{
   -1100,
@@ -60,17 +60,17 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Field
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::storage_names = {{
-  "__fbthrift_field_injected_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::storage_names = {{
+  "__fbthrift_field_injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedToStruct>::name = "FieldsInjectedToStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::fields_names = {{
-  "string_field",
-  "injected_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::FieldsInjectedToStruct>::name = "FieldsInjectedToStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::fields_names = {{
+  "string_field"sv,
+  "injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::fields_ids = {{
   1,
@@ -80,21 +80,21 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::storage_names = {{
-  "__fbthrift_field_string_field",
-  "__fbthrift_field_injected_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::storage_names = {{
+  "__fbthrift_field_string_field"sv,
+  "__fbthrift_field_injected_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::name = "FieldsInjectedWithIncludedStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::fields_names = {{
-  "string_field",
-  "injected_field",
-  "injected_structured_annotation_field",
-  "injected_unstructured_annotation_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::name = "FieldsInjectedWithIncludedStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::fields_names = {{
+  "string_field"sv,
+  "injected_field"sv,
+  "injected_structured_annotation_field"sv,
+  "injected_unstructured_annotation_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::fields_ids = {{
   1,
@@ -108,11 +108,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::storage_names = {{
-  "__fbthrift_field_string_field",
-  "__fbthrift_field_injected_field",
-  "__fbthrift_field_injected_structured_annotation_field",
-  "__fbthrift_field_injected_unstructured_annotation_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::storage_names = {{
+  "__fbthrift_field_string_field"sv,
+  "__fbthrift_field_injected_field"sv,
+  "__fbthrift_field_injected_structured_annotation_field"sv,
+  "__fbthrift_field_injected_unstructured_annotation_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::isset_indexes = {{
   0,

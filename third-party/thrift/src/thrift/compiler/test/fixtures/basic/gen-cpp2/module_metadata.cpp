@@ -34,7 +34,7 @@ void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata
   enum_metadata.name() = "module.MyEnum";
   using EnumTraits = TEnumTraits<::test::fixtures::basic::MyEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
   enum_metadata.name() = "module.HackEnum";
   using EnumTraits = TEnumTraits<::test::fixtures::basic::HackEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
   enum_metadata.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("RenamedEnum")}}).cv_struct_ref());
 }

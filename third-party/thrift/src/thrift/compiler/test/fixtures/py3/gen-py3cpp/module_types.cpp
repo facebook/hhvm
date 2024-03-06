@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::py3::simple::AnEnum const*> const TEnumTraits<::py3::simple::AnEnum>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::AnEnum>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnum>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::names);
 
-bool TEnumTraits<::py3::simple::AnEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::py3::simple::AnEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::py3::simple::AnEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::py3::simple::AnEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -31,13 +31,13 @@ bool TEnumTraits<::py3::simple::AnEnum>::findValue(folly::StringPiece name, type
 namespace apache { namespace thrift {
 
 folly::Range<::py3::simple::AnEnumRenamed const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::names);
 
-bool TEnumTraits<::py3::simple::AnEnumRenamed>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::py3::simple::AnEnumRenamed>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -47,13 +47,13 @@ bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(folly::StringPiece nam
 namespace apache { namespace thrift {
 
 folly::Range<::py3::simple::Flags const*> const TEnumTraits<::py3::simple::Flags>::values = folly::range(TEnumDataStorage<::py3::simple::Flags>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::Flags>::names = folly::range(TEnumDataStorage<::py3::simple::Flags>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::Flags>::names = folly::range(TEnumDataStorage<::py3::simple::Flags>::names);
 
-bool TEnumTraits<::py3::simple::Flags>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::py3::simple::Flags>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::py3::simple::Flags>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::py3::simple::Flags>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -564,13 +564,13 @@ void TccStructTraits<::py3::simple::detail::AdaptedUnion>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::py3::simple::detail::AdaptedUnion::Type const*> const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::values = folly::range(TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::names = folly::range(TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::names = folly::range(TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>::names);
 
-bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -961,13 +961,13 @@ void TccStructTraits<::py3::simple::BinaryUnion>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::py3::simple::BinaryUnion::Type const*> const TEnumTraits<::py3::simple::BinaryUnion::Type>::values = folly::range(TEnumDataStorage<::py3::simple::BinaryUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::BinaryUnion::Type>::names = folly::range(TEnumDataStorage<::py3::simple::BinaryUnion::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::BinaryUnion::Type>::names = folly::range(TEnumDataStorage<::py3::simple::BinaryUnion::Type>::names);
 
-bool TEnumTraits<::py3::simple::BinaryUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::py3::simple::BinaryUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::py3::simple::BinaryUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::py3::simple::BinaryUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

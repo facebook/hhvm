@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::some::ns::EnumB const*> const TEnumTraits<::some::ns::EnumB>::values = folly::range(TEnumDataStorage<::some::ns::EnumB>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::some::ns::EnumB>::names = folly::range(TEnumDataStorage<::some::ns::EnumB>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::some::ns::EnumB>::names = folly::range(TEnumDataStorage<::some::ns::EnumB>::names);
 
-bool TEnumTraits<::some::ns::EnumB>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::some::ns::EnumB>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::some::ns::EnumB>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::some::ns::EnumB>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

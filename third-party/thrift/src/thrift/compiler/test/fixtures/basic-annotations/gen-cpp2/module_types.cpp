@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::YourEnum const*> const TEnumTraits<::cpp2::YourEnum>::values = folly::range(TEnumDataStorage<::cpp2::YourEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::YourEnum>::names = folly::range(TEnumDataStorage<::cpp2::YourEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::cpp2::YourEnum>::names = folly::range(TEnumDataStorage<::cpp2::YourEnum>::names);
 
-bool TEnumTraits<::cpp2::YourEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::cpp2::YourEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::YourEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::cpp2::YourEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -149,13 +149,13 @@ void TccStructTraits<::cpp2::detail::YourUnion>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::detail::YourUnion::Type const*> const TEnumTraits<::cpp2::detail::YourUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::detail::YourUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::detail::YourUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::detail::YourUnion::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::cpp2::detail::YourUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::detail::YourUnion::Type>::names);
 
-bool TEnumTraits<::cpp2::detail::YourUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::cpp2::detail::YourUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::detail::YourUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::cpp2::detail::YourUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

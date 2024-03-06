@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::apache::thrift::test::MyEnum const*> const TEnumTraits<::apache::thrift::test::MyEnum>::values = folly::range(TEnumDataStorage<::apache::thrift::test::MyEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::test::MyEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::test::MyEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::test::MyEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::test::MyEnum>::names);
 
-bool TEnumTraits<::apache::thrift::test::MyEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::apache::thrift::test::MyEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

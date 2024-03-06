@@ -33,10 +33,10 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Foo>::name = "Foo";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::Foo>::fields_names = {{
-  "foo",
-  "bar",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Foo>::name = "Foo";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::fields_names = {{
+  "foo"sv,
+  "bar"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Foo>::fields_ids = {{
   1,
@@ -46,9 +46,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::Foo>::storage_names = {{
-  "__fbthrift_field_foo",
-  "__fbthrift_field_bar",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::storage_names = {{
+  "__fbthrift_field_foo"sv,
+  "__fbthrift_field_bar"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Foo>::isset_indexes = {{
   -1,

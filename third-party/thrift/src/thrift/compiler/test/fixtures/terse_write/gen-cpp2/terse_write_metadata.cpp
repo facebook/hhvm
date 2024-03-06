@@ -34,7 +34,7 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
   enum_metadata.name() = "terse_write.MyEnum";
   using EnumTraits = TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

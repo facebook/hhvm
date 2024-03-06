@@ -20,6 +20,7 @@
 #define THRIFT_UTIL_ENUMUTILS_H_ 1
 
 #include <cstring>
+#include <string_view>
 
 #include <folly/Conv.h>
 #include <folly/Portability.h>
@@ -45,7 +46,7 @@ inline constexpr bool is_thrift_enum_v<
  * Parses an enum name to the enum type
  */
 template <typename EnumType>
-bool tryParseEnum(folly::StringPiece name, EnumType* out) {
+bool tryParseEnum(std::string_view name, EnumType* out) {
   return TEnumTraits<EnumType>::findValue(name, out);
 }
 
@@ -55,7 +56,7 @@ bool tryParseEnum(folly::StringPiece name, EnumType* out) {
  */
 
 template <typename EnumType>
-EnumType enumValueOrThrow(folly::StringPiece name) {
+EnumType enumValueOrThrow(std::string_view name) {
   EnumType out;
   if (!tryParseEnum(name, &out)) {
     folly::throw_exception<std::out_of_range>("name not found in enum");
@@ -81,7 +82,7 @@ const char* enumName(EnumType value, const char* defaultName = nullptr) {
 template <typename EnumType>
 std::string enumNameSafe(EnumType value) {
   auto under = folly::to_underlying(value);
-  folly::StringPiece name;
+  std::string_view name;
   bool found = TEnumTraits<EnumType>::findName(value, &name);
   return found ? std::string(name) : folly::to<std::string>(under);
 }

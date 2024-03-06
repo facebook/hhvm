@@ -34,7 +34,7 @@ void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
   enum_metadata.name() = "includes.AnEnum";
   using EnumTraits = TEnumTraits<::a::different::ns::AnEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

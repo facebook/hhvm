@@ -34,7 +34,7 @@ void EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum>::gen(T
   enum_metadata.name() = "module.MyEnum";
   using EnumTraits = TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
   enum_metadata.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", {{"count", cvInteger(4)}}).cv_struct_ref());
 }

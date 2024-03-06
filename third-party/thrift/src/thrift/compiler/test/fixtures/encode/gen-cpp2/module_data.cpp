@@ -33,9 +33,9 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = {{
-  "field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = {{
+  "field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_ids = {{
   1,
@@ -43,16 +43,16 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::t
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = {{
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Foo>::storage_names = {{
-  "__fbthrift_field_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Foo>::storage_names = {{
+  "__fbthrift_field_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = {{
-  "list_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = {{
+  "list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_ids = {{
   1,
@@ -60,17 +60,17 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::t
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Bar>::storage_names = {{
-  "__fbthrift_field_list_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Bar>::storage_names = {{
+  "__fbthrift_field_list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = {{
-  "list_field",
-  "nested_list_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = {{
+  "list_field"sv,
+  "nested_list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_ids = {{
   1,
@@ -80,29 +80,29 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::fac
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::Baz>::storage_names = {{
-  "__fbthrift_field_list_field",
-  "__fbthrift_field_nested_list_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::Baz>::storage_names = {{
+  "__fbthrift_field_list_field"sv,
+  "__fbthrift_field_nested_list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::Baz>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::name = "OpEncodeStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
-  "int_field",
-  "enum_field",
-  "foo_field",
-  "adapted_field",
-  "list_field",
-  "list_shared_ptr_field",
-  "list_cpp_type_field",
-  "set_field",
-  "map_field",
-  "nested_field",
-  "bar_field",
-  "adapted_list_field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::name = "OpEncodeStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
+  "int_field"sv,
+  "enum_field"sv,
+  "foo_field"sv,
+  "adapted_field"sv,
+  "list_field"sv,
+  "list_shared_ptr_field"sv,
+  "list_cpp_type_field"sv,
+  "set_field"sv,
+  "map_field"sv,
+  "nested_field"sv,
+  "bar_field"sv,
+  "adapted_list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_ids = {{
   1,
@@ -132,19 +132,19 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 12> TStructDataStorage<::fa
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::storage_names = {{
-  "__fbthrift_field_int_field",
-  "__fbthrift_field_enum_field",
-  "__fbthrift_field_foo_field",
-  "__fbthrift_field_adapted_field",
-  "__fbthrift_field_list_field",
-  "__fbthrift_field_list_shared_ptr_field",
-  "__fbthrift_field_list_cpp_type_field",
-  "__fbthrift_field_set_field",
-  "__fbthrift_field_map_field",
-  "__fbthrift_field_nested_field",
-  "__fbthrift_field_bar_field",
-  "__fbthrift_field_adapted_list_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::storage_names = {{
+  "__fbthrift_field_int_field"sv,
+  "__fbthrift_field_enum_field"sv,
+  "__fbthrift_field_foo_field"sv,
+  "__fbthrift_field_adapted_field"sv,
+  "__fbthrift_field_list_field"sv,
+  "__fbthrift_field_list_shared_ptr_field"sv,
+  "__fbthrift_field_list_cpp_type_field"sv,
+  "__fbthrift_field_set_field"sv,
+  "__fbthrift_field_map_field"sv,
+  "__fbthrift_field_nested_field"sv,
+  "__fbthrift_field_bar_field"sv,
+  "__fbthrift_field_adapted_list_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::isset_indexes = {{
   0,

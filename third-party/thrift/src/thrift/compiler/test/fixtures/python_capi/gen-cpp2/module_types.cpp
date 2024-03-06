@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::test::fixtures::python_capi::MyEnum const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::names);
 
-bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -31,13 +31,13 @@ bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(folly::String
 namespace apache { namespace thrift {
 
 folly::Range<::test::fixtures::python_capi::NormalDecentEnum const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::names);
 
-bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -2031,13 +2031,13 @@ void TccStructTraits<::test::fixtures::python_capi::Shallot>::translateFieldName
 namespace apache { namespace thrift {
 
 folly::Range<::test::fixtures::python_capi::Shallot::Type const*> const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>::names);
 
-bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

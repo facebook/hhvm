@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::enum1 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -31,13 +31,13 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(folly::StringPie
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::enum2 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -47,13 +47,13 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(folly::StringPie
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::enum3 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -63,13 +63,13 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(folly::StringPie
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::enum_with_special_names const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -100,13 +100,13 @@ void TccStructTraits<::test_cpp2::cpp_reflection::union1>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::union1::Type const*> const TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -252,13 +252,13 @@ void TccStructTraits<::test_cpp2::cpp_reflection::union2>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::union2::Type const*> const TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -404,13 +404,13 @@ void TccStructTraits<::test_cpp2::cpp_reflection::union3>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::union3::Type const*> const TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -660,13 +660,13 @@ void TccStructTraits<::test_cpp2::cpp_reflection::unionA>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::unionA::Type const*> const TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -2827,13 +2827,13 @@ void TccStructTraits<::test_cpp2::cpp_reflection::union_with_special_names>::tra
 namespace apache { namespace thrift {
 
 folly::Range<::test_cpp2::cpp_reflection::union_with_special_names::Type const*> const TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names);
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

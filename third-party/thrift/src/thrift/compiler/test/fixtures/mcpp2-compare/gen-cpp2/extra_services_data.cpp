@@ -33,21 +33,21 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::extra::svc::containerStruct2>::name = "containerStruct2";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = {{
-  "fieldA",
-  "req_fieldA",
-  "opt_fieldA",
-  "fieldB",
-  "req_fieldB",
-  "opt_fieldB",
-  "fieldC",
-  "req_fieldC",
-  "opt_fieldC",
-  "fieldD",
-  "fieldE",
-  "req_fieldE",
-  "opt_fieldE",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::extra::svc::containerStruct2>::name = "containerStruct2";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = {{
+  "fieldA"sv,
+  "req_fieldA"sv,
+  "opt_fieldA"sv,
+  "fieldB"sv,
+  "req_fieldB"sv,
+  "opt_fieldB"sv,
+  "fieldC"sv,
+  "req_fieldC"sv,
+  "opt_fieldC"sv,
+  "fieldD"sv,
+  "fieldE"sv,
+  "req_fieldE"sv,
+  "opt_fieldE"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_ids = {{
   1,
@@ -79,20 +79,20 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::ex
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
-  "__fbthrift_field_fieldA",
-  "__fbthrift_field_req_fieldA",
-  "__fbthrift_field_opt_fieldA",
-  "__fbthrift_field_fieldB",
-  "__fbthrift_field_req_fieldB",
-  "__fbthrift_field_opt_fieldB",
-  "__fbthrift_field_fieldC",
-  "__fbthrift_field_req_fieldC",
-  "__fbthrift_field_opt_fieldC",
-  "__fbthrift_field_fieldD",
-  "__fbthrift_field_fieldE",
-  "__fbthrift_field_req_fieldE",
-  "__fbthrift_field_opt_fieldE",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
+  "__fbthrift_field_fieldA"sv,
+  "__fbthrift_field_req_fieldA"sv,
+  "__fbthrift_field_opt_fieldA"sv,
+  "__fbthrift_field_fieldB"sv,
+  "__fbthrift_field_req_fieldB"sv,
+  "__fbthrift_field_opt_fieldB"sv,
+  "__fbthrift_field_fieldC"sv,
+  "__fbthrift_field_req_fieldC"sv,
+  "__fbthrift_field_opt_fieldC"sv,
+  "__fbthrift_field_fieldD"sv,
+  "__fbthrift_field_fieldE"sv,
+  "__fbthrift_field_req_fieldE"sv,
+  "__fbthrift_field_opt_fieldE"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = {{
   0,

@@ -8,8 +8,44 @@
 
 #[doc(inline)]
 pub use :: as types;
-#[doc(inline)]
-pub use ::::services as errors;
+
+pub mod errors {
+    #[doc(inline)]
+    pub use ::::services::my_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_service::*;
+
+    #[doc(inline)]
+    pub use ::::services::my_service_prio_parent;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_service_prio_parent::*;
+
+    #[doc(inline)]
+    pub use ::::services::my_service_prio_child;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_service_prio_child::*;
+
+    #[doc(inline)]
+    pub use ::::services::bad_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::bad_service::*;
+    #[doc(inline)]
+    pub use ::::services::bad_interaction;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::bad_interaction::*;
+
+    #[doc(inline)]
+    pub use ::::services::foo_bar_baz_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::foo_bar_baz_service::*;
+}
+
 pub(crate) use crate as server;
 pub(crate) use ::::services;
 

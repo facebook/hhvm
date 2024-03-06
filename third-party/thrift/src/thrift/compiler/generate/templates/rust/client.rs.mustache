@@ -31,8 +31,16 @@ pub mod mock;
 
 #[doc(inline)]
 pub use {{program:types}} as types;
-#[doc(inline)]
-pub use {{program:types}}::errors;
+
+pub mod errors {{>lib/block}}{{#program:services}}
+    {{>lib/client_errors}}
+
+    {{#service:interactions}}    {{>lib/client_errors}}
+
+    {{/service:interactions}}
+    {{/program:services}}
+}
+
 pub(crate) use {{program:crate}} as client;
 pub(crate) use {{program:types}}::services;
 

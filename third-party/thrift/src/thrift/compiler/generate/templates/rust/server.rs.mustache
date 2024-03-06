@@ -29,8 +29,16 @@
 
 #[doc(inline)]
 pub use {{program:types}} as types;
-#[doc(inline)]
-pub use {{program:types}}::services as errors;
+
+pub mod errors {{>lib/block}}{{#program:services}}
+    {{>lib/server_errors}}
+
+    {{#service:interactions}}    {{>lib/server_errors}}
+
+    {{/service:interactions}}
+    {{/program:services}}
+}
+
 pub(crate) use {{program:crate}} as server;
 pub(crate) use {{program:types}}::services;
 

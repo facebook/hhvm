@@ -8,8 +8,27 @@
 
 #[doc(inline)]
 pub use :: as types;
-#[doc(inline)]
-pub use ::::services as errors;
+
+pub mod errors {
+    #[doc(inline)]
+    pub use ::::services::my_root;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_root::*;
+
+    #[doc(inline)]
+    pub use ::::services::my_node;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_node::*;
+
+    #[doc(inline)]
+    pub use ::::services::my_leaf;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::my_leaf::*;
+}
+
 pub(crate) use crate as server;
 pub(crate) use ::::services;
 

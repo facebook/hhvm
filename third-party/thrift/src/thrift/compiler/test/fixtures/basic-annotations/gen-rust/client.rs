@@ -10,8 +10,44 @@ pub mod mock;
 
 #[doc(inline)]
 pub use :: as types;
-#[doc(inline)]
-pub use ::::errors;
+
+pub mod errors {
+    #[doc(inline)]
+    pub use ::::errors::my_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::my_service::*;
+
+    #[doc(inline)]
+    pub use ::::errors::my_service_prio_parent;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::my_service_prio_parent::*;
+
+    #[doc(inline)]
+    pub use ::::errors::my_service_prio_child;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::my_service_prio_child::*;
+
+    #[doc(inline)]
+    pub use ::::errors::bad_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::bad_service::*;
+    #[doc(inline)]
+    pub use ::::errors::bad_interaction;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::bad_interaction::*;
+
+    #[doc(inline)]
+    pub use ::::errors::foo_bar_baz_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::foo_bar_baz_service::*;
+}
+
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 

@@ -10,8 +10,15 @@ pub mod mock;
 
 #[doc(inline)]
 pub use :: as types;
-#[doc(inline)]
-pub use ::::errors;
+
+pub mod errors {
+    #[doc(inline)]
+    pub use ::::errors::pub_sub_streaming_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::errors::pub_sub_streaming_service::*;
+}
+
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 

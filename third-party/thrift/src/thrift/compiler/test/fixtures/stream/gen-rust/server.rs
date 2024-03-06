@@ -8,8 +8,15 @@
 
 #[doc(inline)]
 pub use :: as types;
-#[doc(inline)]
-pub use ::::services as errors;
+
+pub mod errors {
+    #[doc(inline)]
+    pub use ::::services::pub_sub_streaming_service;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::pub_sub_streaming_service::*;
+}
+
 pub(crate) use crate as server;
 pub(crate) use ::::services;
 

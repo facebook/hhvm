@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 
+#include <folly/Executor.h>
 #include <folly/Try.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
@@ -24,7 +25,8 @@ struct DeclBinaryString {
 };
 
 struct Extractor {
-  explicit Extractor(folly::Executor& exec) : m_exec(exec) {}
+  explicit Extractor(folly::Executor::KeepAlive<folly::Executor> exec)
+      : m_exec(exec) {}
 
   virtual ~Extractor() = default;
 
@@ -41,13 +43,14 @@ struct Extractor {
   Extractor& operator=(const Extractor&) = delete;
   Extractor& operator=(Extractor&&) noexcept = delete;
 
-  folly::Executor& m_exec;
+  folly::Executor::KeepAlive<folly::Executor> m_exec;
 };
 
 struct ExtractorFactory {
   virtual ~ExtractorFactory() = default;
 
-  virtual std::unique_ptr<Extractor> make(folly::Executor&) = 0;
+  virtual std::unique_ptr<Extractor> make(
+      folly::Executor::KeepAlive<folly::Executor>) = 0;
 };
 
 // Call within closed-source code to define a proprietary Extractor.
@@ -76,7 +79,7 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
     const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
-    folly::IOThreadPoolExecutor& exec,
+    folly::Executor::KeepAlive<folly::Executor> exec,
     bool enableExternExtractor);
 
 } // namespace Decl

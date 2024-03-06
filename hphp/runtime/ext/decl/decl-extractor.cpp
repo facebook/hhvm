@@ -1,5 +1,3 @@
-// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
-
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -25,13 +23,14 @@ namespace {
 ExtractorFactory* s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : Extractor {
-  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {}
+  explicit SimpleExtractor(folly::Executor::KeepAlive<folly::Executor> exec)
+      : Extractor{exec} {}
 
   ~SimpleExtractor() override = default;
 
   folly::SemiFuture<std::string> get(
       const Facts::PathAndOptionalHash& key) override {
-    return folly::via(&m_exec, [key]() {
+    return folly::via(m_exec, [key]() {
       auto binaryString = decls_binary_from_path(key);
       return binaryString.value;
     });
@@ -93,7 +92,7 @@ void setExtractorFactory(ExtractorFactory* factory) {
 }
 
 std::unique_ptr<Extractor> makeExtractor(
-    folly::Executor& exec,
+    folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
@@ -112,15 +111,15 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
     bool enableExternExtractor) {
   folly::IOThreadPoolExecutor exec{
       1, Facts::make_thread_factory("DeclExtractor")};
-  auto semiFuture =
-      decl_from_path_async(root, pathAndHash, exec, enableExternExtractor);
+  auto semiFuture = decl_from_path_async(
+      root, pathAndHash, folly::getKeepAliveToken(exec), enableExternExtractor);
   return std::move(semiFuture).get();
 }
 
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
     const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
-    folly::IOThreadPoolExecutor& exec,
+    folly::Executor::KeepAlive<folly::Executor> exec,
     bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
@@ -130,7 +129,7 @@ folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
                                                : pathAndHash.m_path;
   Facts::PathAndOptionalHash absPathAndHash{path, pathAndHash.m_hash};
   return folly::via(
-             &exec,
+             exec,
              [extractor = std::move(extractor), absPathAndHash]() {
                if (UNLIKELY(!absPathAndHash.m_hash)) {
                  // We don't know the file's hash yet, so we don't know

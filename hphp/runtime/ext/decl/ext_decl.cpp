@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <folly/Executor.h>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -809,7 +810,10 @@ Object HHVM_STATIC_METHOD(FileDecls, genParsePath, const String& path) {
   MemcacheHitEvent* event;
   try {
     auto declSemiFuture = Decl::decl_from_path_async(
-        root, pathAndHash, exec, s_extractorConfig.enableExternExtractor);
+        root,
+        pathAndHash,
+        folly::getKeepAliveToken(exec),
+        s_extractorConfig.enableExternExtractor);
     event = new MemcacheHitEvent(std::move(declSemiFuture));
     return Object{event->getWaitHandle()};
   } catch (...) {

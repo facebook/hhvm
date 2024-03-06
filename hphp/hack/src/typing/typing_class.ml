@@ -715,12 +715,11 @@ let add_or_check_is_supertype
     match SMap.find_opt interface_name ancestors with
     | None -> (env, SMap.add interface_name (ty, parent_pos_id) ancestors)
     | Some (first_ty, first_parent_pos_id) ->
-      let ((env, _err), lty) =
-        Phase.localize_no_subst env ~ignore_errors:true ty
-      in
-      let ((env, _err), first_lty) =
-        Phase.localize_no_subst ~ignore_errors:true env first_ty
-      in
+      (* We want this check to break through module boundaries so we disable
+       * the localization of internal newtypes outside their module as newtype *)
+      let ety_env = { empty_expand_env with make_internal_opaque = false } in
+      let ((env, _err), lty) = Phase.localize ~ety_env env ty in
+      let ((env, _err), first_lty) = Phase.localize ~ety_env env first_ty in
       let (env, ty_err_opt) =
         let (_, (winning_pos, _), winning_instantiation) =
           Decl_utils.unwrap_class_type first_ty

@@ -1,0 +1,26 @@
+File "internal_generic_arguments.php--A.php", line 16, characters 8-13:
+Invalid argument (Typing[4110])
+  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
+  Expected `int`
+  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
+  But got `string`
+  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
+  This type argument to `F` must match exactly (it is invariant)
+File "internal_generic_arguments.php--A.php", line 16, characters 8-13:
+Invalid argument (Typing[4110])
+  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
+  Expected `string`
+  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
+  This type argument to `F` must match exactly (it is invariant)
+  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
+  But got `int`
+File "internal_generic_arguments.php--B.php", line 4, characters 8-13:
+Invalid argument (Typing[4110])
+  File "internal_generic_arguments.php--A.php", line 12, characters 16-16:
+  Expected `F<string>` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_generic_arguments.php--A.php", line 8, characters 28-36:
+  The type originated from here
+  File "internal_generic_arguments.php--A.php", line 12, characters 16-16:
+  But got `F<int>` because this is an internal symbol from module A, which is opaque outside of the module.
+  File "internal_generic_arguments.php--A.php", line 5, characters 31-36:
+  The type originated from here

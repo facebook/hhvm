@@ -215,6 +215,8 @@ type wildcard_action =
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
+  make_internal_opaque: bool;
+      (** Localize internal classes outside their module as if newtypes i.e. opaque *)
   expand_visible_newtype: bool;
       (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
           True by default. *)

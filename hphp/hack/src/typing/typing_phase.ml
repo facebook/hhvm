@@ -239,6 +239,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       (not (Typing_defs.cyclic_expansion ety_env))
       && Option.is_none ty_err_opt
       && ety_env.expand_visible_newtype
+      && ety_env.make_internal_opaque
       && no_new_global_type_params
     in
     match deref lty with
@@ -818,7 +819,10 @@ and localize_class_instantiation
           nkinds
       in
       (* Hide the class type if its internal and outside of the module *)
-      if Typing_modules.is_class_visible env class_info then
+      if
+        (not ety_env.make_internal_opaque)
+        || Typing_modules.is_class_visible env class_info
+      then
         ((env, err), mk (r, Tclass (sid, nonexact, tyl)))
       else
         let callee_module =
@@ -839,7 +843,7 @@ and localize_class_instantiation
           else
             cstr
         in
-        ((env, err), mk (new_r, Tnewtype (name, [], cstr)))
+        ((env, err), mk (new_r, Tnewtype (name, tyl, cstr)))
 
 and localize_typedef_instantiation
     ~ety_env env r decl_r type_name tyargs (typedef_info : _ option) =

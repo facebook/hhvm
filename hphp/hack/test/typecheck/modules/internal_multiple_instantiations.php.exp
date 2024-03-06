@@ -1,0 +1,14 @@
+File "internal_multiple_instantiations.php--B.php", line 3, characters 17-17:
+This makes D implements F<arraykey> but it already implements F at another instantiation (Typing[4480])
+  File "internal_multiple_instantiations.php--B.php", line 3, characters 30-30:
+  It already implements F<float> via G
+  File "internal_multiple_instantiations.php--A.php", line 5, characters 21-21:
+  This is where G implements F
+  File "internal_multiple_instantiations.php--A.php", line 6, characters 20-20:
+  This is where C implements F
+  File "internal_multiple_instantiations.php--A.php", line 5, characters 21-21:
+  F<float> should be a subtype of F<arraykey>, but it's not because
+  File "internal_multiple_instantiations.php--A.php", line 6, characters 22-29:
+  Expected `arraykey`
+  File "internal_multiple_instantiations.php--A.php", line 5, characters 23-27:
+  But got `float`

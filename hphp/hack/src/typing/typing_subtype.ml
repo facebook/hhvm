@@ -1175,7 +1175,6 @@ end = struct
             apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
     in
     let fail = fail_with_suffix None in
-    let ( ||| ) = ( ||| ) ~fail in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
     (* We don't know whether the assertion is valid or not *)
@@ -1306,116 +1305,22 @@ end = struct
           (r_super, (d_sup, bound_sup))
           env)
     | (_, Taccess _) -> invalid_env env
-    | (_, Tgeneric (name_super, tyargs_super)) ->
+    | (r_super, Tgeneric (name_super, tyargs_super)) ->
       (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
          Env.get_lower_bounds *)
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       (* If subtype and supertype are the same generic parameter, we're done *)
       | LoclType ty_sub ->
-        let (generic_lower_bounds, other_lower_bounds) =
-          let rec fixpoint new_set bounds_set =
-            if Typing_set.is_empty new_set then
-              bounds_set
-            else
-              let add_set =
-                Typing_set.fold
-                  (fun ty add_set ->
-                    match get_node ty with
-                    | Tgeneric (name, targs) ->
-                      let gen_bounds = Env.get_lower_bounds env name targs in
-                      Typing_set.union add_set gen_bounds
-                    | _ -> add_set)
-                  new_set
-                  Typing_set.empty
-              in
-              let bounds_set = Typing_set.union new_set bounds_set in
-              let new_set = Typing_set.diff add_set bounds_set in
-              fixpoint new_set bounds_set
-          in
-          let lower_bounds =
-            fixpoint (Typing_set.singleton lty_super) Typing_set.empty
-          in
-          Typing_set.fold
-            (fun bound_ty (g_set, o_set) ->
-              match get_node bound_ty with
-              | Tgeneric (name, []) -> (SSet.add name g_set, o_set)
-              | _ -> (g_set, Typing_set.add bound_ty o_set))
-            lower_bounds
-            (SSet.empty, Typing_set.empty)
-        in
-        (match get_node ty_sub with
-        | Tgeneric (name_sub, []) when SSet.mem name_sub generic_lower_bounds ->
-          valid env
-        | Tgeneric (name_sub, tyargs_sub) when String.equal name_sub name_super
-          ->
-          if List.is_empty tyargs_super then
-            valid env
-          else
-            (* TODO(T69931993) Type parameter env must carry variance information *)
-            let variance_reifiedl =
-              List.map tyargs_sub ~f:(fun _ ->
-                  (Ast_defs.Invariant, Aast.Erased))
-            in
-            (* Unfortunately, we have to expose this function for proto-HKTs *)
-            Subtype_newtype_r.simplify_subtype_variance_for_non_injective
-              ~subtype_env
-              ~sub_supportdyn
-              ~super_like
-              name_sub
-              None
-              variance_reifiedl
-              tyargs_sub
-              tyargs_super
-              ty_sub
-              lty_super
-              env
-        (* When decomposing subtypes for the purpose of adding bounds on generic
-         * parameters to the context, (so seen_generic_params = None), leave
-         * subtype so that the bounds get added *)
-        | Tvar _
-        | Tunion _ ->
-          default_subtype_help env
-        | _ ->
-          if subtype_env.Subtype_env.require_completeness then
-            default env
-          else (
-            (* If we've seen this type parameter before then we must have gone
-             * round a cycle so we fail
-             *)
-            match
-              VisitedGoals.try_add_visited_generic_super
-                subtype_env.Subtype_env.visited
-                ity_sub
-                name_super
-            with
-            | None -> invalid_env env
-            | Some new_visited ->
-              let subtype_env =
-                Subtype_env.set_visited subtype_env new_visited
-              in
-              (* Collect all the lower bounds ("super" constraints) on the
-               * generic parameter, and check ty_sub against each of them in turn
-               * until one of them succeeds *)
-              let rec try_bounds tyl env =
-                match tyl with
-                | [] -> default_subtype_help env
-                | ty :: tyl ->
-                  env
-                  |> simplify_subtype
-                       ~subtype_env
-                       ~sub_supportdyn
-                       ~super_like
-                       ~this_ty
-                       ~super_supportdyn:false
-                       ty_sub
-                       ty
-                  ||| try_bounds tyl
-              in
-              (* Turn error into a generic error about the type parameter *)
-              let bounds = Typing_set.elements other_lower_bounds in
-              env |> try_bounds bounds |> if_unsat invalid_env
-          )))
+        Subtype_generic_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          ty_sub
+          (r_super, (name_super, tyargs_super))
+          env)
     | (_, Tnonnull) ->
       (match ity_sub with
       | ConstraintType cty -> begin
@@ -2013,6 +1918,148 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_generic_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_ty ->
+    locl_phase Reason.t_ * (string * locl_phase ty list) ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, (name_super, tyargs_super))
+      env =
+    let lty_super = mk (r_super, Tgeneric (name_super, tyargs_super)) in
+    let ( ||| ) = ( ||| ) ~fail in
+    (* We *know* that the assertion is unsatisfiable *)
+    let invalid_env env = invalid ~fail env in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType lty_super)
+    in
+    let (generic_lower_bounds, other_lower_bounds) =
+      let rec fixpoint new_set bounds_set =
+        if Typing_set.is_empty new_set then
+          bounds_set
+        else
+          let add_set =
+            Typing_set.fold
+              (fun ty add_set ->
+                match get_node ty with
+                | Tgeneric (name, targs) ->
+                  let gen_bounds = Env.get_lower_bounds env name targs in
+                  Typing_set.union add_set gen_bounds
+                | _ -> add_set)
+              new_set
+              Typing_set.empty
+          in
+          let bounds_set = Typing_set.union new_set bounds_set in
+          let new_set = Typing_set.diff add_set bounds_set in
+          fixpoint new_set bounds_set
+      in
+      let lower_bounds =
+        fixpoint (Typing_set.singleton lty_super) Typing_set.empty
+      in
+      Typing_set.fold
+        (fun bound_ty (g_set, o_set) ->
+          match get_node bound_ty with
+          | Tgeneric (name, []) -> (SSet.add name g_set, o_set)
+          | _ -> (g_set, Typing_set.add bound_ty o_set))
+        lower_bounds
+        (SSet.empty, Typing_set.empty)
+    in
+    match get_node lty_sub with
+    | Tgeneric (name_sub, []) when SSet.mem name_sub generic_lower_bounds ->
+      valid env
+    | Tgeneric (name_sub, tyargs_sub) when String.equal name_sub name_super ->
+      if List.is_empty tyargs_super then
+        valid env
+      else
+        (* TODO(T69931993) Type parameter env must carry variance information *)
+        let variance_reifiedl =
+          List.map tyargs_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
+        in
+        (* Unfortunately, we have to expose this function for proto-HKTs *)
+        Subtype_newtype_r.simplify_subtype_variance_for_non_injective
+          ~subtype_env
+          ~sub_supportdyn
+          ~super_like
+          name_sub
+          None
+          variance_reifiedl
+          tyargs_sub
+          tyargs_super
+          lty_sub
+          lty_super
+          env
+    (* When decomposing subtypes for the purpose of adding bounds on generic
+     * parameters to the context, (so seen_generic_params = None), leave
+     * subtype so that the bounds get added *)
+    | Tvar _
+    | Tunion _ ->
+      default_subtype_help env
+    | _ ->
+      if subtype_env.Subtype_env.require_completeness then
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType lty_sub)
+          (LoclType lty_super)
+      else (
+        (* If we've seen this type parameter before then we must have gone
+         * round a cycle so we fail
+         *)
+        match
+          VisitedGoals.try_add_visited_generic_super
+            subtype_env.Subtype_env.visited
+            (LoclType lty_sub)
+            name_super
+        with
+        | None -> invalid_env env
+        | Some new_visited ->
+          let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+          (* Collect all the lower bounds ("super" constraints) on the
+           * generic parameter, and check ty_sub against each of them in turn
+           * until one of them succeeds *)
+          let rec try_bounds tyl env =
+            match tyl with
+            | [] -> default_subtype_help env
+            | ty :: tyl ->
+              env
+              |> Subtype.simplify_subtype
+                   ~subtype_env
+                   ~sub_supportdyn
+                   ~super_like
+                   ~this_ty
+                   ~super_supportdyn:false
+                   lty_sub
+                   ty
+              ||| try_bounds tyl
+          in
+          (* Turn error into a generic error about the type parameter *)
+          let bounds = Typing_set.elements other_lower_bounds in
+          env |> try_bounds bounds |> if_unsat invalid_env
+      )
 end
 
 and Subtype_dependent_r : sig

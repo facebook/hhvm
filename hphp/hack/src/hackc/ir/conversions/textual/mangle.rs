@@ -43,6 +43,7 @@ impl Mangle for [u8] {
             b"prune" => "prune_".to_owned(),
             b"ret" => "ret_".to_owned(),
             b"store" => "store_".to_owned(),
+            b"then" => "then_".to_owned(),
             b"throw" => "throw_".to_owned(),
             b"true" => "true_".to_owned(),
             b"type" => "type_".to_owned(),

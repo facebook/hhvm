@@ -666,14 +666,6 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
-  let is_final_and_invariant env id =
-    let class_def = Env.get_class env id in
-    match class_def with
-    | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      false
-
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
       =
     match (ty_sub, ty_super) with
@@ -1186,7 +1178,6 @@ end = struct
     let ( ||| ) = ( ||| ) ~fail in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
-    let invalid_env_with env f = invalid ~fail:f env in
     (* We don't know whether the assertion is valid or not *)
     let default env =
       mk_issubtype_prop
@@ -1301,66 +1292,19 @@ end = struct
             (r_super, ety)
             env
       )
-    | (_r_super, Tdependent (d_sup, bound_sup)) ->
+    | (r_super, Tdependent (d_sup, bound_sup)) ->
       let (env, bound_sup) = Env.expand_type env bound_sup in
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType ty_sub ->
-        (match (deref ty_sub, get_node bound_sup) with
-        | ((_, Tclass _), Tclass ((_, x), _, _))
-          when is_final_and_invariant env x ->
-          (* For final class C, there is no difference between `this as X` and `X`,
-           * and `expr<#n> as X` and `X`.
-           * But we need to take care with variant classes, since we can't
-           * statically guarantee their runtime type.
-           *)
-          simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like:false
-            ~super_supportdyn:false
-            ty_sub
-            bound_sup
-            env
-        | ( (r_sub, Tclass ((_, y), _, _)),
-            Tclass (((_, x) as id), _, _tyl_super) ) ->
-          let fail =
-            if String.equal x y then
-              let p = Reason.to_pos r_sub in
-              let (pos_super, class_name) = id in
-              fail_with_suffix
-                (Some
-                   (Typing_error.Secondary.This_final
-                      { pos_super; class_name; pos_sub = p }))
-            else
-              fail
-          in
-          invalid_env_with env fail
-        | ((_, Tdependent (d_sub, bound_sub)), _) ->
-          let this_ty = Option.first_some this_ty (Some ty_sub) in
-          (* Dependent types are identical but bound might be different *)
-          if equal_dependent_type d_sub d_sup then
-            simplify_subtype
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              ~super_like:false
-              ~super_supportdyn:false
-              bound_sub
-              bound_sup
-              env
-          else
-            simplify_subtype
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              ~super_like:false
-              ~super_supportdyn:false
-              bound_sub
-              lty_super
-              env
-        | _ -> default_subtype_help env))
+        Subtype_dependent_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ty_sub
+          (r_super, (d_sup, bound_sup))
+          env)
     | (_, Taccess _) -> invalid_env env
     | (_, Tgeneric (name_super, tyargs_super)) ->
       (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
@@ -2069,6 +2013,154 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_dependent_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    locl_ty ->
+    locl_phase Reason.t_ * (dependent_type * locl_ty) ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let is_final_and_invariant env id =
+    let class_def = Env.get_class env id in
+    match class_def with
+    | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false
+
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      lty_sub
+      (r_super, (dep_ty_sup, bound_sup))
+      env =
+    let lty_super = mk (r_super, Tdependent (dep_ty_sup, bound_sup)) in
+
+    let fail_snd_err =
+      let (ity_sub, ity_super, stripped_existential) =
+        match
+          Pretty.strip_existential
+            ~ity_sub:(LoclType lty_sub)
+            ~ity_sup:(LoclType lty_super)
+        with
+        | None -> (LoclType lty_sub, LoclType lty_super, false)
+        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
+      in
+      match subtype_env.Subtype_env.tparam_constraints with
+      | [] ->
+        Typing_error.Secondary.Subtyping_error
+          {
+            ty_sub = ity_sub;
+            ty_sup = ity_super;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
+            stripped_existential;
+          }
+      | cstrs ->
+        Typing_error.Secondary.Violated_constraint
+          {
+            cstrs;
+            ty_sub = ity_sub;
+            ty_sup = ity_super;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
+          }
+    in
+    let fail_with_suffix snd_err_opt =
+      let open Typing_error in
+      let maybe_retain_code =
+        match subtype_env.Subtype_env.tparam_constraints with
+        | [] -> Reasons_callback.retain_code
+        | _ -> Fn.id
+      in
+      match snd_err_opt with
+      | Some snd_err ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+            apply_reasons
+              ~on_error:
+                Reasons_callback.(
+                  prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
+              snd_err)
+      | _ ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+            apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
+    in
+    let fail = fail_with_suffix None in
+    let invalid_env_with env f = invalid ~fail:f env in
+
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType lty_super)
+    in
+
+    match (deref lty_sub, get_node bound_sup) with
+    | ((_, Tclass _), Tclass ((_, x), _, _)) when is_final_and_invariant env x
+      ->
+      (* For final class C, there is no difference between `this as X` and `X`,
+       * and `expr<#n> as X` and `X`.
+       * But we need to take care with variant classes, since we can't
+       * statically guarantee their runtime type.
+       *)
+      Subtype.simplify_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like:false
+        ~super_supportdyn:false
+        lty_sub
+        bound_sup
+        env
+    | ((r_sub, Tclass ((_, y), _, _)), Tclass (((_, x) as id), _, _tyl_super))
+      ->
+      let fail =
+        if String.equal x y then
+          let p = Reason.to_pos r_sub in
+          let (pos_super, class_name) = id in
+          fail_with_suffix
+            (Some
+               (Typing_error.Secondary.This_final
+                  { pos_super; class_name; pos_sub = p }))
+        else
+          fail
+      in
+      invalid_env_with env fail
+    | ((_, Tdependent (d_sub, bound_sub)), _) ->
+      let this_ty = Option.first_some this_ty (Some lty_sub) in
+      (* Dependent types are identical but bound might be different *)
+      if equal_dependent_type d_sub dep_ty_sup then
+        Subtype.simplify_subtype
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like:false
+          ~super_supportdyn:false
+          bound_sub
+          bound_sup
+          env
+      else
+        Subtype.simplify_subtype
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like:false
+          ~super_supportdyn:false
+          bound_sub
+          lty_super
+          env
+    | _ -> default_subtype_help env
 end
 
 and Subtype_supportdyn_r : sig

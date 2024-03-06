@@ -16,11 +16,21 @@ import asyncio
 
 import click
 from example.chatroom.thrift_clients import Echo
-from thrift.python.client import get_client
+from thrift.python.client import ClientType, get_client
 
 
-async def async_main(host, port):
-    async with get_client(Echo, host=host, port=port) as client:
+async def async_main(host, port, http):
+    async with get_client(
+        Echo,
+        host=host,
+        port=port,
+        path=("/" if http else None),
+        client_type=(
+            ClientType.THRIFT_HTTP2_CLIENT_TYPE
+            if http
+            else ClientType.THRIFT_ROCKET_CLIENT_TYPE
+        ),
+    ) as client:
         while True:
             text = input("> ")
             resp = await client.echo(text)
@@ -29,7 +39,8 @@ async def async_main(host, port):
 
 @click.command()
 @click.option("--host", default="localhost", help="Hostname of remote thrift server")
-@click.option("--port", default=7777, help="Listening port of remote thrift server")
+@click.option("--port", default=7778, help="Listening port of remote thrift server")
+@click.option("--http/--no-http", default=False, help="Use HTTP2 client")
 def main(*args, **kwargs):
     asyncio.run(async_main(*args, **kwargs))
 

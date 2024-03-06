@@ -23,6 +23,7 @@ cdef extern from "thrift/lib/cpp/transport/THeader.h":
         THRIFT_HEADER_CLIENT_TYPE,
         THRIFT_ROCKET_CLIENT_TYPE,
         THRIFT_HTTP_CLIENT_TYPE,
+        THRIFT_HTTP2_CLIENT_TYPE,
 
 cdef extern from "thrift/lib/cpp2/async/RequestChannel.h" namespace "::apache::thrift":
     cdef cppclass cRequestChannel "::apache::thrift::RequestChannel":

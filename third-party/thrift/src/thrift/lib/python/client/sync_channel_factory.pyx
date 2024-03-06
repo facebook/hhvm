@@ -39,11 +39,11 @@ cdef RequestChannel create_channel(
     double ssl_timeout,
 ):
     endpoint = b''
-    if client_type == ClientType.THRIFT_HTTP_CLIENT_TYPE:
+    if client_type in (ClientType.THRIFT_HTTP_CLIENT_TYPE, ClientType.THRIFT_HTTP2_CLIENT_TYPE):
         if host is None or port is None:
-            raise ValueError("Must set host and port when using ClientType.THRIFT_HTTP_CLIENT_TYPE")
+            raise ValueError("Must set host and port when using HTTP clients")
         if path is None:
-            raise ValueError("use path='/endpoint' when using ClientType.THRIFT_HTTP_CLIENT_TYPE")
+            raise ValueError("use path='/endpoint' when using HTTP clients")
         endpoint = os.fsencode(path)
         path = None
 

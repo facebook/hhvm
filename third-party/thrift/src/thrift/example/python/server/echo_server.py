@@ -37,7 +37,7 @@ async def async_main(port):
 
 
 @click.command()
-@click.option("--port", default=7777, help="Listening port of remote thrift server")
+@click.option("--port", default=7778, help="Listening port of remote thrift server")
 def main(port):
     # TODO: due to some bug, using asyncio.run() will cause process to stuck on exit, to be fixed
     asyncio.get_event_loop().run_until_complete(async_main(port))

@@ -432,6 +432,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
   auto& cols = *trans->unit->logEntry();
   auto kind = show(trans->kind);
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
+  cols.setStr("srckey", showShort(trans->sk));
   if (trans->sk.valid()) {
     auto const func = trans->sk.func();
     cols.setStr("func", func->fullName()->data());

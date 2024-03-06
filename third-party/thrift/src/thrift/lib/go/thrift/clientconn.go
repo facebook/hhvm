@@ -23,33 +23,20 @@ import (
 
 // ClientConn holds all the connection information for a thrift client
 type ClientConn struct {
-	transport Transport
-	iproto    Protocol
-	oproto    Protocol
-	seqID     int32
+	proto Protocol
+	seqID int32
 }
 
-// Transport returns the underlying Transport object inside the ClientConn
+// Deprecated: Transport returns the underlying Transport object inside the ClientConn
 // object
 func (cc *ClientConn) Transport() Transport {
-	return cc.transport
-}
-
-// NewClientConnWithProtocols creates a new ClientConn object using the input and output protocols provided
-func NewClientConnWithProtocols(t Transport, iproto, oproto Protocol) ClientConn {
-	return ClientConn{
-		transport: t,
-		iproto:    iproto,
-		oproto:    oproto,
-	}
+	return nil
 }
 
 // NewClientConnFromProtocol creates a new ClientConn object using a protocol
 func NewClientConnFromProtocol(proto Protocol) ClientConn {
 	return ClientConn{
-		transport: nil,
-		iproto:    proto,
-		oproto:    proto,
+		proto: proto,
 	}
 }
 
@@ -65,35 +52,35 @@ type IResponse interface {
 
 // Close closes the client connection
 func (cc *ClientConn) Close() error {
-	return cc.oproto.Close()
+	return cc.proto.Close()
 }
 
 // SendMsg sends a request to a given thrift endpoint
 func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, msgType MessageType) error {
 	cc.seqID++
 
-	if err := setRequestHeaders(ctx, cc.oproto); err != nil {
+	if err := setRequestHeaders(ctx, cc.proto); err != nil {
 		return err
 	}
 
-	if err := cc.oproto.WriteMessageBegin(method, msgType, cc.seqID); err != nil {
+	if err := cc.proto.WriteMessageBegin(method, msgType, cc.seqID); err != nil {
 		return err
 	}
 
-	if err := req.Write(cc.oproto); err != nil {
+	if err := req.Write(cc.proto); err != nil {
 		return err
 	}
 
-	if err := cc.oproto.WriteMessageEnd(); err != nil {
+	if err := cc.proto.WriteMessageEnd(); err != nil {
 		return err
 	}
 
-	return cc.oproto.Flush()
+	return cc.proto.Flush()
 }
 
 // RecvMsg receives the response from a call to a thrift endpoint
 func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse) error {
-	recvMethod, mTypeID, seqID, err := cc.iproto.ReadMessageBegin()
+	recvMethod, mTypeID, seqID, err := cc.proto.ReadMessageBegin()
 
 	if err != nil {
 		return err
@@ -109,21 +96,21 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse)
 
 	switch mTypeID {
 	case REPLY:
-		if err := res.Read(cc.iproto); err != nil {
+		if err := res.Read(cc.proto); err != nil {
 			return err
 		}
 
-		return cc.iproto.ReadMessageEnd()
+		return cc.proto.ReadMessageEnd()
 	case EXCEPTION:
 		err := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
 
-		recvdErr, readErr := err.Read(cc.iproto)
+		recvdErr, readErr := err.Read(cc.proto)
 
 		if readErr != nil {
 			return readErr
 		}
 
-		if msgEndErr := cc.iproto.ReadMessageEnd(); msgEndErr != nil {
+		if msgEndErr := cc.proto.ReadMessageEnd(); msgEndErr != nil {
 			return msgEndErr
 		}
 		return recvdErr

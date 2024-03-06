@@ -104,30 +104,30 @@ func (f *fakeResponse) Read(proto Protocol) error {
 
 func TestSendMsgError(t *testing.T) {
 	testCases := []struct {
-		oproto   Protocol
+		proto    Protocol
 		request  IRequest
 		expected error
 	}{
 		// Bad WriteMessageBegin
 		{
-			oproto:   &fakeOproto{errOnMessageBegin: true},
+			proto:    &fakeOproto{errOnMessageBegin: true},
 			expected: errFakeOprotoWriteMessageBegin,
 		},
 		// Bad request.Write
 		{
-			oproto:   &fakeOproto{errOnMessageBegin: true},
+			proto:    &fakeOproto{errOnMessageBegin: true},
 			request:  &fakeRequest{shouldReturnError: true},
 			expected: errFakeOprotoWriteMessageBegin,
 		},
 		// Bad WriteMessageEnd
 		{
-			oproto:   &fakeOproto{errOnMessageEnd: true},
+			proto:    &fakeOproto{errOnMessageEnd: true},
 			request:  &fakeRequest{shouldReturnError: false},
 			expected: errFakeOprotoWriteMessageEnd,
 		},
 		// Bad Flush
 		{
-			oproto:   &fakeOproto{errOnFlush: true},
+			proto:    &fakeOproto{errOnFlush: true},
 			request:  &fakeRequest{shouldReturnError: false},
 			expected: errFakeOprotoFlush,
 		},
@@ -136,7 +136,7 @@ func TestSendMsgError(t *testing.T) {
 	defer cancel()
 
 	for i, testCase := range testCases {
-		cc := ClientConn{oproto: testCase.oproto}
+		cc := ClientConn{proto: testCase.proto}
 
 		if err := cc.SendMsg(ctx, "foobar", testCase.request, CALL); err.Error() != testCase.expected.Error() {
 			t.Errorf("#%d: expected call to SendMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)
@@ -147,37 +147,37 @@ func TestSendMsgError(t *testing.T) {
 
 func TestRecvMsgError(t *testing.T) {
 	testCases := []struct {
-		iproto   Protocol
+		proto    Protocol
 		response IResponse
 		expected error
 	}{
 		// Error reading message begin
 		{
-			iproto:   &fakeIproto{shouldReturnError: true},
+			proto:    &fakeIproto{shouldReturnError: true},
 			expected: errFakeIprotoReadMessageBegin,
 		},
 
 		// Bad method name in response
 		{
-			iproto:   &fakeIproto{method: "foobar2"},
+			proto:    &fakeIproto{method: "foobar2"},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: wrong method name"),
 		},
 
 		// Bad seqID in response
 		{
-			iproto:   &fakeIproto{method: "foobar", seqID: -1},
+			proto:    &fakeIproto{method: "foobar", seqID: -1},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: out of sequence response"),
 		},
 
 		// Bad typeID in response
 		{
-			iproto:   &fakeIproto{method: "foobar", seqID: 0, typeID: -1},
+			proto:    &fakeIproto{method: "foobar", seqID: 0, typeID: -1},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: invalid message type"),
 		},
 
 		// Bad REPLY response body read
 		{
-			iproto:   &fakeIproto{method: "foobar", seqID: 0, typeID: REPLY},
+			proto:    &fakeIproto{method: "foobar", seqID: 0, typeID: REPLY},
 			response: &fakeResponse{shouldReturnError: true},
 			expected: errFakeResponseRead,
 		},
@@ -187,7 +187,7 @@ func TestRecvMsgError(t *testing.T) {
 	defer cancel()
 
 	for i, testCase := range testCases {
-		cc := ClientConn{iproto: testCase.iproto}
+		cc := ClientConn{proto: testCase.proto}
 
 		if err := cc.RecvMsg(ctx, "foobar", testCase.response); err.Error() != testCase.expected.Error() {
 			t.Errorf("#%d: expected call to RecvMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)

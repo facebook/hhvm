@@ -6245,23 +6245,35 @@ end = struct
 end
 (* == API =================================================================== *)
 
-(* Determines whether the types are definitely disjoint, or whether they might
-    overlap (i.e., both contain some particular value). *)
-(* One of the main entry points to this module *)
-let sub_type_i ~subtype_env env ty_sub ty_super =
+(* == Tell API ============================================================== *)
+
+(* -- sub_type_i entry point ------------------------------------------------ *)
+
+let sub_type_i env ?(is_coeffect = false) ty_sub ty_super on_error =
+  let subtype_env =
+    Subtype_env.create ~log_level:2 ~is_coeffect ~coerce:None on_error
+  in
   let old_env = env in
-  match
+  let (env, ty_err_opt) =
     Subtype_tell.sub_type_inner
       ~subtype_env
       ~sub_supportdyn:None
-      env
       ~this_ty:None
+      env
       ty_sub
       ty_super
-  with
-  | (env, None) -> (Env.log_env_change "sub_type" old_env env, None)
-  | (_, ty_err_opt) ->
-    (Env.log_env_change "sub_type" old_env old_env, ty_err_opt)
+  in
+  let env =
+    Env.log_env_change "sub_type" old_env
+    @@
+    if Option.is_none ty_err_opt then
+      env
+    else
+      old_env
+  in
+  (env, ty_err_opt)
+
+(* -- sub_type entry point -------------------------------------------------- *)
 
 let sub_type
     env
@@ -6270,237 +6282,35 @@ let sub_type
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     on_error =
-  sub_type_i
-    ~subtype_env:(Subtype_env.create ~is_coeffect ~coerce ~log_level:2 on_error)
-    env
-    (LoclType ty_sub)
-    (LoclType ty_super)
-
-let is_sub_type_alt ~require_completeness ~no_top_bottom env ty1 ty2 =
-  Subtype_ask.is_sub_type_alt_i
-    ~require_completeness
-    ~no_top_bottom
-    env
-    (LoclType ty1)
-    (LoclType ty2)
-
-let is_sub_type env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~require_completeness:false
-    ~no_top_bottom:false
-    ~coerce:None
-    ~sub_supportdyn:None
-    env
-    ty1
-    ty2
-  = Some true
-
-let is_dynamic_aware_sub_type env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~require_completeness:false
-    ~no_top_bottom:false
-    ~coerce:(Some TL.CoerceToDynamic)
-    ~sub_supportdyn:None
-    env
-    ty1
-    ty2
-  = Some true
-
-let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~require_completeness:false
-    ~no_top_bottom:true
-    ~coerce
-    ~sub_supportdyn:None
-    env
-    ty1
-    ty2
-  = Some true
-
-let is_sub_type_ignore_generic_params env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-  (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
-    ~require_completeness:true
-    ~no_top_bottom:true
-    ~coerce:None
-    ~sub_supportdyn:None
-    env
-    ty1
-    ty2
-  = Some true
-
-let can_sub_type env ty1 ty2 =
-  let ( <> ) a b = not (Option.equal Bool.equal a b) in
-  is_sub_type_alt
-    ~require_completeness:false
-    ~no_top_bottom:true
-    ~coerce:None
-    ~sub_supportdyn:None
-    env
-    ty1
-    ty2
-  <> Some false
-
-let is_type_disjoint env ty1 ty2 =
-  (* visited record which type variables & generics we've seen, to cut off cycles. *)
-  let rec is_type_disjoint visited env ty1 ty2 =
-    let (env, ty1) = Env.expand_type env ty1 in
-    let (env, ty2) = Env.expand_type env ty2 in
-    match (get_node ty1, get_node ty2) with
-    | (_, (Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _))
-    | ((Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
-      false
-    | (Tshape _, Tshape _) ->
-      (* This could be more precise, e.g., if we have two closed shapes with different fields.
-         However, intersection already detects this and simplifies to nothing, so it's not
-         so important here. *)
-      false
-    | (Tshape _, _) ->
-      (* Treat shapes as dict<arraykey, mixed> because that implementation detail
-         leaks through when doing is dict<_, _> on them, and they are also
-         Traversable, KeyedContainer, etc. (along with darrays).
-         We could translate darray to a more precise dict type with the same
-         type arguments, but it doesn't matter since disjointness doesn't ever
-         look at them. *)
-      let r = get_reason ty1 in
-      is_type_disjoint visited env MakeType.(dict r (arraykey r) (mixed r)) ty2
-    | (_, Tshape _) ->
-      let r = get_reason ty2 in
-      is_type_disjoint visited env ty1 MakeType.(dict r (arraykey r) (mixed r))
-    | (Ttuple tyl1, Ttuple tyl2) ->
-      (match List.exists2 ~f:(is_type_disjoint visited env) tyl1 tyl2 with
-      | List.Or_unequal_lengths.Ok res -> res
-      | List.Or_unequal_lengths.Unequal_lengths -> true)
-    | (Ttuple _, _) ->
-      (* Treat tuples as vec<mixed> because that implementation detail
-         leaks through when doing is vec<_> on them, and they are also
-         Traversable, Container, etc. along with varrays.
-         We could translate varray to a more precise vec type with the same
-         type argument, but it doesn't matter since disjointness doesn't ever
-         look at it. *)
-      let r = get_reason ty1 in
-      is_type_disjoint visited env MakeType.(vec r (mixed r)) ty2
-    | (_, Ttuple _) ->
-      let r = get_reason ty2 in
-      is_type_disjoint visited env ty1 MakeType.(vec r (mixed r))
-    | (Tvec_or_dict (tyk, tyv), _) ->
-      let r = get_reason ty1 in
-      is_type_disjoint
-        visited
-        env
-        MakeType.(union r [vec r tyv; dict r tyk tyv])
-        ty2
-    | (_, Tvec_or_dict (tyk, tyv)) ->
-      let r = get_reason ty2 in
-      is_type_disjoint
-        visited
-        env
-        ty1
-        MakeType.(union r [vec r tyv; dict r tyk tyv])
-    | (Tgeneric (name, []), _) -> is_generic_disjoint visited env name ty1 ty2
-    | (_, Tgeneric (name, [])) -> is_generic_disjoint visited env name ty2 ty1
-    | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
-      let (env, bounds) =
-        TUtils.get_concrete_supertypes ~abstract_enum:false env ty1
-      in
-      is_intersection_type_disjoint visited env bounds ty2
-    | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
-      let (env, bounds) =
-        TUtils.get_concrete_supertypes ~abstract_enum:false env ty2
-      in
-      is_intersection_type_disjoint visited env bounds ty1
-    | (Tvar tv, _) -> is_tyvar_disjoint visited env tv ty2
-    | (_, Tvar tv) -> is_tyvar_disjoint visited env tv ty1
-    | (Tunion tyl, _) -> List.for_all ~f:(is_type_disjoint visited env ty2) tyl
-    | (_, Tunion tyl) -> List.for_all ~f:(is_type_disjoint visited env ty1) tyl
-    | (Toption ty1, _) ->
-      is_type_disjoint visited env ty1 ty2
-      && is_type_disjoint visited env (MakeType.null Reason.Rnone) ty2
-    | (_, Toption ty2) ->
-      is_type_disjoint visited env ty1 ty2
-      && is_type_disjoint visited env ty1 (MakeType.null Reason.Rnone)
-    | (Tnonnull, _) ->
-      is_sub_type_for_union env ty2 (MakeType.null Reason.Rnone)
-    | (_, Tnonnull) ->
-      is_sub_type_for_union env ty1 (MakeType.null Reason.Rnone)
-    | (Tneg (Neg_prim tp1), _) ->
-      is_sub_type_for_union env ty2 (MakeType.prim_type Reason.Rnone tp1)
-    | (_, Tneg (Neg_prim tp2)) ->
-      is_sub_type_for_union env ty1 (MakeType.prim_type Reason.Rnone tp2)
-    | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
-    | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
-      (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
-         o notin (complement (Union tyl'. c1<tyl'>)), which is just that
-         c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
-         whatever _tyl is, we can chase up the hierarchy to find an instantiation
-         for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
-         the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
-         or c1 is a non-equal subclass of c2, and so objects that are exact c2,
-         can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
-         types to be considered disjoint.
-         e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
-         neg D and C to be disjoint.
-      *)
-      TUtils.is_sub_class_refl env c2 c1
-    | (Tneg _, _)
-    | (_, Tneg _) ->
-      false
-    | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
-    | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
-    | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
-      when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
-      false
-    | (Tprim _, (Tfun _ | Tclass _))
-    | ((Tfun _ | Tclass _), Tprim _) ->
-      true
-    | (Tfun _, Tfun _) -> false
-    | (Tfun _, Tclass _)
-    | (Tclass _, Tfun _) ->
-      true
-    | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
-      Subtype_negation.is_class_disjoint env c1 c2
-  (* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)
-  and is_intersection_type_disjoint visited_tvyars env inter_tyl ty =
-    List.exists ~f:(is_type_disjoint visited_tvyars env ty) inter_tyl
-  and is_intersection_itype_set_disjoint visited_tvyars env inter_ty_set ty =
-    ITySet.exists (is_itype_disjoint visited_tvyars env ty) inter_ty_set
-  and is_itype_disjoint
-      visited_tvyars env (lty1 : locl_ty) (ity : internal_type) =
-    match ity with
-    | LoclType lty2 -> is_type_disjoint visited_tvyars env lty1 lty2
-    | ConstraintType _ -> false
-  and is_tyvar_disjoint visited env tyvar ty =
-    let (visited_tyvars, visited_generics) = visited in
-    if Tvid.Set.mem tyvar visited_tyvars then
-      (* There is a cyclic type variable bound, this will lead to a type error *)
-      false
-    else
-      let bounds = Env.get_tyvar_upper_bounds env tyvar in
-      is_intersection_itype_set_disjoint
-        (Tvid.Set.add tyvar visited_tyvars, visited_generics)
-        env
-        bounds
-        ty
-  and is_generic_disjoint visited env (name : string) gen_ty ty =
-    let (visited_tyvars, visited_generics) = visited in
-    if SSet.mem name visited_generics then
-      false
-    else
-      let (env, bounds) =
-        TUtils.get_concrete_supertypes ~abstract_enum:false env gen_ty
-      in
-      is_intersection_type_disjoint
-        (visited_tyvars, SSet.add name visited_generics)
-        env
-        bounds
-        ty
+  let subtype_env =
+    Subtype_env.create ~log_level:2 ~is_coeffect ~coerce on_error
   in
-  is_type_disjoint (Tvid.Set.empty, SSet.empty) env ty1 ty2
+  let old_env = env in
+  let (env, ty_err_opt) =
+    Subtype_tell.sub_type_inner
+      ~subtype_env
+      ~sub_supportdyn:None
+      env
+      ~this_ty:None
+      (LoclType ty_sub)
+      (LoclType ty_super)
+  in
+  let env =
+    Env.log_env_change "sub_type" old_env
+    @@
+    if Option.is_none ty_err_opt then
+      env
+    else
+      old_env
+  in
+  (env, ty_err_opt)
 
+(* Entry point *)
+let sub_type_or_fail env ty1 ty2 err_opt =
+  sub_type env ty1 ty2
+  @@ Option.map ~f:Typing_error.Reasons_callback.always err_opt
+
+(* -- add_constraint(s) entry point ----------------------------------------- *)
 let decompose_subtype_add_bound
     ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
@@ -6718,6 +6528,7 @@ let add_constraints p env constraints =
   in
   List.fold_left constraints ~f:add_constraint ~init:env
 
+(* -- sub_type_with_dynamic_as_bottom entry point --------------------------- *)
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
   Logging.log_subtype
     ~level:1
@@ -6756,6 +6567,7 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
       env),
     ty_err )
 
+(* -- simplify_subtype_i entry point ---------------------------------------- *)
 let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
   Subtype.simplify_subtype_i
     ~subtype_env:
@@ -6772,18 +6584,7 @@ let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
     ty_super
     env
 
-(*****************************************************************************)
-(* Exporting *)
-(*****************************************************************************)
-
-let sub_type_i env ?(is_coeffect = false) ty1 ty2 on_error =
-  sub_type_i
-    ~subtype_env:
-      (Subtype_env.create ~log_level:2 ~is_coeffect ~coerce:None on_error)
-    env
-    ty1
-    ty2
-
+(* -- subtype_funs entry point ---------------------------------------------- *)
 let subtype_funs
     ~(check_return : bool)
     ~for_override
@@ -6824,14 +6625,256 @@ let subtype_funs
       env),
     ty_err )
 
-let sub_type_or_fail env ty1 ty2 err_opt =
-  sub_type env ty1 ty2
-  @@ Option.map ~f:Typing_error.Reasons_callback.always err_opt
+(* == Ask API =============================================================== *)
 
-let is_sub_type_for_union = is_sub_type_for_union ~coerce:None
+(* -- is_sub_type entry point ----------------------------------------------- *)
 
-let is_sub_type_for_union_i = Subtype_ask.is_sub_type_for_union_i ~coerce:None
+let is_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  Subtype_ask.is_sub_type_alt_i
+    ~require_completeness:false
+    ~no_top_bottom:false
+    ~coerce:None
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+  = Some true
 
+(* -- is_dynamic_aware_sub_type entry point --------------------------------- *)
+let is_dynamic_aware_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  Subtype_ask.is_sub_type_alt_i
+    ~require_completeness:false
+    ~no_top_bottom:false
+    ~coerce:(Some TL.CoerceToDynamic)
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+  = Some true
+
+(* -- is_sub_type_for_union entry point ------------------------------------- *)
+let is_sub_type_for_union_help env ?(coerce = None) ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  Subtype_ask.is_sub_type_alt_i
+    ~require_completeness:false
+    ~no_top_bottom:true
+    ~coerce
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+  = Some true
+
+let is_sub_type_for_union env ty1 ty2 =
+  is_sub_type_for_union_help ~coerce:None env ty1 ty2
+
+(* Entry point *)
+let is_sub_type_for_union_i env ty1 ty2 =
+  Subtype_ask.is_sub_type_for_union_i ~coerce:None env ty1 ty2
+
+(* -- is_sub_type_ignore_generic_params entry point ------------------------- *)
+let is_sub_type_ignore_generic_params env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  Subtype_ask.is_sub_type_alt_i
+  (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
+    ~require_completeness:true
+    ~no_top_bottom:true
+    ~coerce:None
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+  = Some true
+
+(* -- can_sub_type entry point ---------------------------------------------- *)
+let can_sub_type env ty1 ty2 =
+  let ( <> ) a b = not (Option.equal Bool.equal a b) in
+  Subtype_ask.is_sub_type_alt_i
+    ~require_completeness:false
+    ~no_top_bottom:true
+    ~coerce:None
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+  <> Some false
+
+(* -- is_type_disjoint entry point ------------------------------------------ *)
+
+(* visited record which type variables & generics we've seen, to cut off cycles. *)
+let rec is_type_disjoint_help visited env ty1 ty2 =
+  let (env, ty1) = Env.expand_type env ty1 in
+  let (env, ty2) = Env.expand_type env ty2 in
+  match (get_node ty1, get_node ty2) with
+  | (_, (Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _))
+  | ((Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
+    false
+  | (Tshape _, Tshape _) ->
+    (* This could be more precise, e.g., if we have two closed shapes with different fields.
+       However, intersection already detects this and simplifies to nothing, so it's not
+       so important here. *)
+    false
+  | (Tshape _, _) ->
+    (* Treat shapes as dict<arraykey, mixed> because that implementation detail
+       leaks through when doing is dict<_, _> on them, and they are also
+       Traversable, KeyedContainer, etc. (along with darrays).
+       We could translate darray to a more precise dict type with the same
+       type arguments, but it doesn't matter since disjointness doesn't ever
+       look at them. *)
+    let r = get_reason ty1 in
+    is_type_disjoint_help
+      visited
+      env
+      MakeType.(dict r (arraykey r) (mixed r))
+      ty2
+  | (_, Tshape _) ->
+    let r = get_reason ty2 in
+    is_type_disjoint_help
+      visited
+      env
+      ty1
+      MakeType.(dict r (arraykey r) (mixed r))
+  | (Ttuple tyl1, Ttuple tyl2) ->
+    (match List.exists2 ~f:(is_type_disjoint_help visited env) tyl1 tyl2 with
+    | List.Or_unequal_lengths.Ok res -> res
+    | List.Or_unequal_lengths.Unequal_lengths -> true)
+  | (Ttuple _, _) ->
+    (* Treat tuples as vec<mixed> because that implementation detail
+       leaks through when doing is vec<_> on them, and they are also
+       Traversable, Container, etc. along with varrays.
+       We could translate varray to a more precise vec type with the same
+       type argument, but it doesn't matter since disjointness doesn't ever
+       look at it. *)
+    let r = get_reason ty1 in
+    is_type_disjoint_help visited env MakeType.(vec r (mixed r)) ty2
+  | (_, Ttuple _) ->
+    let r = get_reason ty2 in
+    is_type_disjoint_help visited env ty1 MakeType.(vec r (mixed r))
+  | (Tvec_or_dict (tyk, tyv), _) ->
+    let r = get_reason ty1 in
+    is_type_disjoint_help
+      visited
+      env
+      MakeType.(union r [vec r tyv; dict r tyk tyv])
+      ty2
+  | (_, Tvec_or_dict (tyk, tyv)) ->
+    let r = get_reason ty2 in
+    is_type_disjoint_help
+      visited
+      env
+      ty1
+      MakeType.(union r [vec r tyv; dict r tyk tyv])
+  | (Tgeneric (name, []), _) -> is_generic_disjoint visited env name ty1 ty2
+  | (_, Tgeneric (name, [])) -> is_generic_disjoint visited env name ty2 ty1
+  | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
+    let (env, bounds) =
+      TUtils.get_concrete_supertypes ~abstract_enum:false env ty1
+    in
+    is_intersection_type_disjoint visited env bounds ty2
+  | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
+    let (env, bounds) =
+      TUtils.get_concrete_supertypes ~abstract_enum:false env ty2
+    in
+    is_intersection_type_disjoint visited env bounds ty1
+  | (Tvar tv, _) -> is_tyvar_disjoint visited env tv ty2
+  | (_, Tvar tv) -> is_tyvar_disjoint visited env tv ty1
+  | (Tunion tyl, _) ->
+    List.for_all ~f:(is_type_disjoint_help visited env ty2) tyl
+  | (_, Tunion tyl) ->
+    List.for_all ~f:(is_type_disjoint_help visited env ty1) tyl
+  | (Toption ty1, _) ->
+    is_type_disjoint_help visited env ty1 ty2
+    && is_type_disjoint_help visited env (MakeType.null Reason.Rnone) ty2
+  | (_, Toption ty2) ->
+    is_type_disjoint_help visited env ty1 ty2
+    && is_type_disjoint_help visited env ty1 (MakeType.null Reason.Rnone)
+  | (Tnonnull, _) ->
+    is_sub_type_for_union_help env ty2 (MakeType.null Reason.Rnone)
+  | (_, Tnonnull) ->
+    is_sub_type_for_union_help env ty1 (MakeType.null Reason.Rnone)
+  | (Tneg (Neg_prim tp1), _) ->
+    is_sub_type_for_union_help env ty2 (MakeType.prim_type Reason.Rnone tp1)
+  | (_, Tneg (Neg_prim tp2)) ->
+    is_sub_type_for_union_help env ty1 (MakeType.prim_type Reason.Rnone tp2)
+  | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
+  | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
+    (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
+       o notin (complement (Union tyl'. c1<tyl'>)), which is just that
+       c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
+       whatever _tyl is, we can chase up the hierarchy to find an instantiation
+       for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
+       the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
+       or c1 is a non-equal subclass of c2, and so objects that are exact c2,
+       can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
+       types to be considered disjoint.
+       e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
+       neg D and C to be disjoint.
+    *)
+    TUtils.is_sub_class_refl env c2 c1
+  | (Tneg _, _)
+  | (_, Tneg _) ->
+    false
+  | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
+  | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
+  | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
+    when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
+    false
+  | (Tprim _, (Tfun _ | Tclass _))
+  | ((Tfun _ | Tclass _), Tprim _) ->
+    true
+  | (Tfun _, Tfun _) -> false
+  | (Tfun _, Tclass _)
+  | (Tclass _, Tfun _) ->
+    true
+  | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
+    Subtype_negation.is_class_disjoint env c1 c2
+
+(* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)
+and is_intersection_type_disjoint visited_tvyars env inter_tyl ty =
+  List.exists ~f:(is_type_disjoint_help visited_tvyars env ty) inter_tyl
+
+and is_intersection_itype_set_disjoint visited_tvyars env inter_ty_set ty =
+  ITySet.exists (is_itype_disjoint visited_tvyars env ty) inter_ty_set
+
+and is_itype_disjoint visited_tvyars env (lty1 : locl_ty) (ity : internal_type)
+    =
+  match ity with
+  | LoclType lty2 -> is_type_disjoint_help visited_tvyars env lty1 lty2
+  | ConstraintType _ -> false
+
+and is_tyvar_disjoint visited env tyvar ty =
+  let (visited_tyvars, visited_generics) = visited in
+  if Tvid.Set.mem tyvar visited_tyvars then
+    (* There is a cyclic type variable bound, this will lead to a type error *)
+    false
+  else
+    let bounds = Env.get_tyvar_upper_bounds env tyvar in
+    is_intersection_itype_set_disjoint
+      (Tvid.Set.add tyvar visited_tyvars, visited_generics)
+      env
+      bounds
+      ty
+
+and is_generic_disjoint visited env (name : string) gen_ty ty =
+  let (visited_tyvars, visited_generics) = visited in
+  if SSet.mem name visited_generics then
+    false
+  else
+    let (env, bounds) =
+      TUtils.get_concrete_supertypes ~abstract_enum:false env gen_ty
+    in
+    is_intersection_type_disjoint
+      (visited_tyvars, SSet.add name visited_generics)
+      env
+      bounds
+      ty
+
+let is_type_disjoint env ty1 ty2 =
+  is_type_disjoint_help (Tvid.Set.empty, SSet.empty) env ty1 ty2
+
+(* -- Set function references ----------------------------------------------- *)
 let set_fun_refs () =
   TUtils.sub_type_ref := sub_type;
   TUtils.sub_type_i_ref := sub_type_i;

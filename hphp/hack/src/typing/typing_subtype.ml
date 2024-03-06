@@ -1240,74 +1240,21 @@ end = struct
         (LoclType lty_super)
     in
     match deref lty_super with
-    | (_, Tvar var_super) ->
+    | (r_super, Tvar var_super) ->
       (match ity_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
         default_subtype_help env
       | ConstraintType _ -> default env
-      | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (_, Tunion _) -> default_subtype_help env
-        | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-          default_subtype_help env
-        (* We want to treat nullable as a union with the same rule as above.
-         * This is only needed for Tvar on right; other cases are dealt with specially as
-         * derived rules.
-         *)
-        | (r, Toption t) ->
-          let (env, t) = Env.expand_type env t in
-          (match get_node t with
-          (* We special case on `mixed <: Tvar _`, adding the entire `mixed` type
-             as a lower bound. This enables clearer error messages when upper bounds
-             are added to the type variable: transitive closure picks up the
-             entire `mixed` type, and not separately consider `null` and `nonnull` *)
-          | Tnonnull -> default env
-          | _ ->
-            let ty_null = MakeType.null r in
-            env
-            |> simplify_subtype
-                 ~subtype_env
-                 ~sub_supportdyn
-                 ~this_ty
-                 ~super_like
-                 ~super_supportdyn:false
-                 t
-                 lty_super
-            &&& simplify_subtype
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty
-                  ~super_like:false
-                  ~super_supportdyn:false
-                  ty_null
-                  lty_super)
-        | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
-        | _ -> begin
-          match subtype_env.Subtype_env.coerce with
-          | Some cd ->
-            mk_issubtype_prop
-              ~sub_supportdyn
-              ~coerce:(Some cd)
-              env
-              (LoclType ty_sub)
-              (LoclType lty_super)
-          | None ->
-            if super_like then
-              let (env, ty_sub) =
-                Typing_dynamic.strip_covariant_like env ty_sub
-              in
-              env
-              |> simplify_subtype_i
-                   ~subtype_env
-                   ~sub_supportdyn
-                   ~this_ty
-                   ~super_like:false
-                   ~super_supportdyn:false
-                   (LoclType ty_sub)
-                   (LoclType lty_super)
-            else
-              default env
-        end))
+      | LoclType lty_sub ->
+        Subtype_var_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty_sub
+          (r_super, var_super)
+          env)
     | (_, Tintersection tyl) ->
       (match ity_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
@@ -3195,6 +3142,111 @@ end = struct
         (env, Some props)
       | _ -> (env, None))
     | _ -> (env, None)
+end
+
+and Subtype_var_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:locl_phase Reason.t_ option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_ty ->
+    locl_phase Reason.t_ * Tvid.t ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, var_super)
+      env =
+    let default env =
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tvar var_super)))
+    in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tvar var_super)))
+    in
+
+    match deref lty_sub with
+    | (_, Tunion _) -> default_subtype_help env
+    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+      default_subtype_help env
+    (* We want to treat nullable as a union with the same rule as above.
+     * This is only needed for Tvar on right; other cases are dealt with specially as
+     * derived rules.
+     *)
+    | (r, Toption t) ->
+      let (env, t) = Env.expand_type env t in
+      (match get_node t with
+      (* We special case on `mixed <: Tvar _`, adding the entire `mixed` type
+         as a lower bound. This enables clearer error messages when upper bounds
+         are added to the type variable: transitive closure picks up the
+         entire `mixed` type, and not separately consider `null` and `nonnull` *)
+      | Tnonnull -> default env
+      | _ ->
+        let ty_null = MakeType.null r in
+        let lty_super = mk (r_super, Tvar var_super) in
+        env
+        |> Subtype.simplify_subtype
+             ~subtype_env
+             ~sub_supportdyn
+             ~this_ty
+             ~super_like
+             ~super_supportdyn:false
+             t
+             lty_super
+        &&& Subtype.simplify_subtype
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty
+              ~super_like:false
+              ~super_supportdyn:false
+              ty_null
+              lty_super)
+    | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
+    | _ -> begin
+      let lty_super = mk (r_super, Tvar var_super) in
+      match subtype_env.Subtype_env.coerce with
+      | Some cd ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:(Some cd)
+          env
+          (LoclType lty_sub)
+          (LoclType lty_super)
+      | None ->
+        if super_like then
+          let (env, ty_sub) = Typing_dynamic.strip_covariant_like env lty_sub in
+          env
+          |> Subtype.simplify_subtype
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty
+               ~super_like:false
+               ~super_supportdyn:false
+               ty_sub
+               lty_super
+        else
+          default env
+    end
 end
 
 and Can_index : sig

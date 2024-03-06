@@ -231,7 +231,7 @@ func (p *rocketProtocol) ClearPersistentHeaders() {
 	p.persistentHeaders = make(map[string]string)
 }
 
-func (p *rocketProtocol) setRequestHeader(key, value string) {
+func (p *rocketProtocol) SetRequestHeader(key, value string) {
 	if p.reqMetadata == nil {
 		p.reqMetadata = &requestRPCMetadata{}
 	}
@@ -241,7 +241,7 @@ func (p *rocketProtocol) setRequestHeader(key, value string) {
 	p.reqMetadata.Other[key] = value
 }
 
-func (p *rocketProtocol) getRequestHeaders() map[string]string {
+func (p *rocketProtocol) GetRequestHeaders() map[string]string {
 	return p.reqMetadata.Other
 }
 

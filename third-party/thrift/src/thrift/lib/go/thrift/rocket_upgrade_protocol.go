@@ -107,25 +107,25 @@ func (p *upgradeToRocketProtocol) ClearPersistentHeaders() {
 	p.Protocol.(PersistentHeaders).ClearPersistentHeaders()
 }
 
-func (p *upgradeToRocketProtocol) setRequestHeader(key, value string) {
+func (p *upgradeToRocketProtocol) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
-		p.rocketProtocol.(requestHeaders).setRequestHeader(key, value)
-		p.headerProtocol.(requestHeaders).setRequestHeader(key, value)
+		p.rocketProtocol.(RequestHeaders).SetRequestHeader(key, value)
+		p.headerProtocol.(RequestHeaders).SetRequestHeader(key, value)
 		return
 	}
-	p.Protocol.(requestHeaders).setRequestHeader(key, value)
+	p.Protocol.(RequestHeaders).SetRequestHeader(key, value)
 }
 
-func (p *upgradeToRocketProtocol) getRequestHeaders() map[string]string {
+func (p *upgradeToRocketProtocol) GetRequestHeaders() map[string]string {
 	if p.Protocol == nil {
-		headers := p.headerProtocol.(requestHeaders).getRequestHeaders()
-		rocketHeaders := p.rocketProtocol.(requestHeaders).getRequestHeaders()
+		headers := p.headerProtocol.(RequestHeaders).GetRequestHeaders()
+		rocketHeaders := p.rocketProtocol.(RequestHeaders).GetRequestHeaders()
 		for k, v := range rocketHeaders {
 			headers[k] = v
 		}
 		return headers
 	}
-	return p.Protocol.(requestHeaders).getRequestHeaders()
+	return p.Protocol.(RequestHeaders).GetRequestHeaders()
 }
 
 func (p *upgradeToRocketProtocol) GetResponseHeader(key string) (string, bool) {

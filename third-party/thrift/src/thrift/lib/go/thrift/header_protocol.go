@@ -181,11 +181,13 @@ func (p *HeaderProtocol) Headers() map[string]string {
 	return p.trans.Headers()
 }
 
-func (p *HeaderProtocol) setRequestHeader(key, value string) {
+// Deprecated: SetRequestHeader is deprecated and will eventually be private.
+func (p *HeaderProtocol) SetRequestHeader(key, value string) {
 	p.trans.SetHeader(key, value)
 }
 
-func (p *HeaderProtocol) getRequestHeaders() map[string]string {
+// Deprecated: GetRequestHeader is deprecated and will eventually be private.
+func (p *HeaderProtocol) GetRequestHeaders() map[string]string {
 	return p.trans.Headers()
 }
 

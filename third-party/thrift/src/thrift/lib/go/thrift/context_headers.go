@@ -43,15 +43,16 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 	return ctx, nil
 }
 
-type requestHeaders interface {
-	setRequestHeader(key, value string)
-	getRequestHeaders() map[string]string
+// Deprecated: RequestHeaders will eventually be private.
+type RequestHeaders interface {
+	SetRequestHeader(key, value string)
+	GetRequestHeaders() map[string]string
 }
 
 // Compile time interface enforcer
-var _ requestHeaders = (*HeaderProtocol)(nil)
-var _ requestHeaders = (*rocketProtocol)(nil)
-var _ requestHeaders = (*upgradeToRocketProtocol)(nil)
+var _ RequestHeaders = (*HeaderProtocol)(nil)
+var _ RequestHeaders = (*rocketProtocol)(nil)
+var _ RequestHeaders = (*upgradeToRocketProtocol)(nil)
 
 // setRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.
@@ -68,12 +69,12 @@ func setRequestHeaders(ctx context.Context, protocol Protocol) error {
 	if !ok {
 		return NewTransportException(INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
 	}
-	p, ok := protocol.(requestHeaders)
+	p, ok := protocol.(RequestHeaders)
 	if !ok {
 		return NewTransportException(NOT_IMPLEMENTED, fmt.Sprintf("requestHeaders not implemented for transport type %T", protocol))
 	}
 	for k, v := range headersMap {
-		p.setRequestHeader(k, v)
+		p.SetRequestHeader(k, v)
 	}
 	return nil
 }

@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::Deref;
-
 use newtype::newtype_int;
 use newtype::IdVec;
 
@@ -35,11 +33,17 @@ use crate::ValueId;
 use crate::ValueIdMap;
 use crate::Visibility;
 
-#[derive(Copy, Clone, Debug, Default, Hash, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Filename(pub UnitBytesId);
 
+impl Default for Filename {
+    fn default() -> Self {
+        Self(UnitBytesId::EMPTY)
+    }
+}
+
 impl Filename {
-    pub const NONE: Filename = Filename(UnitBytesId::NONE);
+    pub const NONE: Filename = Filename(UnitBytesId::EMPTY);
 }
 
 #[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
@@ -393,7 +397,7 @@ impl Func {
     pub fn is_reified(&self, strings: &crate::StringInterner) -> bool {
         self.attributes
             .iter()
-            .any(|attr| attr.name.as_bstr(strings).deref() == "__Reified")
+            .any(|attr| attr.name.as_bstr(strings) == "__Reified".as_bytes())
     }
 
     pub fn loc(&self, loc: LocId) -> &SrcLoc {

@@ -5,7 +5,6 @@
 use bstr::BStr;
 use naming_special_names_rust::members;
 use newtype::newtype_int;
-use parking_lot::MappedRwLockReadGuard;
 
 use crate::string_intern::StringInterner;
 use crate::UnitBytesId;
@@ -34,17 +33,11 @@ macro_rules! interned_hhbc_intern_id {
                 Self::new(strings.intern_bytes(name))
             }
 
-            pub fn as_bytes<'a>(
-                self,
-                strings: &'a StringInterner,
-            ) -> MappedRwLockReadGuard<'a, [u8]> {
+            pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> &'a [u8] {
                 strings.lookup_bytes(self.id)
             }
 
-            pub fn as_bstr<'a>(
-                self,
-                strings: &'a StringInterner,
-            ) -> MappedRwLockReadGuard<'a, BStr> {
+            pub fn as_bstr<'a>(self, strings: &'a StringInterner) -> &'a BStr {
                 strings.lookup_bstr(self.id)
             }
         }
@@ -237,7 +230,7 @@ impl GlobalId {
         Self { id }
     }
 
-    pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> MappedRwLockReadGuard<'a, [u8]> {
+    pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> &'a [u8] {
         strings.lookup_bytes(self.id)
     }
 }

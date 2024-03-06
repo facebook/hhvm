@@ -520,12 +520,12 @@ fn cmp_id(
     (b, b_strings): (UnitBytesId, &StringInterner),
 ) -> Result {
     match (a, b) {
-        (UnitBytesId::NONE, UnitBytesId::NONE) => {}
-        (UnitBytesId::NONE, b) => {
+        (UnitBytesId::EMPTY, UnitBytesId::EMPTY) => {}
+        (UnitBytesId::EMPTY, b) => {
             let b = b_strings.lookup_bytes(b);
             bail!("UnitBytesId NONE vs \"{}\"", String::from_utf8_lossy(&b));
         }
-        (a, UnitBytesId::NONE) => {
+        (a, UnitBytesId::EMPTY) => {
             let a = a_strings.lookup_bytes(a);
             bail!("UnitBytesId \"{}\" vs NONE", String::from_utf8_lossy(&a));
         }

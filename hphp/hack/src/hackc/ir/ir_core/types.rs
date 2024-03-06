@@ -90,7 +90,7 @@ impl BaseType {
             BaseType::Arraykey => f.write_str("Arraykey"),
             BaseType::Bool => f.write_str("Bool"),
             BaseType::Class(cid) => {
-                write!(f, "Class(\"{}\")", cid.id.display(strings))
+                write!(f, "Class(\"{}\")", strings.display(cid.id))
             }
             BaseType::Classname => f.write_str("Classname"),
             BaseType::Darray => f.write_str("Darray"),
@@ -240,7 +240,7 @@ impl TypeInfo {
     pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         f.write_str("TypeInfo { user_type: ")?;
         if let Some(ut) = self.user_type {
-            write!(f, "\"{}\"", ut.display(strings))?;
+            write!(f, "\"{}\"", strings.display(ut))?;
         } else {
             f.write_str("none")?;
         }

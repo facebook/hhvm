@@ -705,7 +705,7 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
                 let method = MethodId::factory(&builder.strings);
                 let operands = vec![cls].into_boxed_slice();
-                let context = UnitBytesId::NONE;
+                let context = UnitBytesId::EMPTY;
                 let flavor = ObjMethodOp::NullThrows;
                 let detail = CallDetail::FCallObjMethodD { flavor, method };
                 let flags = FCallArgsFlags::default();

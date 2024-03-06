@@ -622,13 +622,8 @@ pub(crate) struct FmtQuotedStringId<'a>(pub(crate) UnitBytesId, pub(crate) &'a S
 
 impl Display for FmtQuotedStringId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtQuotedStringId(id, strings) = *self;
-        if id == UnitBytesId::NONE {
-            write!(f, "none")
-        } else {
-            let name = strings.lookup_bytes(id);
-            FmtEscapedString(&name).fmt(f)
-        }
+        let FmtQuotedStringId(id, _) = *self;
+        FmtEscapedString(id.as_bytes()).fmt(f)
     }
 }
 

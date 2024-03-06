@@ -33,7 +33,7 @@ pub(crate) fn lower_func(
 ) -> Func {
     trace!(
         "{} Before Lower: {}",
-        func_info.name_id().display(&strings),
+        strings.display(func_info.name_id()),
         ir::print::DisplayFunc::new(&func, true, &strings)
     );
 

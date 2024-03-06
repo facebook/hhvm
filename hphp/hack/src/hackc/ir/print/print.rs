@@ -1537,7 +1537,7 @@ fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext<'_>, func: &Func, loc_id: 
         if let Some(loc) = func.get_loc(loc_id) {
             let old_filename = func
                 .get_loc(ctx.cur_loc_id)
-                .map_or(UnitBytesId::NONE, |loc| loc.filename.0);
+                .map_or(UnitBytesId::EMPTY, |loc| loc.filename.0);
             if old_filename != loc.filename.0 {
                 writeln!(w, "  .srcloc {}", FmtFullLoc(loc, ctx.strings))?;
             } else {

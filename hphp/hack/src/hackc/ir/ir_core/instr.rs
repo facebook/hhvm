@@ -1195,7 +1195,7 @@ impl Instr {
     pub fn simple_call(func: FunctionId, operands: &[ValueId], loc: LocId) -> Instr {
         Self::call(Call {
             operands: operands.into(),
-            context: UnitBytesId::NONE,
+            context: UnitBytesId::EMPTY,
             detail: CallDetail::FCallFuncD { func },
             flags: FCallArgsFlags::default(),
             num_rets: 0,
@@ -1215,7 +1215,7 @@ impl Instr {
             operands: std::iter::once(receiver)
                 .chain(operands.iter().copied())
                 .collect(),
-            context: UnitBytesId::NONE,
+            context: UnitBytesId::EMPTY,
             detail: CallDetail::FCallObjMethodD {
                 flavor: ObjMethodOp::NullThrows,
                 method,
@@ -1236,7 +1236,7 @@ impl Instr {
     ) -> Instr {
         Self::call(Call {
             operands: operands.into(),
-            context: UnitBytesId::NONE,
+            context: UnitBytesId::EMPTY,
             detail: CallDetail::FCallClsMethodSD { clsref, method },
             flags: FCallArgsFlags::default(),
             num_rets: 0,

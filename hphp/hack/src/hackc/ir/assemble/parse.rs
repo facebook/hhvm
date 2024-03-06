@@ -17,7 +17,6 @@ use ir_core::BlockId;
 use ir_core::ClassGetCMode;
 use ir_core::ClassId;
 use ir_core::CollectionType;
-use ir_core::ConstId;
 use ir_core::ConstName;
 use ir_core::Constant;
 use ir_core::ConstantId;
@@ -241,9 +240,9 @@ pub(crate) fn parse_module_id(tokenizer: &mut Tokenizer<'_>) -> Result<ModuleId>
     Ok(ModuleId::from_bytes(&id, &tokenizer.strings))
 }
 
-pub(crate) fn parse_const_id(tokenizer: &mut Tokenizer<'_>) -> Result<ConstId> {
+pub(crate) fn parse_const_name(tokenizer: &mut Tokenizer<'_>) -> Result<ConstName> {
     let (id, _) = parse_user_id(tokenizer)?;
-    Ok(ConstId::from_bytes(&id, &tokenizer.strings))
+    Ok(ConstName::from_utf8(&id)?)
 }
 
 pub(crate) fn parse_constant_id(tokenizer: &mut Tokenizer<'_>) -> Result<ConstantId> {
@@ -422,7 +421,7 @@ pub(crate) fn parse_func_id(tokenizer: &mut Tokenizer<'_>) -> Result<FunctionId>
 }
 
 pub(crate) fn parse_hack_constant(tokenizer: &mut Tokenizer<'_>) -> Result<HackConstant> {
-    parse!(tokenizer, <attrs:parse_attr> <name:parse_const_id>);
+    parse!(tokenizer, <attrs:parse_attr> <name:parse_const_name>);
 
     let value = if tokenizer.next_is_identifier("=")? {
         Some(parse_typed_value(tokenizer)?)

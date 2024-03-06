@@ -75,7 +75,7 @@ use crate::parse::parse_bid;
 use crate::parse::parse_class_get_c_kind;
 use crate::parse::parse_class_id;
 use crate::parse::parse_comma_list;
-use crate::parse::parse_const_id;
+use crate::parse::parse_const_name;
 use crate::parse::parse_constant;
 use crate::parse::parse_constant_id;
 use crate::parse::parse_dynamic_call_op;
@@ -1319,8 +1319,8 @@ impl FunctionParser<'_> {
             "class_has_reified_generics" => I::Hhbc(H::ClassHasReifiedGenerics(self.vid(tok)?, loc)),
             "class_name" => I::Hhbc(H::ClassName(self.vid(tok)?, loc)),
             "clone" => I::Hhbc(H::Clone(self.vid(tok)?, loc)),
-            "cls_cns" => parse_instr!(tok, I::Hhbc(H::ClsCns(p0, p1, loc)), <p0:self.vid> "::" <p1:parse_const_id>),
-            "cls_cns_d" => parse_instr!(tok, I::Hhbc(H::ClsCnsD(p0, p1, loc)), <p1:parse_class_id> "::" <p0:parse_const_id>),
+            "cls_cns" => parse_instr!(tok, I::Hhbc(H::ClsCns(p0, p1, loc)), <p0:self.vid> "::" <p1:parse_const_name>),
+            "cls_cns_d" => parse_instr!(tok, I::Hhbc(H::ClsCnsD(p0, p1, loc)), <p1:parse_class_id> "::" <p0:parse_const_name>),
             "cmp" => self.parse_cmp(tok, loc)?,
             "col_from_array" => self.parse_col_from_array(tok, loc)?,
             "combine_and_resolve_type_struct" => I::Hhbc(H::CombineAndResolveTypeStruct(parse_comma_list(tok, false, |tok| self.vid(tok))?.into(), loc)),

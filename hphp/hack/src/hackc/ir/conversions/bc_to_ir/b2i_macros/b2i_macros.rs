@@ -277,7 +277,7 @@ fn parse_convert_simple(
                 convert(quote_spanned!(span=> ir::ClassId::from_hhbc(*#imm, #strings) ));
             }
             ImmType::OA(n) if *n == "ConstName" => {
-                convert(quote_spanned!(span=> ir::ConstId::from_hhbc(*#imm, #strings) ));
+                convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "FunctionName" => {
                 convert(quote_spanned!(span=> ir::FunctionId::from_hhbc(*#imm, #strings) ));

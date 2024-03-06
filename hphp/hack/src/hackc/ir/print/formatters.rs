@@ -341,9 +341,8 @@ pub(crate) struct FmtIdentifierId<'a>(pub UnitBytesId, pub &'a StringInterner);
 
 impl Display for FmtIdentifierId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtIdentifierId(id, strings) = *self;
-        let id = strings.lookup_bytes(id);
-        FmtIdentifier(&id).fmt(f)
+        let FmtIdentifierId(id, _) = *self;
+        FmtIdentifier(id.as_bytes()).fmt(f)
     }
 }
 

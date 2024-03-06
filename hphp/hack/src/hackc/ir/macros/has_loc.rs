@@ -53,7 +53,7 @@ fn field_might_contain_buried_loc_id(ty: &SimpleType<'_>) -> bool {
     if let Some(ident) = ty.get_ident() {
         !(ident == "BlockId"
             || ident == "ClassId"
-            || ident == "ConstId"
+            || ident == "ConstName"
             || ident == "ValueId"
             || ident == "LocalId"
             || ident == "MethodId"

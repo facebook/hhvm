@@ -15,7 +15,7 @@ use crate::BlockId;
 use crate::ClassGetCMode;
 use crate::ClassId;
 use crate::CollectionType;
-use crate::ConstId;
+use crate::ConstName;
 use crate::ContCheckOp;
 use crate::FCallArgsFlags;
 use crate::FatalOp;
@@ -445,8 +445,8 @@ pub enum Hhbc {
     ClassHasReifiedGenerics(ValueId, LocId),
     ClassName(ValueId, LocId),
     Clone(ValueId, LocId),
-    ClsCns(ValueId, ConstId, LocId),
-    ClsCnsD(ConstId, ClassId, LocId),
+    ClsCns(ValueId, ConstName, LocId),
+    ClsCnsD(ConstName, ClassId, LocId),
     ClsCnsL(ValueId, LocalId, LocId),
     Cmp([ValueId; 2], LocId),
     CmpOp([ValueId; 2], CmpOp, LocId),

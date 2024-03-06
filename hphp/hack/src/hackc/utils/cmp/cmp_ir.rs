@@ -492,8 +492,6 @@ fn cmp_hack_constant(
     (a, a_strings): (&HackConstant, &StringInterner),
     (b, b_strings): (&HackConstant, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let HackConstant {
         name: a_name,
         value: a_value,
@@ -504,7 +502,7 @@ fn cmp_hack_constant(
         value: b_value,
         attrs: b_attrs,
     } = b;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_option(
         a_value.as_ref().map(|i| (i, a_strings)),
         b_value.as_ref().map(|i| (i, b_strings)),
@@ -777,10 +775,10 @@ fn cmp_instr_hhbc(
             cmp_id(x0.id, x1.id).qualified("CheckProp param x")?;
         }
         (Hhbc::ClsCns(_, x0, _), Hhbc::ClsCns(_, x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ClsCns param x")?;
+            cmp_eq(x0, x1).qualified("ClsCns param x")?;
         }
         (Hhbc::ClsCnsD(x0, y0, _), Hhbc::ClsCnsD(x1, y1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ClsCnsD param x")?;
+            cmp_eq(x0, x1).qualified("ClsCnsD param x")?;
             cmp_id(y0.id, y1.id).qualified("ClsCnsD param y")?;
         }
         (Hhbc::CmpOp(_, x0, _), Hhbc::CmpOp(_, x1, _)) => {
@@ -1992,7 +1990,7 @@ mod mapping {
 
     impl MapName for (&HackConstant, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.as_str().to_owned()
         }
     }
 

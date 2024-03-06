@@ -43,7 +43,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "ClassId"
             || ident == "CmpOp"
             || ident == "CollectionType"
-            || ident == "ConstId"
+            || ident == "ConstName"
             || ident == "ContCheckOp"
             || ident == "FatalOp"
             || ident == "FunctionId"

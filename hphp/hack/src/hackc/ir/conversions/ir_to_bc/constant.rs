@@ -15,7 +15,5 @@ pub(crate) fn convert_hack_constant(constant: ir::HackConstant, strings: &String
         .map(|v| convert::convert_typed_value(&v, strings))
         .into();
 
-    let name = strings.lookup_const_name(name);
-
     Constant { name, value, attrs }
 }

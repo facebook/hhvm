@@ -1361,8 +1361,8 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     /// Look up a ValueId in the FuncState and return an Expr representing
-    /// it. For InstrIds and complex ConstIds return an Expr containing the
-    /// (already emitted) Sid. For simple ConstIds use an Expr representing the
+    /// it. For InstrIds and complex Constants return an Expr containing the
+    /// (already emitted) Sid. For simple Constants use an Expr representing the
     /// value directly.
     pub(crate) fn lookup_vid(&mut self, vid: ValueId) -> textual::Expr {
         match vid.full() {

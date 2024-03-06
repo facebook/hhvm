@@ -20,7 +20,5 @@ pub(crate) fn convert_constant(constant: &Constant, strings: &StringInterner) ->
         .map(|tv| convert::convert_typed_value(tv, strings))
         .into();
 
-    let name = ir::ConstId::from_hhbc(name, strings);
-
     ir::HackConstant { name, value, attrs }
 }

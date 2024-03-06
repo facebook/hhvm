@@ -182,7 +182,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
             TypeInfo::empty()
         };
         let prop = Property {
-            name: PropId::new(name.id),
+            name: PropId::new(name.as_bytes_id()),
             flags: attrs | Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,

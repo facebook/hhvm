@@ -126,7 +126,6 @@ pub use self::newtype::BlockIdMap;
 pub use self::newtype::BlockIdSet;
 pub use self::newtype::ClassId;
 pub use self::newtype::ClassIdMap;
-pub use self::newtype::ConstId;
 pub use self::newtype::ConstantId;
 pub use self::newtype::FullInstrId;
 pub use self::newtype::FunctionId;

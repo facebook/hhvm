@@ -48,7 +48,6 @@ interned_hhbc_intern_id!(ClassId, ClassName);
 pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHasher<u32>>;
 
 interned_hhbc_intern_id!(ModuleId, ModuleName);
-interned_hhbc_intern_id!(ConstId, ConstName);
 interned_hhbc_intern_id!(FunctionId, FunctionName);
 
 const __FACTORY: &str = "__factory";

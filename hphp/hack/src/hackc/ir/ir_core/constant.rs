@@ -7,7 +7,6 @@ use hhvm_types_ffi::Attr;
 use crate::instr::HasOperands;
 use crate::ClassId;
 use crate::CollectionType;
-use crate::ConstId;
 use crate::ConstName;
 use crate::FloatBits;
 use crate::TypedValue;
@@ -48,7 +47,7 @@ impl HasOperands for Constant {
 
 #[derive(Debug)]
 pub struct HackConstant {
-    pub name: ConstId,
+    pub name: ConstName,
     pub value: Option<TypedValue>,
     pub attrs: Attr,
 }

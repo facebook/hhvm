@@ -824,7 +824,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "cls_cns {}::{}",
                 FmtVid(func, clsid, verbose, strings),
-                FmtIdentifierId(id.id, ctx.strings)
+                FmtIdentifierId(id.as_bytes_id(), ctx.strings)
             )?;
         }
         Hhbc::ClsCnsD(id, clsid, _) => {
@@ -832,7 +832,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "cls_cns_d {}::{}",
                 FmtIdentifierId(clsid.id, ctx.strings),
-                FmtIdentifierId(id.id, ctx.strings)
+                FmtIdentifierId(id.as_bytes_id(), ctx.strings)
             )?;
         }
         Hhbc::ClsCnsL(vid, lid, _) => {
@@ -1357,7 +1357,7 @@ fn print_hack_constant(w: &mut dyn Write, c: &HackConstant, strings: &StringInte
     write!(
         w,
         "constant {attr} {name}",
-        name = FmtIdentifierId(c.name.id, strings)
+        name = FmtIdentifierId(c.name.as_bytes_id(), strings)
     )?;
 
     if let Some(value) = &c.value {

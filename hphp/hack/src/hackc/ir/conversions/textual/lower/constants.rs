@@ -204,7 +204,7 @@ fn write_constant(builder: &mut FuncBuilder, cid: ConstantId) -> (ValueId, bool)
         }
 
         Constant::Named(name) => {
-            let id = ir::GlobalId::new(ir::ConstId::from_hhbc(*name, &builder.strings).id);
+            let id = ir::GlobalId::new(name.as_bytes_id());
             let vid = builder.emit(Instr::Special(ir::instr::Special::Textual(
                 ir::instr::Textual::LoadGlobal { id, is_const: true },
             )));

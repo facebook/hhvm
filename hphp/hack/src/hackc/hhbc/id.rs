@@ -52,8 +52,12 @@ macro_rules! impl_intern_id {
                 self.0.as_bytes()
             }
 
-            pub fn intern(s: &str) -> $type {
-                $type(crate::intern(s))
+            pub fn intern(s: &str) -> Self {
+                Self(crate::intern(s))
+            }
+
+            pub fn from_utf8(s: &[u8]) -> Result<Self, std::str::Utf8Error> {
+                Ok(Self::intern(std::str::from_utf8(s)?))
             }
         }
 

@@ -35,12 +35,6 @@ impl StringCache {
         )
     }
 
-    pub fn lookup_const_name(&self, id: ir::ConstId) -> hhbc::ConstName {
-        hhbc::ConstName::intern(
-            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 const name"),
-        )
-    }
-
     pub fn lookup_method_name(&self, id: ir::MethodId) -> hhbc::MethodName {
         hhbc::MethodName::intern(
             std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 method name"),

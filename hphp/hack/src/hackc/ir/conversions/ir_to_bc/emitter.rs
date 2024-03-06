@@ -469,13 +469,9 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::ClassHasReifiedGenerics(_, _) => Opcode::ClassHasReifiedGenerics,
             Hhbc::ClassName(..) => Opcode::ClassName,
             Hhbc::Clone(..) => Opcode::Clone,
-            Hhbc::ClsCns(_, id, _) => {
-                let id = self.strings.lookup_const_name(id);
-                Opcode::ClsCns(id)
-            }
+            Hhbc::ClsCns(_, id, _) => Opcode::ClsCns(id),
             Hhbc::ClsCnsD(id, clsid, _) => {
                 let clsid = self.strings.lookup_class_name(clsid);
-                let id = self.strings.lookup_const_name(id);
                 Opcode::ClsCnsD(id, clsid)
             }
             Hhbc::ClsCnsL(_, lid, _) => {

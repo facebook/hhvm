@@ -697,10 +697,6 @@ end = struct
       (LoclType ty_sub)
       (LoclType ty_super)
 
-  and simplify_dynamic_aware_subtype ~subtype_env =
-    let subtype_env = Subtype_env.set_coercing_to_dynamic subtype_env in
-    simplify_subtype ~subtype_env
-
   and default_subtype_locl_ty_locl_ty
       ~subtype_env
       ~this_ty
@@ -1711,45 +1707,22 @@ end = struct
                 tv_super
         | _ -> default_subtype_help env))
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
-    | (r_supportdyn, Tnewtype (name_super, [tyarg_super], _))
+    | (r_supportdyn, Tnewtype (name_super, [tyarg_super], bound_super))
       when String.equal name_super SN.Classes.cSupportDyn ->
       (match ity_sub with
       | ConstraintType _cty ->
         (* TODO *)
         default_subtype_help env
       | LoclType lty_sub ->
-        (match deref lty_sub with
-        | (r, Tnewtype (name_sub, [tyarg_sub], _))
-          when String.equal name_sub SN.Classes.cSupportDyn ->
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~this_ty
-               ~super_like
-               ~super_supportdyn:true
-               ~sub_supportdyn:(Some r)
-               tyarg_sub
-               tyarg_super
-        | (_, Tvar _) -> default_subtype_help env
-        | _ ->
-          let ty_dyn = MakeType.dynamic r_supportdyn in
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~this_ty
-               ~sub_supportdyn
-               ~super_like
-               ~super_supportdyn:true
-               lty_sub
-               tyarg_super
-          &&& simplify_dynamic_aware_subtype
-                ~subtype_env
-                ~this_ty
-                ~sub_supportdyn
-                ~super_like:false
-                ~super_supportdyn:false
-                lty_sub
-                ty_dyn))
+        Subtype_supportdyn_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty_sub
+          (r_supportdyn, (tyarg_super, bound_super))
+          env)
     | (r_super, Tnewtype (name_super, tyl_super, bound_super)) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
@@ -2096,6 +2069,76 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_supportdyn_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_ty ->
+    locl_phase Reason.t_ * (locl_phase ty * locl_phase ty) ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_supportdyn, (lty_inner, bound_super))
+      env =
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType
+           (mk
+              ( r_supportdyn,
+                Tnewtype (SN.Classes.cSupportDyn, [lty_inner], bound_super) )))
+    in
+
+    match deref lty_sub with
+    | (r, Tnewtype (name_sub, [tyarg_sub], _))
+      when String.equal name_sub SN.Classes.cSupportDyn ->
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~this_ty
+           ~super_like
+           ~super_supportdyn:true
+           ~sub_supportdyn:(Some r)
+           tyarg_sub
+           lty_inner
+    | (_, Tvar _) -> default_subtype_help env
+    | _ ->
+      let ty_dyn = MakeType.dynamic r_supportdyn in
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~this_ty
+           ~sub_supportdyn
+           ~super_like
+           ~super_supportdyn:true
+           lty_sub
+           lty_inner
+      &&& Subtype.simplify_subtype
+            ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
+            ~this_ty
+            ~sub_supportdyn
+            ~super_like:false
+            ~super_supportdyn:false
+            lty_sub
+            ty_dyn
 end
 
 and Subtype_newtype_r : sig

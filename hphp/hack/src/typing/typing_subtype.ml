@@ -1321,7 +1321,7 @@ end = struct
           ty_sub
           (r_super, (name_super, tyargs_super))
           env)
-    | (_, Tnonnull) ->
+    | (r_nonnull, Tnonnull) ->
       (match ity_sub with
       | ConstraintType cty -> begin
         match deref_constraint_type cty with
@@ -1329,30 +1329,15 @@ end = struct
         | _ -> default_subtype_help env
       end
       | LoclType lty ->
-        (match deref lty with
-        | ( _,
-            ( Tprim
-                Nast.(
-                  ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
-                  | Tarraykey | Tnoreturn ))
-            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _
-            | Tvec_or_dict _ | Taccess _ ) ) ->
-          valid env
-        (* supportdyn<t> <: nonnull iff t <: nonnull *)
-        | (r, Tnewtype (name, [tyarg], _))
-          when String.equal name SN.Classes.cSupportDyn ->
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~sub_supportdyn:(Some r)
-               ~this_ty
-               ~super_like:false
-               ~super_supportdyn:false
-               tyarg
-               lty_super
-        (* negations always contain null *)
-        | (_, Tneg _) -> invalid_env env
-        | _ -> default_subtype_help env))
+        Subtype_nonnull_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty
+          r_nonnull
+          env)
     | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && (Subtype_env.coercing_to_dynamic subtype_env
@@ -1918,6 +1903,67 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_nonnull_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_ty ->
+    locl_phase Reason.t_ ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      r_nonnull
+      env =
+    (* We *know* that the assertion is unsatisfiable *)
+    let invalid_env env = invalid ~fail env in
+
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_nonnull, Tnonnull)))
+    in
+    match deref lty_sub with
+    | ( _,
+        ( Tprim
+            Ast_defs.(
+              ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
+              | Tnoreturn ))
+        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvec_or_dict _
+        | Taccess _ ) ) ->
+      valid env
+    (* supportdyn<t> <: nonnull iff t <: nonnull *)
+    | (r, Tnewtype (name, [tyarg], _))
+      when String.equal name SN.Classes.cSupportDyn ->
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn:(Some r)
+           ~this_ty
+           ~super_like:false
+           ~super_supportdyn:false
+           tyarg
+           (mk (r_nonnull, Tnonnull))
+    (* negations always contain null *)
+    | (_, Tneg _) -> invalid_env env
+    | _ -> default_subtype_help env
 end
 
 and Subtype_generic_r : sig

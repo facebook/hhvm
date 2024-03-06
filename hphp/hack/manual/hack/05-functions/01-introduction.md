@@ -81,3 +81,17 @@ function takes_variadic_fun((function(int...): void) $f): void {
   $f(0, ...$args);
 }
 ```
+
+Finally, functions taking optional parameters can be passed as arguments.
+
+```Hack
+function with_default(int $x, int $y = 0):void {
+}
+function takes_unary_or_binary_fun((function(int,optional int):void) $f):void {
+  $f(1);
+  $f(1,2);
+}
+function demo():void {
+  takes_unary_or_binary_fun(with_default<>);
+}
+```

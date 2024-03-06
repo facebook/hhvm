@@ -1,4 +1,0 @@
-File "function_type_hint_optional_args_disabled.php", line 3, characters 31-38:
-Cannot use unstable feature: `function_type_optional_params` (Parsing[1002])
-File "function_type_hint_optional_args_disabled.php", line 5, characters 25-32:
-Cannot use unstable feature: `function_type_optional_params` (Parsing[1002])

@@ -143,7 +143,7 @@ impl UnstableFeatures {
             UnstableFeatures::StrictSwitch => Unstable,
             UnstableFeatures::ClassType => Unstable,
             UnstableFeatures::FunctionReferences => Unstable,
-            UnstableFeatures::FunctionTypeOptionalParams => Preview,
+            UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
         }
     }
 }
@@ -5474,14 +5474,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             ClassArgsTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::ClassType);
-            }
-            ClosureParameterTypeSpecifier(x) => {
-                if !x.optional.is_missing() {
-                    self.check_can_use_feature(
-                        &x.optional,
-                        &UnstableFeatures::FunctionTypeOptionalParams,
-                    );
-                }
             }
             _ => {}
         }

@@ -257,12 +257,69 @@ trait T0 {
     parent::test_const();
   }
 
-  // TEST-CHECK-BAL: define T0.with_optional_argument
-  // CHECK: define T0.with_optional_argument($this: *T0, $opt: *HackInt, self: *HackMixed) : *void {
+  // TEST-CHECK-BAL: define .wrapper T0$static.with_optional_argument
+  // CHECK: define .wrapper T0$static.with_optional_argument($this: *T0$static, self: *HackMixed) : *void {
+  // CHECK: local $opt1: *void, $opt2: *void
+  // CHECK: #b0:
+  // CHECK:   store &$opt1 <- $builtins.hack_int(0): *HackMixed
+  // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
+  // CHECK:   jmp b1
+  // CHECK: #b1:
+  // CHECK:   n0: *HackMixed = load &$opt1
+  // CHECK:   n1: *HackMixed = load &$opt2
+  // CHECK:   n2: *HackMixed = load &$this
+  // CHECK:   n3 = n2.?.with_optional_argument(n0, n1)
+  // CHECK:   ret n3
+  // CHECK: }
+  // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
+  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK: // forward to the static method
+  // CHECK:   n0: *T0 = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   n2 = T0$static.with_optional_argument(n1)
+  // CHECK:   ret n2
+  // CHECK: }
+  // TEST-CHECK-BAL: define .wrapper T0$static.with_optional_argument
+  // CHECK: define .wrapper T0$static.with_optional_argument($this: *T0$static, $opt1: *HackInt, self: *HackMixed) : *void {
+  // CHECK: local $opt2: *void
+  // CHECK: #b0:
+  // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
+  // CHECK:   jmp b1
+  // CHECK: #b1:
+  // CHECK:   n0: *HackMixed = load &$opt1
+  // CHECK:   n1: *HackMixed = load &$opt2
+  // CHECK:   n2: *HackMixed = load &$this
+  // CHECK:   n3 = n2.?.with_optional_argument(n0, n1)
+  // CHECK:   ret n3
+  // CHECK: }
+  // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
+  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, $opt1: *HackInt, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK: // forward to the static method
+  // CHECK:   n0: *T0 = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   n2: *HackInt = load &$opt1
+  // CHECK:   n3 = T0$static.with_optional_argument(n1, n2)
+  // CHECK:   ret n3
+  // CHECK: }
+  // TEST-CHECK-BAL: define T0$static.with_optional_argument
+  // CHECK: define T0$static.with_optional_argument($this: *T0$static, $opt1: *HackInt, $opt2: *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
-  public function with_optional_argument(int $opt=0): void {
+  // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
+  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, $opt1: *HackInt, $opt2: *HackInt, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK: // forward to the static method
+  // CHECK:   n0: *T0 = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   n2: *HackInt = load &$opt1
+  // CHECK:   n3: *HackInt = load &$opt2
+  // CHECK:   n4 = T0$static.with_optional_argument(n1, n2, n3)
+  // CHECK:   ret n4
+  // CHECK: }
+  public static function with_optional_argument(int $opt1=0, int $opt2=1): void {
   }
 }
 

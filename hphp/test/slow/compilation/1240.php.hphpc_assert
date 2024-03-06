@@ -1,2 +1,2 @@
-Fatal: An unexpected exception was thrown while emitting: More than one function with the name Foo. In %s and %s
+Fatal: An unexpected exception was thrown while emitting: More than one function with the name fOO. In %s and %s
 hphp failed

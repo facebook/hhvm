@@ -1,2 +1,3 @@
 -vEval.AllowHhas=true
 -vEval.CheckBuiltinParamTypeHints=2
+-vEval.LogFsameCollisions=2

@@ -1,1 +1,2 @@
 -vRuntime.Eval.EnableArgsInBacktraces=1
+-vRuntime.Eval.LogFsameCollisions=2

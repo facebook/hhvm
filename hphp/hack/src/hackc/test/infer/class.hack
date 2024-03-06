@@ -12,7 +12,7 @@
 // CHECK:   prop1: .public *HackInt;
 // CHECK:   prop2: .public *HackString;
 // CHECK:   prop5: .public *HackInt;
-// CHECK:   type_: .public *HackInt
+// CHECK:   mangled:::type: .public *HackInt
 // CHECK: }
 
 // TEST-CHECK-BAL: define C$static.__factory
@@ -36,7 +36,7 @@
 // CHECK:   store n4.?.prop5 <- n5: *HackMixed
 // CHECK:   n6: *HackMixed = load &$this
 // CHECK:   n7 = $builtins.hack_int(2)
-// CHECK:   store n6.?.type_ <- n7: *HackMixed
+// CHECK:   store n6.?.mangled:::type <- n7: *HackMixed
 // CHECK:   n8 = __sil_lazy_class_initialize(<D>)
 // CHECK:   n9 = $builtins.hack_field_get(n8, "C")
 // CHECK:   n10: *HackMixed = load &$this
@@ -452,7 +452,7 @@ function sets(): void {
 // CHECK: type TestFieldNamesWithTextualIdents = .kind="class" {
 // CHECK:   n: .public *HackInt;
 // CHECK:   n0n: .public *HackInt;
-// CHECK:   mangled::n10: .public *HackInt
+// CHECK:   mangled:::n10: .public *HackInt
 // CHECK: }
 class TestFieldNamesWithTextualIdents {
 
@@ -463,7 +463,7 @@ class TestFieldNamesWithTextualIdents {
 
 // TEST-CHECK-BAL: type TestFieldNamesWithKeywordsAndConflicts
 // CHECK: type TestFieldNamesWithKeywordsAndConflicts = .kind="class" {
-// CHECK:   define_: .public *HackInt;
+// CHECK:   mangled:::define: .public *HackInt;
 // CHECK:   define_: .public *HackFloat
 // CHECK: }
 class TestFieldNamesWithKeywordsAndConflicts {

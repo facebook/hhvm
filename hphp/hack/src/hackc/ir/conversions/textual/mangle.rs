@@ -24,40 +24,27 @@ fn is_textual_ident(name: &[u8]) -> bool {
         && name[1..].iter().all(|&x| x.is_ascii_digit())
 }
 
+//precondition: name should not contain non-utf8 chars
+fn add_mangling_prefix(name: &[u8]) -> String {
+    // We mangle by adding the prefix 'mangled:::'.
+    // No collision expected because ':::' is not a valid identifier Hack substring
+    // We can not use '::' because we already introduce '::' when removing Hack namespace
+    // separator '//' and the current mangling could by applied on a function name.
+    let mut res = String::from("mangled:::");
+    res.push_str(std::str::from_utf8(name).unwrap());
+    res
+}
+
 impl Mangle for [u8] {
     fn mangle(&self, _strings: &StringInterner) -> String {
         // Handle some reserved tokens.
         match self {
-            b"declare" => "declare_".to_owned(),
-            b"define" => "define_".to_owned(),
-            b"extends" => "extends_".to_owned(),
-            b"false" => "false_".to_owned(),
-            b"float" => "float_".to_owned(),
-            b"global" => "global_".to_owned(),
-            b"handlers" => "handlers_".to_owned(),
-            b"int" => "int_".to_owned(),
-            b"jmp" => "jmp_".to_owned(),
-            b"load" => "load_".to_owned(),
-            b"local" => "local_".to_owned(),
-            b"null" => "null_".to_owned(),
-            b"prune" => "prune_".to_owned(),
-            b"ret" => "ret_".to_owned(),
-            b"store" => "store_".to_owned(),
-            b"then" => "then_".to_owned(),
-            b"throw" => "throw_".to_owned(),
-            b"true" => "true_".to_owned(),
-            b"type" => "type_".to_owned(),
-            b"unreachable" => "unreachable_".to_owned(),
-            b"void" => "void_".to_owned(),
-            _ if is_textual_ident(self) => {
-                // If the ident is of the form n<digits> we mangle it into mangled::n<digits>
-                // no collision expected because '::' is not a valid identifier Hack substring
-                // We also introduce '::' when removing Hack namespace separator '//' but they
-                // should not appear in Hack variables and fieldnames.
-                let mut res = String::from("mangled::");
-                res.push_str(std::str::from_utf8(self).unwrap());
-                res
+            b"declare" | b"define" | b"extends" | b"false" | b"float" | b"global" | b"handlers"
+            | b"int" | b"jmp" | b"load" | b"local" | b"null" | b"prune" | b"ret" | b"store"
+            | b"then" | b"throw" | b"true" | b"type" | b"unreachable" | b"void" => {
+                add_mangling_prefix(self)
             }
+            _ if is_textual_ident(self) => add_mangling_prefix(self),
             _ => {
                 // This mangling is terrible... but probably "good enough".
                 // If a digit is first then we prepend a '_'.

@@ -24,7 +24,6 @@
 namespace apache {
 namespace thrift {
 
-constexpr std::chrono::seconds ServerInterface::BlockingThreadManager::kTimeout;
 thread_local RequestParams ServerInterface::requestParams_;
 
 EventTask::~EventTask() {

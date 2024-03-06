@@ -25,6 +25,17 @@
 namespace apache {
 namespace thrift {
 
+namespace {
+class EmbeddedClientRequestContext
+    : public apache::thrift::server::TConnectionContext {
+ public:
+  explicit EmbeddedClientRequestContext(transport::THeader* header)
+      : TConnectionContext(header) {}
+
+  void setRequestHeader(transport::THeader* header) { header_ = header; }
+};
+} // namespace
+
 ContextStack::ContextStack(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
@@ -97,11 +108,12 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
   }
 
   const size_t nbytes = sizeof(ContextStack) +
-      sizeof(Cpp2ClientRequestContext) + handlers->size() * sizeof(void*);
+      sizeof(EmbeddedClientRequestContext) + handlers->size() * sizeof(void*);
   auto* storage = static_cast<ContextStack*>(operator new (
       nbytes, std::align_val_t{alignof(ContextStack)}));
 
-  auto* connectionContext = new (storage + 1) Cpp2ClientRequestContext(&header);
+  auto* connectionContext =
+      new (storage + 1) EmbeddedClientRequestContext(&header);
 
   auto* object = new (storage) ContextStack(
       WithEmbeddedClientRequestContext(),
@@ -131,12 +143,13 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
   size_t methodNameBytes = serviceName.size() + 1 + methodName.size() + 1;
 
   const size_t nbytes = sizeof(ContextStack) +
-      sizeof(Cpp2ClientRequestContext) + handlers->size() * sizeof(void*) +
+      sizeof(EmbeddedClientRequestContext) + handlers->size() * sizeof(void*) +
       serviceNameBytes + methodNameBytes;
   auto* storage = static_cast<ContextStack*>(operator new (
       nbytes, std::align_val_t{alignof(ContextStack)}));
 
-  auto* connectionContext = new (storage + 1) Cpp2ClientRequestContext(&header);
+  auto* connectionContext =
+      new (storage + 1) EmbeddedClientRequestContext(&header);
   auto serviceNameStorage = reinterpret_cast<char*>(storage) + nbytes -
       serviceNameBytes - methodNameBytes;
   auto methodNameStorage = serviceNameStorage + serviceNameBytes;
@@ -251,7 +264,7 @@ void ContextStack::resetClientRequestContextHeader() {
   }
 
   auto* connectionContext =
-      reinterpret_cast<Cpp2ClientRequestContext*>(this + 1);
+      reinterpret_cast<EmbeddedClientRequestContext*>(this + 1);
   connectionContext->setRequestHeader(nullptr);
 }
 
@@ -259,7 +272,7 @@ void*& ContextStack::contextAt(size_t i) {
   void** start = reinterpret_cast<void**>(this + 1);
   if (hasClientRequestContext_) {
     start = reinterpret_cast<void**>(
-        reinterpret_cast<Cpp2ClientRequestContext*>(start) + 1);
+        reinterpret_cast<EmbeddedClientRequestContext*>(start) + 1);
   }
   return start[i];
 }
@@ -275,26 +288,26 @@ namespace detail {
 } // namespace apache
 
 namespace std {
-void default_delete<apache::thrift::ContextStack>::operator()(
-    apache::thrift::ContextStack* cs) const {
+using apache::thrift::ContextStack;
+using apache::thrift::EmbeddedClientRequestContext;
+
+void default_delete<ContextStack>::operator()(ContextStack* cs) const {
   if (cs) {
-    const size_t nbytes = sizeof(apache::thrift::ContextStack) +
-        (cs->hasClientRequestContext_
-             ? sizeof(apache::thrift::Cpp2ClientRequestContext)
-             : 0) +
+    const size_t nbytes = sizeof(ContextStack) +
+        (cs->hasClientRequestContext_ ? sizeof(EmbeddedClientRequestContext)
+                                      : 0) +
         cs->handlers_->size() * sizeof(void*);
 
     auto* connectionContext = cs->hasClientRequestContext_
-        ? reinterpret_cast<apache::thrift::Cpp2ClientRequestContext*>(cs + 1)
+        ? reinterpret_cast<EmbeddedClientRequestContext*>(cs + 1)
         : nullptr;
 
     cs->~ContextStack();
     if (connectionContext) {
-      connectionContext->~Cpp2ClientRequestContext();
+      connectionContext->~EmbeddedClientRequestContext();
     }
 
-    operator delete (
-        cs, nbytes, std::align_val_t{alignof(apache::thrift::ContextStack)});
+    operator delete (cs, nbytes, std::align_val_t{alignof(ContextStack)});
   }
 }
 } // namespace std

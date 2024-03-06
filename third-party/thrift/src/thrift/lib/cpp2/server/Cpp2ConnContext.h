@@ -539,15 +539,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   detail::ConnectionInternalFieldsT internalFields_;
 };
 
-class Cpp2ClientRequestContext
-    : public apache::thrift::server::TConnectionContext {
- public:
-  explicit Cpp2ClientRequestContext(transport::THeader* header)
-      : TConnectionContext(header) {}
-
-  void setRequestHeader(transport::THeader* header) { header_ = header; }
-};
-
 // Request-specific context
 class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
  protected:

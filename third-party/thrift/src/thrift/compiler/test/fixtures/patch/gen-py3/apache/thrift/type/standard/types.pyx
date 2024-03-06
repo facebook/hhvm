@@ -405,12 +405,8 @@ cdef class TypeUri(thrift.py3.types.Union):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.TypeUri, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("apache_thrift_asyncio.standard.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.TypeUri, self)
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.TypeUri, self)
 
 
 @__cython.auto_pickle(False)
@@ -830,11 +826,7 @@ cdef class TypeName(thrift.py3.types.Union):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.TypeName, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("apache_thrift_asyncio.standard.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.TypeName, self)
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.TypeName, self)
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf

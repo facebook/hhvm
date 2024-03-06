@@ -229,12 +229,8 @@ cdef class AStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.AStruct, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.AStruct, self)
+        py_deprecated_types = importlib.import_module("includes.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AStruct, self)
 @__cython.auto_pickle(False)
 cdef class AStructB(thrift.py3.types.Struct):
     def __init__(AStructB self, **kwargs):
@@ -352,11 +348,7 @@ cdef class AStructB(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.AStructB, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.AStructB, self)
+        py_deprecated_types = importlib.import_module("includes.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AStructB, self)
 IncludedConstant = 42
 IncludedInt64 = int

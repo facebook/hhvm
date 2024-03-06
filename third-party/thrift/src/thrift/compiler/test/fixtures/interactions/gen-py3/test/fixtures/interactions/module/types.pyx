@@ -167,12 +167,8 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
+        py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
 
 cdef class ClientBufferedStream__bool(ClientBufferedStream):
 

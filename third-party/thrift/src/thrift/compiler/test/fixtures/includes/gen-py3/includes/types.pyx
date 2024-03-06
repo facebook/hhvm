@@ -187,12 +187,8 @@ cdef class Included(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Included, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("includes.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Included, self)
+        py_deprecated_types = importlib.import_module("includes.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Included, self)
 ExampleIncluded = Included._fbthrift_create(constant_shared_ptr(cExampleIncluded()))
 IncludedConstant = 42
 IncludedInt64 = int

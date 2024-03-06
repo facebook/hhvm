@@ -174,9 +174,5 @@ cdef class Foo(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("namespace_from_package_without_module_name.module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("test.namespace_from_package_without_module_name.module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
+        py_deprecated_types = importlib.import_module("namespace_from_package_without_module_name.module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)

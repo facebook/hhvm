@@ -158,12 +158,8 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FooStreamEx, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FooStreamEx, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FooStreamEx, self)
 @__cython.auto_pickle(False)
 cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     def __init__(FooEx self, *args, **kwargs):
@@ -260,12 +256,8 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
 @__cython.auto_pickle(False)
 cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     def __init__(FooEx2 self, *args, **kwargs):
@@ -362,12 +354,8 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx2, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx2, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx2, self)
 
 cdef class ClientBufferedStream__i32(ClientBufferedStream):
 

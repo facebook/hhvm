@@ -191,12 +191,8 @@ cdef class A(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
-        try:
-            py_deprecated_types = importlib.import_module("a.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.A, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("a.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.A, self)
+        py_deprecated_types = importlib.import_module("a.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.A, self)
 @__cython.auto_pickle(False)
 cdef class List__c_C(thrift.py3.types.List):
     def __init__(self, items=None):

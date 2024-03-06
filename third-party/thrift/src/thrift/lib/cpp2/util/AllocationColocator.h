@@ -173,7 +173,7 @@ constexpr T align(T value, std::align_val_t alignment) {
 
 struct LocatorBase {
   std::ptrdiff_t offset;
-  explicit LocatorBase(std::ptrdiff_t offset) : offset(offset) {}
+  explicit LocatorBase(std::ptrdiff_t offsetValue) : offset(offsetValue) {}
 
   LocatorBase(const LocatorBase&) = delete;
   LocatorBase& operator=(const LocatorBase&) = delete;
@@ -243,8 +243,8 @@ class AllocationColocator<void> {
   };
 
   struct StringLocator : public detail::LocatorBase {
-    StringLocator(std::ptrdiff_t offset, std::size_t length)
-        : LocatorBase(offset), length(length) {}
+    StringLocator(std::ptrdiff_t offset, std::size_t lengthValue)
+        : LocatorBase(offset), length(lengthValue) {}
     std::size_t length;
   };
 

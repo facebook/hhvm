@@ -25,24 +25,28 @@
 namespace apache {
 namespace thrift {
 
-namespace {
-class EmbeddedClientRequestContext
+using util::AllocationColocator;
+
+class ContextStack::EmbeddedClientRequestContext
     : public apache::thrift::server::TConnectionContext {
  public:
   explicit EmbeddedClientRequestContext(transport::THeader* header)
       : TConnectionContext(header) {}
 
-  void setRequestHeader(transport::THeader* header) { header_ = header; }
+  void resetRequestHeader() { header_ = nullptr; }
 };
-} // namespace
 
 ContextStack::ContextStack(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
     const char* method,
+    void** serviceContexts,
     TConnectionContext* connectionContext)
-    : handlers_(handlers), serviceName_(serviceName), method_(method) {
+    : handlers_(handlers),
+      serviceName_(serviceName),
+      method_(method),
+      serviceContexts_(serviceContexts) {
   CHECK(handlers_ && !handlers_->empty());
   for (size_t i = 0; i < handlers_->size(); ++i) {
     contextAt(i) = (*handlers_)[i]->getServiceContext(
@@ -51,21 +55,19 @@ ContextStack::ContextStack(
 }
 
 ContextStack::ContextStack(
-    WithEmbeddedClientRequestContext,
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
     const char* method,
-    TConnectionContext* connectionContext)
-    : handlers_(handlers),
-      serviceName_(serviceName),
-      method_(method),
-      hasClientRequestContext_(true) {
-  CHECK(handlers_ && !handlers_->empty());
-  for (size_t i = 0; i < handlers_->size(); ++i) {
-    contextAt(i) = (*handlers_)[i]->getServiceContext(
-        serviceName_, method_, connectionContext);
-  }
+    void** serviceContexts,
+    EmbeddedClientContextPtr embeddedClientContext)
+    : ContextStack(
+          handlers,
+          serviceName,
+          method,
+          serviceContexts,
+          embeddedClientContext.get()) {
+  embeddedClientContext_ = std::move(embeddedClientContext);
 }
 
 ContextStack::~ContextStack() {
@@ -84,13 +86,16 @@ ContextStack::UniquePtr ContextStack::create(
     return nullptr;
   }
 
-  const size_t nbytes = sizeof(ContextStack) + handlers->size() * sizeof(void*);
-  auto* storage = static_cast<ContextStack*>(operator new (
-      nbytes, std::align_val_t{alignof(ContextStack)}));
-  auto* object = new (storage)
-      ContextStack(handlers, serviceName, method, connectionContext);
-
-  return ContextStack::UniquePtr(object);
+  AllocationColocator<ContextStack> alloc;
+  return alloc.allocate(
+      [&, contexts = alloc.array<void*>(handlers->size())](auto make) mutable {
+        return ContextStack(
+            handlers,
+            serviceName,
+            method,
+            make(std::move(contexts)),
+            connectionContext);
+      });
 }
 
 ContextStack::UniquePtr ContextStack::createWithClientContext(
@@ -107,22 +112,19 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
     return nullptr;
   }
 
-  const size_t nbytes = sizeof(ContextStack) +
-      sizeof(EmbeddedClientRequestContext) + handlers->size() * sizeof(void*);
-  auto* storage = static_cast<ContextStack*>(operator new (
-      nbytes, std::align_val_t{alignof(ContextStack)}));
-
-  auto* connectionContext =
-      new (storage + 1) EmbeddedClientRequestContext(&header);
-
-  auto* object = new (storage) ContextStack(
-      WithEmbeddedClientRequestContext(),
-      handlers,
-      serviceName,
-      method,
-      connectionContext);
-
-  return ContextStack::UniquePtr(object);
+  AllocationColocator<ContextStack> alloc;
+  return alloc.allocate(
+      [&,
+       embeddedClientContext = alloc.object<EmbeddedClientRequestContext>(),
+       contexts = alloc.array<void*>(handlers->size())](auto make) mutable {
+        return ContextStack(
+            handlers,
+            serviceName,
+            method,
+            make(std::move(contexts)),
+            EmbeddedClientContextPtr(
+                make(std::move(embeddedClientContext), &header)));
+      });
 }
 
 ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
@@ -139,36 +141,36 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
     return nullptr;
   }
 
-  size_t serviceNameBytes = serviceName.size() + 1;
-  size_t methodNameBytes = serviceName.size() + 1 + methodName.size() + 1;
+  AllocationColocator<ContextStack> alloc;
+  return alloc.allocate(
+      [&,
+       embeddedClientContext = alloc.object<EmbeddedClientRequestContext>(),
+       contexts = alloc.array<void*>(handlers->size()),
+       serviceNameStorage = alloc.string(serviceName.size()),
+       methodNameStorage =
+           alloc.string(serviceName.size() + 1 /* dot */ + methodName.size())](
+          auto make) mutable {
+        // Unlike C++, thrift-python (whose implementation also requires
+        // extending string lifetimes) does not prefix the method name with
+        // "Service.". So we are formatting here for consistency.
+        const std::size_t methodNameBytes = methodNameStorage.length + 1;
+        auto methodNamePtr = reinterpret_cast<char*>(
+            make.uninitialized(std::move(methodNameStorage)));
+        std::snprintf(
+            methodNamePtr,
+            methodNameBytes,
+            "%s.%s",
+            serviceName.c_str(),
+            methodName.c_str());
 
-  const size_t nbytes = sizeof(ContextStack) +
-      sizeof(EmbeddedClientRequestContext) + handlers->size() * sizeof(void*) +
-      serviceNameBytes + methodNameBytes;
-  auto* storage = static_cast<ContextStack*>(operator new (
-      nbytes, std::align_val_t{alignof(ContextStack)}));
-
-  auto* connectionContext =
-      new (storage + 1) EmbeddedClientRequestContext(&header);
-  auto serviceNameStorage = reinterpret_cast<char*>(storage) + nbytes -
-      serviceNameBytes - methodNameBytes;
-  auto methodNameStorage = serviceNameStorage + serviceNameBytes;
-  snprintf(serviceNameStorage, serviceNameBytes, "%s", serviceName.c_str());
-  snprintf(
-      methodNameStorage,
-      methodNameBytes,
-      "%s.%s",
-      serviceName.c_str(),
-      methodName.c_str());
-
-  auto* object = new (storage) ContextStack(
-      WithEmbeddedClientRequestContext(),
-      handlers,
-      serviceNameStorage,
-      methodNameStorage,
-      connectionContext);
-
-  return ContextStack::UniquePtr(object);
+        return ContextStack(
+            handlers,
+            make(std::move(serviceNameStorage), serviceName).data(),
+            methodNamePtr,
+            make(std::move(contexts)),
+            EmbeddedClientContextPtr(
+                make(std::move(embeddedClientContext), &header)));
+      });
 }
 
 void ContextStack::preWrite() {
@@ -259,22 +261,16 @@ void ContextStack::userExceptionWrapped(
 }
 
 void ContextStack::resetClientRequestContextHeader() {
-  if (!hasClientRequestContext_) {
+  if (embeddedClientContext_ == nullptr) {
     return;
   }
-
   auto* connectionContext =
-      reinterpret_cast<EmbeddedClientRequestContext*>(this + 1);
-  connectionContext->setRequestHeader(nullptr);
+      static_cast<EmbeddedClientRequestContext*>(embeddedClientContext_.get());
+  connectionContext->resetRequestHeader();
 }
 
 void*& ContextStack::contextAt(size_t i) {
-  void** start = reinterpret_cast<void**>(this + 1);
-  if (hasClientRequestContext_) {
-    start = reinterpret_cast<void**>(
-        reinterpret_cast<EmbeddedClientRequestContext*>(start) + 1);
-  }
-  return start[i];
+  return serviceContexts_[i];
 }
 
 namespace detail {
@@ -286,28 +282,3 @@ namespace detail {
 
 } // namespace thrift
 } // namespace apache
-
-namespace std {
-using apache::thrift::ContextStack;
-using apache::thrift::EmbeddedClientRequestContext;
-
-void default_delete<ContextStack>::operator()(ContextStack* cs) const {
-  if (cs) {
-    const size_t nbytes = sizeof(ContextStack) +
-        (cs->hasClientRequestContext_ ? sizeof(EmbeddedClientRequestContext)
-                                      : 0) +
-        cs->handlers_->size() * sizeof(void*);
-
-    auto* connectionContext = cs->hasClientRequestContext_
-        ? reinterpret_cast<EmbeddedClientRequestContext*>(cs + 1)
-        : nullptr;
-
-    cs->~ContextStack();
-    if (connectionContext) {
-      connectionContext->~EmbeddedClientRequestContext();
-    }
-
-    operator delete (cs, nbytes, std::align_val_t{alignof(ContextStack)});
-  }
-}
-} // namespace std

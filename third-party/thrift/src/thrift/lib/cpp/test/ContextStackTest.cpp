@@ -99,27 +99,32 @@ TEST(ContextStack, ClientHeaders) {
     }
   };
 
-  transport::THeader header;
-  auto handler = std::make_shared<HeaderSettingEventHandler>();
-  auto contextStack = ContextStack::createWithClientContext(
-      std::make_shared<EventHandlerList>(EventHandlerList{handler}),
-      "Service",
-      "Service.method",
-      header);
-  ASSERT_NE(contextStack, nullptr);
+  for (bool copyNames : {false, true}) {
+    transport::THeader header;
+    auto handler = std::make_shared<HeaderSettingEventHandler>();
+    auto contextStack = [&]() {
+      auto handlers =
+          std::make_shared<EventHandlerList>(EventHandlerList{handler});
+      return copyNames ? ContextStack::createWithClientContextCopyNames(
+                             handlers, "Service", "method", header)
+                       : ContextStack::createWithClientContext(
+                             handlers, "Service", "Service.method", header);
+    }();
+    ASSERT_NE(contextStack, nullptr);
 
-  contextStack->preRead();
-  contextStack->preWrite();
+    contextStack->preRead();
+    contextStack->preWrite();
 
-  static const std::vector<std::string> kExpected = {
-      "getServiceContext('Service', 'Service.method')",
-      "preRead('Service.method')",
-      "preWrite('Service.method')",
-  };
-  EXPECT_EQ(handler->getHistory(), kExpected);
-  auto writeHeaders = header.releaseWriteHeaders();
-  EXPECT_EQ(writeHeaders.at("preRead"), "1");
-  EXPECT_EQ(writeHeaders.at("preWrite"), "1");
+    static const std::vector<std::string> kExpected = {
+        "getServiceContext('Service', 'Service.method')",
+        "preRead('Service.method')",
+        "preWrite('Service.method')",
+    };
+    EXPECT_EQ(handler->getHistory(), kExpected);
+    auto writeHeaders = header.releaseWriteHeaders();
+    EXPECT_EQ(writeHeaders.at("preRead"), "1");
+    EXPECT_EQ(writeHeaders.at("preWrite"), "1");
+  }
 }
 
 } // namespace apache::thrift::test

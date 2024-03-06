@@ -1417,7 +1417,8 @@ end = struct
               List.map tyargs_sub ~f:(fun _ ->
                   (Ast_defs.Invariant, Aast.Erased))
             in
-            simplify_subtype_variance_for_non_injective
+            (* Unfortunately, we have to expose this function for proto-HKTs *)
+            Subtype_newtype_r.simplify_subtype_variance_for_non_injective
               ~subtype_env
               ~sub_supportdyn
               ~super_like
@@ -1426,8 +1427,8 @@ end = struct
               variance_reifiedl
               tyargs_sub
               tyargs_super
-              ity_sub
-              (LoclType lty_super)
+              ty_sub
+              lty_super
               env
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
@@ -1749,156 +1750,19 @@ end = struct
                 ~super_supportdyn:false
                 lty_sub
                 ty_dyn))
-    | (_, Tnewtype (name_super, tyl_super, _)) ->
+    | (r_super, Tnewtype (name_super, tyl_super, bound_super)) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType lty ->
-        (match deref lty with
-        | (_, Tclass ((_, name_sub), _, _))
-          when String.equal name_sub name_super && Env.is_enum env name_super ->
-          valid env
-        | (_, Tnewtype (name_sub, tyl_sub, _))
-          when String.equal name_sub name_super ->
-          if List.is_empty tyl_sub then
-            valid env
-          else if Env.is_enum env name_super && Env.is_enum env name_sub then
-            valid env
-          else
-            let td = Env.get_typedef env name_super in
-            begin
-              match td with
-              | Decl_entry.Found { td_tparams; _ } ->
-                let variance_reifiedl =
-                  List.map td_tparams ~f:(fun t ->
-                      (t.tp_variance, t.tp_reified))
-                in
-                simplify_subtype_variance_for_non_injective
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~super_like
-                  name_sub
-                  None
-                  variance_reifiedl
-                  tyl_sub
-                  tyl_super
-                  ity_sub
-                  (LoclType lty_super)
-                  env
-              | Decl_entry.DoesNotExist
-              | Decl_entry.NotYetAvailable ->
-                (* TODO(hverr): decl_entry propagate *)
-                invalid_env env
-            end
-        | (r, Toption ty_sub) ->
-          let ty_null = MakeType.null r in
-          (* Errors due to `null` should refer to full option type *)
-          if_unsat
-            invalid_env
-            (simplify_subtype
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty
-               ~super_like:false
-               ~super_supportdyn:false
-               ty_null
-               lty_super
-               env)
-          &&& simplify_subtype
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty
-                ~super_like:false
-                ~super_supportdyn:false
-                ty_sub
-                lty_super
-        | (r, Tprim Aast.Tarraykey) ->
-          let ty_string = MakeType.string r and ty_int = MakeType.int r in
-          (* Use `if_unsat` so we report arraykey in the error *)
-          if_unsat
-            invalid_env
-            begin
-              env
-              |> simplify_subtype
-                   ~subtype_env
-                   ~sub_supportdyn
-                   ~this_ty
-                   ~super_like:false
-                   ~super_supportdyn:false
-                   ty_string
-                   lty_super
-              &&& simplify_subtype
-                    ~subtype_env
-                    ~sub_supportdyn
-                    ~this_ty
-                    ~super_like:false
-                    ~super_supportdyn:false
-                    ty_int
-                    lty_super
-            end
-        | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
-          default_subtype_help env
-        | _ ->
-          (match Env.get_typedef env name_super with
-          | Decl_entry.Found
-              { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
-          | Decl_entry.Found { td_super_constraint = Some lower; td_tparams; _ }
-            ->
-            let try_lower_bound env =
-              let ((env, cycle), lower_bound) =
-                (* The this_ty cannot does not need to be set because newtypes
-                 * & case types cannot appear within classes thus cannot us
-                 * the this type. If we ever change that this could needs to
-                 * be changed *)
-                Phase.localize
-                  ~ety_env:
-                    {
-                      empty_expand_env with
-                      type_expansions =
-                        (* Subtyping can be called when localizing
-                           a union type, since we attempt to simplify it.
-                           Since case types are encoded as union types,
-                           a cyclic reference to the same case type will
-                           lead to infinite looping. The chain is:
-                             localize -> simplify_union -> sub_type -> localize
-
-                           The expand environment is not threaded through the
-                           whole way, so we won't be able to tell we entered a cycle.
-
-                           For this reason we want to report cycles on the
-                           case type we are currently expanding. If a cycle
-                           occurs we say the proposition is invalid, but
-                           don't report an error, since that will be done
-                           during well-formedness checks on type defs *)
-                        Type_expansions.empty_w_cycle_report
-                          ~report_cycle:(Some (Pos.none, name_super));
-                      substs =
-                        (if List.is_empty tyl_super then
-                          SMap.empty
-                        else
-                          Decl_subst.make_locl td_tparams tyl_super);
-                    }
-                  env
-                  lower
-              in
-              (* If a cycle is detected, consider the case type as
-                 uninhabited and thus an alias for the bottom type.
-                 Handling of the bottom will be done as part of
-                 [default_subtype] so we can consider this as invalid *)
-              if Option.is_some cycle then
-                invalid_env env
-              else
-                simplify_subtype
-                  ~subtype_env
-                  ~sub_supportdyn:None
-                  ~this_ty:None
-                  ~super_like
-                  ~super_supportdyn:false
-                  lty
-                  lower_bound
-                  env
-            in
-            default_subtype_help env ||| try_lower_bound
-          | _ -> default_subtype_help env)))
+        Subtype_newtype_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty
+          (r_super, (name_super, tyl_super, bound_super))
+          env)
     | (_, Tunapplied_alias n_sup) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
@@ -2232,25 +2096,52 @@ end = struct
         ity_sub
         lty_super
         env
+end
 
+and Subtype_newtype_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_ty ->
+    locl_phase Reason.t_ * (string * locl_ty list * locl_phase ty) ->
+    env ->
+    env * TL.subtype_prop
+
+  val simplify_subtype_variance_for_non_injective :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:locl_phase Reason.t_ option ->
+    super_like:bool ->
+    string ->
+    Cls.t option ->
+    (Ast_defs.variance * Ast_defs.reify_kind) list ->
+    locl_ty list ->
+    locl_ty list ->
+    locl_ty ->
+    locl_ty ->
+    env ->
+    env * TL.subtype_prop
+end = struct
   (* Given a type constructor N that may not be injective (e.g., a newtype)
-     * t1 <:v1> u1 /\ ... /\ tn <:vn> un
-     * implies
-     * N<t1, .., tn> <: N<u1, .., un>
-     * where vi is the variance of the i'th generic parameter of N,
-     * and <:v denotes the appropriate direction of subtyping for variance v.
-     * However, the reverse direction does not hold. *)
-  and simplify_subtype_variance_for_non_injective
-      ~(subtype_env : Subtype_env.t)
+       * t1 <:v1> u1 /\ ... /\ tn <:vn> un
+       * implies
+       * N<t1, .., tn> <: N<u1, .., un>
+       * where vi is the variance of the i'th generic parameter of N,
+       * and <:v denotes the appropriate direction of subtyping for variance v.
+       * However, the reverse direction does not hold. *)
+  let simplify_subtype_variance_for_non_injective
+      ~subtype_env
       ~sub_supportdyn
       ~super_like
-      (cid : string)
-      (class_sub : Cls.t option)
+      cid
+      class_sub
       (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
       (children_tyl : locl_ty list)
       (super_tyl : locl_ty list)
-      ty_sub
-      ty_super
+      lty_sub
+      lty_super
       env =
     let ((env, p) as res) =
       Subtype_injective_ctor.simplify_subtype_variance_for_injective
@@ -2274,12 +2165,183 @@ end = struct
           ~sub_supportdyn
           ~coerce:subtype_env.Subtype_env.coerce
           env
-          ty_sub
-          ty_super
+          (LoclType lty_sub)
+          (LoclType lty_super)
       else
         (env, TL.valid)
     else
       res
+
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, (name_super, lty_supers, bound_super))
+      env =
+    let lty_super =
+      mk (r_super, Tnewtype (name_super, lty_supers, bound_super))
+    in
+    let ( ||| ) = ( ||| ) ~fail in
+    (* We *know* that the assertion is unsatisfiable *)
+    let invalid_env env = invalid ~fail env in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType lty_super)
+    in
+    match deref lty_sub with
+    | (_, Tclass ((_, name_sub), _, _))
+      when String.equal name_sub name_super && Env.is_enum env name_super ->
+      valid env
+    | (_, Tnewtype (name_sub, lty_subs, _))
+      when String.equal name_sub name_super ->
+      if List.is_empty lty_subs then
+        valid env
+      else if Env.is_enum env name_super && Env.is_enum env name_sub then
+        valid env
+      else
+        let td = Env.get_typedef env name_super in
+        begin
+          match td with
+          | Decl_entry.Found { td_tparams; _ } ->
+            let variance_reifiedl =
+              List.map td_tparams ~f:(fun t -> (t.tp_variance, t.tp_reified))
+            in
+            simplify_subtype_variance_for_non_injective
+              ~subtype_env
+              ~sub_supportdyn
+              ~super_like
+              name_sub
+              None
+              variance_reifiedl
+              lty_subs
+              lty_supers
+              lty_sub
+              lty_super
+              env
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            (* TODO(hverr): decl_entry propagate *)
+            invalid_env env
+        end
+    | (r, Toption ty_sub) ->
+      let ty_null = MakeType.null r in
+      (* Errors due to `null` should refer to full option type *)
+      if_unsat
+        invalid_env
+        (Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn
+           ~this_ty
+           ~super_like:false
+           ~super_supportdyn:false
+           ty_null
+           lty_super
+           env)
+      &&& Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:false
+            ~super_supportdyn:false
+            ty_sub
+            lty_super
+    | (r, Tprim Aast.Tarraykey) ->
+      let ty_string = MakeType.string r and ty_int = MakeType.int r in
+      (* Use `if_unsat` so we report arraykey in the error *)
+      if_unsat
+        invalid_env
+        begin
+          env
+          |> Subtype.simplify_subtype
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty
+               ~super_like:false
+               ~super_supportdyn:false
+               ty_string
+               lty_super
+          &&& Subtype.simplify_subtype
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty
+                ~super_like:false
+                ~super_supportdyn:false
+                ty_int
+                lty_super
+        end
+    | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
+      default_subtype_help env
+    | _ ->
+      (match Env.get_typedef env name_super with
+      | Decl_entry.Found
+          { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
+      | Decl_entry.Found { td_super_constraint = Some lower; td_tparams; _ } ->
+        let try_lower_bound env =
+          let ((env, cycle), lower_bound) =
+            (* The this_ty cannot does not need to be set because newtypes
+             * & case types cannot appear within classes thus cannot us
+             * the this type. If we ever change that this could needs to
+             * be changed *)
+            Phase.localize
+              ~ety_env:
+                {
+                  empty_expand_env with
+                  type_expansions =
+                    (* Subtyping can be called when localizing
+                       a union type, since we attempt to simplify it.
+                       Since case types are encoded as union types,
+                       a cyclic reference to the same case type will
+                       lead to infinite looping. The chain is:
+                         localize -> simplify_union -> sub_type -> localize
+
+                       The expand environment is not threaded through the
+                       whole way, so we won't be able to tell we entered a cycle.
+
+                       For this reason we want to report cycles on the
+                       case type we are currently expanding. If a cycle
+                       occurs we say the proposition is invalid, but
+                       don't report an error, since that will be done
+                       during well-formedness checks on type defs *)
+                    Type_expansions.empty_w_cycle_report
+                      ~report_cycle:(Some (Pos.none, name_super));
+                  substs =
+                    (if List.is_empty lty_supers then
+                      SMap.empty
+                    else
+                      Decl_subst.make_locl td_tparams lty_supers);
+                }
+              env
+              lower
+          in
+          (* If a cycle is detected, consider the case type as
+             uninhabited and thus an alias for the bottom type.
+             Handling of the bottom will be done as part of
+             [default_subtype] so we can consider this as invalid *)
+          if Option.is_some cycle then
+            invalid_env env
+          else
+            Subtype.simplify_subtype
+              ~subtype_env
+              ~sub_supportdyn:None
+              ~this_ty:None
+              ~super_like
+              ~super_supportdyn:false
+              lty_sub
+              lower_bound
+              env
+        in
+        default_subtype_help env ||| try_lower_bound
+      | _ -> default_subtype_help env)
 end
 
 and Subtype_sound_dynamic_r : sig

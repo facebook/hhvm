@@ -460,3 +460,15 @@ class TestFieldNamesWithTextualIdents {
   }
 
 }
+
+// TEST-CHECK-BAL: type TestFieldNamesWithKeywordsAndConflicts
+// CHECK: type TestFieldNamesWithKeywordsAndConflicts = .kind="class" {
+// CHECK:   define_: .public *HackInt;
+// CHECK:   define_: .public *HackFloat
+// CHECK: }
+class TestFieldNamesWithKeywordsAndConflicts {
+
+  public function __construct(public int $define, public float $define_) {
+  }
+
+}

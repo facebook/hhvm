@@ -1362,26 +1362,19 @@ end = struct
       | ConstraintType _
       | LoclType _ ->
         default_subtype_help env)
-    | (_, Tprim prim_ty) ->
+    | (r_prim, Tprim prim_ty) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType lty ->
-        (match (deref lty, prim_ty) with
-        | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
-        | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
-        | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_ty ->
-          valid env
-        | ((_, Toption arg_ty_sub), Nast.Tnull) ->
-          simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like:false
-            ~super_supportdyn:false
-            arg_ty_sub
-            lty_super
-            env
-        | (_, _) -> default_subtype_help env))
+        Subtype_prim_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty
+          (r_prim, prim_ty)
+          env)
     | (_, Tany _) ->
       (match ity_sub with
       | ConstraintType cty -> begin
@@ -1903,6 +1896,54 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_prim_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_phase ty ->
+    locl_phase Reason.t_ * Ast_defs.tprim ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, prim_sup)
+      env =
+    match (deref lty_sub, prim_sup) with
+    | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
+    | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
+    | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_sup ->
+      valid env
+    | ((_, Toption arg_ty_sub), Nast.Tnull) ->
+      Subtype.simplify_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like:false
+        ~super_supportdyn:false
+        arg_ty_sub
+        (mk (r_super, Tprim prim_sup))
+        env
+    | (_, _) ->
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tprim prim_sup)))
 end
 
 and Subtype_nonnull_r : sig

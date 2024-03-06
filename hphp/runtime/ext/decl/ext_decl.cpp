@@ -166,21 +166,17 @@ hackc::DeclParserConfig initDeclConfig() {
   return config;
 }
 
-// Returns the pair of <sha1 Hash, and optional file contents>
-// We return file contents only if the file is not found in Eden
-// since we need it for computing the decls later.
-std::pair<SHA1, std::optional<std::string>> computeSHA1(
-    const std::string& filePath,
-    const std::string& root) {
-  // If we can get the hash from Eden, do that.
-  // else, compute from the file contents
+// Returns the SHA1 hash of the contents of the file at filePath.
+// If we can supply the hash from Eden, do so.
+// Else, take the slow path and compute the hash from the file contents.
+SHA1 computeSHA1(const std::string& filePath, const std::string& root) {
   auto edenHash = getHashForFile(filePath, root);
   if (edenHash.has_value()) {
-    return std::make_pair(edenHash.value(), std::nullopt);
+    return edenHash.value();
   }
   auto text = Decl::readFile(filePath);
   auto sha1 = HPHP::string_sha1(text);
-  return std::make_pair(SHA1{sha1}, std::move(text));
+  return SHA1{sha1};
 }
 
 // Allocate an HPHP::String copied from a rust::String
@@ -752,7 +748,7 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   // Check if we have already parsed this file
   // and if the cache contains the result
   // validated by the SHA1 hash of the file contents
-  auto const [sha1, textOpt] = computeSHA1(filePath, root);
+  auto const sha1 = computeSHA1(filePath, root);
   {
     FileDeclsCache::ConstAccessor acc;
     if (declCachePtr->find(acc, filePath.native())) {
@@ -801,7 +797,7 @@ Object HHVM_STATIC_METHOD(FileDecls, genParsePath, const String& path) {
         String("File not found ") + path.data());
   };
   auto root = getRepoRootForFile(path);
-  auto const [sha1, textOpt] = computeSHA1(filePath, root);
+  auto const sha1 = computeSHA1(filePath, root);
   Facts::PathAndOptionalHash pathAndHash{
       filePath, Optional<std::string>(sha1.toString())};
   auto config = initDeclConfig(root);

@@ -166,10 +166,8 @@ pub fn has_dynamically_callable(attrs: &[Attribute]) -> bool {
     has(attrs, is_dynamically_callable)
 }
 
-pub fn deprecation_info<'a>(
-    mut iter: impl Iterator<Item = &'a Attribute>,
-) -> Option<&'a [TypedValue]> {
-    iter.find_map(|attr| {
+pub fn deprecation_info(attrs: &[Attribute]) -> Option<&[TypedValue]> {
+    attrs.iter().find_map(|attr| {
         if attr.name.as_str() == ua::DEPRECATED {
             Some(attr.arguments.as_ref())
         } else {

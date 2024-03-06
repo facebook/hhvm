@@ -171,7 +171,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         info,
         method,
         scope: &scope,
-        deprecation_info: hhbc::deprecation_info(attributes.iter()),
+        deprecation_info: hhbc::deprecation_info(&attributes),
         params: &method.params,
         ret,
         method_id: &name,

@@ -150,7 +150,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let deprecation_info = if is_memoize {
         None
     } else {
-        hhbc::deprecation_info(attributes.iter())
+        hhbc::deprecation_info(&attributes)
     };
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal::emit_fatal_runtimeomitframe(
@@ -268,7 +268,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),
                 pos: &method.span,
-                deprecation_info: &deprecation_info,
+                deprecation_info,
                 doc_comment: method.doc_comment.clone(),
                 default_dropthrough,
                 call_context,

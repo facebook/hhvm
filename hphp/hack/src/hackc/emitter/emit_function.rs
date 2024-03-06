@@ -104,7 +104,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         coeffects = coeffects.with_backdoor_globals_leak_safe()
     }
     let ast_body = &f.body.fb_ast;
-    let deprecation_info = hhbc::deprecation_info(user_attrs.iter());
+    let deprecation_info = hhbc::deprecation_info(&user_attrs);
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
         let native = user_attrs.iter().any(|a| ua::is_native(a.name.as_str()));
@@ -131,7 +131,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             scope,
             EmitBodyArgs {
                 flags: body_flags,
-                deprecation_info: &deprecation_info,
+                deprecation_info,
                 default_dropthrough: None,
                 doc_comment: f.doc_comment.clone(),
                 pos: &f.span,

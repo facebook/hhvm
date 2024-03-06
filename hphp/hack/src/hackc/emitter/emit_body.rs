@@ -52,12 +52,12 @@ static THIS: &str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
 pub struct Args<'a> {
-    pub immediate_tparams: &'a Vec<ast::Tparam>,
+    pub immediate_tparams: &'a [ast::Tparam],
     pub class_tparam_names: &'a [&'a str],
-    pub ast_params: &'a Vec<ast::FunParam>,
+    pub ast_params: &'a [ast::FunParam],
     pub ret: Option<&'a ast::Hint>,
     pub pos: &'a Pos,
-    pub deprecation_info: &'a Option<&'a [TypedValue]>,
+    pub deprecation_info: Option<&'a [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub call_context: Option<StringId>,

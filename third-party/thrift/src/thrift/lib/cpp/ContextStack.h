@@ -23,11 +23,20 @@
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
+
+class ContextStack;
+
+namespace detail {
+class ContextStackInternals {
+ public:
+  static void*& contextAt(ContextStack&, size_t index);
+};
+} // namespace detail
 
 class ContextStack {
   friend class EventHandlerBase;
+  friend class detail::ContextStackInternals;
 
  public:
   // Customly sized allocation is used for ContextStack, so we can't use default
@@ -117,8 +126,7 @@ class ContextStack {
   void*& contextAt(size_t i);
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 namespace std {
 template <>

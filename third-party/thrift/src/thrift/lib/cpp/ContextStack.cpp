@@ -264,6 +264,13 @@ void*& ContextStack::contextAt(size_t i) {
   return start[i];
 }
 
+namespace detail {
+/* static */ void*& ContextStackInternals::contextAt(
+    ContextStack& contextStack, size_t index) {
+  return contextStack.contextAt(index);
+}
+} // namespace detail
+
 } // namespace thrift
 } // namespace apache
 

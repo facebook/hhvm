@@ -6295,118 +6295,156 @@ end = struct
     let bounds = Tvid.Map.elements !bound_map in
     rebuild_disj remaining bounds
 
-  let rec props_to_env
-      ty_sub
-      ty_super
-      env
-      ty_errs
-      remain
-      props
-      (on_error : Typing_error.Reasons_callback.t option) =
-    let props_to_env_help = props_to_env ty_sub ty_super in
-    match props with
-    | [] -> (env, List.rev ty_errs, List.rev remain)
-    | prop :: props ->
-      (match prop with
-      | TL.Conj props' ->
-        props_to_env_help env ty_errs remain (props' @ props) on_error
-      | TL.Disj (ty_err_opt, disj_props) ->
-        (* For now, just find the first prop in the disjunction that works *)
-        let rec try_disj disj_props =
-          match disj_props with
-          | [] ->
-            (* For now let it fail later when calling
-               process_simplify_subtype_result on the remaining constraints. *)
-            props_to_env_help env (ty_err_opt :: ty_errs) remain props on_error
-          | prop :: disj_props' ->
-            let (env', ty_errs', other) =
-              props_to_env_help env [] remain [prop] on_error
-            in
-            if List.is_empty ty_errs' || List.for_all ty_errs' ~f:Option.is_none
-            then
-              props_to_env_help env' ty_errs (remain @ other) props on_error
-            else
-              try_disj disj_props'
-        in
+  let log_non_singleton_disj ty_sub ty_super env msg disj_prop props =
+    let rec aux props =
+      match props with
+      | [] -> ()
+      | [TL.Disj (_, props)] -> aux props
+      | [_] -> ()
+      | _ ->
+        Typing_log.log_prop
+          1
+          (Reason.to_pos (get_reason_i ty_sub))
+          ("non-singleton disjunction "
+          ^ msg
+          ^ " of "
+          ^ Typing_print.full_i env ty_sub
+          ^ " <: "
+          ^ Typing_print.full_i env ty_super)
+          env
+          disj_prop
+    in
+    aux props
 
-        let rec log_non_singleton_disj msg props =
-          match props with
-          | [] -> ()
-          | [TL.Disj (_, props)] -> log_non_singleton_disj msg props
-          | [_] -> ()
-          | _ ->
-            Typing_log.log_prop
-              1
-              (Reason.to_pos (get_reason_i ty_sub))
-              ("non-singleton disjunction "
-              ^ msg
-              ^ " of "
-              ^ Typing_print.full_i env ty_sub
-              ^ " <: "
-              ^ Typing_print.full_i env ty_super)
-              env
-              prop
-        in
-        let simplified_disj_props = simplify_disj env disj_props in
-        log_non_singleton_disj "before simplification" disj_props;
-        log_non_singleton_disj "after simplification" simplified_disj_props;
-        try_disj simplified_disj_props
-      | TL.IsSubtype (coerce, ty_sub, ty_super) ->
-        let (env, ty_sub) = Env.expand_internal_type env ty_sub in
-        let (env, ty_super) = Env.expand_internal_type env ty_super in
-        (match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
-        | (Some var_sub, Some var_super) ->
-          let (env, prop1) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var_sub
-              ty_super
-              on_error
-          in
-          let (env, prop2) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var_super
-              ty_sub
-              on_error
-          in
-          props_to_env_help
-            env
-            ty_errs
-            remain
-            (prop1 :: prop2 :: props)
-            on_error
-        | (Some var, _) ->
-          let (env, prop) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_super
-              on_error
-          in
-          props_to_env_help env ty_errs remain (prop :: props) on_error
-        | (_, Some var) ->
-          let (env, prop) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_sub
-              on_error
-          in
-          props_to_env_help env ty_errs remain (prop :: props) on_error
-        | _ -> props_to_env_help env ty_errs (prop :: remain) props on_error))
+  let rec tell ty_sub ty_super env prop on_error =
+    match prop with
+    | TL.Conj props ->
+      tell_all ty_sub ty_super env ~ty_errs:[] ~remain:[] props on_error
+    | TL.Disj (inf_err_opt, props) ->
+      log_non_singleton_disj
+        ty_sub
+        ty_super
+        env
+        "before simplification"
+        prop
+        props;
+      let props = simplify_disj env props in
+      log_non_singleton_disj
+        ty_sub
+        ty_super
+        env
+        "after simplification"
+        prop
+        props;
+      tell_exists
+        ty_sub
+        ty_super
+        env
+        ~ty_errs:[]
+        ~remain:[]
+        ~inf_err_opt
+        props
+        on_error
+    | TL.IsSubtype (coerce, ty_sub, ty_super) ->
+      tell_cstr env (coerce, ty_sub, ty_super) on_error
+
+  and tell_cstr env (coerce, ty_sub, ty_super) on_error =
+    let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+    let (env, ty_super) = Env.expand_internal_type env ty_super in
+    match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
+    (* var-l-r *)
+    | (Some var_sub, Some var_super) ->
+      let (env, prop1) =
+        add_tyvar_upper_bound_and_close
+          ~coerce
+          (valid env)
+          var_sub
+          ty_super
+          on_error
+      in
+      let (env, prop2) =
+        add_tyvar_lower_bound_and_close
+          ~coerce
+          (valid env)
+          var_super
+          ty_sub
+          on_error
+      in
+      tell_all
+        ty_sub
+        ty_super
+        env
+        ~ty_errs:[]
+        ~remain:[]
+        [prop1; prop2]
+        on_error
+    (* var-l *)
+    | (Some var, _) ->
+      let (env, prop) =
+        add_tyvar_upper_bound_and_close
+          ~coerce
+          (valid env)
+          var
+          ty_super
+          on_error
+      in
+      tell ty_sub ty_super env prop on_error
+    | (_, Some var) ->
+      let (env, prop) =
+        add_tyvar_lower_bound_and_close ~coerce (valid env) var ty_sub on_error
+      in
+      tell ty_sub ty_super env prop on_error
+    | _ -> (env, None, [TL.IsSubtype (coerce, ty_sub, ty_super)])
+
+  and tell_all ty_sub ty_super env ~ty_errs ~remain props on_error =
+    match props with
+    | [] ->
+      let ty_err_opt = Typing_error.multiple_opt @@ List.rev ty_errs in
+      (env, ty_err_opt, List.rev remain)
+    | prop :: props ->
+      let (env, inf_err_opt, prop_remain) =
+        tell ty_sub ty_super env prop on_error
+      in
+      let remain = prop_remain @ remain in
+      let ty_errs =
+        Option.value_map
+          ~default:ty_errs
+          ~f:(fun ty_err -> ty_err :: ty_errs)
+          inf_err_opt
+      in
+      tell_all ty_sub ty_super env ~ty_errs ~remain props on_error
+
+  and tell_exists
+      ty_sub ty_super env ~ty_errs ~remain ~inf_err_opt props on_error =
+    (* For now, just find the first prop in the disjunction that works *)
+    match props with
+    | [] ->
+      (* TODO[mjt]: let's not drop the errors accumulated across the disjunction
+         on the floor; we can handle this with a new typing error constructor
+         then figure out how/if we should display the underlying failures
+         to the user.
+      *)
+      (env, inf_err_opt, List.rev remain)
+    | prop :: props ->
+      let (prop_env, prop_inf_err, prop_remain) =
+        tell ty_sub ty_super env prop on_error
+      in
+      (match prop_inf_err with
+      | Some ty_err ->
+        let ty_errs = ty_err :: ty_errs and remain = prop_remain @ remain in
+        tell_exists
+          ty_sub
+          ty_super
+          env
+          ~ty_errs
+          ~remain
+          ~inf_err_opt
+          props
+          on_error
+      | _ -> (prop_env, None, List.rev remain))
 
   let prop_to_env ty_sub ty_super env prop on_error =
-    let (env, ty_errs, props') =
-      props_to_env ty_sub ty_super env [] [] [prop] on_error
-    in
-    let ty_err_opt =
-      Typing_error.union_opt @@ List.filter_map ~f:Fn.id ty_errs
-    in
+    let (env, ty_err_opt, props') = tell ty_sub ty_super env prop on_error in
     let env = Env.add_subtype_prop env (TL.conj_list props') in
     (env, ty_err_opt)
 end

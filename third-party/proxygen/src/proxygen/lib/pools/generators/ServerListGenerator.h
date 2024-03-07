@@ -54,6 +54,16 @@ class ServerListGenerator {
     // Optional parameter. It's only set if a server belongs to a group, which
     // is configured in Pool Config.
     MemberGroupId groupId_{kInvalidPoolMemberGroupId};
+
+    bool operator==(const ServerConfig& other) const {
+      return name == other.name && address == other.address &&
+             altAddresses == other.altAddresses &&
+             properties == other.properties && groupId_ == other.groupId_;
+    }
+
+    bool operator<(const ServerConfig& other) const {
+      return address < other.address;
+    }
   };
 
   /**

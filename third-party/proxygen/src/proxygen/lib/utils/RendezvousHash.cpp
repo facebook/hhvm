@@ -25,6 +25,12 @@ void RendezvousHash::build(
   }
 }
 
+void RendezvousHash::buildEqualWeights(std::vector<uint64_t>& nodes) {
+  for (const auto& hash : nodes) {
+    weights_.emplace_back(hash, /*weight*/ 1);
+  }
+}
+
 /*
  * The algorithm of RendezvousHash goes like this:
  * Assuming we have 3 clusters with names and weights:

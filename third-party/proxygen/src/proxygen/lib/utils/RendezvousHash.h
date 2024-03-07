@@ -24,7 +24,14 @@ class RendezvousHash : public ConsistentHash {
  public:
   double getMaxErrorRate() const override;
 
+  // Build the list of possible candidates' hash weight and their input weight.
+  // Hash weight is taken as the hash(candidate id), whereas input weight is
+  // the relative weight of traffic that candidate should receive.
+  // Input is a vector of pairs of candidate id and its relative weight.
   void build(std::vector<std::pair<std::string, uint64_t>>&) override;
+  // Similar to build, but instead the hash weights are already known
+  // beforehand and each candidate has the same relative weight.
+  void buildEqualWeights(std::vector<uint64_t>&);
 
   size_t get(const uint64_t key, const size_t rank = 0) const override;
 

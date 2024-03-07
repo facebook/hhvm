@@ -76,15 +76,9 @@ struct ResourcePoolDbgInfo {
   4: optional ExecutorDbgInfo executorDbgInfo;
 }
 
-enum CPUConcurrencyControllerMode {
-  DISABLED = 0,
-  DRY_RUN = 1,
-  ENABLED = 2,
-}
-
 struct CPUConcurrencyControllerDbgInfo {
   // Indicates whether CPU concurrency controller is enabled, disabled or in dry run
-  1: CPUConcurrencyControllerMode mode;
+  1: string mode;
 
   // The CPU concurrency enforcement method
   2: string method;

@@ -35,6 +35,11 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift
+   * thrift service: TestService
+   * thrift function: init
+   */
   virtual void init(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_int1);
   virtual void init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_int1);
  protected:

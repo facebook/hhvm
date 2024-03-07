@@ -37,6 +37,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: simple_function
+   */
   virtual void simple_function(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void simple_function(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -132,6 +137,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void simple_functionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simple_functionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: throws_function
+   */
   virtual void throws_function(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void throws_function(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -225,6 +235,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void throws_functionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_functionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: throws_function2
+   */
   virtual void throws_function2(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
   virtual void throws_function2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
  protected:
@@ -320,6 +335,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void throws_function2T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function2Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: throws_function3
+   */
   virtual void throws_function3(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1, const ::std::string& p_param2);
   virtual void throws_function3(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1, const ::std::string& p_param2);
  protected:
@@ -415,6 +435,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void throws_function3T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1, const ::std::string& p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function3Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: oneway_void_ret
+   */
   virtual void oneway_void_ret(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void oneway_void_ret(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -486,6 +511,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void oneway_void_retT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_retCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: oneway_void_ret_i32_i32_i32_i32_i32_param
+   */
   virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
  protected:
@@ -557,6 +587,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void oneway_void_ret_i32_i32_i32_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: oneway_void_ret_map_setlist_param
+   */
   virtual void oneway_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   virtual void oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
  protected:
@@ -628,6 +663,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void oneway_void_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: oneway_void_ret_struct_param
+   */
   virtual void oneway_void_ret_struct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
   virtual void oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
  protected:
@@ -699,6 +739,11 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   void oneway_void_ret_struct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::MyStruct& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift
+   * thrift service: ExtraService
+   * thrift function: oneway_void_ret_listunion_param
+   */
   virtual void oneway_void_ret_listunion_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   virtual void oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
  protected:

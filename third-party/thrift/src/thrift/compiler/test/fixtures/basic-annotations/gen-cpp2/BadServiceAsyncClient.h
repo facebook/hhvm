@@ -44,6 +44,11 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: BadInteraction
+   * thrift function: foo
+   */
  void foo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fooImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
@@ -129,6 +134,11 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
  public:
 };
   BadInteraction createBadInteraction();
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: BadService
+   * thrift function: bar
+   */
   virtual void bar(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void bar(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

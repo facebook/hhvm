@@ -32,6 +32,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: returnstream
+   */
   virtual void returnstream(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   virtual void returnstream(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
  protected:
@@ -125,6 +130,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void returnstreamT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> returnstreamCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: streamthrows
+   */
   virtual void streamthrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void streamthrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -218,6 +228,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void streamthrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> streamthrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: servicethrows
+   */
   virtual void servicethrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void servicethrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -311,6 +326,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void servicethrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> servicethrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: servicethrows2
+   */
   virtual void servicethrows2(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void servicethrows2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -404,6 +424,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void servicethrows2T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> servicethrows2Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: boththrows
+   */
   virtual void boththrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void boththrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -497,6 +522,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void boththrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> boththrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: responseandstreamstreamthrows
+   */
   virtual void responseandstreamstreamthrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -590,6 +620,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void responseandstreamstreamthrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> responseandstreamstreamthrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: responseandstreamservicethrows
+   */
   virtual void responseandstreamservicethrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -683,6 +718,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void responseandstreamservicethrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> responseandstreamservicethrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: responseandstreamboththrows
+   */
   virtual void responseandstreamboththrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:
@@ -776,6 +816,11 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void responseandstreamboththrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> responseandstreamboththrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/stream/src/module.thrift
+   * thrift service: PubSubStreamingService
+   * thrift function: returnstreamFast
+   */
   virtual void returnstreamFast(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   virtual void returnstreamFast(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
  protected:

@@ -32,6 +32,11 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
+   * thrift service: PrimitivesService
+   * thrift function: init
+   */
   virtual void init(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
   virtual void init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
  protected:
@@ -127,6 +132,11 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   void initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
+   * thrift service: PrimitivesService
+   * thrift function: method_that_throws
+   */
   virtual void method_that_throws(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -222,6 +232,11 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   void method_that_throwsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
+   * thrift service: PrimitivesService
+   * thrift function: return_void_method
+   */
   virtual void return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
   virtual void return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
  protected:

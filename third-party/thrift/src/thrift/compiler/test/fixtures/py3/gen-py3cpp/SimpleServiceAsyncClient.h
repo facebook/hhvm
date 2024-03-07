@@ -31,6 +31,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_five
+   */
   virtual void get_five(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -126,6 +131,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: add_five
+   */
   virtual void add_five(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num);
   virtual void add_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num);
  protected:
@@ -221,6 +231,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void add_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> add_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: do_nothing
+   */
   virtual void do_nothing(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void do_nothing(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -314,6 +329,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void do_nothingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_nothingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: concat
+   */
   virtual void concat(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second);
   virtual void concat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second);
  protected:
@@ -409,6 +429,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void concatT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concatCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_value
+   */
   virtual void get_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
   virtual void get_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
  protected:
@@ -504,6 +529,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: negate
+   */
   virtual void negate(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input);
   virtual void negate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input);
  protected:
@@ -599,6 +629,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void negateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> negateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: tiny
+   */
   virtual void tiny(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input);
   virtual void tiny(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input);
  protected:
@@ -694,6 +729,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void tinyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tinyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: small
+   */
   virtual void small(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input);
   virtual void small(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input);
  protected:
@@ -789,6 +829,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void smallT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> smallCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: big
+   */
   virtual void big(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input);
   virtual void big(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input);
  protected:
@@ -884,6 +929,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void bigT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bigCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: two
+   */
   virtual void two(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input);
   virtual void two(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input);
  protected:
@@ -979,6 +1029,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void twoT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> twoCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: expected_exception
+   */
   virtual void expected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void expected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1072,6 +1127,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void expected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> expected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: unexpected_exception
+   */
   virtual void unexpected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void unexpected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1167,6 +1227,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void unexpected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unexpected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: sum_i16_list
+   */
   virtual void sum_i16_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers);
   virtual void sum_i16_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers);
  protected:
@@ -1262,6 +1327,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void sum_i16_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i16_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: sum_i32_list
+   */
   virtual void sum_i32_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers);
   virtual void sum_i32_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers);
  protected:
@@ -1357,6 +1427,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void sum_i32_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i32_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: sum_i64_list
+   */
   virtual void sum_i64_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers);
   virtual void sum_i64_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers);
  protected:
@@ -1452,6 +1527,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void sum_i64_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i64_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: concat_many
+   */
   virtual void concat_many(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
   virtual void concat_many(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
@@ -1547,6 +1627,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void concat_manyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concat_manyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: count_structs
+   */
   virtual void count_structs(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
   virtual void count_structs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
  protected:
@@ -1642,6 +1727,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void count_structsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> count_structsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: sum_set
+   */
   virtual void sum_set(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers);
   virtual void sum_set(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers);
  protected:
@@ -1737,6 +1827,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void sum_setT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_setCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: contains_word
+   */
   virtual void contains_word(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
   virtual void contains_word(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
  protected:
@@ -1832,6 +1927,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void contains_wordT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contains_wordCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_map_value
+   */
   virtual void get_map_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
   virtual void get_map_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
  protected:
@@ -1927,6 +2027,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_map_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_map_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: map_length
+   */
   virtual void map_length(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
   virtual void map_length(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
  protected:
@@ -2022,6 +2127,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void map_lengthT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_lengthCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: sum_map_values
+   */
   virtual void sum_map_values(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
   virtual void sum_map_values(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
  protected:
@@ -2117,6 +2227,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void sum_map_valuesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_map_valuesCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: complex_sum_i32
+   */
   virtual void complex_sum_i32(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
   virtual void complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
  protected:
@@ -2212,6 +2327,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void complex_sum_i32T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> complex_sum_i32Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: repeat_name
+   */
   virtual void repeat_name(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
   virtual void repeat_name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
  protected:
@@ -2307,6 +2427,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void repeat_nameT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> repeat_nameCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_struct
+   */
   virtual void get_struct(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2402,6 +2527,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: fib
+   */
   virtual void fib(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n);
   virtual void fib(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n);
  protected:
@@ -2497,6 +2627,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void fibT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fibCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: unique_words
+   */
   virtual void unique_words(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
   virtual void unique_words(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
@@ -2592,6 +2727,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void unique_wordsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unique_wordsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: words_count
+   */
   virtual void words_count(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
   virtual void words_count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
@@ -2687,6 +2827,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void words_countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> words_countCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: set_enum
+   */
   virtual void set_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum);
   virtual void set_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum);
  protected:
@@ -2782,6 +2927,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void set_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> set_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: list_of_lists
+   */
   virtual void list_of_lists(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
   virtual void list_of_lists(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
  protected:
@@ -2877,6 +3027,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void list_of_listsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_listsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: word_character_frequency
+   */
   virtual void word_character_frequency(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence);
   virtual void word_character_frequency(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence);
  protected:
@@ -2972,6 +3127,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void word_character_frequencyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> word_character_frequencyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: list_of_sets
+   */
   virtual void list_of_sets(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words);
   virtual void list_of_sets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words);
  protected:
@@ -3067,6 +3227,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void list_of_setsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_setsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: nested_map_argument
+   */
   virtual void nested_map_argument(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
   virtual void nested_map_argument(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
  protected:
@@ -3162,6 +3327,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void nested_map_argumentT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> nested_map_argumentCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: make_sentence
+   */
   virtual void make_sentence(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
   virtual void make_sentence(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
  protected:
@@ -3257,6 +3427,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void make_sentenceT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> make_sentenceCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_union
+   */
   virtual void get_union(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
   virtual void get_union(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
  protected:
@@ -3352,6 +3527,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_unionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_unionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_keys
+   */
   virtual void get_keys(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
   virtual void get_keys(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
  protected:
@@ -3447,6 +3627,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_keysT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_keysCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: lookup_double
+   */
   virtual void lookup_double(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key);
   virtual void lookup_double(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key);
  protected:
@@ -3542,6 +3727,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void lookup_doubleT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lookup_doubleCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: retrieve_binary
+   */
   virtual void retrieve_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something);
   virtual void retrieve_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something);
  protected:
@@ -3637,6 +3827,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void retrieve_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> retrieve_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: contain_binary
+   */
   virtual void contain_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries);
   virtual void contain_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries);
  protected:
@@ -3732,6 +3927,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void contain_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: contain_enum
+   */
   virtual void contain_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
   virtual void contain_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
  protected:
@@ -3827,6 +4027,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void contain_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_binary_union_struct
+   */
   virtual void get_binary_union_struct(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u);
   virtual void get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u);
  protected:
@@ -3922,6 +4127,11 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_binary_union_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: SimpleService
+   * thrift function: get_struct_hidden
+   */
   virtual void get_struct_hidden(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

@@ -35,6 +35,11 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/adapter/src/module.thrift
+   * thrift service: AdapterService
+   * thrift function: count
+   */
   virtual void count(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -130,6 +135,11 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   void countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> countCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/adapter/src/module.thrift
+   * thrift service: AdapterService
+   * thrift function: adaptedTypes
+   */
   virtual void adaptedTypes(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::HeapAllocated& p_arg);
   virtual void adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::HeapAllocated& p_arg);
  protected:

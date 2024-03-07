@@ -56,6 +56,11 @@ class I final : public apache::thrift::InteractionHandle {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/single_file_service/src/module.thrift
+   * thrift service: I
+   * thrift function: interact
+   */
  void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void interactImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
@@ -141,6 +146,11 @@ class I final : public apache::thrift::InteractionHandle {
  public:
 };
   I createI();
+ /**
+   * thrift file: thrift/compiler/test/fixtures/single_file_service/src/module.thrift
+   * thrift service: A
+   * thrift function: foo
+   */
   virtual void foo(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void foo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -259,6 +269,11 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/single_file_service/src/module.thrift
+   * thrift service: B
+   * thrift function: bar
+   */
   virtual void bar(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::Foo& p_foo);
   virtual void bar(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::Foo& p_foo);
  protected:
@@ -352,6 +367,11 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
   void barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::Foo& p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> barCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/single_file_service/src/module.thrift
+   * thrift service: B
+   * thrift function: stream_stuff
+   */
   virtual void stream_stuff(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void stream_stuff(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -496,6 +516,11 @@ class I final : public apache::thrift::InteractionHandle {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/single_file_service/src/module.thrift
+   * thrift service: I
+   * thrift function: interact
+   */
  void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void interactImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);

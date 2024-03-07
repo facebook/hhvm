@@ -32,6 +32,11 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
+   * thrift service: C
+   * thrift function: f
+   */
   virtual void f(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void f(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -125,6 +130,11 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   void fT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
+   * thrift service: C
+   * thrift function: numbers
+   */
   virtual void numbers(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void numbers(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -218,6 +228,11 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   void numbersT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> numbersCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
+   * thrift service: C
+   * thrift function: thing
+   */
   virtual void thing(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
   virtual void thing(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
  protected:

@@ -34,6 +34,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: get
+   */
   virtual void get(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -129,6 +134,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void getT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: getter
+   */
   virtual void getter(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void getter(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -224,6 +234,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void getterT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getterCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: lists
+   */
   virtual void lists(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void lists(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -319,6 +334,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void listsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: maps
+   */
   virtual void maps(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void maps(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -414,6 +434,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void mapsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: name
+   */
   virtual void name(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -509,6 +534,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void nameT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> nameCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: name_to_value
+   */
   virtual void name_to_value(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void name_to_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -604,6 +634,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void name_to_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> name_to_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: names
+   */
   virtual void names(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void names(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -699,6 +734,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void namesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> namesCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: prefix_tree
+   */
   virtual void prefix_tree(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void prefix_tree(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -794,6 +834,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void prefix_treeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> prefix_treeCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: sets
+   */
   virtual void sets(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void sets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -889,6 +934,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void setsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> setsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: setter
+   */
   virtual void setter(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void setter(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -984,6 +1034,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void setterT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> setterCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: str
+   */
   virtual void str(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void str(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1079,6 +1134,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void strT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> strCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: strings
+   */
   virtual void strings(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void strings(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1174,6 +1234,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void stringsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> stringsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: type
+   */
   virtual void type(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void type(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1269,6 +1334,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void typeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> typeCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: value
+   */
   virtual void value(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1364,6 +1434,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: value_to_name
+   */
   virtual void value_to_name(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void value_to_name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1459,6 +1534,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void value_to_nameT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> value_to_nameCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: values
+   */
   virtual void values(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void values(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1554,6 +1634,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void valuesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> valuesCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: id
+   */
   virtual void id(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void id(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1649,6 +1734,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void idT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> idCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: ids
+   */
   virtual void ids(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void ids(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1744,6 +1834,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void idsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> idsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: descriptor
+   */
   virtual void descriptor(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void descriptor(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1839,6 +1934,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void descriptorT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> descriptorCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: descriptors
+   */
   virtual void descriptors(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void descriptors(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -1934,6 +2034,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void descriptorsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> descriptorsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: key
+   */
   virtual void key(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void key(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2029,6 +2134,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void keyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> keyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: keys
+   */
   virtual void keys(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void keys(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2124,6 +2234,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void keysT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> keysCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: annotation
+   */
   virtual void annotation(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void annotation(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2219,6 +2334,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void annotationT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> annotationCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: annotations
+   */
   virtual void annotations(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void annotations(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2314,6 +2434,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void annotationsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> annotationsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: member
+   */
   virtual void member(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void member(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2409,6 +2534,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void memberT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> memberCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: members
+   */
   virtual void members(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void members(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2504,6 +2634,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void membersT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> membersCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: field
+   */
   virtual void field(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void field(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -2599,6 +2734,11 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   void fieldT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fieldCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
+   * thrift service: service_with_special_names
+   * thrift function: fields
+   */
   virtual void fields(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void fields(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

@@ -36,6 +36,11 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/inheritance/src/module.thrift
+   * thrift service: MyNode
+   * thrift function: do_mid
+   */
   virtual void do_mid(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void do_mid(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

@@ -36,6 +36,11 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: MyServicePrioChild
+   * thrift function: pang
+   */
   virtual void pang(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void pang(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

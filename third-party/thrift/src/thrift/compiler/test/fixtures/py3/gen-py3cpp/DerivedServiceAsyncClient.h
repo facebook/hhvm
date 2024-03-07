@@ -36,6 +36,11 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: DerivedService
+   * thrift function: get_six
+   */
   virtual void get_six(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get_six(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

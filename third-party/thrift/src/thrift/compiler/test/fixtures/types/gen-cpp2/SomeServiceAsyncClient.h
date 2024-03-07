@@ -36,6 +36,11 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/types/src/module.thrift
+   * thrift service: SomeService
+   * thrift function: bounce_map
+   */
   virtual void bounce_map(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
   virtual void bounce_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
  protected:
@@ -131,6 +136,11 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   void bounce_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bounce_mapCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/types/src/module.thrift
+   * thrift service: SomeService
+   * thrift function: binary_keyed_map
+   */
   virtual void binary_keyed_map(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r);
   virtual void binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r);
  protected:

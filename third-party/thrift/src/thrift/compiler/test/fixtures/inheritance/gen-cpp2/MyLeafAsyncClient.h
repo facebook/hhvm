@@ -36,6 +36,11 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/inheritance/src/module.thrift
+   * thrift service: MyLeaf
+   * thrift function: do_leaf
+   */
   virtual void do_leaf(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void do_leaf(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

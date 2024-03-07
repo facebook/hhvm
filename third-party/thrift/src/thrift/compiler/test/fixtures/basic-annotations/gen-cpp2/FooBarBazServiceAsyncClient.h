@@ -31,6 +31,11 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: FooBarBazService
+   * thrift function: foo
+   */
   virtual void foo(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void foo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -124,6 +129,11 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   void fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fooCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: FooBarBazService
+   * thrift function: bar
+   */
   virtual void bar(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void bar(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -217,6 +227,11 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   void barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> barCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: FooBarBazService
+   * thrift function: baz
+   */
   virtual void baz(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void baz(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

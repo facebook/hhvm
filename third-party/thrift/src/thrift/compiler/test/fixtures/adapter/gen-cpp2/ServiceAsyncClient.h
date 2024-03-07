@@ -35,6 +35,11 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/adapter/src/module.thrift
+   * thrift service: Service
+   * thrift function: func
+   */
   virtual void func(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   virtual void func(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
  protected:

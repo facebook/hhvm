@@ -31,6 +31,11 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: MyServicePrioParent
+   * thrift function: ping
+   */
   virtual void ping(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -124,6 +129,11 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   void pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
+   * thrift service: MyServicePrioParent
+   * thrift function: pong
+   */
   virtual void pong(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void pong(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

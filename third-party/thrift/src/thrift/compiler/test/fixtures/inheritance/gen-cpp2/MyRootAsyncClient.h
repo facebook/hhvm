@@ -31,6 +31,11 @@ class Client<::cpp2::MyRoot> : public apache::thrift::GeneratedAsyncClient {
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/inheritance/src/module.thrift
+   * thrift service: MyRoot
+   * thrift function: do_root
+   */
   virtual void do_root(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void do_root(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

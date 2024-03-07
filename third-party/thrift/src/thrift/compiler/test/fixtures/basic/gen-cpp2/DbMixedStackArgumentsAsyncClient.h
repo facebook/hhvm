@@ -35,6 +35,11 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
+   * thrift service: DbMixedStackArguments
+   * thrift function: getDataByKey0
+   */
   virtual void getDataByKey0(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
   virtual void getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:
@@ -130,6 +135,11 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
   void getDataByKey0T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey0Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
+   * thrift service: DbMixedStackArguments
+   * thrift function: getDataByKey1
+   */
   virtual void getDataByKey1(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
   virtual void getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:

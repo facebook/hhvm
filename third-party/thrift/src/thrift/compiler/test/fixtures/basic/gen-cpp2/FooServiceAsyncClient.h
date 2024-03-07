@@ -35,6 +35,11 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
+   * thrift service: FooService
+   * thrift function: simple_rpc
+   */
   virtual void simple_rpc(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

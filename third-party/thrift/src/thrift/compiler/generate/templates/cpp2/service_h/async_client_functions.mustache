@@ -20,6 +20,11 @@
   <%type:name%> <%function:cpp_name%>();
 <%/function:starts_interaction?%><%^function:starts_interaction?%>
 <%^function:sink?%>
+ /**
+   * thrift file: <%service:autogen_path%>
+   * thrift service: <%service:name%>
+   * thrift function: <%function:name%>
+   */
 <%^service:reduced_client?%><%^function:creates_interaction?%>
   virtual void <%function:cpp_name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_client%>);
   virtual<%/function:creates_interaction?%><%/service:reduced_client?%> void <%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);

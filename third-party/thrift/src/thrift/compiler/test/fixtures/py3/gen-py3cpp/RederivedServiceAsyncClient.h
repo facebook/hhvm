@@ -36,6 +36,11 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   }
 
 
+ /**
+   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
+   * thrift service: RederivedService
+   * thrift function: get_seven
+   */
   virtual void get_seven(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void get_seven(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:

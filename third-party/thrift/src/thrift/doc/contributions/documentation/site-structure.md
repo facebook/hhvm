@@ -17,6 +17,5 @@ The top level content architecture for Thrift is described below.
 <tr><td>Troubleshooting</td><td>Contains instructions to help you debug and troubleshoot known issues</td></tr>
 <tr><td>References</td><td>Contains Thrift API and other reference materials</td></tr>
 <tr><td>Glossary</td><td>Contains terms and definitions used throughout Thrift docs</td></tr>
-<tr><td>Releases</td><td>Contains information about Thrift releases</td></tr>
 <tr><td>Contributions</td><td>Contains instructions for how to contribute to the Thrift project</td></tr>
 </table>

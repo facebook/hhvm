@@ -473,15 +473,6 @@ module.exports = {
         ],
       },
     ]),
-    {
-      type: 'category',
-      label: 'Releases',
-      link: {
-        type: 'doc',
-        id: 'releases/index',
-      },
-      items: ['releases/release-notes-v1'],
-    },
 
     // Documentation for the Thrift team and contributors.
     {

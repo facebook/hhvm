@@ -23,6 +23,16 @@
 
 namespace apache {
 namespace thrift {
+namespace op {
+namespace detail {
+
+// Latest Thrift Dynamic Patch version that the process is aware of. Note, this
+// may differ from `kThriftStaticPatchVersion` if we introduce new operations in
+// Thrift State Patch first.
+inline constexpr int32_t kThriftDynamicPatchVersion = 1;
+
+} // namespace detail
+} // namespace op
 namespace protocol {
 namespace detail {
 
@@ -79,6 +89,23 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch);
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
     const protocol::Object& patch, const folly::IOBuf& buf);
+
+/**
+ * Returns a Thrift Dynamic Patch instance corresponding to the (decoded)
+ * `SafePatch` in Protocol Object.
+ *
+ * @throws std::runtime_error if the given `SafePatch` cannot be successfully
+ * decoded or safely applied in this process (eg. if the version of the Thrift
+ * Patch library in this process is not compatible with the minimum version
+ * required by `SafePatch`).
+ */
+Object fromSafePatch(const protocol::Object& safePatch);
+
+/**
+ * Returns a `SafePatch` instance in Protocol Object corresponding to the
+ * encoded Thrift Dynamic Patch.
+ */
+Object toSafePatch(const protocol::Object& patch);
 
 } // namespace protocol
 } // namespace thrift

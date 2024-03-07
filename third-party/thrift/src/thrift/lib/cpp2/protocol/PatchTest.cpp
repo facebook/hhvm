@@ -1650,5 +1650,30 @@ TEST_F(PatchTest, RemoveField) {
   }
 }
 
+TEST_F(PatchTest, SafePatch) {
+  test::patch::MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  auto dynPatch = patch.toObject();
+  EXPECT_EQ(fromSafePatch(toSafePatch(dynPatch)), dynPatch);
+}
+
+TEST_F(PatchTest, SafePatchInvalid) {
+  test::patch::MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  auto dynPatch = patch.toObject();
+  auto dynSafePatch = toSafePatch(dynPatch);
+  dynSafePatch[FieldId{1}].as_i32() = 0;
+  EXPECT_THROW(fromSafePatch(dynSafePatch), std::runtime_error);
+}
+
+TEST_F(PatchTest, SafePatchInvalidForwardConsumption) {
+  test::patch::MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  auto dynPatch = patch.toObject();
+  auto dynSafePatch = toSafePatch(dynPatch);
+  dynSafePatch[FieldId{1}].as_i32() = 10000;
+  EXPECT_THROW(fromSafePatch(dynSafePatch), std::runtime_error);
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

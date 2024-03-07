@@ -719,6 +719,33 @@ applyPatchToSerializedData<type::StandardProtocol::Binary>(
 template std::unique_ptr<folly::IOBuf>
 applyPatchToSerializedData<type::StandardProtocol::Compact>(
     const protocol::Object& patch, const folly::IOBuf& buf);
+
+Object fromSafePatch(const protocol::Object& safePatch) {
+  const Value* version = safePatch.if_contains(FieldId{1});
+  const Value* data = safePatch.if_contains(FieldId{2});
+  if (!(version && version->is_i32() && data && data->is_binary())) {
+    throw std::runtime_error("Invalid safe patch");
+  }
+  if (version->as_i32() == 0) {
+    throw std::runtime_error("Invalid safe patch");
+  }
+  if (version->as_i32() > op::detail::kThriftDynamicPatchVersion) {
+    throw std::runtime_error(
+        fmt::format("Unsupported patch version: {}", version->as_i32()));
+  }
+  Object patch =
+      parseObject<CompactProtocolReader>(safePatch[FieldId{2}].as_binary());
+  return patch;
+}
+
+Object toSafePatch(const protocol::Object& patch) {
+  Object safePatch;
+  safePatch[FieldId{1}].emplace_i32(op::detail::kThriftDynamicPatchVersion);
+  safePatch[FieldId{2}].emplace_binary(
+      *serializeObject<CompactProtocolWriter>(patch));
+  return safePatch;
+}
+
 } // namespace protocol
 } // namespace thrift
 } // namespace apache

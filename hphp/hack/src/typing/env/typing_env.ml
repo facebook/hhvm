@@ -701,9 +701,12 @@ let get_typedef env x =
   td
 
 let is_typedef env x =
-  match Naming_provider.get_type_kind (get_ctx env) x with
-  | Some Naming_types.TTypedef -> true
-  | _ -> false
+  if is_generic_parameter env x then
+    false
+  else
+    match Naming_provider.get_type_kind (get_ctx env) x with
+    | Some Naming_types.TTypedef -> true
+    | _ -> false
 
 let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
   let { Typing_defs.td_vis; td_module; _ } = td in

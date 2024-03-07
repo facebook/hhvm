@@ -33,8 +33,6 @@ class EventHandlerBase {
  public:
   virtual void addEventHandler(
       const std::shared_ptr<TProcessorEventHandler>& handler);
-  void addNotNullEventHandler(
-      const folly::not_null_shared_ptr<TProcessorEventHandler>& handler);
 
   void clearEventHandlers() { handlers_.reset(); }
 

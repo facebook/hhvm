@@ -33,17 +33,6 @@ void EventHandlerBase::addEventHandler(
   handlers_->push_back(handler);
 }
 
-void EventHandlerBase::addNotNullEventHandler(
-    const folly::not_null_shared_ptr<TProcessorEventHandler>& handler) {
-  if (!handlers_) {
-    handlers_ = std::make_shared<
-        std::vector<std::shared_ptr<TProcessorEventHandler>>>();
-  }
-
-  handlers_->push_back(
-      static_cast<const std::shared_ptr<TProcessorEventHandler>>(handler));
-}
-
 folly::Range<std::shared_ptr<TProcessorEventHandler>*>
 EventHandlerBase::getEventHandlers() const {
   if (!handlers_) {
@@ -56,7 +45,7 @@ TProcessorBase::TProcessorBase() {
   std::shared_lock lock{getRWMutex()};
 
   for (const auto& handler : getHandlers()) {
-    addNotNullEventHandler(handler);
+    addEventHandler(handler);
   }
 }
 
@@ -116,7 +105,7 @@ TClientBase::TClientBase(Options options) {
     handlers_->reserve(capacity);
 
     for (const auto& handler : handlers) {
-      addNotNullEventHandler(handler);
+      addEventHandler(handler);
     }
   }
 }

@@ -33,14 +33,14 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::InterceptedFields>::name = "InterceptedFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = {{
-  "access_field"sv,
-  "access_shared_field"sv,
-  "access_optional_shared_field"sv,
-  "access_shared_const_field"sv,
-  "access_optional_shared_const_field"sv,
-  "access_optional_boxed_field"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::InterceptedFields>::name = "InterceptedFields";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = {{
+  "access_field",
+  "access_shared_field",
+  "access_optional_shared_field",
+  "access_shared_const_field",
+  "access_optional_shared_const_field",
+  "access_optional_boxed_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_ids = {{
   1,
@@ -58,13 +58,13 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::fac
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = {{
-  "__fbthrift_field_access_field"sv,
-  "__fbthrift_field_access_shared_field"sv,
-  "__fbthrift_field_access_optional_shared_field"sv,
-  "__fbthrift_field_access_shared_const_field"sv,
-  "__fbthrift_field_access_optional_shared_const_field"sv,
-  "__fbthrift_field_access_optional_boxed_field"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = {{
+  "__fbthrift_field_access_field",
+  "__fbthrift_field_access_shared_field",
+  "__fbthrift_field_access_optional_shared_field",
+  "__fbthrift_field_access_shared_const_field",
+  "__fbthrift_field_access_optional_shared_const_field",
+  "__fbthrift_field_access_optional_boxed_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = {{
   0,

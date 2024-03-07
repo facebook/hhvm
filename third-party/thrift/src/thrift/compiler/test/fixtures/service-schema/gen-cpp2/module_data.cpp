@@ -33,9 +33,9 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::CustomException>::name = "CustomException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::fields_names = {{
-  "name"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::CustomException>::name = "CustomException";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CustomException>::fields_names = {{
+  "name",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::CustomException>::fields_ids = {{
   1,
@@ -43,8 +43,8 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Custo
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CustomException>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::storage_names = {{
-  "__fbthrift_field_name"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CustomException>::storage_names = {{
+  "__fbthrift_field_name",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::CustomException>::isset_indexes = {{
   0,

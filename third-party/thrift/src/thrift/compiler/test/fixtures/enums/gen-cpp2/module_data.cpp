@@ -33,12 +33,12 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::enums::SomeStruct>::name = "SomeStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_names = {{
-  "reasonable"sv,
-  "fine"sv,
-  "questionable"sv,
-  "tags"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::enums::SomeStruct>::name = "SomeStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_names = {{
+  "reasonable",
+  "fine",
+  "questionable",
+  "tags",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_ids = {{
   1,
@@ -52,11 +52,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = {{
-  "__fbthrift_field_reasonable"sv,
-  "__fbthrift_field_fine"sv,
-  "__fbthrift_field_questionable"sv,
-  "__fbthrift_field_tags"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = {{
+  "__fbthrift_field_reasonable",
+  "__fbthrift_field_fine",
+  "__fbthrift_field_questionable",
+  "__fbthrift_field_tags",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::isset_indexes = {{
   0,
@@ -65,12 +65,12 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::enums::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_names = {{
-  "me2_3"sv,
-  "me3_n3"sv,
-  "me1_t1"sv,
-  "me1_t2"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::enums::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_names = {{
+  "me2_3",
+  "me3_n3",
+  "me1_t1",
+  "me1_t2",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_ids = {{
   1,
@@ -84,11 +84,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = {{
-  "__fbthrift_field_me2_3"sv,
-  "__fbthrift_field_me3_n3"sv,
-  "__fbthrift_field_me1_t1"sv,
-  "__fbthrift_field_me1_t2"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = {{
+  "__fbthrift_field_me2_3",
+  "__fbthrift_field_me3_n3",
+  "__fbthrift_field_me1_t1",
+  "__fbthrift_field_me1_t2",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::isset_indexes = {{
   0,

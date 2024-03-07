@@ -34,7 +34,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metad
   enum_metadata.name() = "module.enum1";
   using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum1>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metad
   enum_metadata.name() = "module.enum2";
   using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum2>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
@@ -58,7 +58,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metad
   enum_metadata.name() = "module.enum3";
   using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum3>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
@@ -70,7 +70,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(Thr
   enum_metadata.name() = "module.enum_with_special_names";
   using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 

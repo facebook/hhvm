@@ -22,7 +22,7 @@ namespace py3 {
 EnumData::EnumData(
     FindNameFunc fn,
     FindValueFunc fv,
-    folly::Range<const std::string_view*> names,
+    folly::Range<const folly::StringPiece*> names,
     const std::vector<NamePair>& nm)
     : findName_{fn},
       findValue_{fv},

@@ -33,12 +33,12 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::BasicTypes>::name = "BasicTypes";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_names = {{
-  "first"sv,
-  "second"sv,
-  "third"sv,
-  "isTrue"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::BasicTypes>::name = "BasicTypes";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_names = {{
+  "first",
+  "second",
+  "third",
+  "isTrue",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_ids = {{
   1,
@@ -52,11 +52,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_I64,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::BasicTypes>::storage_names = {{
-  "__fbthrift_field_first"sv,
-  "__fbthrift_field_second"sv,
-  "__fbthrift_field_third"sv,
-  "__fbthrift_field_isTrue"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::BasicTypes>::storage_names = {{
+  "__fbthrift_field_first",
+  "__fbthrift_field_second",
+  "__fbthrift_field_third",
+  "__fbthrift_field_isTrue",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::BasicTypes>::isset_indexes = {{
   -1,

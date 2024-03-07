@@ -170,13 +170,13 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion>
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

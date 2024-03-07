@@ -196,8 +196,7 @@ struct impl<T, type_class::enumeration> {
     registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
       apache::thrift::ensure_isset_unsafe(dt.enumValues());
       for (size_t i = 0; i < traits::size; ++i) {
-        (*dt.enumValues())[std::string(traits::names[i])] =
-            int(traits::values[i]);
+        (*dt.enumValues())[traits::names[i].str()] = int(traits::values[i]);
       }
     });
   }

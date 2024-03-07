@@ -16,7 +16,7 @@
 from cpython.bytes cimport PyBytes_AsStringAndSize
 from cpython.object cimport PyObject, PyTypeObject
 from folly.iobuf cimport cIOBuf, IOBuf
-from folly.range cimport Range as cRange
+from folly.range cimport StringPiece as cStringPiece, Range as cRange
 from libc.stdint cimport uint32_t, uint16_t
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
@@ -101,7 +101,7 @@ cdef extern from "thrift/lib/py3/enums.h" namespace "::thrift::py3" nogil:
         PyObject* tryAddToCache(int value, PyObject* obj) except +
         size_t size()
         string_view getPyName(string_view name)
-        cRange[const string_view*] getNames()
+        cRange[const cStringPiece*] getNames()
     cdef cppclass cEnumFlagsData "::thrift::py3::EnumFlagsData"(cEnumData):
         PyObject* tryAddToFlagValuesCache(int value, PyObject* obj) except +
         string getNameForDerivedValue(int value) except +

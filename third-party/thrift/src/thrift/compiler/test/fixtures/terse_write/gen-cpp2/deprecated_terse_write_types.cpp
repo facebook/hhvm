@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::terse_write::deprecated::MyEnum const*> const TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

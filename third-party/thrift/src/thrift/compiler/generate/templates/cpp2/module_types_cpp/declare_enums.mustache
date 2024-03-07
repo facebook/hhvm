@@ -25,7 +25,7 @@ folly::Range<<% > common/namespace_cpp2%><%enum:cpp_name%> const*> const TEnumTr
   %><%^enum:empty?%><%!
     %>folly::range(TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values);<%!
   %><%/enum:empty?%>
-folly::Range<std::string_view const*> const TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = <%!
+folly::Range<folly::StringPiece const*> const TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = <%!
   %><%#enum:empty?%><%!
     %>{};<%!
   %><%/enum:empty?%><%!
@@ -33,11 +33,11 @@ folly::Range<std::string_view const*> const TEnumTraits<<% > common/namespace_cp
     %>folly::range(TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names);<%!
   %><%/enum:empty?%>
 
-bool TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

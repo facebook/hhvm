@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::terse_write::MyEnum const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -127,13 +127,13 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyUnion>::translateF
 namespace apache { namespace thrift {
 
 folly::Range<::facebook::thrift::test::terse_write::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

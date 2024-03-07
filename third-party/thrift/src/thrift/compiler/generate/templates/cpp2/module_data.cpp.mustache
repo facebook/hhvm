@@ -45,10 +45,10 @@ namespace apache {
 namespace thrift {
 <%#program:structs%>
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<<%struct:cpp_fullname%>>::name = "<%struct:name%>";
-THRIFT_DATA_MEMBER const std::array<std::string_view, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<<%struct:cpp_fullname%>>::name = "<%struct:name%>";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
   <%#struct:fields%>
-  "<%field:name%>"sv,
+  "<%field:name%>",
   <%/struct:fields%>
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
@@ -61,9 +61,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, <%struct:fields_size%>> TSt
   TType::<% > module_types_tcc/struct_type%>,
   <%/field:type%><%/struct:fields%>
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
   <%#struct:fields%>
-  "<%field:cpp_storage_name%>"sv,
+  "<%field:cpp_storage_name%>",
   <%/struct:fields%>
 }};
 THRIFT_DATA_MEMBER const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{

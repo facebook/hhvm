@@ -23,13 +23,13 @@ template <> struct TEnumDataStorage<::cpp2::ComplexUnion::Type> {
       type::typedefValue,
       type::stringRef,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "intValue"sv,
-      "stringValue"sv,
-      "intListValue"sv,
-      "stringListValue"sv,
-      "typedefValue"sv,
-      "stringRef"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "intValue",
+      "stringValue",
+      "intListValue",
+      "stringListValue",
+      "typedefValue",
+      "stringRef",
   }};
 };
 
@@ -40,9 +40,9 @@ template <> struct TEnumDataStorage<::cpp2::ListUnion::Type> {
       type::intListValue,
       type::stringListValue,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "intListValue"sv,
-      "stringListValue"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "intListValue",
+      "stringListValue",
   }};
 };
 
@@ -53,9 +53,9 @@ template <> struct TEnumDataStorage<::cpp2::DataUnion::Type> {
       type::binaryData,
       type::stringData,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "binaryData"sv,
-      "stringData"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "binaryData",
+      "stringData",
   }};
 };
 
@@ -66,9 +66,9 @@ template <> struct TEnumDataStorage<::cpp2::ValUnion::Type> {
       type::v1,
       type::v2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "v1"sv,
-      "v2"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "v1",
+      "v2",
   }};
 };
 
@@ -79,9 +79,9 @@ template <> struct TEnumDataStorage<::cpp2::VirtualComplexUnion::Type> {
       type::thingOne,
       type::thingTwo,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "thingOne"sv,
-      "thingTwo"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "thingOne",
+      "thingTwo",
   }};
 };
 
@@ -91,15 +91,15 @@ template <> struct TEnumDataStorage<::cpp2::NonCopyableUnion::Type> {
   static constexpr std::array<type, size> values = {{
       type::s,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "s"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "s",
   }};
 };
 
 template <> struct TStructDataStorage<::cpp2::ComplexUnion> {
   static constexpr const std::size_t fields_size = 6;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -107,15 +107,15 @@ template <> struct TStructDataStorage<::cpp2::ComplexUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::ListUnion> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -123,15 +123,15 @@ template <> struct TStructDataStorage<::cpp2::ListUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::DataUnion> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -139,15 +139,15 @@ template <> struct TStructDataStorage<::cpp2::DataUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::Val> {
   static constexpr const std::size_t fields_size = 3;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -155,15 +155,15 @@ template <> struct TStructDataStorage<::cpp2::Val> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::ValUnion> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -171,15 +171,15 @@ template <> struct TStructDataStorage<::cpp2::ValUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::VirtualComplexUnion> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -187,15 +187,15 @@ template <> struct TStructDataStorage<::cpp2::VirtualComplexUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::NonCopyableStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -203,15 +203,15 @@ template <> struct TStructDataStorage<::cpp2::NonCopyableStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::NonCopyableUnion> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -219,7 +219,7 @@ template <> struct TStructDataStorage<::cpp2::NonCopyableUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

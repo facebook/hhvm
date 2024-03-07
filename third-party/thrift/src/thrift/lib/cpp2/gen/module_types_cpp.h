@@ -19,12 +19,12 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
-#include <string_view>
 #include <type_traits>
 
 #include <folly/Indestructible.h>
 #include <folly/Memory.h>
 #include <folly/Portability.h>
+#include <folly/Range.h>
 #include <folly/Traits.h>
 #include <folly/container/F14Map.h>
 #include <folly/lang/Align.h>
@@ -45,9 +45,9 @@ namespace st {
 template <typename Int>
 struct alignas(folly::cacheline_align_v) enum_find {
   struct find_name_result {
-    std::string_view result{};
+    folly::StringPiece result{nullptr, nullptr};
     find_name_result() = default;
-    explicit constexpr find_name_result(std::string_view r) noexcept
+    explicit constexpr find_name_result(folly::StringPiece r) noexcept
         : result{r} {}
     explicit constexpr operator bool() const noexcept {
       return result.data() != nullptr;
@@ -66,12 +66,12 @@ struct alignas(folly::cacheline_align_v) enum_find {
   struct metadata {
     std::size_t const size{};
     const Int* const values{};
-    const std::string_view* const names{};
+    const folly::StringPiece* const names{};
   };
 
   // the fast path cache types
-  using find_name_map_t = folly::F14FastMap<Int, std::string_view>;
-  using find_value_map_t = folly::F14FastMap<std::string_view, Int>;
+  using find_name_map_t = folly::F14FastMap<Int, folly::StringPiece>;
+  using find_value_map_t = folly::F14FastMap<folly::StringPiece, Int>;
 
   // an approximate state of the fast-path caches; approximately mutex-like
   struct cache_state {
@@ -143,14 +143,14 @@ struct alignas(folly::cacheline_align_v) enum_find {
   }
 
   FOLLY_ERASE find_value_result
-  find_value_fast(std::string_view const name) noexcept {
+  find_value_fast(folly::StringPiece const name) noexcept {
     using result = find_value_result;
     const auto& map = reinterpret_cast<bidi_cache&>(cache).find_value_index;
     const auto found = map.find(name);
     return found == map.end() ? result() : result(found->second);
   }
   FOLLY_NOINLINE find_value_result
-  find_value_scan(std::string_view const name) noexcept {
+  find_value_scan(folly::StringPiece const name) noexcept {
     using result = find_value_result;
     // reverse order to simulate loop-map-insert then map-find
     const auto range = folly::range(meta.names, meta.names + meta.size);
@@ -159,7 +159,7 @@ struct alignas(folly::cacheline_align_v) enum_find {
   }
   // param order optimizes outline findValue by minimizing native instructions
   FOLLY_NOINLINE static find_value_result find_value(
-      std::string_view const name, enum_find& self) noexcept {
+      folly::StringPiece const name, enum_find& self) noexcept {
     // with two likelinesses v.s. one, gets the right code layout
     return FOLLY_LIKELY(self.state.ready()) || FOLLY_LIKELY(self.try_prepare())
         ? self.find_value_fast(name)
@@ -180,14 +180,14 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE enum_find<U>& enum_find_instance() {
 
 template <typename E, typename U = std::underlying_type_t<E>>
 FOLLY_ERASE bool enum_find_name(
-    E const value, std::string_view* const out) noexcept {
+    E const value, folly::StringPiece* const out) noexcept {
   const auto r = enum_find<U>::find_name(U(value), enum_find_instance<E>());
   return r && ((*out = r.result), true);
 }
 
 template <typename E, typename U = std::underlying_type_t<E>>
 FOLLY_ERASE bool enum_find_value(
-    std::string_view const name, E* const out) noexcept {
+    folly::StringPiece const name, E* const out) noexcept {
   const auto uout = reinterpret_cast<U*>(out);
   const auto r = enum_find<U>::find_value(name, enum_find_instance<E>());
   return r && ((*uout = r.result), true);
@@ -275,13 +275,13 @@ struct copy_field_fn : copy_field_rec<TypeClass> {
 
 struct translate_field_name_table {
   size_t size;
-  const std::string_view* names;
+  const folly::StringPiece* names;
   const int16_t* ids;
   const protocol::TType* types;
 };
 
 void translate_field_name(
-    std::string_view fname,
+    folly::StringPiece fname,
     int16_t& fid,
     protocol::TType& ftype,
     const translate_field_name_table& table) noexcept;

@@ -46,7 +46,7 @@ void EnumMetadata<<% > common/namespace_cpp2%><%enum:cpp_name%>>::gen(ThriftMeta
   enum_metadata.name() = "<%program:name%>.<%enum:name%>";
   using EnumTraits = TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 <%#enum:structured_annotations%>
 <%#structured_annotation:const_struct?%>

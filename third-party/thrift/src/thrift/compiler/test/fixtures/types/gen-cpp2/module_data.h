@@ -22,12 +22,12 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwi
       type::two,
       type::three,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "none"sv,
-      "zero"sv,
-      "one"sv,
-      "two"sv,
-      "three"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "none",
+      "zero",
+      "one",
+      "two",
+      "three",
   }};
 };
 
@@ -38,9 +38,9 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::is_unscop
       type::hello,
       type::world,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "hello"sv,
-      "world"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "hello",
+      "world",
   }};
 };
 
@@ -51,16 +51,16 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::MyForward
       type::ZERO,
       type::NONZERO,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ZERO"sv,
-      "NONZERO"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ZERO",
+      "NONZERO",
   }};
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::empty_struct> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -68,15 +68,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::empty_s
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -84,15 +84,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::decorat
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct> {
   static constexpr const std::size_t fields_size = 8;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -100,15 +100,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Contain
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -116,15 +116,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CppType
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -132,15 +132,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Virtual
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -148,15 +148,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruc
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -164,15 +164,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Trivial
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -180,15 +180,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Trivial
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ComplexString> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -196,15 +196,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complex
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -212,15 +212,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complex
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadding> {
   static constexpr const std::size_t fields_size = 5;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -228,15 +228,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadd
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
   static constexpr const std::size_t fields_size = 5;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -244,15 +244,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadd
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruct> {
   static constexpr const std::size_t fields_size = 4;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -260,15 +260,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruc
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -276,15 +276,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyDataI
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Renamed> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -292,15 +292,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Renamed
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -308,15 +308,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Annotat
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -324,15 +324,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -340,15 +340,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -356,15 +356,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -372,15 +372,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -388,15 +388,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -404,15 +404,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -420,15 +420,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -436,15 +436,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -452,15 +452,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteList> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -468,15 +468,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep> {
   static constexpr const std::size_t fields_size = 0;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -484,15 +484,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -500,15 +500,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Adapted
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -516,15 +516,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail:
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -532,15 +532,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Depende
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -548,15 +548,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail:
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware> {
   static constexpr const std::size_t fields_size = 7;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -564,15 +564,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Allocat
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2> {
   static constexpr const std::size_t fields_size = 2;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -580,15 +580,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Allocat
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct> {
   static constexpr const std::size_t fields_size = 3;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -596,15 +596,15 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Typedef
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores> {
   static constexpr const std::size_t fields_size = 1;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -612,7 +612,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::StructW
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

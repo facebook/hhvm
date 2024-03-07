@@ -34,7 +34,7 @@ void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
   enum_metadata.name() = "module.AnEnum";
   using EnumTraits = TEnumTraits<::py3::simple::AnEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
   enum_metadata.name() = "module.AnEnumRenamed";
   using EnumTraits = TEnumTraits<::py3::simple::AnEnumRenamed>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
@@ -58,7 +58,7 @@ void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
   enum_metadata.name() = "module.Flags";
   using EnumTraits = TEnumTraits<::py3::simple::Flags>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
   enum_metadata.structured_annotations()->push_back(*cvStruct("python.Flags", {}).cv_struct_ref());
 }

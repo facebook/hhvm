@@ -34,7 +34,7 @@ void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& m
   enum_metadata.name() = "module.Metasyntactic";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::Metasyntactic>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadat
   enum_metadata.name() = "module.MyEnum1";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyEnum1>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
@@ -58,7 +58,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadat
   enum_metadata.name() = "module.MyEnum2";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyEnum2>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
@@ -70,7 +70,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadat
   enum_metadata.name() = "module.MyEnum3";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyEnum3>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadata) {
@@ -82,7 +82,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadat
   enum_metadata.name() = "module.MyEnum4";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyEnum4>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& metadata) {
@@ -94,7 +94,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& 
   enum_metadata.name() = "module.MyBitmaskEnum1";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
@@ -106,7 +106,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& 
   enum_metadata.name() = "module.MyBitmaskEnum2";
   using EnumTraits = TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
   enum_metadata.structured_annotations()->push_back(*cvStruct("thrift.BitmaskEnum", {}).cv_struct_ref());
 }

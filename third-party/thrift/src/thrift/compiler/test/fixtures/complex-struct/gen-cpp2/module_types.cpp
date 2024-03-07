@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::MyEnum const*> const TEnumTraits<::cpp2::MyEnum>::values = folly::range(TEnumDataStorage<::cpp2::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::cpp2::MyEnum>::names = folly::range(TEnumDataStorage<::cpp2::MyEnum>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyEnum>::names = folly::range(TEnumDataStorage<::cpp2::MyEnum>::names);
 
-bool TEnumTraits<::cpp2::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::cpp2::MyEnum>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::cpp2::MyEnum>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -1468,13 +1468,13 @@ void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
 
-bool TEnumTraits<::cpp2::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::cpp2::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::cpp2::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
@@ -1656,13 +1656,13 @@ void TccStructTraits<::cpp2::MyUnionFloatFieldThrowExp>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::MyUnionFloatFieldThrowExp::Type const*> const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::names);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::names);
 
-bool TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

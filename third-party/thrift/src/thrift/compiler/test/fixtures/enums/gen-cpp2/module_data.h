@@ -21,11 +21,11 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic> {
       type::BAZ,
       type::BAX,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "FOO"sv,
-      "BAR"sv,
-      "BAZ"sv,
-      "BAX"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FOO",
+      "BAR",
+      "BAZ",
+      "BAX",
   }};
 };
 
@@ -40,13 +40,13 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1> {
       type::ME1_5,
       type::ME1_6,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ME1_0"sv,
-      "ME1_1"sv,
-      "ME1_2"sv,
-      "ME1_3"sv,
-      "ME1_5"sv,
-      "ME1_6"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ME1_0",
+      "ME1_1",
+      "ME1_2",
+      "ME1_3",
+      "ME1_5",
+      "ME1_6",
   }};
 };
 
@@ -58,10 +58,10 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum2> {
       type::ME2_1,
       type::ME2_2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ME2_0"sv,
-      "ME2_1"sv,
-      "ME2_2"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ME2_0",
+      "ME2_1",
+      "ME2_2",
   }};
 };
 
@@ -76,13 +76,13 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3> {
       type::ME3_9,
       type::ME3_10,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ME3_0"sv,
-      "ME3_1"sv,
-      "ME3_N2"sv,
-      "ME3_N1"sv,
-      "ME3_9"sv,
-      "ME3_10"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ME3_0",
+      "ME3_1",
+      "ME3_N2",
+      "ME3_N1",
+      "ME3_9",
+      "ME3_10",
   }};
 };
 
@@ -95,11 +95,11 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4> {
       type::ME4_C,
       type::ME4_D,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ME4_A"sv,
-      "ME4_B"sv,
-      "ME4_C"sv,
-      "ME4_D"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ME4_A",
+      "ME4_B",
+      "ME4_C",
+      "ME4_D",
   }};
 };
 
@@ -111,10 +111,10 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1> {
       type::TWO,
       type::FOUR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ONE"sv,
-      "TWO"sv,
-      "FOUR"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ONE",
+      "TWO",
+      "FOUR",
   }};
 };
 
@@ -126,17 +126,17 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2> {
       type::TWO,
       type::FOUR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
-      "ONE"sv,
-      "TWO"sv,
-      "FOUR"sv,
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ONE",
+      "TWO",
+      "FOUR",
   }};
 };
 
 template <> struct TStructDataStorage<::test::fixtures::enums::SomeStruct> {
   static constexpr const std::size_t fields_size = 4;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -144,15 +144,15 @@ template <> struct TStructDataStorage<::test::fixtures::enums::SomeStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::enums::MyStruct> {
   static constexpr const std::size_t fields_size = 4;
-  static const std::string_view name;
-  static const std::array<std::string_view, fields_size> fields_names;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -160,7 +160,7 @@ template <> struct TStructDataStorage<::test::fixtures::enums::MyStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
+  static const std::array<folly::StringPiece, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

@@ -33,34 +33,34 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_ids = {{
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_types = {{
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::storage_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = {{
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableStruct>::name = "EmptiableStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = {{
-  "bool_field"sv,
-  "byte_field"sv,
-  "short_field"sv,
-  "int_field"sv,
-  "long_field"sv,
-  "float_field"sv,
-  "double_field"sv,
-  "string_field"sv,
-  "binary_field"sv,
-  "enum_field"sv,
-  "list_field"sv,
-  "set_field"sv,
-  "map_field"sv,
-  "struct_field"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::EmptiableStruct>::name = "EmptiableStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = {{
+  "bool_field",
+  "byte_field",
+  "short_field",
+  "int_field",
+  "long_field",
+  "float_field",
+  "double_field",
+  "string_field",
+  "binary_field",
+  "enum_field",
+  "list_field",
+  "set_field",
+  "map_field",
+  "struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_ids = {{
   1,
@@ -94,21 +94,21 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::storage_names = {{
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-  "__fbthrift_field_struct_field"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::isset_indexes = {{
   0,
@@ -127,22 +127,22 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift
   13,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::name = "EmptiableTerseStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_names = {{
-  "bool_field"sv,
-  "byte_field"sv,
-  "short_field"sv,
-  "int_field"sv,
-  "long_field"sv,
-  "float_field"sv,
-  "double_field"sv,
-  "string_field"sv,
-  "binary_field"sv,
-  "enum_field"sv,
-  "list_field"sv,
-  "set_field"sv,
-  "map_field"sv,
-  "struct_field"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::name = "EmptiableTerseStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_names = {{
+  "bool_field",
+  "byte_field",
+  "short_field",
+  "int_field",
+  "long_field",
+  "float_field",
+  "double_field",
+  "string_field",
+  "binary_field",
+  "enum_field",
+  "list_field",
+  "set_field",
+  "map_field",
+  "struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_ids = {{
   1,
@@ -176,21 +176,21 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::storage_names = {{
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-  "__fbthrift_field_struct_field"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::isset_indexes = {{
   -1,
@@ -209,22 +209,22 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::name = "NotEmptiableStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = {{
-  "bool_field"sv,
-  "byte_field"sv,
-  "short_field"sv,
-  "int_field"sv,
-  "long_field"sv,
-  "float_field"sv,
-  "double_field"sv,
-  "string_field"sv,
-  "binary_field"sv,
-  "enum_field"sv,
-  "list_field"sv,
-  "set_field"sv,
-  "map_field"sv,
-  "struct_field"sv,
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::name = "NotEmptiableStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = {{
+  "bool_field",
+  "byte_field",
+  "short_field",
+  "int_field",
+  "long_field",
+  "float_field",
+  "double_field",
+  "string_field",
+  "binary_field",
+  "enum_field",
+  "list_field",
+  "set_field",
+  "map_field",
+  "struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_ids = {{
   1,
@@ -258,21 +258,21 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::storage_names = {{
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-  "__fbthrift_field_struct_field"sv,
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
 }};
 THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::isset_indexes = {{
   0,

@@ -47,7 +47,7 @@ class EnumData {
   EnumData(
       FindNameFunc* const fn,
       FindValueFunc* const fv,
-      folly::Range<const std::string_view*> names,
+      folly::Range<const folly::StringPiece*> names,
       const std::vector<NamePair>& nm);
 
   virtual ~EnumData() {
@@ -69,7 +69,7 @@ class EnumData {
     return folly::get_default(origToPyNames_, name, name);
   }
 
-  folly::Range<const std::string_view*> getNames() const { return names_; }
+  folly::Range<const folly::StringPiece*> getNames() const { return names_; }
 
  protected:
   using NameMap = std::unordered_map<std::string_view, std::string_view>;
@@ -84,7 +84,7 @@ class EnumData {
   FindValueFunc* const findValue_;
   const std::size_t size_;
   std::atomic<std::size_t> uncached_;
-  const folly::Range<const std::string_view*> names_;
+  const folly::Range<const folly::StringPiece*> names_;
   NameMap pyToOrigNames_;
   NameMap origToPyNames_;
   std::unordered_map<std::string_view, PyObject*> namesToInstances_;
@@ -96,7 +96,7 @@ class EnumFlagsData : public EnumData {
   EnumFlagsData(
       FindNameFunc fn,
       FindValueFunc fv,
-      folly::Range<const std::string_view*> names,
+      folly::Range<const folly::StringPiece*> names,
       const std::vector<NamePair>& nm,
       uint32_t maxPossibleFlagValue)
       : EnumData{fn, fv, names, nm},

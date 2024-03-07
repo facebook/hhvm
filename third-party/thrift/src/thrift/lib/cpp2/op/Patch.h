@@ -80,7 +80,19 @@ struct PatchType<type::union_t<T>> {
       UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>;
 };
 
+template <class T>
+struct SafePatchType {};
+
 } // namespace detail
+
+/// The safe patch represenations for the base thrift types.
+///
+/// Safe patch provides versioning to indicate the minimum Thrift Patch version
+/// required to safely and successfully process that patch as well as opaque
+/// storage that is resilient to Thrift schema compatibility.
+template <typename T>
+using safe_patch_type =
+    typename detail::SafePatchType<type::infer_tag<T>>::type;
 
 /// The patch represenations for the base thrift types.
 ///

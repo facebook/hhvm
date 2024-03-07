@@ -18,7 +18,9 @@
 
 #include <type_traits>
 
+#include <fmt/core.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/op/detail/Patch.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -134,6 +136,47 @@ std::string prettyPrintPatch(
         DebugProtocolWriter::Options::simple()) {
   static_assert(is_patch_v<T>, "Argument must be a Patch.");
   return debugStringViaEncode(obj, std::move(options));
+}
+
+/**
+ * Returns a Thrift Patch instance corresponding to the (decoded) `SafePatch`.
+ *
+ * @throws std::runtime_error if the given `SafePatch` cannot be successfully
+ * decoded or safely applied in this process (eg. if the version of the Thrift
+ * Patch library in this process is not compatible with the minimum version
+ * required by `SafePatch`).
+ */
+template <typename T, typename Tag = type::infer_tag<T>>
+op::patch_type<Tag> fromSafePatch(const op::safe_patch_type<Tag>& safePatch) {
+  if (safePatch.version() == 0) {
+    throw std::runtime_error("Invalid Safe Patch");
+  }
+  if (safePatch.version() > detail::kThriftStaticPatchVersion) {
+    throw std::runtime_error(
+        fmt::format("Unsupported patch version: {}", *safePatch.version()));
+  }
+  op::patch_type<Tag> patch;
+  CompactProtocolReader reader;
+  reader.setInput(safePatch.data()->get());
+  op::decode<type::infer_tag<op::patch_type<Tag>>>(reader, patch);
+  return patch;
+}
+
+/**
+ * Returns a `SafePatch` instance corresponding to the encoded Thrift Patch.
+ */
+template <typename T, typename Tag = type::infer_tag<T>>
+op::safe_patch_type<Tag> toSafePatch(const op::patch_type<Tag>& patch) {
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  op::encode<type::infer_tag<op::patch_type<Tag>>>(writer, patch);
+
+  op::safe_patch_type<Tag> safePatch;
+  safePatch.data() = queue.move();
+  safePatch.version() = detail::kThriftStaticPatchVersion;
+
+  return safePatch;
 }
 
 } // namespace op

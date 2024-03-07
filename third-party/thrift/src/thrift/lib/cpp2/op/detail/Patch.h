@@ -33,6 +33,13 @@ namespace thrift {
 namespace op {
 namespace detail {
 
+// Latest Thrift Static Patch version that the process is aware of. Any Thrift
+// Static Patch with a version higher than this will not be processed by the
+// binary. This is to ensure that the binary does not attempt to process a
+// Thrift Static Patch that includes operations or features it does not support,
+// which could lead to data corruption or other issues
+inline constexpr int32_t kThriftStaticPatchVersion = 1;
+
 // Adapter for all base types.
 template <typename T>
 using AssignPatchAdapter = InlineAdapter<AssignPatch<T>>;

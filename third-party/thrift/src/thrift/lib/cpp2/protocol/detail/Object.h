@@ -518,7 +518,7 @@ void setMaskedDataFull(
     TType arg_type,
     MaskedData& maskedData,
     MaskedProtocolData& protocolData) {
-  auto& values = protocolData.values().ensure();
+  auto& values = protocolData.values().value();
   auto& encodedValue = values.emplace_back();
   encodedValue.wireType() = type::toBaseType(arg_type);
   // get the serialized data from cursor
@@ -618,7 +618,7 @@ MaskedDecodeResultValue parseValueWithMask(
           map[keyValue] = std::move(nestedResult.included);
         }
         if (KeepExcludedData && !apache::thrift::empty(nestedResult.excluded)) {
-          auto& keys = protocolData.keys().ensure();
+          auto& keys = protocolData.keys().value();
           keys.push_back(keyValue);
           type::ValueId id =
               type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};

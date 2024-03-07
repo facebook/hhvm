@@ -27,6 +27,7 @@ include "thrift/annotation/thrift.thrift"
 // '{name}Id'. For example, for a type `Foo`, the ID typedef would be
 // `typedef id.ExternId FooId`.
 @thrift.Experimental
+@thrift.TerseWrite
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

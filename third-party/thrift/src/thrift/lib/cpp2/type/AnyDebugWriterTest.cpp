@@ -70,7 +70,7 @@ TEST(AnyTest, type_str) {
   // invalid TypeStruct
   auto map_type = type::Type::get<type::map<type::i32_t, type::float_t>>();
   auto map_type_struct = map_type.toThrift();
-  map_type_struct.name().ensure().boolType_ref() = type::Void::Unused;
+  map_type_struct.name().value().boolType_ref() = type::Void::Unused;
   EXPECT_EQ(
       anyTypeDebugString(type::Type(map_type_struct)), "\"bool<i32,float>\"");
 }

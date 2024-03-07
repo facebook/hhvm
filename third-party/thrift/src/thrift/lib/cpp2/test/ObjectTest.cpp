@@ -1166,7 +1166,7 @@ void testSerializeObjectWithMapMaskError() {
     MaskedProtocolData protocolData;
     protocolData.protocol() = convertStandardProtocol(Protocol);
     MaskedData& maskedData = protocolData.data_ref().value();
-    auto& keys = protocolData.keys().ensure();
+    auto& keys = protocolData.keys().value();
     keys.push_back(asValueStruct<type::i32_t>(2));
     type::ValueId keyValueId =
         type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};

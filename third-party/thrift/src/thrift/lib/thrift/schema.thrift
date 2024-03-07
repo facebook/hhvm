@@ -39,6 +39,7 @@ include "thrift/annotation/python.thrift"
  * the source file in to the representations found in this file.
  */
 @thrift.Experimental
+@thrift.TerseWrite
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

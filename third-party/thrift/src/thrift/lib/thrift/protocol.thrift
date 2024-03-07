@@ -26,6 +26,7 @@ cpp_include "folly/container/F14Map.h"
 cpp_include "thrift/lib/thrift/detail/id.h"
 
 @thrift.Experimental
+@thrift.TerseWrite
 package "facebook.com/thrift/protocol"
 
 namespace cpp2 apache.thrift.protocol

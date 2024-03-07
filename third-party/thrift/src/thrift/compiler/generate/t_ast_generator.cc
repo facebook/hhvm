@@ -131,7 +131,7 @@ void t_ast_generator::generate_program() {
   auto intern_value = [&](std::unique_ptr<t_const_value> val,
                           t_program* = nullptr) {
     // TODO: deduplication
-    auto& values = ast.values().ensure();
+    auto& values = ast.values().value();
     auto ret = positionToId<t_program::value_id>(values.size());
     values.push_back(const_to_value(*val));
     return ret;
@@ -141,7 +141,7 @@ void t_ast_generator::generate_program() {
     auto& defs = ast.programs()
                      ->at(idToPosition(program_index.at(program)))
                      .definitions()
-                     .ensure();
+                     .value();
     for (auto& def : program->definitions()) {
       if (def.generated() && !include_generated_) {
         continue;
@@ -225,7 +225,7 @@ void t_ast_generator::generate_program() {
     for (auto* include : program.get_included_programs()) {
       // This could invalidate references into `programs`.
       visitor(*include);
-      programs.at(pos).includes().ensure().push_back(program_index.at(include));
+      programs.at(pos).includes().value().push_back(program_index.at(include));
       populate_defs(include);
     }
     is_root_program_ = is_root_program;

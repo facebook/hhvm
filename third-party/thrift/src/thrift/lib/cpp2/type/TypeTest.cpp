@@ -181,7 +181,7 @@ TEST(TypeTest, isFull) {
   EXPECT_FALSE(type.isValid());
 
   TypeStruct params;
-  t.params().ensure().push_back(params);
+  t.params().value().push_back(params);
 
   // invalid params
   EXPECT_FALSE(type.isFull());
@@ -193,7 +193,7 @@ TEST(TypeTest, isFull) {
   EXPECT_TRUE(type.isValid());
 
   params.name()->set_i32Type();
-  t.params().ensure().push_back(params);
+  t.params().value().push_back(params);
   // only checks fullness of params, if present
   EXPECT_TRUE(type.isFull());
   // ensures that appropriate number of params are present

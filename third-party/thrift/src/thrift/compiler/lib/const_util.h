@@ -98,6 +98,10 @@ decltype(auto) ensure(std::unique_ptr<T>& t) {
   return t ? *t : *(t = std::make_unique<T>()); // cpp.ref
 }
 template <typename T>
+decltype(auto) ensure(terse_field_ref<T> t) {
+  return *t;
+}
+template <typename T>
 decltype(auto) ensure(T t) {
   return t.ensure(); // *field_ref
 }

@@ -314,6 +314,13 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
     return;
   }
 
+  void addEventHandler(
+      const std::shared_ptr<TProcessorEventHandler>& eventHandler) override {
+    for (auto& processor : processors_) {
+      processor->addEventHandler(eventHandler);
+    }
+  }
+
  private:
   const std::vector<std::unique_ptr<AsyncProcessor>> processors_;
   const MultiplexAsyncProcessorFactory::CompositionMetadata&

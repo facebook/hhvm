@@ -154,9 +154,12 @@ size_t RendezvousHash::getNthByWeightedHash(
   for (size_t i = 0; i < weights_.size(); ++i) {
     const auto& entry = weights_[i];
     // combine the hash with the cluster together
-    double combinedHash = computeHash(entry.first + key);
-    double scaledHash =
-        (double)combinedHash / std::numeric_limits<uint64_t>::max();
+    const double combinedHash = computeHash(entry.first + key);
+    // Note that double(UINT64_MAX) cannot be exactly represented as a float. We
+    // ignore the small inaccuracy here.
+    const double scaledHash =
+        (double)combinedHash /
+        static_cast<double>(std::numeric_limits<uint64_t>::max());
     double scaledWeight = 0;
     if (entry.second != 0) {
       scaledWeight = pow(scaledHash, (double)1 / entry.second);

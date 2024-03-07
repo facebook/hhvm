@@ -1516,36 +1516,15 @@ end = struct
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (r_sub, Tneg (Neg_prim tprim_sub)) ->
-          simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn:None
-            ~this_ty
-            ~super_like:false
-            ~super_supportdyn:false
-            (MakeType.prim_type r_super tprim_super)
-            (MakeType.prim_type r_sub tprim_sub)
-            env
-        | (_, Tneg (Neg_class _)) ->
-          (* not C contains all primitive types, and so can't be a subtype of
-             not p, which doesn't contain primitive type p *)
-          invalid_env env
-        | (_, Tprim tprim_sub) ->
-          if Subtype_negation.is_tprim_disjoint tprim_sub tprim_super then
-            valid env
-          else
-            invalid_env env
-        | (_, Tclass ((_, cname), ex, _))
-          when String.equal cname SN.Classes.cStringish
-               && is_nonexact ex
-               && Aast.(
-                    equal_tprim tprim_super Tstring
-                    || equal_tprim tprim_super Tarraykey) ->
-          invalid_env env
-        (* All of these are definitely disjoint from primitive types *)
-        | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
-        | _ -> default_subtype_help env))
+        Subtype_neg_prim_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          ty_sub
+          (r_super, tprim_super)
+          env)
     | (_, Tneg (Neg_class (_, c_super))) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
@@ -1838,6 +1817,68 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_neg_prim_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_phase ty ->
+    locl_phase Reason.t_ * Ast_defs.tprim ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, prim_super)
+      env =
+    match deref lty_sub with
+    | (r_sub, Tneg (Neg_prim prim_sub)) ->
+      Subtype.simplify_subtype
+        ~subtype_env
+        ~sub_supportdyn:None
+        ~this_ty
+        ~super_like:false
+        ~super_supportdyn:false
+        (MakeType.prim_type r_super prim_super)
+        (MakeType.prim_type r_sub prim_sub)
+        env
+    | (_, Tneg (Neg_class _)) ->
+      (* not C contains all primitive types, and so can't be a subtype of
+         not p, which doesn't contain primitive type p *)
+      invalid ~fail env
+    | (_, Tprim tprim_sub) ->
+      if Subtype_negation.is_tprim_disjoint tprim_sub prim_super then
+        valid env
+      else
+        invalid ~fail env
+    | (_, Tclass ((_, cname), ex, _))
+      when String.equal cname SN.Classes.cStringish
+           && is_nonexact ex
+           && Aast.(
+                equal_tprim prim_super Tstring
+                || equal_tprim prim_super Tarraykey) ->
+      invalid ~fail env
+    (* All of these are definitely disjoint from primitive types *)
+    | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
+    | _ ->
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tneg (Neg_prim prim_super))))
 end
 
 and Subtype_vec_or_dict_r : sig

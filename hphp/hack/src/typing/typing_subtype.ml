@@ -1462,77 +1462,19 @@ end = struct
               (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
               (super_supportdyn, r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype_help env))
-    | (_, Tvec_or_dict _) ->
+    | (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup)) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType lty ->
-        (match (get_node lty, get_node lty_super) with
-        | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super)) ->
-          let tv_super = Sd.liken ~super_like env tv_super in
-          let tk_super = Sd.liken ~super_like env tk_super in
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty
-               ~super_like:false
-               ~super_supportdyn:false
-               tk_sub
-               tk_super
-          &&& simplify_subtype
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty
-                ~super_like:false
-                ~super_supportdyn:false
-                tv_sub
-                tv_super
-        | ( Tclass ((_, n), _, [tk_sub; tv_sub]),
-            Tvec_or_dict (tk_super, tv_super) )
-          when String.equal n SN.Collections.cDict ->
-          let tv_super = Sd.liken ~super_like env tv_super in
-          let tk_super = Sd.liken ~super_like env tk_super in
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty
-               ~super_like:false
-               ~super_supportdyn:false
-               tk_sub
-               tk_super
-          &&& simplify_subtype
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty
-                ~super_like:false
-                ~super_supportdyn:false
-                tv_sub
-                tv_super
-        | (Tclass ((_, n), _, [tv_sub]), Tvec_or_dict (tk_super, tv_super))
-          when String.equal n SN.Collections.cVec ->
-          let pos = get_pos lty in
-          let tk_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
-          let tv_super = Sd.liken ~super_like env tv_super in
-          let tk_super = Sd.liken ~super_like env tk_super in
-          env
-          |> simplify_subtype
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty
-               ~super_like:false
-               ~super_supportdyn:false
-               tk_sub
-               tk_super
-          &&& simplify_subtype
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty
-                ~super_like:false
-                ~super_supportdyn:false
-                tv_sub
-                tv_super
-        | _ -> default_subtype_help env))
+        Subtype_vec_or_dict_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          lty
+          (r_super, (lty_key_sup, lty_val_sup))
+          env)
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
     | (r_supportdyn, Tnewtype (name_super, [tyarg_super], bound_super))
       when String.equal name_super SN.Classes.cSupportDyn ->
@@ -1896,6 +1838,104 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_vec_or_dict_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_phase ty ->
+    locl_phase Reason.t_ * (locl_ty * locl_ty) ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, (lty_key_sup, lty_val_sup))
+      env =
+    match get_node lty_sub with
+    | Tvec_or_dict (lty_key_sub, lty_val_sub) ->
+      let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
+      let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn
+           ~this_ty
+           ~super_like:false
+           ~super_supportdyn:false
+           lty_key_sub
+           lty_key_sup
+      &&& Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:false
+            ~super_supportdyn:false
+            lty_val_sub
+            lty_val_sup
+    | Tclass ((_, n), _, [lty_key_sub; lty_val_sub])
+      when String.equal n SN.Collections.cDict ->
+      let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
+      let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn
+           ~this_ty
+           ~super_like:false
+           ~super_supportdyn:false
+           lty_key_sub
+           lty_key_sup
+      &&& Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:false
+            ~super_supportdyn:false
+            lty_val_sub
+            lty_val_sup
+    | Tclass ((_, n), _, [lty_val_sub]) when String.equal n SN.Collections.cVec
+      ->
+      let pos = get_pos lty_sub in
+      let lty_key_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
+      let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
+      let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn
+           ~this_ty
+           ~super_like:false
+           ~super_supportdyn:false
+           lty_key_sub
+           lty_key_sup
+      &&& Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:false
+            ~super_supportdyn:false
+            lty_val_sub
+            lty_val_sup
+    | _ ->
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup))))
 end
 
 and Subtype_prim_r : sig

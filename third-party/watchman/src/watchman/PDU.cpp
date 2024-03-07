@@ -379,8 +379,6 @@ bool PduBuffer::streamN(
     watchman_stream* stm,
     json_int_t len,
     json_error_t* jerr) {
-  uint32_t total = 0;
-
   if (!output_bytes(buf, rpos)) {
     snprintf(
         jerr->text,
@@ -426,7 +424,6 @@ bool PduBuffer::streamN(
       return false;
     }
     wpos += r;
-    total += r;
   }
   return true;
 }

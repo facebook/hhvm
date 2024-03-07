@@ -29,11 +29,11 @@ class StringCodec : public Handler<
                         std::string,
                         std::unique_ptr<folly::IOBuf>> {
  public:
-  typedef typename Handler<
+  using Context = typename Handler<
       std::unique_ptr<folly::IOBuf>,
       std::string,
       std::string,
-      std::unique_ptr<folly::IOBuf>>::Context Context;
+      std::unique_ptr<folly::IOBuf>>::Context;
 
   void read(Context* ctx, std::unique_ptr<folly::IOBuf> buf) override {
     if (buf) {

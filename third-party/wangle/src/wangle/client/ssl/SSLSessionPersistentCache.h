@@ -41,7 +41,7 @@ class SSLSessionPersistentCacheBase : public SSLSessionCallbacks {
  public:
   class TimeUtil {
    public:
-    virtual ~TimeUtil() {}
+    virtual ~TimeUtil() = default;
 
     virtual std::chrono::time_point<std::chrono::system_clock> now() const {
       return std::chrono::system_clock::now();

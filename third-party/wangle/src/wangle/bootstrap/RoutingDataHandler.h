@@ -32,13 +32,13 @@ class RoutingDataHandler : public wangle::BytesToBytesHandler {
 
   class Callback {
    public:
-    virtual ~Callback() {}
+    virtual ~Callback() = default;
     virtual void onRoutingData(uint64_t connId, RoutingData& routingData) = 0;
     virtual void onError(uint64_t connId, folly::exception_wrapper ex) = 0;
   };
 
   RoutingDataHandler(uint64_t connId, Callback* cob);
-  ~RoutingDataHandler() override {}
+  ~RoutingDataHandler() override = default;
 
   // BytesToBytesHandler implementation
   void read(Context* ctx, folly::IOBufQueue& q) override;
@@ -80,7 +80,7 @@ class RoutingDataHandler : public wangle::BytesToBytesHandler {
 template <typename R>
 class RoutingDataHandlerFactory {
  public:
-  virtual ~RoutingDataHandlerFactory() {}
+  virtual ~RoutingDataHandlerFactory() = default;
 
   virtual std::shared_ptr<RoutingDataHandler<R>> newHandler(
       uint64_t connId,

@@ -25,7 +25,7 @@ namespace wangle {
 template <class Rin, class Rout = Rin, class Win = Rout, class Wout = Rin>
 class MockHandler : public Handler<Rin, Rout, Win, Wout> {
  public:
-  typedef typename Handler<Rin, Rout, Win, Wout>::Context Context;
+  using Context = typename Handler<Rin, Rout, Win, Wout>::Context;
 
   MockHandler() = default;
   MockHandler(MockHandler&&) = default;

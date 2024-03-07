@@ -70,7 +70,7 @@ template <typename P = DefaultPipeline>
 class BaseClientBootstrap {
  public:
   using Ptr = std::unique_ptr<BaseClientBootstrap>;
-  BaseClientBootstrap() {}
+  BaseClientBootstrap() = default;
 
   virtual ~BaseClientBootstrap() = default;
 

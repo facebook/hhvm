@@ -31,8 +31,8 @@ template <typename T, typename R>
 class BroadcastHandler
     : public HandlerAdapter<T, std::unique_ptr<folly::IOBuf>> {
  public:
-  typedef typename HandlerAdapter<T, std::unique_ptr<folly::IOBuf>>::Context
-      Context;
+  using Context =
+      typename HandlerAdapter<T, std::unique_ptr<folly::IOBuf>>::Context;
 
   ~BroadcastHandler() override {
     CHECK(subscribers_.empty());

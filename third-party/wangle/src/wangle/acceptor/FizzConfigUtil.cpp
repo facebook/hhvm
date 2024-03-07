@@ -20,7 +20,6 @@
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <folly/Format.h>
 #include <folly/String.h>
-#include <wangle/acceptor/FizzConfigUtil.h>
 
 using fizz::CertUtils;
 using fizz::DefaultCertificateVerifier;

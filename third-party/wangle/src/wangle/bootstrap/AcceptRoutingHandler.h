@@ -114,7 +114,7 @@ class AcceptRoutingPipelineFactory : public AcceptPipelineFactory {
 template <typename Pipeline, typename R>
 class RoutingDataPipelineFactory {
  public:
-  virtual ~RoutingDataPipelineFactory() {}
+  virtual ~RoutingDataPipelineFactory() = default;
 
   virtual typename Pipeline::Ptr newPipeline(
       std::shared_ptr<folly::AsyncTransport> socket,

@@ -56,7 +56,7 @@ class FakeSessionCallbacks : public SSLSessionCallbacks {
 
 class ThreadSafeSSLSessionCacheTest : public Test {
  public:
-  ThreadSafeSSLSessionCacheTest() {}
+  ThreadSafeSSLSessionCacheTest() = default;
 
   void SetUp() override {
     for (auto& it : getSessions()) {

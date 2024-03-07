@@ -42,7 +42,7 @@ class MockSubscriber : public Subscriber<T, R> {
 template <typename T>
 class MockByteToMessageDecoder : public ByteToMessageDecoder<T> {
  public:
-  typedef typename ByteToMessageDecoder<T>::Context Context;
+  using Context = typename ByteToMessageDecoder<T>::Context;
 
   MOCK_METHOD4_T(decode, bool(Context*, folly::IOBufQueue&, T&, size_t&));
 };
@@ -50,7 +50,7 @@ class MockByteToMessageDecoder : public ByteToMessageDecoder<T> {
 template <typename T>
 class MockMessageToByteEncoder : public MessageToByteEncoder<T> {
  public:
-  typedef typename MessageToByteEncoder<T>::Context Context;
+  using Context = typename MessageToByteEncoder<T>::Context;
 
   MOCK_METHOD1_T(
       mockEncode,

@@ -28,7 +28,7 @@ void ServerWorkerPool::registerEventBase(folly::EventBase& evb) {
     workers_->push_back({&evb, worker});
   }
 
-  for (auto socket : *sockets_) {
+  for (const auto& socket : *sockets_) {
     socket->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
         [this, worker, socket]() {
           socketFactory_->addAcceptCB(

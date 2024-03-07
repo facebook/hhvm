@@ -151,8 +151,8 @@ class PipelineBase : public std::enable_shared_from_this<PipelineBase> {
   template <class H>
   PipelineBase& removeHelper(H* handler, bool checkEqual);
 
-  typedef std::vector<std::shared_ptr<PipelineContext>>::iterator
-      ContextIterator;
+  using ContextIterator =
+      std::vector<std::shared_ptr<PipelineContext>>::iterator;
 
   ContextIterator removeAt(const ContextIterator& it);
 
@@ -288,7 +288,7 @@ enum class ConnEvent {
   CONN_REMOVED,
 };
 
-typedef boost::variant<
+using AcceptPipelineType = boost::variant<
     folly::IOBuf*,
     folly::AsyncTransport*,
     ConnInfo&,
@@ -301,9 +301,8 @@ typedef boost::variant<
         folly::IOBuf*,
         std::shared_ptr<folly::AsyncUDPSocket>,
         folly::SocketAddress,
-        folly::AsyncUDPSocket::ReadCallback::OnDataAvailableParams>>
-    AcceptPipelineType;
-typedef Pipeline<AcceptPipelineType> AcceptPipeline;
+        folly::AsyncUDPSocket::ReadCallback::OnDataAvailableParams>>;
+using AcceptPipeline = Pipeline<AcceptPipelineType>;
 
 class AcceptPipelineFactory {
  public:

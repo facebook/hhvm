@@ -48,7 +48,7 @@ class FilePersistentCache : public PersistentCache<K, V> {
     cache_->init();
   }
 
-  ~FilePersistentCache() override {}
+  ~FilePersistentCache() override = default;
 
   /**
    * PersistentCache operations

@@ -26,7 +26,7 @@ namespace wangle {
 class FilePersistenceLayer : public CachePersistence {
  public:
   explicit FilePersistenceLayer(const std::string& file) : file_(file) {}
-  ~FilePersistenceLayer() override {}
+  ~FilePersistenceLayer() override = default;
 
   bool persist(const folly::dynamic& arrayOfKvPairs) noexcept override;
 

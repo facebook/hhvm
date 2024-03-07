@@ -27,10 +27,10 @@
 using namespace wangle;
 using namespace folly;
 
-typedef Pipeline<IOBufQueue&, std::unique_ptr<IOBuf>> BytesPipeline;
+using BytesPipeline = Pipeline<IOBufQueue&, std::unique_ptr<IOBuf>>;
 
-typedef ServerBootstrap<BytesPipeline> TestServer;
-typedef ClientBootstrap<BytesPipeline> TestClient;
+using TestServer = ServerBootstrap<BytesPipeline>;
+using TestClient = ClientBootstrap<BytesPipeline>;
 
 class TestClientPipelineFactory : public PipelineFactory<BytesPipeline> {
  public:

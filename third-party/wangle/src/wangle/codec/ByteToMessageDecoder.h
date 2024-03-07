@@ -43,7 +43,7 @@ namespace wangle {
 template <typename M>
 class ByteToMessageDecoder : public InboundHandler<folly::IOBufQueue&, M> {
  public:
-  typedef typename InboundHandler<folly::IOBufQueue&, M>::Context Context;
+  using Context = typename InboundHandler<folly::IOBufQueue&, M>::Context;
 
   /**
    * Decode bytes from buf into result.
@@ -80,6 +80,6 @@ class ByteToMessageDecoder : public InboundHandler<folly::IOBufQueue&, M> {
   bool transportActive_ = true;
 };
 
-typedef ByteToMessageDecoder<std::unique_ptr<folly::IOBuf>> ByteToByteDecoder;
+using ByteToByteDecoder = ByteToMessageDecoder<std::unique_ptr<folly::IOBuf>>;
 
 } // namespace wangle

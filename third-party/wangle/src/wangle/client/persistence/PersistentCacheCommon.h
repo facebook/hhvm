@@ -24,14 +24,12 @@
 
 namespace wangle {
 
-namespace client {
-namespace persistence {
+namespace client::persistence {
 constexpr std::chrono::milliseconds DEFAULT_CACHE_SYNC_INTERVAL =
     std::chrono::milliseconds(5000);
 constexpr int DEFAULT_CACHE_SYNC_RETRIES = 3;
 constexpr std::size_t DEFAULT_CACHE_CAPACITY = 100;
-} // namespace persistence
-} // namespace client
+} // namespace client::persistence
 
 /**
  * A counter that represents a "version" of the data.  This is used to determine

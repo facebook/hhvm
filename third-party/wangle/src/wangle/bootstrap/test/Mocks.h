@@ -88,7 +88,7 @@ class MockRoutingDataHandler : public RoutingDataHandler<char> {
 
 class MockRoutingDataHandlerFactory : public RoutingDataHandlerFactory<char> {
  public:
-  MockRoutingDataHandlerFactory() {}
+  MockRoutingDataHandlerFactory() = default;
 
   std::shared_ptr<RoutingDataHandler<char>> newHandler(
       uint64_t /*connId*/,

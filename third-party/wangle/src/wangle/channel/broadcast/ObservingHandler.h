@@ -32,7 +32,7 @@ template <typename T, typename R, typename P = DefaultPipeline>
 class ObservingHandler : public HandlerAdapter<folly::IOBufQueue&, T>,
                          public Subscriber<T, R> {
  public:
-  typedef typename HandlerAdapter<folly::IOBufQueue&, T>::Context Context;
+  using Context = typename HandlerAdapter<folly::IOBufQueue&, T>::Context;
 
   ObservingHandler(const R& routingData, BroadcastPool<T, R, P>* broadcastPool);
   ~ObservingHandler() override;

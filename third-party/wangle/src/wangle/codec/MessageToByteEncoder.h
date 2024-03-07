@@ -28,8 +28,8 @@ template <typename M>
 class MessageToByteEncoder
     : public OutboundHandler<M, std::unique_ptr<folly::IOBuf>> {
  public:
-  typedef typename OutboundHandler<M, std::unique_ptr<folly::IOBuf>>::Context
-      Context;
+  using Context =
+      typename OutboundHandler<M, std::unique_ptr<folly::IOBuf>>::Context;
 
   virtual std::unique_ptr<folly::IOBuf> encode(M& msg) = 0;
 

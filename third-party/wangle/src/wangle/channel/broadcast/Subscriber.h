@@ -26,7 +26,7 @@ namespace wangle {
 template <typename T, typename R>
 class Subscriber {
  public:
-  virtual ~Subscriber() {}
+  virtual ~Subscriber() = default;
 
   virtual void onNext(const T&) = 0;
   virtual void onError(folly::exception_wrapper ex) = 0;

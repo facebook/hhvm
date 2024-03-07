@@ -42,8 +42,8 @@ class LoadShedConfiguration {
     }
   };
 
-  typedef std::set<folly::SocketAddress, AddressOnlyCompare> AddressSet;
-  typedef std::set<NetworkAddress> NetworkSet;
+  using AddressSet = std::set<folly::SocketAddress, AddressOnlyCompare>;
+  using NetworkSet = std::set<NetworkAddress>;
 
   LoadShedConfiguration() = default;
 

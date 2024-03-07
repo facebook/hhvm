@@ -25,8 +25,8 @@ using namespace folly;
 using namespace wangle;
 using namespace testing;
 
-typedef StrictMock<MockHandlerAdapter<IOBufQueue&, std::unique_ptr<IOBuf>>>
-    MockBytesHandler;
+using MockBytesHandler =
+    StrictMock<MockHandlerAdapter<IOBufQueue&, std::unique_ptr<IOBuf>>>;
 
 MATCHER_P(IOBufContains, str, "") {
   return arg->moveToFbString() == str;

@@ -76,7 +76,7 @@ class SSLSessionCallbacks {
     return 0;
   }
 
-  virtual ~SSLSessionCallbacks() {}
+  virtual ~SSLSessionCallbacks() = default;
 
   /**
    * Sets up SSL Session callbacks on a context.  The application is

@@ -62,7 +62,7 @@ struct dn_char_traits : public std::char_traits<char> {
 };
 
 // Case insensitive string
-typedef std::basic_string<char, dn_char_traits> DNString;
+using DNString = std::basic_string<char, dn_char_traits>;
 
 struct SSLContextKey {
   DNString dnString;

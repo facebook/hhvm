@@ -61,11 +61,11 @@ class ConnectionManager : public folly::DelayedDestruction,
     virtual void onConnectionRemoved(const ManagedConnection* conn) = 0;
   };
 
-  typedef std::unique_ptr<ConnectionManager, Destructor> UniquePtr;
+  using UniquePtr = std::unique_ptr<ConnectionManager, Destructor>;
 
-  typedef folly::CountedIntrusiveList<
+  using ConnectionIterator = folly::CountedIntrusiveList<
       ManagedConnection,
-      &ManagedConnection::listHook_>::iterator ConnectionIterator;
+      &ManagedConnection::listHook_>::iterator;
   /**
    * Returns a new instance of ConnectionManager wrapped in a unique_ptr
    */

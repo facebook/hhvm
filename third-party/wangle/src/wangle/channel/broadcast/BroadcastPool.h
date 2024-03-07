@@ -29,7 +29,7 @@ namespace wangle {
 template <typename R, typename P = DefaultPipeline>
 class ServerPool {
  public:
-  virtual ~ServerPool() {}
+  virtual ~ServerPool() = default;
 
   /**
    * Kick off an upstream connect request given the BaseClientBootstrap
@@ -97,7 +97,7 @@ class BroadcastPool {
         broadcastPipelineFactory_(pipelineFactory),
         clientBootstrapFactory_(clientFactory) {}
 
-  virtual ~BroadcastPool() {}
+  virtual ~BroadcastPool() = default;
 
   // Non-copyable
   BroadcastPool(const BroadcastPool&) = delete;

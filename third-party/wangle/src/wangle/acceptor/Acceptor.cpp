@@ -233,7 +233,7 @@ void Acceptor::resetSSLContextConfigs(
   }
 }
 
-Acceptor::~Acceptor(void) {}
+Acceptor::~Acceptor() = default;
 
 void Acceptor::setTLSTicketSecrets(
     const std::vector<std::string>& oldSecrets,

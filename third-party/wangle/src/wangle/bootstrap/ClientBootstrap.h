@@ -83,7 +83,7 @@ class ClientBootstrap : public BaseClientBootstrap<Pipeline>,
   };
 
  public:
-  ClientBootstrap() {}
+  ClientBootstrap() = default;
 
   ClientBootstrap* group(
       std::shared_ptr<folly::IOThreadPoolExecutorBase> group) {
@@ -144,7 +144,7 @@ class ClientBootstrap : public BaseClientBootstrap<Pipeline>,
 class ClientBootstrapFactory
     : public BaseClientBootstrapFactory<BaseClientBootstrap<>> {
  public:
-  ClientBootstrapFactory() {}
+  ClientBootstrapFactory() = default;
 
   BaseClientBootstrap<>::Ptr newClient() override {
     return std::make_unique<ClientBootstrap<DefaultPipeline>>();

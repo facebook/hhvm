@@ -50,11 +50,11 @@ class Handler : public HandlerBase<HandlerContext<Rout, Wout>> {
  public:
   static const HandlerDir dir = HandlerDir::BOTH;
 
-  typedef Rin rin;
-  typedef Rout rout;
-  typedef Win win;
-  typedef Wout wout;
-  typedef HandlerContext<Rout, Wout> Context;
+  using rin = Rin;
+  using rout = Rout;
+  using win = Win;
+  using wout = Wout;
+  using Context = HandlerContext<Rout, Wout>;
   ~Handler() override = default;
 
   virtual void read(Context* ctx, Rin msg) = 0;
@@ -112,11 +112,11 @@ class InboundHandler : public HandlerBase<InboundHandlerContext<Rout>> {
  public:
   static const HandlerDir dir = HandlerDir::IN;
 
-  typedef Rin rin;
-  typedef Rout rout;
-  typedef folly::Unit win;
-  typedef folly::Unit wout;
-  typedef InboundHandlerContext<Rout> Context;
+  using rin = Rin;
+  using rout = Rout;
+  using win = folly::Unit;
+  using wout = folly::Unit;
+  using Context = InboundHandlerContext<Rout>;
   ~InboundHandler() override = default;
 
   virtual void read(Context* ctx, Rin msg) = 0;
@@ -139,11 +139,11 @@ class OutboundHandler : public HandlerBase<OutboundHandlerContext<Wout>> {
  public:
   static const HandlerDir dir = HandlerDir::OUT;
 
-  typedef folly::Unit rin;
-  typedef folly::Unit rout;
-  typedef Win win;
-  typedef Wout wout;
-  typedef OutboundHandlerContext<Wout> Context;
+  using rin = folly::Unit;
+  using rout = folly::Unit;
+  using win = Win;
+  using wout = Wout;
+  using Context = OutboundHandlerContext<Wout>;
   ~OutboundHandler() override = default;
 
   virtual folly::Future<folly::Unit> write(Context* ctx, Win msg) = 0;
@@ -160,7 +160,7 @@ class OutboundHandler : public HandlerBase<OutboundHandlerContext<Wout>> {
 template <class R, class W = R>
 class HandlerAdapter : public Handler<R, R, W, W> {
  public:
-  typedef typename Handler<R, R, W, W>::Context Context;
+  using Context = typename Handler<R, R, W, W>::Context;
 
   void read(Context* ctx, R msg) override {
     ctx->fireRead(std::forward<R>(msg));
@@ -171,13 +171,13 @@ class HandlerAdapter : public Handler<R, R, W, W> {
   }
 };
 
-typedef HandlerAdapter<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>
-    BytesToBytesHandler;
+using BytesToBytesHandler =
+    HandlerAdapter<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
 
-typedef InboundHandler<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>
-    InboundBytesToBytesHandler;
+using InboundBytesToBytesHandler =
+    InboundHandler<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
 
-typedef OutboundHandler<std::unique_ptr<folly::IOBuf>>
-    OutboundBytesToBytesHandler;
+using OutboundBytesToBytesHandler =
+    OutboundHandler<std::unique_ptr<folly::IOBuf>>;
 
 } // namespace wangle

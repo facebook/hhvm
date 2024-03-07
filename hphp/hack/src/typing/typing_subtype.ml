@@ -1525,28 +1525,19 @@ end = struct
           ty_sub
           (r_super, tprim_super)
           env)
-    | (_, Tneg (Neg_class (_, c_super))) ->
+    | (r_super, Tneg (Neg_class (pos_super, c_super))) ->
       (match ity_sub with
       | ConstraintType _ -> default_subtype_help env
       | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (_, Tneg (Neg_class (_, c_sub))) ->
-          if TUtils.is_sub_class_refl env c_super c_sub then
-            valid env
-          else
-            invalid_env env
-        | (_, Tneg (Neg_prim _)) ->
-          (* not p, for any primitive type p contains all class types, and so
-             can't be a subtype of not c, which doesn't contain class types c *)
-          invalid_env env
-        | (_, Tclass ((_, c_sub), _, _)) ->
-          if Subtype_negation.is_class_disjoint env c_sub c_super then
-            valid env
-          else
-            invalid_env env
-        (* All of these are definitely disjoint from class types *)
-        | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
-        | _ -> default_subtype_help env))
+        Subtype_neg_class_r.simplify
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          ty_sub
+          (r_super, (pos_super, c_super))
+          env)
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
       when (not (Class_refinement.is_empty cr_super))
            && (subtype_env.Subtype_env.require_soundness
@@ -1817,6 +1808,56 @@ end = struct
         ity_sub
         lty_super
         env
+end
+
+and Subtype_neg_class_r : sig
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    locl_phase ty ->
+    locl_phase Reason.t_ * (Pos_or_decl.t * string) ->
+    env ->
+    env * TL.subtype_prop
+end = struct
+  let simplify
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      lty_sub
+      (r_super, (pos_super, c_super))
+      env =
+    match deref lty_sub with
+    | (_, Tneg (Neg_class (_, c_sub))) ->
+      if TUtils.is_sub_class_refl env c_super c_sub then
+        valid env
+      else
+        invalid ~fail env
+    | (_, Tneg (Neg_prim _)) ->
+      (* not p, for any primitive type p contains all class types, and so
+         can't be a subtype of not c, which doesn't contain class types c *)
+      invalid ~fail env
+    | (_, Tclass ((_, c_sub), _, _)) ->
+      if Subtype_negation.is_class_disjoint env c_sub c_super then
+        valid env
+      else
+        invalid ~fail env
+    (* All of these are definitely disjoint from class types *)
+    | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
+    | _ ->
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        (LoclType lty_sub)
+        (LoclType (mk (r_super, Tneg (Neg_class (pos_super, c_super)))))
 end
 
 and Subtype_neg_prim_r : sig

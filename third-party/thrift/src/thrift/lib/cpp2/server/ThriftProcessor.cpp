@@ -48,6 +48,7 @@ void ThriftProcessor::onThriftRequest(
   auto& processorFactory = server_.getDecoratedProcessorFactory();
   if (processor_ == nullptr) {
     processor_ = processorFactory.getProcessor();
+    processor_->coalesceWithServerScopedLegacyEventHandlers(server_);
   }
 
   auto worker = connContext->getWorker();

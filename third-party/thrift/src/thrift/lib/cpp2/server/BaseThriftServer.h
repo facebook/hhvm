@@ -1712,6 +1712,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   struct ProcessedModuleSet {
     std::vector<ModulesSpecification::Info> modules;
+    /**
+     * Event handlers from all modules coalesced into one list.
+     */
     std::vector<std::shared_ptr<TProcessorEventHandler>>
         coalescedLegacyEventHandlers;
   };

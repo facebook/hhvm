@@ -120,6 +120,17 @@ void AsyncProcessor::executeRequest(
   LOG(FATAL) << "Unimplemented executeRequest called";
 }
 
+void AsyncProcessor::coalesceWithServerScopedLegacyEventHandlers(
+    const apache::thrift::server::ServerConfigs& server) {
+  const auto& serverScopedEventHandlers = server.getLegacyEventHandlers();
+  if (!serverScopedEventHandlers.empty()) {
+    std::shared_lock lock{getRWMutex()};
+    for (const auto& eventHandler : serverScopedEventHandlers) {
+      addEventHandler(eventHandler);
+    }
+  }
+}
+
 void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   if (!setUpRequestProcessing(req)) {
     return;

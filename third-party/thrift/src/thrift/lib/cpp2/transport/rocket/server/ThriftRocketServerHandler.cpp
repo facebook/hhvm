@@ -208,6 +208,13 @@ void ThriftRocketServerHandler::handleSetupFrame(
           ErrorCode::INVALID_SETUP, "Unsupported MIME types"));
     }
 
+    SCOPE_EXIT {
+      if (processor_) {
+        processor_->coalesceWithServerScopedLegacyEventHandlers(
+            *worker_->getServer());
+      }
+    };
+
     eventBase_ = connContext_.getTransport()->getEventBase();
     for (const auto& h : setupFrameHandlers_) {
       auto processorInfo = h->tryHandle(meta);

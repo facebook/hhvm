@@ -388,6 +388,24 @@ class AsyncProcessor : public TProcessorBase {
   virtual void executeRequest(
       ServerRequest&& request,
       const AsyncProcessorFactory::MethodMetadata& methodMetadata);
+
+  /**
+   * TProcessorEventHandler instances can come from 3 places:
+   *   1. ServerModules added to ThriftServer
+   *   2. Globally-registered via TProcessorBase::addProcessorEventHandler
+   *   3. AsyncProcessor::addEventHandler calls (typically in services that
+   *      override getProcessor in their handler)
+   *
+   * This function combines all of these sources together such that
+   * getEventHandlers() returns the united set, as if by calling
+   * addEventHandler.
+   *
+   * This function is thread-safe. However, all calls MUST pass in the same
+   * server object. This is reasonable because an AsyncProcessor cannot be used
+   * across ThriftServer instances.
+   */
+  void coalesceWithServerScopedLegacyEventHandlers(
+      const apache::thrift::server::ServerConfigs& server);
 };
 
 namespace detail {

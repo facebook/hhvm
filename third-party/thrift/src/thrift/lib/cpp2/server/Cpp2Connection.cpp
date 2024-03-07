@@ -147,6 +147,8 @@ Cpp2Connection::Cpp2Connection(
           worker_.get()),
       transport_(transport),
       executor_(worker_->getServer()->getHandlerExecutor_deprecated().get()) {
+  processor_->coalesceWithServerScopedLegacyEventHandlers(
+      *worker_->getServer());
   if (worker_->getServer()->resourcePoolSet().empty()) {
     threadManager_ = worker_->getServer()->getThreadManager_deprecated();
   }

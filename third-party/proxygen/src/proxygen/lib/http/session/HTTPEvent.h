@@ -34,7 +34,8 @@ class HTTPEvent {
     CHUNK_COMPLETE,
     TRAILERS_COMPLETE,
     MESSAGE_COMPLETE,
-    UPGRADE
+    UPGRADE,
+    ERROR,
   };
 
   HTTPEvent(HTTPCodec::StreamID streamID, Type event, bool upgrade = false)
@@ -81,14 +82,13 @@ class HTTPEvent {
         upgrade_(false) {
   }
 
-  HTTPEvent(HTTPCodec::StreamID streamID,
-            Type event,
-            std::unique_ptr<HTTPException> error)
+  HTTPEvent(HTTPCodec::StreamID streamID, std::unique_ptr<HTTPException> error)
       : error_(std::move(error)),
         streamID_(streamID),
         length_(0),
-        event_(event),
+        event_(Type::ERROR),
         upgrade_(false) {
+    CHECK(error_);
   }
 
   HTTPEvent(HTTPCodec::StreamID streamID, Type event, UpgradeProtocol protocol)

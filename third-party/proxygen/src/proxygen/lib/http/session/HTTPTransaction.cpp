@@ -668,6 +668,22 @@ void HTTPTransaction::abortAndDeliverError(ErrorCode codecError,
 }
 
 void HTTPTransaction::onError(const HTTPException& error) {
+  /**
+   * Defer ingress RST_STREAM w/ NO_ERROR if ingress EOM is queued. Downstream
+   * may send full response prior to upstream sending entire request.
+   */
+  if (isUpstream() && error.hasCodecStatusCode() &&
+      error.getCodecStatusCode() == ErrorCode::NO_ERROR &&
+      isIngressEOMQueued()) {
+    checkCreateDeferredIngress();
+    deferredIngress_->emplace(id_, std::make_unique<HTTPException>(error));
+    return;
+  }
+
+  processIngressError(error);
+}
+
+void HTTPTransaction::processIngressError(const HTTPException& error) {
   DestructorGuard g(this);
 
   const bool wasAborted = aborted_; // see comment below
@@ -1129,8 +1145,8 @@ size_t HTTPTransaction::sendDeferredBody(uint32_t maxEgress) {
                                windowAvailable > 0 ? windowAvailable : 0)
           : maxEgress;
 
-  // We shouldn't be called if we have no pending body/EOM, egress is paused, or
-  // the send window is closed
+  // We shouldn't be called if we have no pending body/EOM, egress is paused,
+  // or the send window is closed
   const size_t bytesLeft = getOutstandingEgressBodyBytes();
   INVARIANT_RETURN((bytesLeft > 0 || isEgressEOMQueued()) && sendWindow > 0, 0);
 
@@ -1607,6 +1623,9 @@ void HTTPTransaction::resumeIngress() {
         break;
       case HTTPEvent::Type::UPGRADE:
         processIngressUpgrade(callback.getUpgradeProtocol());
+        break;
+      case HTTPEvent::Type::ERROR:
+        processIngressError(*callback.getError());
         break;
     }
   }

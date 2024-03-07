@@ -870,6 +870,143 @@ TEST_F(HTTP2UpstreamSessionTest, InvalidControlStream) {
   httpSession_->destroy();
 }
 
+TEST_F(HTTP2UpstreamSessionTest, FullResponsePriorToEgressCompleteNoError) {
+  // Server codec manually generates full response w/ eom followed by
+  // RST_STREAM=NO_ERROR prior to client egress complete
+  auto egressCodec = makeServerCodec();
+  folly::IOBufQueue serverEgress(folly::IOBufQueue::cacheChainLength());
+  egressCodec->generateSettings(serverEgress);
+
+  // open upstream transaction and send half of body
+  auto handler = openTransaction();
+  EXPECT_CALL(*handler, _detachTransaction()).WillOnce([&]() {
+    // reset txn_ if detachTransaction is invoked
+    handler->txn_ = nullptr;
+  });
+  auto req = getPostRequest(/*contentLength=*/2000);
+  handler->txn_->sendHeaders(req);
+  eventBase_.loopOnce();
+  handler->txn_->sendBody(makeBuf(1000));
+  eventBase_.loopOnce();
+
+  // send server response header
+  auto txnId = handler->txn_->getID();
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  egressCodec->generateHeader(serverEgress, txnId, resp);
+
+  // once we rx server headers, pause ingress to verify that NO_ERROR is
+  // properly deferred
+  handler->expectHeaders([this, &handler](auto&&) {
+    handler->txn_->pauseIngress();
+    eventBase_.terminateLoopSoon();
+  });
+  EXPECT_CALL(*handler, _onBodyWithOffset(_, _)).Times(0);
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  EXPECT_CALL(*handler, _onError(_)).Times(0);
+
+  // generate body, EOM & RST_STREAM w/ NO_ERROR
+  egressCodec->generateBody(
+      serverEgress, txnId, makeBuf(400), HTTPCodec::NoPadding, /*eom=*/true);
+  egressCodec->generateRstStream(serverEgress, txnId, ErrorCode::NO_ERROR);
+
+  // send to transaction
+  auto input = serverEgress.move();
+  input->coalesce();
+  readAndLoop(input->data(), input->length());
+  eventBase_.loop();
+
+  // txn should still exist
+  CHECK_NOTNULL(handler->txn_);
+
+  // resume ingress and loop again
+  EXPECT_CALL(*handler, _onBodyWithOffset(_, _)).Times(1);
+  EXPECT_CALL(*handler, _onEOM()).Times(1);
+  handler->expectError([this](auto&& ex) {
+    CHECK(ex.hasCodecStatusCode());
+    EXPECT_EQ(ex.getCodecStatusCode(), ErrorCode::NO_ERROR);
+    eventBase_.terminateLoopSoon();
+  });
+  handler->txn_->resumeIngress();
+  eventBase_.loop();
+
+  // txn should have detached here
+  CHECK_EQ(handler->txn_, nullptr);
+
+  httpSession_->dropConnection();
+}
+
+TEST_F(HTTP2UpstreamSessionTest, FullResponsePriorToEgressCompleteCancelError) {
+  /**
+   * Similar to the above test, but rather than resuming ingress and expecting a
+   * RST_STREAM=NO_ERROR, we validate that rx'ing an error other than NO_ERROR
+   * (e.g. CANCEL) will bypass ingress paused and deliver the error maintaining
+   * the old behaviour
+   */
+  auto egressCodec = makeServerCodec();
+  folly::IOBufQueue serverEgress(folly::IOBufQueue::cacheChainLength());
+  egressCodec->generateSettings(serverEgress);
+
+  // open upstream transaction and send half of body
+  auto handler = openTransaction();
+  EXPECT_CALL(*handler, _detachTransaction()).WillOnce([&]() {
+    // reset txn_ if detachTransaction is invoked
+    handler->txn_ = nullptr;
+  });
+  auto req = getPostRequest(/*contentLength=*/2000);
+  handler->txn_->sendHeaders(req);
+  eventBase_.loopOnce();
+  handler->txn_->sendBody(makeBuf(1000));
+  eventBase_.loopOnce();
+
+  // send server response header
+  auto txnId = handler->txn_->getID();
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  egressCodec->generateHeader(serverEgress, txnId, resp);
+
+  // once we rx server headers, pause ingress to verify that NO_ERROR is
+  // properly deferred
+  handler->expectHeaders([this, &handler](auto&&) {
+    handler->txn_->pauseIngress();
+    eventBase_.terminateLoopSoon();
+  });
+  EXPECT_CALL(*handler, _onBodyWithOffset(_, _)).Times(0);
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  EXPECT_CALL(*handler, _onError(_)).Times(0);
+
+  // generate body, EOM & RST_STREAM w/ NO_ERROR
+  egressCodec->generateBody(
+      serverEgress, txnId, makeBuf(400), HTTPCodec::NoPadding, /*eom=*/true);
+  egressCodec->generateRstStream(serverEgress, txnId, ErrorCode::NO_ERROR);
+
+  // send to transaction
+  auto input = serverEgress.move();
+  input->coalesce();
+  readAndLoop(input->data(), input->length());
+  eventBase_.loop();
+
+  // txn should still exist
+  CHECK_NOTNULL(handler->txn_);
+
+  // keep ingress paused; ErrorCode::CANCEL should invoke ::onError
+  handler->expectError([this](auto&& ex) {
+    CHECK(ex.hasCodecStatusCode());
+    EXPECT_EQ(ex.getCodecStatusCode(), ErrorCode::CANCEL);
+    eventBase_.terminateLoopSoon();
+  });
+
+  egressCodec->generateRstStream(serverEgress, txnId, ErrorCode::CANCEL);
+  input = serverEgress.move();
+  input->coalesce();
+  readAndLoop(input->data(), input->length());
+
+  // txn should have detached here
+  CHECK_EQ(handler->txn_, nullptr);
+
+  httpSession_->dropConnection();
+}
+
 class HTTP2UpstreamSessionWithVirtualNodesTest
     : public HTTPUpstreamTest<MockHTTPCodecPair> {
  public:

@@ -1731,6 +1731,7 @@ class HTTPTransaction
   void processIngressTrailers(std::unique_ptr<HTTPHeaders> trailers);
   void processIngressUpgrade(UpgradeProtocol protocol);
   void processIngressEOM();
+  void processIngressError(const HTTPException& ex);
 
   void sendBodyFlowControlled(std::unique_ptr<folly::IOBuf> body = nullptr);
   size_t sendBodyNow(std::unique_ptr<folly::IOBuf> body,

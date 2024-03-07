@@ -38,6 +38,9 @@ std::ostream& operator<<(std::ostream& os, HTTPEvent::Type e) {
     case HTTPEvent::Type::UPGRADE:
       os << "uprade";
       break;
+    case HTTPEvent::Type::ERROR:
+      os << "error";
+      break;
   }
 
   return os;

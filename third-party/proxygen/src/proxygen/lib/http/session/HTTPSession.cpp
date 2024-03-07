@@ -1145,19 +1145,15 @@ void HTTPSession::onAbort(HTTPCodec::StreamID streamID, ErrorCode code) {
   if (abortPushesOnRST_ && isDownstream() && !txn->getAssocTxnId() &&
       code == ErrorCode::CANCEL) {
     VLOG(4) << "Cancel all push txns because assoc txn has been cancelled.";
-    for (auto it = txn->getPushedTransactions().begin();
-         it != txn->getPushedTransactions().end();) {
-      auto pushTxn = findTransaction(*it);
-      ++it;
+    for (auto assocPushId : txn->getPushedTransactions()) {
+      auto* pushTxn = findTransaction(assocPushId);
       DCHECK(pushTxn != nullptr);
       pushTxn->onError(ex);
     }
   }
 
-  auto exTxns = txn->getExTransactions();
-  for (auto it = exTxns.begin(); it != exTxns.end(); ++it) {
-    auto exTxn = findTransaction(*it);
-    if (exTxn) {
+  for (auto assocExId : txn->getExTransactions()) {
+    if (auto exTxn = findTransaction(assocExId)) {
       exTxn->onError(ex);
     }
   }

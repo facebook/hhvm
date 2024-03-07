@@ -120,9 +120,13 @@ size_t RendezvousHash::get(uint64_t key) const {
   for (size_t i = 0; i < nodes_.size(); ++i) {
     auto& it = nodes_[i];
     // combine the hash with the cluster together
-    double combinedHash = computeHash(it.first + key);
-    double scaledHash = combinedHash / std::numeric_limits<uint64_t>::max();
-    double scaledWeight = it.second > std::numeric_limits<double>::epsilon()
+    const double combinedHash = computeHash(it.first + key);
+    // Note that double(UINT64_MAX) cannot be exactly represented as a float. We
+    // ignore the small inaccuracy here.
+    const double scaledHash = combinedHash /
+        static_cast<double>(std::numeric_limits<uint64_t>::max());
+    const double scaledWeight =
+        it.second > std::numeric_limits<double>::epsilon()
         ? std::pow(scaledHash, 1.0 / it.second)
         : 0.0;
     if (scaledWeight > maxWeight) {

@@ -19,7 +19,7 @@ use crate::Coeffects;
 use crate::Constant;
 use crate::ConstantId;
 use crate::FunctionFlags;
-use crate::FunctionId;
+use crate::FunctionName;
 use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
@@ -459,7 +459,7 @@ impl Func {
 #[derive(Debug)]
 pub struct Function {
     pub flags: FunctionFlags,
-    pub name: FunctionId,
+    pub name: FunctionName,
     pub func: Func,
 }
 

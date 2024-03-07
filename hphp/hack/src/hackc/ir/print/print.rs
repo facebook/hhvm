@@ -175,7 +175,11 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             )?;
         }
         CallDetail::FCallFuncD { func } => {
-            write!(w, "call func {}", FmtIdentifierId(func.id, ctx.strings))?;
+            write!(
+                w,
+                "call func {}",
+                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
+            )?;
         }
         CallDetail::FCallObjMethod { flavor } => {
             let arrow = match *flavor {
@@ -634,7 +638,7 @@ fn print_function(
     writeln!(
         w,
         "function {name}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {{",
-        name = FmtIdentifierId(f.name.id, strings),
+        name = FmtIdentifierId(f.name.as_bytes_id(), strings),
         tparams = FmtTParams(&f.func.tparams, strings),
         shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
         params = FmtFuncParams(&f.func, strings),
@@ -1184,7 +1188,11 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             )?;
         }
         Hhbc::ResolveFunc(func, _) => {
-            write!(w, "resolve_func {}", FmtIdentifierId(func.id, ctx.strings))?;
+            write!(
+                w,
+                "resolve_func {}",
+                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
+            )?;
         }
         Hhbc::ResolveRClsMethodD(vid, clsid, method, _) => {
             write!(
@@ -1199,7 +1207,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "resolve_r_func {}, {}",
-                FmtIdentifierId(fid.id, ctx.strings),
+                FmtIdentifierId(fid.as_bytes_id(), ctx.strings),
                 FmtVid(func, rid, verbose, strings)
             )?;
         }
@@ -1207,7 +1215,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "resolve_meth_caller {}",
-                FmtIdentifierId(func.id, ctx.strings)
+                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
             )?;
         }
         Hhbc::SelfCls(_) => {

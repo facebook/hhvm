@@ -50,8 +50,7 @@ use syn::Token;
 /// is rewritten as:
 ///
 ///     Opcode::ResolveFunc(ref str1) => {
-///         let str1 =
-///             ir::FunctionId::from_hhbc(*str1, ctx.strings);
+///         let str1 = *str1;
 ///         Action::Push(Instr::Hhbc(Hhbc::ResolveFunc(str1, ctx.loc)))
 ///     }
 ///
@@ -280,7 +279,7 @@ fn parse_convert_simple(
                 convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "FunctionName" => {
-                convert(quote_spanned!(span=> ir::FunctionId::from_hhbc(*#imm, #strings) ));
+                convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "MethodName" => {
                 convert(quote_spanned!(span=> ir::MethodId::from_hhbc(*#imm, #strings) ));

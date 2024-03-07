@@ -211,7 +211,7 @@ impl UnitParser {
                 func,
             } = f;
 
-            let name = MethodId::new(name.id);
+            let name = MethodId::new(name.as_bytes_id());
 
             class.methods.push(Method {
                 flags: cs.flags,

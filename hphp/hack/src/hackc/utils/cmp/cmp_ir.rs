@@ -468,8 +468,6 @@ fn cmp_function(
     (a, a_strings): (&Function, &StringInterner),
     (b, b_strings): (&Function, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Function {
         flags: a_flags,
         name: a_name,
@@ -482,7 +480,7 @@ fn cmp_function(
     } = b;
 
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
 
     Ok(())
@@ -724,7 +722,7 @@ fn cmp_instr_call(
         }
         (CallDetail::FCallFuncD { func: a_func },
          CallDetail::FCallFuncD { func: b_func }) => {
-            cmp_id(a_func.id, b_func.id).qualified("func")?;
+            cmp_eq(a_func, b_func).qualified("func")?;
         }
         (CallDetail::FCallObjMethod { flavor: a_flavor },
          CallDetail::FCallObjMethod { flavor: b_flavor }) => {
@@ -883,17 +881,17 @@ fn cmp_instr_hhbc(
             cmp_id(y0.id, y1.id).qualified("ResolveRClsMethodS param y")?;
         }
         (Hhbc::ResolveFunc(x0, _), Hhbc::ResolveFunc(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveFunc param x")?;
+            cmp_eq(x0, x1).qualified("ResolveFunc param x")?;
         }
         (Hhbc::ResolveRClsMethodD(_, x0, y0, _), Hhbc::ResolveRClsMethodD(_, x1, y1, _)) => {
             cmp_id(x0.id, x1.id).qualified("ResolveRClsMethodD param x")?;
             cmp_id(y0.id, y1.id).qualified("ResolveRClsMethodD param y")?;
         }
         (Hhbc::ResolveRFunc(_, x0, _), Hhbc::ResolveRFunc(_, x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveRFunc param x")?;
+            cmp_eq(x0, x1).qualified("ResolveRFunc param x")?;
         }
         (Hhbc::ResolveMethCaller(x0, _), Hhbc::ResolveMethCaller(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveMethCaller param x")?;
+            cmp_eq(x0, x1).qualified("ResolveMethCaller param x")?;
         }
         (Hhbc::SetOpL(_, _, x0, _), Hhbc::SetOpL(_, _, x1, _)) => {
             cmp_eq(x0, x1).qualified("SetOpL param x")?;
@@ -1984,7 +1982,7 @@ mod mapping {
 
     impl MapName for (&Function, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.as_str().to_owned()
         }
     }
 

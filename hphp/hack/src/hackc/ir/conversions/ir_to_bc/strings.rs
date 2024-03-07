@@ -41,12 +41,6 @@ impl StringCache {
         )
     }
 
-    pub fn lookup_function_name(&self, id: ir::FunctionId) -> hhbc::FunctionName {
-        hhbc::FunctionName::intern(
-            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 function name"),
-        )
-    }
-
     pub fn lookup_prop_name(&self, id: ir::PropId) -> hhbc::PropName {
         hhbc::PropName::intern(
             std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 prop name"),

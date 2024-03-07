@@ -46,7 +46,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "ConstName"
             || ident == "ContCheckOp"
             || ident == "FatalOp"
-            || ident == "FunctionId"
+            || ident == "FunctionName"
             || ident == "IncDecOp"
             || ident == "InitPropOp"
             || ident == "IsTypeOp"

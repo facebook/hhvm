@@ -25,7 +25,7 @@ use ir_core::EnforceableType;
 use ir_core::FatalOp;
 use ir_core::Filename;
 use ir_core::FloatBits;
-use ir_core::FunctionId;
+use ir_core::FunctionName;
 use ir_core::HackConstant;
 use ir_core::IncDecOp;
 use ir_core::InitPropOp;
@@ -415,9 +415,9 @@ pub(crate) fn parse_fatal_op(tokenizer: &mut Tokenizer<'_>) -> Result<FatalOp> {
     })
 }
 
-pub(crate) fn parse_func_id(tokenizer: &mut Tokenizer<'_>) -> Result<FunctionId> {
+pub(crate) fn parse_func_name(tokenizer: &mut Tokenizer<'_>) -> Result<FunctionName> {
     let (ident, _) = parse_user_id(tokenizer)?;
-    Ok(FunctionId::from_bytes(&ident, &tokenizer.strings))
+    Ok(FunctionName::from_utf8(&ident)?)
 }
 
 pub(crate) fn parse_hack_constant(tokenizer: &mut Tokenizer<'_>) -> Result<HackConstant> {

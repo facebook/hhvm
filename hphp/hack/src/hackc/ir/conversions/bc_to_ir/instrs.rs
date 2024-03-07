@@ -19,7 +19,6 @@ use ir::print::FmtRawBid;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
 use ir::FCallArgsFlags;
-use ir::FunctionId;
 use ir::Instr;
 use ir::LocalId;
 use ir::TryCatchId;
@@ -264,10 +263,7 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
             num_args += 1;
             CallDetail::FCallFunc
         }
-        Opcode::FCallFuncD(_, func) => {
-            let func = FunctionId::from_hhbc(func, ctx.strings);
-            CallDetail::FCallFuncD { func }
-        }
+        Opcode::FCallFuncD(_, func) => CallDetail::FCallFuncD { func },
         Opcode::FCallObjMethod(_, _, flavor) => {
             num_args += 1;
             CallDetail::FCallObjMethod { flavor }

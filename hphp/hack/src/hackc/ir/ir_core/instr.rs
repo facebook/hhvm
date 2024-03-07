@@ -19,7 +19,7 @@ use crate::ConstName;
 use crate::ContCheckOp;
 use crate::FCallArgsFlags;
 use crate::FatalOp;
-use crate::FunctionId;
+use crate::FunctionName;
 use crate::GlobalId;
 use crate::IncDecOp;
 use crate::InitPropOp;
@@ -531,10 +531,10 @@ pub enum Hhbc {
     ResolveRClsMethod([ValueId; 2], MethodId, LocId),
     #[has_locals(none)]
     ResolveRClsMethodS(ValueId, SpecialClsRef, MethodId, LocId),
-    ResolveFunc(FunctionId, LocId),
+    ResolveFunc(FunctionName, LocId),
     ResolveRClsMethodD(ValueId, ClassId, MethodId, LocId),
-    ResolveRFunc(ValueId, FunctionId, LocId),
-    ResolveMethCaller(FunctionId, LocId),
+    ResolveRFunc(ValueId, FunctionName, LocId),
+    ResolveMethCaller(FunctionName, LocId),
     SelfCls(LocId),
     SetG([ValueId; 2], LocId),
     SetImplicitContextByValue(ValueId, LocId),
@@ -757,7 +757,7 @@ pub enum CallDetail {
     FCallFunc,
     // foo(42);
     FCallFuncD {
-        func: FunctionId,
+        func: FunctionName,
     },
     // $a->$b(42);
     FCallObjMethod {
@@ -1192,7 +1192,7 @@ impl Instr {
         Instr::Call(Box::new(call))
     }
 
-    pub fn simple_call(func: FunctionId, operands: &[ValueId], loc: LocId) -> Instr {
+    pub fn simple_call(func: FunctionName, operands: &[ValueId], loc: LocId) -> Instr {
         Self::call(Call {
             operands: operands.into(),
             context: UnitBytesId::EMPTY,

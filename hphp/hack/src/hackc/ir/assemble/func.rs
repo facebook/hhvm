@@ -80,7 +80,7 @@ use crate::parse::parse_constant;
 use crate::parse::parse_constant_id;
 use crate::parse::parse_dynamic_call_op;
 use crate::parse::parse_fatal_op;
-use crate::parse::parse_func_id;
+use crate::parse::parse_func_name;
 use crate::parse::parse_i64;
 use crate::parse::parse_inc_dec_op_post;
 use crate::parse::parse_inc_dec_op_pre;
@@ -169,7 +169,7 @@ impl<'b> FunctionParser<'b> {
         unit_state: &mut crate::assemble::UnitParser,
         mut class_state: Option<&'b mut ClassState>,
     ) -> Result<Function> {
-        parse!(tokenizer, <name:parse_func_id>);
+        parse!(tokenizer, <name:parse_func_name>);
 
         let tparams = if tokenizer.next_is_identifier("<")? {
             let mut tparams = ClassIdMap::default();
@@ -511,7 +511,7 @@ impl FunctionParser<'_> {
                     operands_suffix.push(vid);
                     CallDetail::FCallFunc
                 } else {
-                    let func = parse_func_id(tokenizer)?;
+                    let func = parse_func_name(tokenizer)?;
                     CallDetail::FCallFuncD { func }
                 }
             }
@@ -1396,12 +1396,12 @@ impl FunctionParser<'_> {
             "resolve_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethod(p0, p1, loc)), <p0:self.vid> "::" <p1:parse_method_id>),
             "resolve_cls_method_d" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodD(p0, p1, loc)), <p0:parse_class_id> "::" <p1:parse_method_id>),
             "resolve_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodS(p0, p1, loc)), <p0:parse_special_cls_ref> "::" <p1:parse_method_id>),
-            "resolve_func" => I::Hhbc(H::ResolveFunc(parse_func_id(tok)?, loc)),
-            "resolve_meth_caller" => I::Hhbc(H::ResolveMethCaller(parse_func_id(tok)?, loc)),
+            "resolve_func" => I::Hhbc(H::ResolveFunc(parse_func_name(tok)?, loc)),
+            "resolve_meth_caller" => I::Hhbc(H::ResolveMethCaller(parse_func_name(tok)?, loc)),
             "resolve_r_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethod([p0, p1], p2, loc)), <p0:self.vid> "::" <p2:parse_method_id> "," <p1:self.vid>),
             "resolve_r_cls_method_d" => parse_instr!(tok, I::Hhbc(Hhbc::ResolveRClsMethodD(p0, p1, p2, loc)), <p1:parse_class_id> "::" <p2:parse_method_id> "," <p0:self.vid>),
             "resolve_r_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethodS(p0, p1, p2, loc)), <p1:parse_special_cls_ref> "::" <p2:parse_method_id> "," <p0:self.vid>),
-            "resolve_r_func" => parse_instr!(tok, I::Hhbc(H::ResolveRFunc(p0, p1, loc)), <p1:parse_func_id> "," <p0:self.vid>),
+            "resolve_r_func" => parse_instr!(tok, I::Hhbc(H::ResolveRFunc(p0, p1, loc)), <p1:parse_func_name> "," <p0:self.vid>),
             "ret" => self.parse_ret(tok, loc)?,
             "ret_c_suspended" => I::Terminator(T::RetCSuspended(self.vid(tok)?, loc)),
             "select" => parse_instr!(tok, I::Special(Special::Select(p0, p1)), <p1:parse_u32> "from" <p0:self.vid>),

@@ -144,7 +144,7 @@ impl fmt::Display for FmtFieldName<'_> {
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub(crate) enum FunctionName {
     Builtin(crate::hack::Builtin),
-    Function(ir::FunctionId),
+    Function(ir::FunctionName),
     Intrinsic(Intrinsic),
     Method(TypeName, ir::MethodId),
     Unmangled(String),
@@ -190,7 +190,7 @@ impl fmt::Display for FmtFunctionName<'_> {
             FunctionName::Function(fid) => write!(
                 f,
                 "{TOP_LEVELS_CLASS}.{}",
-                fid.as_bytes(strings).mangle(strings)
+                fid.as_str().as_bytes().mangle(strings)
             )?,
             FunctionName::Intrinsic(intrinsic) => {
                 let tn;
@@ -301,7 +301,7 @@ impl fmt::Display for FmtTypeName<'_> {
         match name {
             TypeName::Class(cid) => f.write_str(&cid.as_bytes(strings).mangle(strings)),
             TypeName::Curry(box FunctionName::Function(fid)) => {
-                write!(f, "{}$curry", fid.as_bytes(strings).mangle(strings))
+                write!(f, "{}$curry", fid.as_str().as_bytes().mangle(strings))
             }
             TypeName::Curry(box FunctionName::Method(ty, mid)) => {
                 write!(

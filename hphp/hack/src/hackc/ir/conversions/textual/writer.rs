@@ -124,7 +124,7 @@ impl Thing {
     fn name(&self) -> ir::UnitBytesId {
         match self {
             Thing::Class(c) => c.name.id,
-            Thing::Func(f) => f.name.id,
+            Thing::Func(f) => f.name.as_bytes_id(),
         }
     }
 

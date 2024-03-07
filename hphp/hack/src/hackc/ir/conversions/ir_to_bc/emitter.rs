@@ -351,9 +351,7 @@ impl<'b> InstrEmitter<'b> {
             }
             ir::instr::CallDetail::FCallCtor => Opcode::FCallCtor(fcall_args, hint),
             ir::instr::CallDetail::FCallFunc => Opcode::FCallFunc(fcall_args),
-            ir::instr::CallDetail::FCallFuncD { func } => {
-                Opcode::FCallFuncD(fcall_args, self.strings.lookup_function_name(*func))
-            }
+            ir::instr::CallDetail::FCallFuncD { func } => Opcode::FCallFuncD(fcall_args, *func),
             ir::instr::CallDetail::FCallObjMethod { flavor } => {
                 Opcode::FCallObjMethod(fcall_args, hint, *flavor)
             }
@@ -615,20 +613,14 @@ impl<'b> InstrEmitter<'b> {
                 let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodS(clsref, method)
             }
-            Hhbc::ResolveFunc(func, _) => {
-                Opcode::ResolveFunc(self.strings.lookup_function_name(func))
-            }
-            Hhbc::ResolveMethCaller(func, _) => {
-                Opcode::ResolveMethCaller(self.strings.lookup_function_name(func))
-            }
+            Hhbc::ResolveFunc(func, _) => Opcode::ResolveFunc(func),
+            Hhbc::ResolveMethCaller(func, _) => Opcode::ResolveMethCaller(func),
             Hhbc::ResolveRClsMethodD(_, clsid, method, _) => {
                 let class = self.strings.lookup_class_name(clsid);
                 let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodD(class, method)
             }
-            Hhbc::ResolveRFunc(_, func, _) => {
-                Opcode::ResolveRFunc(self.strings.lookup_function_name(func))
-            }
+            Hhbc::ResolveRFunc(_, func, _) => Opcode::ResolveRFunc(func),
             Hhbc::SelfCls(_) => Opcode::SelfCls,
             Hhbc::SetG(_, _) => Opcode::SetG,
             Hhbc::SetImplicitContextByValue(..) => Opcode::SetImplicitContextByValue,

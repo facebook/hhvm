@@ -11,7 +11,7 @@ use ir_core::instr;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::FuncBuilder;
-use ir_core::FunctionId;
+use ir_core::FunctionName;
 use ir_core::HasEdges;
 use ir_core::Instr;
 use ir_core::LocId;
@@ -106,7 +106,7 @@ impl Block {
         let loc = LocId::NONE;
 
         for (target, name) in &self.call_targets {
-            let target = FunctionId::from_str(target, &fb.strings);
+            let target = FunctionName::intern(target);
             let iid = fb.emit(Instr::simple_call(target, &[], loc));
             if let Some(name) = name {
                 name_to_vid.insert(name.clone(), iid);
@@ -142,7 +142,7 @@ impl Block {
             } => {
                 let lazy = bid_for(lazy);
                 let eager = bid_for(eager);
-                let func = FunctionId::from_str(target, &fb.strings);
+                let func = FunctionName::intern(target);
                 let call = ir_core::Call {
                     operands: Box::new([]),
                     context: ir_core::UnitBytesId::EMPTY,

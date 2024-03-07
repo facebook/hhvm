@@ -48,7 +48,7 @@ pub(crate) fn convert_function<'a>(
     let function = ir::Function {
         func,
         flags: src.flags,
-        name: ir::FunctionId::from_hhbc(src.name, &unit.strings),
+        name: src.name,
     };
 
     unit.functions.push(function);

@@ -131,10 +131,7 @@ pub(crate) fn convert_function<'a>(
     mut function: ir::Function,
     strings: &StringCache,
 ) {
-    trace!(
-        "convert_function {}",
-        function.name.as_bstr(&strings.interner)
-    );
+    trace!("convert_function {}", function.name);
     let span = function.func.loc(function.func.loc_id).to_span();
     let attributes =
         convert::convert_attributes(std::mem::take(&mut function.func.attributes), strings);
@@ -146,7 +143,7 @@ pub(crate) fn convert_function<'a>(
         body,
         coeffects,
         flags: function.flags,
-        name: strings.lookup_function_name(function.name),
+        name: function.name,
         span,
         attrs,
     };

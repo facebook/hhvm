@@ -335,6 +335,9 @@ using SelectPoolResult = std::variant<
  * ThreadManager (tm) or executing inline (eb).
  */
 class AsyncProcessor : public TProcessorBase {
+ protected:
+  using TProcessorBase::TProcessorBase;
+
  public:
   ~AsyncProcessor() override = default;
 

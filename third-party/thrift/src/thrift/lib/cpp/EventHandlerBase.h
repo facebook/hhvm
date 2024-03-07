@@ -61,6 +61,15 @@ class EventHandlerBase {
  * handlers to processors at creation time.
  */
 class TProcessorBase : public EventHandlerBase {
+ protected:
+  /**
+   * This constructor ignores the global registry (see
+   * addProcessorEventHandler). This is useful for "wrapper" implementations
+   * that delegate to underlying processors.
+   */
+  struct IgnoreGlobalEventHandlers {};
+  explicit TProcessorBase(IgnoreGlobalEventHandlers) {}
+
  public:
   TProcessorBase();
 

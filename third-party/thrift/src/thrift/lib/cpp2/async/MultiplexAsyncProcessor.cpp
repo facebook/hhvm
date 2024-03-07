@@ -301,7 +301,8 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
       std::vector<std::unique_ptr<AsyncProcessor>>&& processors,
       const MultiplexAsyncProcessorFactory::CompositionMetadata&
           compositionMetadata)
-      : processors_(std::move(processors)),
+      : AsyncProcessor(IgnoreGlobalEventHandlers{}),
+        processors_(std::move(processors)),
         compositionMetadata_(compositionMetadata) {
     DCHECK(!processors_.empty());
   }

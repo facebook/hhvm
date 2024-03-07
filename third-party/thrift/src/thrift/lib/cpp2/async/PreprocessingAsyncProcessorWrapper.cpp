@@ -20,7 +20,8 @@ namespace apache {
 namespace thrift {
 PreprocessingAsyncProcessorWrapper::PreprocessingAsyncProcessorWrapper(
     std::unique_ptr<AsyncProcessor> innerProcessor)
-    : innerProcessor_(std::move(innerProcessor)) {
+    : AsyncProcessor(IgnoreGlobalEventHandlers{}),
+      innerProcessor_(std::move(innerProcessor)) {
   CHECK(innerProcessor_ != nullptr) << "Cannot wrap null async processor.";
 }
 

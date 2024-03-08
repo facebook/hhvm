@@ -16,7 +16,6 @@
 import difflib
 import os
 import re
-import shlex
 import shutil
 import subprocess
 import sys
@@ -26,7 +25,6 @@ import typing
 import unittest
 from pathlib import Path
 
-import pkg_resources
 from thrift.compiler.test import fixture_utils
 
 
@@ -43,32 +41,6 @@ def _gen_find_recursive_files(top: Path) -> typing.Generator[Path, None, None]:
         root_path = Path(root)
         for filename in filenames:
             yield (root_path / filename).relative_to(top)
-
-
-def _cp_dir(source_root_dir_abspath: Path, dest_root_dir_abspath: Path) -> None:
-    """
-    Recursively copies the contents of the given directory.
-
-    Args:
-        source_root_dir_abspath: Absolute path to the directory to copy (which
-          must exist)
-
-        dest_root_dir_abspath: Absolute path to the destination directory. It
-          will be created (along with any missing parent directories) if needed.
-    """
-    assert source_root_dir_abspath.is_absolute()
-    assert source_root_dir_abspath.is_dir()
-    assert dest_root_dir_abspath.is_absolute()
-
-    for src_file_relpath in _gen_find_recursive_files(source_root_dir_abspath):
-        source_file_abspath = source_root_dir_abspath / src_file_relpath
-        dest_file_abspath = dest_root_dir_abspath / src_file_relpath
-
-        dest_dir_abspath = dest_file_abspath.parent
-        if not dest_dir_abspath.is_dir():
-            dest_dir_abspath.mkdir(parents=True)
-
-        shutil.copy2(source_file_abspath, dest_file_abspath)
 
 
 class FixtureTest(unittest.TestCase):
@@ -90,8 +62,16 @@ class FixtureTest(unittest.TestCase):
         Checks that the contents of the files under the two given paths are
         identical, and fails this test if that is not the case.
         """
-        gen_file_relpaths = list(_gen_find_recursive_files(gen_code_path))
-        fixture_file_relpaths = list(_gen_find_recursive_files(fixture_code_path))
+        gen_file_relpaths: list[Path] = list(_gen_find_recursive_files(gen_code_path))
+
+        # TODO: Remove the filtering logic of the non-output files in the source
+        # fixture as soon as outputs are moved into a dedicated folder
+        #  (eg ".../out/...")
+        fixture_file_relpaths: list[Path] = [
+            file_relpath
+            for file_relpath in _gen_find_recursive_files(fixture_code_path)
+            if file_relpath.name != "cmd" and file_relpath.parts[0] != "src"
+        ]
 
         try:
             # Compare that the generated files are the same
@@ -128,96 +108,33 @@ class FixtureTest(unittest.TestCase):
         self.maxDiff = None
 
     def runTest(self, fixture_name: str) -> None:
-        fixture_dir_relpath = _FIXTURES_ROOT_DIR_RELPATH / fixture_name
 
-        # Copy required directories to temporary folder.
-        self._copy_dir_to_tmp(fixture_dir_relpath / "src")
-        self._copy_dir_to_tmp(Path("thrift/annotation/"))
-        self._copy_dir_to_tmp(Path("thrift/lib/thrift/"))
+        repo_root_dir_abspath = Path.cwd()
+        fixture_dir_abspath = (
+            repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name
+        )
+        fixture_output_root_dir_abspath = self.tmp_dir_abspath
 
-        languages = set()
-        for cmd in fixture_utils.read_lines(Path(fixture_dir_relpath) / "cmd"):
-            # Skip commented out commands
-            if cmd[0] == "#":
-                continue
-
-            (unique_name, generator_spec, target_filename) = shlex.split(cmd.strip())
-            assert re.match(r"^\w+:", unique_name)
-
-            target_file_relpath = fixture_dir_relpath / target_filename
-
-            # Get cmd language
-            lang = (
-                generator_spec.rsplit(":", 1)[0]
-                if ":" in generator_spec
-                else generator_spec
-            )
-
-            # Add to list of generated languages
-            languages.add(lang)
-
-            # Fix cpp args
-            if "cpp" in lang or "py3" in lang or "python_capi" in lang:
-                # Don't use os.path.join to avoid system-specific path separators.
-                path = "thrift/compiler/test/fixtures/" + fixture_name
-                extra = "include_prefix=" + path
-                join = "," if ":" in generator_spec else ":"
-                generator_spec = generator_spec + join + extra
-
-            # Generate arguments to run binary
-            build_command_args = [
-                _THRIFT_BIN_PATH,
-                "-r",
-                "-I",
-                self.tmp_dir_abspath,
-                "-o",
-                os.path.join(self.tmp_dir_abspath, fixture_dir_relpath),
-                "--gen",
-                generator_spec,
-                target_file_relpath,
-            ]
-
-            # Do not recurse in py generators due to a bug in the py generator
-            # Remove once migration to mustache is done
-            if (
-                ("cpp2" == lang)
-                or ("schema" == lang)
-                or ("mstch_cpp2" == lang)
-                or ("mstch_java" == lang)
-                or ("mstch_python" == lang)
-            ):
-                build_command_args.remove("-r")
-
+        fixture_cmds = fixture_utils.parse_fixture_cmds(
+            repo_root_dir_abspath,
+            fixture_name,
+            fixture_dir_abspath,
+            fixture_output_root_dir_abspath,
+            _THRIFT_BIN_PATH,
+        )
+        for fixture_cmd in fixture_cmds:
             # Run thrift compiler and generate files
             subprocess.check_call(
-                build_command_args,
-                cwd=self.tmp_dir_abspath,
+                fixture_cmd.build_command_args,
                 close_fds=True,
             )
 
         # Compare generated code to fixture code
-        for lang in languages:
-            # Edit lang to find correct directory
-            lang = lang.rsplit("_", 1)[0] if "android_lite" in lang else lang
-            lang = lang.rsplit("_", 1)[1] if "mstch_" in lang else lang
-            lang = "py" if lang == "pyi" else lang
-
-            gen_code_abspath = (
-                self.tmp_dir_abspath / fixture_dir_relpath / ("gen-" + lang)
-            )
-
-            fixture_code_relpath = fixture_dir_relpath / ("gen-" + lang)
-
-            self._compare_code(
-                gen_code_abspath, fixture_code_relpath, build_command_args
-            )
-
-    def _copy_dir_to_tmp(self, rel_dir: Path) -> None:
-        """
-        Recursively copies the given directory (relative to the current working
-        directory) to the temporary directory for this test case.
-        """
-        _cp_dir(Path.cwd() / rel_dir, self.tmp_dir_abspath / rel_dir)
+        self._compare_code(
+            fixture_output_root_dir_abspath,
+            fixture_dir_abspath,
+            fixture_cmd.build_command_args,
+        )
 
 
 def _add_fixture(klazz, fixture_name: str) -> None:

@@ -73,11 +73,12 @@ std::string readFile(const std::string& filePath);
  */
 rust::Box<hackc::DeclsHolder> decl_from_path(
     const Facts::PathAndOptionalHash& pathAndHash,
+    const folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor);
 
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
     const Facts::PathAndOptionalHash& pathAndHash,
-    folly::Executor::KeepAlive<folly::Executor> exec,
+    const folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor);
 
 } // namespace Decl

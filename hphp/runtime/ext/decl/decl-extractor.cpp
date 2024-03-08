@@ -71,10 +71,10 @@ DeclBinaryString decls_binary_from_path(
   assertx(path.m_path.is_absolute());
   try {
     hackc::DeclParserConfig config;
-    auto opts = RepoOptions::forFile(path.m_path.c_str());
+    auto opts = RepoOptions::forFile(path.m_path.string());
     opts.flags().initDeclConfig(config);
     config.include_assignment_values = true;
-    auto const text = readFile(path.m_path.native());
+    auto const text = readFile(path.m_path.string());
     auto decls = hackc::parse_decls(
         config, "", {(const uint8_t*)text.data(), (size_t)text.size()});
     auto blob = hackc::decls_holder_to_binary(*decls);
@@ -90,7 +90,7 @@ void setExtractorFactory(ExtractorFactory* factory) {
 }
 
 std::unique_ptr<Extractor> makeExtractor(
-    folly::Executor::KeepAlive<folly::Executor>& exec,
+    const folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
@@ -110,11 +110,10 @@ std::unique_ptr<Extractor> makeExtractor(
  */
 rust::Box<hackc::DeclsHolder> decl_from_path(
     const Facts::PathAndOptionalHash& pathAndHash,
+    const folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor) {
-  folly::IOThreadPoolExecutor exec{
-      1, Facts::make_thread_factory("DeclExtractor")};
-  auto semiFuture = decl_from_path_async(
-      pathAndHash, folly::getKeepAliveToken(exec), enableExternExtractor);
+  auto semiFuture =
+      decl_from_path_async(pathAndHash, exec, enableExternExtractor);
   return std::move(semiFuture).get();
 }
 
@@ -125,7 +124,7 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
  */
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
     const Facts::PathAndOptionalHash& pathAndHash,
-    folly::Executor::KeepAlive<folly::Executor> exec,
+    const folly::Executor::KeepAlive<folly::Executor>& exec,
     bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.

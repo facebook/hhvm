@@ -16,6 +16,7 @@
 */
 
 #include <folly/Executor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -41,6 +42,7 @@ namespace HPHP {
 
 namespace {
 Decl::ExtractorConfig s_extractorConfig{};
+std::unique_ptr<folly::IOThreadPoolExecutor> s_executor;
 // File
 const StaticString s_typedefs("typedefs");
 const StaticString s_functions("functions");
@@ -148,6 +150,14 @@ void assertEnv() {
 
 std::string getRepoRootForFile(const String& path) {
   return RepoOptions::forFile(path.toCppString()).dir();
+}
+
+const folly::Executor::KeepAlive<folly::Executor> getExecutor() {
+  if (s_executor == nullptr) {
+    s_executor = std::make_unique<folly::IOThreadPoolExecutor>(
+        1, Facts::make_thread_factory("DeclExtractor"));
+  }
+  return folly::getKeepAliveToken(s_executor.get());
 }
 
 hackc::DeclParserConfig initDeclConfig(std::string& path) {
@@ -705,7 +715,7 @@ class MemcacheHitEvent : public AsioExternalThreadEvent {
   explicit MemcacheHitEvent(
       folly::SemiFuture<rust::Box<hackc::DeclsHolder>>&& getFuture) {
     std::move(getFuture)
-        .via(&folly::InlineExecutor::instance())
+        .via(getExecutor())
         .thenValue([this](rust::Box<hackc::DeclsHolder>&& declsHolder) {
           holderPtr_ = std::make_shared<rust::Box<hackc::DeclsHolder>>(
               std::move(declsHolder));
@@ -761,9 +771,12 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
   try {
+    auto keepAliveToken = getExecutor();
     data->declsHolder =
         std::make_shared<rust::Box<hackc::DeclsHolder>>(Decl::decl_from_path(
-            pathAndHash, s_extractorConfig.enableExternExtractor));
+            pathAndHash,
+            keepAliveToken,
+            s_extractorConfig.enableExternExtractor));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
@@ -788,14 +801,11 @@ Object HHVM_STATIC_METHOD(FileDecls, genParsePath, const String& path) {
   auto sha1 = computeSHA1(filePath, root);
   Facts::PathAndOptionalHash pathAndHash{
       filePath, Optional<std::string>(sha1.toString())};
-  folly::IOThreadPoolExecutor exec{
-      1, Facts::make_thread_factory("DeclExtractor")};
   MemcacheHitEvent* event;
   try {
+    auto keepAliveToken = getExecutor();
     auto declSemiFuture = Decl::decl_from_path_async(
-        pathAndHash,
-        folly::getKeepAliveToken(exec),
-        s_extractorConfig.enableExternExtractor);
+        pathAndHash, keepAliveToken, s_extractorConfig.enableExternExtractor);
     event = new MemcacheHitEvent(std::move(declSemiFuture));
     return Object{event->getWaitHandle()};
   } catch (...) {
@@ -1143,6 +1153,12 @@ struct DeclExtension final : Extension {
     s_extractorConfig.cacheSize =
         Config::GetInt32(ini, hdf, "Ext.Decl.CacheSize", 500000);
     declCachePtr.reset(new FileDeclsCache(s_extractorConfig.cacheSize));
+  }
+
+  void moduleShutdown() override {
+    // clear the executor to avoid the thread hanging around
+    // after process exit. See D44596199 for similar issues.
+    s_executor.reset();
   }
 
   void moduleRegisterNative() override {

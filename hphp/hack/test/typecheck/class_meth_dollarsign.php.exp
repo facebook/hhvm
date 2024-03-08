@@ -1,16 +1,10 @@
-File "class_meth_dollarsign.php", line 7, characters 20-24:
+File "class_meth_dollarsign.php", line 7, characters 32-37:
 `meth_caller` cannot be called on strings that contain `$` (Parsing[1002])
-File "class_meth_dollarsign.php", line 8, characters 27-32:
-`meth_caller` cannot be called on strings that contain `$` (Parsing[1002])
-File "class_meth_dollarsign.php", line 7, characters 20-24:
-Unbound name: `x$x` (an object type) (Naming[2049])
-File "class_meth_dollarsign.php", line 8, characters 27-32:
+File "class_meth_dollarsign.php", line 7, characters 32-37:
 No instance method `bar$` in `Foo` (Typing[4053])
-  File "class_meth_dollarsign.php", line 8, characters 8-33:
+  File "class_meth_dollarsign.php", line 7, characters 8-38:
   This is why I think it is an object of type Foo
-  File "class_meth_dollarsign.php", line 8, characters 20-24:
+  File "class_meth_dollarsign.php", line 7, characters 20-22:
     where the class `Foo` was referenced here
   File "class_meth_dollarsign.php", line 3, characters 7-9:
   Declaration of `Foo` is here
-File "class_meth_dollarsign.php", line 7, characters 20-24:
-Unbound name (typing): `x$x` (Typing[4107])

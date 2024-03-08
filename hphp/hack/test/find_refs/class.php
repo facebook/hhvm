@@ -49,5 +49,4 @@ function special_funcs() {
 
   Alias::staticMethod<>; // TODO: This is not detected
   meth_caller(Alias::class, 'method'); // TODO: This is not detected
-  meth_caller('Alias', 'method'); // TODO: This is not detected
 }

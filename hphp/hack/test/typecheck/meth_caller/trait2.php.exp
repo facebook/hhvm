@@ -1,2 +1,2 @@
-File "trait2.php", line 8, characters 15-23:
+File "trait2.php", line 8, characters 15-21:
 `MyTrait` is a trait which cannot be used with `meth_caller`. Use a class instead. (Typing[4375])

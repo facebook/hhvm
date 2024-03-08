@@ -1,4 +1,4 @@
-File "method_caller.php", line 13, characters 15-24:
+File "method_caller.php", line 11, characters 15-22:
 Unbound name: `NotFound` (an object type) (Naming[2049])
-File "method_caller.php", line 13, characters 15-24:
+File "method_caller.php", line 11, characters 15-22:
 Unbound name (typing): `NotFound` (Typing[4107])

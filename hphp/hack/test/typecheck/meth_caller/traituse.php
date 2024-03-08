@@ -10,5 +10,4 @@ class MyClass {
 
 function test(): void {
   meth_caller(MyClass::class, 'foo');
-  meth_caller('MyClass', 'foo');
 }

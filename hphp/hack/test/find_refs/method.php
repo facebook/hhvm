@@ -32,10 +32,10 @@ function test(C $c, D $d, E $e, F $f, G $g, Unrelated $u) {
   $g->foo();
   $u->foo();
 
-  meth_caller('C', 'foo');
-  meth_caller('D', 'foo');
-  meth_caller('E', 'foo'); // TODO: This is not detected
-  meth_caller('F', 'foo'); // TODO: This is not detected
-  meth_caller('G', 'foo'); // TODO: This is not detected
-  meth_caller('Unrelated', 'foo'); // TODO: This is not detected
+  meth_caller(C::class, 'foo');
+  meth_caller(D::class, 'foo');
+  meth_caller(E::class, 'foo'); // TODO: This is not detected
+  meth_caller(F::class, 'foo'); // TODO: This is not detected
+  meth_caller(G::class, 'foo'); // TODO: This is not detected
+  meth_caller(Unrelated::class, 'foo'); // TODO: This is not detected
 }

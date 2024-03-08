@@ -1,4 +1,4 @@
-File "deprecated_meth_caller.php", line 9, characters 27-31:
+File "deprecated_meth_caller.php", line 9, characters 32-36:
 The method foo is deprecated: use bar() instead (Typing[4128])
-File "deprecated_meth_caller.php", line 5, characters 19-21:
-Definition is here
+  File "deprecated_meth_caller.php", line 5, characters 19-21:
+  Definition is here

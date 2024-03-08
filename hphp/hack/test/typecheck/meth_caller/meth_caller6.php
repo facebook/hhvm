@@ -19,10 +19,6 @@ final class A<T as E> {
 
 }
 
-function test1<T as E>(): A<T> {
-  return new A(meth_caller('E', 'foo'));
-}
-
 function test2<T as E>(): A<T> {
   // Type of $f should be
   //   function(E):void

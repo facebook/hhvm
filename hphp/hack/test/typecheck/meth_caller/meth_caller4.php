@@ -18,7 +18,7 @@ class X<T> {
 function use_with_ints((function(X<int>, int): int) $caller): void {}
 
 function test(): (function(X<bool>, bool): bool) {
-  $caller = meth_caller('X', 'foo');
+  $caller = meth_caller(X::class, 'foo');
   use_with_ints($caller);
   return $caller;
 }

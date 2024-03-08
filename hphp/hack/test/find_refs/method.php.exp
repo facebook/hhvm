@@ -6,10 +6,10 @@ File "method.php", line 29, characters 7-9: D::foo
 File "method.php", line 30, characters 7-9: D::foo
 File "method.php", line 31, characters 7-9: F::foo
 File "method.php", line 32, characters 7-9: G::foo
-File "method.php", line 35, characters 21-23: C::foo
-File "method.php", line 36, characters 21-23: D::foo
-File "method.php", line 38, characters 21-23: F::foo
-File "method.php", line 39, characters 21-23: G::foo
+File "method.php", line 35, characters 26-28: C::foo
+File "method.php", line 36, characters 26-28: D::foo
+File "method.php", line 38, characters 26-28: F::foo
+File "method.php", line 39, characters 26-28: G::foo
 File "method.php", line 16, characters 19-21: foo
 File "method.php", line 4, characters 19-21: foo
 13 total results

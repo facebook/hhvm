@@ -7,7 +7,7 @@ class X<T> {
 }
 
 function test(): X<int> {
-  $caller = meth_caller('X', 'foo');
+  $caller = meth_caller(X::class, 'foo');
   $x = new X();
   $caller($x, 'a string');
   return $x;

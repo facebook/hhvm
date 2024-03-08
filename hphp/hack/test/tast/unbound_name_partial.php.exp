@@ -1,6 +1,6 @@
 Errors:
-  [4:15-28] Unbound name: `NoSuchClass` (an object type)
-  [4:15-28] Unbound name (typing): `NoSuchClass`
+  [4:15-26] Unbound name: `NoSuchClass` (an object type)
+  [4:15-26] Unbound name (typing): `NoSuchClass`
   [3:18-23] Functions that do not return a value must have a type of void
 [(Fun
     { fd_namespace =
@@ -11,7 +11,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((~mixed), (Some ([3:18-23], (Happly (([3:18-23], "\\HH\\supportdyn"), [([3:18-23], Hmixed)]))))); 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-37], (Expr ((nothing), [4:3-36], (Method_caller (([4:15-28], "\\NoSuchClass"), ([4:30-35], "foo"))))))] };
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-42], (Expr ((nothing), [4:3-41], (Method_caller (([4:15-26], "\\NoSuchClass"), ([4:35-40], "foo"))))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

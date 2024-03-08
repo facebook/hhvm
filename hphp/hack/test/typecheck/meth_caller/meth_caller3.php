@@ -13,10 +13,6 @@ class X<T> {
   public function foo(T $x): T { return $x; }
 }
 
-function test1(): (function(X<int>, int): int) {
-  return meth_caller('X', 'foo');
-}
-
 function test2(): (function(X<int>, int): int) {
   return meth_caller(X::class, 'foo');
 }

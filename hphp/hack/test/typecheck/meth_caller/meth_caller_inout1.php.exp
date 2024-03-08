@@ -1,4 +1,4 @@
-File "meth_caller_inout1.php", line 9, characters 8-35:
+File "meth_caller_inout1.php", line 9, characters 8-40:
 `meth_caller` does not support methods with the `inout` calling convention (Typing[4416])
   File "meth_caller_inout1.php", line 4, characters 33-34:
   This is why I think this method uses the `inout` calling convention

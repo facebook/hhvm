@@ -101,8 +101,6 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
           (Error fn_expr_pos, args_err :: errs)
         | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] -> begin
           match (e1, e2) with
-          | Aast.((_, pc, String cl), (_, pm, String meth)) ->
-            (Ok (Aast.Method_caller ((pc, cl), (pm, meth))), errs)
           | Aast.
               ( (_, _, Class_const ((_, _, CI cl), (_, mem))),
                 (_, pm, String meth) )

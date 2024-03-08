@@ -6,5 +6,5 @@ class Foo {
 
 
 function test(): void {
-  $x = HH\meth_caller('Foo', 'bar');
+  $x = HH\meth_caller(Foo::class, 'bar');
 }

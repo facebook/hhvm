@@ -27,7 +27,7 @@ function use_with_ints((function(Wrapper<int>): C) $caller): void {
 }
 
 function breakIt(): void {
-  $caller = meth_caller('Wrapper', 'foo');
+  $caller = meth_caller(Wrapper::class, 'foo');
   use_with_ints($caller);
 }
 

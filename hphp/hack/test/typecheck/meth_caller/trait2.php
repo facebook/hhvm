@@ -5,5 +5,5 @@ trait MyTrait {
 }
 
 function test(): void {
-  meth_caller('MyTrait', 'foo');
+  meth_caller(MyTrait::class, 'foo');
 }

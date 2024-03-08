@@ -6,5 +6,5 @@ class X {
 }
 
 function test(): (function(X): void) {
-  return meth_caller('X', 'foo');
+  return meth_caller(X::class, 'foo');
 }

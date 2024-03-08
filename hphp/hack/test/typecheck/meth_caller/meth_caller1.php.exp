@@ -1,1 +1,4 @@
-No errors
+File "meth_caller1.php", line 17, characters 22-24:
+The two arguments to `meth_caller()` must be:
+ - first: `ClassOrInterface::class`
+ - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])

@@ -1,4 +1,4 @@
-name: \HH\meth_caller, kind: function, span: line 5, characters 5-27, is_declaration: false
+name: \HH\meth_caller, kind: function, span: line 5, characters 5-32, is_declaration: false
 definition:
  HH\meth_caller
    kind: function

@@ -14,7 +14,6 @@ use nast::ClassId;
 use nast::ClassId_;
 use nast::Expr;
 use nast::Expr_;
-use nast::Id;
 use nast::ParamKind;
 
 use crate::prelude::*;
@@ -52,13 +51,6 @@ impl Pass for ElabExprCallHhMethCallerPass {
                         (ParamKind::Pnormal, Expr(_, rcvr_pos, rcvr)),
                         (ParamKind::Pnormal, Expr(_, meth_pos, Expr_::String(meth))),
                     ] => match rcvr {
-                        Expr_::String(rcvr) => {
-                            *elem = Expr_::MethodCaller(Box::new((
-                                Id(take(rcvr_pos), rcvr.to_string()),
-                                (take(meth_pos), meth.to_string()),
-                            )));
-                            Continue(())
-                        }
                         Expr_::ClassConst(box (ClassId(_, _, ClassId_::CI(id)), (_, mem)))
                             if mem == sn::members::M_CLASS =>
                         {
@@ -69,7 +61,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
                             Continue(())
                         }
                         _ => {
-                            env.emit_error(NamingError::IllegalMethCaller(fn_expr_pos.clone()));
+                            env.emit_error(NamingError::IllegalMethCaller(rcvr_pos.clone()));
                             invalid(elem)
                         }
                     },
@@ -95,6 +87,8 @@ impl Pass for ElabExprCallHhMethCallerPass {
 
 #[cfg(test)]
 mod tests {
+
+    use nast::Id;
 
     use super::*;
 
@@ -131,17 +125,8 @@ mod tests {
         }));
         elem.transform(&env, &mut pass);
 
-        // Expect no errors
-        assert!(env.into_errors().is_empty());
-
-        // Expect our `Expr_` to elaborate to a `MethodCaller`
-        assert!(match elem {
-            Expr_::MethodCaller(meth_caller) => {
-                let (Id(_, x), (_, y)) = *meth_caller;
-                x == rcvr_name && y == meth_name
-            }
-            _ => false,
-        })
+        // Expect error
+        assert!(!env.into_errors().is_empty());
     }
 
     #[test]
@@ -219,7 +204,18 @@ mod tests {
             args: vec![
                 (
                     ParamKind::Pnormal,
-                    Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
+                    Expr(
+                        (),
+                        elab_utils::pos::null(),
+                        Expr_::ClassConst(Box::new((
+                            ClassId(
+                                (),
+                                elab_utils::pos::null(),
+                                ClassId_::CI(Id(elab_utils::pos::null(), rcvr_name.into())),
+                            ),
+                            (elab_utils::pos::null(), sn::members::M_CLASS.to_string()),
+                        ))),
+                    ),
                 ),
                 (
                     ParamKind::Pnormal,

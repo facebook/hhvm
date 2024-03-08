@@ -208,7 +208,7 @@ void RequestInjectionData::threadInit() {
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
-                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
+                   "default_charset", Cfg::Server::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_mimetype", "text/html",

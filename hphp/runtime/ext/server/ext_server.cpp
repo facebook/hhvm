@@ -190,7 +190,7 @@ bool HHVM_FUNCTION(server_is_prepared_to_stop) {
   auto const now = time(nullptr);
   auto const lastPrepareTime = HttpServer::GetPrepareToStopTime();
   if (lastPrepareTime == 0) return false;
-  return (lastPrepareTime + RuntimeOption::ServerPrepareToStopTimeout) >= now;
+  return (lastPrepareTime + Cfg::Server::PrepareToStopTimeout) >= now;
 }
 
 int64_t HHVM_FUNCTION(server_health_level) {

@@ -253,7 +253,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
   if (nbsp) {
     flags |= STRING_HTML_ENCODE_NBSP;
   }
-  if (RuntimeOption::Utf8izeReplace) {
+  if (Cfg::Server::Utf8izeReplace) {
     flags |= STRING_HTML_ENCODE_UTF8IZE_REPLACE;
   }
   if (!*charset || strcasecmp(charset, "UTF-8") == 0) {

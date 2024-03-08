@@ -952,11 +952,11 @@ bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
 
   // There are invalid bytes. Allocate memory, then copy the input, replacing
   // invalid sequences with either the substitution character or nothing,
-  // depending on the value of RuntimeOption::Utf8izeReplace.
+  // depending on the value of Cfg::Server::Utf8izeReplace.
   //
   // Worst case, every remaining byte is invalid, taking a 3-byte substitution.
   int32_t bytesRemaining = srcLenBytes - srcPosBytes;
-  uint64_t dstMaxLenBytes = srcPosBytes + (RuntimeOption::Utf8izeReplace ?
+  uint64_t dstMaxLenBytes = srcPosBytes + (Cfg::Server::Utf8izeReplace ?
     bytesRemaining * U8_LENGTH(SUBSTITUTION_CHARACTER) :
     bytesRemaining);
   if (dstMaxLenBytes > INT_MAX) {
@@ -981,7 +981,7 @@ bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
     if (curCodePoint <= 0) {
       // Invalid UTF-8 sequence.
       // N.B. We consider a null byte an invalid sequence.
-      if (!RuntimeOption::Utf8izeReplace) {
+      if (!Cfg::Server::Utf8izeReplace) {
         continue; // Omit invalid sequence
       }
       curCodePoint = SUBSTITUTION_CHARACTER; // Replace invalid sequences

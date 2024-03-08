@@ -75,11 +75,11 @@ int64_t VirtualHost::getMaxPostSize() const {
   if (m_runtimeOption.maxPostSize != -1) {
     return m_runtimeOption.maxPostSize;
   }
-  return RuntimeOption::MaxPostSize;
+  return Cfg::Server::MaxPostSize;
 }
 
 int64_t VirtualHost::GetLowestMaxPostSize() {
-  auto lowest = RuntimeOption::MaxPostSize;
+  auto lowest = Cfg::Server::MaxPostSize;
   for (auto vhost : RuntimeOption::VirtualHosts) {
     auto max = vhost->getMaxPostSize();
     lowest = std::min(lowest, max);
@@ -253,7 +253,7 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
     ini,
     vh,
     "AlwaysDecodePostData",
-    RuntimeOption::AlwaysDecodePostDataDefault,
+    Cfg::Server::AlwaysDecodePostDataDefault,
     false);
 
   m_decodePostDataBlackList =
@@ -475,7 +475,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
     return m_serverName;
   }
 
-  if (!RuntimeOption::DefaultServerNameSuffix.empty()) {
+  if (!Cfg::Server::DefaultServerNameSuffix.empty()) {
     if (m_pattern) {
       Variant matches;
       Variant ret = preg_match(m_pattern,
@@ -489,15 +489,15 @@ std::string VirtualHost::serverName(const std::string &host) const {
         }
         if (!prefix.empty()) {
           return std::string(prefix.data()) +
-            RuntimeOption::DefaultServerNameSuffix;
+            Cfg::Server::DefaultServerNameSuffix;
         }
       }
     } else if (!m_prefix.empty()) {
-      return m_prefix + RuntimeOption::DefaultServerNameSuffix;
+      return m_prefix + Cfg::Server::DefaultServerNameSuffix;
     }
   }
 
-  return RuntimeOption::Host;
+  return Cfg::Server::Host;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

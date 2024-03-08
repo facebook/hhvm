@@ -172,7 +172,7 @@ public:
     return ipv4.empty() ? RuntimeOption::GetServerPrimaryIPv6() : ipv4;
   };
   virtual uint16_t getServerPort() {
-    return RuntimeOption::ServerPort;
+    return Cfg::Server::Port;
   };
   virtual const char *getServerSoftware() {
     return "HPHP";

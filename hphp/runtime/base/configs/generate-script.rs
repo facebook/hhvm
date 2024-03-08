@@ -297,6 +297,18 @@ fn parse_type<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Co
     )(input)
 }
 
+fn parse_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+    input: &'a str,
+) -> IResult<&'a str, &'a str, E> {
+    context(
+        "parse name",
+        recognize(tuple((
+            alphanumeric1,
+            many0(tuple((tag("_"), alphanumeric1))),
+        ))),
+    )(input)
+}
+
 fn parse_name_with_dot<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
 ) -> IResult<&'a str, &'a str, E> {
@@ -304,10 +316,7 @@ fn parse_name_with_dot<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "parse name with dot",
         preceded(
             space0,
-            recognize(tuple((
-                alphanumeric1,
-                many1(preceded(tag("."), alphanumeric1)),
-            ))),
+            recognize(tuple((parse_name, many1(preceded(tag("."), parse_name))))),
         ),
     )(input)
 }
@@ -319,10 +328,7 @@ fn parse_name_with_optional_dot<'a, E: ParseError<&'a str> + ContextError<&'a st
         "parse name with optional dot",
         preceded(
             space0,
-            recognize(tuple((
-                alphanumeric1,
-                many0(preceded(tag("."), alphanumeric1)),
-            ))),
+            recognize(tuple((parse_name, many0(preceded(tag("."), parse_name))))),
         ),
     )(input)
 }
@@ -334,10 +340,7 @@ fn parse_partial_name<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
         "parse partial name",
         preceded(
             space0,
-            recognize(tuple((
-                alphanumeric1,
-                many0(alt((tag("."), alphanumeric1))),
-            ))),
+            recognize(tuple((parse_name, many0(alt((tag("."), parse_name)))))),
         ),
     )(input)
 }
@@ -364,6 +367,7 @@ fn parse_num<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a
                 recognize(tuple((digit1, opt(preceded(tag("."), digit1))))),
                 recognize(preceded(tag("."), digit1)),
             )),
+            opt(alt((tag("LL"), tag("ll")))),
         ))),
     ))(input)
 }

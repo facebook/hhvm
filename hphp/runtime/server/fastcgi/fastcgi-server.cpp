@@ -26,8 +26,8 @@ namespace HPHP {
 bool FastCGIAcceptor::canAccept(const folly::SocketAddress& /*address*/) {
   // TODO: Support server IP whitelist.
   auto const cons = m_server->getLibEventConnectionCount();
-  return (RuntimeOption::ServerConnectionLimit == 0 ||
-          cons < RuntimeOption::ServerConnectionLimit);
+  return (Cfg::Server::ConnectionLimit == 0 ||
+          cons < Cfg::Server::ConnectionLimit);
 }
 
 void FastCGIAcceptor::onNewConnection(
@@ -71,7 +71,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
   : Server(address, port),
     m_worker(&m_eventBaseManager),
     m_dispatcher(workers, workers,
-                 RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+                 Cfg::Server::ThreadDropCacheTimeoutSeconds,
                  Cfg::Server::ThreadDropStack,
                  this,
                  RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
@@ -87,10 +87,10 @@ FastCGIServer::FastCGIServer(const std::string &address,
     sock_addr.setFromHostPort(address, port);
   }
   m_socketConfig.bindAddress = sock_addr;
-  m_socketConfig.acceptBacklog = RuntimeOption::ServerBacklog;
+  m_socketConfig.acceptBacklog = Cfg::Server::Backlog;
   std::chrono::seconds timeout;
-  if (RuntimeOption::ConnectionTimeoutSeconds >= 0) {
-    timeout = std::chrono::seconds(RuntimeOption::ConnectionTimeoutSeconds);
+  if (Cfg::Server::ConnectionTimeoutSeconds >= 0) {
+    timeout = std::chrono::seconds(Cfg::Server::ConnectionTimeoutSeconds);
   } else {
     // default to 2 minutes
     timeout = std::chrono::seconds(120);
@@ -150,14 +150,14 @@ void FastCGIServer::stop() {
     // connections; there is no way to do a partial shutdown of a server socket
     m_socket->stopAccepting();
 
-    if (RuntimeOption::ServerGracefulShutdownWait > 0) {
+    if (Cfg::Server::GracefulShutdownWait > 0) {
       // Gracefully drain any incomplete requests. We cannot go offline until
       // they are finished as we own their dispatcher and event base.
       if (m_acceptor) {
         m_acceptor->startDrainingAllConnections();
       }
 
-      std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
+      std::chrono::seconds s(Cfg::Server::GracefulShutdownWait);
       std::chrono::milliseconds m(s);
       scheduleTimeout(m);
     } else {

@@ -570,7 +570,7 @@ void CLIServer::start() {
   m_dispatcher = std::make_unique<JobQueue>(
     RuntimeOption::EvalUnixServerWorkers,
     RuntimeOption::EvalUnixServerWorkers,
-    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+    Cfg::Server::ThreadDropCacheTimeoutSeconds,
     Cfg::Server::ThreadDropStack,
     nullptr
   );
@@ -584,7 +584,7 @@ void CLIServer::start() {
     FTRACE(1, "CLIServer::start(): starting...\n");
 
     try {
-      m_server->listen(RuntimeOption::ServerBacklog);
+      m_server->listen(Cfg::Server::Backlog);
       m_server->startAccepting();
     } catch (const std::exception& ex) {
       Logger::Warning("Unable to begin accepting CLI connections: %s",
@@ -2019,7 +2019,7 @@ CLIContext CLIContext::initFromClient(int client) {
       client,
       "xbox-init",
       Cfg::Xbox::ServerInfoThreadCount,
-      RO::ServerThreadDropCacheTimeoutSeconds,
+      Cfg::Server::ThreadDropCacheTimeoutSeconds,
       Cfg::Server::ThreadDropStack
     );
     shared.flags = static_cast<Flags>(shared.flags | Flags::ProxyXbox);

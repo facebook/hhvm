@@ -39,11 +39,11 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   m_name = hdf.getName();
   m_port = Config::GetUInt16(ini, hdf, "Port", 0, false);
   m_serverIP = Config::GetString(ini, hdf, "IP",
-                                 RuntimeOption::ServerIP, false);
+                                 Cfg::Server::IP, false);
   m_threadCount = Config::GetInt32(ini, hdf, "ThreadCount", 5, false);
   m_timeoutSeconds = std::chrono::seconds(
     Config::GetInt32(ini, hdf, "TimeoutSeconds",
-                      RuntimeOption::RequestTimeoutSeconds, false));
+                      Cfg::Server::RequestTimeoutSeconds, false));
   m_reqInitFunc = Config::GetString(ini, hdf, "RequestInitFunction", "", false);
   m_reqInitDoc = Config::GetString(ini, hdf, "RequestInitDocument", "", false);
   m_functions = Config::GetSet(ini, hdf, "Functions", m_functions, false);
@@ -80,7 +80,7 @@ bool SatelliteServerInfo::checkMainURL(const std::string& path) {
 struct XboxServer : SatelliteServer {
   explicit XboxServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
-      (RuntimeOption::ServerType, info->getServerIP(), info->getPort(),
+      (Cfg::Server::Type, info->getServerIP(), info->getPort(),
        info->getThreadCount());
     m_server->setRequestHandlerFactory([info] {
         auto handler = make_unique<XboxRequestHandler>();

@@ -173,7 +173,7 @@ void XboxServer::Restart() {
       s_dispatcher = new JobQueueDispatcher<XboxWorker>
         (Cfg::Xbox::ServerInfoThreadCount,
          Cfg::Xbox::ServerInfoThreadCount,
-         RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+         Cfg::Server::ThreadDropCacheTimeoutSeconds,
          Cfg::Server::ThreadDropStack,
          nullptr);
     }

@@ -56,7 +56,7 @@ struct HttpServer : Synchronizable, TakeoverListener,
    * without running any atexit handlers.
    */
   void runOrExitProcess();
-  /* 
+  /*
    * A separate method to do the same thing for admin server, which can
    * be started sooner than the other servers.
    */
@@ -94,7 +94,7 @@ struct HttpServer : Synchronizable, TakeoverListener,
    * stop it was made.  This function doesn't wait until the previous
    * server exits.  Nothing bad happens if the old server isn't there,
    * or is already in the process of stopping.  These functions are
-   * designed to work when RuntimeOption::StopOldServer is set.
+   * designed to work when Cfg::Server::StopOld is set.
    *
    * Currently they are implemented through commands on admin port.
    * So they will not work if admin server is not present, or if the
@@ -105,8 +105,8 @@ struct HttpServer : Synchronizable, TakeoverListener,
   static bool StopOldServer();
 
   /*
-   * When running with RuntimeOption::StopOldServer, given a target
-   * memory needed (RuntimeOption::ServerRSSNeededMb), check memory
+   * When running with Cfg::Server::StopOld, given a target
+   * memory needed (Cfg::Server::RSSNeededMb), check memory
    * status, stop the old server when necessary, and wait for at most
    * RuntimeOption::OldServerWait seconds after trying to stop the old
    * server, before proceeding regardless of available memory. `final`
@@ -153,4 +153,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

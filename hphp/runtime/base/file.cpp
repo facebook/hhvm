@@ -125,7 +125,7 @@ String File::TranslatePathWithFileCache(const String& filename) {
       StaticContentCache::TheFileCache) {
     if (StaticContentCache::TheFileCache->exists(canonicalized.toCppString())) {
       // we use file cache's file name to make stat() work
-      translated = String(RuntimeOption::FileCache);
+      translated = String(Cfg::Server::FileCache);
     }
   }
   return translated;

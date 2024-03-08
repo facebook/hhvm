@@ -424,7 +424,7 @@ void PageletServer::Restart() {
          nullptr);
       s_dispatcher->setHugePageConfig(
         Cfg::PageletServer::HugeThreadCount,
-        RuntimeOption::ServerHugeStackKb);
+        Cfg::Server::HugeStackSizeKb);
       auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
     }

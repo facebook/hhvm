@@ -749,8 +749,8 @@ init_command_line_globals(
     php_global_set(s__SERVER, std::move(serverArr));
   }
 
-  if (RuntimeOption::RequestTimeoutSeconds) {
-    RID().setTimeout(RuntimeOption::RequestTimeoutSeconds);
+  if (Cfg::Server::RequestTimeoutSeconds) {
+    RID().setTimeout(Cfg::Server::RequestTimeoutSeconds);
   }
 
   if (RuntimeOption::XenonForceAlwaysOn) {
@@ -1118,7 +1118,7 @@ static int start_server(const std::string &username) {
   // data from fbagent/dynologd during warmup, which is helpful for debugging.
   // We cannot do this if hotswap is enabled, because it might result in
   // killing ourself instead of the old server!
-  if (!RuntimeOption::StopOldServer && RuntimeOption::TakeoverFilename.empty()) {
+  if (!Cfg::Server::StopOld && Cfg::Server::TakeoverFilename.empty()) {
     HttpServer::Server->runAdminServerOrExitProcess();
   }
 
@@ -1139,7 +1139,7 @@ static int start_server(const std::string &username) {
   }
   BootStats::mark("warmup");
 
-  if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
+  if (Cfg::Server::StopOld) HttpServer::StopOldServer();
 
   if (RuntimeOption::EvalEnableNuma) {
     purge_all();
@@ -1833,14 +1833,14 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (po.port != -1) {
-    RuntimeOption::ServerPort = po.port;
+    Cfg::Server::Port = po.port;
   }
   if (po.portfd != -1) {
-    RuntimeOption::ServerPortFd = po.portfd;
+    Cfg::Server::PortFd = po.portfd;
     inherited_fds.push_back(po.portfd);
   }
   if (po.sslportfd != -1) {
-    RuntimeOption::SSLPortFd = po.sslportfd;
+    Cfg::Server::SSLPortFd = po.sslportfd;
     inherited_fds.push_back(po.sslportfd);
   }
   if (po.admin_port != -1) {

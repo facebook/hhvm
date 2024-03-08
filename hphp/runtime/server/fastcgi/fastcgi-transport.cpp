@@ -55,7 +55,7 @@ const void *FastCGITransport::getPostData(size_t& size) {
 const void *FastCGITransport::getMorePostData(size_t& size) {
   // session will terminate the request if we don't receive data in
   // this much time
-  long maxWait = RuntimeOption::ConnectionTimeoutSeconds;
+  long maxWait = Cfg::Server::ConnectionTimeoutSeconds;
   if (maxWait <= 0) {
     maxWait = 50; // this was the default read timeout in LibEventServer
   }

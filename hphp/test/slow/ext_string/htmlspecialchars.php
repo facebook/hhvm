@@ -46,7 +46,7 @@ function test_htmlspecialchars() :mixed{
                            "", vec["d"]),
      "abcdef'\"&#xa1;&#xabcd;");
 
-  // The rest here expects RuntimeOption::Utf8izeReplace = true;
+  // The rest here expects Cfg::Server::Utf8izeReplace = true;
   $input =
     u('\u00a1')."\xc2\x41".
     u('\u0561')."\xd5\xe0".

@@ -122,7 +122,7 @@ Array HHVM_FUNCTION(apache_get_config) {
 
   return make_dict_array(
     s_restart_time, HttpServer::StartTime,
-    s_max_clients, RuntimeOption::ServerThreadCount,
+    s_max_clients, Cfg::Server::ThreadCount,
     s_active_clients, workers,
     s_queued_requests, queued,
     s_health_level, health_level

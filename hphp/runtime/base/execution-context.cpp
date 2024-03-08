@@ -517,7 +517,7 @@ Array ExecutionContext::obGetHandlers() {
 
 void ExecutionContext::flush() {
   if (!m_buffers.empty() &&
-      RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
+      Cfg::Server::EnableEarlyFlush && m_protectedLevel &&
       !(m_buffers.front().flags & OBFlags::OutputDisabled)) {
     OutputBuffer &buffer = m_buffers.front();
     StringBuffer &oss = buffer.oss;
@@ -641,8 +641,8 @@ void ExecutionContext::onRequestShutdown() {
 
 void ExecutionContext::executeFunctions(ShutdownType type) {
   RID().resetTimers(
-      RuntimeOption::PspTimeoutSeconds,
-      RuntimeOption::PspCpuTimeoutSeconds
+      Cfg::Server::PspTimeoutSeconds,
+      Cfg::Server::PspCpuTimeoutSeconds
   );
 
   // Implicit context should not have leaked

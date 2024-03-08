@@ -326,74 +326,15 @@ struct RuntimeOption {
 
   static std::map<std::string, AccessLogFileData> RPCLogs;
 
-  static std::string Host;
-  static std::string DefaultServerNameSuffix;
-  static std::string ServerType;
-  static std::string ServerIP;
-  static std::string ServerFileSocket;
   static const std::string& GetServerPrimaryIPv4();
   static const std::string& GetServerPrimaryIPv6();
-  static int ServerPort;
-  static int ServerPortFd;
-  static int ServerBacklog;
-  static int ServerConnectionLimit;
-  static int ServerThreadCount;
-  static int ServerQueueCount;
-  static int ServerIOThreadCount;
-  static int ServerHighQueueingThreshold;
-  static bool ServerLegacyBehavior;
-  // Number of worker threads with stack partially on huge pages.
-  static int ServerHugeThreadCount;
-  static int ServerHugeStackKb;
   static int ServerSchedPolicy;
   static int ServerSchedPriority;
-  static uint32_t ServerLoopSampleRate;
-  static int ServerWarmupThrottleRequestCount;
-  static int ServerWarmupThrottleThreadCount;
-  static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
-  static bool AlwaysDecodePostDataDefault;
-  static bool SetChunkedTransferEncoding;
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
-
-  static int RequestTimeoutSeconds;
-  static int PspTimeoutSeconds;
-  static int PspCpuTimeoutSeconds;
-  static int64_t MaxRequestAgeFactor;
   static int64_t RequestMemoryMaxBytes;
-  // Approximate upper bound for thread heap that is backed by huge pages.  This
-  // doesn't include the first slab colocated with thread stack, if any.
-  static int64_t RequestHugeMaxBytes;
   static int64_t ImageMemoryMaxBytes;
-  static int ServerGracefulShutdownWait;
-  static bool ServerHarshShutdown;
-  static bool ServerEvilShutdown;
-  static bool ServerKillOnTimeout;
-  static bool Server503OnShutdownAbort;
-  static int Server503RetryAfterSeconds;
-  static int ServerPreShutdownWait;
-  static int ServerShutdownListenWait;
-  static int ServerShutdownEOMWait;
-  static int ServerPrepareToStopTimeout;
-  static int ServerPartialPostStatusCode;
-  // If `StopOldServer` is set, we try to stop the old server running
-  // on the local host earlier when we initialize, and we do not start
-  // serving requests until we are confident that the system can give
-  // the new server `ServerRSSNeededMb` resident memory, or till
-  // `OldServerWait` seconds passes after an effort to stop the old
-  // server is made.
-  static bool StopOldServer;
-  static int64_t ServerRSSNeededMb;
-  // Threshold of free memory below which the old server is shutdown immediately
-  // upon a memory pressure check.
-  static int64_t ServerCriticalFreeMb;
-  static int OldServerWait;
-  // The percentage of page caches that can be considered as free (0 -
-  // 100).  This is experimental.
-  static int CacheFreeFactor;
-  static std::vector<std::string> ServerNextProtocols;
-  static bool ServerEnableH2C;
   static int BrotliCompressionEnabled;
   static int BrotliChunkedCompressionEnabled;
   static int BrotliCompressionMode;
@@ -407,20 +348,7 @@ struct RuntimeOption {
   static int ZstdChecksumRate;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
-  static bool EnableKeepAlive;
-  static bool ExposeHPHP;
-  static bool ExposeXFBServer;
-  static bool ExposeXFBDebug;
-  static std::string XFBDebugSSLKey;
-  static int ConnectionTimeoutSeconds;
-  static bool EnableOutputBuffering;
-  static std::string OutputHandler;
-  static bool ImplicitFlush;
-  static bool EnableEarlyFlush;
-  static bool ForceChunkedEncoding;
-  static int64_t MaxPostSize;
   static int64_t LowestMaxPostSize;
-  static bool AlwaysPopulateRawPostData;
   static int64_t UploadMaxFileSize;
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
@@ -429,9 +357,6 @@ struct RuntimeOption {
   static int Rfc1867Freq;
   static std::string Rfc1867Prefix;
   static std::string Rfc1867Name;
-  static bool ExpiresActive;
-  static int ExpiresDefault;
-  static std::string DefaultCharsetName;
   static bool ForceServerNameToHeader;
   static bool PathDebug;
   static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
@@ -439,53 +364,8 @@ struct RuntimeOption {
   static std::vector<std::shared_ptr<SatelliteServerInfo>>
          SatelliteServerInfos;
 
-  // If a request has a body over this limit, switch to on-demand reading.
-  // -1 for no limit.
-  static int64_t RequestBodyReadLimit;
-
-  // Allow POST requests containing NonBlockingPost header to start execution
-  // without waiting for the entire POST body.
-  static bool AllowNonBlockingPosts;
-
-  static bool EnableSSL;
-  static int SSLPort;
-  static int SSLPortFd;
-  static std::string SSLCertificateFile;
-  static std::string SSLCertificateKeyFile;
-  static std::string SSLCertificateDir;
-  static std::string SSLTicketSeedFile;
-  static bool TLSDisableTLS1_2;
-  static std::string TLSClientCipherSpec;
-  static bool EnableSSLWithPlainText;
-  // Level of TLS client auth. Valid values are
-  // 0 => disabled (default)
-  // 1 => optional (verify if client presents a cert)
-  // 2 => required (client must present a valid cert)
-  static int SSLClientAuthLevel;
   // CA file to verify client cert against.
   static std::string SSLClientCAFile;
-  // [DEPRECATED] Sampling ratio for client auth logging.
-  // Must be an int within [0, 100]. 0 => disabled; 100 => log all connections.
-  static uint32_t SSLClientAuthLoggingSampleRatio;
-
-  // Which ACL identity and action to check the client against.
-  static std::string ClientAuthAclIdentity;
-  static std::string ClientAuthAclAction;
-  // If true, terminate connection immediately if a client fails ACL,
-  // otherwise log it and let in.
-  static bool ClientAuthFailClose;
-
-  // On average, sample X connections per ClientAuthLogSampleBase connections,
-  // where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
-  // ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
-  // disable sampling.
-  // For example, if ClientAuthLogSampleBase = 100,
-  // ClientAuthSuccessLogSampleRatio = 0, and
-  // ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
-  // and half (50/100) of client auth failures will be logged.
-  static uint32_t ClientAuthLogSampleBase;
-  static uint32_t ClientAuthSuccessLogSampleRatio;
-  static uint32_t ClientAuthFailureLogSampleRatio;
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;
@@ -502,20 +382,7 @@ struct RuntimeOption {
    */
   static std::map<std::string, std::string> IncludeRoots;
 
-  static std::string FileCache;
-  static std::string DefaultDocument;
-  static std::string GlobalDocument;
-  static std::string ErrorDocument404;
-  static bool ForbiddenAs404;
-  static std::string ErrorDocument500;
-  static std::string FatalErrorMessage;
   static std::string FontPath;
-  static bool EnableStaticContentFromDisk;
-
-  static bool Utf8izeReplace;
-
-  static std::string RequestInitFunction;
-  static std::string RequestInitDocument;
 
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;
@@ -532,7 +399,6 @@ struct RuntimeOption {
   static bool UnserializationWhitelistCheckWarningOnly;
   static int64_t UnserializationBigMapThreshold;
 
-  static std::string TakeoverFilename;
   static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;

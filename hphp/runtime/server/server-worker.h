@@ -129,7 +129,7 @@ protected:
       if (RuntimeOption::ServerErrorMessage) {
         transport->sendString(errorMsg, 500);
       } else {
-        transport->sendString(RuntimeOption::FatalErrorMessage, 500);
+        transport->sendString(Cfg::Server::FatalErrorMessage, 500);
       }
       transport->onSendEnd();
     }
@@ -140,4 +140,3 @@ protected:
 };
 
 }
-

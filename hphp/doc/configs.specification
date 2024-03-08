@@ -454,6 +454,156 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int Server.InternalWarmupThreads = 0, UNKNOWN
 - boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
 - bool Server.ExitOnBindFail = false, UNKNOWN
+- std::string Server.Host = "", UNKNOWN
+- int Server.Port = 80, UNKNOWN
+- int Server.PortFd = -1, UNKNOWN, nobind
+- std::string Server.DefaultServerNameSuffix = "", UNKNOWN
+- bool Server.AlwaysDecodePostDataDefault = true, UNKNOWN
+- bool Server.SetChunkedTransferEncoding = true, UNKNOWN
+- std::string Server.Type = "proxygen", UNKNOWN
+- std::string Server.IP = "", UNKNOWN
+- std::string Server.FileSocket = "", UNKNOWN
+- int Server.Backlog = 128, UNKNOWN
+- int Server.ConnectionLimit = 0, UNKNOWN
+- int Server.ThreadCount, UNKNOWN
+- int Server.QueueCount = ThreadCount, UNKNOWN
+- int Server.IOThreadCount = 1, UNKNOWN
+- int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
+- bool Server.LegacyBehavior = true, UNKNOWN
+- int Server.HugeThreadCount = 0, UNKNOWN
+
+  Number of worker threads with stack partially on huge pages
+
+- int Server.HugeStackSizeKb = 384, UNKNOWN
+- uint32_t Server.LoopSampleRate = 0, UNKNOWN
+- int Server.WarmupThrottleRequestCount = 0, UNKNOWN
+- int Server.WarmupThrottleThreadCount, UNKNOWN
+- int Server.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
+- int Server.RequestTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.MaxRequestAgeFactor = 0, UNKNOWN
+- int Server.PspTimeoutSeconds = 0, UNKNOWN
+- int Server.PspCpuTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.RequestHugeMaxBytes = 24LL << 20, UNKNOWN
+
+  Approximate upper bound for thread heap that is backed by huge pages.
+  This doesn't include the first slab colocated with thread stack, if any.
+
+- int Server.GracefulShutdownWait = 0, UNKNOWN
+- bool Server.HarshShutdown = true, UNKNOWN
+- bool Server.KillOnTimeout = true, UNKNOWN
+- bool Server.EvilShutdown = true, UNKNOWN
+- int Server.PreShutdownWait = 0, UNKNOWN
+- int Server.ShutdownListenWait = 0, UNKNOWN
+- int Server.ShutdownEOMWait = 0, UNKNOWN
+- int Server.PrepareToStopTimeout = 240, UNKNOWN
+- int Server.PartialPostStatusCode = -1, UNKNOWN
+- bool Server.StopOld = false, UNKNOWN
+
+  If `StopOld` is set, we try to stop the old server running
+  on the local host earlier when we initialize, and we do not start
+  serving requests until we are confident that the system can give
+  the new server `RSSNeededMb` resident memory, or till `StopOldWait`
+  seconds passes after an effort to stop the old server is made.
+
+- int Server.StopOldWait = 30, UNKNOWN
+- int64_t Server.RSSNeededMb = 4096, UNKNOWN
+- int64_t Server.CriticalFreeMb = 512, UNKNOWN
+- int Server.CacheFreeFactor = 50, UNKNOWN, postprocess
+- bool Server.Five0ThreeOnShutdownAbort = false (Server.503OnShutdownAbort), UNKNOWN
+- int Server.Five0ThreeRetryAfterSeconds = -1 (Server.503RetryAfterSeconds), UNKNOWN
+- std::vector<std::string> Server.SSLNextProtocols = {}, UNKNOWN
+- bool Server.EnableH2C = false, UNKNOWN
+- bool Server.EnableKeepAlive = true, UNKNOWN
+- bool Server.ExposeHPHP = true, UNKNOWN
+- bool Server.ExposeXFBServer = false, UNKNOWN
+- bool Server.ExposeXFBDebug = false, UNKNOWN
+- std::string Server.XFBDebugSSLKey = "", UNKNOWN
+- int Server.ConnectionTimeoutSeconds = -1, UNKNOWN
+- bool Server.EnableOutputBuffering = false, UNKNOWN
+- std::string Server.OutputHandler = "", UNKNOWN
+- bool Server.ImplicitFlush = false, UNKNOWN
+- bool Server.EnableEarlyFlush = true, UNKNOWN
+- bool Server.ForceChunkedEncoding = false, UNKNOWN
+- int64_t Server.MaxPostSize = 100, UNKNOWN, postprocess
+- bool Server.AlwaysPopulateRawPostData = false, UNKNOWN
+- std::string Server.TakeoverFilename = "", UNKNOWN
+- bool Server.ExpiresActive = true, UNKNOWN
+- int Server.ExpiresDefault = 2592000, UNKNOWN, postprocess
+- std::string Server.DefaultCharsetName = "", UNKNOWN
+- int64_t Server.RequestBodyReadLimit = -1, UNKNOWN
+
+  If a request has a body over this limit, switch to on-demand reading.
+  -1 for no limit.
+
+- bool Server.AllowNonBlockingPosts = true, UNKNOWN
+
+  Allow POST requests containing NonBlockingPost header to start execution
+  without waiting for the entire POST body.
+
+- bool Server.EnableSSL = false, UNKNOWN
+- int Server.SSLPort = 443, UNKNOWN
+- int Server.SSLPortFd = -1, UNKNOWN, nobind
+- std::string Server.SSLCertificateFile = "", UNKNOWN
+- std::string Server.SSLCertificateKeyFile = "", UNKNOWN
+- std::string Server.SSLCertificateDir = "", UNKNOWN
+- std::string Server.SSLTicketSeedFile = "", UNKNOWN
+- bool Server.TLSDisableTLS1_2 = false, UNKNOWN
+- std::string Server.TLSClientCipherSpec = "", UNKNOWN
+- bool Server.EnableSSLWithPlainText = false, UNKNOWN
+- int Server.SSLClientAuthLevel = 0, UNKNOWN, postprocess
+
+  Level of TLS client auth. Valid values are
+  0 => disabled (default)
+  1 => optional (verify if client presents a cert)
+  2 => required (client must present a valid cert)
+
+- std::string Server.SSLClientCAFile = "", UNKNOWN, postprocess
+
+  CA file to verify client cert against.
+
+- std::string Server.ClientAuthAclIdentity = "", UNKNOWN
+
+  Which ACL identity to check the client against.
+
+- std::string Server.ClientAuthAclAction = "", UNKNOWN
+
+  Which ACL action to check the client against.
+
+- bool Server.ClientAuthFailClose = false, UNKNOWN
+
+  If true, terminate connection immediately if a client fails ACL,
+  otherwise log it and let in.
+
+- uint32_t Server.ClientAuthLogSampleBase = 100, UNKNOWN, postprocess
+
+  On average, sample X connections per ClientAuthLogSampleBase connections,
+  where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
+  ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
+  disable sampling.
+  For example, if ClientAuthLogSampleBase = 100,
+  ClientAuthSuccessLogSampleRatio = 0, and
+  ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
+  and half (50/100) of client auth failures will be logged.
+
+- uint32_t Server.ClientAuthSuccessLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- uint32_t Server.ClientAuthFailureLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- std::string Server.FileCache = "", UNKNOWN
+- std::string Server.DefaultDocument = "index.php", UNKNOWN
+- std::string Server.GlobalDocument = "", UNKNOWN
+- std::string Server.ErrorDocument404 = "", UNKNOWN, postprocess
+- bool Server.ForbiddenAs404 = false, UNKNOWN
+- std::string Server.ErrorDocument500 = "", UNKNOWN, postprocess
+- std::string Server.FatalErrorMessage = "", UNKNOWN
+- bool Server.EnableStaticContentFromDisk = true, UNKNOWN
+- bool Server.Utf8izeReplace = true, UNKNOWN
+- std::string Server.RequestInitFunction = "", UNKNOWN
+- std::string Server.RequestInitDocument = "", UNKNOWN
 
 # Xbox
 

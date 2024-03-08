@@ -44,10 +44,10 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
 {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
                transport->getServerObject()) ||
-      (m_forbidden && RuntimeOption::ForbiddenAs404)) {
+      (m_forbidden && Cfg::Server::ForbiddenAs404)) {
     m_forbidden = false; // put down forbidden flag since we are redirecting
-    if (!RuntimeOption::ErrorDocument404.empty()) {
-      String redirectURL(RuntimeOption::ErrorDocument404);
+    if (!Cfg::Server::ErrorDocument404.empty()) {
+      String redirectURL(Cfg::Server::ErrorDocument404);
       if (!m_queryString.empty()) {
         if (redirectURL.find('?') == -1) {
           redirectURL += "?";
@@ -109,7 +109,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
     return true;
   }
 
-  if (!RuntimeOption::GlobalDocument.empty()) {
+  if (!Cfg::Server::GlobalDocument.empty()) {
     // GlobalDocument option in use - never resolveURL and 404 if GlobalDocument
     // does not exist. Still check for rewrites.
 
@@ -119,7 +119,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
       return true;
     }
 
-    m_resolvedURL = String(RuntimeOption::GlobalDocument);
+    m_resolvedURL = String(Cfg::Server::GlobalDocument);
     if (virtualFileExists(vhost, sourceRoot, pathTranslation,
                           m_resolvedURL)) {
       m_globalDoc = true;
@@ -310,7 +310,7 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
           m_resolvedURL.charAt(m_resolvedURL.length() - 1) != '/') {
         m_resolvedURL += "/";
       }
-      m_resolvedURL += String(RuntimeOption::DefaultDocument);
+      m_resolvedURL += String(Cfg::Server::DefaultDocument);
       m_origPathInfo.reset();
       if (virtualFileExists(vhost, sourceRoot, pathTranslation,
                             m_resolvedURL)) {
@@ -369,7 +369,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       return true;
     }
     if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EnableStaticContentFromDisk) {
+      !Cfg::Server::EnableStaticContentFromDisk) {
       return false;
     }
     struct stat st;

@@ -35,9 +35,9 @@ void StaticContentCache::load() {
   BootStats::Block timer("loading static content",
                          RuntimeOption::ServerExecutionMode());
 
-  if (RuntimeOption::RepoAuthoritative && !RuntimeOption::FileCache.empty()) {
+  if (RuntimeOption::RepoAuthoritative && !Cfg::Server::FileCache.empty()) {
     TheFileCache = std::make_shared<VirtualFileSystem>(
-      RuntimeOption::FileCache, RuntimeOption::SourceRoot);
+      Cfg::Server::FileCache, RuntimeOption::SourceRoot);
 
     if (StructuredLog::enabled() &&
         StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
@@ -75,7 +75,7 @@ void StaticContentCache::load() {
     }
 
     Logger::Verbose("loaded file cache from %s",
-                    RuntimeOption::FileCache.c_str());
+                    Cfg::Server::FileCache.c_str());
     return;
   }
 }

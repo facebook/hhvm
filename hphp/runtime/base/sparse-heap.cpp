@@ -107,7 +107,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
     return static_cast<HeapObject*>(p);
   };
 
-  if (m_slabManager && m_hugeBytes < RuntimeOption::RequestHugeMaxBytes) {
+  if (m_slabManager && m_hugeBytes < Cfg::Server::RequestHugeMaxBytes) {
     if (auto slab = m_slabManager->tryAlloc()) {
       stats.mmap_volume += kSlabSize;
       stats.mmap_cap += kSlabSize;

@@ -69,11 +69,11 @@ void CertReloader::find_paths(
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     size_t filename_len = it->size() - path.size();
     if (ends_with(*it, crt_ext) &&
-        *it != RuntimeOption::SSLCertificateFile) {
+        *it != Cfg::Server::SSLCertificateFile) {
       std::string name = it->substr(path.size(), filename_len - crt_ext.size());
       crt_files.insert(name);
     } else if (ends_with(*it, key_ext) &&
-        *it != RuntimeOption::SSLCertificateKeyFile) {
+        *it != Cfg::Server::SSLCertificateKeyFile) {
       std::string name = it->substr(path.size(), filename_len - key_ext.size());
       key_files.insert(name);
     }

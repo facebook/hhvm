@@ -227,8 +227,8 @@ TEST_F(ProxygenTransportBasicTest, unsupported_method) {
 
 TEST_F(ProxygenTransportBasicTest, body_after_413) {
   auto req = getRequest(HTTPMethod::POST);
-  m_transport->setMaxPost(RuntimeOption::MaxPostSize, 30);
-  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  m_transport->setMaxPost(Cfg::Server::MaxPostSize, 30);
+  auto length = folly::to<std::string>(Cfg::Server::MaxPostSize + 1);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
   EXPECT_CALL(m_server, onRequestError(_));
   // The WillOnces will call the non-mocked functions to move the state machine.
@@ -250,7 +250,7 @@ TEST_F(ProxygenTransportBasicTest, body_after_413) {
 
 TEST_F(ProxygenTransportBasicTest, invalid_expect) {
   auto req = getRequest(HTTPMethod::POST);
-  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  auto length = folly::to<std::string>(Cfg::Server::MaxPostSize);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
   req->getHeaders().add(HTTP_HEADER_EXPECT, "105-stop");
   EXPECT_CALL(m_server, onRequestError(_));
@@ -261,7 +261,7 @@ TEST_F(ProxygenTransportBasicTest, invalid_expect) {
 
 TEST_F(ProxygenTransportBasicTest, valid_expect) {
   auto req = getRequest(HTTPMethod::POST);
-  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  auto length = folly::to<std::string>(Cfg::Server::MaxPostSize);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
   req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(100)));
@@ -270,7 +270,7 @@ TEST_F(ProxygenTransportBasicTest, valid_expect) {
 
 TEST_F(ProxygenTransportBasicTest, valid_expect_overlarge_length) {
   auto req = getRequest(HTTPMethod::POST);
-  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  auto length = folly::to<std::string>(Cfg::Server::MaxPostSize + 1);
   req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
   req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
   EXPECT_CALL(m_server, onRequestError(_));

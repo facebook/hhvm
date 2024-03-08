@@ -25,7 +25,7 @@ namespace HPHP {
 CURLcode curl_tls_workarounds_cb(CURL* /*curl*/, void* sslctx, void* /*parm*/) {
   // Check to see if workarounds are enabled.
   SSL_CTX* ctx = (SSL_CTX*)sslctx;
-  if (RuntimeOption::TLSDisableTLS1_2) {
+  if (Cfg::Server::TLSDisableTLS1_2) {
 #ifdef SSL_OP_NO_TLSv1_2
     SSL_CTX_set_options(ctx, SSL_CTX_get_options (ctx) | SSL_OP_NO_TLSv1_2);
 #else
@@ -33,8 +33,8 @@ CURLcode curl_tls_workarounds_cb(CURL* /*curl*/, void* sslctx, void* /*parm*/) {
                  "SSL does not support that option");
 #endif
   }
-  if (!RuntimeOption::TLSClientCipherSpec.empty()) {
-    SSL_CTX_set_cipher_list(ctx, RuntimeOption::TLSClientCipherSpec.c_str());
+  if (!Cfg::Server::TLSClientCipherSpec.empty()) {
+    SSL_CTX_set_cipher_list(ctx, Cfg::Server::TLSClientCipherSpec.c_str());
   }
   return CURLE_OK;
 }

@@ -52,7 +52,7 @@ AccessLog XboxRequestHandler::s_accessLog(
   &(XboxRequestHandler::getAccessLogThreadData));
 
 XboxRequestHandler::XboxRequestHandler()
-  : RequestHandler(RuntimeOption::RequestTimeoutSeconds),
+  : RequestHandler(Cfg::Server::RequestTimeoutSeconds),
     m_logResets(false) {
 }
 

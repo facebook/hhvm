@@ -198,7 +198,7 @@ ProxygenTransport::~ProxygenTransport() {
 bool ProxygenTransport::bufferRequest() const {
   return
     (m_method != Transport::Method::POST ||
-     RuntimeOption::RequestBodyReadLimit <= 0) &&
+     Cfg::Server::RequestBodyReadLimit <= 0) &&
     !isStreamTransport();
 }
 
@@ -244,7 +244,7 @@ bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
     if (auto vhost = VirtualHost::Resolve(host)) {
       m_maxPost = vhost->getMaxPostSize();
     } else {
-      m_maxPost = RuntimeOption::MaxPostSize;
+      m_maxPost = Cfg::Server::MaxPostSize;
     }
   }
   if (content_length > m_maxPost) {
@@ -303,7 +303,7 @@ void ProxygenTransport::onHeadersComplete(
       m_requestHeaders[header.c_str()].push_back(val.c_str());
     });
 
-  if (RuntimeOption::AllowNonBlockingPosts &&
+  if (Cfg::Server::AllowNonBlockingPosts &&
       m_method == Transport::Method::POST &&
       m_requestHeaders.find("NonBlockingPost") != m_requestHeaders.end()) {
     m_streamTransport =
@@ -375,7 +375,7 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
       m_bodyData.append(std::move(chain));
     }
     notify();
-    if (m_bodyData.chainLength() >= RuntimeOption::RequestBodyReadLimit) {
+    if (m_bodyData.chainLength() >= Cfg::Server::RequestBodyReadLimit) {
       VLOG(4) << *m_clientTxn << "Buffer max reached, pausing ingress";
       m_clientTxn->pauseIngress();
     }
@@ -516,7 +516,7 @@ const void *ProxygenTransport::getMorePostData(size_t &size) {
   }
 
   // proxygen will send onTimeout if we don't receive data in this much time
-  long maxWait = RuntimeOption::ConnectionTimeoutSeconds;
+  long maxWait = Cfg::Server::ConnectionTimeoutSeconds;
   if (maxWait <= 0) {
     maxWait = 50; // this was the default read timeout in LibEventServer
   }
@@ -542,8 +542,8 @@ const void *ProxygenTransport::getMorePostData(size_t &size) {
     break;
   }
   // RequestBodyReadLimit is int64_t and could be -1
-  if (oldLength >= RuntimeOption::RequestBodyReadLimit &&
-      m_bodyData.chainLength() < RuntimeOption::RequestBodyReadLimit) {
+  if (oldLength >= Cfg::Server::RequestBodyReadLimit &&
+      m_bodyData.chainLength() < Cfg::Server::RequestBodyReadLimit) {
     VLOG(4) << "resuming ingress";
     m_worker->putResponseMessage(ResponseMessage(
         shared_from_this(), ResponseMessage::Type::RESUME_INGRESS));
@@ -816,7 +816,7 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
         m_response.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
                                     folly::to<std::string>(size));
       }
-    } else if (RuntimeOption::SetChunkedTransferEncoding) {
+    } else if (Cfg::Server::SetChunkedTransferEncoding) {
       // Explicitly add Transfer-Encoding: chunked here.  libproxygen will only
       // add it for keep-alive connections
       m_response.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
@@ -946,7 +946,7 @@ void ProxygenTransport::beginPartialPostEcho() {
   HTTPMessage response;
   response.setHTTPVersion(1,1);
   response.setIsChunked(true);
-  response.setStatusCode(RuntimeOption::ServerPartialPostStatusCode);
+  response.setStatusCode(Cfg::Server::PartialPostStatusCode);
   response.setStatusMessage("Partial post");
 
   // All of the clients headers should be retained downstream,

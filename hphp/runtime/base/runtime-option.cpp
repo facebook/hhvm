@@ -661,59 +661,14 @@ std::string RuntimeOption::AdminLogSymLink;
 
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
-std::string RuntimeOption::Host;
-std::string RuntimeOption::DefaultServerNameSuffix;
-std::string RuntimeOption::ServerType = "proxygen";
-std::string RuntimeOption::ServerIP;
-std::string RuntimeOption::ServerFileSocket;
-int RuntimeOption::ServerPort = 80;
-int RuntimeOption::ServerPortFd = -1;
-int RuntimeOption::ServerBacklog = 128;
-int RuntimeOption::ServerConnectionLimit = 0;
-int RuntimeOption::ServerThreadCount = 50;
-int RuntimeOption::ServerQueueCount = 50;
-int RuntimeOption::ServerIOThreadCount = 1;
-int RuntimeOption::ServerHighQueueingThreshold = 60;
-bool RuntimeOption::ServerLegacyBehavior = true;
-int RuntimeOption::ServerHugeThreadCount = 0;
-int RuntimeOption::ServerHugeStackKb = 384;
 int RuntimeOption::ServerSchedPolicy = -1;
 int RuntimeOption::ServerSchedPriority = 0;
-uint32_t RuntimeOption::ServerLoopSampleRate = 0;
-int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
-int RuntimeOption::ServerWarmupThrottleThreadCount = 0;
-int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
-bool RuntimeOption::AlwaysDecodePostDataDefault = true;
-bool RuntimeOption::SetChunkedTransferEncoding = true;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
-int RuntimeOption::RequestTimeoutSeconds = 0;
-int RuntimeOption::PspTimeoutSeconds = 0;
-int RuntimeOption::PspCpuTimeoutSeconds = 0;
-int64_t RuntimeOption::MaxRequestAgeFactor = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
-int64_t RuntimeOption::RequestHugeMaxBytes = 0;
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
-int RuntimeOption::ServerGracefulShutdownWait = 0;
-bool RuntimeOption::ServerHarshShutdown = true;
-bool RuntimeOption::ServerEvilShutdown = true;
-bool RuntimeOption::ServerKillOnTimeout = true;
-bool RuntimeOption::Server503OnShutdownAbort = false;
-int RuntimeOption::Server503RetryAfterSeconds = -1;
-int RuntimeOption::ServerPreShutdownWait = 0;
-int RuntimeOption::ServerShutdownListenWait = 0;
-int RuntimeOption::ServerShutdownEOMWait = 0;
-int RuntimeOption::ServerPrepareToStopTimeout = 0;
-int RuntimeOption::ServerPartialPostStatusCode = -1;
-bool RuntimeOption::StopOldServer = false;
-int RuntimeOption::OldServerWait = 30;
-int RuntimeOption::CacheFreeFactor = 50;
-int64_t RuntimeOption::ServerRSSNeededMb = 4096;
-int64_t RuntimeOption::ServerCriticalFreeMb = 512;
-std::vector<std::string> RuntimeOption::ServerNextProtocols;
-bool RuntimeOption::ServerEnableH2C = false;
 int RuntimeOption::BrotliCompressionEnabled = -1;
 int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
 int RuntimeOption::BrotliCompressionMode = 0;
@@ -726,20 +681,7 @@ int RuntimeOption::ZstdTargetBlockSize = 0;
 int RuntimeOption::ZstdChecksumRate = 0;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
-bool RuntimeOption::EnableKeepAlive = true;
-bool RuntimeOption::ExposeHPHP = true;
-bool RuntimeOption::ExposeXFBServer = false;
-bool RuntimeOption::ExposeXFBDebug = false;
-std::string RuntimeOption::XFBDebugSSLKey;
-int RuntimeOption::ConnectionTimeoutSeconds = -1;
-bool RuntimeOption::EnableOutputBuffering = false;
-std::string RuntimeOption::OutputHandler;
-bool RuntimeOption::ImplicitFlush = false;
-bool RuntimeOption::EnableEarlyFlush = true;
-bool RuntimeOption::ForceChunkedEncoding = false;
-int64_t RuntimeOption::MaxPostSize = 100;
 int64_t RuntimeOption::LowestMaxPostSize = LLONG_MAX;
-bool RuntimeOption::AlwaysPopulateRawPostData = false;
 int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
@@ -748,36 +690,8 @@ int64_t RuntimeOption::MaxFileUploads = 20;
 int RuntimeOption::Rfc1867Freq = 256 * 1024;
 std::string RuntimeOption::Rfc1867Prefix = "vupload_";
 std::string RuntimeOption::Rfc1867Name = "video_ptoken";
-bool RuntimeOption::ExpiresActive = true;
-int RuntimeOption::ExpiresDefault = 2592000;
-std::string RuntimeOption::DefaultCharsetName = "";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::PathDebug = false;
-
-int64_t RuntimeOption::RequestBodyReadLimit = -1;
-
-bool RuntimeOption::AllowNonBlockingPosts = true;
-
-bool RuntimeOption::EnableSSL = false;
-int RuntimeOption::SSLPort = 443;
-int RuntimeOption::SSLPortFd = -1;
-std::string RuntimeOption::SSLCertificateFile;
-std::string RuntimeOption::SSLCertificateKeyFile;
-std::string RuntimeOption::SSLCertificateDir;
-std::string RuntimeOption::SSLTicketSeedFile;
-bool RuntimeOption::TLSDisableTLS1_2 = false;
-std::string RuntimeOption::TLSClientCipherSpec;
-bool RuntimeOption::EnableSSLWithPlainText = false;
-int RuntimeOption::SSLClientAuthLevel = 0;
-std::string RuntimeOption::SSLClientCAFile = "";
-
-std::string RuntimeOption::ClientAuthAclIdentity;
-std::string RuntimeOption::ClientAuthAclAction;
-bool RuntimeOption::ClientAuthFailClose = false;
-uint32_t RuntimeOption::SSLClientAuthLoggingSampleRatio = 0;
-uint32_t RuntimeOption::ClientAuthSuccessLogSampleRatio = 0;
-uint32_t RuntimeOption::ClientAuthFailureLogSampleRatio = 0;
-uint32_t RuntimeOption::ClientAuthLogSampleBase = 100;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
@@ -789,20 +703,7 @@ bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
-std::string RuntimeOption::FileCache;
-std::string RuntimeOption::DefaultDocument;
-std::string RuntimeOption::GlobalDocument;
-std::string RuntimeOption::ErrorDocument404;
-bool RuntimeOption::ForbiddenAs404 = false;
-std::string RuntimeOption::ErrorDocument500;
-std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
-bool RuntimeOption::EnableStaticContentFromDisk = true;
-
-bool RuntimeOption::Utf8izeReplace = true;
-
-std::string RuntimeOption::RequestInitFunction;
-std::string RuntimeOption::RequestInitDocument;
 
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
@@ -818,7 +719,6 @@ bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
-std::string RuntimeOption::TakeoverFilename;
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
@@ -1963,19 +1863,6 @@ void RuntimeOption::Load(
   }
   {
     // Server
-    Config::Bind(Host, ini, config, "Server.Host");
-    Config::Bind(DefaultServerNameSuffix, ini, config,
-                 "Server.DefaultServerNameSuffix");
-    Config::Bind(AlwaysDecodePostDataDefault, ini, config,
-                 "Server.AlwaysDecodePostDataDefault",
-                 AlwaysDecodePostDataDefault);
-    Config::Bind(SetChunkedTransferEncoding, ini, config,
-                 "Server.SetChunkedTransferEncoding",
-                 SetChunkedTransferEncoding);
-    Config::Bind(ServerType, ini, config, "Server.Type", ServerType);
-    Config::Bind(ServerIP, ini, config, "Server.IP");
-    Config::Bind(ServerFileSocket, ini, config, "Server.FileSocket");
-
 #ifdef HHVM_FACEBOOK
     //Do not cause slowness on startup -- except for Facebook
     if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
@@ -1984,35 +1871,11 @@ void RuntimeOption::Load(
     }
 #endif
 
-    Config::Bind(ServerPort, ini, config, "Server.Port", 80);
-    Config::Bind(ServerBacklog, ini, config, "Server.Backlog", 128);
-    Config::Bind(ServerConnectionLimit, ini, config,
-                 "Server.ConnectionLimit", 0);
-    Config::Bind(ServerThreadCount, ini, config, "Server.ThreadCount",
-                 Process::GetCPUCount() * 2);
-    Config::Bind(ServerQueueCount, ini, config, "Server.QueueCount",
-                 ServerThreadCount);
-    Config::Bind(ServerIOThreadCount, ini, config,
-                 "Server.IOThreadCount", 1);
-    Config::Bind(ServerLegacyBehavior, ini, config, "Server.LegacyBehavior",
-                 ServerLegacyBehavior);
-    Config::Bind(ServerHugeThreadCount, ini, config,
-                 "Server.HugeThreadCount", 0);
-    Config::Bind(ServerHugeStackKb, ini, config, "Server.HugeStackSizeKb", 384);
     ServerSchedPolicy =
       Config::GetInt32(ini, config, "Server.SchedPolicy", ServerSchedPolicy);
     ServerSchedPriority =
       Config::GetInt32(ini, config, "Server.SchedPriority", ServerSchedPriority);
-    Config::Bind(ServerLoopSampleRate, ini, config,
-                 "Server.LoopSampleRate", 0);
-    Config::Bind(ServerWarmupThrottleRequestCount, ini, config,
-                 "Server.WarmupThrottleRequestCount",
-                 ServerWarmupThrottleRequestCount);
-    Config::Bind(ServerWarmupThrottleThreadCount, ini, config,
-                 "Server.WarmupThrottleThreadCount",
-                 Process::GetCPUCount());
-    Config::Bind(ServerThreadDropCacheTimeoutSeconds, ini, config,
-                 "Server.ThreadDropCacheTimeoutSeconds", 0);
+
     if (Config::GetBool(ini, config, "Server.ThreadJobLIFO")) {
       ServerThreadJobLIFOSwitchThreshold = 0;
     }
@@ -2020,50 +1883,12 @@ void RuntimeOption::Load(
                  "Server.ThreadJobLIFOSwitchThreshold",
                  ServerThreadJobLIFOSwitchThreshold);
 
-    Config::Bind(RequestTimeoutSeconds, ini, config,
-                 "Server.RequestTimeoutSeconds", 0);
-    Config::Bind(MaxRequestAgeFactor, ini, config, "Server.MaxRequestAgeFactor",
-                 0);
-    Config::Bind(PspTimeoutSeconds, ini, config, "Server.PspTimeoutSeconds", 0);
-    Config::Bind(PspCpuTimeoutSeconds, ini, config,
-                 "Server.PspCpuTimeoutSeconds", 0);
     Config::Bind(RequestMemoryMaxBytes, ini, config,
                  "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
     RequestInfo::setOOMKillThreshold(
       Config::GetUInt64(ini, config, "Server.RequestMemoryOOMKillBytes",
                         128ULL << 20));
-    Config::Bind(RequestHugeMaxBytes, ini, config,
-                 "Server.RequestHugeMaxBytes", (24LL << 20));
-    Config::Bind(ServerGracefulShutdownWait, ini,
-                 config, "Server.GracefulShutdownWait", 0);
-    Config::Bind(ServerHarshShutdown, ini, config, "Server.HarshShutdown",
-                 true);
-    Config::Bind(ServerKillOnTimeout, ini, config, "Server.KillOnTimeout",
-                 true);
-    Config::Bind(ServerEvilShutdown, ini, config, "Server.EvilShutdown", true);
-    Config::Bind(ServerPreShutdownWait, ini, config,
-                 "Server.PreShutdownWait", 0);
-    Config::Bind(ServerShutdownListenWait, ini, config,
-                 "Server.ShutdownListenWait", 0);
-    Config::Bind(ServerShutdownEOMWait, ini, config,
-                 "Server.ShutdownEOMWait", 0);
-    Config::Bind(ServerPrepareToStopTimeout, ini, config,
-                 "Server.PrepareToStopTimeout", 240);
-    Config::Bind(ServerPartialPostStatusCode, ini, config,
-                 "Server.PartialPostStatusCode", -1);
-    Config::Bind(StopOldServer, ini, config, "Server.StopOld", false);
-    Config::Bind(OldServerWait, ini, config, "Server.StopOldWait", 30);
-    Config::Bind(ServerRSSNeededMb, ini, config, "Server.RSSNeededMb", 4096);
-    Config::Bind(ServerCriticalFreeMb, ini, config,
-                 "Server.CriticalFreeMb", 512);
-    Config::Bind(CacheFreeFactor, ini, config, "Server.CacheFreeFactor", 50);
-    if (CacheFreeFactor > 100) CacheFreeFactor = 100;
-    if (CacheFreeFactor < 0) CacheFreeFactor = 0;
-    Config::Bind(Server503OnShutdownAbort, ini, config, "Server.503OnShutdownAbort", false);
-    Config::Bind(Server503RetryAfterSeconds, ini, config, "Server.503RetryAfterSeconds", -1);
 
-    Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
-    Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
     extern bool g_brotliUseLocalArena;
     Config::Bind(g_brotliUseLocalArena, ini, config,
                  "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
@@ -2091,101 +1916,6 @@ void RuntimeOption::Load(
                  "Server.GzipMaxCompressionLevel", 9);
     Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
                  "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
-    Config::Bind(EnableKeepAlive, ini, config, "Server.EnableKeepAlive", true);
-    Config::Bind(ExposeHPHP, ini, config, "Server.ExposeHPHP", true);
-    Config::Bind(ExposeXFBServer, ini, config, "Server.ExposeXFBServer", false);
-    Config::Bind(ExposeXFBDebug, ini, config, "Server.ExposeXFBDebug", false);
-    Config::Bind(XFBDebugSSLKey, ini, config, "Server.XFBDebugSSLKey", "");
-    Config::Bind(ConnectionTimeoutSeconds, ini, config,
-                 "Server.ConnectionTimeoutSeconds", -1);
-    Config::Bind(EnableOutputBuffering, ini, config,
-                 "Server.EnableOutputBuffering");
-    Config::Bind(OutputHandler, ini, config, "Server.OutputHandler");
-    Config::Bind(ImplicitFlush, ini, config, "Server.ImplicitFlush");
-    Config::Bind(EnableEarlyFlush, ini, config, "Server.EnableEarlyFlush",
-                 true);
-    Config::Bind(ForceChunkedEncoding, ini, config,
-                 "Server.ForceChunkedEncoding");
-    Config::Bind(MaxPostSize, ini, config, "Server.MaxPostSize", 100);
-    MaxPostSize <<= 20;
-    Config::Bind(AlwaysPopulateRawPostData, ini, config,
-                 "Server.AlwaysPopulateRawPostData", false);
-    Config::Bind(TakeoverFilename, ini, config, "Server.TakeoverFilename");
-    Config::Bind(ExpiresActive, ini, config, "Server.ExpiresActive", true);
-    Config::Bind(ExpiresDefault, ini, config, "Server.ExpiresDefault", 2592000);
-    if (ExpiresDefault < 0) ExpiresDefault = 2592000;
-    Config::Bind(DefaultCharsetName, ini, config, "Server.DefaultCharsetName",
-                 "");
-    Config::Bind(RequestBodyReadLimit, ini, config,
-                 "Server.RequestBodyReadLimit", -1);
-    Config::Bind(AllowNonBlockingPosts, ini, config,
-                 "Server.AllowNonBlockingPosts", true);
-    Config::Bind(EnableSSL, ini, config, "Server.EnableSSL");
-    Config::Bind(SSLPort, ini, config, "Server.SSLPort", 443);
-    Config::Bind(SSLCertificateFile, ini, config, "Server.SSLCertificateFile");
-    Config::Bind(SSLCertificateKeyFile, ini, config,
-                 "Server.SSLCertificateKeyFile");
-    Config::Bind(SSLCertificateDir, ini, config, "Server.SSLCertificateDir");
-    Config::Bind(SSLTicketSeedFile, ini, config, "Server.SSLTicketSeedFile");
-    Config::Bind(TLSDisableTLS1_2, ini, config, "Server.TLSDisableTLS1_2",
-                 false);
-    Config::Bind(TLSClientCipherSpec, ini, config,
-                 "Server.TLSClientCipherSpec");
-    Config::Bind(EnableSSLWithPlainText, ini, config,
-                 "Server.EnableSSLWithPlainText");
-    Config::Bind(SSLClientAuthLevel, ini, config,
-                 "Server.SSLClientAuthLevel", 0);
-    if (SSLClientAuthLevel < 0) SSLClientAuthLevel = 0;
-    if (SSLClientAuthLevel > 2) SSLClientAuthLevel = 2;
-    Config::Bind(SSLClientCAFile, ini, config, "Server.SSLClientCAFile", "");
-    if (!SSLClientAuthLevel) {
-      SSLClientCAFile = "";
-    } else if (SSLClientCAFile.empty()) {
-      throw std::runtime_error(
-          "SSLClientCAFile is required to enable client auth");
-    }
-
-    Config::Bind(ClientAuthAclIdentity, ini, config,
-                 "Server.ClientAuthAclIdentity", "");
-    Config::Bind(ClientAuthAclAction, ini, config,
-                 "Server.ClientAuthAclAction", "");
-    Config::Bind(ClientAuthFailClose, ini, config,
-                 "Server.ClientAuthFailClose", false);
-
-    Config::Bind(ClientAuthLogSampleBase, ini, config,
-                 "Server.ClientAuthLogSampleBase", 100);
-    if (ClientAuthLogSampleBase < 1) {
-      ClientAuthLogSampleBase = 1;
-    }
-
-    Config::Bind(SSLClientAuthLoggingSampleRatio, ini, config,
-                 "Server.SSLClientAuthLoggingSampleRatio", 0);
-    if (SSLClientAuthLoggingSampleRatio < 0) {
-      SSLClientAuthLoggingSampleRatio = 0;
-    }
-    if (SSLClientAuthLoggingSampleRatio > ClientAuthLogSampleBase) {
-      SSLClientAuthLoggingSampleRatio = ClientAuthLogSampleBase;
-    }
-
-    Config::Bind(ClientAuthSuccessLogSampleRatio, ini, config,
-                 "Server.ClientAuthSuccessLogSampleRatio", 0);
-    if (ClientAuthSuccessLogSampleRatio <
-          SSLClientAuthLoggingSampleRatio) {
-      ClientAuthSuccessLogSampleRatio = SSLClientAuthLoggingSampleRatio;
-    }
-    if (ClientAuthSuccessLogSampleRatio > ClientAuthLogSampleBase) {
-      ClientAuthSuccessLogSampleRatio = ClientAuthLogSampleBase;
-    }
-
-    Config::Bind(ClientAuthFailureLogSampleRatio, ini, config,
-                 "Server.ClientAuthFailureLogSampleRatio", 0);
-    if (ClientAuthFailureLogSampleRatio <
-          SSLClientAuthLoggingSampleRatio) {
-      ClientAuthFailureLogSampleRatio = SSLClientAuthLoggingSampleRatio;
-    }
-    if (ClientAuthFailureLogSampleRatio > ClientAuthLogSampleBase) {
-      ClientAuthFailureLogSampleRatio = ClientAuthLogSampleBase;
-    }
 
     // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'
     auto defSourceRoot = SourceRoot;
@@ -2201,26 +1931,9 @@ void RuntimeOption::Load(
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    Config::Bind(FileCache, ini, config, "Server.FileCache");
-    Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",
-                 "index.php");
-    Config::Bind(GlobalDocument, ini, config, "Server.GlobalDocument");
-    Config::Bind(ErrorDocument404, ini, config, "Server.ErrorDocument404");
-    normalizePath(ErrorDocument404);
-    Config::Bind(ForbiddenAs404, ini, config, "Server.ForbiddenAs404");
-    Config::Bind(ErrorDocument500, ini, config, "Server.ErrorDocument500");
-    normalizePath(ErrorDocument500);
-    Config::Bind(FatalErrorMessage, ini, config, "Server.FatalErrorMessage");
     FontPath = FileUtil::normalizeDir(
       Config::GetString(ini, config, "Server.FontPath"));
-    Config::Bind(EnableStaticContentFromDisk, ini, config,
-                 "Server.EnableStaticContentFromDisk", true);
-    Config::Bind(Utf8izeReplace, ini, config, "Server.Utf8izeReplace", true);
 
-    Config::Bind(RequestInitFunction, ini, config,
-                 "Server.RequestInitFunction");
-    Config::Bind(RequestInitDocument, ini, config,
-                 "Server.RequestInitDocument");
     Config::Bind(SafeFileAccess, ini, config, "Server.SafeFileAccess");
     Config::Bind(AllowedDirectories, ini, config, "Server.AllowedDirectories");
     Config::Bind(UnserializationWhitelistCheck, ini, config,
@@ -2345,7 +2058,7 @@ void RuntimeOption::Load(
   }
   {
     // Admin Server
-    Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
+    Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", Cfg::Server::IP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
     Config::Bind(AdminServerEnableSSLWithPlainText, ini, config,
@@ -2544,7 +2257,7 @@ void RuntimeOption::Load(
   // **************************************************************************
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config, "expose_php",
-                   &RuntimeOption::ExposeHPHP);
+                   &Cfg::Server::ExposeHPHP);
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
@@ -2554,11 +2267,11 @@ void RuntimeOption::Load(
                      []() {
                        return VirtualHost::GetMaxPostSize();
                      },
-                     &RuntimeOption::MaxPostSize
+                     &Cfg::Server::MaxPostSize
                    ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "always_populate_raw_post_data",
-                   &RuntimeOption::AlwaysPopulateRawPostData);
+                   &Cfg::Server::AlwaysPopulateRawPostData);
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,

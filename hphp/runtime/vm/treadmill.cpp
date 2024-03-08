@@ -162,8 +162,8 @@ const TreadmillRequestInfo* getRequestToAbort() {
       ? req.requestInfo->m_reqInjectionData.getTimeout()
       : 0;
     auto const limit = std::chrono::seconds(std::max(
-      RO::MaxRequestAgeFactor * RO::RequestTimeoutSeconds,
-      RO::MaxRequestAgeFactor * timeout
+      Cfg::Server::MaxRequestAgeFactor * Cfg::Server::RequestTimeoutSeconds,
+      Cfg::Server::MaxRequestAgeFactor * timeout
     ));
     if (!limit.count()) continue;
     auto const age = Clock::now() - req.startTime;
@@ -185,8 +185,8 @@ void checkOldest(Optional<StateGuard>& guard, bool force) {
   if (debug && !force) return;
 
   auto const limit =
-    RuntimeOption::MaxRequestAgeFactor *
-      std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds);
+    Cfg::Server::MaxRequestAgeFactor *
+      std::chrono::seconds(Cfg::Server::RequestTimeoutSeconds);
   if (limit.count() == 0) return;
 
   auto const oldestAge = getOldestRequestAge();

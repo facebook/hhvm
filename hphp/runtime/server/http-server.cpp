@@ -155,49 +155,49 @@ HttpServer::HttpServer() {
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
-  int startingThreadCount = RuntimeOption::ServerThreadCount;
-  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0) {
+  int startingThreadCount = Cfg::Server::ThreadCount;
+  if (Cfg::Server::WarmupThrottleRequestCount > 0) {
     startingThreadCount =
       std::min(startingThreadCount,
-               RuntimeOption::ServerWarmupThrottleThreadCount);
+               Cfg::Server::WarmupThrottleThreadCount);
   }
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
-      (RuntimeOption::ServerType);
-  const std::string address = RuntimeOption::ServerFileSocket.empty()
-    ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
-  ServerOptions options(address, RuntimeOption::ServerPort,
-    RuntimeOption::ServerThreadCount, startingThreadCount,
-    RuntimeOption::ServerQueueCount, RuntimeOption::ServerLegacyBehavior);
-  options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
-  options.m_serverFD = RuntimeOption::ServerPortFd;
-  options.m_sslFD = RuntimeOption::SSLPortFd;
-  options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
-  options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
-  options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
-  options.m_loop_sample_rate = RuntimeOption::ServerLoopSampleRate;
+      (Cfg::Server::Type);
+  const std::string address = Cfg::Server::FileSocket.empty()
+    ? Cfg::Server::IP : Cfg::Server::FileSocket;
+  ServerOptions options(address, Cfg::Server::Port,
+    Cfg::Server::ThreadCount, startingThreadCount,
+    Cfg::Server::QueueCount, Cfg::Server::LegacyBehavior);
+  options.m_useFileSocket = !Cfg::Server::FileSocket.empty();
+  options.m_serverFD = Cfg::Server::PortFd;
+  options.m_sslFD = Cfg::Server::SSLPortFd;
+  options.m_takeoverFilename = Cfg::Server::TakeoverFilename;
+  options.m_hugeThreads = Cfg::Server::HugeThreadCount;
+  options.m_hugeStackKb = Cfg::Server::HugeStackSizeKb;
+  options.m_loop_sample_rate = Cfg::Server::LoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
   m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
-  if (startingThreadCount != RuntimeOption::ServerThreadCount) {
+  if (startingThreadCount != Cfg::Server::ThreadCount) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
       m_pageServer.get(),
-      RuntimeOption::ServerWarmupThrottleRequestCount,
-      RuntimeOption::RequestTimeoutSeconds);
+      Cfg::Server::WarmupThrottleRequestCount,
+      Cfg::Server::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {
       return handlerFactory->createHandler();
     });
   } else {
     m_pageServer->setRequestHandlerFactory<HttpRequestHandler>(
-      RuntimeOption::RequestTimeoutSeconds);
+      Cfg::Server::RequestTimeoutSeconds);
   }
 
-  if (RuntimeOption::EnableSSL) {
+  if (Cfg::Server::EnableSSL) {
     assertx(SSLInit::IsInited());
-    m_pageServer->enableSSL(RuntimeOption::SSLPort);
+    m_pageServer->enableSSL(Cfg::Server::SSLPort);
   }
 
-  if (RuntimeOption::EnableSSLWithPlainText) {
+  if (Cfg::Server::EnableSSLWithPlainText) {
     assertx(SSLInit::IsInited());
     m_pageServer->enableSSLWithPlainText();
   }
@@ -207,7 +207,7 @@ HttpServer::HttpServer() {
                               RuntimeOption::AdminThreadCount);
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
-    RuntimeOption::RequestTimeoutSeconds);
+    Cfg::Server::RequestTimeoutSeconds);
   if (RuntimeOption::AdminServerEnableSSLWithPlainText) {
     assertx(SSLInit::IsInited());
     m_adminServer->enableSSLWithPlainText();
@@ -236,7 +236,7 @@ HttpServer::HttpServer() {
       auto queued_requests = dispatcherStats.queuedJobCount;
       counters["queued_requests"] = queued_requests;
       counters["queued_requests_high"] =
-        queued_requests > RuntimeOption::ServerHighQueueingThreshold;
+        queued_requests > Cfg::Server::HighQueueingThreshold;
 
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
@@ -321,7 +321,7 @@ void HttpServer::serverStopped(HPHP::Server* server) {
   assertx(server == m_pageServer.get());
   removePid();
 
-  auto sockFile = RuntimeOption::ServerFileSocket;
+  auto sockFile = Cfg::Server::FileSocket;
   if (!sockFile.empty()) {
     unlink(sockFile.c_str());
   }
@@ -388,7 +388,7 @@ void HttpServer::runOrExitProcess() {
 
   ServerStats::Clear();                 // Clear stats from warmup requests
 
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     if (!startServer(true)) {
       startupFailure("Unable to start page server");
       not_reached();
@@ -401,7 +401,7 @@ void HttpServer::runOrExitProcess() {
   // If we haven't already, start the admin server.
   // We can't start the admin server early when hotswap is enabled because
   // it might result in killing ourself instead of the old server.
-  if (RuntimeOption::StopOldServer || !RuntimeOption::TakeoverFilename.empty()) {
+  if (Cfg::Server::StopOld || !Cfg::Server::TakeoverFilename.empty()) {
     runAdminServerOrExitProcess();
   }
 
@@ -497,7 +497,7 @@ void HttpServer::runOrExitProcess() {
     }
   }
 
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     Logger::Info("stopping page server");
     m_pageServer->stop();
   }
@@ -512,7 +512,7 @@ void HttpServer::runOrExitProcess() {
 }
 
 void HttpServer::waitForServers() {
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     m_pageServer->waitForEnd();
   }
   if (RuntimeOption::AdminServerPort) {
@@ -551,11 +551,11 @@ void HttpServer::stop(const char* stopReason) {
   Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
 
-  if (RuntimeOption::ServerKillOnTimeout) {
+  if (Cfg::Server::KillOnTimeout) {
     int totalWait =
-      RuntimeOption::ServerPreShutdownWait +
-      RuntimeOption::ServerShutdownListenWait +
-      RuntimeOption::ServerGracefulShutdownWait;
+      Cfg::Server::PreShutdownWait +
+      Cfg::Server::ShutdownListenWait +
+      Cfg::Server::GracefulShutdownWait;
 
     if (totalWait > 0) {
       // Use a killer thread to _Exit() after totalWait seconds.  If
@@ -583,11 +583,11 @@ void HttpServer::stop(const char* stopReason) {
 void HttpServer::stopOnSignal(int sig) {
   int zero = 0;
   if (SignalReceived.compare_exchange_strong(zero, sig) &&
-      RuntimeOption::ServerKillOnTimeout) {
+      Cfg::Server::KillOnTimeout) {
     auto const totalWait =
-      RuntimeOption::ServerPreShutdownWait +
-      RuntimeOption::ServerShutdownListenWait +
-      RuntimeOption::ServerGracefulShutdownWait;
+      Cfg::Server::PreShutdownWait +
+      Cfg::Server::ShutdownListenWait +
+      Cfg::Server::GracefulShutdownWait;
     // In case HttpServer::stop() isn't invoked in the synchronous signal
     // handler.
     if (totalWait > 0) {
@@ -611,7 +611,7 @@ void HttpServer::EvictFileCache() {
   // need more free memory, e.g., when a new instance of the server is
   // about to start.
   advise_out(RuntimeOption::RepoPath);
-  advise_out(RuntimeOption::FileCache);
+  advise_out(Cfg::Server::FileCache);
 }
 
 void HttpServer::PrepareToStop() {
@@ -698,7 +698,7 @@ static bool sendAdminCommand(const char* cmd) {
 }
 
 bool HttpServer::ReduceOldServerLoad() {
-  if (!RuntimeOption::StopOldServer) return false;
+  if (!Cfg::Server::StopOld) return false;
   if (OldServerStopTime > 0) return true;
   Logger::Info("trying to reduce load of the old HPHP server");
   return sendAdminCommand("prepare-to-stop");
@@ -727,7 +727,7 @@ static inline int64_t availableMemory(const MemInfo& mem, int64_t rss,
 bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
                              int64_t rssNeeded, int cacheFreeFactor) {
   if (!mem.valid()) return false;
-  if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
+  if (mem.freeMb < Cfg::Server::CriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   auto const result = (rssMb + availableMb >= rssNeeded);
   if (result) assertx(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
@@ -737,7 +737,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
 bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
                          int64_t rssNeeded, int cacheFreeFactor) {
   if (!mem.valid()) return false;
-  if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
+  if (mem.freeMb < Cfg::Server::CriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   // Estimation of the memory needed till the next check point.  Since
   // the current check point is not the last one, we try to be more
@@ -749,15 +749,15 @@ bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
 }
 
 void HttpServer::CheckMemAndWait(bool final) {
-  if (!RuntimeOption::StopOldServer) return;
-  if (RuntimeOption::OldServerWait <= 0) return;
+  if (!Cfg::Server::StopOld) return;
+  if (Cfg::Server::StopOldWait <= 0) return;
 
-  auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
-  auto const factor = RuntimeOption::CacheFreeFactor;
+  auto const rssNeeded = Cfg::Server::RSSNeededMb;
+  auto const factor = Cfg::Server::CacheFreeFactor;
   do {
     // Don't wait too long
     if (OldServerStopTime > 0 &&
-        time(nullptr) - OldServerStopTime >= RuntimeOption::OldServerWait) {
+        time(nullptr) - OldServerStopTime >= Cfg::Server::StopOldWait) {
       return;
     }
 
@@ -863,7 +863,7 @@ std::pair<int, int> HttpServer::getSatelliteRequestCount() const {
 
 bool HttpServer::startServer(bool pageServer) {
   int port = pageServer ?
-    RuntimeOption::ServerPort : RuntimeOption::AdminServerPort;
+    Cfg::Server::Port : RuntimeOption::AdminServerPort;
 
   // 1. try something nice
   for (unsigned int i = 0; i < 60; i++) {
@@ -884,19 +884,19 @@ bool HttpServer::startServer(bool pageServer) {
         return false;
       }
 
-      if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+      if (pageServer && !Cfg::Server::FileSocket.empty()) {
         if (i == 0) {
           Logger::Info("Unlinking unused socket at %s",
-                       RuntimeOption::ServerFileSocket.c_str());
+                       Cfg::Server::FileSocket.c_str());
         }
         struct stat stat_buf;
-        if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+        if (stat(Cfg::Server::FileSocket.c_str(), &stat_buf) == 0
             && S_ISSOCK(stat_buf.st_mode)) {
           std::string cmd = "bash -c '! fuser ";
-          cmd += RuntimeOption::ServerFileSocket;
+          cmd += Cfg::Server::FileSocket;
           cmd += "'";
           if (FileUtil::ssystem(cmd.c_str()) == 0) {
-            unlink(RuntimeOption::ServerFileSocket.c_str());
+            unlink(Cfg::Server::FileSocket.c_str());
           }
         }
       }
@@ -905,7 +905,7 @@ bool HttpServer::startServer(bool pageServer) {
   }
 
   // 2. try something harsh
-  if (RuntimeOption::ServerHarshShutdown) {
+  if (Cfg::Server::HarshShutdown) {
     for (unsigned int i = 0; i < 5; i++) {
       try {
         if (pageServer) {
@@ -925,7 +925,7 @@ bool HttpServer::startServer(bool pageServer) {
   }
 
   // 3. try something evil
-  if (RuntimeOption::ServerEvilShutdown) {
+  if (Cfg::Server::EvilShutdown) {
     for (unsigned int i = 0; i < 60; i++) {
       try {
         if (pageServer) {
@@ -935,16 +935,16 @@ bool HttpServer::startServer(bool pageServer) {
         }
         return true;
       } catch (FailedToListenException& ) {
-        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+        if (pageServer && !Cfg::Server::FileSocket.empty()) {
           if (i == 0) {
             Logger::Info("unlinking socket at %s",
-                         RuntimeOption::ServerFileSocket.c_str());
+                         Cfg::Server::FileSocket.c_str());
           }
 
           struct stat stat_buf;
-          if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+          if (stat(Cfg::Server::FileSocket.c_str(), &stat_buf) == 0
               && S_ISSOCK(stat_buf.st_mode)) {
-            unlink(RuntimeOption::ServerFileSocket.c_str());
+            unlink(Cfg::Server::FileSocket.c_str());
           }
         } else {
           if (i == 0) {

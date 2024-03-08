@@ -161,10 +161,10 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   }
 
   time_t base = time(nullptr);
-  if (RuntimeOption::ExpiresActive) {
-    time_t exp = base + RuntimeOption::ExpiresDefault;
+  if (Cfg::Server::ExpiresActive) {
+    time_t exp = base + Cfg::Server::ExpiresDefault;
     char age[20];
-    snprintf(age, sizeof(age), "max-age=%d", RuntimeOption::ExpiresDefault);
+    snprintf(age, sizeof(age), "max-age=%d", Cfg::Server::ExpiresDefault);
     transport->addHeader("Cache-Control", age);
     transport->addHeader("Expires",
       req::make<DateTime>(exp, true)->toString(
@@ -270,9 +270,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     const timespec& queueTime = transport->getQueueTime();
 
     if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000LL) {
-      if (RuntimeOption::Server503RetryAfterSeconds >= 0) {
+      if (Cfg::Server::Five0ThreeRetryAfterSeconds >= 0) {
         transport->addHeader("Retry-After", folly::to<std::string>(
-              RuntimeOption::Server503RetryAfterSeconds).c_str());
+              Cfg::Server::Five0ThreeRetryAfterSeconds).c_str());
       }
       transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
@@ -332,7 +332,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
         // (qigao) not calling stat at this point because the timestamp of
         // local cache file is not valuable, maybe misleading. This way
         // the Last-Modified header will not show in response.
-        // stat(RuntimeOption::FileCache.c_str(), &st);
+        // stat(Cfg::Server::FileCache.c_str(), &st);
         sendStaticContent(transport, content->buffer, content->size, 0, false,
                           path, ext);
         ServerStats::LogPage(path, 200);
@@ -340,7 +340,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       }
     }
 
-    if (RuntimeOption::EnableStaticContentFromDisk) {
+    if (Cfg::Server::EnableStaticContentFromDisk) {
       String translated = File::TranslatePath(String(absPath));
       if (!translated.empty() &&
           handleFileRequest(transport, translated, path, ext)) {
@@ -403,9 +403,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
 void HttpRequestHandler::abortRequest(Transport* transport) {
   // TODO: t5284137 add some tests for abortRequest
-  if (RuntimeOption::Server503RetryAfterSeconds >= 0) {
+  if (Cfg::Server::Five0ThreeRetryAfterSeconds >= 0) {
     transport->addHeader("Retry-After", folly::to<std::string>(
-          RuntimeOption::Server503RetryAfterSeconds).c_str());
+          Cfg::Server::Five0ThreeRetryAfterSeconds).c_str());
   }
   transport->sendString("Service Unavailable", 503);
   transport->onSendEnd();
@@ -430,14 +430,14 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
   context->obStart(uninit_null(), 0, obFlags);
   context->obProtect(true);
-  if (RuntimeOption::ImplicitFlush) {
+  if (Cfg::Server::ImplicitFlush) {
     context->obSetImplicitFlush(true);
   }
-  if (RuntimeOption::EnableOutputBuffering) {
-    if (RuntimeOption::OutputHandler.empty()) {
+  if (Cfg::Server::EnableOutputBuffering) {
+    if (Cfg::Server::OutputHandler.empty()) {
       context->obStart();
     } else {
-      context->obStart(String(RuntimeOption::OutputHandler));
+      context->obStart(String(Cfg::Server::OutputHandler));
     }
   }
   InitFiniNode::RequestStart();
@@ -468,8 +468,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   bool error = false;
   std::string errorMsg = "Internal Server Error";
   ret = hphp_invoke(context, file, false, Array(), nullptr,
-                    RuntimeOption::RequestInitFunction,
-                    RuntimeOption::RequestInitDocument,
+                    Cfg::Server::RequestInitFunction,
+                    Cfg::Server::RequestInitDocument,
                     error, errorMsg,
                     true /* once */,
                     false /* warmupOnly */,
@@ -486,7 +486,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
     string errorPage = context->getErrorPage().data();
     if (errorPage.empty()) {
-      errorPage = RuntimeOption::ErrorDocument500;
+      errorPage = Cfg::Server::ErrorDocument500;
     }
     if (!errorPage.empty()) {
       context->obProtect(false);
@@ -494,8 +494,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       context->obStart();
       context->obProtect(true);
       ret = hphp_invoke(context, errorPage, false, Array(), nullptr,
-                        RuntimeOption::RequestInitFunction,
-                        RuntimeOption::RequestInitDocument,
+                        Cfg::Server::RequestInitFunction,
+                        Cfg::Server::RequestInitDocument,
                         error, errorMsg,
                         true /* once */,
                         false /* warmupOnly */,
@@ -515,7 +515,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       if (RuntimeOption::ServerErrorMessage) {
         transport->sendString(errorMsg, 500, false, false, "hphp_invoke");
       } else {
-        transport->sendString(RuntimeOption::FatalErrorMessage,
+        transport->sendString(Cfg::Server::FatalErrorMessage,
                               500, false, false, "hphp_invoke");
       }
     }

@@ -641,15 +641,15 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 
-  if (RuntimeOption::ExposeHPHP) {
+  if (Cfg::Server::ExposeHPHP) {
     addHeaderImpl("X-Powered-By", (String("HHVM/") + HHVM_VERSION).c_str());
   }
 
-  if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&
-      !RuntimeOption::XFBDebugSSLKey.empty() &&
+  if ((Cfg::Server::ExposeXFBServer || Cfg::Server::ExposeXFBDebug) &&
+      !Cfg::Server::XFBDebugSSLKey.empty() &&
       m_responseHeaders.find("X-FB-Debug") == m_responseHeaders.end()) {
     String ip = this->getServerAddr();
-    String key = RuntimeOption::XFBDebugSSLKey;
+    String key = Cfg::Server::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
     bool crypto_strong = false;
     auto const iv_len = (int)HHVM_FN(openssl_cipher_iv_length)(cipher).toInt64();
@@ -670,7 +670,7 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections
-  if (!RuntimeOption::EnableKeepAlive || isServerStopping()) {
+  if (!Cfg::Server::EnableKeepAlive || isServerStopping()) {
     addHeaderImpl("Connection", "close");
     removeHeaderImpl("Keep-Alive");
 
@@ -748,7 +748,7 @@ void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
     return;
   }
 
-  if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
+  if (!precompressed && Cfg::Server::ForceChunkedEncoding) {
     chunked = true;
   }
 

@@ -321,7 +321,7 @@ struct ChildProcess : SweepableResourceData {
     int wstatus;
     do {
       wait_pid = LightProcess::waitpid(child, &wstatus, 0,
-                                       RuntimeOption::RequestTimeoutSeconds);
+                                       Cfg::Server::RequestTimeoutSeconds);
     } while (wait_pid == -1 && errno == EINTR);
 
     if (wait_pid == -1) {

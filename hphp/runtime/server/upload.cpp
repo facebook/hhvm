@@ -44,7 +44,7 @@ struct Rfc1867Data final : RequestEventHandler {
   int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
   void requestInit() override {
-    if (RuntimeOption::EnableUploadProgress) {
+    if (Cfg::Server::UploadEnableUploadProgress) {
       rfc1867Callback = apc_rfc1867_progress;
     } else {
       rfc1867Callback = nullptr;
@@ -725,7 +725,7 @@ void rfc1867PostHandler(Transport* transport,
   int fd=-1;
   void *event_extra_data = nullptr;
   unsigned int llen = 0;
-  int upload_count = RuntimeOption::MaxFileUploads;
+  int upload_count = Cfg::Server::UploadMaxFileUploads;
 
   /* Initialize the buffer */
   if (!(mbuff = multipart_buffer_new(transport,
@@ -844,7 +844,7 @@ void rfc1867PostHandler(Transport* transport,
       }
 
       /* If file_uploads=off, skip the file part */
-      if (!RuntimeOption::EnableFileUploads) {
+      if (!Cfg::Server::UploadEnableFileUploads) {
         skip_upload = 1;
       } else if (upload_count <= 0) {
         Logger::Warning(
@@ -895,7 +895,7 @@ void rfc1867PostHandler(Transport* transport,
 
         // open a temporary file
         snprintf(path, sizeof(path), "%s/XXXXXX",
-                 RuntimeOption::UploadTmpDir.c_str());
+                 Cfg::Server::UploadTmpDir.c_str());
         fd = mkstemp(path);
         upload_count--;
         if (fd == -1) {

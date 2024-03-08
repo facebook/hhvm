@@ -311,9 +311,6 @@ struct RuntimeOption {
   static int RuntimeErrorReportingLevel;
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
-  static std::string ServerUser; // run server under this user account
-  static bool AllowRunAsRoot; // Allow running hhvm as root.
-
   static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
 
@@ -328,13 +325,7 @@ struct RuntimeOption {
 
   static const std::string& GetServerPrimaryIPv4();
   static const std::string& GetServerPrimaryIPv6();
-  static int ServerSchedPolicy;
-  static int ServerSchedPriority;
-  static int ServerThreadJobLIFOSwitchThreshold;
-  static bool ServerForkEnabled;
-  static bool ServerForkLogging;
   static int64_t RequestMemoryMaxBytes;
-  static int64_t ImageMemoryMaxBytes;
   static int BrotliCompressionEnabled;
   static int BrotliChunkedCompressionEnabled;
   static int BrotliCompressionMode;
@@ -349,26 +340,10 @@ struct RuntimeOption {
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
   static int64_t LowestMaxPostSize;
-  static int64_t UploadMaxFileSize;
-  static std::string UploadTmpDir;
-  static bool EnableFileUploads;
-  static bool EnableUploadProgress;
-  static int64_t MaxFileUploads;
-  static int Rfc1867Freq;
-  static std::string Rfc1867Prefix;
-  static std::string Rfc1867Name;
-  static bool ForceServerNameToHeader;
-  static bool PathDebug;
   static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
   static std::shared_ptr<IpBlockMap> IpBlocks;
   static std::vector<std::shared_ptr<SatelliteServerInfo>>
          SatelliteServerInfos;
-
-  // CA file to verify client cert against.
-  static std::string SSLClientCAFile;
-
-  static std::string SourceRoot;
-  static std::vector<std::string> IncludeSearchPaths;
 
   /**
    * Legal root directory expressions in an include expression. For example,
@@ -382,22 +357,12 @@ struct RuntimeOption {
    */
   static std::map<std::string, std::string> IncludeRoots;
 
-  static std::string FontPath;
-
-  static bool SafeFileAccess;
-  static std::vector<std::string> AllowedDirectories;
-  static std::set<std::string> AllowedFiles;
   static hphp_string_imap<std::string> StaticFileExtensions;
   static hphp_string_imap<std::string> PhpFileExtensions;
-  static std::set<std::string> ForbiddenFileExtensions;
-  static std::set<std::string> StaticFileGenerators;
+    static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
   static std::set<std::string> RenamableFunctions;
   static std::set<std::string> NonInterceptableFunctions;
-
-  static bool UnserializationWhitelistCheck;
-  static bool UnserializationWhitelistCheckWarningOnly;
-  static int64_t UnserializationBigMapThreshold;
 
   static std::string AdminServerIP;
   static int AdminServerPort;
@@ -423,7 +388,6 @@ struct RuntimeOption {
   static bool UseProxyURLs;
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
-  static bool AlwaysUseRelativePath;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
@@ -460,21 +424,12 @@ struct RuntimeOption {
 
   static int64_t MaxSQLRowCount;
   static int64_t SocketDefaultTimeout;
-  static bool LockCodeMemory;
-  static int MaxArrayChain;
-  static bool WarnOnCollectionToArray;
-  static bool UseDirectCopy;
 
   static bool DisableSmallAllocator;
 
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;
-
-  // The file name that is used by LightProcess to bind the socket
-  // is the following prefix followed by the pid of the hphp process.
-  static std::string LightProcessFilePrefix;
-  static int LightProcessCount;
 
   // Eval options
   static bool EnableXHP;
@@ -1198,8 +1153,6 @@ public:
   static bool StrobelightEnabled;
 
   static bool SetProfileNullThisObject;
-
-  static bool ApplySecondaryQueuePenalty;
 
   static bool funcIsRenamable(const StringData* name);
 };

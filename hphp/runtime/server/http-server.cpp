@@ -437,7 +437,7 @@ void HttpServer::runOrExitProcess() {
   {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
-    if (!RuntimeOption::ServerForkEnabled) {
+    if (!Cfg::Server::ForkingEnabled) {
       if (DisableFork) {
         // We should not fork from the server process.  Use light process
         // instead.  This will intercept subsequent fork() calls and make them
@@ -456,7 +456,7 @@ void HttpServer::runOrExitProcess() {
                      });
 #endif
     }
-    if (RuntimeOption::ServerForkLogging) {
+    if (Cfg::Server::ForkingLogForkAttempts) {
       if (EnableForkLogging) {
         EnableForkLogging();
       } else {

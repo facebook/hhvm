@@ -306,7 +306,7 @@ fs::path GetCurrentSourceRoot() {
   if (!tl_info.isNull() && tl_info->hasDocRoot) {
     return tl_info->path;
   } else {
-    return RuntimeOption::SourceRoot;
+    return Cfg::Server::SourceRoot;
   }
 }
 

@@ -399,7 +399,7 @@ void RequestInjectionData::threadInit() {
 
 std::string RequestInjectionData::getDefaultIncludePath() {
   std::string result;
-  folly::join(":", RuntimeOption::IncludeSearchPaths, result);
+  folly::join(":", Cfg::Server::IncludeSearchPaths, result);
   return result;
 }
 
@@ -416,7 +416,7 @@ void RequestInjectionData::onSessionInit() {
   m_sflagsAndStkPtr = &rds::header()->stackLimitAndSurprise;
   m_allowedDirectoriesInfo.reset();
   m_open_basedir_separator = s_PATH_SEPARATOR.toCppString();
-  m_safeFileAccess = RuntimeOption::SafeFileAccess;
+  m_safeFileAccess = Cfg::Server::SafeFileAccess;
   if (open_basedir_val) {
     setAllowedDirectories(*open_basedir_val);
   }

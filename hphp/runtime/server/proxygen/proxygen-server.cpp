@@ -221,7 +221,7 @@ ProxygenServer::ProxygenServer(
                    options.m_maxQueue,
                    Cfg::Server::ThreadDropCacheTimeoutSeconds,
                    Cfg::Server::ThreadDropStack,
-                   this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
+                   this, Cfg::Server::ThreadJobLIFOSwitchThreshold,
                    Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                    kNumPriorities,
                    options.m_hugeThreads,

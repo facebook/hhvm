@@ -37,7 +37,7 @@ void StaticContentCache::load() {
 
   if (RuntimeOption::RepoAuthoritative && !Cfg::Server::FileCache.empty()) {
     TheFileCache = std::make_shared<VirtualFileSystem>(
-      Cfg::Server::FileCache, RuntimeOption::SourceRoot);
+      Cfg::Server::FileCache, Cfg::Server::SourceRoot);
 
     if (StructuredLog::enabled() &&
         StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {

@@ -644,7 +644,6 @@ int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorMode::HPHP_ALL);
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
-std::string RuntimeOption::ServerUser;
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 hphp_fast_string_set RuntimeOption::ActiveExperiments;
 hphp_fast_string_set RuntimeOption::InactiveExperiments;
@@ -660,15 +659,8 @@ std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
-
-int RuntimeOption::ServerSchedPolicy = -1;
-int RuntimeOption::ServerSchedPriority = 0;
-int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
-bool RuntimeOption::ServerForkEnabled = true;
-bool RuntimeOption::ServerForkLogging = false;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
-int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::BrotliCompressionEnabled = -1;
 int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
 int RuntimeOption::BrotliCompressionMode = 0;
@@ -682,42 +674,19 @@ int RuntimeOption::ZstdChecksumRate = 0;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
 int64_t RuntimeOption::LowestMaxPostSize = LLONG_MAX;
-int64_t RuntimeOption::UploadMaxFileSize = 100;
-std::string RuntimeOption::UploadTmpDir = "/tmp";
-bool RuntimeOption::EnableFileUploads = true;
-bool RuntimeOption::EnableUploadProgress = false;
-int64_t RuntimeOption::MaxFileUploads = 20;
-int RuntimeOption::Rfc1867Freq = 256 * 1024;
-std::string RuntimeOption::Rfc1867Prefix = "vupload_";
-std::string RuntimeOption::Rfc1867Name = "video_ptoken";
-bool RuntimeOption::ForceServerNameToHeader = false;
-bool RuntimeOption::PathDebug = false;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
 std::vector<std::shared_ptr<SatelliteServerInfo>>
   RuntimeOption::SatelliteServerInfos;
 
-bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
-
-std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
-std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
-std::string RuntimeOption::FontPath;
 
-bool RuntimeOption::SafeFileAccess = false;
-std::vector<std::string> RuntimeOption::AllowedDirectories;
-std::set<std::string> RuntimeOption::AllowedFiles;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
-std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 std::set<std::string> RuntimeOption::RenamableFunctions;
 std::set<std::string> RuntimeOption::NonInterceptableFunctions;
-
-bool RuntimeOption::UnserializationWhitelistCheck = false;
-bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
-int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
@@ -737,7 +706,6 @@ std::set<std::string> RuntimeOption::ServeURLs;
 bool RuntimeOption::UseProxyURLs;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
-bool RuntimeOption::AlwaysUseRelativePath = false;
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -775,10 +743,6 @@ std::vector<std::string> RuntimeOption::StatsTrackedKeys;
 
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
-bool RuntimeOption::LockCodeMemory = false;
-int RuntimeOption::MaxArrayChain = INT_MAX;
-bool RuntimeOption::WarnOnCollectionToArray = false;
-bool RuntimeOption::UseDirectCopy = false;
 
 #if FOLLY_SANITIZE
 bool RuntimeOption::DisableSmallAllocator = true;
@@ -788,9 +752,6 @@ bool RuntimeOption::DisableSmallAllocator = false;
 
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
-
-std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
-int RuntimeOption::LightProcessCount = 0;
 
 int64_t RuntimeOption::HeapSizeMB = 4096; // 4gb
 int64_t RuntimeOption::HeapResetCountBase = 1;
@@ -1018,8 +979,6 @@ bool RuntimeOption::StrobelightEnabled = false;
 bool RuntimeOption::TrackPerUnitMemory = false;
 
 bool RuntimeOption::SetProfileNullThisObject = true;
-
-bool RuntimeOption::ApplySecondaryQueuePenalty = false;
 
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
@@ -1762,11 +1721,7 @@ void RuntimeOption::Load(
       EvalEnableNuma = false;
     }
 
-    Config::Bind(ServerForkEnabled, ini, config,
-                 "Server.Forking.Enabled", ServerForkEnabled);
-    Config::Bind(ServerForkLogging, ini, config,
-                 "Server.Forking.LogForkAttempts", ServerForkLogging);
-    if (!ServerForkEnabled && ServerExecutionMode()) {
+    if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().
       low_2m_pages(EvalMaxLowMemHugePages);
       high_2m_pages(EvalMaxHighArenaHugePages);
@@ -1863,31 +1818,12 @@ void RuntimeOption::Load(
   }
   {
     // Server
-#ifdef HHVM_FACEBOOK
-    //Do not cause slowness on startup -- except for Facebook
     if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
-      throw std::runtime_error("Unable to resolve the server's "
-          "IPv4 or IPv6 address");
+      throw std::runtime_error("Unable to resolve the server's IPv4 or IPv6 address");
     }
-#endif
-
-    ServerSchedPolicy =
-      Config::GetInt32(ini, config, "Server.SchedPolicy", ServerSchedPolicy);
-    ServerSchedPriority =
-      Config::GetInt32(ini, config, "Server.SchedPriority", ServerSchedPriority);
-
-    if (Config::GetBool(ini, config, "Server.ThreadJobLIFO")) {
-      ServerThreadJobLIFOSwitchThreshold = 0;
-    }
-    Config::Bind(ServerThreadJobLIFOSwitchThreshold, ini, config,
-                 "Server.ThreadJobLIFOSwitchThreshold",
-                 ServerThreadJobLIFOSwitchThreshold);
 
     Config::Bind(RequestMemoryMaxBytes, ini, config,
                  "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
-    RequestInfo::setOOMKillThreshold(
-      Config::GetUInt64(ini, config, "Server.RequestMemoryOOMKillBytes",
-                        128ULL << 20));
 
     extern bool g_brotliUseLocalArena;
     Config::Bind(g_brotliUseLocalArena, ini, config,
@@ -1917,98 +1853,40 @@ void RuntimeOption::Load(
     Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
                  "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
 
-    // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'
-    auto defSourceRoot = SourceRoot;
-    Config::Bind(SourceRoot, ini, config, "Server.SourceRoot", SourceRoot);
-    SourceRoot = FileUtil::normalizeDir(SourceRoot);
-    if (SourceRoot.empty()) {
-      SourceRoot = defSourceRoot;
+    // These things should be in Cfg PostProcess methods. But because they use
+    // normalizeDir they can't
+    {
+      Cfg::Server::SourceRoot = FileUtil::normalizeDir(Cfg::Server::SourceRoot);
+      if (Cfg::Server::SourceRoot.empty()) {
+        Cfg::Server::SourceRoot = Cfg::Server::SourceRootDefault();
+      }
+
+      for (unsigned int i = 0; i < Cfg::Server::IncludeSearchPaths.size(); i++) {
+        Cfg::Server::IncludeSearchPaths[i] = FileUtil::normalizeDir(Cfg::Server::IncludeSearchPaths[i]);
+      }
+      Cfg::Server::IncludeSearchPaths.insert(Cfg::Server::IncludeSearchPaths.begin(), ".");
+
+      Cfg::Server::FontPath = FileUtil::normalizeDir(Cfg::Server::FontPath);
     }
 
-    Config::Bind(IncludeSearchPaths, ini, config, "Server.IncludeSearchPaths");
-    for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
-      IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
-    }
-    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    FontPath = FileUtil::normalizeDir(
-      Config::GetString(ini, config, "Server.FontPath"));
-
-    Config::Bind(SafeFileAccess, ini, config, "Server.SafeFileAccess");
-    Config::Bind(AllowedDirectories, ini, config, "Server.AllowedDirectories");
-    Config::Bind(UnserializationWhitelistCheck, ini, config,
-                 "Server.UnserializationWhitelistCheck", false);
-    Config::Bind(UnserializationWhitelistCheckWarningOnly, ini, config,
-                 "Server.UnserializationWhitelistCheckWarningOnly", true);
-    Config::Bind(UnserializationBigMapThreshold, ini, config,
-                 "Server.UnserializationBigMapThreshold", 1 << 16);
-    Config::Bind(AllowedFiles, ini, config, "Server.AllowedFiles");
-    Config::Bind(ForbiddenFileExtensions, ini, config,
-                 "Server.ForbiddenFileExtensions");
-    Config::Bind(LockCodeMemory, ini, config, "Server.LockCodeMemory", false);
-    Config::Bind(MaxArrayChain, ini, config, "Server.MaxArrayChain", INT_MAX);
     Config::Bind(RenamableFunctions, ini, config, "Eval.RenamableFunctions");
     Config::Bind(NonInterceptableFunctions, ini, config, "Eval.NonInterceptableFunctions");
-    if (MaxArrayChain != INT_MAX) {
-      // VanillaDict needs a higher threshold to avoid false-positives.
-      // (and we always use VanillaDict)
-      MaxArrayChain *= 2;
-    }
 
-    Config::Bind(WarnOnCollectionToArray, ini, config,
-                 "Server.WarnOnCollectionToArray", false);
-    Config::Bind(UseDirectCopy, ini, config, "Server.UseDirectCopy", false);
-    Config::Bind(AlwaysUseRelativePath, ini, config,
-                 "Server.AlwaysUseRelativePath", false);
-    {
-      // Server Upload
-      Config::Bind(UploadMaxFileSize, ini, config,
-                   "Server.Upload.UploadMaxFileSize", 100);
-      UploadMaxFileSize <<= 20;
-      Config::Bind(UploadTmpDir, ini, config, "Server.Upload.UploadTmpDir",
-                   "/tmp");
-      Config::Bind(EnableFileUploads, ini, config,
-                   "Server.Upload.EnableFileUploads", true);
-      Config::Bind(MaxFileUploads, ini, config, "Server.Upload.MaxFileUploads",
-                   20);
-      Config::Bind(EnableUploadProgress, ini, config,
-                   "Server.Upload.EnableUploadProgress");
-      Config::Bind(Rfc1867Freq, ini, config, "Server.Upload.Rfc1867Freq",
-                   256 * 1024);
-      if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
-      Config::Bind(Rfc1867Prefix, ini, config, "Server.Upload.Rfc1867Prefix",
-                   "vupload_");
-      Config::Bind(Rfc1867Name, ini, config, "Server.Upload.Rfc1867Name",
-                   "video_ptoken");
-    }
-    Config::Bind(ImageMemoryMaxBytes, ini, config,
-                 "Server.ImageMemoryMaxBytes", 0);
-    if (ImageMemoryMaxBytes == 0) {
-      ImageMemoryMaxBytes = UploadMaxFileSize * 2;
-    }
-    Config::Bind(LightProcessFilePrefix, ini, config,
-                 "Server.LightProcessFilePrefix", "./lightprocess");
-    Config::Bind(LightProcessCount, ini, config,
-                 "Server.LightProcessCount", 0);
     Config::Bind(LightProcess::g_strictUser, ini, config,
                  "Server.LightProcessStrictUser", false);
-    Config::Bind(ForceServerNameToHeader, ini, config,
-                 "Server.ForceServerNameToHeader");
-    Config::Bind(PathDebug, ini, config, "Server.PathDebug", false);
-    Config::Bind(ServerUser, ini, config, "Server.User", "");
-    Config::Bind(AllowRunAsRoot, ini, config, "Server.AllowRunAsRoot", false);
   }
 
-  VirtualHost::SortAllowedDirectories(AllowedDirectories);
+  VirtualHost::SortAllowedDirectories(Cfg::Server::AllowedDirectories);
   {
     auto vh_callback = [] (const IniSettingMap &ini_vh, const Hdf &hdf_vh,
                            const std::string &ini_vh_key) {
       if (VirtualHost::IsDefault(ini_vh, hdf_vh, ini_vh_key)) {
         VirtualHost::GetDefault().init(ini_vh, hdf_vh, ini_vh_key);
-        VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
+        VirtualHost::GetDefault().addAllowedDirectories(Cfg::Server::AllowedDirectories);
       } else {
         auto host = std::make_shared<VirtualHost>(ini_vh, hdf_vh, ini_vh_key);
-        host->addAllowedDirectories(AllowedDirectories);
+        host->addAllowedDirectories(Cfg::Server::AllowedDirectories);
         VirtualHosts.push_back(host);
       }
     };
@@ -2232,10 +2110,6 @@ void RuntimeOption::Load(
     Config::Bind(SetProfileNullThisObject, ini, config,
                  "SetProfile.NullThisObject", true);
   }
-  {
-    // Loadhint queue penalty
-    Config::Bind(ApplySecondaryQueuePenalty, ini, config, "Server.ApplySecondaryQueuePenalty", false);
-  }
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
@@ -2275,7 +2149,7 @@ void RuntimeOption::Load(
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
-                   "doc_root", &RuntimeOption::SourceRoot);
+                   "doc_root", &Cfg::Server::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "sendmail_path", &RuntimeOption::SendmailPath);
 
@@ -2286,15 +2160,15 @@ void RuntimeOption::Load(
   // File Uploads
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "file_uploads", "true",
-                   &RuntimeOption::EnableFileUploads);
+                   &Cfg::Server::UploadEnableFileUploads);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
-                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
+                   "upload_tmp_dir", &Cfg::Server::UploadTmpDir);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "upload_max_filesize",
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& value) {
                        return ini_on_update(
-                         value, RuntimeOption::UploadMaxFileSize);
+                         value, Cfg::Server::UploadMaxFileSize);
                      },
                      []() {
                        return convert_long_to_bytes(

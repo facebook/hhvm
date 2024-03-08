@@ -918,25 +918,25 @@ static void pagein_self(void) {
     }
   }
 
-  if (RO::ServerSchedPolicy >= 0 && RO::ServerSchedPolicy <= SCHED_BATCH) {
+  if (Cfg::Server::SchedPolicy >= 0 && Cfg::Server::SchedPolicy <= SCHED_BATCH) {
     sched_param param{};
-    if (RO::ServerSchedPolicy == SCHED_RR) {
+    if (Cfg::Server::SchedPolicy == SCHED_RR) {
       param.sched_priority =
-        std::max(0, sched_get_priority_min(RO::ServerSchedPolicy));
+        std::max(0, sched_get_priority_min(Cfg::Server::SchedPolicy));
     }
-    auto const ret = sched_setscheduler(0, RO::ServerSchedPolicy, &param);
+    auto const ret = sched_setscheduler(0, Cfg::Server::SchedPolicy, &param);
     if (ret) {
       Logger::Error("failed to adjust scheduling priority: " +
                     folly::errnoStr(errno));
     } else {
       Logger::Info("successfully adjusted scheduling priority to %d",
-                   RO::ServerSchedPolicy);
+                   Cfg::Server::SchedPolicy);
     }
   }
-  if (RO::ServerSchedPriority) {
-    auto const ret = setpriority(PRIO_PROCESS, 0, RO::ServerSchedPriority);
+  if (Cfg::Server::SchedPriority) {
+    auto const ret = setpriority(PRIO_PROCESS, 0, Cfg::Server::SchedPriority);
     if (ret) {
-      Logger::FError("failed to setpriority to {}: {}", RO::ServerSchedPriority,
+      Logger::FError("failed to setpriority to {}: {}", Cfg::Server::SchedPriority,
                      folly::errnoStr(errno));
     }
   }
@@ -999,7 +999,7 @@ static void pagein_self(void) {
             hugifyText(from, to);
           }
         }
-        if (!RuntimeOption::LockCodeMemory) {
+        if (!Cfg::Server::LockCodeMemory) {
           munlock(beginPtr, end - begin);
         }
       }
@@ -1062,11 +1062,11 @@ static int start_server(const std::string &username) {
         Cronolog::changeOwner(username, el.second.symLink);
       }
     }
-    if (!Capability::ChangeUnixUser(username, RuntimeOption::AllowRunAsRoot)) {
+    if (!Capability::ChangeUnixUser(username, Cfg::Server::AllowRunAsRoot)) {
       _exit(HPHP_EXIT_FAILURE);
     }
     LightProcess::ChangeUser(username);
-  } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
+  } else if (getuid() == 0 && !Cfg::Server::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");
     _exit(HPHP_EXIT_FAILURE);
@@ -1847,7 +1847,7 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::AdminServerPort = po.admin_port;
   }
   if (po.noSafeAccessCheck) {
-    RuntimeOption::SafeFileAccess = false;
+    Cfg::Server::SafeFileAccess = false;
   }
   IniSetting::s_system_settings_are_set = true;
   if (debug) tl_heap->checkHeap("resetRuntimeOptions");
@@ -1884,8 +1884,8 @@ static int execute_program_impl(int argc, char** argv) {
         HttpServer::Server->stopOnSignal(SIGCHLD);
       }
     });
-    LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                             RuntimeOption::LightProcessCount,
+    LightProcess::Initialize(Cfg::Server::LightProcessFilePrefix,
+                             Cfg::Server::LightProcessCount,
                              RuntimeOption::EvalRecordSubprocessTimes,
                              inherited_fds);
   }
@@ -2203,8 +2203,8 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (po.mode == "daemon" || po.mode == "server") {
-    if (!po.user.empty()) RuntimeOption::ServerUser = po.user;
-    return start_server(RuntimeOption::ServerUser);
+    if (!po.user.empty()) Cfg::Server::User = po.user;
+    return start_server(Cfg::Server::User);
   }
 
   if (po.mode == "replay" && !po.args.empty()) {
@@ -2235,7 +2235,7 @@ static int execute_program_impl(int argc, char** argv) {
 String canonicalize_path(const String& p, const char* root, int rootLen) {
   String path = FileUtil::canonicalize(p);
   if (path.charAt(0) == '/') {
-    auto const& sourceRoot = RuntimeOption::SourceRoot;
+    auto const& sourceRoot = Cfg::Server::SourceRoot;
     int len = sourceRoot.size();
     if (len && strncmp(path.data(), sourceRoot.c_str(), len) == 0) {
       return path.substr(len);
@@ -2819,7 +2819,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   // based on what server.source_root was set to (current process directory
   // being the default)
   if (RuntimeOption::RepoAuthoritative) {
-    context->setCwd(RuntimeOption::SourceRoot);
+    context->setCwd(Cfg::Server::SourceRoot);
   }
 
   String oldCwd;

@@ -549,7 +549,7 @@ typedef std::vector<TestTransportAsyncFuncPtr> TestTransportAsyncFuncPtrVec;
  * all handling are thread-safe.
  */
 bool TestServer::TestRequestHandling() {
-  RuntimeOption::AllowedFiles.insert("/string");
+  Cfg::Server::AllowedFiles.insert("/string");
   TestTransportPtrVec transports(TEST_SIZE);
   TestTransportAsyncFuncPtrVec funcs(TEST_SIZE);
   for (unsigned int i = 0; i < TEST_SIZE; i++) {

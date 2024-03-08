@@ -1423,7 +1423,7 @@ bool findFileWrapper(const String& file, void* ctx) {
     }
     return false;
   }
-  if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
+  if (RuntimeOption::SandboxMode || !Cfg::Server::AlwaysUseRelativePath) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
                  wrapper)) {
       context->path = translatedPath;
@@ -1788,7 +1788,7 @@ void prefetchUnit(StringData* requestedPath,
   auto const deferResolveVmInclude =
     FileUtil::isAbsolutePath(requestedPath->slice()) &&
     !RID().hasSafeFileAccess() &&
-    (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath);
+    (RuntimeOption::SandboxMode || !Cfg::Server::AlwaysUseRelativePath);
 
   Optional<struct stat> fileStat;
   const StringData* path = nullptr;

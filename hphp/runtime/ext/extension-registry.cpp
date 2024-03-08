@@ -147,19 +147,19 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 
 void moduleInit() {
   auto db = RuntimeOption::EvalDumpBytecode;
-  auto rp = RuntimeOption::AlwaysUseRelativePath;
-  auto sf = RuntimeOption::SafeFileAccess;
+  auto rp = Cfg::Server::AlwaysUseRelativePath;
+  auto sf = Cfg::Server::SafeFileAccess;
   auto ah = RuntimeOption::EvalAllowHhas;
 
   RuntimeOption::EvalDumpBytecode &= ~1;
-  RuntimeOption::AlwaysUseRelativePath = false;
-  RuntimeOption::SafeFileAccess = false;
+  Cfg::Server::AlwaysUseRelativePath = false;
+  Cfg::Server::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
 
   SCOPE_EXIT {
     RuntimeOption::EvalDumpBytecode = db;
-    RuntimeOption::AlwaysUseRelativePath = rp;
-    RuntimeOption::SafeFileAccess = sf;
+    Cfg::Server::AlwaysUseRelativePath = rp;
+    Cfg::Server::SafeFileAccess = sf;
     RuntimeOption::EvalAllowHhas = ah;
   };
 

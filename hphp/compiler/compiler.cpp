@@ -518,7 +518,7 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.StrictUtf8Mode = RuntimeOption::EvalStrictUtf8Mode;
 
   if (Option::ConstFoldFileBC) {
-    gd.SourceRootForFileBC.emplace(RO::SourceRoot);
+    gd.SourceRootForFileBC.emplace(Cfg::Server::SourceRoot);
   }
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
@@ -1087,8 +1087,8 @@ using ParsedFiles = folly_concurrent_hash_map_simd<
 
 bool process(CompilerOptions &po) {
 #ifndef _MSC_VER
-  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount,
+  LightProcess::Initialize(Cfg::Server::LightProcessFilePrefix,
+                           Cfg::Server::LightProcessCount,
                            RuntimeOption::EvalRecordSubprocessTimes,
                            {});
 #endif
@@ -1623,7 +1623,7 @@ bool process(CompilerOptions &po) {
   }
 
   if (Option::ConstFoldFileBC) {
-    HHBBC::options.SourceRootForFileBC = RO::SourceRoot;
+    HHBBC::options.SourceRootForFileBC = Cfg::Server::SourceRoot;
   }
   HHBBC::options.CoreDump = po.coredump;
 

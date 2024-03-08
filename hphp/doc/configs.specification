@@ -463,6 +463,8 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - std::string Server.Type = "proxygen", UNKNOWN
 - std::string Server.IP = "", UNKNOWN
 - std::string Server.FileSocket = "", UNKNOWN
+- int Server.SchedPolicy = -1, UNKNOWN
+- int Server.SchedPriority = 0, UNKNOWN
 - int Server.Backlog = 128, UNKNOWN
 - int Server.ConnectionLimit = 0, UNKNOWN
 - int Server.ThreadCount, UNKNOWN
@@ -604,6 +606,55 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - bool Server.Utf8izeReplace = true, UNKNOWN
 - std::string Server.RequestInitFunction = "", UNKNOWN
 - std::string Server.RequestInitDocument = "", UNKNOWN
+- bool Server.ThreadJobLIFO = false, UNKNOWN
+- int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
+- std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
+- std::string Server.FontPath = "", UNKNOWN
+- uint64_t Server.RequestMemoryOOMKillBytes = 128ULL << 20, UNKNOWN
+- std::string Server.SourceRoot, UNKNOWN
+- bool Server.SafeFileAccess = false, UNKNOWN
+- std::vector<std::string> Server.AllowedDirectories = {}, UNKNOWN
+- bool Server.UnserializationWhitelistCheck = false, UNKNOWN
+- bool Server.UnserializationWhitelistCheckWarningOnly = true, UNKNOWN
+- int64_t Server.UnserializationBigMapThreshold = 1 << 16, UNKNOWN
+- std::set<std::string> Server.AllowedFiles = {}, UNKNOWN
+- std::set<std::string> Server.ForbiddenFileExtensions = {}, UNKNOWN
+- bool Server.LockCodeMemory = false, UNKNOWN
+- int Server.MaxArrayChain = INT_MAX, UNKNOWN, postprocess
+- bool Server.WarnOnCollectionToArray = false, UNKNOWN
+- bool Server.UseDirectCopy = false, UNKNOWN
+- bool Server.AlwaysUseRelativePath = false, UNKNOWN
+- bool Server.ApplySecondaryQueuePenalty = false, UNKNOWN
+
+  Loadhint queue penalty
+
+- bool Server.Forking.Enabled = true, UNKNOWN
+- bool Server.Forking.LogForkAttempts = false, UNKNOWN
+- std::string Server.LightProcessFilePrefix = "./lightprocess", UNKNOWN
+
+  The file name that is used by LightProcess to bind the socket
+  is the following prefix followed by the pid of the hphp process.
+
+- int Server.LightProcessCount = 0, UNKNOWN
+- bool Server.ForceServerNameToHeader = false, UNKNOWN
+- bool Server.PathDebug = false, UNKNOWN
+- std::string Server.User = "", UNKNOWN
+
+  Run server under this user account
+
+- bool Server.AllowRunAsRoot = false, UNKNOWN
+
+  Allow running hhvm as root
+
+- int64_t Server.Upload.MaxFileSize = 100 (Server.Upload.UploadMaxFileSize), UNKNOWN, postprocess
+- std::string Server.Upload.TmpDir = "/tmp" (Server.Upload.UploadTmpDir), UNKNOWN
+- bool Server.Upload.EnableFileUploads = true, UNKNOWN
+- int64_t Server.Upload.MaxFileUploads = 20, UNKNOWN
+- bool Server.Upload.EnableUploadProgress = false, UNKNOWN
+- int Server.Upload.Rfc1867Freq = 256 * 1024, UNKNOWN, postprocess
+- std::string Server.Upload.Rfc1867Prefix = "vupload_", UNKNOWN
+- std::string Server.Upload.Rfc1867Name = "video_ptoken", UNKNOWN
+- int64_t Server.ImageMemoryMaxBytes = 0, UNKNOWN, postprocess
 
 # Xbox
 

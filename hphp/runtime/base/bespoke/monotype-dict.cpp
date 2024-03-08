@@ -965,9 +965,9 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
     *add.index = i;
   });
 
-  if (chain > 2048 && chain > folly::nextPowTwo(size_t(RO::MaxArrayChain))) {
+  if (chain > 2048 && chain > folly::nextPowTwo(size_t(Cfg::Server::MaxArrayChain))) {
     tl_heap->objFreeIndex(ad, index);
-    raise_error("Array is too unbalanced (%u)", RO::MaxArrayChain + 1);
+    raise_error("Array is too unbalanced (%u)", Cfg::Server::MaxArrayChain + 1);
   }
 
   if (copy) {

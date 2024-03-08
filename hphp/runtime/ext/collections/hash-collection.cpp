@@ -52,7 +52,7 @@ void HashCollection::throwReserveTooLarge() {
 
 NEVER_INLINE
 int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
-  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+  if (n > size_t(Cfg::Server::MaxArrayChain)) {
     raise_error("%s is too unbalanced (%lu)",
                 getClassName().data() + 3, // strip "HH\" prefix
                 n);

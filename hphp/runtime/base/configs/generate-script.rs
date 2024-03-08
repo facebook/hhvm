@@ -367,7 +367,7 @@ fn parse_num<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a
                 recognize(tuple((digit1, opt(preceded(tag("."), digit1))))),
                 recognize(preceded(tag("."), digit1)),
             )),
-            opt(alt((tag("LL"), tag("ll")))),
+            opt(alt((tag("LL"), tag("ll"), tag("ULL"), tag("ull")))),
         ))),
     ))(input)
 }
@@ -621,7 +621,7 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                 }
             }
             if config.default_value.is_none() {
-                private_methods.push(format!(
+                public_methods.push(format!(
                     "  static {} {}Default();",
                     config.type_.str(),
                     shortname
@@ -636,13 +636,16 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             }
         }
 
-        public_methods.push("  static void Load(const IniSettingMap& ini, const Hdf& config);");
-        public_methods.push("  static std::string Debug();");
+        public_methods
+            .push("  static void Load(const IniSettingMap& ini, const Hdf& config);".to_string());
+        public_methods.push("  static std::string Debug();".to_string());
         if has_repo_option_flags {
-            public_methods.push("  static void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);");
-            public_methods.push("  static void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, const RepoOptionsFlags& default_flags);");
-            public_methods
-                .push("  static void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);");
+            public_methods.push("  static void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);".to_string());
+            public_methods.push("  static void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, const RepoOptionsFlags& default_flags);".to_string());
+            public_methods.push(
+                "  static void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);"
+                    .to_string(),
+            );
         }
 
         let has_compiler_option = section
@@ -651,7 +654,8 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             .any(|c| c.features.compiler_option.is_some());
         if has_compiler_option {
             public_methods.push(
-                "  static void LoadForCompiler(const IniSettingMap& ini, const Hdf& config);",
+                "  static void LoadForCompiler(const IniSettingMap& ini, const Hdf& config);"
+                    .to_string(),
             );
         }
 

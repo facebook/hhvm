@@ -497,7 +497,7 @@ static void CopyServerInfo(Array& server,
   // Use the header from the transport if it is available
   if (!serverNameHeader.empty()) {
     hostName = serverNameHeader;
-  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+  } else if (hostName.empty() || Cfg::Server::ForceServerNameToHeader) {
     hostName = hostHeader;
   }
 
@@ -623,7 +623,7 @@ static void CopyPathInfo(Array& server,
 
   String documentRoot = transport->getDocumentRoot();
   if (documentRoot.empty()) {
-    // Right now this is just RuntimeOption::SourceRoot but mwilliams wants to
+    // Right now this is just Cfg::Server::SourceRoot but mwilliams wants to
     // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
   }

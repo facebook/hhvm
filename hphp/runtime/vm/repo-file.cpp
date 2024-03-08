@@ -107,10 +107,10 @@ constexpr size_t kIndexDataSizeLimit   = std::numeric_limits<uint32_t>::max();
 
 const StringData* relativePathToSourceRoot(const StringData* path) {
   assertx(!path->empty());
-  if (path->data()[0] == '/' && !RO::SourceRoot.empty() &&
-    !strncmp(RO::SourceRoot.c_str(), path->data(), RO::SourceRoot.size())) {
-    return makeStaticString(path->data() + RO::SourceRoot.size(),
-                            path->size() - RO::SourceRoot.size());
+  if (path->data()[0] == '/' && !Cfg::Server::SourceRoot.empty() &&
+    !strncmp(Cfg::Server::SourceRoot.c_str(), path->data(), Cfg::Server::SourceRoot.size())) {
+    return makeStaticString(path->data() + Cfg::Server::SourceRoot.size(),
+                            path->size() - Cfg::Server::SourceRoot.size());
   }
   return path;
 }
@@ -125,9 +125,9 @@ void RepoUnitInfo::serde(BlobEncoder& sd) const {
   std::string spath = path->toCppString();
   auto const pathData = spath.c_str();
   assertx(!spath.empty());
-  if (pathData[0] == '/' && !RO::SourceRoot.empty() &&
-      !strncmp(RO::SourceRoot.c_str(), pathData, RO::SourceRoot.size())) {
-    spath = spath.substr(RO::SourceRoot.size());
+  if (pathData[0] == '/' && !Cfg::Server::SourceRoot.empty() &&
+      !strncmp(Cfg::Server::SourceRoot.c_str(), pathData, Cfg::Server::SourceRoot.size())) {
+    spath = spath.substr(Cfg::Server::SourceRoot.size());
   }
 
   sd(unitSn)(spath)(emitterLocation)(symbolsLocation);
@@ -138,8 +138,8 @@ void RepoUnitInfo::serde(BlobDecoder& sd) {
 
   sd(unitSn)(spath)(emitterLocation)(symbolsLocation);
 
-  if (!RO::SourceRoot.empty() && !spath.empty() && spath.c_str()[0] != '/') {
-    spath = RO::SourceRoot + spath;
+  if (!Cfg::Server::SourceRoot.empty() && !spath.empty() && spath.c_str()[0] != '/') {
+    spath = Cfg::Server::SourceRoot + spath;
   }
   path = makeStaticString(spath);
 }

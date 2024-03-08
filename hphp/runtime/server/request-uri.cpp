@@ -355,7 +355,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();
-    if (RuntimeOption::PathDebug) {
+    if (Cfg::Server::PathDebug) {
       m_triedURLs.push_back(m_absolutePath.toCppString());
     }
 
@@ -364,8 +364,8 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       return true;
     }
 
-    if (RuntimeOption::AllowedFiles.find(fullname.c_str()) !=
-      RuntimeOption::AllowedFiles.end()) {
+    if (Cfg::Server::AllowedFiles.find(fullname.c_str()) !=
+      Cfg::Server::AllowedFiles.end()) {
       return true;
     }
     if (RuntimeOption::RepoAuthoritative &&
@@ -427,12 +427,12 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
 
 void RequestURI::processExt() {
   m_ext = parseExt(m_path);
-  if (RuntimeOption::ForbiddenFileExtensions.empty()) {
+  if (Cfg::Server::ForbiddenFileExtensions.empty()) {
     return;
   }
   if (m_ext &&
-      RuntimeOption::ForbiddenFileExtensions.find(m_ext) !=
-      RuntimeOption::ForbiddenFileExtensions.end()) {
+      Cfg::Server::ForbiddenFileExtensions.find(m_ext) !=
+      Cfg::Server::ForbiddenFileExtensions.end()) {
     m_forbidden = true;
   }
 }
@@ -482,7 +482,7 @@ void RequestURI::clear() {
 
 const std::string RequestURI::getDefault404() {
   std::string ret = "404 File Not Found";
-  if (RuntimeOption::PathDebug) {
+  if (Cfg::Server::PathDebug) {
     ret += "<br/>Paths examined:<ul>";
     for (auto& url : m_triedURLs) {
       ret += "<li>" + url + "</li>";

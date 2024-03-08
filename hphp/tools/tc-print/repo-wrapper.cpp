@@ -55,8 +55,8 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   hasRepo = !repoFileName.empty();
   if (hasRepo) RepoFile::init(repoFileName);
 
-  RuntimeOption::AlwaysUseRelativePath = false;
-  RuntimeOption::SafeFileAccess = false;
+  Cfg::Server::AlwaysUseRelativePath = false;
+  Cfg::Server::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
   RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
   RuntimeOption::RepoAuthoritative = true;

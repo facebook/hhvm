@@ -117,7 +117,7 @@ int FileStreamWrapper::unlink(const String& path) {
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {
   int ret =
-    RuntimeOption::UseDirectCopy ?
+    Cfg::Server::UseDirectCopy ?
       FileUtil::directRename(File::TranslatePath(oldname).data(),
                              File::TranslatePath(newname).data())
                                  :

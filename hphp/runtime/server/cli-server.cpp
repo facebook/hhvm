@@ -1482,7 +1482,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
 
       FTRACE(2, "{}({}): rename({}, {})\n", __func__, fd, oldp, newp);
 
-      int ret = RuntimeOption::UseDirectCopy
+      int ret = Cfg::Server::UseDirectCopy
         ? FileUtil::directRename(oldp.c_str(), newp.c_str())
         : FileUtil::rename(oldp.c_str(), newp.c_str());
 

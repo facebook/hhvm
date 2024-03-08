@@ -1101,7 +1101,7 @@ static VirtualFileSystem::FileType lookupVirtualFile(const String& filename) {
   bool isRelative = !FileUtil::isAbsolutePath(filename.slice());
   if (isRelative) {
     cwd = g_context->getCwd();
-    root = RuntimeOption::SourceRoot;
+    root = Cfg::Server::SourceRoot;
     if (cwd.empty() || FileUtil::isDirSeparator(cwd[cwd.size() - 1])) {
       root.pop_back();
     }
@@ -1609,7 +1609,7 @@ bool HHVM_FUNCTION(copy,
     return HHVM_FN(fclose)(dfile.toResource());
   } else {
     int ret =
-      RuntimeOption::UseDirectCopy ?
+      Cfg::Server::UseDirectCopy ?
       FileUtil::directCopy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data())
       :

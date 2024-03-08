@@ -656,7 +656,7 @@ bool VanillaDict::IsVectorData(const ArrayData* ad) {
 
 NEVER_INLINE
 int32_t* warnUnbalanced(VanillaDict* a, size_t n, int32_t* ei) {
-  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+  if (n > size_t(Cfg::Server::MaxArrayChain)) {
     decRefArr(a->asArrayData()); // otherwise, a leaks when exn propagates
     raise_error("Array is too unbalanced (%lu)", n);
   }

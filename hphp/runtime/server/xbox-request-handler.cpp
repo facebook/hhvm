@@ -274,7 +274,7 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
 std::string XboxRequestHandler::getSourceFilename(const std::string &path) {
   if (path.empty() || path[0] == '/') return path;
   // If it is not a sandbox, sourceRoot will be the same as
-  // RuntimeOption::SourceRoot.
+  // Cfg::Server::SourceRoot.
   std::string sourceRoot = SourceRootInfo::GetCurrentSourceRoot();
   if (sourceRoot.empty()) {
     return Process::GetCurrentDirectory() + "/" + path;

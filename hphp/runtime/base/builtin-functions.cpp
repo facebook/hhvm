@@ -992,7 +992,7 @@ void throw_parameter_wrong_type(TypedValue tv,
 }
 
 void check_collection_cast_to_array() {
-  if (RuntimeOption::WarnOnCollectionToArray) {
+  if (Cfg::Server::WarnOnCollectionToArray) {
     raise_warning("Casting a collection to an array is an expensive operation "
                   "and should be avoided where possible. To convert a "
                   "collection to an array without raising a warning, use the "
@@ -1197,14 +1197,14 @@ static Variant invoke_file(const String& s,
 Variant include_impl_invoke(const String& file, bool once,
                             const char *currentDir, bool callByHPHPInvoke) {
   if (FileUtil::isAbsolutePath(file.toCppString())) {
-    if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
+    if (RuntimeOption::SandboxMode || !Cfg::Server::AlwaysUseRelativePath) {
       try {
         return invoke_file(file, once, currentDir, callByHPHPInvoke);
       } catch(PhpFileDoesNotExistException& ) {}
     }
 
     try {
-      String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
+      String rel_path(FileUtil::relativePath(Cfg::Server::SourceRoot,
                                            string(file.data())));
 
       // Don't try/catch - We want the exception to be passed along

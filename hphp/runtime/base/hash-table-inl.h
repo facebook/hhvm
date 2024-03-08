@@ -265,7 +265,7 @@ typename HashTable<ArrayType, ElmType>::Inserter
 HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
                                                     size_t mask,
                                                     hash_t h0) const {
-  uint64_t balanceLimit = RuntimeOption::MaxArrayChain;
+  uint64_t balanceLimit = Cfg::Server::MaxArrayChain;
   for (uint64_t i = 1, probe = (uint32_t)h0 & mask;; ++i) {
     auto ei = &table[probe];
     if (!validPos(*ei)) {

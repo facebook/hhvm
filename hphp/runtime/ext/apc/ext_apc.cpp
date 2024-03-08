@@ -567,13 +567,13 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
     rfc1867ApcData->bytes_processed = 0;
     rfc1867ApcData->prev_bytes_processed = 0;
     rfc1867ApcData->rate = 0;
-    rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
+    rfc1867ApcData->update_freq = Cfg::Server::UploadRfc1867Freq;
 
     if (rfc1867ApcData->update_freq < 0) {
       assertx(false); // TODO: support percentage
       // frequency is a percentage, not bytes
       rfc1867ApcData->update_freq =
-        rfc1867ApcData->content_length * RuntimeOption::Rfc1867Freq / 100;
+        rfc1867ApcData->content_length * Cfg::Server::UploadRfc1867Freq / 100;
     }
     break;
   }
@@ -581,17 +581,17 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
   case MULTIPART_EVENT_FORMDATA: {
     multipart_event_formdata *data = (multipart_event_formdata *)event_data;
     if (data->name &&
-        !strncasecmp(data->name, RuntimeOption::Rfc1867Name.c_str(),
-                     RuntimeOption::Rfc1867Name.size()) &&
+        !strncasecmp(data->name, Cfg::Server::UploadRfc1867Name.c_str(),
+                     Cfg::Server::UploadRfc1867Name.size()) &&
         data->value && data->length &&
         data->length < RFC1867_TRACKING_KEY_MAXLEN -
-                       RuntimeOption::Rfc1867Prefix.size()) {
-      int len = RuntimeOption::Rfc1867Prefix.size();
+                       Cfg::Server::UploadRfc1867Prefix.size()) {
+      int len = Cfg::Server::UploadRfc1867Prefix.size();
       if (len > RFC1867_TRACKING_KEY_MAXLEN) {
         len = RFC1867_TRACKING_KEY_MAXLEN;
       }
       rfc1867ApcData->tracking_key =
-        std::string(RuntimeOption::Rfc1867Prefix.c_str(), len);
+        std::string(Cfg::Server::UploadRfc1867Prefix.c_str(), len);
       len = strlen(*data->value);
       int rem = RFC1867_TRACKING_KEY_MAXLEN -
                 rfc1867ApcData->tracking_key.size();

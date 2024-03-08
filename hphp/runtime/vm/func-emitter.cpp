@@ -393,7 +393,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
      !RuntimeOption::RepoAuthoritative ||
      FileUtil::isAbsolutePath(originalFilename->slice())) ?
     originalFilename :
-    makeStaticString(RuntimeOption::SourceRoot +
+    makeStaticString(Cfg::Server::SourceRoot +
                      originalFilename->toCppString());
 
   f->shared()->m_localNames.create(m_localNames);

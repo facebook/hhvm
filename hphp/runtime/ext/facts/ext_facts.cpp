@@ -800,7 +800,7 @@ void FactsExtension::moduleInit() {
   // if any threads have been created during the moduleLoad() step.
   try {
     enableFactsLogging(
-        RuntimeOption::ServerUser,
+        Cfg::Server::User,
         Cfg::Autoload::Logging,
         Cfg::Autoload::AllowLoggingPropagation);
   } catch (std::exception& e) {

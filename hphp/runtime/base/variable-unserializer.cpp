@@ -452,7 +452,7 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
     return ok;
   }
 
-  if (!RuntimeOption::UnserializationWhitelistCheck) {
+  if (!Cfg::Server::UnserializationWhitelistCheck) {
     // No need for BC HHVM-style whitelist check,
     // since the check isn't enabled.
     // Go with PHP5 default behavior of allowing all
@@ -470,7 +470,7 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
     "The object being unserialized with class name '%s' "
     "is not in the given whitelist"; // followed by ' in <filename> on line %d'.
 
-  if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+  if (Cfg::Server::UnserializationWhitelistCheckWarningOnly) {
     // Nope, just whine to the user and let it through
     raise_warning(err_msg, clsName.c_str());
     return true;
@@ -1688,7 +1688,7 @@ void VariableUnserializer::unserializeMap(ObjectData* obj, int64_t sz,
 
   auto map = static_cast<BaseMap*>(obj);
   map->reserve(sz);
-  if (sz >= RuntimeOption::UnserializationBigMapThreshold &&
+  if (sz >= Cfg::Server::UnserializationBigMapThreshold &&
       tryUnserializeStrIntMap(map, sz)) {
     return;
   }

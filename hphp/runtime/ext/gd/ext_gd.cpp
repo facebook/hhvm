@@ -138,9 +138,9 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + size > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + size > (size_t)Cfg::Server::ImageMemoryMaxBytes) {
       return nullptr;
     }
 
@@ -165,10 +165,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
-    if (bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+    if (bytes > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + bytes > (size_t)Cfg::Server::ImageMemoryMaxBytes) {
       return nullptr;
     }
 
@@ -204,10 +204,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
     assertx(count == 1); // double free on failure
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     local_free(lnPtr);
 #else
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     local_free(sizePtr);
 #endif
   }
@@ -218,7 +218,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -241,8 +241,8 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
       assertx(count == 1); // double free on failure
@@ -259,8 +259,8 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
 #else
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(sizePtr, sizeof(size) + size))) {
       local_free(sizePtr);
       return nullptr;
@@ -2937,8 +2937,8 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   FILE *fp = nullptr;
-  if (!RuntimeOption::FontPath.empty()) {
-    fontname = String(RuntimeOption::FontPath.c_str()) +
+  if (!Cfg::Server::FontPath.empty()) {
+    fontname = String(Cfg::Server::FontPath.c_str()) +
                HHVM_FN(basename)(fontname);
   }
   auto stream = php_open_plain_file(fontname, "rb", &fp);

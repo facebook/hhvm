@@ -74,7 +74,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  Cfg::Server::ThreadDropCacheTimeoutSeconds,
                  Cfg::Server::ThreadDropStack,
                  this,
-                 RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
+                 Cfg::Server::ThreadJobLIFOSwitchThreshold,
                  Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   folly::SocketAddress sock_addr;

@@ -99,7 +99,7 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
   if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
     return vh->m_runtimeOption.uploadMaxFileSize;
   }
-  return RuntimeOption::UploadMaxFileSize;
+  return Cfg::Server::UploadMaxFileSize;
 }
 
 void VirtualHost::UpdateSerializationSizeLimit() {
@@ -123,7 +123,7 @@ const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
   if (!vh->m_runtimeOption.allowedDirectories.empty()) {
     return vh->m_runtimeOption.allowedDirectories;
   }
-  return RuntimeOption::AllowedDirectories;
+  return Cfg::Server::AllowedDirectories;
 }
 
 void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
@@ -185,7 +185,7 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
   m_runtimeOption.serializationSizeLimit = serializationSizeLimit;
 
-  m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
+  m_documentRoot = Cfg::Server::SourceRoot + m_pathTranslation;
   if (m_documentRoot.length() > 1 &&
       m_documentRoot.back() == '/') {
     m_documentRoot.pop_back();

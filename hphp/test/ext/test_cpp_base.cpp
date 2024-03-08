@@ -316,25 +316,25 @@ bool TestCppBase::TestVirtualHost() {
     "  }\n"
   );
 
-  // reset RuntimeOption::AllowedDirectories to empty because if the INI
+  // reset Cfg::Server::AllowedDirectories to empty because if the INI
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
   std::vector<VirtualHost> hosts;
-  RuntimeOption::AllowedDirectories =
+  Cfg::Server::AllowedDirectories =
     Config::GetStrVector(ini, hdf, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb, const Hdf &hdf_cb,
                  const std::string &host) {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
       VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
       VirtualHost::GetDefault().
-        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+        addAllowedDirectories(Cfg::Server::AllowedDirectories);
     } else {
       auto vh = VirtualHost(ini_cb, hdf_cb, host);
       // These will be added
       // "    AllowedDirectories.* = /var/www\n"
       // "    AllowedDirectories.* = /usr/bin\n"
-      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      vh.addAllowedDirectories(Cfg::Server::AllowedDirectories);
       hosts.push_back(vh);
     }
   };
@@ -346,7 +346,7 @@ bool TestCppBase::TestVirtualHost() {
     if (name == "flibtest") {
       VERIFY(host.getPathTranslation() == "flib/_bin/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "flib/_bin");
+             Cfg::Server::SourceRoot + "flib/_bin");
       VERIFY(host.getServerVars().size() == 0);
       VERIFY(VirtualHost::GetAllowedDirectories().size() == 2);
       VERIFY(host.valid() == true);
@@ -354,7 +354,7 @@ bool TestCppBase::TestVirtualHost() {
     } else if (name == "upload") {
       VERIFY(host.getPathTranslation() == "html/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "html");
+             Cfg::Server::SourceRoot + "html");
       // SortALlowedDirectories might add something and remove
       // duplicates. In this case, /var/releases/continuous_www_scripts4
       // was added and the duplicate /var/www was removed.s
@@ -427,13 +427,13 @@ bool TestCppBase::TestVirtualHostIni() {
   Hdf empty;
   std::vector<VirtualHost> hosts;
 
-  // reset RuntimeOption::AllowedDirectories to empty because if the Hdf
+  // reset Cfg::Server::AllowedDirectories to empty because if the Hdf
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
   Config::ParseIniString(inistr, ini);
-  RuntimeOption::AllowedDirectories =
+  Cfg::Server::AllowedDirectories =
     Config::GetStrVector(ini, empty, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb,
                  const Hdf &hdf_cb,
@@ -441,13 +441,13 @@ bool TestCppBase::TestVirtualHostIni() {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
       VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
       VirtualHost::GetDefault().
-        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+        addAllowedDirectories(Cfg::Server::AllowedDirectories);
     } else {
       auto vh = VirtualHost(ini_cb, hdf_cb, host);
       // These will be added
       // "hhvm.server.allowed_directories[] = /var/www\n"
       // "hhvm.server.allowed_directories[] = /usr/bin\n"
-      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      vh.addAllowedDirectories(Cfg::Server::AllowedDirectories);
       hosts.push_back(vh);
     }
   };
@@ -459,7 +459,7 @@ bool TestCppBase::TestVirtualHostIni() {
     if (name == "flibtest") {
       VERIFY(host.getPathTranslation() == "flib/_bin/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "flib/_bin");
+             Cfg::Server::SourceRoot + "flib/_bin");
       VERIFY(host.getServerVars().size() == 0);
       VERIFY(VirtualHost::GetAllowedDirectories().size() == 2);
       VERIFY(host.valid() == true);
@@ -476,7 +476,7 @@ bool TestCppBase::TestVirtualHostIni() {
     } else if (name == "upload") {
       VERIFY(host.getPathTranslation() == "html/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "html");
+             Cfg::Server::SourceRoot + "html");
       // SortALlowedDirectories might add something and remove
       // duplicates. In this case, /var/releases/continuous_www_scripts4
       // was added and the duplicate /var/www was removed.s
@@ -512,15 +512,15 @@ bool TestCppBase::TestCollectionHdf() {
     "    HighPriorityEndPoints.* = /power\n"
     "  }\n"
   );
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
-  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+  Config::Bind(Cfg::Server::AllowedDirectories, ini,
                hdf, "Server.AllowedDirectories");
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
     Config::GetStrVector(ini, hdf, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories);
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+                      Cfg::Server::AllowedDirectories);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
 
   boost::container::flat_set<std::string> serverHighPriorityEndPoints;
@@ -543,18 +543,18 @@ bool TestCppBase::TestCollectionIni() {
   Hdf empty;
 
   // Ensure we have no residuals left over from the HDF run.
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
   Config::ParseIniString(inistr, ini);
-  Config::Bind(RuntimeOption::AllowedDirectories, ini, empty,
+  Config::Bind(Cfg::Server::AllowedDirectories, ini, empty,
                "Server.AllowedDirectories"); // Test converting name
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
     Config::GetStrVector(ini, empty, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories, false);
+                      Cfg::Server::AllowedDirectories, false);
   // This should still be 2. In other words, Get shouldn't append
   // values.
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
 
   boost::container::flat_set<std::string> serverHighPriorityEndPoints;

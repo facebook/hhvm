@@ -1,5 +1,11 @@
 # Thrift Patch
 
+:::note
+
+This is the contributor guide to Thrift Patch, meant for someone implementing Thrift Patch features one of the Thrift Languages. If you're looking for a user guide, see [this page](../features/patch/patch.md).
+
+:::
+
 Thrift Patch implementation **must** contain 2 parts.
 
 1. Functionalities of apply/merge without schema.

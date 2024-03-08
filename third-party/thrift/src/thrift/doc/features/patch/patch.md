@@ -4,9 +4,9 @@ state: experimental
 
 # Patch
 
-:::note
+:::caution
 
-Thrift Patch is an experimental feature that is under alpha testing. It's only implemented in C++. To use Patch, please reach out to the Thrift team with your use-case. You will also need to add your codebase to `PATCH_VISIBILITY` in `thrift/lib/thrift/TARGETS`.
+Thrift Patch is an experimental feature that is under alpha testing. It's only supported in C++ with no guarantees about safety/performance/etc if any features of Patch are used in other languages. To use Patch, please reach out to the Thrift team with your use-case. You will also need to add your codebase to `PATCH_VISIBILITY` in `thrift/lib/thrift/TARGETS`.
 
 :::
 

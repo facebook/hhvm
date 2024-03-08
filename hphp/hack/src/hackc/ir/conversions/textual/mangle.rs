@@ -39,11 +39,10 @@ impl Mangle for [u8] {
     fn mangle(&self, _strings: &StringInterner) -> String {
         // Handle some reserved tokens.
         match self {
-            b"declare" | b"define" | b"extends" | b"false" | b"float" | b"global" | b"handlers"
-            | b"int" | b"jmp" | b"load" | b"local" | b"null" | b"prune" | b"ret" | b"store"
-            | b"then" | b"throw" | b"true" | b"type" | b"unreachable" | b"void" => {
-                add_mangling_prefix(self)
-            }
+            b"declare" | b"define" | b"else" | b"extends" | b"false" | b"float" | b"global"
+            | b"handlers" | b"if" | b"int" | b"jmp" | b"load" | b"local" | b"null" | b"prune"
+            | b"ret" | b"store" | b"then" | b"throw" | b"true" | b"type" | b"unreachable"
+            | b"void" => add_mangling_prefix(self),
             _ if is_textual_ident(self) => add_mangling_prefix(self),
             _ => {
                 // This mangling is terrible... but probably "good enough".

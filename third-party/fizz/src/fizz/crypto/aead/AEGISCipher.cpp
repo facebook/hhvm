@@ -98,116 +98,88 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
-    folly::ByteRange key,
     Aead::AeadOptions options) const {
-  const uint8_t* adData = nullptr;
-  size_t adLen = 0;
-  std::unique_ptr<folly::IOBuf> ad;
-  if (associatedData) {
-    if (associatedData->isChained()) {
-      ad = associatedData->cloneCoalesced();
-      adData = ad->data();
-      adLen = ad->length();
-    } else {
-      adData = associatedData->data();
-      adLen = associatedData->length();
-    }
-  }
-
-  auto inputLength = plaintext->computeChainDataLength();
-  // the stateInit function will skip adding aad to the state when adData is
-  // null and adLen is 0
-  impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
-
-  const auto& bufOption = options.bufferOpt;
-  const auto& allocOption = options.allocOpt;
-  std::unique_ptr<folly::IOBuf> output;
-  folly::IOBuf* input;
-
-  // Whether to allow modifying buffer contents directly
-  bool allowInplaceEdit = !plaintext->isShared() ||
-      bufOption != Aead::BufferOption::RespectSharedPolicy;
-
-  // Whether to allow growing tailRoom
-  bool allowGrowth =
-      (bufOption ==
-           Aead::BufferOption::AllowFullModification || // When explicitly
-                                                        // requested
-       !plaintext->isShared() || // When plaintext is unique
-       !allowInplaceEdit); // When not in-place (new buffer)
-
-  // Whether to allow memory allocations (throws if needs more memory)
-  bool allowAlloc = allocOption == Aead::AllocationOption::Allow;
-
-  if (!allowInplaceEdit && !allowAlloc) {
-    throw std::runtime_error(
-        "Cannot encrypt (must be in-place or allow allocation)");
-  }
-
-  if (allowInplaceEdit) {
-    output = std::move(plaintext);
-    input = output.get();
-  } else {
-    // create enough to also fit the tag and headroom
-    size_t totalSize{0};
-    if (!folly::checked_add<size_t>(
-            &totalSize, headroom_, inputLength, kTagLength)) {
-      throw std::overflow_error("Output buffer size");
-    }
-    output = folly::IOBuf::create(totalSize);
-    output->advance(headroom_);
-    output->append(inputLength);
-    input = plaintext.get();
-  }
-
-  struct Impl {
+  struct AeadImpl {
     const AEGISCipher& self;
-    unsigned char* tag;
+    unsigned char tagTemp[kTagLength];
 
-    Impl(const AEGISCipher& s, unsigned char* t) : self(s), tag(t) {}
-    bool encryptUpdate(
-        uint8_t* cipher,
-        int* outLen,
-        const uint8_t* plain,
-        size_t len) {
-      size_t tempOutLen;
-      auto ret = self.impl_->encryptUpdate(cipher, &tempOutLen, plain, len);
-      *outLen = tempOutLen;
-      return ret == 0;
+    explicit AeadImpl(const AEGISCipher& s) : self(s) {}
+    void init(
+        folly::ByteRange iv,
+        const folly::IOBuf* associatedData,
+        size_t plaintextLength) {
+      const uint8_t* adData = nullptr;
+      size_t adLen = 0;
+      std::unique_ptr<folly::IOBuf> ad;
+      if (associatedData) {
+        if (associatedData->isChained()) {
+          ad = associatedData->cloneCoalesced();
+          adData = ad->data();
+          adLen = ad->length();
+        } else {
+          adData = associatedData->data();
+          adLen = associatedData->length();
+        }
+      }
+      // the stateInit function will skip adding aad to the state when adData is
+      // null and adLen is 0
+      // @lint-ignore CLANGTIDY facebook-hte-NullableDereference
+      self.impl_->stateInit(
+          adData,
+          adLen,
+          iv.data(),
+          self.trafficKeyKey_.data(),
+          plaintextLength);
     }
-    bool encryptFinal(unsigned char* outm, int* outLen) {
-      size_t tempOutLen;
-      auto ret = self.impl_->encryptFinal(outm, &tempOutLen, tag, kTagLength);
-      *outLen = tempOutLen;
-      return ret == 0;
+
+    void encrypt(folly::IOBuf& plaintext, folly::IOBuf& ciphertext) {
+      struct EVPEncImpl {
+        const AEGISCipher& self;
+        unsigned char* tag;
+
+        EVPEncImpl(const AEGISCipher& s, unsigned char* t) : self(s), tag(t) {}
+        bool encryptUpdate(
+            uint8_t* cipher,
+            int* outLen,
+            const uint8_t* plain,
+            size_t len) {
+          size_t tempOutLen;
+          auto ret = self.impl_->encryptUpdate(cipher, &tempOutLen, plain, len);
+          *outLen = tempOutLen;
+          return ret == 0;
+        }
+        bool encryptFinal(unsigned char* outm, int* outLen) {
+          size_t tempOutLen;
+          auto ret =
+              self.impl_->encryptFinal(outm, &tempOutLen, tag, kTagLength);
+          *outLen = tempOutLen;
+          return ret == 0;
+        }
+      };
+      if (self.mms_ == AEGISCipher::kAEGIS128LMMS) {
+        encFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
+            EVPEncImpl(self, tagTemp), plaintext, ciphertext);
+      } else if (self.mms_ == AEGISCipher::kAEGIS256MMS) {
+        encFuncBlocks<AEGISCipher::kAEGIS256MMS>(
+            EVPEncImpl(self, tagTemp), plaintext, ciphertext);
+      } else {
+        throw std::runtime_error("Unsupported AEGIS state size");
+      }
+    }
+
+    void final(int tagLen, void* tagOut) {
+      memcpy(tagOut, tagTemp, tagLen);
     }
   };
-  unsigned char tag[kTagLength];
-  if (mms_ == AEGISCipher::kAEGIS128LMMS) {
-    encFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-        Impl(*this, tag), *input, *output);
-  } else if (mms_ == AEGISCipher::kAEGIS256MMS) {
-    encFuncBlocks<AEGISCipher::kAEGIS256MMS>(Impl(*this, tag), *input, *output);
-  } else {
-    throw std::runtime_error("Unsupported AEGIS state size");
-  }
 
-  // output is always something we can modify
-  auto tailRoom = output->prev()->tailroom();
-  if (tailRoom < kTagLength || !allowGrowth) {
-    if (!allowAlloc) {
-      throw std::runtime_error("Cannot encrypt (insufficient space for tag)");
-    }
-    std::unique_ptr<folly::IOBuf> tag_iobuf = folly::IOBuf::create(kTagLength);
-    tag_iobuf->append(kTagLength);
-    memcpy(tag_iobuf->writableData(), tag, kTagLength);
-    output->prependChain(std::move(tag_iobuf));
-  } else {
-    auto lastBuf = output->prev();
-    lastBuf->append(kTagLength);
-    memcpy(lastBuf->writableTail() - kTagLength, tag, kTagLength);
-  }
-  return output;
+  return encryptHelper(
+      AeadImpl{*this},
+      std::move(plaintext),
+      associatedData,
+      iv,
+      kTagLength,
+      headroom_,
+      options);
 }
 
 folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
@@ -372,8 +344,7 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::encrypt(
     const folly::IOBuf* associatedData,
     folly::ByteRange nonce,
     Aead::AeadOptions options) const {
-  return doEncrypt(
-      std::move(plaintext), associatedData, nonce, trafficKeyKey_, options);
+  return doEncrypt(std::move(plaintext), associatedData, nonce, options);
 }
 
 // TODO: (T136805571) We will add implementation for inplace encryption later
@@ -387,7 +358,6 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::inplaceEncrypt(
       std::move(plaintext),
       associatedData,
       folly::ByteRange(iv.data(), ivLength_),
-      trafficKeyKey_,
       {Aead::BufferOption::AllowFullModification,
        Aead::AllocationOption::Deny});
 }

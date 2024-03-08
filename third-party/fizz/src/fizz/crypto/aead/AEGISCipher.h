@@ -54,7 +54,6 @@ class AEGISCipher : public Aead {
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange iv,
-      folly::ByteRange key,
       Aead::AeadOptions options) const;
 
   folly::Optional<std::unique_ptr<folly::IOBuf>> doDecrypt(

@@ -30,6 +30,9 @@ Thrift SemiAny is an alternative to Thrift Any which is useful in situations whe
 
 An API producing an `Any` is automatically better documented at baseline before the first docstring is produced.
 
+## Important caveats
+
+Even when using Thrift deterministic hashing, it is not guaranteed that the hash of an Any with fixed contents will remain the same over time or between implementations. Thrift serialization is not deterministic so the same contents may produce a different serialized representation and therefore a different hash for the Any.
 
 ## Thrift Structs for Any and SemiAny
 

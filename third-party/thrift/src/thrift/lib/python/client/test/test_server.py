@@ -20,9 +20,10 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import tempfile
-import time
 import typing
 from multiprocessing import Event, Process, synchronize
+
+from thrift.lib.python.client.test.http2_helper import install_http2_routing_handler
 
 from thrift.py3.server import get_context, SocketAddress, ThriftServer
 from thrift.python.leaf.services import LeafServiceInterface
@@ -134,6 +135,7 @@ def server_in_another_process() -> typing.Generator[str, None, None]:
 @contextlib.asynccontextmanager
 async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
     server = ThriftServer(LeafServiceHandler(), ip="::1")
+    install_http2_routing_handler(server)
     serve_task = asyncio.get_event_loop().create_task(server.serve())
     addr = await server.get_address()
     try:

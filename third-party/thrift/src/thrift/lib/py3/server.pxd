@@ -138,6 +138,7 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void setIdleServerTimeout(milliseconds idleServerTimeout)
         cbool getQuickExitOnShutdownTimeout()
         void setQuickExitOnShutdownTimeout(cbool quickExitOnShutdownTimeout)
+        void addRoutingHandler(unique_ptr[cTransportRoutingHandler])
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":
@@ -221,6 +222,7 @@ cdef class ThriftServer:
     cdef object loop
     cdef object address_future
     cdef void set_is_overloaded(self, cIsOverloadedFunc is_overloaded)
+    cdef void add_routing_handler(self, unique_ptr[cTransportRoutingHandler] handler)
 
 
 cdef class ClientMetadata:
@@ -268,8 +270,5 @@ cdef class WriteHeaders(Headers):
 cdef class StatusServerInterface:
     cdef shared_ptr[cStatusServerInterface] _cpp_obj
 
-
-cdef extern from "<utility>" namespace "std" nogil:
-    cdef unique_ptr[cTransportRoutingHandler] move(unique_ptr[cTransportRoutingHandler])
 
 cdef object THRIFT_REQUEST_CONTEXT

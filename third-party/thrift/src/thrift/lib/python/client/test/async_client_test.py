@@ -89,6 +89,18 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 sum = await client.add(1, 2)
                 self.assertEqual(3, sum)
 
+    async def test_http2_client(self) -> None:
+        async with server_in_event_loop() as addr:
+            async with get_client(
+                TestService,
+                host=addr.ip,
+                port=addr.port,
+                path="/",
+                client_type=ClientType.THRIFT_HTTP2_CLIENT_TYPE,
+            ) as client:
+                sum = await client.add(1, 2)
+                self.assertEqual(3, sum)
+
     async def test_void_return(self) -> None:
         async with server_in_event_loop() as addr:
             async with get_client(TestService, host=addr.ip, port=addr.port) as client:

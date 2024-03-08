@@ -307,6 +307,9 @@ cdef class ThriftServer:
     def set_quick_exit_on_shutdown_timeout(self, cbool quick_exit_on_shutdown_timeout):
         self.server.get().setQuickExitOnShutdownTimeout(quick_exit_on_shutdown_timeout)
 
+    cdef void add_routing_handler(self, unique_ptr[cTransportRoutingHandler] handler):
+        self.server.get().addRoutingHandler(cmove(handler))
+
 cdef class ClientMetadata:
     @staticmethod
     cdef ClientMetadata _fbthrift_create(optional[ClientMetadataRef] metadata_ref):

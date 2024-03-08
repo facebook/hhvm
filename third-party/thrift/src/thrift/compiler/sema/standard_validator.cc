@@ -553,6 +553,24 @@ void validate_field_default_value(
   }
 }
 
+void validate_field_name(diagnostic_context& ctx, const t_field& field) {
+  const auto* strct = dynamic_cast<const t_structured*>(ctx.parent());
+  if (field.get_name() == strct->get_name()) {
+    std::string parent_structure;
+    if (strct->is_union()) {
+      parent_structure = "union";
+    } else if (strct->is_exception()) {
+      parent_structure = "exception";
+    } else {
+      parent_structure = "struct";
+    }
+    ctx.warning(
+        "Field '{}' has the same name as the containing {}.",
+        field.get_name(),
+        parent_structure);
+  }
+}
+
 void validate_structured_annotation(
     diagnostic_context& ctx, const t_named& node) {
   std::unordered_map<const t_type*, const t_const*> seen;
@@ -1246,6 +1264,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
+  validator.add_field_visitor(&validate_field_name);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);

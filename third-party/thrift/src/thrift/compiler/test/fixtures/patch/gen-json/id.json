@@ -3,17 +3,17 @@
   "thrift_module" : "id",
   "constants" : {
     "noId" : {
-      "lineno" : 103,
+      "lineno" : 104,
       "value" : 0,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 103,
+          "line" : 104,
           "column" : 1
         },
         "end" : {
-          "line" : 103,
+          "line" : 104,
           "column" : 25
         }
       }
@@ -29,121 +29,121 @@
   },
   "typedefs" : {
     "FieldId" : {
-      "lineno" : 45,
+      "lineno" : 46,
       "type_enum" : "I16",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 45,
+          "line" : 46,
           "column" : 1
         },
         "end" : {
-          "line" : 48,
+          "line" : 49,
           "column" : 20
         }
       }
     },
     "ExternId" : {
-      "lineno" : 99,
+      "lineno" : 100,
       "type_enum" : "I64",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 99,
+          "line" : 100,
           "column" : 1
         },
         "end" : {
-          "line" : 100,
+          "line" : 101,
           "column" : 21
         }
       }
     },
     "ValueId" : {
-      "lineno" : 108,
+      "lineno" : 109,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 108,
+          "line" : 109,
           "column" : 1
         },
         "end" : {
-          "line" : 111,
+          "line" : 112,
           "column" : 25
         }
       }
     },
     "ProtocolId" : {
-      "lineno" : 116,
+      "lineno" : 117,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 116,
+          "line" : 117,
           "column" : 1
         },
         "end" : {
-          "line" : 119,
+          "line" : 120,
           "column" : 28
         }
       }
     },
     "TypeId" : {
-      "lineno" : 124,
+      "lineno" : 125,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 124,
+          "line" : 125,
           "column" : 1
         },
         "end" : {
-          "line" : 127,
+          "line" : 128,
           "column" : 24
         }
       }
     },
     "DefinitionId" : {
-      "lineno" : 132,
+      "lineno" : 133,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 132,
+          "line" : 133,
           "column" : 1
         },
         "end" : {
-          "line" : 135,
+          "line" : 136,
           "column" : 30
         }
       }
     },
     "ProgramId" : {
-      "lineno" : 140,
+      "lineno" : 141,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 140,
+          "line" : 141,
           "column" : 1
         },
         "end" : {
-          "line" : 143,
+          "line" : 144,
           "column" : 27
         }
       }
     },
     "SourceId" : {
-      "lineno" : 148,
+      "lineno" : 149,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
       "source_range" : {
         "begin" : {
-          "line" : 148,
+          "line" : 149,
           "column" : 1
         },
         "end" : {
-          "line" : 151,
+          "line" : 152,
           "column" : 26
         }
       }

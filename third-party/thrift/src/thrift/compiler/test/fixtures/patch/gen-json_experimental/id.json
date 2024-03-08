@@ -28,49 +28,49 @@
         "name": "FieldId",
         "type": "i16",
         "is_exception": false,
-        "lineno": 45
+        "lineno": 46
       },
       "ExternId": {
         "name": "ExternId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 99
+        "lineno": 100
       },
       "ValueId": {
         "name": "ValueId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 108
+        "lineno": 109
       },
       "ProtocolId": {
         "name": "ProtocolId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 116
+        "lineno": 117
       },
       "TypeId": {
         "name": "TypeId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 124
+        "lineno": 125
       },
       "DefinitionId": {
         "name": "DefinitionId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 132
+        "lineno": 133
       },
       "ProgramId": {
         "name": "ProgramId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 140
+        "lineno": 141
       },
       "SourceId": {
         "name": "SourceId",
         "type": "i64",
         "is_exception": false,
-        "lineno": 148
+        "lineno": 149
       }
   },
   "constants": {
@@ -78,7 +78,7 @@
         "name": "noId",
         "type": "i64",
         "value": 0,
-        "lineno": 103
+        "lineno": 104
       }
   },  "source_path" : "thrift/lib/thrift/id",
   "py_namespace" : "thrift.lib.thrift.id"

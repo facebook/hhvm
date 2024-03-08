@@ -174,74 +174,86 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(
     bool useBlockOps,
     EVP_CIPHER_CTX* decryptCtx,
     bool inPlace) {
-  auto inputLength = ciphertext->computeChainDataLength();
+  struct AeadImpl {
+    EVP_CIPHER_CTX* decryptCtx;
+    bool useBlockOps;
 
-  folly::IOBuf* input;
-  std::unique_ptr<folly::IOBuf> output;
-  // If not in-place, allocate buffers. Otherwise in and out are same.
-  if (!inPlace) {
-    output = folly::IOBuf::create(inputLength);
-    output->append(inputLength);
-    input = ciphertext.get();
-  } else {
-    output = std::move(ciphertext);
-    input = output.get();
-  }
+    AeadImpl(EVP_CIPHER_CTX* d, bool u) : decryptCtx(d), useBlockOps(u) {}
 
-  if (EVP_DecryptInit_ex(decryptCtx, nullptr, nullptr, nullptr, iv.data()) !=
-      1) {
-    throw std::runtime_error("Decryption error");
-  }
-
-  if (associatedData) {
-    for (auto current : *associatedData) {
-      if (current.size() > std::numeric_limits<int>::max()) {
-        throw std::runtime_error("too much associated data");
-      }
-      int len;
-      if (EVP_DecryptUpdate(
-              decryptCtx,
-              nullptr,
-              &len,
-              current.data(),
-              static_cast<int>(current.size())) != 1) {
+    void init(
+        folly::ByteRange iv,
+        const folly::IOBuf* associatedData,
+        size_t /*ciphertextLength*/) {
+      if (EVP_DecryptInit_ex(
+              decryptCtx, nullptr, nullptr, nullptr, iv.data()) != 1) {
         throw std::runtime_error("Decryption error");
       }
-    }
-  }
 
-  bool decrypted;
-  if (useBlockOps) {
-    struct Impl {
-      EVP_CIPHER_CTX* decryptCtx;
-      bool decryptUpdate(
-          uint8_t* plain,
-          const uint8_t* cipher,
-          size_t len,
-          int* outLen) {
-        return EVP_DecryptUpdate(
-                   decryptCtx, plain, outLen, cipher, static_cast<int>(len)) ==
-            1;
+      if (associatedData) {
+        for (auto current : *associatedData) {
+          if (current.size() > std::numeric_limits<int>::max()) {
+            throw std::runtime_error("too much associated data");
+          }
+          int len;
+          if (EVP_DecryptUpdate(
+                  decryptCtx,
+                  nullptr,
+                  &len,
+                  current.data(),
+                  static_cast<int>(current.size())) != 1) {
+            throw std::runtime_error("Decryption error");
+          }
+        }
       }
-      bool setExpectedTag(int tagSize, unsigned char* tag) {
-        return EVP_CIPHER_CTX_ctrl(
-                   decryptCtx,
-                   EVP_CTRL_GCM_SET_TAG,
-                   tagSize,
-                   static_cast<void*>(tag)) == 1;
+    }
+
+    bool decryptAndFinal(
+        folly::IOBuf& ciphertext,
+        folly::IOBuf& plaintext,
+        folly::MutableByteRange tagOut) {
+      if (useBlockOps) {
+        struct EVPDecImpl {
+          EVP_CIPHER_CTX* decryptCtx;
+
+          explicit EVPDecImpl(EVP_CIPHER_CTX* d) : decryptCtx(d) {}
+          bool decryptUpdate(
+              uint8_t* plain,
+              const uint8_t* cipher,
+              size_t len,
+              int* outLen) {
+            return EVP_DecryptUpdate(
+                       decryptCtx,
+                       plain,
+                       outLen,
+                       cipher,
+                       static_cast<int>(len)) == 1;
+          }
+          bool setExpectedTag(int tagSize, unsigned char* tag) {
+            return EVP_CIPHER_CTX_ctrl(
+                       decryptCtx,
+                       EVP_CTRL_GCM_SET_TAG,
+                       tagSize,
+                       static_cast<void*>(tag)) == 1;
+          }
+          bool decryptFinal(unsigned char* outm, int* outLen) {
+            return EVP_DecryptFinal_ex(decryptCtx, outm, outLen) == 1;
+          }
+        };
+        return decFuncBlocks<16>(
+            EVPDecImpl{decryptCtx}, ciphertext, plaintext, tagOut);
+      } else {
+        return decFunc(decryptCtx, ciphertext, plaintext, tagOut);
       }
-      bool decryptFinal(unsigned char* outm, int* outLen) {
-        return EVP_DecryptFinal_ex(decryptCtx, outm, outLen) == 1;
-      }
-    };
-    decrypted = decFuncBlocks<16>(Impl{decryptCtx}, *input, *output, tagOut);
-  } else {
-    decrypted = decFunc(decryptCtx, *input, *output, tagOut);
-  }
-  if (!decrypted) {
-    return folly::none;
-  }
-  return output;
+    }
+  };
+
+  return decryptHelper(
+      AeadImpl{decryptCtx, useBlockOps},
+      std::move(ciphertext),
+      associatedData,
+      iv,
+      tagOut,
+      inPlace);
 }
 
 } // namespace

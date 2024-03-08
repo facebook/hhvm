@@ -226,4 +226,48 @@ std::unique_ptr<folly::IOBuf> encryptHelper(
   return output;
 }
 
+/**
+ * AeadImpl has the following requirements:
+ *     * void AeadImpl::init(folly::ByteRange iv, const folly::IOBuf*
+ * associatedData, size_t ciphertextLength)
+ *       - initializes a decryption context with `iv` and associated data.
+ * Associated data can be null.
+ *     * bool AeadImpl::decryptAndFinal(folly::IOBuf& ciphertext, folly::IOBuf&
+ * plaintext, folly::MutableByteRange tagOut)
+ *       - decrypts `ciphertextLength` bytes of `ciphertext`. The implementation
+ * must write the plaintext to `plaintext`. `plaintext` is guaranteed to be
+ * writable for `ciphertextLength` bytes. Return whether the decryption was
+ * successful.
+ */
+template <class AeadImpl>
+folly::Optional<std::unique_ptr<folly::IOBuf>> decryptHelper(
+    AeadImpl&& impl,
+    std::unique_ptr<folly::IOBuf>&& ciphertext,
+    const folly::IOBuf* associatedData,
+    folly::ByteRange iv,
+    folly::MutableByteRange tagOut,
+    bool inPlace) {
+  auto inputLength = ciphertext->computeChainDataLength();
+  impl.init(iv, associatedData, inputLength);
+
+  folly::IOBuf* input;
+  std::unique_ptr<folly::IOBuf> output;
+  // If not in-place, allocate buffers. Otherwise in and out are same.
+  if (!inPlace) {
+    output = folly::IOBuf::create(inputLength);
+    output->append(inputLength);
+    input = ciphertext.get();
+  } else {
+    output = std::move(ciphertext);
+    input = output.get();
+  }
+
+  bool decrypted = impl.decryptAndFinal(*input, *output, tagOut);
+
+  if (!decrypted) {
+    return folly::none;
+  }
+  return output;
+}
+
 } // namespace fizz

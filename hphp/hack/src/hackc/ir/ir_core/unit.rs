@@ -15,7 +15,7 @@ use crate::FatalOp;
 use crate::Function;
 use crate::HackConstant;
 use crate::Module;
-use crate::ModuleId;
+use crate::ModuleName;
 use crate::SymbolRefs;
 use crate::Typedef;
 
@@ -73,7 +73,7 @@ pub struct Unit {
     pub modules: Vec<Module>,
 
     /// What module is this unit declared to be part of
-    pub module_use: Option<ModuleId>,
+    pub module_use: Option<ModuleName>,
 
     /// The unit string interning table.
     pub strings: Arc<StringInterner>,

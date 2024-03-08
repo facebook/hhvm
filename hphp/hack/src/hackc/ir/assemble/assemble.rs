@@ -18,7 +18,7 @@ use ir_core::IncludePath;
 use ir_core::Method;
 use ir_core::MethodId;
 use ir_core::Module;
-use ir_core::ModuleId;
+use ir_core::ModuleName;
 use ir_core::SrcLoc;
 use ir_core::StringInterner;
 use ir_core::Typedef;
@@ -33,7 +33,7 @@ use crate::parse::parse_comma_list;
 use crate::parse::parse_doc_comment;
 use crate::parse::parse_fatal_op;
 use crate::parse::parse_hack_constant;
-use crate::parse::parse_module_id;
+use crate::parse::parse_module_name;
 use crate::parse::parse_src_loc;
 use crate::parse::parse_type_info;
 use crate::parse::parse_typed_value;
@@ -235,7 +235,7 @@ impl UnitParser {
     }
 
     fn parse_module(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <name:parse_module_id> "[" <attributes:parse_attribute,*> "]");
+        parse!(tokenizer, <name:parse_module_name> "[" <attributes:parse_attribute,*> "]");
 
         let doc_comment = parse_doc_comment(tokenizer)?;
 
@@ -251,10 +251,8 @@ impl UnitParser {
     }
 
     fn parse_module_use(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let module_use = ModuleId::from_bytes(
-            &tokenizer.expect_any_string()?.unescaped_string()?,
-            &self.unit.strings,
-        );
+        let module_use =
+            ModuleName::from_utf8(&tokenizer.expect_any_string()?.unescaped_string()?)?;
         self.unit.module_use = Some(module_use);
         Ok(())
     }

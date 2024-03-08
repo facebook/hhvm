@@ -44,8 +44,6 @@ macro_rules! interned_hhbc_intern_id {
     };
 }
 
-interned_hhbc_intern_id!(ModuleId, ModuleName);
-
 const __FACTORY: &str = "__factory";
 pub const _86CINIT: &str = "86cinit";
 pub const _86PINIT: &str = "86pinit";

@@ -35,7 +35,7 @@ use ir_core::IsTypeOp;
 use ir_core::KeysetValue;
 use ir_core::MOpMode;
 use ir_core::MethodId;
-use ir_core::ModuleId;
+use ir_core::ModuleName;
 use ir_core::OODeclExistsOp;
 use ir_core::Param;
 use ir_core::PropId;
@@ -235,9 +235,9 @@ pub(crate) fn parse_class_name(tokenizer: &mut Tokenizer<'_>) -> Result<ClassNam
     Ok(ClassName::from_utf8(&id)?)
 }
 
-pub(crate) fn parse_module_id(tokenizer: &mut Tokenizer<'_>) -> Result<ModuleId> {
+pub(crate) fn parse_module_name(tokenizer: &mut Tokenizer<'_>) -> Result<ModuleName> {
     let (id, _) = parse_user_id(tokenizer)?;
-    Ok(ModuleId::from_bytes(&id, &tokenizer.strings))
+    Ok(ModuleName::from_utf8(&id)?)
 }
 
 pub(crate) fn parse_const_name(tokenizer: &mut Tokenizer<'_>) -> Result<ConstName> {

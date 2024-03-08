@@ -55,7 +55,7 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
                 .iter()
                 .map(|a| convert_attribute(a, &strings))
                 .collect(),
-            name: ir::ModuleId::from_hhbc(module.name, &strings),
+            name: module.name,
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
             doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
         })
@@ -73,10 +73,7 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
         fatal: Default::default(),
         file_attributes,
         functions: Default::default(),
-        module_use: unit
-            .module_use
-            .map(|name| ir::ModuleId::from_hhbc(name, &strings))
-            .into(),
+        module_use: unit.module_use.into(),
         modules,
         strings,
         symbol_refs: unit.symbol_refs.clone(),

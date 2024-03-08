@@ -49,7 +49,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         .into_iter()
         .map(|module| hhbc::Module {
             attributes: convert_attributes(module.attributes, &strings).into(),
-            name: strings.lookup_module_name(module.name),
+            name: module.name,
             span: module.src_loc.to_span(),
             doc_comment: module.doc_comment.map(|c| c.into()).into(),
             exports: Maybe::Nothing, // TODO
@@ -57,10 +57,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         })
         .collect::<Vec<_>>()
         .into();
-    unit.module_use = ir_unit
-        .module_use
-        .map(|id| strings.lookup_module_name(id))
-        .into();
+    unit.module_use = ir_unit.module_use.into();
     unit.symbol_refs = convert_symbol_refs(&ir_unit.symbol_refs);
 
     if let Some(ir::Fatal { op, loc, message }) = ir_unit.fatal.as_ref() {

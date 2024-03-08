@@ -1402,8 +1402,6 @@ fn cmp_module(
     (a, a_strings): (&Module, &StringInterner),
     (b, b_strings): (&Module, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Module {
         attributes: a_attributes,
         name: a_name,
@@ -1416,7 +1414,7 @@ fn cmp_module(
         src_loc: b_src_loc,
         doc_comment: b_doc_comment,
     } = b;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
     cmp_src_loc((a_src_loc, a_strings), (b_src_loc, b_strings)).qualified("src_loc")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
@@ -1887,10 +1885,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     )
     .qualified("modules")?;
 
-    cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), |a, b| {
-        cmp_id((a.id, a_strings), (b.id, b_strings))
-    })
-    .qualified("module_use")?;
+    cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), cmp_eq).qualified("module_use")?;
 
     cmp_symbol_refs(a_symbol_refs, b_symbol_refs).qualified("symbol_refs")?;
 
@@ -1959,7 +1954,7 @@ mod mapping {
 
     impl MapName for (&Module, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.into_string()
         }
     }
 

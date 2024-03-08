@@ -5,12 +5,12 @@
 
 use crate::func::SrcLoc;
 use crate::Attribute;
-use crate::ModuleId;
+use crate::ModuleName;
 
 #[derive(Debug)]
 pub struct Module {
     pub attributes: Vec<Attribute>,
-    pub name: ModuleId,
+    pub name: ModuleName,
     pub src_loc: SrcLoc,
     pub doc_comment: Option<Vec<u8>>,
 }

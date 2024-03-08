@@ -2252,7 +2252,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
             write!(
                 w,
                 "module {name} [{attributes}] ",
-                name = FmtIdentifierId(name.id, strings),
+                name = FmtIdentifierId(name.as_bytes_id(), strings),
                 attributes =
                     FmtSep::comma(attributes.iter(), |w, a| FmtAttribute(a, strings).fmt(w))
             )?;
@@ -2271,7 +2271,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
         writeln!(
             w,
             "module_use {}\n",
-            FmtEscapedString(&module_use.as_bytes(strings))
+            FmtEscapedString(module_use.as_str().as_bytes())
         )?;
     }
 

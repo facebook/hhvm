@@ -35,6 +35,8 @@ get_property(id-cpp2-SOURCES GLOBAL PROPERTY id-cpp2-SOURCES)
 get_property(standard-cpp2-SOURCES GLOBAL PROPERTY standard-cpp2-SOURCES)
 get_property(type_rep-cpp2-SOURCES GLOBAL PROPERTY type_rep-cpp2-SOURCES)
 get_property(type-cpp2-SOURCES GLOBAL PROPERTY type-cpp2-SOURCES)
+get_property(serverdbginfo-cpp2-SOURCES GLOBAL PROPERTY
+  serverdbginfo-cpp2-SOURCES)
 
 bypass_source_check("${metadata-cpp2-SOURCES}")
 add_library(
@@ -151,6 +153,19 @@ add_library(
 add_dependencies(rpcmetadata RpcMetadata-cpp2-target)
 target_link_libraries(
   rpcmetadata
+  PUBLIC
+    Folly::folly
+)
+
+bypass_source_check("${serverdbginfo-cpp2-SOURCES}")
+add_library(
+  serverdbginfo
+
+  ${serverdbginfo-cpp2-SOURCES}
+)
+add_dependencies(serverdbginfo serverdbginfo-cpp2-target)
+target_link_libraries(
+  serverdbginfo
   PUBLIC
     Folly::folly
 )
@@ -321,6 +336,7 @@ add_dependencies(
   thrifttyperep
   thrifttype
   thriftanyrep
+  serverdbginfo
 )
 target_link_libraries(
   thriftcpp2
@@ -334,6 +350,7 @@ target_link_libraries(
     thrifttyperep
     thrifttype
     thriftanyrep
+    serverdbginfo
 )
 
 add_library(
@@ -373,6 +390,7 @@ install(
 if (BUILD_SHARED_LIBS)
   set_target_properties(rpcmetadata thriftannotation thriftmetadata
     thriftfrozen2 thriftprotocol thriftcpp2 thrifttyperep thrifttype
+    serverdbginfo
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
 endif()
@@ -387,6 +405,7 @@ install(
     thriftanyrep
     thriftprotocol
     thriftcpp2
+    serverdbginfo
   EXPORT fbthrift-exports
   DESTINATION ${LIB_INSTALL_DIR}
 )

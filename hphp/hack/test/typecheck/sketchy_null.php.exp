@@ -1,0 +1,6 @@
+File "sketchy_null.php", line 7, characters 12-13:
+Invalid return type (Typing[4110])
+  File "sketchy_null.php", line 3, characters 23-26:
+  Expected `null`
+  File "sketchy_null.php", line 3, characters 12-16:
+  But got `nonnull`

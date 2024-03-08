@@ -1768,12 +1768,12 @@ let refine_lvalue_type env ((ty, _, _) as te) ~refine =
     set_local ~is_defined:true ~bound_ty env lid ty
   | None -> env
 
-let rec condition_nullity ~nonnull (env : env) te =
+let rec condition_nullity ~is_sketchy ~nonnull (env : env) te =
   match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
   | (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs = var; rhs = te }) ->
-    let env = condition_nullity ~nonnull env te in
-    let env = condition_nullity ~nonnull env var in
+    let env = condition_nullity ~is_sketchy ~nonnull env te in
+    let env = condition_nullity ~is_sketchy ~nonnull env var in
     env
   (* case where `Shapes::idx(...)` must be made null/non-null *)
   | ( _,
@@ -1794,14 +1794,16 @@ let rec condition_nullity ~nonnull (env : env) te =
         (env, shape_ty)
     in
     refine_lvalue_type env shape ~refine
-  | (_, _, Hole (te, _, _, _)) -> condition_nullity ~nonnull env te
+  | (_, _, Hole (te, _, _, _)) -> condition_nullity ~is_sketchy ~nonnull env te
   | (_, p, _) ->
     let refine env ty =
       if nonnull then
         Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) ty
-      else
+      else if not is_sketchy then
         let r = Reason.Rwitness_from_decl (get_pos ty) in
         Inter.intersect env ~r ty (MakeType.null r)
+      else
+        (env, ty)
     in
     refine_lvalue_type env te ~refine
 
@@ -2128,8 +2130,10 @@ let refine_for_hint
 let refine_for_is ~hint_first env tparamet ivar refinement_reason hint =
   let env =
     match snd hint with
-    | Aast.Hnonnull -> condition_nullity ~nonnull:tparamet env ivar
-    | Aast.Hprim Tnull -> condition_nullity ~nonnull:(not tparamet) env ivar
+    | Aast.Hnonnull ->
+      condition_nullity ~is_sketchy:false ~nonnull:tparamet env ivar
+    | Aast.Hprim Tnull ->
+      condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env ivar
     | _ -> env
   in
   let (env, locl) =
@@ -7142,7 +7146,9 @@ end = struct
           _;
         }
       when String.equal SN.StdlibFunctions.is_null f ->
-      let env = condition_nullity ~nonnull:(not tparamet) env te in
+      let env =
+        condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env te
+      in
       (env, { pkgs = SSet.empty })
     | Aast.Binop
         {
@@ -7156,7 +7162,9 @@ end = struct
           lhs = e;
           rhs = (_, _, Aast.Null);
         } ->
-      let env = condition_nullity ~nonnull:(not tparamet) env e in
+      let env =
+        condition_nullity ~is_sketchy:false ~nonnull:(not tparamet) env e
+      in
       (env, { pkgs = SSet.empty })
     | Aast.Binop
         {
@@ -7176,7 +7184,7 @@ end = struct
       (match get_node ety with
       | Tprim Tbool -> (env, { pkgs = SSet.empty })
       | _ ->
-        let env = condition_nullity ~nonnull:tparamet env te in
+        let env = condition_nullity ~is_sketchy:true ~nonnull:tparamet env te in
         (env, { pkgs = SSet.empty }))
     | Aast.Binop
         { bop = (Ast_defs.Diff | Ast_defs.Diff2) as op; lhs = e1; rhs = e2 } ->

@@ -1,4 +1,4 @@
 File "lambda09.php", line 19, characters 12-13:
 Variable `$y` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
+  File "lambda09.php", line 16, characters 9-10:
   Did you mean `$x` instead?

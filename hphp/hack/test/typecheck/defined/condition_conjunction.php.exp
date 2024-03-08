@@ -16,31 +16,31 @@ File "condition_conjunction.php", line 27, characters 14-15:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "condition_conjunction.php", line 11, characters 20-21:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
+  File "condition_conjunction.php", line 4, characters 8-9:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 12, characters 20-21:
 Variable `$u` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
+  File "condition_conjunction.php", line 4, characters 8-9:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 17, characters 18-19:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "condition_conjunction.php", line 4, characters 26-27:
+  File "condition_conjunction.php", line 4, characters 8-9:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 18, characters 18-19:
 Variable `$u` is undefined, or not always defined. (Naming[2050])
-  File "condition_conjunction.php", line 4, characters 26-27:
+  File "condition_conjunction.php", line 4, characters 8-9:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 19, characters 18-19:
 Variable `$t` is undefined, or not always defined. (Naming[2050])
-  File "condition_conjunction.php", line 4, characters 26-27:
+  File "condition_conjunction.php", line 4, characters 8-9:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 29, characters 20-21:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
+  File "condition_conjunction.php", line 23, characters 28-29:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 30, characters 20-21:
 Variable `$u` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
+  File "condition_conjunction.php", line 23, characters 28-29:
   Did you mean `$y` instead?
 File "condition_conjunction.php", line 34, characters 18-19:
 Variable `$z` is undefined, or not always defined. (Naming[2050])

@@ -44,17 +44,17 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/types.h":
   pass
 
 cdef extern from *:
     ctypedef bstring foo_Bar "foo::Bar"
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_types.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h" namespace "::py3::simple":
     cdef cppclass cAnEnum "::py3::simple::AnEnum":
         pass
 
@@ -79,15 +79,15 @@ cdef class AnEnumRenamed(thrift.py3.types.CompiledEnum):
 cdef class Flags(thrift.py3.types.Flag):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_types_custom_protocol.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_custom_protocol.h" namespace "::py3::simple":
 
     cdef cppclass cSimpleException "::py3::simple::SimpleException"(cTException):
         cSimpleException() except +
@@ -444,7 +444,7 @@ cdef class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cAnEnumRenamed,cint32_t]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_constants.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_constants.h" namespace "::py3::simple":
     cdef cbool cA_BOOL "::py3::simple::module_constants::A_BOOL"
     cdef cint8_t cA_BYTE "::py3::simple::module_constants::A_BYTE"
     cdef cint16_t cTHE_ANSWER "::py3::simple::module_constants::THE_ANSWER"

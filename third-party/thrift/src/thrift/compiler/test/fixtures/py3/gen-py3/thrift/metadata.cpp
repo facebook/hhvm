@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/annotation/gen-py3/thrift/metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3/thrift/metadata.h"
 
 namespace facebook {
 namespace thrift {

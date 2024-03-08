@@ -44,15 +44,15 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport module0.types_fields as _fbthrift_types_fields
 
-cdef extern from "gen-py3/module0/types.h":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-py3/module0/types.h":
   pass
 
 
-cdef extern from "gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/module0_types.h" namespace "::module0":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_types.h" namespace "::module0":
     cdef cppclass cEnum "::module0::Enum":
         pass
 
@@ -63,15 +63,15 @@ cdef extern from "gen-cpp2/module0_types.h" namespace "::module0":
 cdef class Enum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/module0_types_custom_protocol.h" namespace "::module0":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_types_custom_protocol.h" namespace "::module0":
 
     cdef cppclass cStruct "::module0::Struct":
         cStruct() except +
@@ -106,6 +106,6 @@ cdef class List__Enum(thrift.py3.types.List):
     cdef shared_ptr[vector[cEnum]] _make_instance(object items) except *
 
 
-cdef extern from "gen-cpp2/module0_constants.h" namespace "::module0":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_constants.h" namespace "::module0":
     cdef cStruct cc0 "::module0::module0_constants::c0"()
     cdef vector[cEnum] ce0s "::module0::module0_constants::e0s"()

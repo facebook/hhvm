@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/compiler/test/fixtures/terse_write/src/gen-py3/terse_write/metadata.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-py3/terse_write/metadata.h"
 
 namespace facebook {
 namespace thrift {

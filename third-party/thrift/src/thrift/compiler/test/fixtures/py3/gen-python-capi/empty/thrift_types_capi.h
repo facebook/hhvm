@@ -12,7 +12,7 @@
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 
-#include <thrift/compiler/test/fixtures/py3/src/gen-cpp2/empty_types.h>
+#include <thrift/compiler/test/fixtures/py3/gen-cpp2/empty_types.h>
 
 namespace apache {
 namespace thrift {

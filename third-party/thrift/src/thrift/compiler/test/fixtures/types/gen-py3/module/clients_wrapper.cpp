@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/types/src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/types/gen-py3/module/clients_wrapper.h>
 
 namespace apache {
 namespace thrift {

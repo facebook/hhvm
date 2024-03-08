@@ -27,7 +27,7 @@ from thrift.py3.client cimport cClientWrapper
 cimport emptyns.types as _emptyns_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/emptyns_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_clients.h" namespace "::cpp2":
   cdef cppclass cTestServiceAsyncClient "::cpp2::TestServiceAsyncClient":
       pass
 
@@ -38,7 +38,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-py3/emptyns/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/emptyns/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cTestServiceClientWrapper "::cpp2::TestServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

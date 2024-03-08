@@ -27,21 +27,21 @@ from thrift.py3.client cimport cClientWrapper
 cimport module.types as _module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServiceClientWrapper] move(unique_ptr[cMyServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceFastAsyncClient "::cpp2::MyServiceFastAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServiceFastClientWrapper] move(unique_ptr[cMyServiceFastClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cDbMixedStackArgumentsAsyncClient "::cpp2::DbMixedStackArgumentsAsyncClient":
       pass
 
@@ -52,7 +52,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cMyServiceClientWrapper "::cpp2::MyServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

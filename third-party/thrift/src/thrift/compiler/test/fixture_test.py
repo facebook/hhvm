@@ -157,7 +157,7 @@ class FixtureTest(unittest.TestCase):
             languages.add(lang)
 
             # Fix cpp args
-            if "cpp" in lang:
+            if "cpp" in lang or "py3" in lang or "python_capi" in lang:
                 # Don't use os.path.join to avoid system-specific path separators.
                 path = "thrift/compiler/test/fixtures/" + fixture_name
                 extra = "include_prefix=" + path

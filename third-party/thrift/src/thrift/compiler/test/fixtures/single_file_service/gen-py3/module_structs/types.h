@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_structs_data.h"
-#include "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_structs_types.h"
-#include "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_structs_metadata.h"
+#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_data.h"
+#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_types.h"
+#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_metadata.h"
 namespace thrift {
 namespace py3 {
 

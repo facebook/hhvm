@@ -45,7 +45,7 @@ cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_t
 
 cimport apache.thrift.fixtures.types.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-py3/module/types.h":
   pass
 
 cdef extern from * nogil:
@@ -465,11 +465,11 @@ cdef extern from * nogil:
         bint empty()
 
 
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types.h" namespace "::apache::thrift::fixtures::types":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h" namespace "::apache::thrift::fixtures::types":
     cdef cppclass chas_bitwise_ops "::apache::thrift::fixtures::types::has_bitwise_ops":
         pass
 
@@ -494,15 +494,15 @@ cdef class is_unscoped(thrift.py3.types.CompiledEnum):
 cdef class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_custom_protocol.h" namespace "::apache::thrift::fixtures::types":
+cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types_custom_protocol.h" namespace "::apache::thrift::fixtures::types":
 
     cdef cppclass cempty_struct "::apache::thrift::fixtures::types::empty_struct":
         cempty_struct() except +

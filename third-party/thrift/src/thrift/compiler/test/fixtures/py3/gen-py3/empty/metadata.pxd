@@ -10,5 +10,5 @@ from thrift.py3.common cimport (
     cThriftMetadata as __fbthrift_cThriftMetadata,
 )
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/empty/metadata.h" :
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/empty/metadata.h" :
     cdef cThriftMetadata cGetThriftModuleMetadata "::cpp2::empty_getThriftModuleMetadata"()

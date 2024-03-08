@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/adapter/src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/adapter/gen-py3/module/clients_wrapper.h>
 
 namespace facebook {
 namespace thrift {

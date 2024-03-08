@@ -27,7 +27,7 @@ from thrift.py3.client cimport cClientWrapper
 cimport module.types as _module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/sink/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cSinkServiceAsyncClient "::cpp2::SinkServiceAsyncClient":
       pass
 
@@ -38,7 +38,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/sink/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/sink/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cSinkServiceClientWrapper "::cpp2::SinkServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

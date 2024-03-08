@@ -45,22 +45,22 @@ cimport transitive.types as _transitive_types
 
 cimport includes.types_fields as _fbthrift_types_fields
 
-cdef extern from "gen-py3/includes/types.h":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/includes/types.h":
   pass
 
 
 
 
 
-cdef extern from "gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/includes_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cIncluded "::cpp2::Included":
         cIncluded() except +
@@ -89,6 +89,6 @@ cdef class Included(thrift.py3.types.Struct):
 
 
 
-cdef extern from "gen-cpp2/includes_constants.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h" namespace "::cpp2":
     cdef cIncluded cExampleIncluded "::cpp2::includes_constants::ExampleIncluded"()
     cdef cint64_t cIncludedConstant "::cpp2::includes_constants::IncludedConstant"

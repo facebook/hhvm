@@ -27,39 +27,39 @@ from thrift.py3.client cimport cClientWrapper
 cimport module.types as _module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServiceClientWrapper] move(unique_ptr[cMyServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServicePrioParentAsyncClient "::cpp2::MyServicePrioParentAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServicePrioParentClientWrapper] move(unique_ptr[cMyServicePrioParentClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServicePrioChildAsyncClient "::cpp2::MyServicePrioChildAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServicePrioChildClientWrapper] move(unique_ptr[cMyServicePrioChildClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cBadServiceAsyncClient "::cpp2::GoodServiceAsyncClient":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cBadServiceAsyncClient_BadInteraction "::cpp2::BadServiceAsyncClient::BadInteraction":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cBadServiceClientWrapper] move(unique_ptr[cBadServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cFooBarBazServiceAsyncClient "::cpp2::FooBarBazServiceAsyncClient":
       pass
 
@@ -70,7 +70,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cMyServiceClientWrapper "::cpp2::MyServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

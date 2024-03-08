@@ -31,5 +31,5 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-py3/module_structs/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/module_structs/clients_wrapper.h" namespace "::cpp2":
   pass

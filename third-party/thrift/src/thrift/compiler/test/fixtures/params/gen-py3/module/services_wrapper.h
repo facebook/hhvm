@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/params/src/gen-cpp2/NestedContainers.h>)
-#include <thrift/compiler/test/fixtures/params/src/gen-cpp2/NestedContainers.h>
+#if __has_include(<thrift/compiler/test/fixtures/params/gen-cpp2/NestedContainers.h>)
+#include <thrift/compiler/test/fixtures/params/gen-cpp2/NestedContainers.h>
 #else
-#include <thrift/compiler/test/fixtures/params/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/params/gen-cpp2/module_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

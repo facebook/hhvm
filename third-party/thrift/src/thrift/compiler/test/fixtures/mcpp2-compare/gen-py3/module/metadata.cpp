@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-py3/module/metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/metadata.h"
 
 namespace some {
 namespace valid {

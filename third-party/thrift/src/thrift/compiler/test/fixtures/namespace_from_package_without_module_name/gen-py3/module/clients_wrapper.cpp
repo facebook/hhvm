@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-py3/module/clients_wrapper.h>
 
 namespace test {
 namespace namespace_from_package_without_module_name {

@@ -12,6 +12,6 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__TestService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/s_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/s_handlers.h" namespace "::cpp2":
     cdef cppclass cTestServiceSvIf "::cpp2::TestServiceSvIf":
         pass

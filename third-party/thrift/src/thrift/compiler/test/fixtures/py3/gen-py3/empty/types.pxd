@@ -44,7 +44,7 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport empty.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/empty/types.h":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/empty/types.h":
   pass
 
 

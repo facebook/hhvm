@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/annotation/gen-cpp2/hack_data.h"
-#include "thrift/annotation/gen-cpp2/hack_types.h"
-#include "thrift/annotation/gen-cpp2/hack_metadata.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/hack_data.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/hack_types.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/hack_metadata.h"
 namespace thrift {
 namespace py3 {
 

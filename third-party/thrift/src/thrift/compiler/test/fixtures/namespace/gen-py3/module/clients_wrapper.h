@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/namespace/src/gen-cpp2/TestService.h>)
-#include <thrift/compiler/test/fixtures/namespace/src/gen-cpp2/TestService.h>
+#if __has_include(<thrift/compiler/test/fixtures/namespace/gen-cpp2/TestService.h>)
+#include <thrift/compiler/test/fixtures/namespace/gen-cpp2/TestService.h>
 #else
-#include <thrift/compiler/test/fixtures/namespace/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/namespace/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

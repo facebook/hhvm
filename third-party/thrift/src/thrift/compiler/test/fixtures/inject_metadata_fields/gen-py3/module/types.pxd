@@ -45,22 +45,22 @@ cimport foo.types as _foo_types
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/module/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cFields "::cpp2::Fields":
         cFields() except +

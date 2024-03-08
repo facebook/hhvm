@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/py3/src/gen-py3cpp/NullService.h>)
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/NullService.h>
+#if __has_include(<thrift/compiler/test/fixtures/py3/gen-py3cpp/NullService.h>)
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/NullService.h>
 #else
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/empty_handlers.h>
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

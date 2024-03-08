@@ -46,22 +46,22 @@ cimport module1.types as _module1_types
 
 cimport module2.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/src/gen-py3/module2/types.h":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-py3/module2/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/src/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/src/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/src/gen-cpp2/module2_types_custom_protocol.h" namespace "::module2":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types_custom_protocol.h" namespace "::module2":
 
     cdef cppclass cStruct "::module2::Struct":
         cStruct() except +
@@ -116,7 +116,7 @@ cdef class BigStruct(thrift.py3.types.Struct):
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/src/gen-cpp2/module2_constants.h" namespace "::module2":
+cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_constants.h" namespace "::module2":
     cdef cStruct cc2 "::module2::module2_constants::c2"()
     cdef cStruct cc3 "::module2::module2_constants::c3"()
     cdef cStruct cc4 "::module2::module2_constants::c4"()

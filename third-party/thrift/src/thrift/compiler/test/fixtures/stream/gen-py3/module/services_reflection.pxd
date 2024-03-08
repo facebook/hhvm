@@ -12,6 +12,6 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/stream/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/stream/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cPubSubStreamingServiceSvIf "::cpp2::PubSubStreamingServiceSvIf":
         pass

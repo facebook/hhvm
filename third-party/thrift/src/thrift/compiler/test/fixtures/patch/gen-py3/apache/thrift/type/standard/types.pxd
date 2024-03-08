@@ -44,7 +44,7 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport apache.thrift.type.standard.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/lib/thrift/gen-py3/standard/types.h":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-py3/standard/types.h":
   pass
 
 cdef extern from "<folly/io/IOBuf.h>":
@@ -54,11 +54,11 @@ cdef extern from "<folly/FBString.h>":
 cdef extern from *:
     ctypedef string folly_fbstring "folly::fbstring"
 
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apache::thrift::type":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/standard_types.h" namespace "::apache::thrift::type":
     cdef cppclass cVoid "::apache::thrift::type::Void":
         pass
 
@@ -76,15 +76,15 @@ cdef class Void(thrift.py3.types.CompiledEnum):
 cdef class StandardProtocol(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" namespace "::apache::thrift::type":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/standard_types_custom_protocol.h" namespace "::apache::thrift::type":
     cdef enum cTypeUri__type "::apache::thrift::type::TypeUri::Type":
         cTypeUri__type___EMPTY__ "::apache::thrift::type::TypeUri::Type::__EMPTY__",
         cTypeUri__type_uri "::apache::thrift::type::TypeUri::Type::uri",

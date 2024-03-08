@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/compiler/test/fixtures/patch/src/gen-py3/module/metadata.h"
+#include "thrift/compiler/test/fixtures/patch/gen-py3/module/metadata.h"
 
 namespace test {
 namespace fixtures {

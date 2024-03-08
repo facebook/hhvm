@@ -6,20 +6,20 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/A.h>)
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/A.h>
+#if __has_include(<thrift/compiler/test/fixtures/single_file_service/gen-cpp2/A.h>)
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/A.h>
 #else
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/B.h>)
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/B.h>
+#if __has_include(<thrift/compiler/test/fixtures/single_file_service/gen-cpp2/B.h>)
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/B.h>
 #else
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/C.h>)
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/C.h>
+#if __has_include(<thrift/compiler/test/fixtures/single_file_service/gen-cpp2/C.h>)
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/C.h>
 #else
-#include <thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

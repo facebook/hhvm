@@ -28,21 +28,21 @@ cimport module.types as _module_types
 
 cimport includes.types as _includes_types
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
   cdef cppclass cEmptyServiceAsyncClient "::some::valid::ns::EmptyServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cEmptyServiceClientWrapper] move(unique_ptr[cEmptyServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
   cdef cppclass cReturnServiceAsyncClient "::some::valid::ns::ReturnServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cReturnServiceClientWrapper] move(unique_ptr[cReturnServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
   cdef cppclass cParamServiceAsyncClient "::some::valid::ns::ParamServiceAsyncClient":
       pass
 
@@ -53,7 +53,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-py3/module/clients_wrapper.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/clients_wrapper.h" namespace "::some::valid::ns":
   cdef cppclass cEmptyServiceClientWrapper "::some::valid::ns::EmptyServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

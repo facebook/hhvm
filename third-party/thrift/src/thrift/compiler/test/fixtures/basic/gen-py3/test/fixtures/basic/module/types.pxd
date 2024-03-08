@@ -44,15 +44,15 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport test.fixtures.basic.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_types.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h" namespace "::test::fixtures::basic":
     cdef cppclass cMyEnum "::test::fixtures::basic::MyEnum":
         pass
 
@@ -70,15 +70,15 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 cdef class HackEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::basic":
 
     cdef cppclass cMyStruct "::test::fixtures::basic::MyStruct":
         cMyStruct() except +

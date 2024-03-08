@@ -28,29 +28,29 @@ cimport module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cAAsyncClient "::cpp2::AAsyncClient":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cAAsyncClient_I "::cpp2::AAsyncClient::I":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cAClientWrapper] move(unique_ptr[cAClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cBAsyncClient "::cpp2::BAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cBClientWrapper] move(unique_ptr[cBClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cCAsyncClient "::cpp2::CAsyncClient":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cCAsyncClient_I "::cpp2::CAsyncClient::I":
       pass
 
@@ -61,7 +61,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cAClientWrapper "::cpp2::AClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

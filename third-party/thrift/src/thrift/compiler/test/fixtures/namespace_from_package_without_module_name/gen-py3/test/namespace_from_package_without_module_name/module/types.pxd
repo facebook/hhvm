@@ -44,22 +44,22 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport test.namespace_from_package_without_module_name.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-py3/module/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/gen-cpp2/module_types_custom_protocol.h" namespace "::test::namespace_from_package_without_module_name":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types_custom_protocol.h" namespace "::test::namespace_from_package_without_module_name":
 
     cdef cppclass cFoo "::test::namespace_from_package_without_module_name::Foo":
         cFoo() except +

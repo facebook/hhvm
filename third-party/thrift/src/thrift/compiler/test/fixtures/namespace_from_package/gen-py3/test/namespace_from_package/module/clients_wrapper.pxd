@@ -27,7 +27,7 @@ from thrift.py3.client cimport cClientWrapper
 cimport test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/src/gen-cpp2/module_clients.h" namespace "::test::namespace_from_package::module":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_clients.h" namespace "::test::namespace_from_package::module":
   cdef cppclass cTestServiceAsyncClient "::test::namespace_from_package::module::TestServiceAsyncClient":
       pass
 
@@ -38,7 +38,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/src/gen-py3/module/clients_wrapper.h" namespace "::test::namespace_from_package::module":
+cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-py3/module/clients_wrapper.h" namespace "::test::namespace_from_package::module":
   cdef cppclass cTestServiceClientWrapper "::test::namespace_from_package::module::TestServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

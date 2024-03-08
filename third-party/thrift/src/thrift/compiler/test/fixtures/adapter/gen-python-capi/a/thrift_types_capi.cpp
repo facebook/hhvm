@@ -11,11 +11,11 @@
 #include <thrift/lib/python/capi/iobuf.h>
 #include <thrift/lib/python/types.h>
 
-#include <thrift/compiler/test/fixtures/adapter/src/gen-python-capi/a/thrift_types_api.h>
-#include <thrift/compiler/test/fixtures/adapter/src/gen-python-capi/a/thrift_types_capi.h>
+#include <thrift/compiler/test/fixtures/adapter/gen-python-capi/a/thrift_types_api.h>
+#include <thrift/compiler/test/fixtures/adapter/gen-python-capi/a/thrift_types_capi.h>
 
-#include "thrift/compiler/test/fixtures/adapter/src/gen-python-capi/b/thrift_types_capi.h"
-#include "thrift/compiler/test/fixtures/adapter/src/gen-python-capi/c/thrift_types_capi.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-python-capi/b/thrift_types_capi.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-python-capi/c/thrift_types_capi.h"
 
 namespace apache {
 namespace thrift {

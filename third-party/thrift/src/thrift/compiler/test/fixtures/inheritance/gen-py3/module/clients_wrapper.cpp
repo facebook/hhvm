@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/inheritance/gen-py3/module/clients_wrapper.h>
 
 namespace cpp2 {
 

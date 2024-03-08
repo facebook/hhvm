@@ -45,7 +45,7 @@ cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_type
 
 cimport my.namespacing.extend.test.extend.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-py3/extend/types.h":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/extend/types.h":
   pass
 
 

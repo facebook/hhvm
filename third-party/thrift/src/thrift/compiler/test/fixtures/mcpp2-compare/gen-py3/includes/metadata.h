@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "gen-cpp2/includes_metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h"
 
 namespace a {
 namespace different {

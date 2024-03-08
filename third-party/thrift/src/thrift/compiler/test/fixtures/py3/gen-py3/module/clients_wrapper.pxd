@@ -27,21 +27,21 @@ from thrift.py3.client cimport cClientWrapper
 cimport module.types as _module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h" namespace "::py3::simple":
   cdef cppclass cSimpleServiceAsyncClient "::py3::simple::SimpleServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cSimpleServiceClientWrapper] move(unique_ptr[cSimpleServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h" namespace "::py3::simple":
   cdef cppclass cDerivedServiceAsyncClient "::py3::simple::DerivedServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cDerivedServiceClientWrapper] move(unique_ptr[cDerivedServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h" namespace "::py3::simple":
   cdef cppclass cRederivedServiceAsyncClient "::py3::simple::RederivedServiceAsyncClient":
       pass
 
@@ -52,7 +52,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/module/clients_wrapper.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapper.h" namespace "::py3::simple":
   cdef cppclass cSimpleServiceClientWrapper "::py3::simple::SimpleServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

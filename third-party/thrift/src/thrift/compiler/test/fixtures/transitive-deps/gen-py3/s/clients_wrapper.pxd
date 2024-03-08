@@ -29,7 +29,7 @@ cimport s.types as _s_types
 cimport b.types as _b_types
 cimport c.types as _c_types
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/s_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/s_clients.h" namespace "::cpp2":
   cdef cppclass cTestServiceAsyncClient "::cpp2::TestServiceAsyncClient":
       pass
 
@@ -40,7 +40,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-py3/s/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/s/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cTestServiceClientWrapper "::cpp2::TestServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

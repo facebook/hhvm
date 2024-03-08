@@ -6,20 +6,20 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/EmptyService.h>)
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/EmptyService.h>
+#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/EmptyService.h>)
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/EmptyService.h>
 #else
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/ReturnService.h>)
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/ReturnService.h>
+#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ReturnService.h>)
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ReturnService.h>
 #else
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/ParamService.h>)
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/ParamService.h>
+#if __has_include(<thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ParamService.h>)
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ParamService.h>
 #else
-#include <thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

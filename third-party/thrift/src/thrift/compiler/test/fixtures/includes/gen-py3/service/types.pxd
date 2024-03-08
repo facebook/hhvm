@@ -47,7 +47,7 @@ cimport transitive.types as _transitive_types
 
 cimport service.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/includes/src/gen-py3/service/types.h":
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/service/types.h":
   pass
 
 

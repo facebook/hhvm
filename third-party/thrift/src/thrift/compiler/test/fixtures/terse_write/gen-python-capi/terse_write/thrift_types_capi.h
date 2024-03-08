@@ -12,7 +12,7 @@
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 
-#include <thrift/compiler/test/fixtures/terse_write/src/gen-cpp2/terse_write_types.h>
+#include <thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h>
 
 namespace apache {
 namespace thrift {

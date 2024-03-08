@@ -12,18 +12,18 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__EmptyService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
     cdef cppclass cEmptyServiceSvIf "::some::valid::ns::EmptyServiceSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__ReturnService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
     cdef cppclass cReturnServiceSvIf "::some::valid::ns::ReturnServiceSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__ParamService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_handlers.h" namespace "::some::valid::ns":
     cdef cppclass cParamServiceSvIf "::some::valid::ns::ParamServiceSvIf":
         pass

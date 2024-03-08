@@ -11,5 +11,5 @@ from thrift.py3.server cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/src/gen-py3/module_structs/services_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/module_structs/services_wrapper.h" namespace "::cpp2":
     pass

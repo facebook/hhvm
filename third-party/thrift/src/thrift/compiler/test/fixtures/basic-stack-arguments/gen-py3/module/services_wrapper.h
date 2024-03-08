@@ -6,20 +6,20 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/MyService.h>)
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/MyService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/MyService.h>)
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/MyService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/MyServiceFast.h>)
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/MyServiceFast.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/MyServiceFast.h>)
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/MyServiceFast.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/DbMixedStackArguments.h>)
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/DbMixedStackArguments.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/DbMixedStackArguments.h>)
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/DbMixedStackArguments.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

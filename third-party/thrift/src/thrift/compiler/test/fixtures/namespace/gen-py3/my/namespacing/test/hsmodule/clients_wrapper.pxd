@@ -27,7 +27,7 @@ from thrift.py3.client cimport cClientWrapper
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
 
-cdef extern from "gen-cpp2/hsmodule_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_clients.h" namespace "::cpp2":
   cdef cppclass cHsTestServiceAsyncClient "::cpp2::HsTestServiceAsyncClient":
       pass
 
@@ -38,7 +38,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "gen-py3/hsmodule/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/hsmodule/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cHsTestServiceClientWrapper "::cpp2::HsTestServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

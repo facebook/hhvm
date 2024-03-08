@@ -6,15 +6,15 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/adapter/src/gen-cpp2/Service.h>)
-#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/Service.h>
+#if __has_include(<thrift/compiler/test/fixtures/adapter/gen-cpp2/Service.h>)
+#include <thrift/compiler/test/fixtures/adapter/gen-cpp2/Service.h>
 #else
-#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/adapter/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>)
-#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>
+#if __has_include(<thrift/compiler/test/fixtures/adapter/gen-cpp2/AdapterService.h>)
+#include <thrift/compiler/test/fixtures/adapter/gen-cpp2/AdapterService.h>
 #else
-#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/adapter/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

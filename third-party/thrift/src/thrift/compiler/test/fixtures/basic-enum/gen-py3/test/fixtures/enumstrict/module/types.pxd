@@ -44,15 +44,15 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport test.fixtures.enumstrict.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_types.h" namespace "::test::fixtures::enumstrict":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types.h" namespace "::test::fixtures::enumstrict":
     cdef cppclass cEmptyEnum "::test::fixtures::enumstrict::EmptyEnum":
         pass
 
@@ -77,15 +77,15 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 cdef class MyBigEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::enumstrict":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::enumstrict":
 
     cdef cppclass cMyStruct "::test::fixtures::enumstrict::MyStruct":
         cMyStruct() except +
@@ -122,6 +122,6 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cMyEnum,string]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-enum/src/gen-cpp2/module_constants.h" namespace "::test::fixtures::enumstrict":
+cdef extern from "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_constants.h" namespace "::test::fixtures::enumstrict":
     cdef cMyEnum ckOne "::test::fixtures::enumstrict::module_constants::kOne"()
     cdef cmap[cMyEnum,string] cenumNames "::test::fixtures::enumstrict::module_constants::enumNames"()

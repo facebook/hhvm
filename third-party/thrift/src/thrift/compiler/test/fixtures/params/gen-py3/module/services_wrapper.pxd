@@ -11,5 +11,5 @@ from thrift.py3.server cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 
-cdef extern from "thrift/compiler/test/fixtures/params/src/gen-py3/module/services_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/params/gen-py3/module/services_wrapper.h" namespace "::cpp2":
     shared_ptr[cAsyncProcessorFactory] cNestedContainersInterface "::cpp2::NestedContainersInterface"(PyObject *if_object, cFollyExecutor* Q) except *

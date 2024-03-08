@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/stream/src/gen-cpp2/PubSubStreamingService.h>)
-#include <thrift/compiler/test/fixtures/stream/src/gen-cpp2/PubSubStreamingService.h>
+#if __has_include(<thrift/compiler/test/fixtures/stream/gen-cpp2/PubSubStreamingService.h>)
+#include <thrift/compiler/test/fixtures/stream/gen-cpp2/PubSubStreamingService.h>
 #else
-#include <thrift/compiler/test/fixtures/stream/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/stream/gen-cpp2/module_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

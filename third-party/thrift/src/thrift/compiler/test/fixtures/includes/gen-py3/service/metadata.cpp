@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/compiler/test/fixtures/includes/src/gen-py3/service/metadata.h"
+#include "thrift/compiler/test/fixtures/includes/gen-py3/service/metadata.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata service_getThriftModuleMetadata() {

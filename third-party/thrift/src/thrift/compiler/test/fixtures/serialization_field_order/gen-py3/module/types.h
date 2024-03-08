@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/compiler/test/fixtures/serialization_field_order/src/gen-cpp2/module_data.h"
-#include "thrift/compiler/test/fixtures/serialization_field_order/src/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/serialization_field_order/src/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_metadata.h"
 namespace thrift {
 namespace py3 {
 

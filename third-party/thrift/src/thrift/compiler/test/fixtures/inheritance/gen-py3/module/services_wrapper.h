@@ -6,20 +6,20 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyRoot.h>)
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyRoot.h>
+#if __has_include(<thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyRoot.h>)
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyRoot.h>
 #else
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyNode.h>)
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyNode.h>
+#if __has_include(<thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyNode.h>)
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyNode.h>
 #else
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyLeaf.h>)
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/MyLeaf.h>
+#if __has_include(<thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyLeaf.h>)
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyLeaf.h>
 #else
-#include <thrift/compiler/test/fixtures/inheritance/src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

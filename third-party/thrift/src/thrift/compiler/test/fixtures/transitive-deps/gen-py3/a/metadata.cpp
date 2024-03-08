@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "thrift/compiler/test/fixtures/transitive-deps/src/gen-py3/a/metadata.h"
+#include "thrift/compiler/test/fixtures/transitive-deps/gen-py3/a/metadata.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata a_getThriftModuleMetadata() {

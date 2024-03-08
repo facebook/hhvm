@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/terse_write/src/gen-cpp2/terse_write_metadata.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_metadata.h"
 
 namespace facebook {
 namespace thrift {

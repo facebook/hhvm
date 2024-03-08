@@ -44,7 +44,7 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/list/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/list/gen-py3/module/types.h":
   pass
 
 
@@ -68,5 +68,5 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint64_t,vector[string]]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/list/src/gen-cpp2/module_constants.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/list/gen-cpp2/module_constants.h" namespace "::cpp2":
     cdef cmap[cint64_t,vector[string]] cTEST_MAP "::cpp2::module_constants::TEST_MAP"()

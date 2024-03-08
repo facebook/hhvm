@@ -44,22 +44,22 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport emptyns.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-py3/emptyns/types.h":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/emptyns/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/emptyns_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/emptyns_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/emptyns_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cFoo "::cpp2::Foo":
         cFoo() except +

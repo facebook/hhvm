@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "gen-py3/included/metadata.h"
+#include "thrift/compiler/test/fixtures/types/gen-py3/included/metadata.h"
 
 namespace apache {
 namespace thrift {

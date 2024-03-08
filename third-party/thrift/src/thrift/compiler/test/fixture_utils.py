@@ -19,7 +19,7 @@ import shlex
 import sys
 import typing
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pkg_resources
 
@@ -215,11 +215,15 @@ def _parse_fixture_cmd(
         ]
 
         # Add include_prefix for mstch_cpp* generators
-        if "mstch_cpp" in generator_spec:
+        if (
+            "mstch_cpp" in generator_spec
+            or "mstch_py3" in generator_spec
+            or "mstch_python_capi" in generator_spec
+        ):
             generator_spec = _add_option_to_generator_spec(
                 generator_spec,
                 "include_prefix",
-                os.path.join("thrift/compiler/test/fixtures", fixture_name),
+                PurePosixPath("thrift/compiler/test/fixtures") / fixture_name,
             )
 
         return FixtureCmd(

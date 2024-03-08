@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/annotation/gen-cpp2/scope_metadata.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/scope_metadata.h"
 
 namespace facebook {
 namespace thrift {

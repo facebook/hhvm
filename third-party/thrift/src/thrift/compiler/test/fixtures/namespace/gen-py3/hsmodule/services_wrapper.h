@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#if __has_include(<gen-cpp2/HsTestService.h>)
-#include <gen-cpp2/HsTestService.h>
+#if __has_include(<thrift/compiler/test/fixtures/namespace/gen-cpp2/HsTestService.h>)
+#include <thrift/compiler/test/fixtures/namespace/gen-cpp2/HsTestService.h>
 #else
-#include <gen-cpp2/hsmodule_handlers.h>
+#include <thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

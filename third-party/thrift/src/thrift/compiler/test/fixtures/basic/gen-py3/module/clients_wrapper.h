@@ -6,25 +6,25 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/basic/src/gen-cpp2/FooService.h>)
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/FooService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic/gen-cpp2/FooService.h>)
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/FooService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic/src/gen-cpp2/FB303Service.h>)
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/FB303Service.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic/gen-cpp2/FB303Service.h>)
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/FB303Service.h>
 #else
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic/src/gen-cpp2/MyService.h>)
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/MyService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic/gen-cpp2/MyService.h>)
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/MyService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic/src/gen-cpp2/DbMixedStackArguments.h>)
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/DbMixedStackArguments.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic/gen-cpp2/DbMixedStackArguments.h>)
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/DbMixedStackArguments.h>
 #else
-#include <thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

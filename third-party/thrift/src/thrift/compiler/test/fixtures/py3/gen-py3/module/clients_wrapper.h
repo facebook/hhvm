@@ -6,20 +6,20 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/py3/src/gen-py3cpp/SimpleService.h>)
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/SimpleService.h>
+#if __has_include(<thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleService.h>)
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleService.h>
 #else
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h>
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/py3/src/gen-py3cpp/DerivedService.h>)
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/DerivedService.h>
+#if __has_include(<thrift/compiler/test/fixtures/py3/gen-py3cpp/DerivedService.h>)
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/DerivedService.h>
 #else
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h>
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/py3/src/gen-py3cpp/RederivedService.h>)
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/RederivedService.h>
+#if __has_include(<thrift/compiler/test/fixtures/py3/gen-py3cpp/RederivedService.h>)
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/RederivedService.h>
 #else
-#include <thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h>
+#include <thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

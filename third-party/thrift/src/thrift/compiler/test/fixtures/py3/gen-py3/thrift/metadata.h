@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/annotation/gen-py3cpp/thrift_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/thrift_metadata.h"
 
 namespace facebook {
 namespace thrift {

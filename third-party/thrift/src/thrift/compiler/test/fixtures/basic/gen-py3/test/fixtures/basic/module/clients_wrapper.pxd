@@ -27,28 +27,28 @@ from thrift.py3.client cimport cClientWrapper
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
   cdef cppclass cFooServiceAsyncClient "::test::fixtures::basic::FooServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cFooServiceClientWrapper] move(unique_ptr[cFooServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
   cdef cppclass cFB303ServiceAsyncClient "::test::fixtures::basic::FB303ServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cFB303ServiceClientWrapper] move(unique_ptr[cFB303ServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
   cdef cppclass cMyServiceAsyncClient "::test::fixtures::basic::MyServiceAsyncClient":
       pass
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cMyServiceClientWrapper] move(unique_ptr[cMyServiceClientWrapper])
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
   cdef cppclass cDbMixedStackArgumentsAsyncClient "::test::fixtures::basic::DbMixedStackArgumentsAsyncClient":
       pass
 
@@ -59,7 +59,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic/src/gen-py3/module/clients_wrapper.h" namespace "::test::fixtures::basic":
+cdef extern from "thrift/compiler/test/fixtures/basic/gen-py3/module/clients_wrapper.h" namespace "::test::fixtures::basic":
   cdef cppclass cFooServiceClientWrapper "::test::fixtures::basic::FooServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "gen-cpp2/c_metadata.h"
+#include "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/c_metadata.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata c_getThriftModuleMetadata();

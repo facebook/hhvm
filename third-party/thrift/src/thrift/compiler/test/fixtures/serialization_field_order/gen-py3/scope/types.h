@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/annotation/gen-cpp2/scope_data.h"
-#include "thrift/annotation/gen-cpp2/scope_types.h"
-#include "thrift/annotation/gen-cpp2/scope_metadata.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/scope_data.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/scope_types.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/scope_metadata.h"
 namespace thrift {
 namespace py3 {
 

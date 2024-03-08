@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/transitive-deps/src/gen-py3/s/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/transitive-deps/gen-py3/s/clients_wrapper.h>
 
 namespace cpp2 {
 

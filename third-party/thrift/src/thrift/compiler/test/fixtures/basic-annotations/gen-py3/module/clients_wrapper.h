@@ -6,30 +6,30 @@
  */
 
 #pragma once
-#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyService.h>)
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioParent.h>)
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioParent.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioParent.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioParent.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioChild.h>)
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioChild.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioChild.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioChild.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/BadService.h>)
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/BadService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h>
 #endif
-#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>)
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/FooBarBazService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/FooBarBazService.h>
 #else
-#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h>
 #endif
 
 #include <folly/futures/Future.h>

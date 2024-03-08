@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "gen-py3/includes/metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/includes/metadata.h"
 
 namespace a {
 namespace different {

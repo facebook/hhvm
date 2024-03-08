@@ -28,19 +28,19 @@ cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_m
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient_MyInteraction "::cpp2::MyServiceAsyncClient::MyInteraction":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient_MyInteractionFast "::cpp2::MyServiceAsyncClient::MyInteractionFast":
       pass
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient_SerialInteraction "::cpp2::MyServiceAsyncClient::SerialInteraction":
       pass
 
@@ -51,7 +51,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cMyServiceClientWrapper "::cpp2::MyServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/basic-stack-arguments/gen-py3/module/clients_wrapper.h>
 
 namespace cpp2 {
 

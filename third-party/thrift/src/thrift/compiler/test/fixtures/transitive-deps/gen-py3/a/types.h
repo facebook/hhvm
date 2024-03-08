@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_data.h"
-#include "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_types.h"
-#include "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_metadata.h"
+#include "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_data.h"
+#include "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_types.h"
+#include "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_metadata.h"
 namespace thrift {
 namespace py3 {
 

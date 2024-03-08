@@ -44,15 +44,15 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_types.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types.h" namespace "::cpp2":
     cdef cppclass cMyEnum "::cpp2::MyEnum":
         pass
 
@@ -70,15 +70,15 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 cdef class TypedEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
     cdef enum cMyUnion__type "::cpp2::MyUnion::Type":
         cMyUnion__type___EMPTY__ "::cpp2::MyUnion::Type::__EMPTY__",
         cMyUnion__type_anInteger "::cpp2::MyUnion::Type::anInteger",
@@ -706,7 +706,7 @@ cdef class List__i64(thrift.py3.types.List):
     cdef shared_ptr[vector[cint64_t]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_constants.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_constants.h" namespace "::cpp2":
     cdef cStructWithRef ckStructWithRef "::cpp2::module_constants::kStructWithRef"()
     cdef cStructWithRefTypeUnique ckStructWithRefTypeUnique "::cpp2::module_constants::kStructWithRefTypeUnique"()
     cdef cStructWithRefTypeShared ckStructWithRefTypeShared "::cpp2::module_constants::kStructWithRefTypeShared"()

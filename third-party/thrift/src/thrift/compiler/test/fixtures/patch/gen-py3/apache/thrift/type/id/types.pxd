@@ -44,7 +44,7 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport apache.thrift.type.id.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/lib/thrift/gen-py3/id/types.h":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-py3/id/types.h":
   pass
 
 cdef extern from "thrift/lib/thrift/detail/id.h":
@@ -56,5 +56,5 @@ cdef extern from "thrift/lib/thrift/detail/id.h":
 
 
 
-cdef extern from "thrift/lib/thrift/gen-cpp2/id_constants.h" namespace "::apache::thrift::type":
+cdef extern from "thrift/compiler/test/fixtures/patch/gen-cpp2/id_constants.h" namespace "::apache::thrift::type":
     cdef cint64_t cnoId "::apache::thrift::type::id_constants::noId"

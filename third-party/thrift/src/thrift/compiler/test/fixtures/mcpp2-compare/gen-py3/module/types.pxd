@@ -45,7 +45,7 @@ cimport includes.types as _includes_types
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/types.h":
   pass
 
 cdef extern from "<folly/small_vector.h>":
@@ -366,11 +366,11 @@ cdef extern from * nogil:
 cdef extern from *:
     ctypedef cint64_t Foo "Foo"
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_types.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h" namespace "::some::valid::ns":
     cdef cppclass cMyEnumA "::some::valid::ns::MyEnumA":
         pass
 
@@ -402,15 +402,15 @@ cdef class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
 cdef class MyEnumB(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_types_custom_protocol.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types_custom_protocol.h" namespace "::some::valid::ns":
 
     cdef cppclass cEmpty "::some::valid::ns::Empty":
         cEmpty() except +
@@ -1618,7 +1618,7 @@ cdef class List__MyStruct(thrift.py3.types.List):
     cdef shared_ptr[vector[cMyStruct]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/module_constants.h" namespace "::some::valid::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_constants.h" namespace "::some::valid::ns":
     cdef cbool caBool "::some::valid::ns::module_constants::aBool"
     cdef cint8_t caByte "::some::valid::ns::module_constants::aByte"
     cdef cint16_t ca16BitInt "::some::valid::ns::module_constants::a16BitInt"

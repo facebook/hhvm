@@ -44,15 +44,15 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_types.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.h" namespace "::cpp2":
     cdef cppclass cAnimal "::cpp2::Animal":
         pass
 
@@ -63,15 +63,15 @@ cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_ty
 cdef class Animal(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cColor "::cpp2::Color":
         cColor() except +

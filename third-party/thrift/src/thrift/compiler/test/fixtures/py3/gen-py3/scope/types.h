@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/annotation/gen-py3cpp/scope_data.h"
-#include "thrift/annotation/gen-py3cpp/scope_types.h"
-#include "thrift/annotation/gen-py3cpp/scope_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/scope_data.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/scope_types.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/scope_metadata.h"
 namespace thrift {
 namespace py3 {
 

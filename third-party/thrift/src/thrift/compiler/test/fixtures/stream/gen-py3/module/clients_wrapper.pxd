@@ -28,7 +28,7 @@ cimport module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
 
-cdef extern from "thrift/compiler/test/fixtures/stream/src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/stream/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cPubSubStreamingServiceAsyncClient "::cpp2::PubSubStreamingServiceAsyncClient":
       pass
 
@@ -39,7 +39,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/stream/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/stream/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cPubSubStreamingServiceClientWrapper "::cpp2::PubSubStreamingServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

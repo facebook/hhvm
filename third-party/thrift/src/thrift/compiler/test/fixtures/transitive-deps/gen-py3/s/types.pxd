@@ -46,7 +46,7 @@ cimport c.types as _c_types
 
 cimport s.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-py3/s/types.h":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/s/types.h":
   pass
 
 

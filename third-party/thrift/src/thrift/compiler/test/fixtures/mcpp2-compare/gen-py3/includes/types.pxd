@@ -44,17 +44,17 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport includes.types_fields as _fbthrift_types_fields
 
-cdef extern from "gen-py3/includes/types.h":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/includes/types.h":
   pass
 
 cdef extern from "folly/sorted_vector_types.h":
   pass
 
-cdef extern from "gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/includes_types.h" namespace "::a::different::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h" namespace "::a::different::ns":
     cdef cppclass cAnEnum "::a::different::ns::AnEnum":
         pass
 
@@ -65,15 +65,15 @@ cdef extern from "gen-cpp2/includes_types.h" namespace "::a::different::ns":
 cdef class AnEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/includes_types_custom_protocol.h" namespace "::a::different::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types_custom_protocol.h" namespace "::a::different::ns":
 
     cdef cppclass cAStruct "::a::different::ns::AStruct":
         cAStruct() except +
@@ -122,5 +122,5 @@ cdef class AStructB(thrift.py3.types.Struct):
 
 
 
-cdef extern from "gen-cpp2/includes_constants.h" namespace "::a::different::ns":
+cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h" namespace "::a::different::ns":
     cdef cint64_t cIncludedConstant "::a::different::ns::includes_constants::IncludedConstant"

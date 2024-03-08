@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/annotation/gen-cpp2/internal_data.h"
-#include "thrift/annotation/gen-cpp2/internal_types.h"
-#include "thrift/annotation/gen-cpp2/internal_metadata.h"
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/internal_data.h"
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/internal_types.h"
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/internal_metadata.h"
 namespace thrift {
 namespace py3 {
 

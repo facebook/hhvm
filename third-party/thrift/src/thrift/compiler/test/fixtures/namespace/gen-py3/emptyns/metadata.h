@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/emptyns_metadata.h"
+#include "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_metadata.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata emptyns_getThriftModuleMetadata();

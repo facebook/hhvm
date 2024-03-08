@@ -44,22 +44,22 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport my.namespacing.test.hsmodule.types_fields as _fbthrift_types_fields
 
-cdef extern from "gen-py3/hsmodule/types.h":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/hsmodule/types.h":
   pass
 
 
 
 
 
-cdef extern from "gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/hsmodule_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cHsFoo "::cpp2::HsFoo":
         cHsFoo() except +

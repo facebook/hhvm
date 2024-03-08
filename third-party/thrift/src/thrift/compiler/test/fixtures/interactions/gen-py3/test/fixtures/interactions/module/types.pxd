@@ -51,22 +51,22 @@ from thrift.py3.stream cimport (
 
 cimport test.fixtures.interactions.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cCustomException "::cpp2::CustomException"(cTException):
         cCustomException() except +

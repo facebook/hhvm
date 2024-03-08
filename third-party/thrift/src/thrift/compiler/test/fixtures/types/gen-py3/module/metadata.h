@@ -9,7 +9,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h"
 
 namespace apache {
 namespace thrift {

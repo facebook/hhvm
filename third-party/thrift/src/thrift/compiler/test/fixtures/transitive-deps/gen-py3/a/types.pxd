@@ -46,22 +46,22 @@ cimport c.types as _c_types
 
 cimport a.types_fields as _fbthrift_types_fields
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-py3/a/types.h":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/a/types.h":
   pass
 
 
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/transitive-deps/src/gen-cpp2/a_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/a_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cA "::cpp2::A":
         cA() except +

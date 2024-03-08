@@ -11,9 +11,9 @@
 #include <folly/Range.h>
 
 #include <thrift/lib/py3/enums.h>
-#include "thrift/compiler/test/fixtures/includes/src/gen-cpp2/matching_struct_names_data.h"
-#include "thrift/compiler/test/fixtures/includes/src/gen-cpp2/matching_struct_names_types.h"
-#include "thrift/compiler/test/fixtures/includes/src/gen-cpp2/matching_struct_names_metadata.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_struct_names_data.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_struct_names_types.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_struct_names_metadata.h"
 namespace thrift {
 namespace py3 {
 

@@ -11,8 +11,8 @@
 #include <thrift/lib/python/capi/iobuf.h>
 #include <thrift/lib/python/types.h>
 
-#include <thrift/compiler/test/fixtures/terse_write/src/gen-python-capi/terse_write/thrift_types_api.h>
-#include <thrift/compiler/test/fixtures/terse_write/src/gen-python-capi/terse_write/thrift_types_capi.h>
+#include <thrift/compiler/test/fixtures/terse_write/gen-python-capi/terse_write/thrift_types_api.h>
+#include <thrift/compiler/test/fixtures/terse_write/gen-python-capi/terse_write/thrift_types_capi.h>
 
 
 namespace apache {

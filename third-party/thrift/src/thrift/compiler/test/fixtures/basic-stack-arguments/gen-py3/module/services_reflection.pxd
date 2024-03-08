@@ -12,18 +12,18 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__MyService(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServiceSvIf "::cpp2::MyServiceSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__MyServiceFast(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServiceFastSvIf "::cpp2::MyServiceFastSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__DbMixedStackArguments(bint for_clients)
 
-cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cDbMixedStackArgumentsSvIf "::cpp2::DbMixedStackArgumentsSvIf":
         pass

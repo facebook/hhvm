@@ -29,7 +29,7 @@ cimport my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_e
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport my.namespacing.test.hsmodule.clients_wrapper as _my_namespacing_test_hsmodule_clients_wrapper
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-cpp2/extend_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/extend_clients.h" namespace "::cpp2":
   cdef cppclass cExtendTestServiceAsyncClient "::cpp2::ExtendTestServiceAsyncClient":
       pass
 
@@ -40,7 +40,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/src/gen-py3/extend/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/extend/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cExtendTestServiceClientWrapper "::cpp2::ExtendTestServiceClientWrapper"(_my_namespacing_test_hsmodule_clients_wrapper.cHsTestServiceClientWrapper):
 
     cFollyFuture[cbool] check(cRpcOptions, 

@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "gen-py3/foo/metadata.h"
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/foo/metadata.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata foo_getThriftModuleMetadata() {

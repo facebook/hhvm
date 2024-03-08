@@ -44,22 +44,22 @@ from folly.optional cimport cOptional as __cOptional
 
 cimport foo.types_fields as _fbthrift_types_fields
 
-cdef extern from "gen-py3/foo/types.h":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/foo/types.h":
   pass
 
 
 
 
 
-cdef extern from "gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "gen-cpp2/foo_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cFields "::cpp2::Fields":
         cFields() except +

@@ -5,8 +5,8 @@
  *  @generated
  */
 
-#include <thrift/compiler/test/fixtures/namespace/src/gen-py3/extend/services_wrapper.h>
-#include <thrift/compiler/test/fixtures/namespace/src/gen-py3/extend/services_api.h>
+#include <thrift/compiler/test/fixtures/namespace/gen-py3/extend/services_wrapper.h>
+#include <thrift/compiler/test/fixtures/namespace/gen-py3/extend/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
 namespace cpp2 {

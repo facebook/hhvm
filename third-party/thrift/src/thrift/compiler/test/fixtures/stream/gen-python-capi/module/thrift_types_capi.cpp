@@ -11,8 +11,8 @@
 #include <thrift/lib/python/capi/iobuf.h>
 #include <thrift/lib/python/types.h>
 
-#include <thrift/compiler/test/fixtures/stream/src/gen-python-capi/module/thrift_types_api.h>
-#include <thrift/compiler/test/fixtures/stream/src/gen-python-capi/module/thrift_types_capi.h>
+#include <thrift/compiler/test/fixtures/stream/gen-python-capi/module/thrift_types_api.h>
+#include <thrift/compiler/test/fixtures/stream/gen-python-capi/module/thrift_types_capi.h>
 
 
 namespace apache {

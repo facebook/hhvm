@@ -11,7 +11,7 @@ from thrift.py3.server cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 
-cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/module/services_wrapper.h" namespace "::py3::simple":
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/services_wrapper.h" namespace "::py3::simple":
     shared_ptr[cAsyncProcessorFactory] cSimpleServiceInterface "::py3::simple::SimpleServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *
     shared_ptr[cAsyncProcessorFactory] cDerivedServiceInterface "::py3::simple::DerivedServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *
     shared_ptr[cAsyncProcessorFactory] cRederivedServiceInterface "::py3::simple::RederivedServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *

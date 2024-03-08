@@ -60,7 +60,6 @@ class AEGISCipher : public Aead {
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange iv,
-      folly::ByteRange key,
       folly::MutableByteRange tagOut,
       bool inPlace) const;
 

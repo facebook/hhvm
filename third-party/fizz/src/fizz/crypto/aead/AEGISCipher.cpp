@@ -186,81 +186,91 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
-    folly::ByteRange key,
     folly::MutableByteRange tagOut,
     bool inPlace) const {
-  const uint8_t* adData = nullptr;
-  size_t adLen = 0;
-  std::unique_ptr<folly::IOBuf> ad;
-  if (associatedData) {
-    if (associatedData->isChained()) {
-      ad = associatedData->cloneCoalesced();
-      adData = ad->data();
-      adLen = ad->length();
-    } else {
-      adData = associatedData->data();
-      adLen = associatedData->length();
-    }
-  }
-
-  auto inputLength = ciphertext->computeChainDataLength();
-  // the stateInit function will skip adding aad to the state when adData is
-  // null and adLen is 0
-  impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
-
-  folly::IOBuf* input;
-  std::unique_ptr<folly::IOBuf> output;
-  if (!inPlace) {
-    output = folly::IOBuf::create(inputLength);
-    output->append(inputLength);
-    input = ciphertext.get();
-  } else {
-    output = std::move(ciphertext);
-    input = output.get();
-  }
-
-  struct Impl {
+  struct AeadImpl {
     const AEGISCipher& self;
-    const unsigned char* expectedTag{nullptr};
 
-    explicit Impl(const AEGISCipher& s) : self(s) {}
-    bool decryptUpdate(
-        uint8_t* plain,
-        const uint8_t* cipher,
-        size_t len,
-        int* outLen) {
-      size_t tempOutLen;
-      auto ret = self.impl_->decryptUpdate(plain, &tempOutLen, cipher, len);
-      *outLen = static_cast<int>(tempOutLen);
-      return ret == 0;
+    explicit AeadImpl(const AEGISCipher& s) : self(s) {}
+    void init(
+        folly::ByteRange iv,
+        const folly::IOBuf* associatedData,
+        size_t ciphertextLength) {
+      const uint8_t* adData = nullptr;
+      size_t adLen = 0;
+      std::unique_ptr<folly::IOBuf> ad;
+      if (associatedData) {
+        if (associatedData->isChained()) {
+          ad = associatedData->cloneCoalesced();
+          adData = ad->data();
+          adLen = ad->length();
+        } else {
+          adData = associatedData->data();
+          adLen = associatedData->length();
+        }
+      }
+
+      // the stateInit function will skip adding aad to the state when adData is
+      // null and adLen is 0
+      // @lint-ignore CLANGTIDY facebook-hte-NullableDereference
+      self.impl_->stateInit(
+          adData,
+          adLen,
+          iv.data(),
+          self.trafficKeyKey_.data(),
+          ciphertextLength);
     }
-    bool setExpectedTag(int /*tagSize*/, const unsigned char* tag) {
-      this->expectedTag = tag;
-      return true;
-    }
-    bool decryptFinal(unsigned char* outm, int* outLen) {
-      size_t tempOutLen;
-      auto ret =
-          self.impl_->decryptFinal(outm, &tempOutLen, expectedTag, kTagLength);
-      *outLen = static_cast<int>(tempOutLen);
-      return ret == 0;
+
+    bool decryptAndFinal(
+        folly::IOBuf& ciphertext,
+        folly::IOBuf& plaintext,
+        folly::MutableByteRange tagOut) {
+      struct EVPDecImpl {
+        const AEGISCipher& self;
+        const unsigned char* expectedTag{nullptr};
+
+        explicit EVPDecImpl(const AEGISCipher& s) : self(s) {}
+        bool decryptUpdate(
+            uint8_t* plain,
+            const uint8_t* cipher,
+            size_t len,
+            int* outLen) {
+          size_t tempOutLen;
+          auto ret = self.impl_->decryptUpdate(plain, &tempOutLen, cipher, len);
+          *outLen = static_cast<int>(tempOutLen);
+          return ret == 0;
+        }
+        bool setExpectedTag(int /*tagSize*/, const unsigned char* tag) {
+          this->expectedTag = tag;
+          return true;
+        }
+        bool decryptFinal(unsigned char* outm, int* outLen) {
+          size_t tempOutLen;
+          auto ret = self.impl_->decryptFinal(
+              outm, &tempOutLen, expectedTag, kTagLength);
+          *outLen = static_cast<int>(tempOutLen);
+          return ret == 0;
+        }
+      };
+
+      if (self.mms_ == AEGISCipher::kAEGIS128LMMS) {
+        return decFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
+            EVPDecImpl(self), ciphertext, plaintext, tagOut);
+      } else if (self.mms_ == AEGISCipher::kAEGIS256MMS) {
+        return decFuncBlocks<AEGISCipher::kAEGIS256MMS>(
+            EVPDecImpl(self), ciphertext, plaintext, tagOut);
+      } else {
+        throw std::runtime_error("Unsupported AEGIS state size");
+      }
     }
   };
-
-  bool decrypted;
-  if (mms_ == AEGISCipher::kAEGIS128LMMS) {
-    decrypted = decFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-        Impl(*this), *input, *output, tagOut);
-  } else if (mms_ == AEGISCipher::kAEGIS256MMS) {
-    decrypted = decFuncBlocks<AEGISCipher::kAEGIS256MMS>(
-        Impl(*this), *input, *output, tagOut);
-  } else {
-    throw std::runtime_error("Unsupported AEGIS state size");
-  }
-  if (!decrypted) {
-    return folly::none;
-  }
-  return output;
+  return decryptHelper(
+      AeadImpl{*this},
+      std::move(ciphertext),
+      associatedData,
+      iv,
+      tagOut,
+      inPlace);
 }
 
 AEGISCipher::AEGISCipher(
@@ -414,12 +424,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
     trimBytes(*ciphertext, tagOut);
   }
   return doDecrypt(
-      std::move(ciphertext),
-      associatedData,
-      nonce,
-      trafficKeyKey_,
-      tagOut,
-      inPlace);
+      std::move(ciphertext), associatedData, nonce, tagOut, inPlace);
 }
 
 size_t AEGISCipher::getCipherOverhead() const {

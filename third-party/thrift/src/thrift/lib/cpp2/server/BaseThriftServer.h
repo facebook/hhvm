@@ -27,6 +27,7 @@
 
 #include <folly/Memory.h>
 #include <folly/Portability.h>
+#include <folly/SharedMutex.h>
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
 #include <folly/VirtualExecutor.h>
@@ -388,7 +389,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   /**
    * The thread manager used for sync calls.
    */
-  mutable std::mutex threadManagerMutex_;
+  mutable folly::SharedMutex threadManagerMutex_;
   std::shared_ptr<apache::thrift::concurrency::ThreadManager> threadManager_;
   // we need to make the wrapper stick to the server because the users calling
   // getThreadManager are relying on the server to maintatin the tm lifetime
@@ -429,7 +430,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
    private:
     std::atomic<bool> empty_;
-    mutable std::mutex mutex_;
+    mutable folly::SharedMutex mutex_;
     float errorThreshold_;
     float dropThreshold_;
     float disconnectThreshold_;
@@ -451,7 +452,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
       std::shared_ptr<apache::thrift::concurrency::ThreadManager>
           threadManager) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     threadManager_ = threadManager;
     tmLoggingWrapper_ =
         std::make_shared<ThreadManagerLoggingWrapper>(threadManager_, this);
@@ -542,7 +543,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   void setCPUWorkerThreadPriority(
       concurrency::PosixThreadFactory::THREAD_PRIORITY priority) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     CHECK(!threadFactory_);
     threadPriority_ = priority;
@@ -556,7 +557,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   void setThreadFactory(
       std::shared_ptr<concurrency::ThreadFactory> threadFactory) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     CHECK(!threadPriority_);
     threadFactory_ = std::move(threadFactory);
@@ -567,7 +568,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    */
   void setThreadManagerType(ThreadManagerType threadManagerType) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     threadManagerType_ = threadManagerType;
   }
@@ -578,7 +579,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   void setThreadManagerPoolSizes(
       const std::array<size_t, concurrency::N_PRIORITIES>& poolSizes) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     for (std::size_t i = 0; i < concurrency::N_PRIORITIES; ++i) {
       threadManagerPrioritiesAndPoolSizes_[i].second = poolSizes[i];
@@ -596,7 +597,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
               size_t>,
           concurrency::N_PRIORITIES>& poolPrioritiesAndSizes) {
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     threadManagerPrioritiesAndPoolSizes_ = poolPrioritiesAndSizes;
   }
@@ -626,7 +627,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     CHECK(threadInitializer);
     CHECK(threadFinalizer);
     CHECK(configMutable());
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::lock_guard lock(threadManagerMutex_);
     CHECK(!threadManager_);
     threadInitializer_ = std::move(threadInitializer);
     threadFinalizer_ = std::move(threadFinalizer);
@@ -714,12 +715,12 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    */
   std::shared_ptr<concurrency::ThreadManager> getThreadManager_deprecated()
       const override {
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::shared_lock lock(threadManagerMutex_);
     return tmLoggingWrapper_;
   }
 
   std::shared_ptr<folly::Executor> getThreadManager() const override {
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::shared_lock lock(threadManagerMutex_);
     return threadManager_;
   }
 
@@ -737,7 +738,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
           .sharedPtrExecutor()
           .value();
     }
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::shared_lock lock(threadManagerMutex_);
     return threadManager_;
   }
 
@@ -750,7 +751,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
           .value()
           .get();
     }
-    std::lock_guard<std::mutex> lock(threadManagerMutex_);
+    std::shared_lock lock(threadManagerMutex_);
     return threadManager_.get();
   }
 

@@ -110,7 +110,7 @@ void BaseThriftServer::CumulativeFailureInjection::set(
   CHECK_GE(fi.disconnectFraction, 0);
   CHECK_LE(fi.errorFraction + fi.dropFraction + fi.disconnectFraction, 1);
 
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard lock(mutex_);
   errorThreshold_ = fi.errorFraction;
   dropThreshold_ = errorThreshold_ + fi.dropFraction;
   disconnectThreshold_ = dropThreshold_ + fi.disconnectFraction;
@@ -131,7 +131,7 @@ BaseThriftServer::CumulativeFailureInjection::test() const {
   std::uniform_real_distribution<float> dist(0, 1);
   float val = dist(*rng);
 
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::shared_lock lock(mutex_);
   if (val <= errorThreshold_) {
     return InjectedFailure::ERROR;
   } else if (val <= dropThreshold_) {

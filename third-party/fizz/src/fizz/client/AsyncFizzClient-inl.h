@@ -317,7 +317,7 @@ void AsyncFizzClientT<SM>::writeAppData(
     if (!earlyDataState_->pendingAppWrites.empty() ||
         size > earlyDataState_->remainingEarlyData) {
       AppWrite w;
-      w.callback = callback;
+      w.token = callback;
       w.data = std::move(buf);
       w.flags = flags;
       w.aeadOptions = writeAeadOptions_;
@@ -326,7 +326,7 @@ void AsyncFizzClientT<SM>::writeAppData(
       earlyDataState_->pendingAppWrites.push_back(std::move(w));
     } else {
       EarlyAppWrite w;
-      w.callback = callback;
+      w.token = callback;
       w.data = std::move(buf);
       w.flags = flags;
       w.aeadOptions = writeAeadOptions_;
@@ -348,7 +348,7 @@ void AsyncFizzClientT<SM>::writeAppData(
     }
   } else {
     AppWrite w;
-    w.callback = callback;
+    w.token = callback;
     w.data = std::move(buf);
     w.flags = flags;
     w.aeadOptions = writeAeadOptions_;
@@ -402,23 +402,33 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
     replaySafetyCallback_ = nullptr;
   }
 
+  auto invokeWriteError = [](auto& ex, void* callback) {
+    DCHECK(callback);
+    static_cast<folly::AsyncTransportWrapper::WriteCallback*>(callback)
+        ->writeErr(0, ex);
+  };
+
   // if there are writes pending, call their error callback and clear the queue
   while (!pendingHandshakeAppWrites_.empty()) {
     auto w = std::move(pendingHandshakeAppWrites_.front());
     pendingHandshakeAppWrites_.pop_front();
-    if (w.callback) {
-      w.callback->writeErr(0, ex);
+    if (w.token) {
+      invokeWriteError(ex, w.token);
     }
   }
 
   while (earlyDataState_ && !earlyDataState_->pendingAppWrites.empty()) {
     auto w = std::move(earlyDataState_->pendingAppWrites.front());
     earlyDataState_->pendingAppWrites.pop_front();
-    if (w.callback) {
-      w.callback->writeErr(0, ex);
+    if (w.token) {
+      invokeWriteError(ex, w.token);
     }
   }
-  fizzClient_.moveToErrorState(ex);
+
+  fizzClient_.moveToErrorState([&](void* writeCallbackToken) {
+    invokeWriteError(ex, writeCallbackToken);
+  });
+
   deliverError(ex, closeTransport);
 }
 
@@ -469,7 +479,10 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(WriteToSocket& data) {
   for (size_t i = 1; i < data.contents.size(); ++i) {
     allData->prependChain(std::move(data.contents[i].data));
   }
-  client_.transport_->writeChain(data.callback, std::move(allData), data.flags);
+  client_.transport_->writeChain(
+      static_cast<folly::AsyncTransportWrapper::WriteCallback*>(data.token),
+      std::move(allData),
+      data.flags);
 }
 
 template <typename SM>
@@ -601,8 +614,9 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
   // TODO: buffer these callbacks until full handshake success, and call
   //       writeSuccess/writeErr depending on whether we are treating rejection
   //       as a fatal error.
-  if (write.write.callback) {
-    write.write.callback->writeSuccess();
+  if (write.write.token) {
+    static_cast<folly::AsyncTransportWrapper::WriteCallback*>(write.write.token)
+        ->writeSuccess();
   }
 }
 

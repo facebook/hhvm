@@ -60,8 +60,9 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::newTransportData() {
 }
 
 template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
+template <class Callback, typename>
 void FizzBase<Derived, ActionMoveVisitor, StateMachine>::moveToErrorState(
-    const folly::AsyncSocketException& ex) {
+    Callback cb) {
   // If we're already in error state, skip delivering additional error
   // callbacks. This prevents recursion if we are invoked within an earlier
   // error callback.
@@ -77,13 +78,13 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::moveToErrorState(
     pendingEvents_.pop_front();
     switch (event.type()) {
       case detail::PendingEvent::Type::AppWrite_E:
-        if (event.asAppWrite()->callback) {
-          event.asAppWrite()->callback->writeErr(0, ex);
+        if (event.asAppWrite()->token) {
+          cb(event.asAppWrite()->token);
         }
         break;
       case detail::PendingEvent::Type::EarlyAppWrite_E:
-        if (event.asEarlyAppWrite()->callback) {
-          event.asEarlyAppWrite()->callback->writeErr(0, ex);
+        if (event.asEarlyAppWrite()->token) {
+          cb(event.asEarlyAppWrite()->token);
         }
         break;
       case detail::PendingEvent::Type::AppClose_E:

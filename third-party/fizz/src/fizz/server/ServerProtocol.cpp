@@ -22,6 +22,7 @@
 #include <folly/Overload.h>
 #include <folly/tracing/StaticTracepoint.h>
 #include <algorithm>
+#include <set>
 
 using folly::Optional;
 using folly::SemiFuture;
@@ -1993,7 +1994,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
-  write.callback = appWrite.callback;
+  write.token = appWrite.token;
   write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
@@ -2030,7 +2031,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::AppWrite>::
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
-  write.callback = appWrite.callback;
+  write.token = appWrite.token;
   write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
@@ -2337,7 +2338,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
-  write.callback = appWrite.callback;
+  write.token = appWrite.token;
   write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;

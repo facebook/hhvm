@@ -2306,7 +2306,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::AppWrite>::handle(
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
-  write.callback = appWrite.callback;
+  write.token = appWrite.token;
   write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
@@ -2448,7 +2448,7 @@ static Actions handleEarlyAppWrite(const State& state, EarlyAppWrite appWrite) {
     case EarlyDataType::Attempted:
     case EarlyDataType::Accepted: {
       WriteToSocket write;
-      write.callback = appWrite.callback;
+      write.token = appWrite.token;
       write.flags = appWrite.flags;
       auto appData = state.earlyWriteRecordLayer()->writeAppData(
           std::move(appWrite.data), appWrite.aeadOptions);
@@ -2518,7 +2518,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
     // the early data was accepted, otherwise we need to ignore them to preserve
     // the all-or-nothing property of early data.
     WriteToSocket write;
-    write.callback = appWrite.callback;
+    write.token = appWrite.token;
     write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
         std::move(appWrite.data), appWrite.aeadOptions));
     write.flags = appWrite.flags;

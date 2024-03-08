@@ -11,6 +11,9 @@
 #include <fizz/protocol/Factory.h>
 #include <fizz/protocol/Params.h>
 #include <fizz/util/Variant.h>
+#include <folly/io/async/AsyncSocketException.h>
+#include <folly/io/async/DelayedDestruction.h>
+#include <deque>
 
 namespace fizz {
 
@@ -104,12 +107,22 @@ class FizzBase {
   void newTransportData();
 
   /**
-   * Calls error callbacks on any pending events and prevents any further events
-   * from being processed. Should be called when an error is received from
-   * either the state machine or the transport that will cause the connection to
-   * abort. Note that this does not stop a currently processing event.
+   * moveToErrorState transits the state machine into a terminal error state,
+   * which prevents any further events from being processed.
+   *
+   * This is expected to be called by the I/O layer whenever the I/O layer
+   * encounters any condition that would cause the transport to become
+   * unsuitable for use.
+   *
+   * Any submitted enqueued writes to the state machine that will not be
+   * processed as a result of moving to the error state will be handed back to
+   * the I/O layer in `cb` if the corresponding token is non-nullptr.
    */
-  void moveToErrorState(const folly::AsyncSocketException& ex);
+
+  template <
+      class Callback,
+      typename = typename std::invoke_result<Callback, void*>::type>
+  void moveToErrorState(Callback cb);
 
   /**
    * Pause the state machine from processing further events. Note that any event

@@ -15,7 +15,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/async/AsyncTransport.h>
+#include <folly/io/async/WriteFlags.h>
 #include <folly/small_vector.h>
 #include <array>
 #include <vector>
@@ -40,7 +40,7 @@ struct DeliverAppData {
  * flags   : The flags to use when writing the contents to the socket.
  */
 struct WriteToSocket {
-  folly::AsyncTransportWrapper::WriteCallback* callback{nullptr};
+  void* token{nullptr};
 #if FOLLY_MOBILE
   std::vector<TLSContent> contents;
 #else

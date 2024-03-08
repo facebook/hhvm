@@ -15,8 +15,9 @@
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/record/Types.h>
 #include <fizz/util/Variant.h>
+#include <folly/Executor.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/async/AsyncTransport.h>
+#include <folly/io/async/WriteFlags.h>
 
 namespace fizz {
 
@@ -47,14 +48,14 @@ struct Connect : EventType<Event::Connect> {
 };
 
 struct EarlyAppWrite : EventType<Event::EarlyAppWrite> {
-  folly::AsyncTransportWrapper::WriteCallback* callback{nullptr};
+  void* token{nullptr};
   std::unique_ptr<folly::IOBuf> data;
   folly::WriteFlags flags;
   Aead::AeadOptions aeadOptions;
 };
 
 struct AppWrite : EventType<Event::AppWrite> {
-  folly::AsyncTransportWrapper::WriteCallback* callback{nullptr};
+  void* token{nullptr};
   std::unique_ptr<folly::IOBuf> data;
   folly::WriteFlags flags;
   Aead::AeadOptions aeadOptions;

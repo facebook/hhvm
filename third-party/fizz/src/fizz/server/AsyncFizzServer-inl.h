@@ -217,7 +217,7 @@ void AsyncFizzServerT<SM>::writeAppData(
   }
 
   AppWrite write;
-  write.callback = callback;
+  write.token = static_cast<void*>(callback);
   write.data = std::move(buf);
   write.flags = flags;
   write.aeadOptions = writeAeadOptions_;
@@ -253,7 +253,12 @@ void AsyncFizzServerT<SM>::deliverAllErrors(
     const folly::AsyncSocketException& ex,
     bool closeTransport) {
   deliverHandshakeError(ex);
-  fizzServer_.moveToErrorState(ex);
+
+  fizzServer_.moveToErrorState([&](void* callback) {
+    static_cast<folly::AsyncTransportWrapper::WriteCallback*>(callback)
+        ->writeErr(0, ex);
+  });
+
   deliverError(ex, closeTransport);
 }
 
@@ -283,7 +288,10 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(WriteToSocket& data) {
   for (size_t i = 1; i < data.contents.size(); ++i) {
     allData->prependChain(std::move(data.contents[i].data));
   }
-  server_.transport_->writeChain(data.callback, std::move(allData), data.flags);
+  server_.transport_->writeChain(
+      static_cast<folly::AsyncTransportWrapper::WriteCallback*>(data.token),
+      std::move(allData),
+      data.flags);
 }
 
 template <typename SM>

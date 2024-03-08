@@ -22,6 +22,7 @@
 #include <fizz/record/Types.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
+#include <folly/net/NetworkSocket.h>
 
 namespace fizz {
 

@@ -311,10 +311,10 @@ void decompressZstd(std::string compressed, const std::string& expected) {
 struct ResponseCompressorTest : Test {
  protected:
   void SetUp() override {
-    RuntimeOption::GzipCompressionLevel = 0;
-    RuntimeOption::BrotliCompressionEnabled = false;
-    RuntimeOption::BrotliChunkedCompressionEnabled = false;
-    RuntimeOption::ZstdCompressionEnabled = false;
+    Cfg::Server::GzipCompressionLevel = 0;
+    Cfg::Server::BrotliCompressionEnabled = false;
+    Cfg::Server::BrotliChunkedCompressionEnabled = false;
+    Cfg::Server::ZstdCompressionEnabled = false;
     Cfg::Server::AddVaryEncoding = true;
   }
 
@@ -500,7 +500,7 @@ TEST_F(ResponseCompressorTest, testGzipNotAcceptedOtherMultiple) {
 }
 
 TEST_F(ResponseCompressorTest, testGzipEnabled) {
-  RuntimeOption::GzipCompressionLevel = 6;
+  Cfg::Server::GzipCompressionLevel = 6;
   mh.addRequestHeader("Accept-Encoding", "gzip");
   auto compressor = std::make_unique<GzipResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -515,14 +515,14 @@ TEST_F(ResponseCompressorTest, testGzipNotEnabled) {
 }
 
 TEST_F(ResponseCompressorTest, testGzipEncodingName) {
-  RuntimeOption::GzipCompressionLevel = 6;
+  Cfg::Server::GzipCompressionLevel = 6;
   mh.addRequestHeader("Accept-Encoding", "gzip");
   auto compressor = std::make_unique<GzipResponseCompressor>(&mh);
   EXPECT_EQ(std::string(compressor->encodingName()), "gzip");
 }
 
 TEST_F(ResponseCompressorTest, testGzipCompression) {
-  RuntimeOption::GzipCompressionLevel = 6;
+  Cfg::Server::GzipCompressionLevel = 6;
   mh.addRequestHeader("Accept-Encoding", "gzip");
   auto compressor = std::make_unique<GzipResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -533,7 +533,7 @@ TEST_F(ResponseCompressorTest, testGzipCompression) {
 }
 
 TEST_F(ResponseCompressorTest, testGzipChunkedCompression) {
-  RuntimeOption::GzipCompressionLevel = 6;
+  Cfg::Server::GzipCompressionLevel = 6;
   mh.addRequestHeader("Accept-Encoding", "gzip");
   auto compressor = std::make_unique<GzipResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -584,20 +584,20 @@ TEST_F(ResponseCompressorTest, testBrotliNotAcceptedOtherMultiple) {
 }
 
 TEST_F(ResponseCompressorTest, testBrotliEnabled) {
-  RuntimeOption::BrotliCompressionEnabled = true;
-  RuntimeOption::BrotliChunkedCompressionEnabled = true;
+  Cfg::Server::BrotliCompressionEnabled = true;
+  Cfg::Server::BrotliChunkedCompressionEnabled = true;
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
 }
 
 TEST_F(ResponseCompressorTest, testBrotliEnabledOneShot) {
-  RuntimeOption::BrotliCompressionEnabled = true;
+  Cfg::Server::BrotliCompressionEnabled = true;
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
 }
 
 TEST_F(ResponseCompressorTest, testBrotliEnabledChunked) {
-  RuntimeOption::BrotliChunkedCompressionEnabled = true;
+  Cfg::Server::BrotliChunkedCompressionEnabled = true;
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
 }
@@ -608,16 +608,16 @@ TEST_F(ResponseCompressorTest, testBrotliNotEnabled) {
 }
 
 TEST_F(ResponseCompressorTest, testBrotliEncodingName) {
-  RuntimeOption::BrotliCompressionEnabled = true;
-  RuntimeOption::BrotliChunkedCompressionEnabled = true;
+  Cfg::Server::BrotliCompressionEnabled = true;
+  Cfg::Server::BrotliChunkedCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "br");
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_EQ(std::string(compressor->encodingName()), "br");
 }
 
 TEST_F(ResponseCompressorTest, testBrotliCompression) {
-  RuntimeOption::BrotliCompressionEnabled = true;
-  RuntimeOption::BrotliChunkedCompressionEnabled = true;
+  Cfg::Server::BrotliCompressionEnabled = true;
+  Cfg::Server::BrotliChunkedCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "br");
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -627,8 +627,8 @@ TEST_F(ResponseCompressorTest, testBrotliCompression) {
 }
 
 TEST_F(ResponseCompressorTest, testBrotliChunkedCompression) {
-  RuntimeOption::BrotliCompressionEnabled = true;
-  RuntimeOption::BrotliChunkedCompressionEnabled = true;
+  Cfg::Server::BrotliCompressionEnabled = true;
+  Cfg::Server::BrotliChunkedCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "br");
   auto compressor = std::make_unique<BrotliResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -679,7 +679,7 @@ TEST_F(ResponseCompressorTest, testZstdNotAcceptedOtherMultiple) {
 }
 
 TEST_F(ResponseCompressorTest, testZstdEnabled) {
-  RuntimeOption::ZstdCompressionEnabled = true;
+  Cfg::Server::ZstdCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "zstd");
   auto compressor = std::make_unique<ZstdResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -694,14 +694,14 @@ TEST_F(ResponseCompressorTest, testZstdNotEnabled) {
 }
 
 TEST_F(ResponseCompressorTest, testZstdEncodingName) {
-  RuntimeOption::ZstdCompressionEnabled = true;
+  Cfg::Server::ZstdCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "zstd");
   auto compressor = std::make_unique<ZstdResponseCompressor>(&mh);
   EXPECT_EQ(std::string(compressor->encodingName()), "zstd");
 }
 
 TEST_F(ResponseCompressorTest, testZstdCompression) {
-  RuntimeOption::ZstdCompressionEnabled = true;
+  Cfg::Server::ZstdCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "zstd");
   auto compressor = std::make_unique<ZstdResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());
@@ -712,7 +712,7 @@ TEST_F(ResponseCompressorTest, testZstdCompression) {
 }
 
 TEST_F(ResponseCompressorTest, testZstdChunkedCompression) {
-  RuntimeOption::ZstdCompressionEnabled = true;
+  Cfg::Server::ZstdCompressionEnabled = true;
   mh.addRequestHeader("Accept-Encoding", "zstd");
   auto compressor = std::make_unique<ZstdResponseCompressor>(&mh);
   EXPECT_TRUE(compressor->isEnabled());

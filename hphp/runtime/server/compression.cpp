@@ -212,10 +212,10 @@ bool ResponseCompressor::isAccepted() {
 
 GzipResponseCompressor::GzipResponseCompressor(ITransportHeaders* headers)
   : ResponseCompressor(headers),
-    m_enabled(RuntimeOption::GzipCompressionLevel > 0) {}
+    m_enabled(Cfg::Server::GzipCompressionLevel > 0) {}
 
 void GzipResponseCompressor::enable() {
-  m_enabled = RuntimeOption::GzipCompressionLevel > 0;
+  m_enabled = Cfg::Server::GzipCompressionLevel > 0;
 }
 
 void GzipResponseCompressor::disable() {
@@ -228,12 +228,12 @@ GzipCompressor* GzipResponseCompressor::getCompressor() {
     if (!isEnabled()) {
       return nullptr;
     }
-    int compressionLevel = RuntimeOption::GzipCompressionLevel;
+    int compressionLevel = Cfg::Server::GzipCompressionLevel;
     String compressionLevelStr;
     IniSetting::Get(s_zlibOCL, compressionLevelStr);
     int level = compressionLevelStr.toInt64();
     if (level > compressionLevel &&
-        level <= RuntimeOption::GzipMaxCompressionLevel) {
+        level <= Cfg::Server::GzipMaxCompressionLevel) {
       compressionLevel = level;
     }
     m_compressor = std::make_unique<GzipCompressor>(
@@ -267,12 +267,12 @@ StringHolder GzipResponseCompressor::compressResponse(
 
 BrotliResponseCompressor::BrotliResponseCompressor(ITransportHeaders* headers)
   : ResponseCompressor(headers),
-    m_enabled(RuntimeOption::BrotliCompressionEnabled),
-    m_chunkedEnabled(RuntimeOption::BrotliChunkedCompressionEnabled) {}
+    m_enabled(Cfg::Server::BrotliCompressionEnabled),
+    m_chunkedEnabled(Cfg::Server::BrotliChunkedCompressionEnabled) {}
 
 void BrotliResponseCompressor::enable() {
-  m_enabled = RuntimeOption::BrotliCompressionEnabled;
-  m_chunkedEnabled = RuntimeOption::BrotliChunkedCompressionEnabled;
+  m_enabled = Cfg::Server::BrotliCompressionEnabled;
+  m_chunkedEnabled = Cfg::Server::BrotliChunkedCompressionEnabled;
 }
 
 void BrotliResponseCompressor::disable() {
@@ -294,7 +294,7 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
       return nullptr;
     }
     BrotliEncoderMode mode =
-        (BrotliEncoderMode)RuntimeOption::BrotliCompressionMode;
+        (BrotliEncoderMode)Cfg::Server::BrotliCompressionMode;
 
     Variant qualityVar;
     IniSetting::Get(s_brotliCQ, qualityVar);
@@ -350,10 +350,10 @@ StringHolder BrotliResponseCompressor::compressResponse(
 
 ZstdResponseCompressor::ZstdResponseCompressor(ITransportHeaders* headers)
   : ResponseCompressor(headers),
-    m_enabled(RuntimeOption::ZstdCompressionEnabled) {}
+    m_enabled(Cfg::Server::ZstdCompressionEnabled) {}
 
 void ZstdResponseCompressor::enable() {
-  m_enabled = RuntimeOption::ZstdCompressionEnabled;
+  m_enabled = Cfg::Server::ZstdCompressionEnabled;
 }
 
 void ZstdResponseCompressor::disable() {

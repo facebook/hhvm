@@ -655,6 +655,29 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - std::string Server.Upload.Rfc1867Prefix = "vupload_", UNKNOWN
 - std::string Server.Upload.Rfc1867Name = "video_ptoken", UNKNOWN
 - int64_t Server.ImageMemoryMaxBytes = 0, UNKNOWN, postprocess
+- int Server.BrotliCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliChunkedCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliCompressionLgWindowSize = 20, UNKNOWN
+
+  Base 2 logarithm of the sliding window size. Range is 10-24.
+
+- int Server.BrotliCompressionMode = 0, UNKNOWN
+- int Server.BrotliCompressionQuality = 6, UNKNOWN
+- int Server.ZstdCompressionEnabled = -1, UNKNOWN
+- int Server.ZstdCompressionLevel = 3, UNKNOWN
+- int Server.ZstdWindowLog = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdTargetBlockSize = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdChecksumRate = 0, UNKNOWN
+- int Server.GzipCompressionLevel = 3, UNKNOWN
+- int Server.GzipMaxCompressionLevel = 9, UNKNOWN
 
 # Xbox
 

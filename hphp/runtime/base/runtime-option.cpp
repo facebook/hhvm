@@ -661,18 +661,6 @@ std::string RuntimeOption::AdminLogSymLink;
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
-int RuntimeOption::BrotliCompressionEnabled = -1;
-int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
-int RuntimeOption::BrotliCompressionMode = 0;
-int RuntimeOption::BrotliCompressionQuality = 6;
-int RuntimeOption::BrotliCompressionLgWindowSize = 20;
-int RuntimeOption::ZstdCompressionEnabled = -1;
-int RuntimeOption::ZstdCompressionLevel = 3;
-int RuntimeOption::ZstdWindowLog = 0;
-int RuntimeOption::ZstdTargetBlockSize = 0;
-int RuntimeOption::ZstdChecksumRate = 0;
-int RuntimeOption::GzipCompressionLevel = 3;
-int RuntimeOption::GzipMaxCompressionLevel = 9;
 int64_t RuntimeOption::LowestMaxPostSize = LLONG_MAX;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
@@ -1825,33 +1813,19 @@ void RuntimeOption::Load(
     Config::Bind(RequestMemoryMaxBytes, ini, config,
                  "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
 
-    extern bool g_brotliUseLocalArena;
-    Config::Bind(g_brotliUseLocalArena, ini, config,
-                 "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
-    Config::Bind(BrotliCompressionEnabled, ini, config,
-                 "Server.BrotliCompressionEnabled", -1);
-    Config::Bind(BrotliChunkedCompressionEnabled, ini, config,
-                 "Server.BrotliChunkedCompressionEnabled", -1);
-    Config::Bind(BrotliCompressionLgWindowSize, ini, config,
-                 "Server.BrotliCompressionLgWindowSize", 20);
-    Config::Bind(BrotliCompressionMode, ini, config,
-                 "Server.BrotliCompressionMode", 0);
-    Config::Bind(BrotliCompressionQuality, ini, config,
-                 "Server.BrotliCompressionQuality", 6);
-    Config::Bind(ZstdCompressionEnabled, ini, config,
-                 "Server.ZstdCompressionEnabled", -1);
-    Config::Bind(ZstdCompressor::s_useLocalArena, ini, config,
-                 "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
-    Config::Bind(ZstdCompressionLevel, ini, config,
-                 "Server.ZstdCompressionLevel", 3);
-    Config::Bind(ZstdChecksumRate, ini, config,
-                "Server.ZstdChecksumRate", 0);
-    Config::Bind(GzipCompressionLevel, ini, config,
-                 "Server.GzipCompressionLevel", 3);
-    Config::Bind(GzipMaxCompressionLevel, ini, config,
-                 "Server.GzipMaxCompressionLevel", 9);
-    Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
-                 "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
+    // These are here because the value is part of util so they can't use the normal
+    // configs.specification
+    {
+      extern bool g_brotliUseLocalArena;
+      Config::Bind(g_brotliUseLocalArena, ini, config,
+                  "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
+      Config::Bind(ZstdCompressor::s_useLocalArena, ini, config,
+                  "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
+      Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
+                  "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
+      Config::Bind(LightProcess::g_strictUser, ini, config,
+                   "Server.LightProcessStrictUser", false);
+    }
 
     // These things should be in Cfg PostProcess methods. But because they use
     // normalizeDir they can't
@@ -1872,9 +1846,6 @@ void RuntimeOption::Load(
 
     Config::Bind(RenamableFunctions, ini, config, "Eval.RenamableFunctions");
     Config::Bind(NonInterceptableFunctions, ini, config, "Eval.NonInterceptableFunctions");
-
-    Config::Bind(LightProcess::g_strictUser, ini, config,
-                 "Server.LightProcessStrictUser", false);
   }
 
   VirtualHost::SortAllowedDirectories(Cfg::Server::AllowedDirectories);

@@ -326,19 +326,6 @@ struct RuntimeOption {
   static const std::string& GetServerPrimaryIPv4();
   static const std::string& GetServerPrimaryIPv6();
   static int64_t RequestMemoryMaxBytes;
-  static int BrotliCompressionEnabled;
-  static int BrotliChunkedCompressionEnabled;
-  static int BrotliCompressionMode;
-  // Base 2 logarithm of the sliding window size. Range is 10-24.
-  static int BrotliCompressionLgWindowSize;
-  static int BrotliCompressionQuality;
-  static int ZstdCompressionEnabled;
-  static int ZstdCompressionLevel;
-  static int ZstdWindowLog;
-  static int ZstdTargetBlockSize;
-  static int ZstdChecksumRate;
-  static int GzipCompressionLevel;
-  static int GzipMaxCompressionLevel;
   static int64_t LowestMaxPostSize;
   static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
   static std::shared_ptr<IpBlockMap> IpBlocks;

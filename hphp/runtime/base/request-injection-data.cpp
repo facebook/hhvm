@@ -357,13 +357,13 @@ void RequestInjectionData::threadInit() {
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "brotli.compression_quality",
-      std::to_string(RuntimeOption::BrotliCompressionQuality).c_str(),
+      std::to_string(Cfg::Server::BrotliCompressionQuality).c_str(),
       &m_brotliQuality);
   IniSetting::Bind(
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "brotli.compression_lgwin",
-      std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
+      std::to_string(Cfg::Server::BrotliCompressionLgWindowSize).c_str(),
       &m_brotliLgWindowSize);
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
@@ -372,25 +372,25 @@ void RequestInjectionData::threadInit() {
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "zstd.compression_level",
-      std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
+      std::to_string(Cfg::Server::ZstdCompressionLevel).c_str(),
       &m_zstdLevel);
   IniSetting::Bind(
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "zstd.checksum_rate",
-      std::to_string(RuntimeOption::ZstdChecksumRate).c_str(),
+      std::to_string(Cfg::Server::ZstdChecksumRate).c_str(),
       &m_zstdChecksumRate);
   IniSetting::Bind(
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "zstd.window_log",
-      std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
+      std::to_string(Cfg::Server::ZstdWindowLog).c_str(),
       &m_zstdWindowLog);
   IniSetting::Bind(
       IniSetting::CORE,
       IniSetting::Mode::Request,
       "zstd.target_block_size",
-      std::to_string(RuntimeOption::ZstdTargetBlockSize).c_str(),
+      std::to_string(Cfg::Server::ZstdTargetBlockSize).c_str(),
       &m_zstdTargetBlockSize);
 
   // TODO(20427335): Get rid of this illogical onSessionInit() call.

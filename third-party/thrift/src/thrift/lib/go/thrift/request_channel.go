@@ -20,11 +20,11 @@ import "context"
 
 // RequestChannel is an API that implements the most minimal surface for
 // generated client code. An implementation:
-//  * Must be thread-safe
-//  * May implement request pipelining
-//  * May implement reconnection logic
-//  * May implement connection pooling
-//  * Hides implementation details of the protocol and transport.
+//   - Must be thread-safe
+//   - May implement request pipelining
+//   - May implement reconnection logic
+//   - May implement connection pooling
+//   - Hides implementation details of the protocol and transport.
 type RequestChannel interface {
 	ClientInterface
 

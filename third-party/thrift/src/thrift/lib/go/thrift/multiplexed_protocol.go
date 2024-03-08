@@ -143,7 +143,7 @@ func (t *MultiplexedProcessor) GetProcessorFunction(name string) (ProcessorFunct
 	return actualProcessor.GetProcessorFunction(v[1])
 }
 
-//Protocol that use stored message for ReadMessageBegin
+// Protocol that use stored message for ReadMessageBegin
 type storedMessageProtocol struct {
 	Protocol
 	name   string

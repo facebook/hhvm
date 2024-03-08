@@ -37,7 +37,8 @@ type SSLSocket struct {
 // NewSSLSocket creates a net.Conn-backed Transport, given a host and port and tls Configuration
 //
 // Example:
-// 	trans, err := thrift.NewSSLSocket("localhost:9090", nil)
+//
+//	trans, err := thrift.NewSSLSocket("localhost:9090", nil)
 func NewSSLSocket(hostPort string, cfg *tls.Config) (*SSLSocket, error) {
 	return NewSSLSocketTimeout(hostPort, cfg, 0)
 }

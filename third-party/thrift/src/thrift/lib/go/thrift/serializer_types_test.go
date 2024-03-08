@@ -95,19 +95,19 @@ func MyTestEnumFromString(s string) (MyTestEnum, error) {
 func MyTestEnumPtr(v MyTestEnum) *MyTestEnum { return &v }
 
 // Attributes:
-//  - On
-//  - B
-//  - Int16
-//  - Int32
-//  - Int64
-//  - D
-//  - F
-//  - St
-//  - Bin
-//  - StringMap
-//  - StringList
-//  - StringSet
-//  - E
+//   - On
+//   - B
+//   - Int16
+//   - Int32
+//   - Int64
+//   - D
+//   - F
+//   - St
+//   - Bin
+//   - StringMap
+//   - StringList
+//   - StringSet
+//   - E
 type MyTestStruct struct {
 	On         bool              `thrift:"on,1" json:"on"`
 	B          byte              `thrift:"b,2" json:"b"`

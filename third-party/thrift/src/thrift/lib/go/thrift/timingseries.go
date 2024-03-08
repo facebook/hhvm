@@ -49,13 +49,14 @@ func (ac *AtomicCounter) Get() int64 {
 // variable length statistics reports via .Summarize()
 //
 // Usage:
-//   ts := NewTimingSeries(nil)
-//   start := time.Now()
-//   doSomethingThatYouWantToMeasure()
-//   ts.Record(time.Since(start))
 //
-//   summary := ts.Summarize(60 * time.Second)
-//   fmt.Printf("%s\n", summary.String())
+//	ts := NewTimingSeries(nil)
+//	start := time.Now()
+//	doSomethingThatYouWantToMeasure()
+//	ts.Record(time.Since(start))
+//
+//	summary := ts.Summarize(60 * time.Second)
+//	fmt.Printf("%s\n", summary.String())
 type TimingSeries struct {
 	start     time.Time
 	buckets   []bucket

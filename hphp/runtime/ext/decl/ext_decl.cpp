@@ -740,15 +740,8 @@ class MemcacheHitEvent : public AsioExternalThreadEvent {
 Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   assertEnv();
   std::filesystem::path filePath{path.data()};
-  if (!std::filesystem::exists(filePath)) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-        String("File not found ") + path.data());
-  };
   auto root = getRepoRootForFile(path);
-  // Check if we have already parsed this file
-  // and if the cache contains the result
-  // validated by the SHA1 hash of the file contents
-  auto const sha1 = computeSHA1(filePath, root);
+  auto sha1 = computeSHA1(filePath, root);
   {
     FileDeclsCache::ConstAccessor acc;
     if (declCachePtr->find(acc, filePath.native())) {
@@ -767,11 +760,10 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
       filePath, Optional<std::string>(sha1.toString())};
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
-  auto config = initDeclConfig(root);
   try {
     data->declsHolder =
         std::make_shared<rust::Box<hackc::DeclsHolder>>(Decl::decl_from_path(
-            filePath, pathAndHash, s_extractorConfig.enableExternExtractor));
+            pathAndHash, s_extractorConfig.enableExternExtractor));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
@@ -792,21 +784,15 @@ String HHVM_STATIC_METHOD(FileDecls, getRepoOptionsHash) {
 Object HHVM_STATIC_METHOD(FileDecls, genParsePath, const String& path) {
   assertEnv();
   std::filesystem::path filePath{path.data()};
-  if (!std::filesystem::exists(filePath)) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-        String("File not found ") + path.data());
-  };
   auto root = getRepoRootForFile(path);
-  auto const sha1 = computeSHA1(filePath, root);
+  auto sha1 = computeSHA1(filePath, root);
   Facts::PathAndOptionalHash pathAndHash{
       filePath, Optional<std::string>(sha1.toString())};
-  auto config = initDeclConfig(root);
   folly::IOThreadPoolExecutor exec{
       1, Facts::make_thread_factory("DeclExtractor")};
   MemcacheHitEvent* event;
   try {
     auto declSemiFuture = Decl::decl_from_path_async(
-        root,
         pathAndHash,
         folly::getKeepAliveToken(exec),
         s_extractorConfig.enableExternExtractor);

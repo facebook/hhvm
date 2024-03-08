@@ -72,12 +72,10 @@ std::string readFile(const std::string& filePath);
  * Throws DeclExtractionExc on error.
  */
 rust::Box<hackc::DeclsHolder> decl_from_path(
-    const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
     bool enableExternExtractor);
 
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
-    const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
     folly::Executor::KeepAlive<folly::Executor> exec,
     bool enableExternExtractor);

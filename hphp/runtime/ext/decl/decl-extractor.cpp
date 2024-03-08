@@ -54,13 +54,11 @@ rust::Box<hackc::DeclsHolder> decode_decls(const std::string& blob) {
 std::string readFile(const std::string& filePath) {
   auto w = Stream::getWrapperFromURI(filePath);
   if (!(w && w->isNormalFileStream())) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not open FileStreamWrapper for ") + filePath);
+    throw DeclExtractionExc{"Could not open FileStreamWrapper for " + filePath};
   }
   const auto f = w->open(filePath, "r", 0, nullptr);
   if (!f) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not read file: ") + filePath);
+    throw DeclExtractionExc{"Could not read file: " + filePath};
   }
   auto const contents = f->read();
   auto const text = contents.toCppString();
@@ -105,39 +103,48 @@ std::unique_ptr<Extractor> makeExtractor(
   return std::make_unique<SimpleExtractor>(exec);
 }
 
+/*
+ * Returns decls from the supplied path.
+ * Schedules and immediately invokes a folly SemiFuture.
+ * pathAndHash must supply an absolute path.
+ */
 rust::Box<hackc::DeclsHolder> decl_from_path(
-    const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
     bool enableExternExtractor) {
   folly::IOThreadPoolExecutor exec{
       1, Facts::make_thread_factory("DeclExtractor")};
   auto semiFuture = decl_from_path_async(
-      root, pathAndHash, folly::getKeepAliveToken(exec), enableExternExtractor);
+      pathAndHash, folly::getKeepAliveToken(exec), enableExternExtractor);
   return std::move(semiFuture).get();
 }
 
+/*
+ * Returns decls from the supplied path.
+ * Schedules and returns a folly SemiFuture.
+ * pathAndHash must supply an absolute path.
+ */
 folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
-    const std::filesystem::path& root,
     const Facts::PathAndOptionalHash& pathAndHash,
     folly::Executor::KeepAlive<folly::Executor> exec,
     bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
+  if (!pathAndHash.m_path.is_absolute()) {
+    throw DeclExtractionExc{
+        "Path must be absolute, got " + pathAndHash.m_path.string()};
+  };
   auto extractor = makeExtractor(exec, enableExternExtractor);
 
-  auto path = pathAndHash.m_path.is_relative() ? root / pathAndHash.m_path
-                                               : pathAndHash.m_path;
-  Facts::PathAndOptionalHash absPathAndHash{path, pathAndHash.m_hash};
   return folly::via(
              exec,
-             [extractor = std::move(extractor), absPathAndHash]() {
-               if (UNLIKELY(!absPathAndHash.m_hash)) {
+             [extractor = std::move(extractor), pathAndHash]() {
+               if (UNLIKELY(!pathAndHash.m_hash)) {
                  // We don't know the file's hash yet, so we don't know
                  // which key to use to query memcache. We'll try to extract
                  // facts from disk instead.
                  throw DeclExtractionExc{"No hash provided"};
                }
-               return extractor->get(absPathAndHash);
+               return extractor->get(pathAndHash);
              })
       .thenValue([](std::string&& declBinary) -> rust::Box<hackc::DeclsHolder> {
         auto decl = decode_decls(declBinary);
@@ -145,28 +152,27 @@ folly::SemiFuture<rust::Box<hackc::DeclsHolder>> decl_from_path_async(
         // in order to validate content at time of read
         return decl;
       })
-      .thenTry(
-          [absPathAndHash](folly::Try<rust::Box<hackc::DeclsHolder>>&& decl) {
-            if (decl.hasValue()) {
-              return std::move(*decl);
-            } else {
-              XLOGF(
-                  WARN,
-                  "Error extracting {}: {}",
-                  absPathAndHash.m_path.native().c_str(),
-                  decl.exception().what().c_str());
-              // // There might have been a SHA1 mismatch due to a filesystem
-              // // race. Try again without an expected hash.
-              Facts::PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
-              auto declsBinary = decls_binary_from_path(withoutHash);
-              if (declsBinary.value.empty()) {
-                throw DeclExtractionExc{
-                    "Could not extract decls from disk or cache"};
-              }
-              auto declsHolder = decode_decls(declsBinary.value);
-              return declsHolder;
-            }
-          });
+      .thenTry([pathAndHash](folly::Try<rust::Box<hackc::DeclsHolder>>&& decl) {
+        if (decl.hasValue()) {
+          return std::move(*decl);
+        } else {
+          XLOGF(
+              WARN,
+              "Error extracting {}: {}",
+              pathAndHash.m_path.native().c_str(),
+              decl.exception().what().c_str());
+          // // There might have been a SHA1 mismatch due to a filesystem
+          // // race. Try again without an expected hash.
+          Facts::PathAndOptionalHash withoutHash{pathAndHash.m_path, {}};
+          auto declsBinary = decls_binary_from_path(withoutHash);
+          if (declsBinary.value.empty()) {
+            throw DeclExtractionExc{
+                "Could not extract decls from disk or cache"};
+          }
+          auto declsHolder = decode_decls(declsBinary.value);
+          return declsHolder;
+        }
+      });
 }
 
 } // namespace Decl

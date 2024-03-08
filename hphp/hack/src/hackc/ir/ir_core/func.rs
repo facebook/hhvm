@@ -26,7 +26,7 @@ use crate::InstrId;
 use crate::LocId;
 use crate::LocalId;
 use crate::MethodFlags;
-use crate::MethodId;
+use crate::MethodName;
 use crate::TypeInfo;
 use crate::UnitBytesId;
 use crate::ValueId;
@@ -468,7 +468,7 @@ pub struct Function {
 pub struct Method {
     pub flags: MethodFlags,
     pub func: Func,
-    pub name: MethodId,
+    pub name: MethodName,
     pub visibility: Visibility,
 }
 

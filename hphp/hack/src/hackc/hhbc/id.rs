@@ -9,6 +9,7 @@
 
 use bstr::BStr;
 use bstr::ByteSlice;
+use naming_special_names_rust::members;
 use serde::Serialize;
 
 use crate::StringId;
@@ -192,7 +193,48 @@ impl MethodName {
     pub fn from_ast_name_and_suffix(s: &str, suffix: &str) -> Self {
         MethodName::from_str_with_suffix(hhbc_string_utils::strip_global_ns(s), suffix)
     }
+
+    pub fn _86cinit() -> Self {
+        Self::intern(_86CINIT)
+    }
+
+    pub fn _86pinit() -> Self {
+        Self::intern(_86PINIT)
+    }
+
+    pub fn _86sinit() -> Self {
+        Self::intern(_86SINIT)
+    }
+
+    pub fn constructor() -> Self {
+        Self::intern(members::__CONSTRUCT)
+    }
+
+    pub fn factory() -> Self {
+        Self::intern(__FACTORY)
+    }
+
+    pub fn is_86cinit(&self) -> bool {
+        self.as_str() == _86CINIT
+    }
+
+    pub fn is_86pinit(&self) -> bool {
+        self.as_str() == _86PINIT
+    }
+
+    pub fn is_86sinit(&self) -> bool {
+        self.as_str() == _86SINIT
+    }
+
+    pub fn is_constructor(&self) -> bool {
+        self.as_str() == members::__CONSTRUCT
+    }
 }
+
+const __FACTORY: &str = "__factory";
+const _86CINIT: &str = "86cinit";
+const _86PINIT: &str = "86pinit";
+const _86SINIT: &str = "86sinit";
 
 #[derive(Copy, Clone, Eq, Hash, Serialize)]
 #[repr(C)]

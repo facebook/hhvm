@@ -35,7 +35,7 @@ use ir::IsTypeOp;
 use ir::LocId;
 use ir::LocalId;
 use ir::MemberOpBuilder;
-use ir::MethodId;
+use ir::MethodName;
 use ir::ObjMethodOp;
 use ir::PropId;
 use ir::ReadonlyOp;
@@ -575,7 +575,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 },
             ) => {
                 let flavor = ObjMethodOp::NullThrows;
-                let method = MethodId::constructor(&builder.strings);
+                let method = MethodName::constructor();
                 call.detail = CallDetail::FCallObjMethodD { flavor, method };
                 Instr::Call(Box::new(call))
             }
@@ -703,7 +703,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 builder.hack_builtin(Builtin::NewDict, &args, loc)
             }
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
-                let method = MethodId::factory(&builder.strings);
+                let method = MethodName::factory();
                 let operands = vec![cls].into_boxed_slice();
                 let context = UnitBytesId::EMPTY;
                 let flavor = ObjMethodOp::NullThrows;

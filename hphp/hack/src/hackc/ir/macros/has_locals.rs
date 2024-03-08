@@ -52,7 +52,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "IsTypeOp"
             || ident == "IterId"
             || ident == "LocId"
-            || ident == "MethodId"
+            || ident == "MethodName"
             || ident == "ParamId"
             || ident == "Predicate"
             || ident == "PropId"

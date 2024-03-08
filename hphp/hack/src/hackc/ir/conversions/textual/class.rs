@@ -105,7 +105,7 @@ impl ClassState<'_, '_> {
         }
 
         let mut methods = std::mem::take(&mut self.class.methods);
-        methods.sort_by(|a, b| cmp_method(a, b, &self.unit_state.strings));
+        methods.sort_by(cmp_method);
         for method in methods {
             self.write_method(method)?;
         }
@@ -284,11 +284,7 @@ impl ClassState<'_, '_> {
     }
 
     fn write_method(&mut self, method: ir::Method) -> Result {
-        trace!(
-            "Convert Method {}::{}",
-            self.class.name,
-            method.name.as_bstr(&self.unit_state.strings)
-        );
+        trace!("Convert Method {}::{}", self.class.name, method.name);
 
         let is_static = match method.func.attrs.is_static() {
             true => IsStatic::Static,
@@ -353,16 +349,14 @@ fn compute_base(class: &ir::Class) -> Option<ir::ClassName> {
     }
 }
 
-fn cmp_method(a: &ir::Method, b: &ir::Method, strings: &ir::StringInterner) -> Ordering {
+fn cmp_method(a: &ir::Method, b: &ir::Method) -> Ordering {
     let line_a = a.func.locs[a.func.loc_id].line_begin as usize;
     let line_b = b.func.locs[b.func.loc_id].line_begin as usize;
     line_a
         .cmp(&line_b)
         .then_with(|| {
             // Same source line - use name.
-            let name_a = strings.lookup_bstr(a.name.id);
-            let name_b = strings.lookup_bstr(b.name.id);
-            name_a.cmp(&name_b)
+            a.name.cmp(&b.name)
         })
         .then_with(|| {
             // Same name - use param count.

@@ -127,7 +127,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call cls_method {}::{}",
                 FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
             )?;
         }
         CallDetail::FCallClsMethodM { method, log } => {
@@ -140,7 +140,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call cls_method {}::{}{}",
                 FmtVid(func, call.detail.class(&call.operands), verbose, strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
                 dc
             )?;
         }
@@ -157,7 +157,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call cls_method {}::{}",
                 FmtSpecialClsRef(*clsref),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
             )?;
         }
         CallDetail::FCallCtor => {
@@ -204,7 +204,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call obj_method {}{arrow}{}",
                 FmtVid(func, call.detail.obj(&call.operands), verbose, strings),
-                FmtIdentifierId(method.id, ctx.strings)
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings)
             )?;
         }
     }
@@ -404,7 +404,11 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     }
 
     for method in &class.methods {
-        writeln!(w, "  method {}", FmtIdentifierId(method.name.id, strings))?;
+        writeln!(
+            w,
+            "  method {}",
+            FmtIdentifierId(method.name.as_bytes_id(), strings)
+        )?;
     }
 
     writeln!(w, "}}")?;
@@ -1159,7 +1163,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_cls_method {}::{}",
                 FmtVid(func, vid, ctx.verbose, strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
             )?;
         }
         Hhbc::ResolveClsMethodD(clsid, method, _) => {
@@ -1167,7 +1171,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_cls_method_d {}::{}",
                 FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
             )?;
         }
         Hhbc::ResolveClsMethodS(clsref, method, _) => {
@@ -1175,7 +1179,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_cls_method_s {}::{}",
                 FmtSpecialClsRef(clsref),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
             )?;
         }
         Hhbc::ResolveRClsMethod([clsid, vid], method, _) => {
@@ -1183,7 +1187,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_r_cls_method {}::{}, {}",
                 FmtVid(func, clsid, verbose, strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
                 FmtVid(func, vid, verbose, strings),
             )?;
         }
@@ -1192,7 +1196,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_r_cls_method_s {}::{}, {}",
                 FmtSpecialClsRef(clsref),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
                 FmtVid(func, vid, verbose, strings),
             )?;
         }
@@ -1208,7 +1212,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_r_cls_method_d {}::{}, {}",
                 FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.id, ctx.strings),
+                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
                 FmtVid(func, vid, verbose, strings),
             )?;
         }
@@ -1849,7 +1853,7 @@ fn print_method(
         w,
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {vis} {{",
         clsid = FmtIdentifierId(clsid.as_bytes_id(), strings),
-        method = FmtIdentifierId(method.name.id, strings),
+        method = FmtIdentifierId(method.name.as_bytes_id(), strings),
         tparams = FmtTParams(&method.func.tparams, strings),
         shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams, strings),
         params = FmtFuncParams(&method.func, strings),

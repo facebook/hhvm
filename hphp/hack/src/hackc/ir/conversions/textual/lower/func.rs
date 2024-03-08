@@ -15,7 +15,7 @@ use ir::LocId;
 use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::MethodFlags;
-use ir::MethodId;
+use ir::MethodName;
 use ir::ReadonlyOp;
 use ir::SpecialClsRef;
 use ir::StringInterner;
@@ -68,10 +68,10 @@ pub(crate) fn lower_func(
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
 
     match func_info {
-        FuncInfo::Method(mi) if mi.name.is_86pinit(&strings) => {
+        FuncInfo::Method(mi) if mi.name.is_86pinit() => {
             rewrite_86pinit(&mut builder, mi);
         }
-        FuncInfo::Method(mi) if mi.name.is_86sinit(&strings) => {
+        FuncInfo::Method(mi) if mi.name.is_86sinit() => {
             rewrite_86sinit(&mut builder, mi);
         }
         _ => {}
@@ -211,7 +211,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 // This is a "complex" constant - we need to call 86cinit to get
                 // the value.
                 let clsref = SpecialClsRef::SelfCls;
-                let method = MethodId::_86cinit(&builder.strings);
+                let method = MethodName::_86cinit();
                 let name = builder.emit_constant(Constant::String(name.id));
                 Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
             }

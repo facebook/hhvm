@@ -28,7 +28,7 @@ use crate::IsTypeOp;
 use crate::IterId;
 use crate::LocId;
 use crate::MOpMode;
-use crate::MethodId;
+use crate::MethodName;
 use crate::OODeclExistsOp;
 use crate::ObjMethodOp;
 use crate::PropId;
@@ -523,16 +523,16 @@ pub enum Hhbc {
     RaiseClassStringConversionNotice(LocId),
     RecordReifiedGeneric(ValueId, LocId),
     ResolveClass(ClassName, LocId),
-    ResolveClsMethod(ValueId, MethodId, LocId),
-    ResolveClsMethodD(ClassName, MethodId, LocId),
+    ResolveClsMethod(ValueId, MethodName, LocId),
+    ResolveClsMethodD(ClassName, MethodName, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
-    ResolveClsMethodS(SpecialClsRef, MethodId, LocId),
-    ResolveRClsMethod([ValueId; 2], MethodId, LocId),
+    ResolveClsMethodS(SpecialClsRef, MethodName, LocId),
+    ResolveRClsMethod([ValueId; 2], MethodName, LocId),
     #[has_locals(none)]
-    ResolveRClsMethodS(ValueId, SpecialClsRef, MethodId, LocId),
+    ResolveRClsMethodS(ValueId, SpecialClsRef, MethodName, LocId),
     ResolveFunc(FunctionName, LocId),
-    ResolveRClsMethodD(ValueId, ClassName, MethodId, LocId),
+    ResolveRClsMethodD(ValueId, ClassName, MethodName, LocId),
     ResolveRFunc(ValueId, FunctionName, LocId),
     ResolveMethCaller(FunctionName, LocId),
     SelfCls(LocId),
@@ -735,11 +735,11 @@ pub enum CallDetail {
     // A::foo(42);
     FCallClsMethodD {
         clsid: ClassName,
-        method: MethodId,
+        method: MethodName,
     },
     // $a::foo(42);
     FCallClsMethodM {
-        method: MethodId,
+        method: MethodName,
         log: IsLogAsDynamicCallOp,
     },
     // self::$a();
@@ -749,7 +749,7 @@ pub enum CallDetail {
     // self::foo();
     FCallClsMethodSD {
         clsref: SpecialClsRef,
-        method: MethodId,
+        method: MethodName,
     },
     // new A(42);
     FCallCtor,
@@ -766,7 +766,7 @@ pub enum CallDetail {
     // $a->foo(42);
     FCallObjMethodD {
         flavor: ObjMethodOp,
-        method: MethodId,
+        method: MethodName,
     },
 }
 
@@ -1206,7 +1206,7 @@ impl Instr {
     }
 
     pub fn simple_method_call(
-        method: MethodId,
+        method: MethodName,
         receiver: ValueId,
         operands: &[ValueId],
         loc: LocId,
@@ -1230,7 +1230,7 @@ impl Instr {
 
     pub fn method_call_special(
         clsref: SpecialClsRef,
-        method: MethodId,
+        method: MethodName,
         operands: &[ValueId],
         loc: LocId,
     ) -> Instr {

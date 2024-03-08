@@ -23,12 +23,6 @@ impl StringCache {
         )?))
     }
 
-    pub fn lookup_method_name(&self, id: ir::MethodId) -> hhbc::MethodName {
-        hhbc::MethodName::intern(
-            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 method name"),
-        )
-    }
-
     pub fn lookup_prop_name(&self, id: ir::PropId) -> hhbc::PropName {
         hhbc::PropName::intern(
             std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 prop name"),

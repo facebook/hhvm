@@ -152,7 +152,7 @@ pub(crate) fn convert_method<'a>(
     strings: &StringCache,
     adata: &mut AdataCache,
 ) -> Method {
-    trace!("convert_method {}", method.name.as_bstr(&strings.interner));
+    trace!("convert_method {}", method.name);
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
@@ -161,7 +161,7 @@ pub(crate) fn convert_method<'a>(
     let body = convert_func(method.func, strings, adata);
     hhbc::Method {
         attributes: attributes.into(),
-        name: strings.lookup_method_name(method.name),
+        name: method.name,
         body,
         span,
         coeffects,

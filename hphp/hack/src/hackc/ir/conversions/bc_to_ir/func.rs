@@ -80,7 +80,7 @@ pub(crate) fn convert_method<'a>(
     let method = ir::Method {
         flags: src.flags,
         func,
-        name: ir::MethodId::from_hhbc(src.name, &unit.strings),
+        name: src.name,
         visibility: src.visibility,
     };
 

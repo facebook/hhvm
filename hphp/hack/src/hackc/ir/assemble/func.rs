@@ -88,7 +88,7 @@ use crate::parse::parse_init_prop_op;
 use crate::parse::parse_instr_id;
 use crate::parse::parse_is_type_op;
 use crate::parse::parse_m_op_mode;
-use crate::parse::parse_method_id;
+use crate::parse::parse_method_name;
 use crate::parse::parse_oo_decl_exists_op;
 use crate::parse::parse_opt_enum;
 use crate::parse::parse_param;
@@ -476,7 +476,7 @@ impl FunctionParser<'_> {
                         CallDetail::FCallClsMethodS { clsref }
                     } else {
                         // clsref::id => FCallClsMethodSD
-                        let method = parse_method_id(tokenizer)?;
+                        let method = parse_method_name(tokenizer)?;
                         CallDetail::FCallClsMethodSD { clsref, method }
                     }
                 } else if let Some(cls_vid) = self.vid_opt(tokenizer)? {
@@ -489,7 +489,7 @@ impl FunctionParser<'_> {
                         CallDetail::FCallClsMethod { log }
                     } else {
                         // vid::id dc => FCallClsMethodM
-                        let method = parse_method_id(tokenizer)?;
+                        let method = parse_method_name(tokenizer)?;
                         let log = parse_dynamic_call_op(tokenizer)?;
                         CallDetail::FCallClsMethodM { method, log }
                     }
@@ -497,7 +497,7 @@ impl FunctionParser<'_> {
                     // id::id => FCallClsMethodD
                     let clsid = parse_class_name(tokenizer)?;
                     tokenizer.expect_identifier("::")?;
-                    let method = parse_method_id(tokenizer)?;
+                    let method = parse_method_name(tokenizer)?;
                     CallDetail::FCallClsMethodD { clsid, method }
                 }
             }
@@ -531,7 +531,7 @@ impl FunctionParser<'_> {
                     CallDetail::FCallObjMethod { flavor }
                 } else {
                     // vid->id => FCallObjMethodD
-                    let method = parse_method_id(tokenizer)?;
+                    let method = parse_method_name(tokenizer)?;
                     CallDetail::FCallObjMethodD { method, flavor }
                 }
             }
@@ -1393,14 +1393,14 @@ impl FunctionParser<'_> {
             "require_once" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::RequireOnce, vid: self.vid(tok)?, loc })),
             "require_once_doc" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::RequireOnceDoc, vid: self.vid(tok)?, loc })),
             "resolve_class" => I::Hhbc(H::ResolveClass(parse_class_name(tok)?, loc)),
-            "resolve_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethod(p0, p1, loc)), <p0:self.vid> "::" <p1:parse_method_id>),
-            "resolve_cls_method_d" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodD(p0, p1, loc)), <p0:parse_class_name> "::" <p1:parse_method_id>),
-            "resolve_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodS(p0, p1, loc)), <p0:parse_special_cls_ref> "::" <p1:parse_method_id>),
+            "resolve_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethod(p0, p1, loc)), <p0:self.vid> "::" <p1:parse_method_name>),
+            "resolve_cls_method_d" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodD(p0, p1, loc)), <p0:parse_class_name> "::" <p1:parse_method_name>),
+            "resolve_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveClsMethodS(p0, p1, loc)), <p0:parse_special_cls_ref> "::" <p1:parse_method_name>),
             "resolve_func" => I::Hhbc(H::ResolveFunc(parse_func_name(tok)?, loc)),
             "resolve_meth_caller" => I::Hhbc(H::ResolveMethCaller(parse_func_name(tok)?, loc)),
-            "resolve_r_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethod([p0, p1], p2, loc)), <p0:self.vid> "::" <p2:parse_method_id> "," <p1:self.vid>),
-            "resolve_r_cls_method_d" => parse_instr!(tok, I::Hhbc(Hhbc::ResolveRClsMethodD(p0, p1, p2, loc)), <p1:parse_class_name> "::" <p2:parse_method_id> "," <p0:self.vid>),
-            "resolve_r_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethodS(p0, p1, p2, loc)), <p1:parse_special_cls_ref> "::" <p2:parse_method_id> "," <p0:self.vid>),
+            "resolve_r_cls_method" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethod([p0, p1], p2, loc)), <p0:self.vid> "::" <p2:parse_method_name> "," <p1:self.vid>),
+            "resolve_r_cls_method_d" => parse_instr!(tok, I::Hhbc(Hhbc::ResolveRClsMethodD(p0, p1, p2, loc)), <p1:parse_class_name> "::" <p2:parse_method_name> "," <p0:self.vid>),
+            "resolve_r_cls_method_s" => parse_instr!(tok, I::Hhbc(H::ResolveRClsMethodS(p0, p1, p2, loc)), <p1:parse_special_cls_ref> "::" <p2:parse_method_name> "," <p0:self.vid>),
             "resolve_r_func" => parse_instr!(tok, I::Hhbc(H::ResolveRFunc(p0, p1, loc)), <p1:parse_func_name> "," <p0:self.vid>),
             "ret" => self.parse_ret(tok, loc)?,
             "ret_c_suspended" => I::Terminator(T::RetCSuspended(self.vid(tok)?, loc)),

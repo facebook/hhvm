@@ -134,7 +134,6 @@ pub use self::newtype::InstrId;
 pub use self::newtype::InstrIdMap;
 pub use self::newtype::InstrIdSet;
 pub use self::newtype::LocId;
-pub use self::newtype::MethodId;
 pub use self::newtype::PropId;
 pub use self::newtype::ValueId;
 pub use self::newtype::ValueIdMap;

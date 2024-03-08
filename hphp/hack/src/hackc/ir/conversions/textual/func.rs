@@ -27,7 +27,7 @@ use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
 use ir::MethodFlags;
-use ir::MethodId;
+use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringInterner;
 use ir::UnitBytesId;
@@ -391,13 +391,13 @@ fn write_func(
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
-            name if name.is_86cinit(&strings) => {
+            name if name.is_86cinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::ConstInit(mi.class.name))
             }
-            name if name.is_86pinit(&strings) => {
+            name if name.is_86pinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
             }
-            name if name.is_86sinit(&strings) => {
+            name if name.is_86sinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
             }
             _ => mangle::FunctionName::method(mi.class.name, mi.is_static, mi.name),
@@ -482,13 +482,13 @@ pub(crate) fn write_func_decl(
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
-            name if name.is_86cinit(&unit_state.strings) => {
+            name if name.is_86cinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::ConstInit(mi.class.name))
             }
-            name if name.is_86pinit(&unit_state.strings) => {
+            name if name.is_86pinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
             }
-            name if name.is_86sinit(&unit_state.strings) => {
+            name if name.is_86sinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
             }
             _ => mangle::FunctionName::method(mi.class.name, mi.is_static, mi.name),
@@ -1517,7 +1517,7 @@ impl<'a> FuncInfo<'a> {
     pub(crate) fn name_id(&self) -> ir::UnitBytesId {
         match self {
             FuncInfo::Function(fi) => fi.name.as_bytes_id(),
-            FuncInfo::Method(mi) => mi.name.id,
+            FuncInfo::Method(mi) => mi.name.as_bytes_id(),
         }
     }
 
@@ -1555,7 +1555,7 @@ pub(crate) struct FunctionInfo {
 // Extra data associated with class methods that aren't stored on the Func.
 #[derive(Clone)]
 pub(crate) struct MethodInfo<'a> {
-    pub(crate) name: MethodId,
+    pub(crate) name: MethodName,
     pub(crate) attrs: ir::Attr,
     pub(crate) class: &'a ir::Class,
     pub(crate) is_static: IsStatic,

@@ -334,20 +334,16 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::FCallClsMethod(fcall_args, hint, *log)
             }
             ir::instr::CallDetail::FCallClsMethodD { clsid, method } => {
-                let class = *clsid;
-                let method = self.strings.lookup_method_name(*method);
-                Opcode::FCallClsMethodD(fcall_args, class, method)
+                Opcode::FCallClsMethodD(fcall_args, *clsid, *method)
             }
             ir::instr::CallDetail::FCallClsMethodM { method, log } => {
-                let method = self.strings.lookup_method_name(*method);
-                Opcode::FCallClsMethodM(fcall_args, hint, *log, method)
+                Opcode::FCallClsMethodM(fcall_args, hint, *log, *method)
             }
             ir::instr::CallDetail::FCallClsMethodS { clsref } => {
                 Opcode::FCallClsMethodS(fcall_args, hint, *clsref)
             }
             ir::instr::CallDetail::FCallClsMethodSD { method, clsref } => {
-                let method = self.strings.lookup_method_name(*method);
-                Opcode::FCallClsMethodSD(fcall_args, hint, *clsref, method)
+                Opcode::FCallClsMethodSD(fcall_args, hint, *clsref, *method)
             }
             ir::instr::CallDetail::FCallCtor => Opcode::FCallCtor(fcall_args, hint),
             ir::instr::CallDetail::FCallFunc => Opcode::FCallFunc(fcall_args),
@@ -356,8 +352,7 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::FCallObjMethod(fcall_args, hint, *flavor)
             }
             ir::instr::CallDetail::FCallObjMethodD { flavor, method } => {
-                let method = self.strings.lookup_method_name(*method);
-                Opcode::FCallObjMethodD(fcall_args, hint, *flavor, method)
+                Opcode::FCallObjMethodD(fcall_args, hint, *flavor, *method)
             }
         };
         self.push_opcode(instr);
@@ -577,30 +572,16 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::RaiseClassStringConversionNotice(..) => Opcode::RaiseClassStringConversionNotice,
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
             Hhbc::ResolveClass(clsid, _) => Opcode::ResolveClass(clsid),
-            Hhbc::ResolveClsMethod(_, method, _) => {
-                let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveClsMethod(method)
-            }
-            Hhbc::ResolveClsMethodD(clsid, method, _) => {
-                let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveClsMethodD(clsid, method)
-            }
-            Hhbc::ResolveClsMethodS(clsref, method, _) => {
-                let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveClsMethodS(clsref, method)
-            }
-            Hhbc::ResolveRClsMethod(_, method, _) => {
-                let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveRClsMethod(method)
-            }
+            Hhbc::ResolveClsMethod(_, method, _) => Opcode::ResolveClsMethod(method),
+            Hhbc::ResolveClsMethodD(clsid, method, _) => Opcode::ResolveClsMethodD(clsid, method),
+            Hhbc::ResolveClsMethodS(clsref, method, _) => Opcode::ResolveClsMethodS(clsref, method),
+            Hhbc::ResolveRClsMethod(_, method, _) => Opcode::ResolveRClsMethod(method),
             Hhbc::ResolveRClsMethodS(_, clsref, method, _) => {
-                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodS(clsref, method)
             }
             Hhbc::ResolveFunc(func, _) => Opcode::ResolveFunc(func),
             Hhbc::ResolveMethCaller(func, _) => Opcode::ResolveMethCaller(func),
             Hhbc::ResolveRClsMethodD(_, clsid, method, _) => {
-                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodD(clsid, method)
             }
             Hhbc::ResolveRFunc(_, func, _) => Opcode::ResolveRFunc(func),

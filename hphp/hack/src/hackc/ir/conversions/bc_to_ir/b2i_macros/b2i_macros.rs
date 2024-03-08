@@ -282,7 +282,7 @@ fn parse_convert_simple(
                 convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "MethodName" => {
-                convert(quote_spanned!(span=> ir::MethodId::from_hhbc(*#imm, #strings) ));
+                convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "PropName" => {
                 convert(quote_spanned!(span=> ir::PropId::from_hhbc(*#imm, #strings) ));

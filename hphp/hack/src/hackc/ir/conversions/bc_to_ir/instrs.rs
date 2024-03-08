@@ -240,14 +240,9 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
             num_args += 2;
             CallDetail::FCallClsMethod { log }
         }
-        Opcode::FCallClsMethodD(_, class, method) => {
-            let clsid = class;
-            let method = ir::MethodId::from_hhbc(method, ctx.strings);
-            CallDetail::FCallClsMethodD { clsid, method }
-        }
+        Opcode::FCallClsMethodD(_, clsid, method) => CallDetail::FCallClsMethodD { clsid, method },
         Opcode::FCallClsMethodM(_, _, log, method) => {
             num_args += 1;
-            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodM { method, log }
         }
         Opcode::FCallClsMethodS(_, _, clsref) => {
@@ -255,7 +250,6 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
             CallDetail::FCallClsMethodS { clsref }
         }
         Opcode::FCallClsMethodSD(_, _, clsref, method) => {
-            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodSD { clsref, method }
         }
         Opcode::FCallCtor(_, _) => CallDetail::FCallCtor,
@@ -269,7 +263,6 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
             CallDetail::FCallObjMethod { flavor }
         }
         Opcode::FCallObjMethodD(_, _, flavor, method) => {
-            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallObjMethodD { flavor, method }
         }
         _ => unreachable!(),

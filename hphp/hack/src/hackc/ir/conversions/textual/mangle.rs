@@ -145,16 +145,20 @@ pub(crate) enum FunctionName {
     Builtin(crate::hack::Builtin),
     Function(ir::FunctionName),
     Intrinsic(Intrinsic),
-    Method(TypeName, ir::MethodId),
+    Method(TypeName, ir::MethodName),
     Unmangled(String),
 }
 
 impl FunctionName {
-    pub(crate) fn method(class: ir::ClassName, is_static: IsStatic, method: ir::MethodId) -> Self {
+    pub(crate) fn method(
+        class: ir::ClassName,
+        is_static: IsStatic,
+        method: ir::MethodName,
+    ) -> Self {
         Self::Method(TypeName::class(class, is_static), method)
     }
 
-    pub(crate) fn untyped_method(method: ir::MethodId) -> Self {
+    pub(crate) fn untyped_method(method: ir::MethodName) -> Self {
         Self::Method(TypeName::Unknown, method)
     }
 
@@ -227,7 +231,7 @@ impl fmt::Display for FmtFunctionName<'_> {
                     f,
                     "{}.{}",
                     class.display(strings),
-                    mid.as_bytes(strings).mangle(strings)
+                    mid.as_bytes().mangle(strings)
                 )?;
             }
             FunctionName::Unmangled(s) => s.fmt(f)?,
@@ -307,7 +311,7 @@ impl fmt::Display for FmtTypeName<'_> {
                     f,
                     "{}_{}$curry",
                     ty.display(strings),
-                    mid.as_bytes(strings).mangle(strings)
+                    mid.as_bytes().mangle(strings)
                 )
             }
             TypeName::Curry(_) => panic!("Unable to name curry type {name:?}"),

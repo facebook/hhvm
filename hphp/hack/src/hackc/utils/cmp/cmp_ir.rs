@@ -677,11 +677,11 @@ fn cmp_instr_call(
         (CallDetail::FCallClsMethodD { clsid: a_clsid, method: a_method },
          CallDetail::FCallClsMethodD { clsid: b_clsid, method: b_method }) => {
             cmp_eq(a_clsid, b_clsid).qualified("clsid")?;
-            cmp_id(a_method.id, b_method.id).qualified("method")?;
+            cmp_eq(a_method, b_method).qualified("method")?;
         }
         (CallDetail::FCallClsMethodM { method: a_method, log: a_log },
          CallDetail::FCallClsMethodM { method: b_method, log: b_log }) => {
-            cmp_id(a_method.id, b_method.id).qualified("method")?;
+            cmp_eq(a_method, b_method).qualified("method")?;
             cmp_eq(a_log, b_log).qualified("log")?;
         }
         (CallDetail::FCallClsMethodS { clsref: a_clsref },
@@ -691,7 +691,7 @@ fn cmp_instr_call(
         (CallDetail::FCallClsMethodSD { clsref: a_clsref, method: a_method },
          CallDetail::FCallClsMethodSD { clsref: b_clsref, method: b_method }) => {
             cmp_eq(a_clsref, b_clsref).qualified("clsref")?;
-            cmp_id(a_method.id, b_method.id).qualified("method")?;
+            cmp_eq(a_method, b_method).qualified("method")?;
         }
         (CallDetail::FCallFuncD { func: a_func },
          CallDetail::FCallFuncD { func: b_func }) => {
@@ -704,7 +704,7 @@ fn cmp_instr_call(
         (CallDetail::FCallObjMethodD { flavor: a_flavor, method: a_method },
          CallDetail::FCallObjMethodD { flavor: b_flavor, method: b_method }) => {
             cmp_eq(a_flavor, b_flavor).qualified("flavor")?;
-            cmp_id(a_method.id, b_method.id).qualified("method")?;
+            cmp_eq(a_method, b_method).qualified("method")?;
         }
 
         // these should never happen
@@ -836,22 +836,22 @@ fn cmp_instr_hhbc(
             cmp_eq(x0, x1).qualified("ResolveClass param x")?;
         }
         (Hhbc::ResolveClsMethod(_, x0, _), Hhbc::ResolveClsMethod(_, x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveClsMethod param x")?;
+            cmp_eq(x0, x1).qualified("ResolveClsMethod param x")?;
         }
         (Hhbc::ResolveClsMethodD(x0, y0, _), Hhbc::ResolveClsMethodD(x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("ResolveClsMethodD param x")?;
-            cmp_id(y0.id, y1.id).qualified("ResolveClsMethodD param y")?;
+            cmp_eq(y0, y1).qualified("ResolveClsMethodD param y")?;
         }
         (Hhbc::ResolveClsMethodS(x0, y0, _), Hhbc::ResolveClsMethodS(x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("ResolveClsMethodS param x")?;
-            cmp_id(y0.id, y1.id).qualified("ResolveClsMethodS param y")?;
+            cmp_eq(y0, y1).qualified("ResolveClsMethodS param y")?;
         }
         (Hhbc::ResolveRClsMethod(_, x0, _), Hhbc::ResolveRClsMethod(_, x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveRClsMethod param x")?;
+            cmp_eq(x0, x1).qualified("ResolveRClsMethod param x")?;
         }
         (Hhbc::ResolveRClsMethodS(_, x0, y0, _), Hhbc::ResolveRClsMethodS(_, x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("ResolveRClsMethodS param x")?;
-            cmp_id(y0.id, y1.id).qualified("ResolveRClsMethodS param y")?;
+            cmp_eq(y0, y1).qualified("ResolveRClsMethodS param y")?;
         }
         (Hhbc::ResolveFunc(x0, _), Hhbc::ResolveFunc(x1, _)) => {
             cmp_eq(x0, x1).qualified("ResolveFunc param x")?;
@@ -1377,8 +1377,6 @@ fn cmp_method(
     (a, a_strings): (&Method, &StringInterner),
     (b, b_strings): (&Method, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Method {
         flags: a_flags,
         func: a_func,
@@ -1393,7 +1391,7 @@ fn cmp_method(
     } = b;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     Ok(())
 }
@@ -1948,7 +1946,7 @@ mod mapping {
 
     impl MapName for (&Method, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.into_string()
         }
     }
 

@@ -34,7 +34,7 @@ use ir_core::IsLogAsDynamicCallOp;
 use ir_core::IsTypeOp;
 use ir_core::KeysetValue;
 use ir_core::MOpMode;
-use ir_core::MethodId;
+use ir_core::MethodName;
 use ir_core::ModuleName;
 use ir_core::OODeclExistsOp;
 use ir_core::Param;
@@ -537,9 +537,9 @@ pub(crate) fn parse_m_op_mode(tokenizer: &mut Tokenizer<'_>) -> Result<MOpMode> 
     .unwrap_or(MOpMode::None))
 }
 
-pub(crate) fn parse_method_id(tokenizer: &mut Tokenizer<'_>) -> Result<MethodId> {
+pub(crate) fn parse_method_name(tokenizer: &mut Tokenizer<'_>) -> Result<MethodName> {
     let (id, _) = parse_user_id(tokenizer)?;
-    Ok(MethodId::from_bytes(&id, &tokenizer.strings))
+    Ok(MethodName::from_utf8(&id)?)
 }
 
 pub(crate) fn parse_oo_decl_exists_op(tokenizer: &mut Tokenizer<'_>) -> Result<OODeclExistsOp> {

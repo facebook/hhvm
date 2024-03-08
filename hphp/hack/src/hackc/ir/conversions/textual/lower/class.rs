@@ -16,7 +16,7 @@ use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::Method;
 use ir::MethodFlags;
-use ir::MethodId;
+use ir::MethodName;
 use ir::Param;
 use ir::PropId;
 use ir::Property;
@@ -136,7 +136,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
     }
 
     for method in &mut class.methods {
-        if method.name.is_86pinit(&strings) {
+        if method.name.is_86pinit() {
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
             method.func.attrs -= Attr::AttrStatic;
         }
@@ -151,13 +151,13 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
     // lowering).
     create_method_if_missing(
         &mut class,
-        MethodId::_86pinit(&strings),
+        MethodName::_86pinit(),
         IsStatic::NonStatic,
         Arc::clone(&strings),
     );
     create_method_if_missing(
         &mut class,
-        MethodId::_86sinit(&strings),
+        MethodName::_86sinit(),
         IsStatic::Static,
         Arc::clone(&strings),
     );
@@ -241,7 +241,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
 }
 
 fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInterner>) {
-    let name = MethodId::constructor(&strings);
+    let name = MethodName::constructor();
 
     let func = FuncBuilder::build_func(Arc::clone(&strings), |fb| {
         let loc = fb.add_loc(class.src_loc.clone());
@@ -280,7 +280,7 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
 
 fn create_method_if_missing(
     class: &mut Class,
-    name: MethodId,
+    name: MethodName,
     is_static: IsStatic,
     strings: Arc<StringInterner>,
 ) {

@@ -16,7 +16,7 @@ use ir_core::Function;
 use ir_core::FunctionName;
 use ir_core::IncludePath;
 use ir_core::Method;
-use ir_core::MethodId;
+use ir_core::MethodName;
 use ir_core::Module;
 use ir_core::ModuleName;
 use ir_core::SrcLoc;
@@ -210,12 +210,10 @@ impl UnitParser {
                 func,
             } = f;
 
-            let name = MethodId::new(name.as_bytes_id());
-
             class.methods.push(Method {
                 flags: cs.flags,
                 func,
-                name,
+                name: MethodName::new(name.as_string_id()),
                 visibility: cs.visibility,
             });
         } else {

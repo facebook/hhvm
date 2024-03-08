@@ -44,7 +44,7 @@ fn field_might_contain_buried_value_id(ty: &SimpleType<'_>) -> bool {
             || ident == "ClassName"
             || ident == "ConstName"
             || ident == "LocId"
-            || ident == "MethodId"
+            || ident == "MethodName"
             || ident == "FunctionName"
             || ident == "LocalId"
             || ident == "ParamId"

@@ -3,7 +3,6 @@
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
 use bstr::BStr;
-use naming_special_names_rust::members;
 use newtype::newtype_int;
 
 use crate::string_intern::StringInterner;
@@ -42,50 +41,6 @@ macro_rules! interned_hhbc_intern_id {
             }
         }
     };
-}
-
-const __FACTORY: &str = "__factory";
-pub const _86CINIT: &str = "86cinit";
-pub const _86PINIT: &str = "86pinit";
-pub const _86SINIT: &str = "86sinit";
-
-interned_hhbc_intern_id!(MethodId, MethodName);
-impl MethodId {
-    pub fn _86cinit(strings: &StringInterner) -> Self {
-        Self::from_str(_86CINIT, strings)
-    }
-
-    pub fn _86pinit(strings: &StringInterner) -> Self {
-        Self::from_str(_86PINIT, strings)
-    }
-
-    pub fn _86sinit(strings: &StringInterner) -> Self {
-        Self::from_str(_86SINIT, strings)
-    }
-
-    pub fn constructor(strings: &StringInterner) -> Self {
-        Self::from_str(members::__CONSTRUCT, strings)
-    }
-
-    pub fn factory(strings: &StringInterner) -> Self {
-        Self::from_str(__FACTORY, strings)
-    }
-
-    pub fn is_86cinit(&self, strings: &StringInterner) -> bool {
-        strings.eq_str(self.id, _86CINIT)
-    }
-
-    pub fn is_86pinit(&self, strings: &StringInterner) -> bool {
-        strings.eq_str(self.id, _86PINIT)
-    }
-
-    pub fn is_86sinit(&self, strings: &StringInterner) -> bool {
-        strings.eq_str(self.id, _86SINIT)
-    }
-
-    pub fn is_constructor(&self, strings: &StringInterner) -> bool {
-        strings.eq_str(self.id, members::__CONSTRUCT)
-    }
 }
 
 interned_hhbc_intern_id!(PropId, PropName);

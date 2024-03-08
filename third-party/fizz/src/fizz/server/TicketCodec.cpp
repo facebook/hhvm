@@ -7,6 +7,7 @@
  */
 
 #include <fizz/server/TicketCodec.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
@@ -37,7 +38,8 @@ void appendClientCertificate(
   };
 
   auto trySerializeX509 = [&]() {
-    auto opensslCert = dynamic_cast<const OpenSSLCert*>(cert.get());
+    auto opensslCert =
+        dynamic_cast<const folly::OpenSSLTransportCertificate*>(cert.get());
     if (opensslCert && opensslCert->getX509()) {
       selectedStorage = CertificateStorage::X509;
       clientCertBuf =

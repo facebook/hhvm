@@ -203,7 +203,7 @@ class MockPeerCert : public PeerCert {
 class MockCertificateVerifier : public CertificateVerifier {
  public:
   MOCK_METHOD(
-      std::shared_ptr<const folly::AsyncTransportCertificate>,
+      std::shared_ptr<const Cert>,
       verify,
       (const std::vector<std::shared_ptr<const PeerCert>>&),
       (const));

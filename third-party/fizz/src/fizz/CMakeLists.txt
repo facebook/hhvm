@@ -99,7 +99,7 @@ else()
 endif()
 
 # Fizz build time options
-option(FIZZ_BUILD_AEGIS "Compiles Fizz with AEGIS support (experimental)" OFF)
+include(FizzOptions)
 
 configure_file(fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATION ${INCLUDE_INSTALL_DIR}/fizz/)
@@ -157,8 +157,6 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
     ${FIZZ_TEST_HEADERS}
     ${headers})
 endforeach()
-
-
 
 if(FIZZ_BUILD_AEGIS)
     set(FIZZ_AESNI_SOURCES

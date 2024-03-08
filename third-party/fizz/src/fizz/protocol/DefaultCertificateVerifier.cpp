@@ -46,8 +46,7 @@ DefaultCertificateVerifier::createFromCAFiles(
           folly::StringPiece(certBuffer)));
 }
 
-std::shared_ptr<const folly::AsyncTransportCertificate>
-DefaultCertificateVerifier::verify(
+std::shared_ptr<const Cert> DefaultCertificateVerifier::verify(
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   std::ignore = verifyWithX509StoreCtx(certs);
   // Just return the original cert in the default case

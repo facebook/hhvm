@@ -118,11 +118,11 @@ class AsyncKTLSSocket : public folly::AsyncSocket {
     return "Fizz/KTLS";
   }
 
-  const folly::AsyncTransportCertificate* getPeerCertificate() const override {
+  const Cert* getPeerCertificate() const override {
     return peerCert_.get();
   }
 
-  const folly::AsyncTransportCertificate* getSelfCertificate() const override {
+  const Cert* getSelfCertificate() const override {
     return selfCert_.get();
   }
 

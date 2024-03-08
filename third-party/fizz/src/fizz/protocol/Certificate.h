@@ -8,11 +8,34 @@
 
 #pragma once
 
+#include <fizz/fizz-config.h>
 #include <fizz/record/Types.h>
+
+#include <map>
+
+#if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
 #include <folly/io/async/AsyncTransportCertificate.h>
 #include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 
-#include <map>
+namespace fizz {
+using Cert = folly::AsyncTransportCertificate;
+using SelfCertBase = folly::OpenSSLTransportCertificate;
+using PeerCertBase = folly::OpenSSLTransportCertificate;
+using IdentityCertBase = Cert;
+} // namespace fizz
+
+#else
+namespace fizz {
+struct Cert {
+  virtual ~Cert();
+  virtual std::string getIdentity() const = 0;
+};
+
+using SelfCertBase = Cert;
+using PeerCertBase = Cert;
+using IdentityCertBase = Cert;
+} // namespace fizz
+#endif
 
 namespace fizz {
 
@@ -23,10 +46,7 @@ enum class CertificateVerifyContext {
   DelegatedCredential
 };
 
-using Cert = folly::AsyncTransportCertificate;
-using OpenSSLCert = folly::OpenSSLTransportCertificate;
-
-class IdentityCert : public Cert {
+class IdentityCert : public IdentityCertBase {
  public:
   explicit IdentityCert(std::string identity);
   ~IdentityCert() override = default;
@@ -37,9 +57,9 @@ class IdentityCert : public Cert {
   std::string identity_;
 };
 
-class SelfCert : public OpenSSLCert {
+class SelfCert : public SelfCertBase {
  public:
-  ~SelfCert() override = default;
+  virtual ~SelfCert() override = default;
 
   /**
    * Returns additional identities this certificate can also represent (for
@@ -64,9 +84,9 @@ class SelfCert : public OpenSSLCert {
       folly::ByteRange toBeSigned) const = 0;
 };
 
-class PeerCert : public OpenSSLCert {
+class PeerCert : public PeerCertBase {
  public:
-  ~PeerCert() override = default;
+  virtual ~PeerCert() override = default;
 
   /**
    * Verifies that signature is a valid signature of toBeSigned. Throws if it's

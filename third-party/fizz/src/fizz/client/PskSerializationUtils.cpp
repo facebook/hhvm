@@ -3,6 +3,7 @@
 #include "fizz/client/PskSerializationUtils.h"
 
 #include <fizz/record/Types.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 using namespace folly;
@@ -12,7 +13,8 @@ namespace fizz {
 namespace {
 
 void tryWriteCert(const fizz::Cert* cert, io::Appender& appender) {
-  if (auto opensslCert = dynamic_cast<const fizz::OpenSSLCert*>(cert)) {
+  if (auto opensslCert =
+          dynamic_cast<const folly::OpenSSLTransportCertificate*>(cert)) {
     auto x509 = opensslCert->getX509();
     fizz::detail::writeBuf<uint32_t>(
         x509 ? folly::ssl::OpenSSLCertUtils::derEncode(*x509) : nullptr,

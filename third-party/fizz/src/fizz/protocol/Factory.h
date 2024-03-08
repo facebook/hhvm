@@ -22,7 +22,6 @@
 #include <fizz/record/EncryptedRecordLayer.h>
 #include <fizz/record/PlaintextRecordLayer.h>
 #include <fizz/record/Types.h>
-#include <folly/io/async/AsyncTransportCertificate.h>
 
 namespace fizz {
 
@@ -76,8 +75,8 @@ class Factory {
       CertificateEntry certEntry,
       bool /*leaf*/) const = 0;
 
-  [[nodiscard]] virtual std::shared_ptr<folly::AsyncTransportCertificate>
-  makeIdentityOnlyCert(std::string ident) const = 0;
+  [[nodiscard]] virtual std::shared_ptr<Cert> makeIdentityOnlyCert(
+      std::string ident) const = 0;
 
   [[nodiscard]] virtual std::string getHkdfPrefix() const = 0;
 };

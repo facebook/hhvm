@@ -42,7 +42,7 @@ class DefaultCertificateVerifier : public CertificateVerifier {
   }
 
   // NOLINTNEXTLINE(modernize-use-nodiscard)
-  std::shared_ptr<const folly::AsyncTransportCertificate> verify(
+  std::shared_ptr<const Cert> verify(
       const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs)
       const override;
 

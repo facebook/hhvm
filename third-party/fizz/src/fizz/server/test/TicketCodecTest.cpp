@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
@@ -148,7 +149,10 @@ TEST(TicketCodecTest, TestEncodeNoX509) {
   auto drs = x509Decode(std::move(encoded));
   EXPECT_TRUE(drs.clientCert);
   EXPECT_EQ(drs.clientCert->getIdentity(), "clientid");
-  EXPECT_EQ(dynamic_cast<const OpenSSLCert*>(drs.clientCert.get()), nullptr);
+  EXPECT_EQ(
+      dynamic_cast<const folly::OpenSSLTransportCertificate*>(
+          drs.clientCert.get()),
+      nullptr);
 }
 
 TEST(TicketCodecTest, TestDecodeDifferentStorage) {
@@ -163,7 +167,8 @@ TEST(TicketCodecTest, TestDecodeDifferentStorage) {
   auto drs = x509Decode(std::move(encoded));
   EXPECT_TRUE(drs.clientCert);
   EXPECT_EQ(drs.clientCert->getIdentity(), "Fizz");
-  auto opensslCert = dynamic_cast<const OpenSSLCert*>(drs.clientCert.get());
+  auto opensslCert = dynamic_cast<const folly::OpenSSLTransportCertificate*>(
+      drs.clientCert.get());
   EXPECT_NE(opensslCert, nullptr);
   EXPECT_NE(opensslCert->getX509(), nullptr);
 
@@ -176,7 +181,9 @@ TEST(TicketCodecTest, TestDecodeDifferentStorage) {
   EXPECT_TRUE(drsX509.clientCert);
   EXPECT_EQ(drsX509.clientCert->getIdentity(), "FizzIdOnly");
   EXPECT_EQ(
-      dynamic_cast<const OpenSSLCert*>(drsX509.clientCert.get()), nullptr);
+      dynamic_cast<const folly::OpenSSLTransportCertificate*>(
+          drsX509.clientCert.get()),
+      nullptr);
 }
 
 TEST(TicketCodecTest, TestDecode) {

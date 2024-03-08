@@ -30,6 +30,7 @@
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 #include <iostream>
@@ -311,7 +312,9 @@ class Connection : public AsyncSocket::ConnectCallback,
       LOG(INFO) << "     i:" << OpenSSLCertUtils::getIssuer(*x509Cert).value();
     }
 
-    if (auto opensslCert = dynamic_cast<const OpenSSLCert*>(serverCert.get())) {
+    if (auto opensslCert =
+            dynamic_cast<const folly::OpenSSLTransportCertificate*>(
+                serverCert.get())) {
       BioUniquePtr bio(BIO_new(BIO_s_mem()));
       if (!PEM_write_bio_X509(bio.get(), opensslCert->getX509().get())) {
         LOG(ERROR) << "  Couldn't convert server certificate to PEM: "
@@ -324,7 +327,9 @@ class Connection : public AsyncSocket::ConnectCallback,
       }
     }
 
-    if (auto opensslCert = dynamic_cast<const OpenSSLCert*>(clientCert.get())) {
+    if (auto opensslCert =
+            dynamic_cast<const folly::OpenSSLTransportCertificate*>(
+                clientCert.get())) {
       BioUniquePtr bio(BIO_new(BIO_s_mem()));
       if (!PEM_write_bio_X509(bio.get(), opensslCert->getX509().get())) {
         LOG(ERROR) << "  Couldn't convert client certificate to PEM: "

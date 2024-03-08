@@ -30,11 +30,11 @@ class CertificateVerifier {
    * possession of the first certificate in certs. Throws on error or if
    * verification fails.
    * The returned cert will be used for replacing peer cert in fizz State
-   * if it is a valid folly::AsyncTransportCertificate. Implementation
+   * if it is a valid fizz::Cert. Implementation
    * can return a null shared_ptr if replacing the peer cert is not desired.
    */
   // NOLINTNEXTLINE(modernize-use-nodiscard)
-  virtual std::shared_ptr<const folly::AsyncTransportCertificate> verify(
+  virtual std::shared_ptr<const Cert> verify(
       const std::vector<std::shared_ptr<const PeerCert>>& certs) const = 0;
 
   /**

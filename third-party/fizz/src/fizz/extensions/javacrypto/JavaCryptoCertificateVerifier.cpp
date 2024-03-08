@@ -26,8 +26,7 @@ JavaCryptoCertificateVerifier::createFromCAFile(
       context, std::move(store));
 }
 
-std::shared_ptr<const folly::AsyncTransportCertificate>
-JavaCryptoCertificateVerifier::verify(
+std::shared_ptr<const Cert> JavaCryptoCertificateVerifier::verify(
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   if (certs.empty()) {
     throw std::runtime_error("no certificates to verify");

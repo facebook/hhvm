@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/record/Types.h>
 #include <folly/io/IOBufIovecBuilder.h>
@@ -16,8 +17,6 @@
 #include <folly/io/async/WriteChainAsyncTransportWrapper.h>
 
 namespace fizz {
-
-using Cert = folly::AsyncTransportCertificate;
 
 /**
  * This class is a wrapper around AsyncTransportWrapper to handle most app level
@@ -201,9 +200,9 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   /**
    * Get the certificates in fizz::Cert form.
    */
-  const Cert* getPeerCertificate() const override = 0;
+  const fizz::Cert* getPeerCertificate() const override = 0;
 
-  const Cert* getSelfCertificate() const override = 0;
+  const fizz::Cert* getSelfCertificate() const override = 0;
 
   bool isReplaySafe() const override = 0;
   void setReplaySafetyCallback(

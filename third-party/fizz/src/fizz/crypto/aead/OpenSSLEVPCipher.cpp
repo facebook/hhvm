@@ -87,119 +87,83 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
     size_t headroom,
     EVP_CIPHER_CTX* encryptCtx,
     Aead::AeadOptions options) {
-  auto inputLength = plaintext->computeChainDataLength();
-  const auto& bufOption = options.bufferOpt;
-  const auto& allocOption = options.allocOpt;
-  // Setup input and output buffers.
-  std::unique_ptr<folly::IOBuf> output;
-  folly::IOBuf* input;
+  struct AeadImpl {
+    EVP_CIPHER_CTX* encryptCtx;
+    bool useBlockOps;
 
-  // Whether to allow modifying buffer contents directly
-  bool allowInplaceEdit = !plaintext->isShared() ||
-      bufOption != Aead::BufferOption::RespectSharedPolicy;
+    AeadImpl(EVP_CIPHER_CTX* e, bool u) : encryptCtx(e), useBlockOps(u) {}
 
-  // Whether to allow growing tailRoom
-  bool allowGrowth =
-      (bufOption ==
-           Aead::BufferOption::AllowFullModification || // When explicitly
-                                                        // requested
-       !plaintext->isShared() || // When plaintext is unique
-       !allowInplaceEdit); // When not in-place (new buffer)
-
-  // Whether to allow memory allocations (throws if needs more memory)
-  bool allowAlloc = allocOption == Aead::AllocationOption::Allow;
-
-  if (!allowInplaceEdit && !allowAlloc) {
-    throw std::runtime_error(
-        "Cannot encrypt (must be in-place or allow allocation)");
-  }
-
-  if (allowInplaceEdit) {
-    output = std::move(plaintext);
-    input = output.get();
-  } else {
-    // create enough to also fit the tag and headroom
-    size_t totalSize{0};
-    if (!folly::checked_add<size_t>(
-            &totalSize, headroom, inputLength, tagLen)) {
-      throw std::overflow_error("Output buffer size");
-    }
-    output = folly::IOBuf::create(totalSize);
-    output->advance(headroom);
-    output->append(inputLength);
-    input = plaintext.get();
-  }
-
-  if (EVP_EncryptInit_ex(encryptCtx, nullptr, nullptr, nullptr, iv.data()) !=
-      1) {
-    throw std::runtime_error("Encryption error");
-  }
-
-  if (associatedData) {
-    for (auto current : *associatedData) {
-      if (current.size() > std::numeric_limits<int>::max()) {
-        throw std::runtime_error("too much associated data");
+    void init(
+        folly::ByteRange iv,
+        const folly::IOBuf* associatedData,
+        size_t /*plaintextLength*/) {
+      if (EVP_EncryptInit_ex(
+              encryptCtx, nullptr, nullptr, nullptr, iv.data()) != 1) {
+        throw std::runtime_error("Encryption error");
       }
-      int len;
-      if (EVP_EncryptUpdate(
-              encryptCtx,
-              nullptr,
-              &len,
-              current.data(),
-              static_cast<int>(current.size())) != 1) {
+      if (associatedData) {
+        for (auto current : *associatedData) {
+          if (current.size() > std::numeric_limits<int>::max()) {
+            throw std::runtime_error("too much associated data");
+          }
+          int len;
+          if (EVP_EncryptUpdate(
+                  encryptCtx,
+                  nullptr,
+                  &len,
+                  current.data(),
+                  static_cast<int>(current.size())) != 1) {
+            throw std::runtime_error("Encryption error");
+          }
+        }
+      }
+    }
+
+    void encrypt(folly::IOBuf& plaintext, folly::IOBuf& ciphertext) {
+      if (useBlockOps) {
+        struct EVPEncImpl {
+          EVP_CIPHER_CTX* encryptCtx;
+
+          explicit EVPEncImpl(EVP_CIPHER_CTX* e) : encryptCtx(e) {}
+          bool encryptUpdate(
+              uint8_t* cipher,
+              int* outLen,
+              const uint8_t* plain,
+              size_t len) {
+            return EVP_EncryptUpdate(
+                       encryptCtx,
+                       cipher,
+                       outLen,
+                       plain,
+                       static_cast<int>(len)) == 1;
+          }
+          bool encryptFinal(uint8_t* cipher, int* outLen) {
+            return EVP_EncryptFinal_ex(encryptCtx, cipher, outLen) == 1;
+          }
+        };
+        // TODO(T180781189): make transformBufferBlocks not take a template
+        // parameter for the block size.
+        encFuncBlocks<16>(EVPEncImpl{encryptCtx}, plaintext, ciphertext);
+      } else {
+        encFunc(encryptCtx, plaintext, ciphertext);
+      }
+    }
+
+    void final(int tagLen, void* tagOut) {
+      if (EVP_CIPHER_CTX_ctrl(
+              encryptCtx, EVP_CTRL_GCM_GET_TAG, tagLen, tagOut) != 1) {
         throw std::runtime_error("Encryption error");
       }
     }
-  }
-
-  if (useBlockOps) {
-    struct Impl {
-      EVP_CIPHER_CTX* encryptCtx;
-      bool encryptUpdate(
-          uint8_t* cipher,
-          int* outLen,
-          const uint8_t* plain,
-          size_t len) {
-        return EVP_EncryptUpdate(
-                   encryptCtx, cipher, outLen, plain, static_cast<int>(len)) ==
-            1;
-      }
-      bool encryptFinal(uint8_t* cipher, int* outLen) {
-        return EVP_EncryptFinal_ex(encryptCtx, cipher, outLen) == 1;
-      }
-    };
-    encFuncBlocks<16>(Impl{encryptCtx}, *input, *output);
-  } else {
-    encFunc(encryptCtx, *input, *output);
-  }
-
-  // output is always something we can modify
-  auto tailRoom = output->prev()->tailroom();
-  if (tailRoom < tagLen || !allowGrowth) {
-    if (!allowAlloc) {
-      throw std::runtime_error("Cannot encrypt (insufficient space for tag)");
-    }
-    std::unique_ptr<folly::IOBuf> tag = folly::IOBuf::create(tagLen);
-    tag->append(tagLen);
-    if (EVP_CIPHER_CTX_ctrl(
-            encryptCtx, EVP_CTRL_GCM_GET_TAG, tagLen, tag->writableData()) !=
-        1) {
-      throw std::runtime_error("Encryption error");
-    }
-    output->prependChain(std::move(tag));
-  } else {
-    auto lastBuf = output->prev();
-    lastBuf->append(tagLen);
-    // we can copy into output directly
-    if (EVP_CIPHER_CTX_ctrl(
-            encryptCtx,
-            EVP_CTRL_GCM_GET_TAG,
-            tagLen,
-            lastBuf->writableTail() - tagLen) != 1) {
-      throw std::runtime_error("Encryption error");
-    }
-  }
-  return output;
+  };
+  return encryptHelper(
+      AeadImpl{encryptCtx, useBlockOps},
+      std::move(plaintext),
+      associatedData,
+      iv,
+      tagLen,
+      headroom,
+      options);
 }
 
 folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(

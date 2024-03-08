@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
 #include <folly/Conv.h>
 #include <folly/Memory.h>
@@ -131,6 +132,98 @@ void encFuncBlocks(
     }
     outputCursor.push(block.data(), outLen);
   }
+}
+
+/**
+ * An object satisfies AeadImpl if the following requirements hold:
+ *     * void AeadImpl::init(folly::ByteRange iv, const folly::IOBuf*
+ * associatedData, size_t plaintextLength)
+ *       - initializes an encryption context with `iv` and
+ * associated data. Associated data can be null.
+ *
+ *     * void AeadImpl::encrypt(folly::IOBuf& ciphertext, folly::IOBuf&
+ * plaintext)
+ *       - encrypts `plaintextLength` bytes of `plaintext`. The implementation
+ * must write the ciphertext to `ciphertext`. `cipherText` is guaranteed to be
+ * writable for `plaintextLength` bytes.
+ *
+ *     * void AeadImpl::final(int tagLen, void* tagOut)
+ *       - finalizes the encryption, and writes the resulting AEAD tag into
+ * `tagOut` which is guaranteed to be at least `taglen` bytes.
+ */
+template <class AeadImpl>
+std::unique_ptr<folly::IOBuf> encryptHelper(
+    AeadImpl&& impl,
+    std::unique_ptr<folly::IOBuf>&& plaintext,
+    const folly::IOBuf* associatedData,
+    folly::ByteRange iv,
+    size_t tagLen,
+    size_t headroom,
+    Aead::AeadOptions options) {
+  auto inputLength = plaintext->computeChainDataLength();
+  impl.init(iv, associatedData, inputLength);
+
+  const auto& bufOption = options.bufferOpt;
+  const auto& allocOption = options.allocOpt;
+  // Setup input and output buffers.
+  std::unique_ptr<folly::IOBuf> output;
+  folly::IOBuf* input;
+
+  // Whether to allow modifying buffer contents directly
+  bool allowInplaceEdit = !plaintext->isShared() ||
+      bufOption != Aead::BufferOption::RespectSharedPolicy;
+
+  // Whether to allow growing tailRoom
+  bool allowGrowth =
+      (bufOption ==
+           Aead::BufferOption::AllowFullModification || // When explicitly
+                                                        // requested
+       !plaintext->isShared() || // When plaintext is unique
+       !allowInplaceEdit); // When not in-place (new buffer)
+
+  // Whether to allow memory allocations (throws if needs more memory)
+  bool allowAlloc = allocOption == Aead::AllocationOption::Allow;
+
+  if (!allowInplaceEdit && !allowAlloc) {
+    throw std::runtime_error(
+        "Cannot encrypt (must be in-place or allow allocation)");
+  }
+
+  if (allowInplaceEdit) {
+    output = std::move(plaintext);
+    input = output.get();
+  } else {
+    // create enough to also fit the tag and headroom
+    size_t totalSize{0};
+    if (!folly::checked_add<size_t>(
+            &totalSize, headroom, inputLength, tagLen)) {
+      throw std::overflow_error("Output buffer size");
+    }
+    output = folly::IOBuf::create(totalSize);
+    output->advance(headroom);
+    output->append(inputLength);
+    input = plaintext.get();
+  }
+
+  impl.encrypt(*input, *output);
+
+  // output is always something we can modify
+  auto tailRoom = output->prev()->tailroom();
+  if (tailRoom < tagLen || !allowGrowth) {
+    if (!allowAlloc) {
+      throw std::runtime_error("Cannot encrypt (insufficient space for tag)");
+    }
+    std::unique_ptr<folly::IOBuf> tag = folly::IOBuf::create(tagLen);
+    tag->append(tagLen);
+    impl.final(tagLen, tag->writableData());
+    output->prependChain(std::move(tag));
+  } else {
+    auto lastBuf = output->prev();
+    lastBuf->append(tagLen);
+    // we can copy into output directly
+    impl.final(tagLen, lastBuf->writableTail() - tagLen);
+  }
+  return output;
 }
 
 } // namespace fizz

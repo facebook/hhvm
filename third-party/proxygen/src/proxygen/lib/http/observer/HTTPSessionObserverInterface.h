@@ -46,7 +46,11 @@ class HTTPSessionObserverInterface {
  public:
   using Clock = std::chrono::steady_clock;
   using TimePoint = std::chrono::time_point<Clock>;
-  enum class Events { requestStarted = 1, preWrite = 2, pingReply = 3 };
+  enum class Events {
+    RequestStarted = 1,
+    PreWrite = 2,
+    PingReply = 3,
+  };
 
   virtual ~HTTPSessionObserverInterface() = default;
 

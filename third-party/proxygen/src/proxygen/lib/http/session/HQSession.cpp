@@ -2523,7 +2523,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
               .setHeaders(msgPtr->getHeaders())
               .build();
       session_.sessionObserverContainer_.invokeInterfaceMethod<
-          HTTPSessionObserverInterface::Events::requestStarted>(
+          HTTPSessionObserverInterface::Events::RequestStarted>(
           [&event](auto observer, auto observed) {
             observer->requestStarted(observed, event);
           });
@@ -2879,7 +2879,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
             .setHeaders(headers.getHeaders())
             .build();
     session_.sessionObserverContainer_.invokeInterfaceMethod<
-        HTTPSessionObserverInterface::Events::requestStarted>(
+        HTTPSessionObserverInterface::Events::RequestStarted>(
         [&event](auto observer, auto observed) {
           observer->requestStarted(observed, event);
         });

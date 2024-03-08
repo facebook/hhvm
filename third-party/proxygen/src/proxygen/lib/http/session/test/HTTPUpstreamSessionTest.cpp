@@ -3245,7 +3245,7 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::requestStarted)
+          .enable(HTTPSessionObserverInterface::Events::RequestStarted)
           .build());
   httpSession_->addObserver(observerSubscribed.get());
 

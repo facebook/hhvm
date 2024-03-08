@@ -1603,7 +1603,7 @@ TEST_P(HQDownstreamSessionTest, Observer_RequestStarted) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::requestStarted)
+          .enable(HTTPSessionObserverInterface::Events::RequestStarted)
           .build());
   hqSession_->addObserver(observerSubscribed.get());
 

@@ -872,7 +872,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
               .setHeaders(msgPtr->getHeaders())
               .build();
       sessionObserverContainer_.invokeInterfaceMethod<
-          HTTPSessionObserverInterface::Events::requestStarted>(
+          HTTPSessionObserverInterface::Events::RequestStarted>(
           [&event](auto observer, auto observed) {
             observer->requestStarted(observed, event);
           });
@@ -1261,7 +1261,7 @@ void HTTPSession::onPingReply(uint64_t data) {
           .setTimestamp(HTTPSessionObserverInterface::Clock::now())
           .build();
   sessionObserverContainer_
-      .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::pingReply>(
+      .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::PingReply>(
           [&](auto observer, auto observed) {
             observer->pingReply(observed, pingReplyEvent);
           });
@@ -1653,7 +1653,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
             .setHeaders(headers.getHeaders())
             .build();
     sessionObserverContainer_.invokeInterfaceMethod<
-        HTTPSessionObserverInterface::Events::requestStarted>(
+        HTTPSessionObserverInterface::Events::RequestStarted>(
         [&event](auto observer, auto observed) {
           observer->requestStarted(observed, event);
         });
@@ -2228,7 +2228,7 @@ void HTTPSession::runLoopCallback() noexcept {
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
             .build();
     sessionObserverContainer_
-        .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::preWrite>(
+        .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::PreWrite>(
             [&event](auto observer, auto observed) {
               observer->preWrite(observed, event);
             });

@@ -4482,7 +4482,7 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::requestStarted)
+          .enable(HTTPSessionObserverInterface::Events::RequestStarted)
           .build());
   httpSession_->addObserver(observerSubscribed.get());
 
@@ -4524,7 +4524,7 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_SendPingByObserver) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::preWrite)
+          .enable(HTTPSessionObserverInterface::Events::PreWrite)
           .build());
   httpSession_->addObserver(observerSubscribed.get());
 
@@ -4574,7 +4574,7 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_PingReply) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::pingReply)
+          .enable(HTTPSessionObserverInterface::Events::PingReply)
           .build());
   httpSession_->addObserver(observerSubscribed.get());
   uint64_t pingId = 0;
@@ -4608,7 +4608,7 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {
   // Add an observer subscribed to this event
   auto observerSubscribed = addMockSessionObserver(
       MockSessionObserver::EventSetBuilder()
-          .enable(HTTPSessionObserverInterface::Events::preWrite)
+          .enable(HTTPSessionObserverInterface::Events::PreWrite)
           .build());
   httpSession_->addObserver(observerSubscribed.get());
 

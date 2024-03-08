@@ -23,12 +23,6 @@ impl StringCache {
         )?))
     }
 
-    pub fn lookup_class_name(&self, id: ir::ClassId) -> hhbc::ClassName {
-        hhbc::ClassName::intern(
-            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 class name"),
-        )
-    }
-
     pub fn lookup_module_name(&self, id: ir::ModuleId) -> hhbc::ModuleName {
         hhbc::ModuleName::intern(
             std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 module name"),

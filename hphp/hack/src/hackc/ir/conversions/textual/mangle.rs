@@ -85,12 +85,12 @@ impl Mangle for ir::PropId {
 
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub(crate) enum Intrinsic {
-    ConstInit(ir::ClassId),
-    Construct(ir::ClassId),
-    Factory(ir::ClassId),
+    ConstInit(ir::ClassName),
+    Construct(ir::ClassName),
+    Factory(ir::ClassName),
     Invoke(TypeName),
-    PropInit(ir::ClassId),
-    StaticInit(ir::ClassId),
+    PropInit(ir::ClassName),
+    StaticInit(ir::ClassName),
 }
 
 impl Intrinsic {
@@ -151,7 +151,7 @@ pub(crate) enum FunctionName {
 }
 
 impl FunctionName {
-    pub(crate) fn method(class: ir::ClassId, is_static: IsStatic, method: ir::MethodId) -> Self {
+    pub(crate) fn method(class: ir::ClassName, is_static: IsStatic, method: ir::MethodId) -> Self {
         Self::Method(TypeName::class(class, is_static), method)
     }
 
@@ -273,15 +273,15 @@ impl fmt::Display for FmtGlobalName<'_> {
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum TypeName {
-    Class(ir::ClassId),
+    Class(ir::ClassName),
     Curry(Box<FunctionName>),
-    StaticClass(ir::ClassId),
+    StaticClass(ir::ClassName),
     Unknown,
     UnmangledRef(&'static str),
 }
 
 impl TypeName {
-    pub(crate) fn class(class: ir::ClassId, is_static: crate::class::IsStatic) -> Self {
+    pub(crate) fn class(class: ir::ClassName, is_static: crate::class::IsStatic) -> Self {
         match is_static {
             IsStatic::Static => Self::StaticClass(class),
             IsStatic::NonStatic => Self::Class(class),
@@ -299,7 +299,7 @@ impl fmt::Display for FmtTypeName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtTypeName(strings, name) = *self;
         match name {
-            TypeName::Class(cid) => f.write_str(&cid.as_bytes(strings).mangle(strings)),
+            TypeName::Class(cid) => f.write_str(&cid.as_str().as_bytes().mangle(strings)),
             TypeName::Curry(box FunctionName::Function(fid)) => {
                 write!(f, "{}$curry", fid.as_str().as_bytes().mangle(strings))
             }
@@ -314,7 +314,7 @@ impl fmt::Display for FmtTypeName<'_> {
             TypeName::Curry(_) => panic!("Unable to name curry type {name:?}"),
             TypeName::Unknown => f.write_str("?"),
             TypeName::StaticClass(cid) => {
-                f.write_str(&cid.as_bytes(strings).mangle(strings))?;
+                f.write_str(&cid.as_str().as_bytes().mangle(strings))?;
                 f.write_str("$static")
             }
             TypeName::UnmangledRef(s) => s.fmt(f),

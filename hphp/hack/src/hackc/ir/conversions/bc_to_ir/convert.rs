@@ -125,7 +125,7 @@ pub(crate) fn convert_attribute(attr: &hhbc::Attribute, strings: &StringInterner
         .map(|tv| convert_typed_value(tv, strings))
         .collect();
     ir::Attribute {
-        name: ir::ClassId::from_str(attr.name.as_str(), strings),
+        name: ir::ClassName::new(attr.name),
         arguments,
     }
 }
@@ -140,9 +140,7 @@ pub(crate) fn convert_typed_value(
         hhbc::TypedValue::Bool(v) => ir::TypedValue::Bool(*v),
         hhbc::TypedValue::Float(v) => ir::TypedValue::Float(*v),
         hhbc::TypedValue::String(v) => ir::TypedValue::String(strings.intern_bytes(v.as_ref())),
-        hhbc::TypedValue::LazyClass(v) => {
-            ir::TypedValue::LazyClass(ir::ClassId::from_str(v.as_str(), strings))
-        }
+        hhbc::TypedValue::LazyClass(v) => ir::TypedValue::LazyClass(ir::ClassName::new(*v)),
         hhbc::TypedValue::Null => ir::TypedValue::Null,
         hhbc::TypedValue::Vec(vs) => ir::TypedValue::Vec(
             vs.iter()
@@ -167,9 +165,7 @@ pub(crate) fn convert_typed_value(
 pub(crate) fn convert_array_key(tv: &hhbc::TypedValue, strings: &StringInterner) -> ir::ArrayKey {
     match *tv {
         hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),
-        hhbc::TypedValue::LazyClass(v) => {
-            ir::ArrayKey::LazyClass(ir::ClassId::from_str(v.as_str(), strings))
-        }
+        hhbc::TypedValue::LazyClass(v) => ir::ArrayKey::LazyClass(ir::ClassName::new(v)),
         hhbc::TypedValue::String(v) => ir::ArrayKey::String(strings.intern_bytes(v.as_ref())),
         _ => panic!("Unable to convert {tv:?} to ArrayKey"),
     }

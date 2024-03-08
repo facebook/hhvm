@@ -7,9 +7,9 @@ use std::fmt;
 
 use naming_special_names_rust as naming_special_names;
 
-use crate::newtype::ClassId;
 use crate::Attr;
 use crate::Attribute;
+use crate::ClassName;
 use crate::SrcLoc;
 use crate::StringInterner;
 use crate::TypeConstraintFlags;
@@ -58,7 +58,7 @@ pub enum BaseType {
     AnyArray,
     Arraykey,
     Bool,
-    Class(ClassId),
+    Class(ClassName),
     Classname,
     Darray,
     Dict,
@@ -90,7 +90,7 @@ impl BaseType {
             BaseType::Arraykey => f.write_str("Arraykey"),
             BaseType::Bool => f.write_str("Bool"),
             BaseType::Class(cid) => {
-                write!(f, "Class(\"{}\")", strings.display(cid.id))
+                write!(f, "Class(\"{}\")", strings.display(cid.as_bytes_id()))
             }
             BaseType::Classname => f.write_str("Classname"),
             BaseType::Darray => f.write_str("Darray"),
@@ -288,7 +288,7 @@ impl From<BaseType> for TypeInfo {
 
 #[derive(Clone, Debug)]
 pub struct Typedef {
-    pub name: ClassId,
+    pub name: ClassName,
     pub attributes: Vec<Attribute>,
     pub type_info_union: Vec<TypeInfo>,
     pub type_structure: TypedValue,

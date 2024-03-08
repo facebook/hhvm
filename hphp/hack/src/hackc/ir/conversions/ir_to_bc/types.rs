@@ -42,7 +42,7 @@ fn convert_type(ty: &ir::TypeInfo, strings: &StringCache) -> TypeInfo {
     } else {
         match ty.enforced.ty {
             BaseType::Mixed | BaseType::Void => None,
-            BaseType::Class(name) => Some(strings.intern(name.id).expect("non-utf8 constraint")),
+            BaseType::Class(name) => Some(name.as_string_id()),
             _ => unreachable!(),
         }
     };
@@ -108,7 +108,6 @@ pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache) -> hhbc::T
         case_type,
     } = td;
 
-    let name = strings.lookup_class_name(name);
     let span = hhbc::Span {
         line_begin: loc.line_begin,
         line_end: loc.line_end,

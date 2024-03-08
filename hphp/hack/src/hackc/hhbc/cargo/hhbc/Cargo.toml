@@ -18,8 +18,10 @@ ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_hhbc_defs_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
+indexmap = { version = "2.1.0", features = ["arbitrary", "rayon", "serde"] }
 intern = { version = "0.1.0", path = "../../../../utils/intern" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
+newtype = { version = "0.0.0", path = "../../../../utils/newtype" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }

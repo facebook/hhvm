@@ -13,8 +13,8 @@ use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
-use crate::ClassId;
-use crate::ClassIdMap;
+use crate::ClassName;
+use crate::ClassNameMap;
 use crate::Coeffects;
 use crate::Constant;
 use crate::ConstantId;
@@ -226,9 +226,9 @@ pub struct Func {
     pub return_type: TypeInfo,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
-    pub shadowed_tparams: Vec<ClassId>,
+    pub shadowed_tparams: Vec<ClassName>,
     pub loc_id: LocId,
-    pub tparams: ClassIdMap<TParamBounds>,
+    pub tparams: ClassNameMap<TParamBounds>,
 }
 
 impl Func {
@@ -394,10 +394,10 @@ impl Func {
             .map_or(false, |iid| self.instr(iid).is_terminal())
     }
 
-    pub fn is_reified(&self, strings: &crate::StringInterner) -> bool {
+    pub fn is_reified(&self) -> bool {
         self.attributes
             .iter()
-            .any(|attr| attr.name.as_bstr(strings) == "__Reified".as_bytes())
+            .any(|attr| attr.name.as_str() == "__Reified")
     }
 
     pub fn loc(&self, loc: LocId) -> &SrcLoc {

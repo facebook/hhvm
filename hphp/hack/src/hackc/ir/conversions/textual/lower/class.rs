@@ -6,7 +6,7 @@ use ir::Attr;
 use ir::Attribute;
 use ir::BaseType;
 use ir::Class;
-use ir::ClassId;
+use ir::ClassName;
 use ir::Constant;
 use ir::EnforceableType;
 use ir::FuncBuilder;
@@ -173,7 +173,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         let HackConstant { name, value, attrs } = constant;
         // Mark the property as originally being a constant.
         let attributes = vec![Attribute {
-            name: ClassId::from_str(INFER_CONSTANT, &strings),
+            name: ClassName::intern(INFER_CONSTANT),
             arguments: Vec::new(),
         }];
         let type_info = if let Some(value) = value.as_ref() {
@@ -211,7 +211,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
             .collect();
         // Mark the property as originally being a type constant.
         let attributes = vec![Attribute {
-            name: ClassId::from_str(INFER_TYPE_CONSTANT, &strings),
+            name: ClassName::intern(INFER_TYPE_CONSTANT),
             arguments,
         }];
         let mut modifiers = TypeConstraintFlags::TypeConstant;

@@ -334,7 +334,7 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::FCallClsMethod(fcall_args, hint, *log)
             }
             ir::instr::CallDetail::FCallClsMethodD { clsid, method } => {
-                let class = self.strings.lookup_class_name(*clsid);
+                let class = *clsid;
                 let method = self.strings.lookup_method_name(*method);
                 Opcode::FCallClsMethodD(fcall_args, class, method)
             }
@@ -468,10 +468,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::ClassName(..) => Opcode::ClassName,
             Hhbc::Clone(..) => Opcode::Clone,
             Hhbc::ClsCns(_, id, _) => Opcode::ClsCns(id),
-            Hhbc::ClsCnsD(id, clsid, _) => {
-                let clsid = self.strings.lookup_class_name(clsid);
-                Opcode::ClsCnsD(id, clsid)
-            }
+            Hhbc::ClsCnsD(id, clsid, _) => Opcode::ClsCnsD(id, clsid),
             Hhbc::ClsCnsL(_, lid, _) => {
                 let local = self.lookup_local(lid);
                 Opcode::ClsCnsL(local)
@@ -508,10 +505,7 @@ impl<'b> InstrEmitter<'b> {
                 ref operands,
                 clsid,
                 ..
-            } => {
-                let class = self.strings.lookup_class_name(clsid);
-                Opcode::CreateCl(operands.len() as u32, class)
-            }
+            } => Opcode::CreateCl(operands.len() as u32, clsid),
             Hhbc::CreateCont(_) => Opcode::CreateCont,
             Hhbc::CreateSpecialImplicitContext(..) => Opcode::CreateSpecialImplicitContext,
             Hhbc::Div(..) => Opcode::Div,
@@ -533,10 +527,7 @@ impl<'b> InstrEmitter<'b> {
                 let prop = self.strings.lookup_prop_name(prop);
                 Opcode::InitProp(prop, op)
             }
-            Hhbc::InstanceOfD(_, clsid, _) => {
-                let clsid = self.strings.lookup_class_name(clsid);
-                Opcode::InstanceOfD(clsid)
-            }
+            Hhbc::InstanceOfD(_, clsid, _) => Opcode::InstanceOfD(clsid),
             Hhbc::IsLateBoundCls(_, _) => Opcode::IsLateBoundCls,
             Hhbc::IsTypeC(_, op, _) => Opcode::IsTypeC(op),
             Hhbc::IsTypeL(lid, op, _) => {
@@ -567,10 +558,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::NewDictArray(hint, _) => Opcode::NewDictArray(hint),
             Hhbc::NewKeysetArray(ref operands, _) => Opcode::NewKeysetArray(operands.len() as u32),
             Hhbc::NewObj(_, _) => Opcode::NewObj,
-            Hhbc::NewObjD(clsid, _) => {
-                let clsid = self.strings.lookup_class_name(clsid);
-                Opcode::NewObjD(clsid)
-            }
+            Hhbc::NewObjD(clsid, _) => Opcode::NewObjD(clsid),
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
             Hhbc::NewPair(..) => Opcode::NewPair,
             Hhbc::NewStructDict(ref keys, _, _) => {
@@ -588,18 +576,14 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::Print(..) => Opcode::Print,
             Hhbc::RaiseClassStringConversionNotice(..) => Opcode::RaiseClassStringConversionNotice,
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
-            Hhbc::ResolveClass(clsid, _) => {
-                let class = self.strings.lookup_class_name(clsid);
-                Opcode::ResolveClass(class)
-            }
+            Hhbc::ResolveClass(clsid, _) => Opcode::ResolveClass(clsid),
             Hhbc::ResolveClsMethod(_, method, _) => {
                 let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveClsMethod(method)
             }
             Hhbc::ResolveClsMethodD(clsid, method, _) => {
-                let class = self.strings.lookup_class_name(clsid);
                 let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveClsMethodD(class, method)
+                Opcode::ResolveClsMethodD(clsid, method)
             }
             Hhbc::ResolveClsMethodS(clsref, method, _) => {
                 let method = self.strings.lookup_method_name(method);
@@ -616,9 +600,8 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::ResolveFunc(func, _) => Opcode::ResolveFunc(func),
             Hhbc::ResolveMethCaller(func, _) => Opcode::ResolveMethCaller(func),
             Hhbc::ResolveRClsMethodD(_, clsid, method, _) => {
-                let class = self.strings.lookup_class_name(clsid);
                 let method = self.strings.lookup_method_name(method);
-                Opcode::ResolveRClsMethodD(class, method)
+                Opcode::ResolveRClsMethodD(clsid, method)
             }
             Hhbc::ResolveRFunc(_, func, _) => Opcode::ResolveRFunc(func),
             Hhbc::SelfCls(_) => Opcode::SelfCls,
@@ -713,10 +696,7 @@ impl<'b> InstrEmitter<'b> {
                 Constant::File => Opcode::File,
                 Constant::FuncCred => Opcode::FuncCred,
                 Constant::Int(v) => Opcode::Int(*v),
-                Constant::LazyClass(cid) => {
-                    let cn = self.strings.lookup_class_name(*cid);
-                    Opcode::LazyClass(cn)
-                }
+                Constant::LazyClass(cid) => Opcode::LazyClass(*cid),
                 Constant::Method => Opcode::Method,
                 Constant::Named(name) => Opcode::CnsE(*name),
                 Constant::NewCol(k) => Opcode::NewCol(*k),

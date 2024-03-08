@@ -137,7 +137,7 @@ pub(crate) fn convert_attributes(
                     .map(|arg| convert_typed_value(&arg, strings)),
             );
             // XXX attribute names are class names
-            hhbc::Attribute::new(strings.lookup_class_name(attr.name).as_str(), arguments)
+            hhbc::Attribute::new(attr.name.as_string_id(), arguments)
         })
         .collect()
 }
@@ -151,9 +151,7 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue, strings: &StringCache) ->
         ir::TypedValue::String(v) => {
             hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(*v))
         }
-        ir::TypedValue::LazyClass(v) => {
-            hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
-        }
+        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
         ir::TypedValue::Null => hhbc::TypedValue::Null,
         ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(
             Vec::from_iter(vs.iter().map(|v| convert_typed_value(v, strings))).into(),
@@ -175,9 +173,7 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue, strings: &StringCache) ->
 pub(crate) fn convert_array_key(tv: &ir::ArrayKey, strings: &StringCache) -> hhbc::TypedValue {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
-        ir::ArrayKey::LazyClass(v) => {
-            hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
-        }
+        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
         ir::ArrayKey::String(v) => {
             hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(v))
         }

@@ -9,7 +9,6 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
-use ir_core::ClassId;
 use ir_core::ClassName;
 use ir_core::ConstName;
 use ir_core::Fatal;
@@ -29,7 +28,7 @@ use parse_macro_ir::parse;
 use crate::parse::parse_attr;
 use crate::parse::parse_attribute;
 use crate::parse::parse_attributes;
-use crate::parse::parse_class_id;
+use crate::parse::parse_class_name;
 use crate::parse::parse_comma_list;
 use crate::parse::parse_doc_comment;
 use crate::parse::parse_fatal_op;
@@ -197,7 +196,7 @@ impl UnitParser {
 
     fn parse_method(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let (clsname, clsloc) = parse_user_id(tokenizer)?;
-        let clsid = ClassId::from_bytes(&clsname, &self.unit.strings);
+        let clsid = ClassName::from_utf8(&clsname)?;
         tokenizer.expect_identifier("::")?;
 
         let mut cs = crate::func::ClassState::default();
@@ -261,7 +260,7 @@ impl UnitParser {
     }
 
     fn parse_typedef(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <vis:parse_user_id> <name:parse_class_id> ":" <type_info_union:parse_type_info,*> "="
+        parse!(tokenizer, <vis:parse_user_id> <name:parse_class_name> ":" <type_info_union:parse_type_info,*> "="
                <attributes:parse_attributes("<")> <type_structure:parse_typed_value> <attrs:parse_attr>);
 
         let loc = self.get_cur_src_loc();

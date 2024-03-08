@@ -3,13 +3,13 @@
 pub use hhvm_types_ffi::ffi::TypeStructureKind;
 
 use crate::ArrayKey;
-use crate::ClassId;
+use crate::ClassName;
 use crate::StringInterner;
 use crate::TypedValue;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum TypeStruct {
-    Unresolved(ClassId),
+    Unresolved(ClassName),
     Null,
     Nonnull,
 }
@@ -22,7 +22,7 @@ impl TypeStruct {
             TypeStruct::Unresolved(cid) => {
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
                 let classname_key = ArrayKey::String(strings.intern_str("classname"));
-                let name = TypedValue::String(cid.id);
+                let name = TypedValue::String(cid.as_bytes_id());
                 TypedValue::Dict(
                     [(kind_key, kind), (classname_key, name)]
                         .into_iter()
@@ -52,7 +52,7 @@ impl TypeStruct {
             let classname_key = ArrayKey::String(strings.intern_str("classname"));
             let classname = dv.get(&classname_key)?.get_string()?;
             let classname = strings.lookup_bytes_or_none(classname)?;
-            let cid = ClassId::from_bytes(&classname, strings);
+            let cid = ClassName::from_utf8(classname).ok()?;
             Some(TypeStruct::Unresolved(cid))
         } else {
             None
@@ -84,8 +84,7 @@ mod test {
             Some(TypeStruct::Nonnull)
         );
 
-        let classname = strings.intern_str("ExampleClass");
-        let class_ts = TypeStruct::Unresolved(ClassId::new(classname));
+        let class_ts = TypeStruct::Unresolved(ClassName::intern("ExampleClass"));
         assert_eq!(
             TypeStruct::try_from_typed_value(
                 &class_ts.clone().into_typed_value(&strings),

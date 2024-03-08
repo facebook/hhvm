@@ -7,12 +7,12 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
-use ir_core::class::Requirement;
 use ir_core::Class;
-use ir_core::ClassId;
+use ir_core::ClassName;
 use ir_core::CtxConstant;
 use ir_core::PropId;
 use ir_core::Property;
+use ir_core::Requirement;
 use ir_core::StringInterner;
 use ir_core::TraitReqKind;
 use ir_core::TypeConstant;
@@ -21,7 +21,7 @@ use parse_macro_ir::parse;
 use crate::parse::parse_attr;
 use crate::parse::parse_attribute;
 use crate::parse::parse_attributes;
-use crate::parse::parse_class_id;
+use crate::parse::parse_class_name;
 use crate::parse::parse_comma_list;
 use crate::parse::parse_doc_comment;
 use crate::parse::parse_enum;
@@ -44,7 +44,7 @@ impl ClassParser {
     ) -> Result<Class> {
         parse!(tokenizer, <name:parse_user_id> <flags:parse_attr> "{" "\n");
 
-        let name = ClassId::from_bytes(&name.0, &unit_state.unit.strings);
+        let name = ClassName::from_utf8(&name.0)?;
 
         let src_loc = unit_state.get_cur_src_loc();
 
@@ -148,19 +148,19 @@ impl ClassParser {
     }
 
     fn parse_enum_includes(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <enum_includes:parse_class_id,*>);
+        parse!(tokenizer, <enum_includes:parse_class_name,*>);
         self.class.enum_includes = enum_includes;
         Ok(())
     }
 
     fn parse_extends(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let name = parse_class_id(tokenizer)?;
+        let name = parse_class_name(tokenizer)?;
         self.class.base = Some(name);
         Ok(())
     }
 
     fn parse_implements(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let name = parse_class_id(tokenizer)?;
+        let name = parse_class_name(tokenizer)?;
         self.class.implements.push(name);
         Ok(())
     }
@@ -207,7 +207,7 @@ impl ClassParser {
             })
         })?;
 
-        let name = parse_class_id(tokenizer)?;
+        let name = parse_class_name(tokenizer)?;
         self.class.requirements.push(Requirement { name, kind });
         Ok(())
     }
@@ -237,7 +237,7 @@ impl ClassParser {
     }
 
     fn parse_uses(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let name = parse_class_id(tokenizer)?;
+        let name = parse_class_name(tokenizer)?;
         self.class.uses.push(name);
         Ok(())
     }

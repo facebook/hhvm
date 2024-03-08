@@ -13,7 +13,7 @@ use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::BlockId;
 use crate::ClassGetCMode;
-use crate::ClassId;
+use crate::ClassName;
 use crate::CollectionType;
 use crate::ConstName;
 use crate::ContCheckOp;
@@ -446,7 +446,7 @@ pub enum Hhbc {
     ClassName(ValueId, LocId),
     Clone(ValueId, LocId),
     ClsCns(ValueId, ConstName, LocId),
-    ClsCnsD(ConstName, ClassId, LocId),
+    ClsCnsD(ConstName, ClassName, LocId),
     ClsCnsL(ValueId, LocalId, LocId),
     Cmp([ValueId; 2], LocId),
     CmpOp([ValueId; 2], CmpOp, LocId),
@@ -465,7 +465,7 @@ pub enum Hhbc {
     ContValid(LocId),
     CreateCl {
         operands: Box<[ValueId]>,
-        clsid: ClassId,
+        clsid: ClassName,
         loc: LocId,
     },
     CreateCont(LocId),
@@ -481,7 +481,7 @@ pub enum Hhbc {
     IncDecS([ValueId; 2], IncDecOp, LocId),
     IncludeEval(IncludeEval),
     InitProp(ValueId, PropId, InitPropOp, LocId),
-    InstanceOfD(ValueId, ClassId, LocId),
+    InstanceOfD(ValueId, ClassName, LocId),
     IsLateBoundCls(ValueId, LocId),
     IsTypeC(ValueId, IsTypeOp, LocId),
     #[has_operands(none)]
@@ -507,7 +507,7 @@ pub enum Hhbc {
     NewDictArray(/* capacity hint */ u32, LocId),
     NewKeysetArray(Box<[ValueId]>, LocId),
     NewObj(ValueId, LocId),
-    NewObjD(ClassId, LocId),
+    NewObjD(ClassName, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
     NewObjS(SpecialClsRef, LocId),
@@ -522,9 +522,9 @@ pub enum Hhbc {
     Print(ValueId, LocId),
     RaiseClassStringConversionNotice(LocId),
     RecordReifiedGeneric(ValueId, LocId),
-    ResolveClass(ClassId, LocId),
+    ResolveClass(ClassName, LocId),
     ResolveClsMethod(ValueId, MethodId, LocId),
-    ResolveClsMethodD(ClassId, MethodId, LocId),
+    ResolveClsMethodD(ClassName, MethodId, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
     ResolveClsMethodS(SpecialClsRef, MethodId, LocId),
@@ -532,7 +532,7 @@ pub enum Hhbc {
     #[has_locals(none)]
     ResolveRClsMethodS(ValueId, SpecialClsRef, MethodId, LocId),
     ResolveFunc(FunctionName, LocId),
-    ResolveRClsMethodD(ValueId, ClassId, MethodId, LocId),
+    ResolveRClsMethodD(ValueId, ClassName, MethodId, LocId),
     ResolveRFunc(ValueId, FunctionName, LocId),
     ResolveMethCaller(FunctionName, LocId),
     SelfCls(LocId),
@@ -734,7 +734,7 @@ pub enum CallDetail {
     },
     // A::foo(42);
     FCallClsMethodD {
-        clsid: ClassId,
+        clsid: ClassName,
         method: MethodId,
     },
     // $a::foo(42);

@@ -31,20 +31,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
         uses,
     } = class;
 
-    let requirements = Vec::from_iter((requirements.iter()).map(
-        |ir::class::Requirement { name, kind }| {
-            let name = strings.lookup_class_name(*name);
-            hhbc::Requirement { name, kind: *kind }
-        },
-    ));
-
     let ctx_constants = Vec::from_iter(ctx_constants.iter().map(|ctx| convert_ctx_constant(ctx)));
-
-    let enum_includes = Vec::from_iter(
-        enum_includes
-            .into_iter()
-            .map(|id| strings.lookup_class_name(id)),
-    );
 
     let enum_type: Maybe<_> = enum_type
         .as_ref()
@@ -62,18 +49,6 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
         bounds: Vec::from_iter(tys.iter().map(|ty| types::convert(ty, strings).unwrap())).into(),
     }));
 
-    let base = base.map(|base| strings.lookup_class_name(base)).into();
-
-    let implements = Vec::from_iter(
-        implements
-            .iter()
-            .map(|interface| strings.lookup_class_name(*interface)),
-    );
-
-    let name = strings.lookup_class_name(name);
-
-    let uses = Vec::from_iter(uses.into_iter().map(|use_| strings.lookup_class_name(use_)));
-
     let methods = Vec::from_iter(
         methods
             .into_iter()
@@ -82,7 +57,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
 
     let class = hhbc::Class {
         attributes: convert::convert_attributes(attributes, strings).into(),
-        base,
+        base: base.into(),
         constants: Vec::from_iter(
             constants
                 .into_iter()
@@ -103,7 +78,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
                 .map(|prop| convert_property(prop, strings)),
         )
         .into(),
-        requirements: requirements.into(),
+        requirements: requirements.clone().into(),
         span: src_loc.to_span(),
         type_constants: type_constants.into(),
         upper_bounds: upper_bounds.into(),

@@ -153,7 +153,7 @@ pub(crate) struct FmtAttribute<'a>(pub &'a Attribute, pub &'a StringInterner);
 impl Display for FmtAttribute<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtAttribute(attr, strings) = *self;
-        FmtIdentifierId(attr.name.id, strings).fmt(f)?;
+        FmtIdentifierId(attr.name.as_bytes_id(), strings).fmt(f)?;
         if !attr.arguments.is_empty() {
             write!(
                 f,
@@ -365,7 +365,11 @@ impl Display for FmtConstant<'_> {
             Constant::FuncCred => write!(f, "func_cred"),
             Constant::Int(value) => write!(f, "{}", value),
             Constant::LazyClass(cid) => {
-                write!(f, "lazy_class({})", FmtIdentifierId(cid.id, strings))
+                write!(
+                    f,
+                    "lazy_class({})",
+                    FmtIdentifierId(cid.as_bytes_id(), strings)
+                )
             }
             Constant::Method => write!(f, "method"),
             Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
@@ -693,7 +697,7 @@ impl Display for FmtSpecialClsRef {
 }
 
 pub(crate) struct FmtTParams<'a>(
-    pub(crate) &'a ClassIdMap<TParamBounds>,
+    pub(crate) &'a ClassNameMap<TParamBounds>,
     pub &'a StringInterner,
 );
 
@@ -709,7 +713,7 @@ impl Display for FmtTParams<'_> {
                 // sure we don't confuse with '>>'.
                 "<{} >",
                 FmtSep::comma(map.iter(), |f, (name, bounds)| {
-                    FmtIdentifierId(name.id, strings).fmt(f)?;
+                    FmtIdentifierId(name.as_bytes_id(), strings).fmt(f)?;
                     if !bounds.bounds.is_empty() {
                         write!(f, ": ")?;
                         let mut sep = "";
@@ -726,7 +730,7 @@ impl Display for FmtTParams<'_> {
 }
 
 pub(crate) struct FmtShadowedTParams<'a>(
-    pub(crate) &'a Vec<ClassId>,
+    pub(crate) &'a Vec<ClassName>,
     pub(crate) &'a StringInterner,
 );
 
@@ -740,7 +744,7 @@ impl Display for FmtShadowedTParams<'_> {
                 f,
                 "[{}]",
                 FmtSep::comma(vec.iter(), |f, name| {
-                    FmtIdentifierId(name.id, strings).fmt(f)
+                    FmtIdentifierId(name.as_bytes_id(), strings).fmt(f)
                 })
             )
         }
@@ -761,7 +765,7 @@ impl Display for FmtTypedValue<'_> {
             TypedValue::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
             TypedValue::Float(v) => FmtFloat(v.to_f64()).fmt(f),
             TypedValue::LazyClass(lit) => {
-                write!(f, "lazy({})", FmtQuotedStringId(lit.id, strings))
+                write!(f, "lazy({})", FmtQuotedStringId(lit.as_bytes_id(), strings))
             }
             TypedValue::Null => f.write_str("null"),
             TypedValue::Vec(values) => {
@@ -806,7 +810,9 @@ impl Display for FmtArrayKey<'_> {
                 write!(f, "{}", v)
             }
             ArrayKey::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
-            ArrayKey::LazyClass(v) => write!(f, "lazy({})", FmtQuotedStringId(v.id, strings)),
+            ArrayKey::LazyClass(v) => {
+                write!(f, "lazy({})", FmtQuotedStringId(v.as_bytes_id(), strings))
+            }
         }
     }
 }
@@ -850,7 +856,9 @@ impl<'a> Display for FmtTypeInfo<'a> {
             BaseType::AnyArray => f.write_str("array")?,
             BaseType::Arraykey => f.write_str("arraykey")?,
             BaseType::Bool => f.write_str("bool")?,
-            BaseType::Class(cid) => write!(f, "class {}", FmtIdentifierId(cid.id, strings))?,
+            BaseType::Class(cid) => {
+                write!(f, "class {}", FmtIdentifierId(cid.as_bytes_id(), strings))?
+            }
             BaseType::Classname => f.write_str("classname")?,
             BaseType::Darray => f.write_str("darray")?,
             BaseType::Dict => f.write_str("dict")?,

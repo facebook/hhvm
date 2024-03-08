@@ -3,17 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::StringId;
-
 use crate::func::SrcLoc;
 use crate::Attr;
 use crate::Attribute;
-use crate::ClassId;
+use crate::ClassName;
 use crate::CtxConstant;
 use crate::HackConstant;
 use crate::Method;
 use crate::PropId;
-use crate::TraitReqKind;
+use crate::Requirement;
+use crate::StringId;
 use crate::TypeConstant;
 use crate::TypeInfo;
 use crate::TypedValue;
@@ -26,7 +25,7 @@ pub struct Class {
     pub attributes: Vec<Attribute>,
 
     /// Base class.
-    pub base: Option<ClassId>,
+    pub base: Option<ClassName>,
 
     /// Class constants.
     pub constants: Vec<HackConstant>,
@@ -43,17 +42,17 @@ pub struct Class {
     ///                ^^^
     /// ```
     pub enum_type: Option<TypeInfo>,
-    pub enum_includes: Vec<ClassId>,
+    pub enum_includes: Vec<ClassName>,
 
     pub flags: Attr,
 
     /// The implemented interfaces.
-    pub implements: Vec<ClassId>,
+    pub implements: Vec<ClassName>,
 
     /// The methods defined in this class.
     pub methods: Vec<Method>,
 
-    pub name: ClassId,
+    pub name: ClassName,
     pub properties: Vec<Property>,
     pub requirements: Vec<Requirement>,
     pub src_loc: SrcLoc,
@@ -62,7 +61,7 @@ pub struct Class {
     /// For class generics the upper bounds of each generic.
     pub upper_bounds: Vec<(StringId, Vec<TypeInfo>)>,
 
-    pub uses: Vec<ClassId>,
+    pub uses: Vec<ClassName>,
 }
 
 impl Class {
@@ -84,10 +83,4 @@ pub struct Property {
     pub initial_value: Option<TypedValue>,
     pub type_info: TypeInfo,
     pub doc_comment: ffi::Maybe<Vec<u8>>,
-}
-
-#[derive(Debug)]
-pub struct Requirement {
-    pub name: ClassId,
-    pub kind: TraitReqKind,
 }

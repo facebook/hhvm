@@ -91,9 +91,9 @@ pub(crate) fn convert_func<'a>(
 
     let doc_comment = func.doc_comment.map(|c| c.into()).into();
 
-    let upper_bounds = Vec::from_iter(func.tparams.iter().map(|(name, tparam)| {
+    let upper_bounds = Vec::from_iter(func.tparams.into_iter().map(|(name, tparam)| {
         hhbc::UpperBound {
-            name: strings.intern(name.id).expect("non-utf8 class name"),
+            name: name.as_string_id(),
             bounds: tparam
                 .bounds
                 .iter()
@@ -102,11 +102,8 @@ pub(crate) fn convert_func<'a>(
         }
     }));
 
-    let shadowed_tparams = Vec::from_iter(
-        func.shadowed_tparams
-            .iter()
-            .map(|name| strings.lookup_class_name(*name).as_string_id()),
-    );
+    let shadowed_tparams =
+        Vec::from_iter(func.shadowed_tparams.iter().map(|name| name.as_string_id()));
 
     let body_instrs = body_instrs.to_vec();
     let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs).unwrap();

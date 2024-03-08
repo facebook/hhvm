@@ -59,6 +59,10 @@ macro_rules! impl_intern_id {
             pub fn from_utf8(s: &[u8]) -> Result<Self, std::str::Utf8Error> {
                 Ok(Self::intern(std::str::from_utf8(s)?))
             }
+
+            pub fn from_bytes(id: crate::BytesId) -> Result<Self, std::str::Utf8Error> {
+                Ok(Self(StringId::from_bytes(id)?))
+            }
         }
 
         impl write_bytes::DisplayBytes for $type {
@@ -135,6 +139,7 @@ impl std::fmt::Display for AdataId {
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct ClassName(StringId);
+pub type ClassNameMap<T> = indexmap::IndexMap<ClassName, T, newtype::BuildIdHasher<u32>>;
 
 impl_intern_id!(ClassName);
 

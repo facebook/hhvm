@@ -8,7 +8,6 @@ use std::sync::OnceLock;
 use ffi::Maybe;
 use hhbc::StringId;
 use ir::BaseType;
-use ir::ClassId;
 use ir::StringInterner;
 use itertools::Itertools;
 use maplit::hashmap;
@@ -22,7 +21,7 @@ pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir:
     let constraint_ty = match name {
         // Checking for emptiness to filter out cases where the type constraint is not enforceable
         // (e.g. name = "", hint = type_const).
-        Some(name) if !name.is_empty() => cvt_constraint_type(name, strings),
+        Some(name) if !name.is_empty() => cvt_constraint_type(name),
         Some(_) => BaseType::None,
         _ => user_type
             .as_ref()
@@ -61,7 +60,7 @@ pub(crate) fn convert_maybe_type<'a>(
     }
 }
 
-fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
+fn cvt_constraint_type(name: StringId) -> BaseType {
     use std::collections::HashMap;
     static CONSTRAINT_BY_NAME: OnceLock<HashMap<&'static str, BaseType>> = OnceLock::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
@@ -93,11 +92,8 @@ fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
 
     constraint_by_name
         .get(name.as_str())
-        .cloned()
-        .unwrap_or_else(|| {
-            let name = ClassId::new(strings.intern_str(name.as_str()));
-            BaseType::Class(name)
-        })
+        .copied()
+        .unwrap_or_else(|| BaseType::Class(ir::ClassName::new(name)))
 }
 
 pub(crate) fn convert_typedef<'a>(
@@ -116,7 +112,6 @@ pub(crate) fn convert_typedef<'a>(
     } = td;
 
     let loc = ir::SrcLoc::from_span(filename, span);
-    let name = ClassId::from_hhbc(*name, strings);
     let attributes = attributes
         .iter()
         .map(|a| convert::convert_attribute(a, strings))
@@ -128,7 +123,7 @@ pub(crate) fn convert_typedef<'a>(
     let type_structure = convert::convert_typed_value(type_structure, strings);
 
     ir::Typedef {
-        name,
+        name: *name,
         attributes,
         type_info_union,
         type_structure,

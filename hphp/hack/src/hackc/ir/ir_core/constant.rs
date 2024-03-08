@@ -5,7 +5,7 @@ use std::sync::Arc;
 use hhvm_types_ffi::Attr;
 
 use crate::instr::HasOperands;
-use crate::ClassId;
+use crate::ClassName;
 use crate::CollectionType;
 use crate::ConstName;
 use crate::FloatBits;
@@ -24,7 +24,7 @@ pub enum Constant {
     Float(FloatBits),
     FuncCred,
     Int(i64),
-    LazyClass(ClassId),
+    LazyClass(ClassName),
     Method,
     Named(ConstName),
     NewCol(CollectionType),

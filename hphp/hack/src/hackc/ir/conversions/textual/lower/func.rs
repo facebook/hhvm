@@ -50,7 +50,7 @@ pub(crate) fn lower_func(
 
     // If the function is reified then make the implied 0ReifiedGenerics
     // parameter explicit.
-    if func.is_reified(&strings) {
+    if func.is_reified() {
         add_reified_parameter(&mut func, &strings);
     }
 
@@ -187,10 +187,10 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
 
     let class = &method_info.class;
 
-    let infer_const = ir::ClassId::from_str(crate::lower::class::INFER_CONSTANT, &builder.strings);
+    let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
 
     // Now emit the static properties.
-    let cls_name = builder.emit_constant(Constant::String(class.name.id));
+    let cls_name = builder.emit_constant(Constant::String(class.name.as_bytes_id()));
     let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
         cls_name,
         ClassGetCMode::Normal,

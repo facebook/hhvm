@@ -8,7 +8,7 @@ use std::sync::Arc;
 use hash::IndexMap;
 use hash::IndexSet;
 
-use crate::ClassId;
+use crate::ClassName;
 use crate::Constant;
 use crate::FloatBits;
 use crate::TypeInfo;
@@ -21,7 +21,7 @@ pub enum TypedValue {
     Float(FloatBits),
     Int(i64),
     Keyset(KeysetValue),
-    LazyClass(ClassId),
+    LazyClass(ClassName),
     Null,
     String(UnitBytesId),
     Uninit,
@@ -73,7 +73,7 @@ impl From<TypedValue> for Constant {
             TypedValue::Bool(b) => Constant::Bool(b),
             TypedValue::Float(f) => Constant::Float(f),
             TypedValue::Int(i) => Constant::Int(i),
-            TypedValue::LazyClass(id) => Constant::String(id.id),
+            TypedValue::LazyClass(id) => Constant::String(id.as_bytes_id()),
             TypedValue::Null => Constant::Null,
             TypedValue::String(id) => Constant::String(id),
             TypedValue::Uninit => Constant::Uninit,
@@ -88,7 +88,7 @@ impl From<TypedValue> for Constant {
 pub enum ArrayKey {
     Int(i64),
     String(UnitBytesId),
-    LazyClass(ClassId),
+    LazyClass(ClassName),
 }
 
 /// A wrapper around IndexSet<ArrayKey> which includes key ordering for

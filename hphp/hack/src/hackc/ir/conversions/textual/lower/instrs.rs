@@ -626,7 +626,7 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, loc)) => {
                 // ClsCnsD(id, cid) -> CGetS(id, cid)
-                let cid = builder.emit_constant(Constant::String(cid.id));
+                let cid = builder.emit_constant(Constant::String(cid.as_bytes_id()));
                 let const_id = builder.emit_constant(Constant::String(const_id.as_bytes_id()));
                 Instr::Hhbc(Hhbc::CGetS([const_id, cid], ReadonlyOp::Readonly, loc))
             }

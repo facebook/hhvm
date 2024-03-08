@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir::class::Requirement;
 use ir::func::DefaultValue;
 use ir::func::ExFrame;
 use ir::instr::BaseOp;
@@ -15,6 +14,7 @@ use ir::instr::MemberKey;
 use ir::instr::MemberOp;
 use ir::instr::Special;
 use ir::instr::Terminator;
+use ir::Requirement;
 use ir::SymbolRefs;
 // This is reasonable because if we compare everything then we'll end up pulling
 // in everything...
@@ -37,9 +37,7 @@ fn cmp_attribute(
     (a, a_strings): (&Attribute, &StringInterner),
     (b, b_strings): (&Attribute, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
-    cmp_id(a.name.id, b.name.id).qualified("name")?;
+    cmp_eq(a.name, b.name).qualified("name")?;
     cmp_slice(
         a.arguments.iter().map(|a| (a, a_strings)),
         b.arguments.iter().map(|b| (b, b_strings)),
@@ -106,8 +104,6 @@ fn cmp_class(
     (a, a_strings): (&Class, &StringInterner),
     (b, b_strings): (&Class, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Class {
         attributes: a_attributes,
         base: a_base,
@@ -148,7 +144,7 @@ fn cmp_class(
     } = b;
 
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
-    cmp_option(a_base.map(|i| i.id), b_base.map(|i| i.id), cmp_id).qualified("base")?;
+    cmp_option(a_base.as_ref(), b_base.as_ref(), cmp_eq).qualified("base")?;
     cmp_map_t(
         a_constants.iter().map(|a| (a, a_strings)),
         b_constants.iter().map(|b| (b, b_strings)),
@@ -168,26 +164,16 @@ fn cmp_class(
         cmp_type_info,
     )
     .qualified("enum_type")?;
-    cmp_slice(
-        a_enum_includes.iter().map(|i| i.id),
-        b_enum_includes.iter().map(|i| i.id),
-        cmp_id,
-    )
-    .qualified("enum_includes")?;
+    cmp_slice(a_enum_includes.iter(), b_enum_includes.iter(), cmp_eq).qualified("enum_includes")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_slice(
-        a_implements.iter().map(|i| i.id),
-        b_implements.iter().map(|i| i.id),
-        cmp_id,
-    )
-    .qualified("implements")?;
+    cmp_slice(a_implements.iter(), b_implements.iter(), cmp_eq).qualified("implements")?;
     cmp_map_t(
         a_methods.iter().map(|i| (i, a_strings)),
         b_methods.iter().map(|i| (i, b_strings)),
         cmp_method,
     )
     .qualified("methods")?;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_map_t(
         a_properties.iter().map(|i| (i, a_strings)),
         b_properties.iter().map(|i| (i, b_strings)),
@@ -195,8 +181,8 @@ fn cmp_class(
     )
     .qualified("properties")?;
     cmp_slice(
-        a_requirements.iter().map(|i| (i, a_strings)),
-        b_requirements.iter().map(|i| (i, b_strings)),
+        a_requirements.iter(),
+        b_requirements.iter(),
         cmp_requirement,
     )
     .qualified("requirements")?;
@@ -213,12 +199,7 @@ fn cmp_class(
         cmp_upper_bounds,
     )
     .qualified("upper_bounds")?;
-    cmp_slice(
-        a_uses.iter().map(|i| i.id),
-        b_uses.iter().map(|i| i.id),
-        cmp_id,
-    )
-    .qualified("uses")?;
+    cmp_slice(a_uses.iter(), b_uses.iter(), cmp_eq).qualified("uses")?;
     Ok(())
 }
 
@@ -291,9 +272,7 @@ fn cmp_constant(
         }
         (Constant::Float(a), Constant::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (Constant::Int(a), Constant::Int(b)) => cmp_eq(a, b).qualified("int")?,
-        (Constant::LazyClass(a), Constant::LazyClass(b)) => {
-            cmp_id(a.id, b.id).qualified("lazy_class")?
-        }
+        (Constant::LazyClass(a), Constant::LazyClass(b)) => cmp_eq(a, b).qualified("lazy_class")?,
         (Constant::Named(a), Constant::Named(b)) => cmp_eq(a, b).qualified("named")?,
         (Constant::NewCol(a), Constant::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
         (Constant::String(a), Constant::String(b)) => cmp_id(*a, *b).qualified("string")?,
@@ -379,8 +358,6 @@ fn cmp_func(
     (a, a_strings): (&Func, &StringInterner),
     (b, b_strings): (&Func, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Func {
         attributes: a_attributes,
         attrs: a_attrs,
@@ -436,12 +413,8 @@ fn cmp_func(
     .qualified("params")?;
     cmp_type_info((a_return_type, a_strings), (b_return_type, b_strings))
         .qualified("return_type")?;
-    cmp_slice(
-        a_shadowed_tparams.iter().map(|i| i.id),
-        b_shadowed_tparams.iter().map(|i| i.id),
-        cmp_id,
-    )
-    .qualified("shadowed_tparams")?;
+    cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
+        .qualified("shadowed_tparams")?;
 
     cmp_map_t(
         a_tparams.iter().map(|(i, j)| (i, j, a_strings)),
@@ -703,7 +676,7 @@ fn cmp_instr_call(
         }
         (CallDetail::FCallClsMethodD { clsid: a_clsid, method: a_method },
          CallDetail::FCallClsMethodD { clsid: b_clsid, method: b_method }) => {
-            cmp_id(a_clsid.id, b_clsid.id).qualified("clsid")?;
+            cmp_eq(a_clsid, b_clsid).qualified("clsid")?;
             cmp_id(a_method.id, b_method.id).qualified("method")?;
         }
         (CallDetail::FCallClsMethodM { method: a_method, log: a_log },
@@ -777,7 +750,7 @@ fn cmp_instr_hhbc(
         }
         (Hhbc::ClsCnsD(x0, y0, _), Hhbc::ClsCnsD(x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("ClsCnsD param x")?;
-            cmp_id(y0.id, y1.id).qualified("ClsCnsD param y")?;
+            cmp_eq(y0, y1).qualified("ClsCnsD param y")?;
         }
         (Hhbc::CmpOp(_, x0, _), Hhbc::CmpOp(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("CmpOp param x")?;
@@ -800,7 +773,7 @@ fn cmp_instr_hhbc(
                 loc: _,
             },
         ) => {
-            cmp_id(x0.id, x1.id).qualified("CreateCl param x")?;
+            cmp_eq(x0, x1).qualified("CreateCl param x")?;
         }
         (Hhbc::IncDecL(_, x0, _), Hhbc::IncDecL(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("IncDecL param x")?;
@@ -828,7 +801,7 @@ fn cmp_instr_hhbc(
             cmp_eq(y0, y1).qualified("InitProp param y")?;
         }
         (Hhbc::InstanceOfD(_, x0, _), Hhbc::InstanceOfD(_, x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("InstanceOfD param x")?;
+            cmp_eq(x0, x1).qualified("InstanceOfD param x")?;
         }
         (Hhbc::IsTypeC(_, x0, _), Hhbc::IsTypeC(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("IsTypeC param x")?;
@@ -847,7 +820,7 @@ fn cmp_instr_hhbc(
             cmp_eq(x0, x1).qualified("NewDictArray param x")?;
         }
         (Hhbc::NewObjD(x0, _), Hhbc::NewObjD(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("NewObjD param x")?;
+            cmp_eq(x0, x1).qualified("NewObjD param x")?;
         }
         (Hhbc::NewObjS(x0, _), Hhbc::NewObjS(x1, _)) => {
             cmp_eq(x0, x1).qualified("NewObjS param x")?;
@@ -860,13 +833,13 @@ fn cmp_instr_hhbc(
             cmp_eq(x0, x1).qualified("OODeclExists param x")?;
         }
         (Hhbc::ResolveClass(x0, _), Hhbc::ResolveClass(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveClass param x")?;
+            cmp_eq(x0, x1).qualified("ResolveClass param x")?;
         }
         (Hhbc::ResolveClsMethod(_, x0, _), Hhbc::ResolveClsMethod(_, x1, _)) => {
             cmp_id(x0.id, x1.id).qualified("ResolveClsMethod param x")?;
         }
         (Hhbc::ResolveClsMethodD(x0, y0, _), Hhbc::ResolveClsMethodD(x1, y1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveClsMethodD param x")?;
+            cmp_eq(x0, x1).qualified("ResolveClsMethodD param x")?;
             cmp_id(y0.id, y1.id).qualified("ResolveClsMethodD param y")?;
         }
         (Hhbc::ResolveClsMethodS(x0, y0, _), Hhbc::ResolveClsMethodS(x1, y1, _)) => {
@@ -884,8 +857,8 @@ fn cmp_instr_hhbc(
             cmp_eq(x0, x1).qualified("ResolveFunc param x")?;
         }
         (Hhbc::ResolveRClsMethodD(_, x0, y0, _), Hhbc::ResolveRClsMethodD(_, x1, y1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("ResolveRClsMethodD param x")?;
-            cmp_id(y0.id, y1.id).qualified("ResolveRClsMethodD param y")?;
+            cmp_eq(x0, x1).qualified("ResolveRClsMethodD param x")?;
+            cmp_eq(y0, y1).qualified("ResolveRClsMethodD param y")?;
         }
         (Hhbc::ResolveRFunc(_, x0, _), Hhbc::ResolveRFunc(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("ResolveRFunc param x")?;
@@ -1555,12 +1528,7 @@ fn cmp_property(
     Ok(())
 }
 
-fn cmp_requirement(
-    (a, a_strings): (&Requirement, &StringInterner),
-    (b, b_strings): (&Requirement, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_requirement(a: &Requirement, b: &Requirement) -> Result {
     let Requirement {
         name: a_name,
         kind: a_kind,
@@ -1569,7 +1537,7 @@ fn cmp_requirement(
         name: b_name,
         kind: b_kind,
     } = b;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_kind, b_kind).qualified("kind")?;
     Ok(())
 }
@@ -1610,12 +1578,10 @@ fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
 }
 
 fn cmp_tparam_bounds(
-    (a_id, a, a_strings): (&ClassId, &TParamBounds, &StringInterner),
-    (b_id, b, b_strings): (&ClassId, &TParamBounds, &StringInterner),
+    (a_id, a, a_strings): (&ClassName, &TParamBounds, &StringInterner),
+    (b_id, b, b_strings): (&ClassName, &TParamBounds, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
-    cmp_id(a_id.id, b_id.id).qualified("0")?;
+    cmp_eq(a_id, b_id).qualified("0")?;
     cmp_slice(
         a.bounds.iter().map(|i| (i, a_strings)),
         b.bounds.iter().map(|i| (i, b_strings)),
@@ -1677,7 +1643,7 @@ fn cmp_type_info(
         modifiers: b_modifiers,
     } = b_enforced;
 
-    cmp_base_ty((a_ty, a_strings), (b_ty, b_strings))
+    cmp_base_ty(a_ty, b_ty)
         .qualified("ty")
         .qualified("enforced")?;
     cmp_eq(a_modifiers, b_modifiers)
@@ -1686,15 +1652,10 @@ fn cmp_type_info(
     Ok(())
 }
 
-fn cmp_base_ty(
-    (a, a_strings): (&BaseType, &StringInterner),
-    (b, b_strings): (&BaseType, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_base_ty(a: &BaseType, b: &BaseType) -> Result {
     cmp_eq(std::mem::discriminant(a), std::mem::discriminant(b))?;
     match (a, b) {
-        (BaseType::Class(a), BaseType::Class(b)) => cmp_id(a.id, b.id),
+        (BaseType::Class(a), BaseType::Class(b)) => cmp_eq(a, b),
 
         (BaseType::AnyArray, _)
         | (BaseType::Arraykey, _)
@@ -1741,8 +1702,8 @@ fn cmp_typed_value(
         (TypedValue::Bool(a), TypedValue::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (TypedValue::Float(a), TypedValue::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (TypedValue::String(a), TypedValue::String(b)) => cmp_id(*a, *b).qualified("string")?,
-        (TypedValue::LazyClass(ClassId { id: a }), TypedValue::LazyClass(ClassId { id: b })) => {
-            cmp_id(*a, *b).qualified("lazy_class")?
+        (TypedValue::LazyClass(a), TypedValue::LazyClass(b)) => {
+            cmp_eq(*a, *b).qualified("lazy_class")?
         }
         (TypedValue::Vec(a), TypedValue::Vec(b)) => {
             cmp_slice(
@@ -1806,8 +1767,8 @@ fn cmp_array_key(
         (ArrayKey::Int(a), ArrayKey::Int(b)) => cmp_eq(a, b).qualified("int")?,
         (ArrayKey::String(a), ArrayKey::String(b)) => cmp_id(*a, *b).qualified("string")?,
 
-        (ArrayKey::LazyClass(ClassId { id: a }), ArrayKey::LazyClass(ClassId { id: b })) => {
-            cmp_id(*a, *b).qualified("lazy_class")?
+        (ArrayKey::LazyClass(a), ArrayKey::LazyClass(b)) => {
+            cmp_eq(*a, *b).qualified("lazy_class")?
         }
 
         // these should never happen
@@ -1823,8 +1784,6 @@ fn cmp_typedef(
     (a, a_strings): (&Typedef, &StringInterner),
     (b, b_strings): (&Typedef, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Typedef {
         name: a_name,
         attributes: a_attributes,
@@ -1843,7 +1802,7 @@ fn cmp_typedef(
         attrs: b_attrs,
         case_type: b_case_type,
     } = b;
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
     cmp_slice(
         a_type_info_union.iter().map(|i| (i, a_strings)),
@@ -1964,13 +1923,13 @@ mod mapping {
 
     impl MapName for (&Attribute, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.as_str().to_owned()
         }
     }
 
     impl MapName for (&Class, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.as_str().to_owned()
         }
     }
 
@@ -2010,15 +1969,15 @@ mod mapping {
         }
     }
 
-    impl MapName for (&ClassId, &TParamBounds, &StringInterner) {
+    impl MapName for (&ClassName, &TParamBounds, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.as_bstr(self.2).to_string()
+            self.0.as_str().to_owned()
         }
     }
 
     impl MapName for (&Typedef, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.as_str().to_owned()
         }
     }
 }

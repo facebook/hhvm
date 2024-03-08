@@ -16,7 +16,7 @@ use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::BlockId;
-use ir::ClassId;
+use ir::ClassName;
 use ir::Constant;
 use ir::Func;
 use ir::FunctionFlags;
@@ -235,12 +235,12 @@ pub(crate) fn lower_and_write_func(
 
 const WRAPPER_ATTRIBUTE_NAME: &str = "__wrapperattribute";
 
-fn wrapper_attribute(strings: &StringInterner) -> ClassId {
-    ClassId::from_str(WRAPPER_ATTRIBUTE_NAME, strings)
+fn wrapper_attribute() -> ClassName {
+    ClassName::intern(WRAPPER_ATTRIBUTE_NAME)
 }
 
-fn is_wrapper_attribute(classid: &ClassId, strings: &StringInterner) -> bool {
-    strings.eq_str(classid.id, WRAPPER_ATTRIBUTE_NAME)
+fn is_wrapper_attribute(classid: ClassName) -> bool {
+    classid.as_str() == WRAPPER_ATTRIBUTE_NAME
 }
 
 /// Given a Func that has default parameters make a version of the function with
@@ -266,7 +266,7 @@ fn split_default_func(
         return None;
     }
 
-    let has_reified = orig_func.is_reified(strings);
+    let has_reified = orig_func.is_reified();
     let mut variadic_idx = None;
     if orig_func.params[max_params - 1].is_variadic {
         max_params -= 1;
@@ -276,7 +276,7 @@ fn split_default_func(
     for param_count in min_params..max_params {
         let mut func = orig_func.clone();
         func.attributes.push(ir::Attribute {
-            name: wrapper_attribute(strings),
+            name: wrapper_attribute(),
             arguments: Vec::new(),
         });
 
@@ -412,10 +412,7 @@ fn write_func(
         is_curry: false,
         is_final: func_info.attrs().is_final(),
         is_abstract: func_info.attrs().is_abstract(),
-        is_wrapper: func
-            .attributes
-            .iter()
-            .any(|a| is_wrapper_attribute(&a.name, &unit_state.strings)),
+        is_wrapper: func.attributes.iter().any(|a| is_wrapper_attribute(a.name)),
     };
 
     // TODO(aorenste) move of `func` occurs in the lambda below, so I clone it to
@@ -504,10 +501,7 @@ pub(crate) fn write_func_decl(
         is_final: func_info.attrs().is_final(),
         is_curry: false,
         is_abstract: func_info.attrs().is_abstract(),
-        is_wrapper: func
-            .attributes
-            .iter()
-            .any(|a| is_wrapper_attribute(&a.name, &unit_state.strings)),
+        is_wrapper: func.attributes.iter().any(|a| is_wrapper_attribute(a.name)),
     };
 
     txf.declare_function(&name, &attributes, &param_tys, &ret_ty)?;
@@ -660,7 +654,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             | Hhbc::ConsumeL(lid, _),
         ) => write_load_var(state, iid, lid)?,
         Instr::Hhbc(Hhbc::CGetS([field, class], _, _)) => {
-            let class_id = lookup_constant_string(state.func, class).map(ClassId::new);
+            let class_id = lookup_constant_string(state.func, class).map(ClassName::from_bytes);
             let field_str = lookup_constant_string(state.func, field);
             let output = if let Some(field_str) = field_str {
                 let field = util::escaped_string(&state.strings.lookup_bstr(field_str));
@@ -673,7 +667,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                         // C::foo
                         // This isn't created by HackC but can be created by infer
                         // lowering.
-                        state.load_static_class(cid)?.into()
+                        state.load_static_class(cid?)?.into()
                     }
                 };
                 state.call_builtin(hack::Builtin::FieldGet, (this, field))?
@@ -1155,7 +1149,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
                 let target = if in_trait {
-                    let base = ClassId::from_str("__self__", &state.strings);
+                    let base = ClassName::intern("__self__");
                     mangle::FunctionName::method(base, is_static, method)
                 } else {
                     mangle::FunctionName::method(mi.class.name, is_static, method)
@@ -1181,7 +1175,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
                 let target = if in_trait {
-                    let base = ClassId::from_str("__parent__", &state.strings);
+                    let base = ClassName::intern("__parent__");
                     mangle::FunctionName::method(base, is_static, method)
                 } else {
                     let base = if let Some(base) = mi.class.base {
@@ -1189,7 +1183,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                     } else {
                         // Uh oh. We're asking to call parent::foo() when we don't
                         // have a known parent. This can happen in a trait...
-                        ClassId::from_str("__parent__", &state.strings)
+                        ClassName::intern("__parent__")
                     };
                     mangle::FunctionName::method(base, is_static, method)
                 };
@@ -1312,7 +1306,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     /// Loads the static singleton for a class.
-    fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
+    fn load_static_class(&mut self, cid: ClassName) -> Result<textual::Sid> {
         match *self.func_info {
             FuncInfo::Method(MethodInfo {
                 class, is_static, ..

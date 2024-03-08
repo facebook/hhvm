@@ -12,7 +12,7 @@ use ir::func::DefaultValue;
 use ir::instr::Terminator;
 use ir::CcReified;
 use ir::CcThis;
-use ir::ClassIdMap;
+use ir::ClassNameMap;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
@@ -112,25 +112,20 @@ fn convert_body<'a>(
         stack_depth: _,
     } = *body;
 
-    let tparams: ClassIdMap<_> = upper_bounds
+    let tparams: ClassNameMap<_> = upper_bounds
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
-            let id = unit.strings.intern_str(name.as_str());
-            let name = ir::ClassId::new(id);
             let bounds = bounds
                 .iter()
                 .map(|ty| types::convert_type(ty, &unit.strings))
                 .collect();
-            (name, ir::TParamBounds { bounds })
+            (ir::ClassName::new(*name), ir::TParamBounds { bounds })
         })
         .collect();
 
-    let shadowed_tparams: Vec<ir::ClassId> = shadowed_tparams
+    let shadowed_tparams: Vec<ir::ClassName> = shadowed_tparams
         .iter()
-        .map(|name| {
-            let id = unit.strings.intern_str(name.as_str());
-            ir::ClassId::new(id)
-        })
+        .map(|s| ir::ClassName::new(*s))
         .collect();
 
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();

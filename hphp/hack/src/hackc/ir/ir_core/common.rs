@@ -1,6 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 
-use crate::ClassId;
+use crate::ClassName;
 use crate::TypedValue;
 
 /// Attributes are the bit of metadata that appears in double angle-brackets
@@ -15,6 +15,6 @@ use crate::TypedValue;
 /// ```
 #[derive(Clone, Debug)]
 pub struct Attribute {
-    pub name: ClassId,
+    pub name: ClassName,
     pub arguments: Vec<TypedValue>,
 }

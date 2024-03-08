@@ -126,7 +126,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call cls_method {}::{}",
-                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
                 FmtIdentifierId(method.id, ctx.strings),
             )?;
         }
@@ -315,7 +315,7 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     writeln!(
         w,
         "class {} {} {{",
-        FmtIdentifierId(class.name.id, strings),
+        FmtIdentifierId(class.name.as_bytes_id(), strings),
         FmtAttr(class.flags, AttrContext::Class)
     )?;
 
@@ -324,11 +324,19 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     }
 
     if let Some(base) = class.base {
-        writeln!(w, "  extends {}", FmtIdentifierId(base.id, strings))?;
+        writeln!(
+            w,
+            "  extends {}",
+            FmtIdentifierId(base.as_bytes_id(), strings)
+        )?;
     }
 
     for implement in &class.implements {
-        writeln!(w, "  implements {}", FmtIdentifierId(implement.id, strings))?;
+        writeln!(
+            w,
+            "  implements {}",
+            FmtIdentifierId(implement.as_bytes_id(), strings)
+        )?;
     }
 
     if let Some(et) = class.enum_type.as_ref() {
@@ -340,7 +348,8 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
             w,
             "  enum_includes {}",
             FmtSep::comma(class.enum_includes.iter(), |w, ie| FmtIdentifierId(
-                ie.id, strings
+                ie.as_bytes_id(),
+                strings
             )
             .fmt(w))
         )?;
@@ -364,7 +373,7 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     }
 
     for use_ in &class.uses {
-        writeln!(w, "  uses {}", FmtIdentifierId(use_.id, strings))?;
+        writeln!(w, "  uses {}", FmtIdentifierId(use_.as_bytes_id(), strings))?;
     }
 
     for req in &class.requirements {
@@ -377,7 +386,7 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
             w,
             "  require {} {}",
             kind,
-            FmtIdentifierId(req.name.id, strings)
+            FmtIdentifierId(req.name.as_bytes_id(), strings)
         )?;
     }
 
@@ -835,7 +844,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "cls_cns_d {}::{}",
-                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
                 FmtIdentifierId(id.as_bytes_id(), ctx.strings)
             )?;
         }
@@ -908,7 +917,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "create_class {}({})",
-                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
                 FmtSep::comma(operands.iter(), |w, arg| write!(
                     w,
                     "{}",
@@ -984,7 +993,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             w,
             "instance_of_d {}, {}",
             FmtVid(func, vid, ctx.verbose, strings),
-            FmtIdentifierId(clsid.id, ctx.strings)
+            FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
         )?,
         Hhbc::IsLateBoundCls(vid, _) => {
             write!(
@@ -1076,7 +1085,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "new_obj direct {}",
-                FmtIdentifierId(clsid.id, ctx.strings)
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
             )?;
         }
         Hhbc::NewObjS(clsref, _) => {
@@ -1143,7 +1152,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
         Hhbc::ResolveClass(clsid, _) => write!(
             w,
             "resolve_class {}",
-            FmtIdentifierId(clsid.id, ctx.strings)
+            FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
         )?,
         Hhbc::ResolveClsMethod(vid, method, _) => {
             write!(
@@ -1157,7 +1166,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "resolve_cls_method_d {}::{}",
-                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
                 FmtIdentifierId(method.id, ctx.strings),
             )?;
         }
@@ -1198,7 +1207,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "resolve_r_cls_method_d {}::{}, {}",
-                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
                 FmtIdentifierId(method.id, ctx.strings),
                 FmtVid(func, vid, verbose, strings),
             )?;
@@ -1830,7 +1839,7 @@ fn print_member_key(
 
 fn print_method(
     w: &mut dyn Write,
-    clsid: ClassId,
+    clsid: ClassName,
     method: &Method,
     verbose: bool,
     strings: &StringInterner,
@@ -1839,7 +1848,7 @@ fn print_method(
     writeln!(
         w,
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {vis} {{",
-        clsid = FmtIdentifierId(clsid.id, strings),
+        clsid = FmtIdentifierId(clsid.as_bytes_id(), strings),
         method = FmtIdentifierId(method.name.id, strings),
         tparams = FmtTParams(&method.func.tparams, strings),
         shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams, strings),
@@ -1947,7 +1956,7 @@ fn print_property(w: &mut dyn Write, property: &Property, strings: &StringIntern
             write!(
                 w,
                 "{}({})",
-                FmtIdentifierId(attr.name.id, strings),
+                FmtIdentifierId(attr.name.as_bytes_id(), strings),
                 FmtSep::comma(attr.arguments.iter(), |w, arg| {
                     FmtTypedValue(arg, strings).fmt(w)
                 })
@@ -2212,7 +2221,7 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         w,
         "typedef {vis} {name}: {ty} = {attributes}{ts} {attrs}",
         vis = if *case_type { "case_type" } else { "alias" },
-        name = FmtIdentifierId(name.id, strings),
+        name = FmtIdentifierId(name.as_bytes_id(), strings),
         ty = FmtSep::comma(type_info_union.iter(), |w, ti| FmtTypeInfo(ti, strings)
             .fmt(w)),
         attributes = FmtSep::new("<", ",", "> ", attributes, |w, attribute| FmtAttribute(

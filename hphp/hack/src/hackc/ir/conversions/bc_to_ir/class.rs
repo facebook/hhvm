@@ -24,12 +24,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .map(|ty| types::convert_type(ty, &unit.strings))
         .into_option();
 
-    let enum_includes = cls
-        .enum_includes
-        .iter()
-        .map(|name| ir::ClassId::from_hhbc(*name, &unit.strings))
-        .collect_vec();
-
     let type_constants = cls
         .type_constants
         .iter()
@@ -37,16 +31,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .collect();
 
     let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
-
-    let requirements = cls
-        .requirements
-        .as_ref()
-        .iter()
-        .map(|hhbc::Requirement { name, kind }| {
-            let name = ir::ClassId::from_hhbc(*name, &unit.strings);
-            ir::class::Requirement { name, kind: *kind }
-        })
-        .collect_vec();
 
     let upper_bounds = cls
         .upper_bounds
@@ -66,18 +50,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .map(|a| convert::convert_attribute(a, &unit.strings))
         .collect_vec();
 
-    let base = cls
-        .base
-        .map(|cls| ir::ClassId::from_hhbc(cls, &unit.strings))
-        .into();
-
-    let implements = cls
-        .implements
-        .as_ref()
-        .iter()
-        .map(|interface| ir::ClassId::from_hhbc(*interface, &unit.strings))
-        .collect_vec();
-
     let properties = cls
         .properties
         .as_ref()
@@ -85,30 +57,24 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .map(|prop| convert_property(prop, &unit.strings))
         .collect_vec();
 
-    let name = ir::ClassId::from_hhbc(cls.name, &unit.strings);
-
     unit.classes.push(ir::Class {
         attributes,
-        base,
+        base: cls.base.into(),
         constants,
         ctx_constants,
         doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
-        enum_includes,
+        enum_includes: cls.enum_includes.clone().into(),
         enum_type,
         flags: cls.flags,
-        implements,
+        implements: cls.implements.clone().into(),
         methods: Default::default(),
-        name,
+        name: cls.name,
         properties,
-        requirements,
+        requirements: cls.requirements.clone().into(),
         src_loc: ir::SrcLoc::from_span(filename, &cls.span),
         type_constants,
         upper_bounds,
-        uses: cls
-            .uses
-            .iter()
-            .map(|use_| ir::ClassId::from_hhbc(*use_, &unit.strings))
-            .collect(),
+        uses: cls.uses.clone().into(),
     });
 }
 

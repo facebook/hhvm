@@ -241,7 +241,7 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
             CallDetail::FCallClsMethod { log }
         }
         Opcode::FCallClsMethodD(_, class, method) => {
-            let clsid = ir::ClassId::from_hhbc(class, ctx.strings);
+            let clsid = class;
             let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodD { clsid, method }
         }
@@ -1148,9 +1148,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
         Opcode::CnsE(id) => Action::Constant(Constant::Named(id)),
-        Opcode::CreateCl(num_args, class) => {
+        Opcode::CreateCl(num_args, clsid) => {
             let operands = collect_args(ctx, num_args);
-            let clsid = ir::ClassId::from_hhbc(class, ctx.strings);
             Action::Push(Instr::Hhbc(Hhbc::CreateCl {
                 operands: operands.into(),
                 clsid,

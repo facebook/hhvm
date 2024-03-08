@@ -15,7 +15,7 @@ use ir_core::BareThisOp;
 use ir_core::BaseType;
 use ir_core::BlockId;
 use ir_core::ClassGetCMode;
-use ir_core::ClassId;
+use ir_core::ClassName;
 use ir_core::CollectionType;
 use ir_core::ConstName;
 use ir_core::Constant;
@@ -74,7 +74,7 @@ fn parse_array_key(tokenizer: &mut Tokenizer<'_>) -> Result<ArrayKey> {
     let t = tokenizer.expect_any_token()?;
     Ok(match t {
         Token::Identifier(s, _) if s == "lazy" => {
-            parse!(tokenizer, "(" <id:parse_class_id> ")");
+            parse!(tokenizer, "(" <id:parse_class_name> ")");
             ArrayKey::LazyClass(id)
         }
         Token::Identifier(s, _) if is_int(s.as_bytes()) => {
@@ -145,7 +145,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
 }
 
 pub(crate) fn parse_attribute(tokenizer: &mut Tokenizer<'_>) -> Result<Attribute> {
-    let name = parse_class_id(tokenizer)?;
+    let name = parse_class_name(tokenizer)?;
     let arguments = if tokenizer.next_is_identifier("(")? {
         parse!(tokenizer, <args:parse_typed_value,*> ")");
         args
@@ -179,7 +179,7 @@ fn parse_base_type(tokenizer: &mut Tokenizer<'_>) -> Result<BaseType> {
         "array" => BaseType::AnyArray,
         "arraykey" => BaseType::Arraykey,
         "bool" => BaseType::Bool,
-        "class" => BaseType::Class(parse_class_id(tokenizer)?),
+        "class" => BaseType::Class(parse_class_name(tokenizer)?),
         "classname" => BaseType::Classname,
         "darray" => BaseType::Darray,
         "dict" => BaseType::Dict,
@@ -230,9 +230,9 @@ pub(crate) fn parse_bid(tokenizer: &mut Tokenizer<'_>) -> Result<BlockId> {
     convert_bid(&ident)
 }
 
-pub(crate) fn parse_class_id(tokenizer: &mut Tokenizer<'_>) -> Result<ClassId> {
+pub(crate) fn parse_class_name(tokenizer: &mut Tokenizer<'_>) -> Result<ClassName> {
     let (id, _) = parse_user_id(tokenizer)?;
-    Ok(ClassId::from_bytes(&id, &tokenizer.strings))
+    Ok(ClassName::from_utf8(&id)?)
 }
 
 pub(crate) fn parse_module_id(tokenizer: &mut Tokenizer<'_>) -> Result<ModuleId> {
@@ -347,7 +347,7 @@ pub(crate) fn parse_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> 
             "func_cred" => Constant::FuncCred,
             "inf" => Constant::Float(FloatBits(f64::INFINITY)),
             "lazy_class" => {
-                parse!(tokenizer, "(" <value:parse_class_id> ")");
+                parse!(tokenizer, "(" <value:parse_class_name> ")");
                 Constant::LazyClass(value)
             }
             "method" => Constant::Method,
@@ -611,9 +611,9 @@ pub(crate) fn parse_readonly(tokenizer: &mut Tokenizer<'_>) -> Result<ReadonlyOp
     .unwrap_or(ReadonlyOp::Any))
 }
 
-pub(crate) fn parse_shadowed_tparams(tokenizer: &mut Tokenizer<'_>) -> Result<Vec<ClassId>> {
+pub(crate) fn parse_shadowed_tparams(tokenizer: &mut Tokenizer<'_>) -> Result<Vec<ClassName>> {
     Ok(if tokenizer.next_is_identifier("[")? {
-        parse!(tokenizer, <tparams:parse_class_id,*> "]");
+        parse!(tokenizer, <tparams:parse_class_name,*> "]");
         tparams
     } else {
         Vec::new()
@@ -798,7 +798,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
             TypedValue::Keyset(KeysetValue(values.into_iter().collect()))
         }
         Token::Identifier(s, _) if s == "lazy" => {
-            parse!(tokenizer, "(" <id:parse_class_id> ")");
+            parse!(tokenizer, "(" <id:parse_class_name> ")");
             TypedValue::LazyClass(id)
         }
         Token::Identifier(s, _) if s == "nan" => TypedValue::Float(FloatBits(f64::NAN)),

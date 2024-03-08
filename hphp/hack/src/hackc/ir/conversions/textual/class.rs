@@ -45,10 +45,8 @@ pub(crate) fn write_class(
     unit_state: &mut UnitState,
     class: ir::Class,
 ) -> Result {
-    trace!("Convert Class {}", class.name.as_bstr(&unit_state.strings));
-
+    trace!("Convert Class {}", class.name);
     let class = crate::lower::lower_class(class, Arc::clone(&unit_state.strings));
-
     let mut state = ClassState::new(txf, unit_state, class);
     state.write_class()
 }
@@ -144,7 +142,7 @@ impl ClassState<'_, '_> {
         }
         self.class.properties = properties;
 
-        let mut extends: Vec<ir::ClassId> = Vec::new();
+        let mut extends: Vec<ir::ClassName> = Vec::new();
         if let Some(base) = compute_base(&self.class) {
             extends.push(base);
         }
@@ -288,7 +286,7 @@ impl ClassState<'_, '_> {
     fn write_method(&mut self, method: ir::Method) -> Result {
         trace!(
             "Convert Method {}::{}",
-            self.class.name.as_bstr(&self.unit_state.strings),
+            self.class.name,
             method.name.as_bstr(&self.unit_state.strings)
         );
 
@@ -324,25 +322,25 @@ impl ClassState<'_, '_> {
 }
 
 /// For a given class return the Ty for its non-static (instance) type.
-pub(crate) fn non_static_ty(class: ir::ClassId) -> textual::Ty {
+pub(crate) fn non_static_ty(class: ir::ClassName) -> textual::Ty {
     let cname = TypeName::Class(class);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
 /// For a given class return the Ty for its static type.
-pub(crate) fn static_ty(class: ir::ClassId) -> textual::Ty {
+pub(crate) fn static_ty(class: ir::ClassName) -> textual::Ty {
     let cname = TypeName::StaticClass(class);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
-pub(crate) fn class_ty(class: ir::ClassId, is_static: IsStatic) -> textual::Ty {
+pub(crate) fn class_ty(class: ir::ClassName, is_static: IsStatic) -> textual::Ty {
     match is_static {
         IsStatic::Static => static_ty(class),
         IsStatic::NonStatic => non_static_ty(class),
     }
 }
 
-fn compute_base(class: &ir::Class) -> Option<ir::ClassId> {
+fn compute_base(class: &ir::Class) -> Option<ir::ClassName> {
     if class.flags.is_trait() {
         // Traits express bases through a 'require extends'.
         let req = class

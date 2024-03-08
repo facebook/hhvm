@@ -273,7 +273,7 @@ fn parse_convert_simple(
 
         match ty {
             ImmType::OA(n) if *n == "ClassName" => {
-                convert(quote_spanned!(span=> ir::ClassId::from_hhbc(*#imm, #strings) ));
+                convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "ConstName" => {
                 convert(quote_spanned!(span=> *#imm ));

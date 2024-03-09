@@ -30,7 +30,6 @@ include "thrift/annotation/python.thrift"
  * type would be `exception FooException`.
  */
 @thrift.Experimental
-@thrift.TerseWrite
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

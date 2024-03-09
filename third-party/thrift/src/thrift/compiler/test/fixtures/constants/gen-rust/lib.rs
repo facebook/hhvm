@@ -6,9 +6,6 @@
 
 #[doc(inline)]
 pub use self::consts::*;
-#[allow(unused_imports)]
-#[doc(no_inline)]
-pub use self::errors::*;
 #[doc(inline)]
 pub use self::types::*;
 

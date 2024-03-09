@@ -34,15 +34,9 @@ include!("{{program:include_src}}");
 #[doc(inline)]
 pub use self::consts::*;
 {{/program:constants?}}
-#[allow(unused_imports)]
-#[doc(no_inline)]
-pub use self::errors::*;{{!
-}}{{#program:types?}}
+{{#program:types?}}
 #[doc(inline)]
-pub use self::types::*;{{!
-}}{{/program:types?}}{{!
-}}{{!
-}}{{#program:types?}}
+pub use self::types::*;
 
 #[doc(inline)]
 pub use {{program:types}} as types;

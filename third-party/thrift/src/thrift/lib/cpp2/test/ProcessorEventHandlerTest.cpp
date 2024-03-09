@@ -43,9 +43,9 @@ class TestModule : public apache::thrift::ServerModule {
 
   std::string getName() const override { return "TestModule"; }
 
-  std::vector<std::unique_ptr<TProcessorEventHandler>> getLegacyEventHandlers()
+  std::vector<std::shared_ptr<TProcessorEventHandler>> getLegacyEventHandlers()
       override {
-    std::vector<std::unique_ptr<TProcessorEventHandler>> result;
+    std::vector<std::shared_ptr<TProcessorEventHandler>> result;
     auto evtHandler = std::make_unique<TrackingTProcessorEventHandler>();
     eventHandlerRef_ = evtHandler.get();
     result.emplace_back(std::move(evtHandler));

@@ -26,7 +26,7 @@ class ServerModule {
 
   virtual std::string getName() const = 0;
 
-  virtual std::vector<std::unique_ptr<TProcessorEventHandler>>
+  virtual std::vector<std::shared_ptr<TProcessorEventHandler>>
   getLegacyEventHandlers() {
     return {};
   }

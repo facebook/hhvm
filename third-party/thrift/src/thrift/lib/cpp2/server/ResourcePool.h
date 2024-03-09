@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
 #include <thrift/lib/cpp2/server/IResourcePoolAcceptor.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
+#include <thrift/lib/thrift/gen-cpp2/serverdbginfo_types.h>
 
 namespace apache::thrift {
 
@@ -102,6 +103,8 @@ class ResourcePool : public IResourcePoolAcceptor {
   void stop();
 
   std::string describe() const;
+
+  serverdbginfo::ResourcePoolDbgInfo getDbgInfo() const;
 
  private:
   friend class ResourcePoolSet;

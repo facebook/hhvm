@@ -125,6 +125,8 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   std::string describe() const override;
 
+  serverdbginfo::RequestPileDbgInfo getDbgInfo() const override;
+
  private:
   // we choose 1KB as segment size to minimize allocations
   using RetrievalIndexQueue = folly::UMPMCQueue<

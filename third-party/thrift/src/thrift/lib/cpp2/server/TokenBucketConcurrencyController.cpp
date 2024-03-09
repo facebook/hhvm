@@ -48,4 +48,12 @@ void TokenBucketConcurrencyController::execute(ServerRequest&& request) {
   notifyOnFinishExecution(request);
 }
 
+serverdbginfo::ConcurrencyControllerDbgInfo
+TokenBucketConcurrencyController::getDbgInfo() const {
+  serverdbginfo::ConcurrencyControllerDbgInfo info;
+  info.name() = folly::demangle(typeid(*this));
+  info.qpsLimit() = qpsLimit_.load();
+  return info;
+}
+
 } // namespace apache::thrift

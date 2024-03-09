@@ -21,6 +21,7 @@
 #include <string>
 
 #include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
+#include <thrift/lib/thrift/gen-cpp2/serverdbginfo_types.h>
 
 namespace apache::thrift {
 
@@ -66,6 +67,8 @@ class RequestPileInterface : public RequestCompletionCallback {
   void onRequestFinished(ServerRequestData&) override;
 
   virtual std::string describe() const = 0;
+
+  virtual serverdbginfo::RequestPileDbgInfo getDbgInfo() const { return {}; }
 };
 
 } // namespace apache::thrift

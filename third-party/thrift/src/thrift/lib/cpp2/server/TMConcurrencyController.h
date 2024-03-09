@@ -27,6 +27,8 @@ class TMConcurrencyController : public ParallelConcurrencyControllerBase {
       : ParallelConcurrencyControllerBase(pile), tm_(tm) {}
   std::string describe() const override;
 
+  serverdbginfo::ConcurrencyControllerDbgInfo getDbgInfo() const override;
+
  private:
   concurrency::ThreadManager& tm_;
 

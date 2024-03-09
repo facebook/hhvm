@@ -2171,5 +2171,28 @@ folly::observer::Observer<bool> ThriftServer::enableAegis() {
   return THRIFT_FLAG_OBSERVE(server_fizz_enable_aegis);
 }
 
+serverdbginfo::ResourcePoolsDbgInfo ThriftServer::getResourcePoolsDbgInfo()
+    const {
+  if (!resourcePoolEnabled()) {
+    serverdbginfo::ResourcePoolsDbgInfo info;
+    info.enabled() = false;
+    return info;
+  }
+
+  serverdbginfo::ResourcePoolsDbgInfo info;
+  info.enabled() = true;
+  info.resourcePools() = {};
+
+  resourcePoolSet().forEachResourcePool([&](ResourcePool* resourcePool) {
+    if (!resourcePool) {
+      return;
+    }
+
+    info.resourcePools()->push_back(resourcePool->getDbgInfo());
+  });
+
+  return info;
+}
+
 } // namespace thrift
 } // namespace apache

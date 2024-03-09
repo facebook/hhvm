@@ -50,4 +50,32 @@ std::string InternalPriorityRequestPile::describe() const {
   return result;
 }
 
+serverdbginfo::RequestPileDbgInfo InternalPriorityRequestPile::getDbgInfo()
+    const {
+  serverdbginfo::RequestPileDbgInfo info;
+  info.name() = folly::demangle(typeid(*this));
+
+  auto loPriPileInfo = loPriPile_.getDbgInfo();
+  auto hiPriPileInfo = loPriPile_.getDbgInfo();
+
+  info.prioritiesCount() =
+      *loPriPileInfo.prioritiesCount() + *hiPriPileInfo.prioritiesCount();
+
+  info.bucketsPerPriority()->insert(
+      info.bucketsPerPriority()->end(),
+      (*loPriPileInfo.bucketsPerPriority()).begin(),
+      (*loPriPileInfo.bucketsPerPriority()).end());
+
+  info.bucketsPerPriority()->insert(
+      info.bucketsPerPriority()->end(),
+      (*hiPriPileInfo.bucketsPerPriority()).begin(),
+      (*hiPriPileInfo.bucketsPerPriority()).end());
+
+  info.perBucketRequestLimit() = std::max(
+      *loPriPileInfo.perBucketRequestLimit(),
+      *hiPriPileInfo.perBucketRequestLimit());
+
+  return info;
+}
+
 } // namespace apache::thrift

@@ -38,6 +38,18 @@ std::string describeExecutor(std::shared_ptr<folly::Executor> executor) {
     return "None";
   }
 }
+
+serverdbginfo::ExecutorDbgInfo getExecutorDbgInfo(folly::Executor* executor) {
+  serverdbginfo::ExecutorDbgInfo executorDbgInfo;
+  executorDbgInfo.name() = folly::demangle(typeid(*executor)).toStdString();
+
+  if (auto* threadPoolExecutor =
+          dynamic_cast<folly::ThreadPoolExecutor*>(executor)) {
+    executorDbgInfo.threadsCount() = threadPoolExecutor->numThreads();
+  }
+
+  return executorDbgInfo;
+}
 } // namespace
 
 // ResourcePool
@@ -118,5 +130,24 @@ std::string ResourcePool::describe() const {
       requestPile_ ? requestPile_->describe() : "None",
       concurrencyController_ ? concurrencyController_->describe() : "None",
       describeExecutor(executor_));
+}
+
+serverdbginfo::ResourcePoolDbgInfo ResourcePool::getDbgInfo() const {
+  serverdbginfo::ResourcePoolDbgInfo info;
+  info.name() = name_;
+
+  if (requestPile_) {
+    info.requestPileDbgInfo() = requestPile_->getDbgInfo();
+  }
+
+  if (concurrencyController_) {
+    info.concurrencyControllerDbgInfo() = concurrencyController_->getDbgInfo();
+  }
+
+  if (auto executor = executor_.get()) {
+    info.executorDbgInfo() = getExecutorDbgInfo(executor);
+  }
+
+  return info;
 }
 } // namespace apache::thrift

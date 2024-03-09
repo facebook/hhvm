@@ -41,4 +41,13 @@ std::string TMConcurrencyController::describe() const {
       executionLimit_.load());
 }
 
+serverdbginfo::ConcurrencyControllerDbgInfo
+TMConcurrencyController::getDbgInfo() const {
+  serverdbginfo::ConcurrencyControllerDbgInfo info;
+  info.name() = folly::demangle(typeid(*this));
+  info.qpsLimit() = getQpsLimit();
+  info.concurrencyLimit() = getExecutionLimitRequests();
+  return info;
+}
+
 } // namespace apache::thrift

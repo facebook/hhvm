@@ -62,6 +62,8 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
     }
   }
 
+  serverdbginfo::ConcurrencyControllerDbgInfo getDbgInfo() const override;
+
  private:
   void dequeueAttempt() {
     size_t maxTries{256};

@@ -72,10 +72,12 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
 #include <thrift/lib/cpp2/server/ThriftQuicServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/TokenBucketConcurrencyController.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
@@ -4401,6 +4403,94 @@ class HeaderOrRocketCompression
     CompressionAlgorithm compression_;
   };
 };
+
+TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
+  // Arrange integration test setup
+  auto handler = std::make_shared<TestInterface>();
+  auto server = std::make_shared<ScopedServerInterfaceThread>(
+      handler, "::1", 9989, [](ThriftServer& server) {
+        {
+          server.requireResourcePools();
+
+          auto rrOptions = RoundRobinRequestPile::Options();
+          rrOptions.numMaxRequests = 123;
+          rrOptions.setNumPriorities(3);
+          auto requestPile = std::make_unique<RoundRobinRequestPile>(rrOptions);
+          auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(3);
+          auto concurrencyController =
+              std::make_unique<ParallelConcurrencyController>(
+                  *requestPile, *executor);
+          concurrencyController->setExecutionLimitRequests(333);
+          server.resourcePoolSet().addResourcePool(
+              "Custom1",
+              std::move(requestPile),
+              executor,
+              std::move(concurrencyController),
+              concurrency::PRIORITY::IMPORTANT);
+        }
+        {
+          auto requestPile = std::make_unique<RoundRobinRequestPile>(
+              RoundRobinRequestPile::Options());
+          auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(5);
+          auto concurrencyController =
+              std::make_unique<TokenBucketConcurrencyController>(
+                  *requestPile, *executor);
+          concurrencyController->setQpsLimit(555);
+          server.resourcePoolSet().addResourcePool(
+              "Custom2",
+              std::move(requestPile),
+              executor,
+              std::move(concurrencyController),
+              concurrency::PRIORITY::IMPORTANT);
+        }
+      });
+
+  // Act
+  auto& thriftServer = dynamic_cast<ThriftServer&>(server->getThriftServer());
+  auto result = thriftServer.getResourcePoolsDbgInfo();
+
+  // Assert
+  auto resourcePools = result.resourcePools().value();
+  EXPECT_EQ(4, resourcePools.size());
+  EXPECT_EQ("DefaultSync", resourcePools[0].name());
+  EXPECT_EQ("DefaultAsync", resourcePools[1].name());
+  EXPECT_EQ("Custom1", resourcePools[2].name());
+  EXPECT_EQ("Custom2", resourcePools[3].name());
+
+  auto& rrServerDbgInfo = resourcePools[2].requestPileDbgInfo().value();
+  EXPECT_TRUE(
+      (*rrServerDbgInfo.name()).find("RoundRobinRequestPile") !=
+      std::string::npos);
+  EXPECT_EQ(123, *rrServerDbgInfo.perBucketRequestLimit());
+  EXPECT_EQ(3, *rrServerDbgInfo.prioritiesCount());
+  EXPECT_EQ(3, (*rrServerDbgInfo.bucketsPerPriority()).size());
+
+  auto& parallelCcDbgInfo =
+      resourcePools[2].concurrencyControllerDbgInfo().value();
+  EXPECT_TRUE(
+      (*parallelCcDbgInfo.name()).find("ParallelConcurrencyController") !=
+      std::string::npos);
+  EXPECT_EQ(333, parallelCcDbgInfo.concurrencyLimit().value());
+  EXPECT_EQ(0, parallelCcDbgInfo.qpsLimit().value());
+
+  auto& cpuExecutorDbgInfo = resourcePools[2].executorDbgInfo().value();
+  EXPECT_TRUE(
+      (*cpuExecutorDbgInfo.name()).find("CPUThreadPoolExecutor") !=
+      std::string::npos);
+  EXPECT_EQ(3, cpuExecutorDbgInfo.threadsCount().value());
+
+  auto& tbCcDbgInfo = resourcePools[3].concurrencyControllerDbgInfo().value();
+  EXPECT_TRUE(
+      (*tbCcDbgInfo.name()).find("TokenBucketConcurrencyController") !=
+      std::string::npos);
+  EXPECT_EQ(555, tbCcDbgInfo.qpsLimit().value());
+
+  auto& executorDbgInfo = resourcePools[3].executorDbgInfo().value();
+  EXPECT_TRUE(
+      (*executorDbgInfo.name()).find("CPUThreadPoolExecutor") !=
+      std::string::npos);
+  EXPECT_EQ(5, executorDbgInfo.threadsCount().value());
+}
 
 TEST_P(HeaderOrRocketCompression, ClientCompressionTest) {
   THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(

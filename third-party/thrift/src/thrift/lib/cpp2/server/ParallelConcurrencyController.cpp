@@ -166,4 +166,13 @@ std::string ParallelConcurrencyController::describe() const {
       executionLimit_.load());
 }
 
+serverdbginfo::ConcurrencyControllerDbgInfo
+ParallelConcurrencyController::getDbgInfo() const {
+  serverdbginfo::ConcurrencyControllerDbgInfo info;
+  info.name() = folly::demangle(typeid(*this));
+  info.concurrencyLimit() = executionLimit_.load();
+  info.qpsLimit() = 0; // no QPS limit, concurrency limit is used
+  return info;
+}
+
 } // namespace apache::thrift

@@ -946,6 +946,11 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void ensureResourcePools();
 
   /**
+   * Returns debug information regarding ResourcePool setup on this server.
+   **/
+  serverdbginfo::ResourcePoolsDbgInfo getResourcePoolsDbgInfo() const;
+
+  /**
    * Kill the workers and wait for listeners to quit
    */
   void cleanUp();

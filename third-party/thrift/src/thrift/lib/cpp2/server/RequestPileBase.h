@@ -38,6 +38,8 @@ class RequestPileBase : public RequestPileInterface {
   // happens on the CPU workers
   void onDequeued(ServerRequest& req);
 
+  serverdbginfo::RequestPileDbgInfo getDbgInfo() const override;
+
  private:
   std::string resourcePoolName_;
 

@@ -78,4 +78,10 @@ void RequestPileBase::registerThreadId() {
   thread_local Init init(threadIdCollector_);
 }
 
+serverdbginfo::RequestPileDbgInfo RequestPileBase::getDbgInfo() const {
+  serverdbginfo::RequestPileDbgInfo info;
+  info.name() = resourcePoolName_;
+  return info;
+}
+
 } // namespace apache::thrift

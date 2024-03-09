@@ -95,6 +95,8 @@ class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {
       : ParallelConcurrencyControllerBase(pile), executor_(ex) {}
   std::string describe() const override;
 
+  serverdbginfo::ConcurrencyControllerDbgInfo getDbgInfo() const override;
+
  private:
   folly::Executor& executor_;
 

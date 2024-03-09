@@ -213,4 +213,19 @@ std::string RoundRobinRequestPile::describe() const {
   return result;
 }
 
+serverdbginfo::RequestPileDbgInfo RoundRobinRequestPile::getDbgInfo() const {
+  serverdbginfo::RequestPileDbgInfo info;
+  info.name() = folly::demangle(typeid(*this));
+  info.prioritiesCount() = opts_.numBucketsPerPriority.size();
+
+  for (size_t i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
+    info.bucketsPerPriority()->push_back(opts_.numBucketsPerPriority[i]);
+  }
+
+  info.perBucketRequestLimit() = opts_.numMaxRequests;
+  info.queuedRequestsCount() = requestCount();
+
+  return info;
+}
+
 } // namespace apache::thrift

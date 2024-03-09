@@ -38,6 +38,8 @@ class InternalPriorityRequestPile : public RequestPileBase {
 
   std::string describe() const override;
 
+  serverdbginfo::RequestPileDbgInfo getDbgInfo() const override;
+
  private:
   RoundRobinRequestPile loPriPile_, highPriPile_;
 };

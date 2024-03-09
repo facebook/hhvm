@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
+#include <thrift/lib/thrift/gen-cpp2/serverdbginfo_types.h>
 
 namespace apache::thrift {
 
@@ -73,6 +74,10 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   virtual uint64_t numPendingDequeRequest() const { return 0; }
 
   virtual std::string describe() const = 0;
+
+  virtual serverdbginfo::ConcurrencyControllerDbgInfo getDbgInfo() const {
+    return {};
+  }
 
   // ConcurrencyController can notify an observer when request execution is
   // completed

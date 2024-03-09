@@ -295,6 +295,29 @@ TEST(RoundRobinRequestPileTest, requestCount) {
   cc.setExecutionLimitRequests(1);
 }
 
+TEST(RoundRobinRequestPileTest, GetDbgInfo) {
+  // Arrange
+  int priorities = 5;
+  RoundRobinRequestPile::Options opts;
+  opts.setNumPriorities(priorities);
+  for (int i = 0; i < priorities; i++) {
+    opts.setNumBucketsPerPriority(i, 10 * (i + 1));
+  }
+  opts.pileSelectionFunction = getScopeFunc();
+  RoundRobinRequestPile requestPile(opts);
+
+  // Act
+  auto result = requestPile.getDbgInfo();
+
+  // Assert
+  EXPECT_TRUE(
+      (*result.name()).find("RoundRobinRequestPile") != std::string::npos);
+  EXPECT_EQ(result.get_prioritiesCount(), priorities);
+  for (int i = 0; i < priorities; ++i) {
+    EXPECT_EQ((*result.bucketsPerPriority())[i], 10 * (i + 1));
+  }
+}
+
 /*
   WARNING: Benchmark running in DEBUG mode
   ============================================================================

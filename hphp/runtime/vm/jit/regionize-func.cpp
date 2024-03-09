@@ -319,8 +319,8 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
     std::ofstream outFile(dotFileName);
     if (outFile.is_open()) {
       cfg.print(outFile, funcId, profData);
-      FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
-             funcId, dotFileName);
+      FTRACE(5, "regionizeFunc: initial CFG for func {}({}) saved to file {}\n",
+        Func::fromFuncId(funcId)->fullName()->data(), funcId, dotFileName);
       outFile.close();
     }
   }

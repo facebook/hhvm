@@ -271,7 +271,7 @@ bool TransCFG::hasArc(TransID srcId, TransID dstId) const {
 
 void TransCFG::print(std::ostream& out, FuncId funcId,
                      const ProfData* profData) const {
-  out << "digraph TransCFG { // function: "
+  out << "digraph TransCFG {\ncomment=\"function: \""
       << Func::fromFuncId(funcId)->fullName()->data() << "\n";
 
   // find max node weight

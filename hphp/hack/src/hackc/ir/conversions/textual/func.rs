@@ -687,7 +687,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                 (None, Some(f)) => {
                     // $x::foo
                     let obj = state.lookup_vid(class);
-                    let field = ir::PropId::new(f);
+                    let field = ir::PropName::from_bytes(f)?;
                     state.store_mixed(
                         Expr::field(obj, textual::Ty::unknown(), FieldName::prop(field)),
                         value.clone(),

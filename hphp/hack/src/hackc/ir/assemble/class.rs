@@ -3,17 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use anyhow::Context;
 use anyhow::Result;
 use ir_core::Class;
 use ir_core::ClassName;
 use ir_core::CtxConstant;
-use ir_core::PropId;
+use ir_core::PropName;
 use ir_core::Property;
 use ir_core::Requirement;
-use ir_core::StringInterner;
 use ir_core::TraitReqKind;
 use ir_core::TypeConstant;
 use parse_macro_ir::parse;
@@ -34,7 +31,6 @@ use crate::tokenizer::Tokenizer;
 
 pub(crate) struct ClassParser {
     class: Class,
-    strings: Arc<StringInterner>,
 }
 
 impl ClassParser {
@@ -49,7 +45,6 @@ impl ClassParser {
         let src_loc = unit_state.get_cur_src_loc();
 
         let mut state = ClassParser {
-            strings: Arc::clone(&unit_state.unit.strings),
             class: Class {
                 attributes: Default::default(),
                 base: Default::default(),
@@ -176,7 +171,7 @@ impl ClassParser {
                <attributes:parse_attributes("<")> <visibility:parse_visibility>
                ":" <type_info:parse_type_info>
                <doc_comment:parse_doc_comment>);
-        let name = PropId::from_bytes(&name.0, &self.strings);
+        let name = PropName::intern(std::str::from_utf8(&name.0)?);
 
         let initial_value = if tokenizer.next_is_identifier("=")? {
             Some(parse_typed_value(tokenizer)?)

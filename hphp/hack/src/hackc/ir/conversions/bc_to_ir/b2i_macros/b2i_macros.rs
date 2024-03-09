@@ -269,8 +269,6 @@ fn parse_convert_simple(
             conv.push(quote_spanned!(span=> let #imm = #converter; ));
         };
 
-        let strings = quote_spanned!(span=> ctx.strings);
-
         match ty {
             ImmType::OA(n) if *n == "ClassName" => {
                 convert(quote_spanned!(span=> *#imm ));
@@ -285,7 +283,7 @@ fn parse_convert_simple(
                 convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::OA(n) if *n == "PropName" => {
-                convert(quote_spanned!(span=> ir::PropId::from_hhbc(*#imm, #strings) ));
+                convert(quote_spanned!(span=> *#imm ));
             }
             ImmType::AA
             | ImmType::ARR(_)

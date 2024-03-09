@@ -22,10 +22,4 @@ impl StringCache {
             &self.interner.lookup_bytes(id),
         )?))
     }
-
-    pub fn lookup_prop_name(&self, id: ir::PropId) -> hhbc::PropName {
-        hhbc::PropName::intern(
-            std::str::from_utf8(&self.interner.lookup_bstr(id.id)).expect("non-utf8 prop name"),
-        )
-    }
 }

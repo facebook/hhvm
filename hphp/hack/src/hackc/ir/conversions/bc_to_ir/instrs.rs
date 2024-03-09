@@ -469,14 +469,8 @@ fn convert_member_key(
             let lid = convert_local(ctx, &local);
             (instr::MemberKey::PL, readonly, None, Some(lid))
         }
-        hhbc::MemberKey::PT(s, readonly) => {
-            let id = ir::PropId::from_hhbc(s, ctx.strings);
-            (instr::MemberKey::PT(id), readonly, None, None)
-        }
-        hhbc::MemberKey::QT(s, readonly) => {
-            let id = ir::PropId::from_hhbc(s, ctx.strings);
-            (instr::MemberKey::QT(id), readonly, None, None)
-        }
+        hhbc::MemberKey::PT(id, readonly) => (instr::MemberKey::PT(id), readonly, None, None),
+        hhbc::MemberKey::QT(id, readonly) => (instr::MemberKey::QT(id), readonly, None, None),
         hhbc::MemberKey::W => (instr::MemberKey::W, ir::ReadonlyOp::Any, None, None),
     }
 }

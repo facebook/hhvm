@@ -452,10 +452,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::CheckClsReifiedGenericMismatch(..) => Opcode::CheckClsReifiedGenericMismatch,
             Hhbc::CheckClsRGSoft(..) => Opcode::CheckClsRGSoft,
             Hhbc::ChainFaults(..) => Opcode::ChainFaults,
-            Hhbc::CheckProp(prop, _) => {
-                let prop = self.strings.lookup_prop_name(prop);
-                Opcode::CheckProp(prop)
-            }
+            Hhbc::CheckProp(prop, _) => Opcode::CheckProp(prop),
             Hhbc::CheckThis(_) => Opcode::CheckThis,
             Hhbc::ClassGetC(_, mode, _) => Opcode::ClassGetC(mode),
             Hhbc::ClassGetTS(_, _) => Opcode::ClassGetTS,
@@ -518,10 +515,7 @@ impl<'b> InstrEmitter<'b> {
             }
             Hhbc::IncDecS(_, op, _) => Opcode::IncDecS(op),
             Hhbc::IncludeEval(ref ie) => self.emit_include_eval(ie),
-            Hhbc::InitProp(_, prop, op, _) => {
-                let prop = self.strings.lookup_prop_name(prop);
-                Opcode::InitProp(prop, op)
-            }
+            Hhbc::InitProp(_, prop, op, _) => Opcode::InitProp(prop, op),
             Hhbc::InstanceOfD(_, clsid, _) => Opcode::InstanceOfD(clsid),
             Hhbc::IsLateBoundCls(_, _) => Opcode::IsLateBoundCls,
             Hhbc::IsTypeC(_, op, _) => Opcode::IsTypeC(op),
@@ -879,14 +873,8 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(lid);
                 hhbc::MemberKey::PL(local, readonly)
             }
-            instr::MemberKey::PT(name) => {
-                let name = self.strings.lookup_prop_name(name);
-                hhbc::MemberKey::PT(name, readonly)
-            }
-            instr::MemberKey::QT(name) => {
-                let name = self.strings.lookup_prop_name(name);
-                hhbc::MemberKey::QT(name, readonly)
-            }
+            instr::MemberKey::PT(name) => hhbc::MemberKey::PT(name, readonly),
+            instr::MemberKey::QT(name) => hhbc::MemberKey::QT(name, readonly),
             instr::MemberKey::W => hhbc::MemberKey::W,
         }
     }

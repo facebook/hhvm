@@ -89,7 +89,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
 
 fn convert_property(src: ir::Property, strings: &StringCache) -> hhbc::Property {
     hhbc::Property {
-        name: strings.lookup_prop_name(src.name),
+        name: src.name,
         flags: src.flags,
         attributes: convert::convert_attributes(src.attributes, strings).into(),
         visibility: src.visibility,

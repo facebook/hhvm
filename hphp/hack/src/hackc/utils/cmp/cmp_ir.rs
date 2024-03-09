@@ -743,7 +743,7 @@ fn cmp_instr_hhbc(
             cmp_eq(x0, x1).qualified("CGetS param x")?;
         }
         (Hhbc::CheckProp(x0, _), Hhbc::CheckProp(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("CheckProp param x")?;
+            cmp_eq(x0, x1).qualified("CheckProp param x")?;
         }
         (Hhbc::ClsCns(_, x0, _), Hhbc::ClsCns(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("ClsCns param x")?;
@@ -797,7 +797,7 @@ fn cmp_instr_hhbc(
                 .qualified("loc")?;
         }
         (Hhbc::InitProp(_, x0, y0, _), Hhbc::InitProp(_, x1, y1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("InitProp param x")?;
+            cmp_eq(x0, x1).qualified("InitProp param x")?;
             cmp_eq(y0, y1).qualified("InitProp param y")?;
         }
         (Hhbc::InstanceOfD(_, x0, _), Hhbc::InstanceOfD(_, x1, _)) => {
@@ -1097,7 +1097,7 @@ fn cmp_instr_member_op_base(
             cmp_eq(a_mode, b_mode).qualified("mode")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
             cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
-            cmp_id((a_prop.id, a_strings), (b_prop.id, b_strings)).qualified("prop")?;
+            cmp_eq(a_prop, b_prop).qualified("prop")?;
         }
 
         // these should never happen
@@ -1217,7 +1217,7 @@ fn cmp_member_key(
             cmp_id(*a, *b)?;
         }
         (MemberKey::PT(a), MemberKey::PT(b)) | (MemberKey::QT(a), MemberKey::QT(b)) => {
-            cmp_id(a.id, b.id)?;
+            cmp_eq(a, b)?;
         }
 
         (MemberKey::EC, MemberKey::EC)
@@ -1483,8 +1483,6 @@ fn cmp_property(
     (a, a_strings): (&Property, &StringInterner),
     (b, b_strings): (&Property, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Property {
         name: a_name,
         flags: a_flags,
@@ -1504,7 +1502,7 @@ fn cmp_property(
         doc_comment: b_doc_comment,
     } = b;
 
-    cmp_id(a_name.id, b_name.id).qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_flags, b_flags).qualified("flagsr")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
@@ -1958,7 +1956,7 @@ mod mapping {
 
     impl MapName for (&Property, &StringInterner) {
         fn get_name(&self) -> String {
-            self.0.name.as_bstr(self.1).to_string()
+            self.0.name.into_string()
         }
     }
 

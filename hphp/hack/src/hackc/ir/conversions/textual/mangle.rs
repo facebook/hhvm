@@ -76,9 +76,9 @@ impl Mangle for [u8] {
 
 // Classes and functions live in different namespaces.
 
-impl Mangle for ir::PropId {
+impl Mangle for ir::PropName {
     fn mangle(&self, strings: &StringInterner) -> String {
-        self.as_bytes(strings).mangle(strings)
+        self.as_bytes().mangle(strings)
     }
 }
 
@@ -107,12 +107,12 @@ impl Intrinsic {
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum FieldName {
-    Prop(ir::PropId),
+    Prop(ir::PropName),
     Raw(String),
 }
 
 impl FieldName {
-    pub(crate) fn prop(pid: ir::PropId) -> Self {
+    pub(crate) fn prop(pid: ir::PropName) -> Self {
         Self::Prop(pid)
     }
 
@@ -132,7 +132,7 @@ impl fmt::Display for FmtFieldName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtFieldName(strings, name) = *self;
         match name {
-            FieldName::Prop(pid) => f.write_str(&pid.as_bytes(strings).mangle(strings)),
+            FieldName::Prop(p) => f.write_str(&p.as_bytes().mangle(strings)),
             FieldName::Raw(s) => f.write_str(s),
         }
     }

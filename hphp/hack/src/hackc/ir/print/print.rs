@@ -812,9 +812,11 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 FmtVid(func, vid, verbose, strings)
             )?;
         }
-        Hhbc::CheckProp(prop, _) => {
-            write!(w, "check_prop {}", FmtIdentifierId(prop.id, ctx.strings))?
-        }
+        Hhbc::CheckProp(prop, _) => write!(
+            w,
+            "check_prop {}",
+            FmtIdentifierId(prop.as_bytes_id(), ctx.strings)
+        )?,
         Hhbc::CheckThis(_) => {
             write!(w, "check_this")?;
         }
@@ -988,7 +990,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "init_prop {}, {}, {}",
-                FmtQuotedStringId(prop.id, ctx.strings),
+                FmtQuotedStringId(prop.as_bytes_id(), ctx.strings),
                 FmtVid(func, vid, verbose, strings),
                 FmtInitPropOp(op)
             )?;
@@ -1666,7 +1668,7 @@ fn print_member_op(
                 w,
                 "{}::{}",
                 FmtVid(func, cls, true, strings),
-                FmtQuotedStringId(prop.id, strings)
+                FmtQuotedStringId(prop.as_bytes_id(), strings)
             )?;
         }
     }
@@ -1834,8 +1836,8 @@ fn print_member_key(
             let lid = locals.next().unwrap();
             write!(w, "{}", FmtLid(lid, strings))?
         }
-        MemberKey::PT(pid) => write!(w, "{}", FmtQuotedStringId(pid.id, strings))?,
-        MemberKey::QT(pid) => write!(w, "{}", FmtQuotedStringId(pid.id, strings))?,
+        MemberKey::PT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id(), strings))?,
+        MemberKey::QT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id(), strings))?,
         MemberKey::W => write!(w, "]")?,
     }
     Ok(())
@@ -1954,7 +1956,7 @@ fn print_property(w: &mut dyn Write, property: &Property, strings: &StringIntern
     write!(
         w,
         "  property {name} {flags}{attributes} {vis} : {ty} {doc}",
-        name = FmtIdentifierId(property.name.id, strings),
+        name = FmtIdentifierId(property.name.as_bytes_id(), strings),
         flags = FmtAttr(property.flags, AttrContext::Property),
         attributes = FmtSep::new(" <", ", ", ">", property.attributes.iter(), |w, attr| {
             write!(

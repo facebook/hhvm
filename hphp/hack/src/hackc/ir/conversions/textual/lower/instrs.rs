@@ -37,7 +37,7 @@ use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::MethodName;
 use ir::ObjMethodOp;
-use ir::PropId;
+use ir::PropName;
 use ir::ReadonlyOp;
 use ir::SetOpOp;
 use ir::SpecialClsRef;
@@ -226,7 +226,7 @@ impl LowerInstrs<'_> {
                 let base = operands.next().unwrap();
                 if let Some(propname) = lookup_constant_string(&builder.func, prop) {
                     // Convert BaseSC w/ constant string to BaseST
-                    let pid = PropId::new(propname);
+                    let pid = PropName::from_bytes(propname).expect("non-utf8 property name");
                     let mut mop = MemberOpBuilder::base_st(base, pid, mode, readonly, loc);
                     mop.operands.extend(operands);
                     mop.locals.extend(locals);
@@ -240,7 +240,7 @@ impl LowerInstrs<'_> {
         None
     }
 
-    fn check_prop(&self, builder: &mut FuncBuilder, _pid: PropId, _loc: LocId) -> Instr {
+    fn check_prop(&self, builder: &mut FuncBuilder, _: PropName, _: LocId) -> Instr {
         // CheckProp checks to see if the prop has already been initialized - we'll just always say "no".
         Instr::copy(builder.emit_constant(Constant::Bool(false)))
     }
@@ -249,7 +249,7 @@ impl LowerInstrs<'_> {
         &self,
         builder: &mut FuncBuilder,
         vid: ValueId,
-        pid: PropId,
+        pid: PropName,
         _op: InitPropOp,
         loc: LocId,
     ) -> Instr {

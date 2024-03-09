@@ -18,7 +18,7 @@ use ir::Method;
 use ir::MethodFlags;
 use ir::MethodName;
 use ir::Param;
-use ir::PropId;
+use ir::PropName;
 use ir::Property;
 use ir::StringInterner;
 use ir::TypeConstant;
@@ -120,7 +120,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         // null.
 
         // (strip the leading '$')
-        let name = PropId::new(strings.intern_str(THIS_AS_PROPERTY));
+        let name = PropName::intern(THIS_AS_PROPERTY);
         class.properties.insert(
             0,
             Property {
@@ -182,7 +182,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
             TypeInfo::empty()
         };
         let prop = Property {
-            name: PropId::new(name.as_bytes_id()),
+            name: PropName::new(name.as_string_id()),
             flags: attrs | Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,
@@ -199,7 +199,6 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
             initializer,
             is_abstract,
         } = tc;
-        let name = PropId::from_bytes(name.as_str().as_bytes(), &strings);
         let arguments: Vec<TypedValue> = initializer
             .as_ref()
             .and_then(|init| compute_tc_attribute(init, &strings))
@@ -226,7 +225,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
             },
         };
         let prop = Property {
-            name,
+            name: PropName::new(name),
             flags: Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,
@@ -251,7 +250,7 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
 
         for prop in &class.properties {
             fb.func.params.push(Param {
-                name: prop.name.id,
+                name: prop.name.as_bytes_id(),
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
@@ -260,7 +259,7 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
                 default_value: None,
             });
 
-            let lid = LocalId::Named(prop.name.id);
+            let lid = LocalId::Named(prop.name.as_bytes_id());
             let value = fb.emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, loc)));
             MemberOpBuilder::base_h(loc).emit_set_m_pt(fb, prop.name, value);
         }

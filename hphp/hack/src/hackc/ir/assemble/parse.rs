@@ -38,7 +38,7 @@ use ir_core::MethodName;
 use ir_core::ModuleName;
 use ir_core::OODeclExistsOp;
 use ir_core::Param;
-use ir_core::PropId;
+use ir_core::PropName;
 use ir_core::ReadonlyOp;
 use ir_core::SetOpOp;
 use ir_core::SilenceOp;
@@ -592,9 +592,9 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<Param> {
     })
 }
 
-pub(crate) fn parse_prop_id(tokenizer: &mut Tokenizer<'_>) -> Result<PropId> {
+pub(crate) fn parse_prop_id(tokenizer: &mut Tokenizer<'_>) -> Result<PropName> {
     let (id, _) = parse_user_id(tokenizer)?;
-    Ok(PropId::from_bytes(&id, &tokenizer.strings))
+    Ok(PropName::from_utf8(&id)?)
 }
 
 pub(crate) fn parse_readonly(tokenizer: &mut Tokenizer<'_>) -> Result<ReadonlyOp> {

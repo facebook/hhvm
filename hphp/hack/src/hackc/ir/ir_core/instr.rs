@@ -31,7 +31,7 @@ use crate::MOpMode;
 use crate::MethodName;
 use crate::OODeclExistsOp;
 use crate::ObjMethodOp;
-use crate::PropId;
+use crate::PropName;
 use crate::QueryMOp;
 use crate::ReadonlyOp;
 use crate::SetOpOp;
@@ -438,7 +438,7 @@ pub enum Hhbc {
     ChainFaults([ValueId; 2], LocId),
     CheckClsReifiedGenericMismatch(ValueId, LocId),
     CheckClsRGSoft(ValueId, LocId),
-    CheckProp(PropId, LocId),
+    CheckProp(PropName, LocId),
     CheckThis(LocId),
     ClassGetC(ValueId, ClassGetCMode, LocId),
     ClassGetTS(ValueId, LocId),
@@ -480,7 +480,7 @@ pub enum Hhbc {
     IncDecL(LocalId, IncDecOp, LocId),
     IncDecS([ValueId; 2], IncDecOp, LocId),
     IncludeEval(IncludeEval),
-    InitProp(ValueId, PropId, InitPropOp, LocId),
+    InitProp(ValueId, PropName, InitPropOp, LocId),
     InstanceOfD(ValueId, ClassName, LocId),
     IsLateBoundCls(ValueId, LocId),
     IsTypeC(ValueId, IsTypeOp, LocId),
@@ -604,7 +604,7 @@ pub enum BaseOp {
         mode: MOpMode,
         readonly: ReadonlyOp,
         loc: LocId,
-        prop: PropId,
+        prop: PropName,
     },
 }
 
@@ -948,10 +948,10 @@ pub enum MemberKey {
     PL,
     // literal string as property
     //   $a->hello
-    PT(PropId),
+    PT(PropName),
     // nullsafe PT
     //   $a?->hello
-    QT(PropId),
+    QT(PropName),
     // new element
     //   $a[]
     W,

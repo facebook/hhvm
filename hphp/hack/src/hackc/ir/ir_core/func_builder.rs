@@ -28,7 +28,7 @@ use crate::InstrIdMap;
 use crate::LocId;
 use crate::LocalId;
 use crate::MOpMode;
-use crate::PropId;
+use crate::PropName;
 use crate::QueryMOp;
 use crate::ReadonlyOp;
 use crate::StringInterner;
@@ -486,7 +486,7 @@ impl MemberOpBuilder {
 
     pub fn base_st(
         base: ValueId,
-        prop: PropId,
+        prop: PropName,
         mode: MOpMode,
         readonly: ReadonlyOp,
         loc: LocId,
@@ -533,7 +533,7 @@ impl MemberOpBuilder {
         builder.emit(Instr::MemberOp(mop))
     }
 
-    pub fn query_pt(self, key: PropId) -> MemberOp {
+    pub fn query_pt(self, key: PropName) -> MemberOp {
         let loc = self.base_op.loc_id();
         self.final_op(FinalOp::QueryM {
             key: MemberKey::PT(key),
@@ -543,12 +543,12 @@ impl MemberOpBuilder {
         })
     }
 
-    pub fn emit_query_pt(self, builder: &mut FuncBuilder, key: PropId) -> ValueId {
+    pub fn emit_query_pt(self, builder: &mut FuncBuilder, key: PropName) -> ValueId {
         let mop = self.query_pt(key);
         builder.emit(Instr::MemberOp(mop))
     }
 
-    pub fn set_m_pt(mut self, key: PropId, value: ValueId) -> MemberOp {
+    pub fn set_m_pt(mut self, key: PropName, value: ValueId) -> MemberOp {
         let loc = self.base_op.loc_id();
         let key = MemberKey::PT(key);
         let readonly = ReadonlyOp::Any;
@@ -556,7 +556,12 @@ impl MemberOpBuilder {
         self.final_op(FinalOp::SetM { key, readonly, loc })
     }
 
-    pub fn emit_set_m_pt(self, builder: &mut FuncBuilder, key: PropId, value: ValueId) -> ValueId {
+    pub fn emit_set_m_pt(
+        self,
+        builder: &mut FuncBuilder,
+        key: PropName,
+        value: ValueId,
+    ) -> ValueId {
         let mop = self.set_m_pt(key, value);
         builder.emit(Instr::MemberOp(mop))
     }

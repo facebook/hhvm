@@ -10,7 +10,7 @@ use crate::ClassName;
 use crate::CtxConstant;
 use crate::HackConstant;
 use crate::Method;
-use crate::PropId;
+use crate::PropName;
 use crate::Requirement;
 use crate::StringId;
 use crate::TypeConstant;
@@ -65,7 +65,7 @@ pub struct Class {
 }
 
 impl Class {
-    pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property> {
+    pub fn get_prop_by_pid(&self, pid: PropName) -> Option<&Property> {
         self.properties.iter().find(|prop| prop.name == pid)
     }
 
@@ -76,7 +76,7 @@ impl Class {
 
 #[derive(Clone, Debug)]
 pub struct Property {
-    pub name: PropId,
+    pub name: PropName,
     pub flags: Attr,
     pub attributes: Vec<Attribute>,
     pub visibility: Visibility,

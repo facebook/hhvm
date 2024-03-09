@@ -55,7 +55,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "MethodName"
             || ident == "ParamId"
             || ident == "Predicate"
-            || ident == "PropId"
+            || ident == "PropName"
             || ident == "ReadonlyOp"
             || ident == "SetOpOp"
             || ident == "SurpriseCheck"

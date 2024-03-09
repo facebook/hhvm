@@ -212,7 +212,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 // the value.
                 let clsref = SpecialClsRef::SelfCls;
                 let method = MethodName::_86cinit();
-                let name = builder.emit_constant(Constant::String(name.id));
+                let name = builder.emit_constant(Constant::String(name.as_bytes_id()));
                 Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
             }
             ir::Property {
@@ -234,7 +234,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
         };
 
         if let Some(vid) = vid {
-            let prop_name = builder.emit_constant(Constant::String(prop.name.id));
+            let prop_name = builder.emit_constant(Constant::String(prop.name.as_bytes_id()));
             builder.emit(Instr::Hhbc(Hhbc::SetS(
                 [prop_name, cls, vid],
                 ReadonlyOp::Any,
@@ -255,14 +255,12 @@ fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, strings: &St
     // end. That way when we overwrite the '$this' local we're doing so as the
     // last access to the closure class '$this'.
     let sort_cmp = |a: &ir::Property, b: &ir::Property| -> std::cmp::Ordering {
-        if strings.eq_str(a.name.id, THIS_AS_PROPERTY) {
+        if a.name.as_str() == THIS_AS_PROPERTY {
             std::cmp::Ordering::Greater
-        } else if strings.eq_str(b.name.id, THIS_AS_PROPERTY) {
+        } else if b.name.as_str() == THIS_AS_PROPERTY {
             std::cmp::Ordering::Less
         } else {
-            let a = strings.lookup_bytes(a.name.id);
-            let b = strings.lookup_bytes(b.name.id);
-            a.cmp(&b)
+            a.name.cmp(&b.name)
         }
     };
 
@@ -271,7 +269,7 @@ fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, strings: &St
 
     for prop in &properties {
         // Property names are the variable names without the '$'.
-        let prop_str = strings.lookup_bstr(prop.name.id);
+        let prop_str = prop.name.as_bstr();
         let mut var = prop_str.to_vec();
         var.insert(0, b'$');
         let lid = LocalId::Named(strings.intern_bytes(var));

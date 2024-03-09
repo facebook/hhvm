@@ -49,7 +49,7 @@ use ir_core::LocalId;
 use ir_core::MOpMode;
 use ir_core::MethodFlags;
 use ir_core::ObjMethodOp;
-use ir_core::PropId;
+use ir_core::PropName;
 use ir_core::QueryMOp;
 use ir_core::SetRangeOp;
 use ir_core::SwitchKind;
@@ -1035,11 +1035,11 @@ impl FunctionParser<'_> {
                     MemberKey::PC
                 }
                 OpKind::L => MemberKey::PL,
-                OpKind::T(id) => MemberKey::PT(PropId::new(id)),
+                OpKind::T(id) => MemberKey::PT(PropName::from_bytes(id)?),
                 OpKind::W => return Err(tloc.bail("']' not allowed with pointer")),
             },
             "?->" => match kind {
-                OpKind::T(id) => MemberKey::QT(PropId::new(id)),
+                OpKind::T(id) => MemberKey::QT(PropName::from_bytes(id)?),
                 OpKind::C | OpKind::I(_) | OpKind::L | OpKind::W => {
                     return Err(tloc.bail("']' not allowed with {kind:?}"));
                 }

@@ -85,7 +85,7 @@ fn convert_property(prop: &hhbc::Property, strings: &ir::StringInterner) -> ir::
         .map(|a| convert::convert_attribute(a, strings))
         .collect_vec();
     ir::Property {
-        name: ir::PropId::from_hhbc(prop.name, strings),
+        name: prop.name,
         flags: prop.flags,
         attributes,
         visibility: prop.visibility,

@@ -2,3 +2,7 @@ File "fun_param.php", line 3, characters 18-22:
 Cannot re-assign `$this` (Parsing[1002])
 File "fun_param.php", line 5, characters 33-37:
 Cannot re-assign `$this` (Parsing[1002])
+File "fun_param.php", line 3, characters 18-22:
+Cannot use `$this` as lexical variable (Naming[2077])
+File "fun_param.php", line 5, characters 33-37:
+Cannot use `$this` as lexical variable (Naming[2077])

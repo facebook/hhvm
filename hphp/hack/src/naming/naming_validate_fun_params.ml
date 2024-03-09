@@ -24,6 +24,11 @@ let validate_fun_params params =
                   { pos = param_pos; name = param_name }
            in
            (seen, err :: errs)
+         else if String.equal param_name SN.SpecialIdents.this then
+           let err =
+             Err.naming @@ Naming_error.This_as_lexical_variable param_pos
+           in
+           (seen, err :: errs)
          else
            (SSet.add param_name seen, errs))
 

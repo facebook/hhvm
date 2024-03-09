@@ -33,6 +33,8 @@ impl ValidateFunParamsPass {
                     pos: pos.clone(),
                     name: name.clone(),
                 });
+            } else if name == sn::special_idents::THIS {
+                env.emit_error(NamingError::ThisAsLexicalVariable(pos.clone()));
             } else {
                 seen.insert(name);
             }

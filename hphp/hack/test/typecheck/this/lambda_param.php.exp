@@ -2,3 +2,9 @@ File "lambda_param.php", line 5, characters 11-15:
 Cannot re-assign `$this` (Parsing[1002])
 File "lambda_param.php", line 6, characters 15-19:
 Cannot re-assign `$this` (Parsing[1002])
+File "lambda_param.php", line 5, characters 11-15:
+Cannot use `$this` as lexical variable (Naming[2077])
+File "lambda_param.php", line 6, characters 15-19:
+Cannot use `$this` as lexical variable (Naming[2077])
+File "lambda_param.php", line 7, characters 11-15:
+Cannot use `$this` as lexical variable (Naming[2077])

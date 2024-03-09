@@ -1507,7 +1507,7 @@ pub(crate) fn print_textual(
             write!(
                 w,
                 "textual::load_global({}, {is_const})",
-                FmtIdentifierId(id.id, strings)
+                FmtIdentifierId(id.as_bytes_id(), strings)
             )?;
         }
         Textual::String(s) => {

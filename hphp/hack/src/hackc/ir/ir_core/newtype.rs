@@ -4,8 +4,8 @@
 // which random stuff to get from `ir` and which to get elsewhere.
 use newtype::newtype_int;
 
-use crate::string_intern::StringInterner;
-use crate::UnitBytesId;
+use crate::BytesId;
+use crate::StringId;
 
 // A BlockId represents a Block within a Func.
 newtype_int!(BlockId, u32, BlockIdMap, BlockIdSet);
@@ -132,15 +132,23 @@ pub type ValueIdSet = std::collections::HashSet<ValueId, newtype::BuildIdHasher<
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GlobalId {
-    pub id: UnitBytesId,
+    pub id: StringId,
 }
 
 impl GlobalId {
-    pub fn new(id: UnitBytesId) -> Self {
+    pub fn new(id: StringId) -> Self {
         Self { id }
     }
 
-    pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> &'a [u8] {
-        strings.lookup_bytes(self.id)
+    pub fn as_str(&self) -> &str {
+        self.id.as_str()
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        self.as_str().as_bytes()
+    }
+
+    pub fn as_bytes_id(&self) -> BytesId {
+        self.id.as_bytes()
     }
 }

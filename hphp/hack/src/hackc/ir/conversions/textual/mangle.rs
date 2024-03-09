@@ -265,10 +265,10 @@ impl fmt::Display for FmtGlobalName<'_> {
         let FmtGlobalName(strings, name) = *self;
         match name {
             GlobalName::Global(id) => {
-                write!(f, "global::{}", id.as_bytes(strings).mangle(strings))
+                write!(f, "global::{}", id.as_bytes().mangle(strings))
             }
             GlobalName::GlobalConst(id) => {
-                write!(f, "gconst::{}", id.as_bytes(strings).mangle(strings))
+                write!(f, "gconst::{}", id.as_bytes().mangle(strings))
             }
         }
     }

@@ -89,11 +89,19 @@ impl LowerInstrs<'_> {
         vid.constant()
             .and_then(|cid| match builder.func.constant(cid) {
                 Constant::String(s) => {
-                    let id = ir::GlobalId::new(*s);
-                    Some(Instr::Special(Special::Textual(Textual::LoadGlobal {
-                        id,
-                        is_const: false,
-                    })))
+                    match ir::StringId::from_bytes(*s) {
+                        Ok(s) => {
+                            let id = ir::GlobalId::new(s);
+                            Some(Instr::Special(Special::Textual(Textual::LoadGlobal {
+                                id,
+                                is_const: false,
+                            })))
+                        }
+                        Err(_) => {
+                            // Non-utf8 string value cannot be a symbol name
+                            None
+                        }
+                    }
                 }
                 _ => None,
             })
@@ -350,14 +358,14 @@ impl LowerInstrs<'_> {
         let mut ops = Vec::new();
 
         let name = format!("{}", name.display(&builder.strings));
-        let name = GlobalId::new(builder.strings.intern_str(format!(
+        let name = GlobalId::new(ir::intern(format!(
             "memocache::{}",
             crate::util::escaped_ident(name.into())
         )));
         // NOTE: This is called 'LocalId' but actually represents a GlobalId
         // (because we don't have a DerefGlobal instr - but it would work the
         // same with just a different type).
-        let global = builder.emit(Textual::deref(LocalId::Named(name.id)));
+        let global = builder.emit(Textual::deref(LocalId::Named(name.id.as_bytes())));
         ops.push(global);
 
         match *self.func_info {

@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
+#include <thrift/lib/thrift/gen-cpp2/serverdbginfo_types.h>
 
 namespace apache::thrift {
 
@@ -110,6 +111,9 @@ class CPUConcurrencyController {
 
     // Returns a string description of the Config
     std::string describe() const;
+
+    // Returns a string representation of the CPU load source
+    std::string_view cpuLoadSourceName() const;
   };
 
   CPUConcurrencyController(
@@ -146,6 +150,8 @@ class CPUConcurrencyController {
   bool enabled() const { return (*config_.rlock())->enabled(); }
 
   std::shared_ptr<const Config> config() const { return config_.copy(); }
+
+  serverdbginfo::CPUConcurrencyControllerDbgInfo getDbgInfo() const;
 
  private:
   void cycleOnce();

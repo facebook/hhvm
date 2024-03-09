@@ -18,6 +18,7 @@
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 
 #include <algorithm>
+#include <chrono>
 #include <fmt/core.h>
 #include <folly/lang/Assume.h>
 
@@ -353,6 +354,18 @@ std::string_view CPUConcurrencyController::Config::methodName() const {
   folly::assume_unreachable();
 }
 
+std::string_view CPUConcurrencyController::Config::cpuLoadSourceName() const {
+  switch (cpuLoadSource) {
+    case CPULoadSource::CONTAINER_AND_HOST:
+      return "CONTAINER_AND_HOST";
+    case CPULoadSource::CONTAINER_ONLY:
+      return "CONTAINER_ONLY";
+    case CPULoadSource::HOST_ONLY:
+      return "HOST_ONLY";
+  }
+  folly::assume_unreachable();
+}
+
 std::string_view CPUConcurrencyController::Config::concurrencyUnit() const {
   switch (method) {
     case Method::CONCURRENCY_LIMITS:
@@ -379,4 +392,36 @@ std::string CPUConcurrencyController::Config::describe() const {
       concurrencyUpperBound);
 }
 
+serverdbginfo::CPUConcurrencyControllerDbgInfo
+CPUConcurrencyController::getDbgInfo() const {
+  serverdbginfo::CPUConcurrencyControllerDbgInfo info;
+  auto configLocal = config();
+
+  info.mode() = configLocal->modeName();
+  info.method() = configLocal->methodName();
+  info.cpuTarget() = configLocal->cpuTarget;
+  info.cpuLoadSource() = configLocal->cpuLoadSourceName();
+
+  info.refreshPeriodMs() =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          configLocal->refreshPeriodMs)
+          .count();
+  info.additiveMultiplier() = configLocal->additiveMultiplier;
+  info.decreaseMultiplier() = configLocal->decreaseMultiplier;
+  info.increaseDistanceRatio() = configLocal->increaseDistanceRatio;
+  info.bumpOnError() = configLocal->bumpOnError;
+  info.refractoryPeriodMs() =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          configLocal->refractoryPeriodMs)
+          .count();
+  info.initialEstimateFactor() = configLocal->initialEstimateFactor;
+  info.initialEstimatePercentile() = configLocal->initialEstimatePercentile;
+  info.collectionSampleSize() = configLocal->collectionSampleSize;
+  info.concurrencyUpperBound() = configLocal->concurrencyUpperBound;
+  info.concurrencyLowerBound() = configLocal->concurrencyLowerBound;
+
+  info.cpuLoad() = getLoadInternal(configLocal);
+
+  return info;
+}
 } // namespace apache::thrift

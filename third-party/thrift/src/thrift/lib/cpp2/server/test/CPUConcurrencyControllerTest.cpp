@@ -132,3 +132,50 @@ TEST_F(CPUConcurrencyControllerTest, testEventHandler) {
   setConfig(CPUConcurrencyController::Config{
       .mode = CPUConcurrencyController::Mode::DISABLED});
 }
+
+TEST_F(CPUConcurrencyControllerTest, getDbgInfo) {
+  using namespace apache::thrift;
+  server::test::MockServerConfigs serverConfigs{};
+  ThriftServerConfig thriftServerConfig{};
+  folly::observer::SimpleObservable<CPUConcurrencyController::Config>
+      configObservable;
+
+  configObservable.setValue(CPUConcurrencyController::Config{
+      .mode = CPUConcurrencyController::Mode::ENABLED,
+      .method = CPUConcurrencyController::Method::TOKEN_BUCKET,
+      .cpuTarget = 99,
+      .cpuLoadSource = apache::thrift::CPULoadSource::CONTAINER_AND_HOST,
+      .refreshPeriodMs = std::chrono::milliseconds(100),
+      .additiveMultiplier = 0.01,
+      .decreaseMultiplier = 0.02,
+      .increaseDistanceRatio = 0.03,
+      .bumpOnError = true,
+      .refractoryPeriodMs = std::chrono::milliseconds(200),
+      .initialEstimatePercentile = 0.04,
+      .collectionSampleSize = 11,
+      .concurrencyUpperBound = 1002,
+      .concurrencyLowerBound = 1001,
+  });
+
+  CPUConcurrencyController cpuConcurrencyController{
+      configObservable.getObserver(), serverConfigs, thriftServerConfig};
+
+  // Act
+  auto dbgInfo = cpuConcurrencyController.getDbgInfo();
+
+  // Assert
+  ASSERT_EQ("ENABLED", dbgInfo.get_mode());
+  ASSERT_EQ(*dbgInfo.method(), "TOKEN_BUCKET");
+  ASSERT_EQ(*dbgInfo.cpuTarget(), 99);
+  ASSERT_EQ(*dbgInfo.cpuLoadSource(), "CONTAINER_AND_HOST");
+  ASSERT_EQ(*dbgInfo.refreshPeriodMs(), 100);
+  ASSERT_EQ(*dbgInfo.additiveMultiplier(), 0.01);
+  ASSERT_EQ(*dbgInfo.decreaseMultiplier(), 0.02);
+  ASSERT_EQ(*dbgInfo.increaseDistanceRatio(), 0.03);
+  ASSERT_TRUE(*dbgInfo.bumpOnError());
+  ASSERT_EQ(*dbgInfo.refractoryPeriodMs(), 200);
+  ASSERT_EQ(*dbgInfo.initialEstimatePercentile(), 0.04);
+  ASSERT_EQ(*dbgInfo.collectionSampleSize(), 11);
+  ASSERT_EQ(*dbgInfo.concurrencyLowerBound(), 1001);
+  ASSERT_EQ(*dbgInfo.concurrencyUpperBound(), 1002);
+}

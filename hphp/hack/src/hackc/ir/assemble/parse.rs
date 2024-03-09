@@ -82,10 +82,7 @@ fn parse_array_key(tokenizer: &mut Tokenizer<'_>) -> Result<ArrayKey> {
             let i = s.parse()?;
             ArrayKey::Int(i)
         }
-        Token::QuotedString(_, s, _) => {
-            let id = tokenizer.strings.intern_bytes(unescape(&s)?);
-            ArrayKey::String(id)
-        }
+        Token::QuotedString(_, s, _) => ArrayKey::String(ir_core::intern_bytes(unescape(&s)?)),
         _ => return Err(t.bail(format!("Expected string or int but got {t}"))),
     })
 }
@@ -330,7 +327,7 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
 pub(crate) fn parse_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> {
     Ok(match tokenizer.expect_any_token()? {
         t @ Token::QuotedString(..) => {
-            let id = tokenizer.strings.intern_bytes(t.unescaped_string()?);
+            let id = ir_core::intern_bytes(t.unescaped_string()?);
             Constant::String(id)
         }
         ref t @ Token::Identifier(ref s, _) => match s.as_str() {
@@ -647,7 +644,7 @@ pub(crate) fn parse_src_loc(tokenizer: &mut Tokenizer<'_>, cur: Option<&SrcLoc>)
 
     let filename = if let Some(filename) = filename {
         let filename = filename.unescaped_string()?;
-        Filename(tokenizer.strings.intern_bytes(filename))
+        Filename(ir_core::intern_bytes(filename))
     } else if let Some(cur) = cur {
         cur.filename
     } else {
@@ -696,7 +693,7 @@ pub(crate) fn parse_silence_op(tokenizer: &mut Tokenizer<'_>) -> Result<SilenceO
 pub(crate) fn parse_string_id(tokenizer: &mut Tokenizer<'_>) -> Result<UnitBytesId> {
     let name = tokenizer.expect_any_string()?;
     let name = name.unescaped_string()?;
-    Ok(tokenizer.strings.intern_bytes(name))
+    Ok(ir_core::intern_bytes(name))
 }
 
 pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo> {
@@ -816,7 +813,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
             Num::Float(f) => TypedValue::Float(FloatBits(f)),
         },
         Token::QuotedString(_, s, _) => {
-            let id = tokenizer.strings.intern_bytes(unescape(&s)?);
+            let id = ir_core::intern_bytes(unescape(&s)?);
             TypedValue::String(id)
         }
         _ => return Err(t.bail("Invalid TypedValue, got '{t}'")),

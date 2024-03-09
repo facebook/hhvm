@@ -118,7 +118,7 @@ impl FuncBuilder {
     where
         F: FnOnce(&mut FuncBuilder) -> R,
     {
-        let tmp_strings = Arc::new(StringInterner::read_only());
+        let tmp_strings = Arc::new(StringInterner);
         Self::borrow_func(borrowed, tmp_strings, f)
     }
 

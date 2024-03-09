@@ -8,6 +8,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use anyhow::Error;
+use bstr::ByteSlice;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::Hhbc;
@@ -652,7 +653,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let class_id = lookup_constant_string(state.func, class).map(ClassName::from_bytes);
             let field_str = lookup_constant_string(state.func, field);
             let output = if let Some(field_str) = field_str {
-                let field = util::escaped_string(&state.strings.lookup_bstr(field_str));
+                let field = util::escaped_string(field_str.as_bytes().as_bstr());
                 let this = match class_id {
                     None => {
                         // "C"::foo
@@ -794,8 +795,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         }
         Instr::Special(Special::Textual(Textual::String(s))) => {
             let expr = {
-                let s = state.strings.lookup_bstr(s);
-                let s = util::escaped_string(&s);
+                let s = util::escaped_string(s.as_bytes().as_bstr());
                 let s = hack::expr_builtin(hack::Builtin::String, [s]);
                 state.fb.write_expr_stmt(s)?
             };
@@ -867,7 +867,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                 Constant::NewCol(..) => todo!(),
                 Constant::Null => Expr::Const(Const::Null),
                 Constant::String(s) => {
-                    let s = util::escaped_string(&state.strings.lookup_bytes(*s));
+                    let s = util::escaped_string(s.as_bytes());
                     hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
                 }
                 Constant::Uninit => Expr::Const(Const::Null),
@@ -1373,8 +1373,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     }
                     Constant::Null => textual::Expr::null(),
                     Constant::String(s) => {
-                        let s = self.strings.lookup_bstr(*s);
-                        let s = util::escaped_string(&s);
+                        let s = util::escaped_string(s.as_bytes().as_bstr());
                         hack::expr_builtin(Builtin::String, [s])
                     }
                     Constant::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
@@ -1509,10 +1508,10 @@ impl<'a> FuncInfo<'a> {
         }
     }
 
-    pub(crate) fn name_id(&self) -> ir::UnitBytesId {
+    pub(crate) fn name_id(&self) -> ir::StringId {
         match self {
-            FuncInfo::Function(fi) => fi.name.as_bytes_id(),
-            FuncInfo::Method(mi) => mi.name.as_bytes_id(),
+            FuncInfo::Function(fi) => fi.name.as_string_id(),
+            FuncInfo::Method(mi) => mi.name.as_string_id(),
         }
     }
 

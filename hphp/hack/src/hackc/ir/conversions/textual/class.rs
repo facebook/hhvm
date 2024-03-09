@@ -15,6 +15,7 @@ use std::cmp::Ordering;
 use std::sync::Arc;
 
 use anyhow::Error;
+use bstr::ByteSlice;
 use hash::IndexMap;
 use ir::LocalId;
 use itertools::Itertools;
@@ -221,9 +222,7 @@ impl ClassState<'_, '_> {
                 let mut parameters = Vec::new();
                 for arg in &attribute.arguments {
                     match arg.get_string() {
-                        Some(sid) => {
-                            parameters.push(self.unit_state.strings.lookup_bstr(sid).to_string())
-                        }
+                        Some(sid) => parameters.push(sid.as_bytes().as_bstr().to_string()),
                         _ => {
                             textual_todo! {
                                 parameters.push(format!("TODO: {arg:?}"));

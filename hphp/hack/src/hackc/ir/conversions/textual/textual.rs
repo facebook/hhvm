@@ -512,7 +512,8 @@ impl TextualFile<'_> {
     }
 
     fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
-        let filename = self.strings.lookup_bstr(src_loc.filename.0);
+        use bstr::ByteSlice;
+        let filename = src_loc.filename.0.as_bytes().as_bstr();
         writeln!(self.w, "// .file \"{filename}\"")?;
         self.write_line_loc(src_loc)?;
         Ok(())

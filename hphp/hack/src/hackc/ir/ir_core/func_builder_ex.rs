@@ -133,7 +133,7 @@ impl FuncBuilderEx for FuncBuilder {
     }
 
     fn emit_string(&mut self, s: &str) -> ValueId {
-        self.emit_constant(Constant::String(self.strings.intern_str(s)))
+        self.emit_constant(Constant::String(crate::intern_bytes(s.as_bytes())))
     }
 
     #[allow(clippy::todo)]

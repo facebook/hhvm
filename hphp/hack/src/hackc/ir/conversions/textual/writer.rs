@@ -55,7 +55,7 @@ pub fn textual_writer(
         .map(Thing::Class)
         .chain(unit.functions.into_iter().map(Thing::Func))
         .collect_vec();
-    things.sort_by(|a, b| Thing::cmp(a, b, &unit.strings));
+    things.sort_by(Thing::cmp);
 
     for thing in things {
         match thing {
@@ -121,10 +121,10 @@ impl Thing {
         }
     }
 
-    fn name(&self) -> ir::UnitBytesId {
+    fn name(&self) -> ir::StringId {
         match self {
-            Thing::Class(c) => c.name.as_bytes_id(),
-            Thing::Func(f) => f.name.as_bytes_id(),
+            Thing::Class(c) => c.name.as_string_id(),
+            Thing::Func(f) => f.name.as_string_id(),
         }
     }
 
@@ -135,15 +135,13 @@ impl Thing {
         }
     }
 
-    fn cmp(a: &Thing, b: &Thing, strings: &ir::StringInterner) -> Ordering {
+    fn cmp(a: &Thing, b: &Thing) -> Ordering {
         // Start with source line
         a.line()
             .cmp(&b.line())
             .then_with(|| {
                 // Same source line? Sort by name.
-                let name_a = strings.lookup_bstr(a.name());
-                let name_b = strings.lookup_bstr(b.name());
-                name_a.cmp(&name_b)
+                a.name().cmp(&b.name())
             })
             .then_with(|| {
                 // Same name??? Use number of parameters.

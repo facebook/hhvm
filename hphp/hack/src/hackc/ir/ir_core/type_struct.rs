@@ -1,8 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 pub use hhvm_types_ffi::ffi::TypeStructureKind;
+use intern::bytes_id;
 
 use crate::ArrayKey;
+use crate::BytesId;
 use crate::ClassName;
 use crate::StringInterner;
 use crate::TypedValue;
@@ -15,13 +17,13 @@ pub enum TypeStruct {
 }
 
 impl TypeStruct {
-    pub fn into_typed_value(self, strings: &StringInterner) -> TypedValue {
-        let kind_key = ArrayKey::String(strings.intern_str("kind"));
+    pub fn into_typed_value(self, _: &StringInterner) -> TypedValue {
+        let kind_key = ArrayKey::String(bytes_id!(b"kind"));
 
         match self {
             TypeStruct::Unresolved(cid) => {
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
-                let classname_key = ArrayKey::String(strings.intern_str("classname"));
+                let classname_key = ArrayKey::String(bytes_id!(b"classname"));
                 let name = TypedValue::String(cid.as_bytes_id());
                 TypedValue::Dict(
                     [(kind_key, kind), (classname_key, name)]
@@ -40,20 +42,23 @@ impl TypeStruct {
         }
     }
 
-    pub fn try_from_typed_value(tv: &TypedValue, strings: &StringInterner) -> Option<TypeStruct> {
+    pub fn try_from_typed_value(tv: &TypedValue, _: &StringInterner) -> Option<TypeStruct> {
         let dv = tv.get_dict()?;
-        let kind_key = ArrayKey::String(strings.intern_str("kind"));
+        let kind_key = ArrayKey::String(bytes_id!(b"kind"));
         let kind = dv.get(&kind_key)?.get_int()?;
         if kind == i64::from(TypeStructureKind::T_null) {
             Some(TypeStruct::Null)
         } else if kind == i64::from(TypeStructureKind::T_nonnull) {
             Some(TypeStruct::Nonnull)
         } else if kind == i64::from(TypeStructureKind::T_unresolved) {
-            let classname_key = ArrayKey::String(strings.intern_str("classname"));
+            let classname_key = ArrayKey::String(bytes_id!(b"classname"));
             let classname = dv.get(&classname_key)?.get_string()?;
-            let classname = strings.lookup_bytes_or_none(classname)?;
-            let cid = ClassName::from_utf8(classname).ok()?;
-            Some(TypeStruct::Unresolved(cid))
+            if classname == BytesId::EMPTY {
+                None
+            } else {
+                let cid = ClassName::from_bytes(classname).ok()?;
+                Some(TypeStruct::Unresolved(cid))
+            }
         } else {
             None
         }

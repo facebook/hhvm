@@ -21,7 +21,7 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
     use std::os::unix::ffi::OsStrExt;
     let strings = Arc::new(ir::StringInterner::default());
 
-    let filename = ir::Filename(strings.intern_bytes(filename.as_os_str().as_bytes()));
+    let filename = ir::Filename(ir::intern_bytes(filename.as_os_str().as_bytes()));
 
     // Traditionally the HHBC AdataIds are named A_# - but let's not rely on
     // that.
@@ -136,7 +136,7 @@ pub(crate) fn convert_typed_value(
         hhbc::TypedValue::Int(v) => ir::TypedValue::Int(*v),
         hhbc::TypedValue::Bool(v) => ir::TypedValue::Bool(*v),
         hhbc::TypedValue::Float(v) => ir::TypedValue::Float(*v),
-        hhbc::TypedValue::String(v) => ir::TypedValue::String(strings.intern_bytes(v.as_ref())),
+        hhbc::TypedValue::String(v) => ir::TypedValue::String(*v),
         hhbc::TypedValue::LazyClass(v) => ir::TypedValue::LazyClass(ir::ClassName::new(*v)),
         hhbc::TypedValue::Null => ir::TypedValue::Null,
         hhbc::TypedValue::Vec(vs) => ir::TypedValue::Vec(
@@ -159,11 +159,11 @@ pub(crate) fn convert_typed_value(
     }
 }
 
-pub(crate) fn convert_array_key(tv: &hhbc::TypedValue, strings: &StringInterner) -> ir::ArrayKey {
+pub(crate) fn convert_array_key(tv: &hhbc::TypedValue, _: &StringInterner) -> ir::ArrayKey {
     match *tv {
         hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),
         hhbc::TypedValue::LazyClass(v) => ir::ArrayKey::LazyClass(ir::ClassName::new(v)),
-        hhbc::TypedValue::String(v) => ir::ArrayKey::String(strings.intern_bytes(v.as_ref())),
+        hhbc::TypedValue::String(v) => ir::ArrayKey::String(v),
         _ => panic!("Unable to convert {tv:?} to ArrayKey"),
     }
 }

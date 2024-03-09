@@ -182,7 +182,6 @@ mod test {
     use std::hash::BuildHasher;
 
     use super::*;
-    use crate::StringInterner;
 
     #[test]
     fn test1() {
@@ -230,29 +229,14 @@ mod test {
 
     #[test]
     fn test3() {
-        let strings = StringInterner::default();
+        use intern::bytes_id;
         let a = TypedValue::Dict(
             [
-                (
-                    ArrayKey::String(strings.intern_str("E")),
-                    TypedValue::Int(1),
-                ),
-                (
-                    ArrayKey::String(strings.intern_str("F")),
-                    TypedValue::Int(1),
-                ),
-                (
-                    ArrayKey::String(strings.intern_str("G")),
-                    TypedValue::Int(1),
-                ),
-                (
-                    ArrayKey::String(strings.intern_str("H")),
-                    TypedValue::Int(1),
-                ),
-                (
-                    ArrayKey::String(strings.intern_str("I")),
-                    TypedValue::Int(1),
-                ),
+                (ArrayKey::String(bytes_id!(b"E")), TypedValue::Int(1)),
+                (ArrayKey::String(bytes_id!(b"F")), TypedValue::Int(1)),
+                (ArrayKey::String(bytes_id!(b"G")), TypedValue::Int(1)),
+                (ArrayKey::String(bytes_id!(b"H")), TypedValue::Int(1)),
+                (ArrayKey::String(bytes_id!(b"I")), TypedValue::Int(1)),
             ]
             .into_iter()
             .collect(),

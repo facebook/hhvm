@@ -26,7 +26,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
         TypedValue::Float(f) => hack::expr_builtin(Builtin::Float, [Expr::Const(Const::Float(f))]),
         TypedValue::LazyClass(cid) => Expr::Const(Const::LazyClass(TypeName::Class(cid))),
         TypedValue::String(s) => {
-            let s = util::escaped_string(&strings.lookup_bytes(s));
+            let s = util::escaped_string(s.as_bytes());
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }
         TypedValue::Null => textual::Expr::null(),
@@ -58,11 +58,11 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
     }
 }
 
-pub(crate) fn array_key_expr(ak: &ArrayKey, strings: &StringInterner) -> Expr {
+pub(crate) fn array_key_expr(ak: &ArrayKey, _: &StringInterner) -> Expr {
     match *ak {
         ArrayKey::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
         ArrayKey::String(s) => {
-            let s = util::escaped_string(&strings.lookup_bytes(s));
+            let s = util::escaped_string(s.as_bytes());
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }
         ArrayKey::LazyClass(c) => {

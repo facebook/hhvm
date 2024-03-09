@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use bstr::ByteSlice;
 use ir::instr;
 // use ir::print::print;
 use ir::Attr;
@@ -36,10 +37,10 @@ pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
 
 pub(crate) const THIS_AS_PROPERTY: &str = "this";
 
-fn typed_value_into_string(tv: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
+fn typed_value_into_string(tv: &TypedValue, _: &Arc<StringInterner>) -> Option<String> {
     let ostr = tv
         .get_string()
-        .map(|sid| strings.lookup_bstr(sid).to_string());
+        .map(|sid| sid.as_bytes().as_bstr().to_string());
     trace!("tv {:?} -> {:?}", tv, ostr);
     ostr
 }
@@ -59,7 +60,7 @@ fn typed_value_into_strings(tv: &TypedValue, strings: &Arc<StringInterner>) -> O
 fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
     match typed_value {
         TypedValue::Dict(dict) => {
-            let kind_key = ir::ArrayKey::String(strings.intern_str("kind"));
+            let kind_key = ir::ArrayKey::String(ir::intern("kind").as_bytes());
             dict.get(&kind_key)
                 .and_then(|tv| tv.get_int())
                 .and_then(|i| {
@@ -68,12 +69,13 @@ fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>)
                     let unresolved: i64 = ir::TypeStructureKind::T_unresolved.into();
                     let type_access: i64 = ir::TypeStructureKind::T_typeaccess.into();
                     if i == unresolved {
-                        let class_name = ir::ArrayKey::String(strings.intern_str("classname"));
+                        let class_name = ir::ArrayKey::String(ir::intern("classname").as_bytes());
                         dict.get(&class_name)
                             .and_then(|cn| typed_value_into_string(cn, strings))
                     } else if i == type_access {
-                        let root_name = ir::ArrayKey::String(strings.intern_str("root_name"));
-                        let access_list = ir::ArrayKey::String(strings.intern_str("access_list"));
+                        let root_name = ir::ArrayKey::String(ir::intern("root_name").as_bytes());
+                        let access_list =
+                            ir::ArrayKey::String(ir::intern("access_list").as_bytes());
                         let root_name = dict
                             .get(&root_name)
                             .and_then(|rn| typed_value_into_string(rn, strings));
@@ -202,10 +204,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         let arguments: Vec<TypedValue> = initializer
             .as_ref()
             .and_then(|init| compute_tc_attribute(init, &strings))
-            .map(|s| {
-                let sid = strings.intern_str(s.clone());
-                TypedValue::String(sid)
-            })
+            .map(|s| TypedValue::String(ir::intern(s).as_bytes()))
             .into_iter()
             .collect();
         // Mark the property as originally being a type constant.

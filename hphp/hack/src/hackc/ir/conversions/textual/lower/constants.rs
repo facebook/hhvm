@@ -29,8 +29,8 @@ pub(crate) fn write_constants(builder: &mut FuncBuilder) {
             Constant::File => {
                 // Rewrite __FILE__ as a simple string since the real filename
                 // shouldn't matter for analysis.
-                let id = builder.strings.intern_str("__FILE__");
-                *c = Constant::String(id);
+                let id = ir::intern("__FILE__");
+                *c = Constant::String(id.as_bytes());
             }
             _ => {}
         }
@@ -141,7 +141,7 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
 fn sort_and_filter_constants(
     func: &Func,
     constants: ConstantIdSet,
-    string_intern: &StringInterner,
+    _: &StringInterner,
 ) -> Vec<ConstantId> {
     let mut result = Vec::with_capacity(constants.len());
     let mut arrays = Vec::with_capacity(constants.len());
@@ -171,7 +171,7 @@ fn sort_and_filter_constants(
                 // If the string is short then just keep it inline. This makes
                 // it easier to visually read the output but may be more work
                 // for infer (because it's a call)...
-                if string_intern.lookup_bstr(*s).len() > 40 {
+                if s.as_bytes().len() > 40 {
                     result.push(cid);
                 }
             }

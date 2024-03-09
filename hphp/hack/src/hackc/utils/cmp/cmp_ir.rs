@@ -479,23 +479,21 @@ fn cmp_hack_constant(
 }
 
 fn cmp_id(
-    (a, a_strings): (UnitBytesId, &StringInterner),
-    (b, b_strings): (UnitBytesId, &StringInterner),
+    (a, _): (UnitBytesId, &StringInterner),
+    (b, _): (UnitBytesId, &StringInterner),
 ) -> Result {
     match (a, b) {
         (UnitBytesId::EMPTY, UnitBytesId::EMPTY) => {}
         (UnitBytesId::EMPTY, b) => {
-            let b = b_strings.lookup_bytes(b);
+            let b = b.as_bytes();
             bail!("UnitBytesId NONE vs \"{}\"", String::from_utf8_lossy(&b));
         }
         (a, UnitBytesId::EMPTY) => {
-            let a = a_strings.lookup_bytes(a);
+            let a = a.as_bytes();
             bail!("UnitBytesId \"{}\" vs NONE", String::from_utf8_lossy(&a));
         }
         (a, b) => {
-            let a = a_strings.lookup_bytes(a);
-            let b = b_strings.lookup_bytes(b);
-            cmp_eq(a.as_ref() as &[u8], b.as_ref() as &[u8])?;
+            cmp_eq(a, b)?;
         }
     }
     Ok(())

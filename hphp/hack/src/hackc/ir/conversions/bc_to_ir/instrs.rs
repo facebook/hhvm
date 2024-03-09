@@ -1148,10 +1148,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
         Opcode::NewStructDict(keys) => {
-            let keys: Box<[UnitBytesId]> = keys
-                .iter()
-                .map(|key| ctx.strings.intern_bytes(key.as_ref()))
-                .collect();
+            let keys: Box<[UnitBytesId]> = keys.iter().copied().collect();
             let values = collect_args(ctx, keys.len() as u32);
             Action::Push(Instr::Hhbc(Hhbc::NewStructDict(keys, values.into(), loc)))
         }
@@ -1160,11 +1157,11 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
         Opcode::String(value) => {
-            let s1 = Constant::String(ctx.strings.intern_bytes(value.as_ref()));
+            let s1 = Constant::String(value);
             Action::Constant(s1)
         }
         Opcode::EnumClassLabel(value) => {
-            let s1 = Constant::EnumClassLabel(ctx.strings.intern_bytes(value.as_ref()));
+            let s1 = Constant::EnumClassLabel(value);
             Action::Constant(s1)
         }
     };

@@ -542,13 +542,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::NewObjD(clsid, _) => Opcode::NewObjD(clsid),
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
             Hhbc::NewPair(..) => Opcode::NewPair,
-            Hhbc::NewStructDict(ref keys, _, _) => {
-                let keys = Vec::from_iter(
-                    keys.iter()
-                        .map(|key| hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*key))),
-                );
-                Opcode::NewStructDict(keys.into())
-            }
+            Hhbc::NewStructDict(ref keys, _, _) => Opcode::NewStructDict(keys.to_vec().into()),
             Hhbc::NewVec(ref vids, _) => Opcode::NewVec(vids.len() as u32),
             Hhbc::Not(..) => Opcode::Not,
             Hhbc::OODeclExists(_, kind, _) => Opcode::OODeclExists(kind),
@@ -655,10 +649,7 @@ impl<'b> InstrEmitter<'b> {
                 Constant::Bool(false) => Opcode::False,
                 Constant::Bool(true) => Opcode::True,
                 Constant::Dir => Opcode::Dir,
-                Constant::EnumClassLabel(v) => {
-                    let s = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*v));
-                    Opcode::EnumClassLabel(s)
-                }
+                Constant::EnumClassLabel(v) => Opcode::EnumClassLabel(*v),
                 Constant::Float(v) => Opcode::Double(*v),
                 Constant::File => Opcode::File,
                 Constant::FuncCred => Opcode::FuncCred,
@@ -668,10 +659,7 @@ impl<'b> InstrEmitter<'b> {
                 Constant::Named(name) => Opcode::CnsE(*name),
                 Constant::NewCol(k) => Opcode::NewCol(*k),
                 Constant::Null => Opcode::Null,
-                Constant::String(v) => {
-                    let s = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*v));
-                    Opcode::String(s)
-                }
+                Constant::String(v) => Opcode::String(*v),
                 Constant::Uninit => Opcode::NullUninit,
             }
         };
@@ -852,10 +840,7 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(lid);
                 hhbc::MemberKey::EL(local, readonly)
             }
-            instr::MemberKey::ET(name) => {
-                let name = hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(name));
-                hhbc::MemberKey::ET(name, readonly)
-            }
+            instr::MemberKey::ET(name) => hhbc::MemberKey::ET(name, readonly),
             instr::MemberKey::PC => {
                 *stack_index -= 1;
                 hhbc::MemberKey::PC(*stack_index, readonly)
@@ -1016,12 +1001,7 @@ impl<'b> InstrEmitter<'b> {
                 ref targets,
                 ..
             } => {
-                let cases =
-                    Vec::from_iter(cases.iter().map(|case| {
-                        hhbc::intern_bytes(&*self.strings.interner.lookup_bytes(*case))
-                    }))
-                    .into();
-
+                let cases = cases.to_vec().into();
                 let targets = Vec::from_iter(
                     targets
                         .iter()

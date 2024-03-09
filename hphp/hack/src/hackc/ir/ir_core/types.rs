@@ -84,14 +84,12 @@ pub enum BaseType {
 }
 
 impl BaseType {
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>, _: &StringInterner) -> fmt::Result {
         match self {
             BaseType::AnyArray => f.write_str("AnyArray"),
             BaseType::Arraykey => f.write_str("Arraykey"),
             BaseType::Bool => f.write_str("Bool"),
-            BaseType::Class(cid) => {
-                write!(f, "Class(\"{}\")", strings.display(cid.as_bytes_id()))
-            }
+            BaseType::Class(cid) => write!(f, "Class(\"{cid}\")"),
             BaseType::Classname => f.write_str("Classname"),
             BaseType::Darray => f.write_str("Darray"),
             BaseType::Dict => f.write_str("Dict"),

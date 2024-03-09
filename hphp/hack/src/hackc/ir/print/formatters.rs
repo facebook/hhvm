@@ -762,7 +762,7 @@ impl Display for FmtTypedValue<'_> {
                 write!(f, "{}", v)
             }
             TypedValue::Bool(b) => f.write_str(if *b { "true" } else { "false" }),
-            TypedValue::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
+            TypedValue::String(v) => FmtEscapedString(v.as_bytes()).fmt(f),
             TypedValue::Float(v) => FmtFloat(v.to_f64()).fmt(f),
             TypedValue::LazyClass(lit) => {
                 write!(f, "lazy({})", FmtQuotedStringId(lit.as_bytes_id(), strings))
@@ -809,7 +809,7 @@ impl Display for FmtArrayKey<'_> {
             ArrayKey::Int(v) => {
                 write!(f, "{}", v)
             }
-            ArrayKey::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
+            ArrayKey::String(v) => FmtEscapedString(v.as_bytes()).fmt(f),
             ArrayKey::LazyClass(v) => {
                 write!(f, "lazy({})", FmtQuotedStringId(v.as_bytes_id(), strings))
             }

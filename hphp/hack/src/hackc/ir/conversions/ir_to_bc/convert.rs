@@ -145,9 +145,7 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue, strings: &StringCache) ->
         ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
         ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
-        ir::TypedValue::String(v) => {
-            hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(*v))
-        }
+        ir::TypedValue::String(v) => hhbc::TypedValue::String(*v),
         ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
         ir::TypedValue::Null => hhbc::TypedValue::Null,
         ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(
@@ -167,12 +165,10 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue, strings: &StringCache) ->
     }
 }
 
-pub(crate) fn convert_array_key(tv: &ir::ArrayKey, strings: &StringCache) -> hhbc::TypedValue {
+pub(crate) fn convert_array_key(tv: &ir::ArrayKey, _: &StringCache) -> hhbc::TypedValue {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
         ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
-        ir::ArrayKey::String(v) => {
-            hhbc::TypedValue::intern_string(&*strings.interner.lookup_bytes(v))
-        }
+        ir::ArrayKey::String(v) => hhbc::TypedValue::String(v),
     }
 }

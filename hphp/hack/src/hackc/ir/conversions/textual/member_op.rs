@@ -381,10 +381,7 @@ where
             }
             MemberKey::ET(s) => {
                 // $a["hello"]
-                let key = {
-                    let key = self.state.strings.lookup_bytes(s);
-                    crate::util::escaped_string(&key)
-                };
+                let key = crate::util::escaped_string(s.as_bytes());
                 let key = self.state.call_builtin(hack::Builtin::String, [key])?;
                 self.push_array_dim(key.into())?;
             }

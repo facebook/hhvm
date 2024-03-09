@@ -866,7 +866,7 @@ impl CallDetail {
 #[has_locals(none)]
 pub struct Call {
     pub operands: Box<[ValueId]>,
-    pub context: UnitBytesId,
+    pub context: StringId,
     pub detail: CallDetail,
     pub flags: FCallArgsFlags,
     pub num_rets: u32,
@@ -1196,7 +1196,7 @@ impl Instr {
     pub fn simple_call(func: FunctionName, operands: &[ValueId], loc: LocId) -> Instr {
         Self::call(Call {
             operands: operands.into(),
-            context: UnitBytesId::EMPTY,
+            context: StringId::EMPTY,
             detail: CallDetail::FCallFuncD { func },
             flags: FCallArgsFlags::default(),
             num_rets: 0,
@@ -1216,7 +1216,7 @@ impl Instr {
             operands: std::iter::once(receiver)
                 .chain(operands.iter().copied())
                 .collect(),
-            context: UnitBytesId::EMPTY,
+            context: StringId::EMPTY,
             detail: CallDetail::FCallObjMethodD {
                 flavor: ObjMethodOp::NullThrows,
                 method,
@@ -1237,7 +1237,7 @@ impl Instr {
     ) -> Instr {
         Self::call(Call {
             operands: operands.into(),
-            context: UnitBytesId::EMPTY,
+            context: StringId::EMPTY,
             detail: CallDetail::FCallClsMethodSD { clsref, method },
             flags: FCallArgsFlags::default(),
             num_rets: 0,

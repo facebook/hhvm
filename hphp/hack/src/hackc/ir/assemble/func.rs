@@ -52,6 +52,7 @@ use ir_core::ObjMethodOp;
 use ir_core::PropName;
 use ir_core::QueryMOp;
 use ir_core::SetRangeOp;
+use ir_core::StringId;
 use ir_core::SwitchKind;
 use ir_core::TParamBounds;
 use ir_core::TryCatchId;
@@ -591,7 +592,7 @@ impl FunctionParser<'_> {
             flags |= flag;
         }
 
-        let context = parse_string_id(tokenizer)?;
+        let context = StringId::from_bytes(parse_string_id(tokenizer)?)?;
 
         let call = instr::Call {
             operands: operands.into(),

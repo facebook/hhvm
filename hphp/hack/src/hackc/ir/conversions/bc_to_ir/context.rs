@@ -9,7 +9,6 @@ use std::sync::Arc;
 use hash::HashMap;
 use hhbc::BytesId;
 use hhbc::Instruct;
-use hhbc::StringId;
 use ir::instr;
 use ir::instr::Special;
 use ir::BlockId;
@@ -164,10 +163,6 @@ impl<'b> Context<'b> {
         for instr in selects {
             self.push(instr);
         }
-    }
-
-    pub(crate) fn intern_string_id(&mut self, s: StringId) -> ir::UnitBytesId {
-        self.strings.intern_bytes(s.as_str().as_bytes())
     }
 
     pub(crate) fn intern_bytes_id(&mut self, s: BytesId) -> ir::UnitBytesId {

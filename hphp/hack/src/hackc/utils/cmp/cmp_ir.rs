@@ -553,9 +553,7 @@ fn cmp_instr(
         .qualified("loc_id")?;
 
         match (a_instr, b_instr) {
-            (Instr::Call(a), Instr::Call(b)) => {
-                cmp_instr_call((a, a_strings), (b, b_strings)).qualified("call")
-            }
+            (Instr::Call(a), Instr::Call(b)) => cmp_instr_call(a, b).qualified("call"),
             (Instr::Hhbc(a), Instr::Hhbc(b)) => {
                 cmp_instr_hhbc((a, a_func, a_strings), (b, b_func, b_strings)).qualified("hhbc")
             }
@@ -620,12 +618,7 @@ fn cmp_operand(
     Ok(())
 }
 
-fn cmp_instr_call(
-    (a, a_strings): (&Call, &StringInterner),
-    (b, b_strings): (&Call, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_instr_call(a: &Call, b: &Call) -> Result {
     // Ignore LocId, ValueIds and LocalIds - those are checked elsewhere.
     let Call {
         operands: _,
@@ -647,7 +640,7 @@ fn cmp_instr_call(
         readonly: b_readonly,
         loc: _,
     } = b;
-    cmp_id(*a_context, *b_context).qualified("context")?;
+    cmp_eq(a_context, b_context).qualified("context")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_num_rets, b_num_rets).qualified("num_rets")?;
     cmp_slice(a_inouts, b_inouts, cmp_eq).qualified("inouts")?;
@@ -1274,7 +1267,7 @@ fn cmp_instr_terminator(
         match (a, b) {
             (Terminator::CallAsync(a_call, _),
              Terminator::CallAsync(b_call, _)) => {
-                cmp_instr_call((a_call, a_strings), (b_call, b_strings))?;
+                cmp_instr_call(a_call, b_call)?;
             }
             (Terminator::Fatal(_, a_op, _),
              Terminator::Fatal(_, b_op, _)) => {

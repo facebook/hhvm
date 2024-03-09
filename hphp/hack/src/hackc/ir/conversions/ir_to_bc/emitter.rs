@@ -304,11 +304,6 @@ impl<'b> InstrEmitter<'b> {
             let inouts = convert_indexes_to_bools(num_args as usize, call.inouts.as_deref());
             let readonly = convert_indexes_to_bools(num_args as usize, call.readonly.as_deref());
 
-            let context = ir::intern(
-                std::str::from_utf8(&self.strings.interner.lookup_bytes(call.context))
-                    .expect("non-utf8 context"),
-            );
-
             let async_eager_target = if let Some(label) = async_eager_target {
                 label
             } else {
@@ -322,7 +317,7 @@ impl<'b> InstrEmitter<'b> {
                 num_rets,
                 inouts: inouts.into(),
                 readonly: readonly.into(),
-                context,
+                context: call.context,
             }
         };
         let hint = BytesId::EMPTY;

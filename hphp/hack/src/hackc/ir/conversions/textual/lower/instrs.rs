@@ -41,9 +41,9 @@ use ir::PropName;
 use ir::ReadonlyOp;
 use ir::SetOpOp;
 use ir::SpecialClsRef;
+use ir::StringId;
 use ir::TypeStructEnforceKind;
 use ir::TypeStructResolveOp;
-use ir::UnitBytesId;
 use ir::ValueId;
 use itertools::Itertools;
 use naming_special_names_rust::special_idents;
@@ -713,7 +713,7 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
                 let method = MethodName::factory();
                 let operands = vec![cls].into_boxed_slice();
-                let context = UnitBytesId::EMPTY;
+                let context = StringId::EMPTY;
                 let flavor = ObjMethodOp::NullThrows;
                 let detail = CallDetail::FCallObjMethodD { flavor, method };
                 let flags = FCallArgsFlags::default();

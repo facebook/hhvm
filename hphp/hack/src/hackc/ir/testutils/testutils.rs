@@ -145,7 +145,7 @@ impl Block {
                 let func = FunctionName::intern(target);
                 let call = ir_core::Call {
                     operands: Box::new([]),
-                    context: ir_core::UnitBytesId::EMPTY,
+                    context: ir_core::StringId::EMPTY,
                     detail: instr::CallDetail::FCallFuncD { func },
                     flags: ir_core::FCallArgsFlags::default(),
                     num_rets: 1,

@@ -216,8 +216,6 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
         _ => unreachable!(),
     };
 
-    let context = ctx.intern_string_id(fcall_args.context);
-
     let mut num_args = fcall_args.num_args;
     // These first two stack entries correspond to an HHVM ActRec (in
     // TypedValue-sized chunks - see kNumActRecCells).  The first entry fits
@@ -325,7 +323,7 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
     };
 
     let call = instr::Call {
-        context,
+        context: fcall_args.context,
         detail,
         flags: fcall_args.flags,
         inouts,

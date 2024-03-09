@@ -289,7 +289,11 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
     if call.flags.contains(FCallArgsFlags::NumArgsStart) {
         write!(w, " num_args_start")?;
     }
-    write!(w, " {}", FmtQuotedStringId(call.context, ctx.strings))?;
+    write!(
+        w,
+        " {}",
+        FmtQuotedStringId(call.context.as_bytes(), ctx.strings)
+    )?;
     Ok(())
 }
 

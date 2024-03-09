@@ -29,6 +29,7 @@ use ir::LocalId;
 use ir::MethodFlags;
 use ir::MethodName;
 use ir::SpecialClsRef;
+use ir::StringId;
 use ir::StringInterner;
 use ir::UnitBytesId;
 use ir::ValueId;
@@ -1082,10 +1083,10 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
     if flags & FCallArgsFlags::ExplicitContext != 0 {
-        if let Some(context) = state.strings.lookup_bytes_or_none(context) {
+        if context != StringId::EMPTY {
             // For analysis context shouldn't really matter. For now with a
             // calling context just report it as a comment.
-            let context = util::escaped_string(&context);
+            let context = util::escaped_string(context.as_str().as_bytes());
             state.fb.comment(&format!("ExplicitContext: {context}"))?;
         }
     }

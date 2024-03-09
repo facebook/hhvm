@@ -19,12 +19,12 @@ use std::error::Error;
 use fbthrift::application_exception::ApplicationException;
 use fbthrift::application_exception::ApplicationExceptionErrorCode;
 use k9::snapshot;
-use thrift_test::errors::test_service::DoFooError;
-use thrift_test::errors::test_service::DoFooStreamStreamError;
-use thrift_test::errors::test_service::DoNoThrowError;
 use thrift_test::types::ErrorCode;
 use thrift_test::types::InternalError;
 use thrift_test::types::RetryableError;
+use thrift_test_clients::errors::DoFooError;
+use thrift_test_clients::errors::DoFooStreamStreamError;
+use thrift_test_clients::errors::DoNoThrowError;
 
 fn make_ie() -> DoFooError {
     DoFooError::ie(InternalError {

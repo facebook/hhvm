@@ -34,6 +34,7 @@ tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 
 [dev-dependencies]
 fbthrift_test_if = { version = "0.0.1+unstable", path = "cargo_thrift" }
+fbthrift_test_if_clients = { version = "0.0.1+unstable", path = "cargo_thrift/clients" }
 proptest = "1.0"
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 

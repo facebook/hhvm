@@ -1,0 +1,24 @@
+string(143) "O:28:"__SystemLib\MethCallerHelper":2:{s:35:"%s";s:1:"C";s:36:"%s";s:1:"m";}"
+string(143) "O:28:"__SystemLib\MethCallerHelper":2:{s:35:"%s";s:1:"C";s:36:"%s";s:1:"m";}"
+NULL
+NULL
+
+Warning: fb_compact_serialize(): unable to serialize object/resource/ref/func/class in %s/meth-caller-serialize-native.php on line 16
+NULL
+
+Warning: fb_compact_serialize(): unable to serialize object/resource/ref/func/class in %s/meth-caller-serialize-native.php on line 17
+NULL
+string(2) "{}"
+string(2) "{}"
+string(149) "v:1:{O:28:"__SystemLib\MethCallerHelper":2:{s:35:"%s";s:1:"C";s:36:"%s";s:1:"m";}}"
+string(149) "v:1:{O:28:"__SystemLib\MethCallerHelper":2:{s:35:"%s";s:1:"C";s:36:"%s";s:1:"m";}}"
+NULL
+NULL
+
+Warning: fb_compact_serialize(): unable to serialize object/resource/ref/func/class in %s/meth-caller-serialize-native.php on line 31
+string(3) "%s"
+
+Warning: fb_compact_serialize(): unable to serialize object/resource/ref/func/class in %s/meth-caller-serialize-native.php on line 32
+string(3) "%s"
+string(4) "[{}]"
+string(4) "[{}]"

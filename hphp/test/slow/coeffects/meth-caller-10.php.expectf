@@ -1,2 +1,1 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'meth_caller(): method A::foo not found' in %s:9
 %A

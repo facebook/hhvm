@@ -1,4 +1,3 @@
 -vEval.CoeffectEnforcementLevels.pure=1
 -vEval.CoeffectEnforcementLevels.rx=1
 -vEval.CoeffectEnforcementLevels.zoned=1
--vEval.EmitMethCallerFuncPointers=1

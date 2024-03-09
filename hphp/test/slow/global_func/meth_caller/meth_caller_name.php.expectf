@@ -1,32 +1,72 @@
-function(MethCaller$A$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(1) "A"
 string(1) "f"
-function(MethCaller$B$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(1) "B"
 string(1) "f"
-function(MethCaller$C$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(1) "C"
 string(1) "f"
-function(MethCaller$D$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(1) "D"
 string(1) "f"
-function(MethCaller$Ans\A$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(5) "Ans\A"
 string(1) "f"
-function(MethCaller$Ans\B$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(5) "Ans\B"
 string(1) "f"
-function(MethCaller$Ans\C$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(5) "Ans\C"
 string(1) "f"
-function(MethCaller$Ans\D$f)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
 bool(true)
 string(5) "Ans\D"
 string(1) "f"

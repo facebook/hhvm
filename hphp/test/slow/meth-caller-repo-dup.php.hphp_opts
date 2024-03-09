@@ -1,2 +1,1 @@
--vRuntime.Eval.EmitMethCallerFuncPointers=1
 --inputs=__DIR__/meth-caller-repo-dup.php.inc

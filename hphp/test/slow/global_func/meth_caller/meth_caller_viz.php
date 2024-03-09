@@ -2,15 +2,15 @@
 
 namespace {
 class A {
-  protected function f($x) :mixed{ return "A::f($x)"; }
+  public function f($x) :mixed{ return "A::f($x)"; }
   private function g($x) :mixed{ return "A::g($x)"; }
 }
 }
 
 namespace Q {
 class B extends \A {
-  protected function f($x) :mixed{ return "Q\\B::f($x)"; }
-  private function g($x) :mixed{ return "Q\\B::g($x)"; }
+  public function f($x) :mixed{ return "Q\\B::f($x)"; }
+  public function g($x) :mixed{ return "Q\\B::g($x)"; }
 
   function doit() :mixed{
     \var_dump(\HH\meth_caller(\A::class, "f")(new X\C(), 2));
@@ -28,8 +28,8 @@ class B extends \A {
 
 namespace Q\X {
 class C extends \Q\B {
-  protected function f($x) :mixed{ return "Q\\X\\C::f($x)"; }
-  private function g($x) :mixed{ return "Q\\X\\C::g($x)"; }
+  public function f($x) :mixed{ return "Q\\X\\C::f($x)"; }
+  public function g($x) :mixed{ return "Q\\X\\C::g($x)"; }
 }
 }
 

@@ -1,12 +1,46 @@
-string(31) "Cannot store meth_caller in APC"
-string(31) "Cannot store meth_caller in APC"
-string(31) "Cannot store meth_caller in APC"
-string(31) "Cannot store meth_caller in APC"
-string(31) "Cannot store meth_caller in APC"
-string(31) "Cannot store meth_caller in APC"
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "m"
+}
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "m"
+}
+vec(1) {
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+vec(1) {
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+dict(1) {
+  ["a"]=>
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}
+dict(1) {
+  ["a"]=>
+  object(__SystemLib\MethCallerHelper) (2) {
+    ["class":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "C"
+    ["method":"__SystemLib\MethCallerHelper":private]=>
+    string(1) "m"
+  }
+}

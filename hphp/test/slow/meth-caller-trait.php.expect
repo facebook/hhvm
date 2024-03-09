@@ -1,7 +1,7 @@
 Hello, P!
 Hello, P!
-string(33) "object must be an instance of (C)"
+string(52) "object must be an instance of (C), instead it is (P)"
 Hello, C!
 Hello, C!
 Hello, C!
-string(33) "meth_caller(): class T is a trait"
+string(52) "object must be an instance of (T), instead it is (P)"

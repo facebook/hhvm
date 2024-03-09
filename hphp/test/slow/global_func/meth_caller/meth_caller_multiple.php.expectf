@@ -1,25 +1,50 @@
-function(MethCaller$Ans\A$afunc)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
 int(2)
 string(5) "Ans\A"
 string(5) "afunc"
-function(MethCaller$Ans\A$afunc)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
 int(4)
 string(5) "Ans\A"
 string(5) "afunc"
-function(MethCaller$Ans\A$afunc)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
 int(2)
 string(5) "Ans\A"
 string(5) "afunc"
-function(MethCaller$Ans\Bns\A$afunc)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(9) "Ans\Bns\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
 int(3)
 string(9) "Ans\Bns\A"
 string(5) "afunc"
-function(MethCaller$Ans\A$afunc)
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
 int(8)
 
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (Ans\A)' in %s/meth_caller_multiple.php:25
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (Ans\A), instead it is (Ans\Bns\A)' in %s/meth_caller_multiple.php:25
 Stack trace:
 #0 (): HH\invariant_violation()
-#1 %s/meth_caller_multiple.php(25): MethCaller$Ans\A$afunc()
+#1 %s/meth_caller_multiple.php(25): __SystemLib\MethCallerHelper->__invoke()
 #2 (): Ans\Bns\main()
-%a {main}
+#3 {main}

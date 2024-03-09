@@ -1,2 +1,1 @@
--vEval.EmitMethCallerFuncPointers=0 -vEval.ForbidMethCallerAPCSerialize=2
-
+-vEval.ForbidMethCallerAPCSerialize=2

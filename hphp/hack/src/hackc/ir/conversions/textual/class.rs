@@ -257,7 +257,7 @@ impl ClassState<'_, '_> {
         let static_ty = static_ty(self.class.name);
         let ty = textual::Return::new(non_static_ty(self.class.name));
 
-        let this_lid = LocalId::Named(self.unit_state.strings.intern_str(special_idents::THIS));
+        let this_lid = LocalId::Named(ir::intern(special_idents::THIS));
         let params = vec![textual::Param {
             name: VarName::Local(this_lid),
             attrs: None,

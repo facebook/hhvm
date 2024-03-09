@@ -44,6 +44,7 @@ use ir_core::SetOpOp;
 use ir_core::SilenceOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
+use ir_core::StringId;
 use ir_core::TypeConstraintFlags;
 use ir_core::TypeInfo;
 use ir_core::TypeStructEnforceKind;
@@ -843,11 +844,10 @@ pub(crate) fn parse_user_id(tokenizer: &mut Tokenizer<'_>) -> Result<(Vec<u8>, T
     Ok((value.into_owned(), tloc))
 }
 
-fn parse_var(tokenizer: &mut Tokenizer<'_>) -> Result<UnitBytesId> {
+fn parse_var(tokenizer: &mut Tokenizer<'_>) -> Result<StringId> {
     parse!(tokenizer, @pos <name:parse_user_id>);
     if name.0.first().copied() == Some(b'$') {
-        let id = tokenizer.strings.intern_bytes(name.0);
-        Ok(id)
+        Ok(ir_core::intern(std::str::from_utf8(&name.0)?))
     } else {
         Err(pos.bail(format!(
             "Expected leading '$' but got {}",

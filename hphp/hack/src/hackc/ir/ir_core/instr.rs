@@ -38,6 +38,7 @@ use crate::SetOpOp;
 use crate::SetRangeOp;
 use crate::SilenceOp;
 use crate::SpecialClsRef;
+use crate::StringId;
 use crate::SwitchKind;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
@@ -1308,9 +1309,11 @@ newtype_int!(UnnamedLocalId, u32, UnnamedLocalIdMap, UnnamedLocalIdSet);
 /// Note: Unlike HHBC the IR named and unnamed are in distinct namespaces.
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum LocalId {
-    Named(UnitBytesId),
-    // The UnnamedLocalIds are just for uniqueness - there are no requirements
-    // for these IDs to be contiguous or in any particular order.
+    /// Named locals correspond to hhbc::Body::decl_vars
+    Named(StringId),
+
+    /// The UnnamedLocalIds are just for uniqueness - there are no requirements
+    /// for these IDs to be contiguous or in any particular order.
     Unnamed(UnnamedLocalId),
 }
 

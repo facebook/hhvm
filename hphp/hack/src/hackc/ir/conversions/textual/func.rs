@@ -161,7 +161,7 @@ fn compute_func_params<'a, 'b>(
 ) -> Vec<(textual::Param<'b>, LocalId)> {
     let mut result = Vec::new();
 
-    let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
+    let this_lid = LocalId::Named(ir::intern(special_idents::THIS));
     // Prepend the 'this' parameter.
     let this_param = textual::Param {
         name: VarName::Local(this_lid),
@@ -249,7 +249,7 @@ fn is_wrapper_attribute(classid: ClassName) -> bool {
 fn split_default_func(
     orig_func: &Func,
     func_info: &FuncInfo<'_>,
-    strings: &StringInterner,
+    _: &StringInterner,
 ) -> Option<Vec<Func>> {
     let mut result = Vec::new();
     let loc = orig_func.loc_id;
@@ -321,7 +321,7 @@ fn split_default_func(
                 params.push(ValueId::from(iid));
             }
             if has_reified {
-                let name = strings.intern_str(hhbc_string_utils::reified::GENERICS_LOCAL_NAME);
+                let name = ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME);
                 let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(name), loc));
                 let iid = func.alloc_instr(instr);
                 block.iids.push(iid);
@@ -330,7 +330,7 @@ fn split_default_func(
             let instr = match func_info {
                 FuncInfo::Function(fi) => Instr::simple_call(fi.name, &params, loc),
                 FuncInfo::Method(mi) => {
-                    let this_str = strings.intern_str(special_idents::THIS);
+                    let this_str = ir::intern(special_idents::THIS);
                     let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(this_str), loc));
                     let receiver = func.alloc_instr(instr);
                     block.iids.push(receiver);
@@ -457,7 +457,7 @@ fn write_func(
             ),
             mangle::FunctionName::Method(..) | mangle::FunctionName::Unmangled(..),
         ) => {
-            write_instance_stub(txf, unit_state, mi, &coeffects, &tx_params, &ret_ty, &span)?;
+            write_instance_stub(txf, mi, &coeffects, &tx_params, &ret_ty, &span)?;
         }
         _ => {}
     }
@@ -514,14 +514,12 @@ pub(crate) fn write_func_decl(
 /// non-static.
 fn write_instance_stub(
     txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
     method_info: &MethodInfo<'_>,
     coeffects: &[ir::Ctx],
     tx_params: &[textual::Param<'_>],
     ret_ty: &textual::Return<'_>,
     span: &ir::SrcLoc,
 ) -> Result {
-    let strings = &unit_state.strings;
     let name_str = mangle::FunctionName::method(
         method_info.class.name,
         IsStatic::NonStatic,
@@ -547,7 +545,7 @@ fn write_instance_stub(
         &locals,
         |fb| {
             fb.comment("forward to the static method")?;
-            let this_str = strings.intern_str(special_idents::THIS);
+            let this_str = ir::intern(special_idents::THIS);
             let this_lid = LocalId::Named(this_str);
             let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
             let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
@@ -1333,7 +1331,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     fn load_this(&mut self) -> Result<textual::Sid> {
-        let var = LocalId::Named(self.strings.intern_str(special_idents::THIS));
+        let var = LocalId::Named(ir::intern(special_idents::THIS));
         let mi = self.expect_method_info();
         let ty = mi.class_ty();
         let this = self.fb.load(&ty, textual::Expr::deref(var))?;
@@ -1581,13 +1579,9 @@ impl MethodInfo<'_> {
 /// Unnamed locals have only their id which may differ accross runs. In which
 /// case the IR would be non-deterministic and hence unstable ordering would be
 /// the least of our concerns.
-fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
+fn cmp_lid(_: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
     match (x, y) {
-        (LocalId::Named(x_bid), LocalId::Named(y_bid)) => {
-            let x_name = strings.lookup_bytes(*x_bid);
-            let y_name = strings.lookup_bytes(*y_bid);
-            x_name.cmp(&y_name)
-        }
+        (LocalId::Named(x_id), LocalId::Named(y_id)) => x_id.cmp(y_id),
         (LocalId::Named(_), LocalId::Unnamed(_)) => std::cmp::Ordering::Less,
         (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
         (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),

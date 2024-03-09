@@ -55,7 +55,7 @@ pub(crate) fn lower_func(
     }
 
     if func_info.declared_in_trait() {
-        add_self_trait_parameter(&mut func, &strings);
+        add_self_trait_parameter(&mut func);
     }
 
     // Start by 'unasync'ing the Func.
@@ -102,9 +102,9 @@ pub(crate) fn lower_func(
     func
 }
 
-fn add_reified_parameter(func: &mut Func, strings: &StringInterner) {
+fn add_reified_parameter(func: &mut Func, _: &StringInterner) {
     func.params.push(ir::Param {
-        name: strings.intern_str(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
+        name: ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
         is_variadic: false,
         is_inout: false,
         is_readonly: false,
@@ -120,12 +120,12 @@ fn add_reified_parameter(func: &mut Func, strings: &StringInterner) {
     });
 }
 
-fn add_self_trait_parameter(func: &mut Func, strings: &StringInterner) {
+fn add_self_trait_parameter(func: &mut Func) {
     // We insert a `self` parameter so infer's analysis can
     // do its job. We don't use `$` so we are sure we don't clash with
     // existing Hack user defined variables.
     func.params.push(ir::Param {
-        name: strings.intern_str("self"),
+        name: ir::string_id!("self"),
         is_variadic: false,
         is_inout: false,
         is_readonly: false,
@@ -246,7 +246,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     builder.cur_block_mut().iids.extend(saved);
 }
 
-fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, strings: &StringInterner) {
+fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, _: &StringInterner) {
     let mut instrs = Vec::new();
 
     let loc = func.loc_id;
@@ -269,11 +269,8 @@ fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, strings: &St
 
     for prop in &properties {
         // Property names are the variable names without the '$'.
-        let prop_str = prop.name.as_bstr();
-        let mut var = prop_str.to_vec();
-        var.insert(0, b'$');
-        let lid = LocalId::Named(strings.intern_bytes(var));
-
+        let var = format!("${}", prop.name);
+        let lid = LocalId::Named(ir::intern(var));
         let iid = func.alloc_instr(Instr::MemberOp(
             MemberOpBuilder::base_h(loc).query_pt(prop.name),
         ));

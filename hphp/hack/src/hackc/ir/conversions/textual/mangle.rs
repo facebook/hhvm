@@ -74,6 +74,12 @@ impl Mangle for [u8] {
     }
 }
 
+impl Mangle for str {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        self.as_bytes().mangle(strings)
+    }
+}
+
 // Classes and functions live in different namespaces.
 
 impl Mangle for ir::PropName {
@@ -366,7 +372,7 @@ impl fmt::Display for FmtLid<'_> {
         let FmtLid(strings, lid) = *self;
         match lid {
             ir::LocalId::Named(id) => {
-                let name = strings.lookup_bstr(id).mangle(strings);
+                let name = id.as_str().mangle(strings);
                 f.write_str(&name)
             }
             ir::LocalId::Unnamed(id) => {

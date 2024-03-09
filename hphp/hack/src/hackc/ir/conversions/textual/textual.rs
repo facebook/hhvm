@@ -366,12 +366,12 @@ impl TextualFile<'_> {
         )?;
 
         const THIS_NAME: &str = "this";
-        let this_lid = LocalId::Named(self.strings.intern_str(THIS_NAME));
+        let this_lid = LocalId::Named(ir::intern(THIS_NAME));
         let this_ty = Ty::Type(curry_ty.clone());
         let this_ty_ptr = Ty::named_type_ptr(curry_ty.clone());
 
         const VARARGS_NAME: &str = "args";
-        let varargs_lid = LocalId::Named(self.strings.intern_str(VARARGS_NAME));
+        let varargs_lid = LocalId::Named(ir::intern(VARARGS_NAME));
         let args_ty = Ty::SpecialPtr(SpecialTy::Vec);
 
         let params = vec![
@@ -405,7 +405,7 @@ impl TextualFile<'_> {
             &ret_ty,
             &[],
             |fb| {
-                let this_id = fb.txf.strings.intern_str(THIS_NAME);
+                let this_id = ir::intern(THIS_NAME);
                 let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
 
                 let mut args = Vec::new();
@@ -416,7 +416,7 @@ impl TextualFile<'_> {
                     args.push(arg);
                 }
 
-                let varargs_id = fb.txf.strings.intern_str(VARARGS_NAME);
+                let varargs_id = ir::intern(VARARGS_NAME);
                 let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
                 args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
 

@@ -1939,7 +1939,7 @@ pub(crate) fn print_param(
         "{} {}{}",
         FmtTypeInfo(ty, strings),
         ellipsis_for_variadic,
-        FmtIdentifierId(name, strings)
+        FmtIdentifierId(name.as_bytes(), strings)
     )?;
     if let Some(dv) = default_value {
         write!(

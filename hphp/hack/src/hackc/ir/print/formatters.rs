@@ -513,7 +513,7 @@ impl Display for FmtLid<'_> {
         let FmtLid(ref lid, strings) = *self;
         match *lid {
             LocalId::Unnamed(id) => write!(f, "@{}", id.as_usize()),
-            LocalId::Named(var) => FmtIdentifierId(var, strings).fmt(f),
+            LocalId::Named(var) => FmtIdentifierId(var.as_bytes(), strings).fmt(f),
         }
     }
 }

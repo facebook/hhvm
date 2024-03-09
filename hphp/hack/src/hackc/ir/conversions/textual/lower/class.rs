@@ -250,7 +250,7 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
 
         for prop in &class.properties {
             fb.func.params.push(Param {
-                name: prop.name.as_bytes_id(),
+                name: prop.name.as_string_id(),
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
@@ -259,7 +259,7 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
                 default_value: None,
             });
 
-            let lid = LocalId::Named(prop.name.as_bytes_id());
+            let lid = LocalId::Named(prop.name.as_string_id());
             let value = fb.emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, loc)));
             MemberOpBuilder::base_h(loc).emit_set_m_pt(fb, prop.name, value);
         }

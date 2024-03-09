@@ -539,8 +539,8 @@ fn cmp_instr(
 
         cmp_eq(a_instr.locals().len(), b_instr.locals().len()).qualified("locals.len")?;
         cmp_slice(
-            a_instr.locals().iter().map(|i| (*i, a_strings)),
-            b_instr.locals().iter().map(|i| (*i, b_strings)),
+            a_instr.locals().iter().copied(),
+            b_instr.locals().iter().copied(),
             cmp_local,
         )
         .qualified("locals")?;
@@ -584,23 +584,16 @@ fn cmp_instr(
         .with_raw(|| format!("::<{:?}>", std::mem::discriminant(a_instr)))
 }
 
-fn cmp_local(
-    (a, a_strings): (LocalId, &StringInterner),
-    (b, b_strings): (LocalId, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_local(a: LocalId, b: LocalId) -> Result {
     match (a, b) {
-        (LocalId::Named(a_id), LocalId::Named(b_id)) => cmp_id(a_id, b_id).qualified("named"),
+        (LocalId::Named(a_id), LocalId::Named(b_id)) => cmp_eq(a_id, b_id).qualified("named"),
         (LocalId::Unnamed(a_id), LocalId::Unnamed(b_id)) => cmp_eq(a_id, b_id).qualified("unnamed"),
-        (LocalId::Named(a_id), LocalId::Unnamed(b_id)) => bail!(
-            "LocalId mismatch {} vs {b_id}",
-            String::from_utf8_lossy(&a_strings.lookup_bytes(a_id))
-        ),
-        (LocalId::Unnamed(a_id), LocalId::Named(b_id)) => bail!(
-            "LocalId mismatch {a_id} vs {}",
-            String::from_utf8_lossy(&b_strings.lookup_bytes(b_id))
-        ),
+        (LocalId::Named(a_id), LocalId::Unnamed(b_id)) => {
+            bail!("LocalId mismatch Named({a_id}) vs Unnamed({b_id})")
+        }
+        (LocalId::Unnamed(a_id), LocalId::Named(b_id)) => {
+            bail!("LocalId mismatch Unnamed({a_id}) vs Named({b_id})",)
+        }
     }
 }
 
@@ -1423,8 +1416,6 @@ fn cmp_param(
     (a, a_strings): (&Param, &StringInterner),
     (b, b_strings): (&Param, &StringInterner),
 ) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,
@@ -1444,9 +1435,7 @@ fn cmp_param(
         default_value: b_default_value,
     } = b;
 
-    cmp_id(*a_name, *b_name)
-        .qualified("name")
-        .qualified("name")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;

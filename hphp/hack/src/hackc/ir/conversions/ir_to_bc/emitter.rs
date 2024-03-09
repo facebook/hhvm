@@ -74,10 +74,7 @@ pub(crate) fn emit_func(
         .iter()
         .sorted_by_key(|(_, v)| *v)
         .filter_map(|(k, _)| match *k {
-            LocalId::Named(name) => Some(ir::intern(
-                std::str::from_utf8(&strings.interner.lookup_bytes(name))
-                    .expect("non-utf8 local name"),
-            )),
+            LocalId::Named(name) => Some(name),
             LocalId::Unnamed(_) => None,
         })
         .skip(func.params.len())

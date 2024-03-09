@@ -27,6 +27,7 @@ use crate::LocId;
 use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
+use crate::StringId;
 use crate::TypeInfo;
 use crate::UnitBytesId;
 use crate::ValueId;
@@ -96,7 +97,7 @@ impl SrcLoc {
 /// Func parameters.
 #[derive(Clone, Debug)]
 pub struct Param {
-    pub name: UnitBytesId,
+    pub name: StringId,
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,

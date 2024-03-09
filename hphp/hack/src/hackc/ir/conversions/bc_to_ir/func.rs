@@ -172,9 +172,8 @@ fn convert_body<'a>(
         }
     }
 
-    for decl in decl_vars.as_ref() {
-        let id = ctx.strings.intern_bytes(decl.as_str().as_bytes());
-        ctx.named_local_lookup.push(LocalId::Named(id));
+    for &decl in decl_vars {
+        ctx.named_local_lookup.push(LocalId::Named(decl));
     }
 
     // Go through the work queue and convert each sequence.  We convert a
@@ -231,7 +230,7 @@ fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
         Maybe::Nothing => None,
     };
 
-    let name = ctx.strings.intern_bytes(param.name.as_str().as_bytes());
+    let name = param.name;
     ctx.named_local_lookup.push(LocalId::Named(name));
 
     let user_attributes = param

@@ -165,12 +165,11 @@ mod test {
     use ir_core::Instr;
     use ir_core::InstrId;
     use ir_core::Param;
-    use ir_core::StringInterner;
     use ir_core::TypeInfo;
 
-    fn mk_param(name: &str, dv: BlockId, strings: &StringInterner) -> Param {
+    fn mk_param(name: &str, dv: BlockId) -> Param {
         Param {
-            name: strings.intern_str(name),
+            name: ir_core::intern(name),
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
@@ -348,7 +347,7 @@ mod test {
             testutils::Block::ret("d"),
             testutils::Block::ret("e"),
         ]);
-        func.params.push(mk_param("x", BlockId(1), &strings));
+        func.params.push(mk_param("x", BlockId(1)));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
 
         eprintln!("FUNC:\n{}", print::DisplayFunc::new(&func, true, &strings));
@@ -365,7 +364,7 @@ mod test {
             ],
             Arc::clone(&strings),
         );
-        expected.params.push(mk_param("x", BlockId(1), &strings));
+        expected.params.push(mk_param("x", BlockId(1)));
         *expected.instr_mut(InstrId(1)) = Instr::enter(BlockId(0), ir_core::LocId::NONE);
 
         testutils::assert_func_struct_eq(&func, &expected, &strings);

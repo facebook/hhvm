@@ -373,7 +373,7 @@ impl FunctionParser<'_> {
 
         match id[0] {
             b'$' => {
-                let id = self.builder.strings.intern_bytes(id);
+                let id = ir_core::intern(std::str::from_utf8(&id)?);
                 Ok(LocalId::Named(id))
             }
             b'@' => {

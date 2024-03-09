@@ -47,6 +47,7 @@ pub mod unit;
 // which random stuff to get from `ir` and which to get elsewhere.
 pub use hhbc::intern;
 pub use hhbc::intern_bytes;
+pub use hhbc::string_id;
 pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::BareThisOp;
 pub use hhbc::BytesId;

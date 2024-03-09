@@ -321,7 +321,7 @@ where
             BaseOp::BaseH { loc: _ } => {
                 // Get base from $this: $this[k]
                 // Just pretend to be a BaseL w/ $this.
-                let lid = LocalId::Named(self.state.strings.intern_str(special_idents::THIS));
+                let lid = LocalId::Named(ir::intern(special_idents::THIS));
                 self.pending = Pending::Base(Base::Local(lid));
             }
             BaseOp::BaseL {

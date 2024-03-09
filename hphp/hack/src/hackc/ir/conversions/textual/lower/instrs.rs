@@ -365,12 +365,12 @@ impl LowerInstrs<'_> {
         // NOTE: This is called 'LocalId' but actually represents a GlobalId
         // (because we don't have a DerefGlobal instr - but it would work the
         // same with just a different type).
-        let global = builder.emit(Textual::deref(LocalId::Named(name.id.as_bytes())));
+        let global = builder.emit(Textual::deref(LocalId::Named(name.id)));
         ops.push(global);
 
         match *self.func_info {
             FuncInfo::Method(_) => {
-                let this = builder.strings.intern_str(special_idents::THIS);
+                let this = ir::intern(special_idents::THIS);
                 let lid = LocalId::Named(this);
                 ops.push(builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc))));
             }
@@ -602,7 +602,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 },
             ) => rewrite_nullsafe_call(iid, builder, call, state),
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
-                let this = builder.strings.intern_str(special_idents::THIS);
+                let this = ir::intern(special_idents::THIS);
                 let lid = LocalId::Named(this);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
@@ -735,7 +735,7 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::SelfCls(loc)) if self.func_info.declared_in_trait() => {
                 // In a trait, turn the `self` keyword into the fresh parameter we add
                 // to the type signatures.
-                let lid = builder.strings.intern_str("self");
+                let lid = ir::intern("self");
                 let lid = LocalId::Named(lid);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
@@ -962,8 +962,8 @@ fn rewrite_nullsafe_call(
     }
 }
 
-fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
-    let name = strings.intern_str(format!("iter{}", id.idx));
+fn iter_var_name(id: ir::IterId, _: &ir::StringInterner) -> LocalId {
+    let name = ir::intern(format!("iter{}", id.idx));
     LocalId::Named(name)
 }
 

@@ -56,56 +56,29 @@ class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceCl
   /* send and recv functions */
 }
 
-// HELPER FUNCTIONS AND STRUCTURES
+abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
+  abstract const type TThriftIf as FooHackServiceAsyncIf;
+  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'FooHackService';
 
-class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
-  public static function getServiceMetadata()[]: \tmeta_ThriftService {
-    return \tmeta_ThriftService::fromShape(
-      shape(
-        "name" => "module.FooHackService",
-      )
-    );
-  }
+  protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $reply_type = \TMessageType::REPLY;
 
-  public static function getServiceMetadataResponse()[]: \tmeta_ThriftServiceMetadataResponse {
-    return \tmeta_ThriftServiceMetadataResponse::fromShape(
-      shape(
-        'context' => \tmeta_ThriftServiceContext::fromShape(
-          shape(
-            'service_info' => self::getServiceMetadata(),
-            'module' => \tmeta_ThriftModuleContext::fromShape(
-              shape(
-                'name' => 'module',
-              )
-            ),
-          )
-        ),
-        'metadata' => \tmeta_ThriftMetadata::fromShape(
-          shape(
-            'enums' => dict[
-            ],
-            'structs' => dict[
-            ],
-            'exceptions' => dict[
-            ],
-            'services' => dict[
-            ],
-          )
-        ),
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
-    return shape(
-      'service' => dict[],
-      'functions' => dict[
-      ],
-    );
-  }
-}
-
- = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else {
+      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+    try {
+      $result->success = FooHackServiceStaticMetadata::getServiceMetadataResponse();
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     if ($output is \TBinaryProtocolAccelerated)
     {

@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use ir::StringInterner;
-use ir::UnitBytesId;
 
 pub(crate) struct StringCache {
     pub interner: Arc<StringInterner>,
@@ -15,11 +14,5 @@ pub(crate) struct StringCache {
 impl StringCache {
     pub fn new(interner: Arc<StringInterner>) -> Self {
         Self { interner }
-    }
-
-    pub fn intern(&self, id: UnitBytesId) -> Result<hhbc::StringId, std::str::Utf8Error> {
-        Ok(hhbc::intern(std::str::from_utf8(
-            &self.interner.lookup_bytes(id),
-        )?))
     }
 }

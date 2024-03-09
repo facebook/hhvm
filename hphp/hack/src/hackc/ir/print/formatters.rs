@@ -846,7 +846,7 @@ impl<'a> Display for FmtTypeInfo<'a> {
         let FmtTypeInfo(ti, strings) = self;
         write!(f, "<")?;
         if let Some(id) = ti.user_type {
-            FmtQuotedStringId(id, strings).fmt(f)?;
+            FmtQuotedStringId(id.as_bytes(), strings).fmt(f)?;
         } else {
             f.write_str("N")?;
         }

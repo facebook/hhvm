@@ -15,7 +15,7 @@ use maplit::hashmap;
 use crate::convert;
 use crate::types;
 
-pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir::TypeInfo {
+pub(crate) fn convert_type(ty: &hhbc::TypeInfo) -> ir::TypeInfo {
     let user_type = ty.user_type.into_option();
     let name = ty.type_constraint.name.into_option();
     let constraint_ty = match name {
@@ -42,7 +42,7 @@ pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir:
     };
 
     ir::TypeInfo {
-        user_type: user_type.map(|u| strings.intern_bytes(u.as_str().as_bytes())),
+        user_type,
         enforced: ir::EnforceableType {
             ty: constraint_ty,
             modifiers: ty.type_constraint.flags,
@@ -50,12 +50,9 @@ pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir:
     }
 }
 
-pub(crate) fn convert_maybe_type<'a>(
-    ty: Maybe<&hhbc::TypeInfo>,
-    strings: &StringInterner,
-) -> ir::TypeInfo {
+pub(crate) fn convert_maybe_type(ty: Maybe<&hhbc::TypeInfo>) -> ir::TypeInfo {
     match ty {
-        Maybe::Just(ty) => convert_type(ty, strings),
+        Maybe::Just(ty) => convert_type(ty),
         Maybe::Nothing => ir::TypeInfo::empty(),
     }
 }
@@ -118,7 +115,7 @@ pub(crate) fn convert_typedef<'a>(
         .collect_vec();
     let type_info_union = type_info_union
         .iter()
-        .map(|ti| types::convert_type(ti, strings))
+        .map(types::convert_type)
         .collect_vec();
     let type_structure = convert::convert_typed_value(type_structure, strings);
 

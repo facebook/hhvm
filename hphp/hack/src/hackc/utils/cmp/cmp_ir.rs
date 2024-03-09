@@ -158,12 +158,7 @@ fn cmp_class(
     )
     .qualified("ctx_constants")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
-    cmp_option(
-        a_enum_type.as_ref().map(|i| (i, a_strings)),
-        b_enum_type.as_ref().map(|i| (i, b_strings)),
-        cmp_type_info,
-    )
-    .qualified("enum_type")?;
+    cmp_option(a_enum_type.as_ref(), b_enum_type.as_ref(), cmp_type_info).qualified("enum_type")?;
     cmp_slice(a_enum_includes.iter(), b_enum_includes.iter(), cmp_eq).qualified("enum_includes")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_slice(a_implements.iter(), b_implements.iter(), cmp_eq).qualified("implements")?;
@@ -194,8 +189,8 @@ fn cmp_class(
     )
     .qualified("type_constants")?;
     cmp_slice(
-        a_upper_bounds.iter().map(|i| (i, a_strings)),
-        b_upper_bounds.iter().map(|i| (i, b_strings)),
+        a_upper_bounds.iter(),
+        b_upper_bounds.iter(),
         cmp_upper_bounds,
     )
     .qualified("upper_bounds")?;
@@ -411,8 +406,7 @@ fn cmp_func(
         cmp_param,
     )
     .qualified("params")?;
-    cmp_type_info((a_return_type, a_strings), (b_return_type, b_strings))
-        .qualified("return_type")?;
+    cmp_type_info(a_return_type, b_return_type).qualified("return_type")?;
     cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
         .qualified("shadowed_tparams")?;
 
@@ -1437,7 +1431,7 @@ fn cmp_param(
         (b_user_attributes, b_strings),
     )
     .qualified("user_attributes")?;
-    cmp_type_info((a_ty, a_strings), (b_ty, b_strings)).qualified("ty")?;
+    cmp_type_info(a_ty, b_ty).qualified("ty")?;
     cmp_option(
         a_default_value.as_ref(),
         b_default_value.as_ref(),
@@ -1494,7 +1488,7 @@ fn cmp_property(
         cmp_typed_value,
     )
     .qualified("initial_value")?;
-    cmp_type_info((a_type_info, a_strings), (b_type_info, b_strings)).qualified("type_info")?;
+    cmp_type_info(a_type_info, b_type_info).qualified("type_info")?;
     cmp_option(
         a_doc_comment.as_ref().into_option(),
         b_doc_comment.as_ref().into_option(),
@@ -1554,17 +1548,13 @@ fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
 }
 
 fn cmp_tparam_bounds(
-    (a_id, a, a_strings): (&ClassName, &TParamBounds, &StringInterner),
-    (b_id, b, b_strings): (&ClassName, &TParamBounds, &StringInterner),
+    (a_id, a, _): (&ClassName, &TParamBounds, &StringInterner),
+    (b_id, b, _): (&ClassName, &TParamBounds, &StringInterner),
 ) -> Result {
     cmp_eq(a_id, b_id).qualified("0")?;
-    cmp_slice(
-        a.bounds.iter().map(|i| (i, a_strings)),
-        b.bounds.iter().map(|i| (i, b_strings)),
-        cmp_type_info,
-    )
-    .qualified("bounds")
-    .qualified("1")?;
+    cmp_slice(a.bounds.iter(), b.bounds.iter(), cmp_type_info)
+        .qualified("bounds")
+        .qualified("1")?;
     Ok(())
 }
 
@@ -1593,12 +1583,7 @@ fn cmp_type_constant(
     Ok(())
 }
 
-fn cmp_type_info(
-    (a, a_strings): (&TypeInfo, &StringInterner),
-    (b, b_strings): (&TypeInfo, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_type_info(a: &TypeInfo, b: &TypeInfo) -> Result {
     let TypeInfo {
         user_type: a_user_type,
         enforced: a_enforced,
@@ -1608,7 +1593,7 @@ fn cmp_type_info(
         enforced: b_enforced,
     } = b;
 
-    cmp_option(*a_user_type, *b_user_type, cmp_id).qualified("user_type")?;
+    cmp_option(*a_user_type, *b_user_type, cmp_eq).qualified("user_type")?;
 
     let EnforceableType {
         ty: a_ty,
@@ -1781,8 +1766,8 @@ fn cmp_typedef(
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
     cmp_slice(
-        a_type_info_union.iter().map(|i| (i, a_strings)),
-        b_type_info_union.iter().map(|i| (i, b_strings)),
+        a_type_info_union.iter(),
+        b_type_info_union.iter(),
         cmp_type_info,
     )?;
     cmp_typed_value((a_type_structure, a_strings), (b_type_structure, b_strings))
@@ -1877,17 +1862,9 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     Ok(())
 }
 
-fn cmp_upper_bounds(
-    (a, a_strings): (&(StringId, Vec<TypeInfo>), &StringInterner),
-    (b, b_strings): (&(StringId, Vec<TypeInfo>), &StringInterner),
-) -> Result {
+fn cmp_upper_bounds(a: &(StringId, Vec<TypeInfo>), b: &(StringId, Vec<TypeInfo>)) -> Result {
     cmp_eq(a.0, b.0).qualified("key")?;
-    cmp_slice(
-        a.1.iter().map(|i| (i, a_strings)),
-        b.1.iter().map(|i| (i, b_strings)),
-        cmp_type_info,
-    )
-    .qualified("value")?;
+    cmp_slice(a.1.iter(), b.1.iter(), cmp_type_info).qualified("value")?;
     Ok(())
 }
 

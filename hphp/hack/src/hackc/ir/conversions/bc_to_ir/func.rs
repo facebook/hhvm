@@ -115,10 +115,7 @@ fn convert_body<'a>(
     let tparams: ClassNameMap<_> = upper_bounds
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
-            let bounds = bounds
-                .iter()
-                .map(|ty| types::convert_type(ty, &unit.strings))
-                .collect();
+            let bounds = bounds.iter().map(types::convert_type).collect();
             (ir::ClassName::new(*name), ir::TParamBounds { bounds })
         })
         .collect();
@@ -153,7 +150,7 @@ fn convert_body<'a>(
         locs,
         num_iters,
         params: Default::default(),
-        return_type: types::convert_maybe_type(return_type_info.as_ref(), &unit.strings),
+        return_type: types::convert_maybe_type(return_type_info.as_ref()),
         shadowed_tparams,
         loc_id: ir::LocId::from_usize(0),
         tparams,
@@ -245,7 +242,7 @@ fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
         is_variadic: param.is_variadic,
         is_inout: param.is_inout,
         is_readonly: param.is_readonly,
-        ty: types::convert_maybe_type(param.type_info.as_ref(), ctx.strings),
+        ty: types::convert_maybe_type(param.type_info.as_ref()),
         user_attributes,
     }
 }

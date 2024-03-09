@@ -21,7 +21,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
     let enum_type = cls
         .enum_type
         .as_ref()
-        .map(|ty| types::convert_type(ty, &unit.strings))
+        .map(types::convert_type)
         .into_option();
 
     let type_constants = cls
@@ -37,7 +37,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
             let tys = (bounds.as_ref().iter())
-                .map(|ty| types::convert_type(ty, &unit.strings))
+                .map(types::convert_type)
                 .collect_vec();
             (*name, tys)
         })
@@ -94,7 +94,7 @@ fn convert_property(prop: &hhbc::Property, strings: &ir::StringInterner) -> ir::
             .as_ref()
             .map(|tv| convert::convert_typed_value(tv, strings))
             .into(),
-        type_info: types::convert_type(&prop.type_info, strings),
+        type_info: types::convert_type(&prop.type_info),
         doc_comment: prop.doc_comment.clone().map(|c| c.into()),
     }
 }

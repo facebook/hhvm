@@ -60,7 +60,7 @@ pub(crate) fn convert_func<'a>(
     let mut labeler = emitter::Labeler::new(&func);
     let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, strings, adata);
 
-    let return_type_info = crate::types::convert(&func.return_type, strings);
+    let return_type_info = crate::types::convert(&func.return_type);
 
     let params = Vec::from_iter(func.params.into_iter().map(|param| {
         let name = param.name;
@@ -81,7 +81,7 @@ pub(crate) fn convert_func<'a>(
             is_inout: param.is_inout,
             is_readonly: param.is_readonly,
             user_attributes: user_attributes.into(),
-            type_info: crate::types::convert(&param.ty, strings),
+            type_info: crate::types::convert(&param.ty),
             default_value,
         }
     }));
@@ -94,7 +94,7 @@ pub(crate) fn convert_func<'a>(
             bounds: tparam
                 .bounds
                 .iter()
-                .map(|ty| crate::types::convert(ty, strings).unwrap())
+                .map(|ty| crate::types::convert(ty).unwrap())
                 .collect(),
         }
     }));

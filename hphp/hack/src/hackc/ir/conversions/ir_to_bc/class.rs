@@ -35,7 +35,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
 
     let enum_type: Maybe<_> = enum_type
         .as_ref()
-        .map(|et| types::convert(et, strings).unwrap())
+        .map(|et| types::convert(et).unwrap())
         .into();
 
     let type_constants = Vec::from_iter(
@@ -46,7 +46,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
 
     let upper_bounds = Vec::from_iter(upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
         name: *name,
-        bounds: Vec::from_iter(tys.iter().map(|ty| types::convert(ty, strings).unwrap())).into(),
+        bounds: Vec::from_iter(tys.iter().map(|ty| types::convert(ty).unwrap())).into(),
     }));
 
     let methods = Vec::from_iter(
@@ -97,7 +97,7 @@ fn convert_property(src: ir::Property, strings: &StringCache) -> hhbc::Property 
             .initial_value
             .map(|tv| convert::convert_typed_value(&tv, strings))
             .into(),
-        type_info: types::convert(&src.type_info, strings).unwrap(),
+        type_info: types::convert(&src.type_info).unwrap(),
         doc_comment: src.doc_comment.map(|c| c.into()),
     }
 }

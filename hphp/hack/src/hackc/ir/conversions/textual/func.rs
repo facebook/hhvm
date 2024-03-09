@@ -31,7 +31,6 @@ use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringId;
 use ir::StringInterner;
-use ir::UnitBytesId;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
@@ -86,17 +85,14 @@ fn add_attr<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, s: impl Into<Cow<'a, str>>
     }
 }
 
-fn extract_awaitable_and_type_constant(
-    unit_state: &UnitState,
-    user_type: UnitBytesId,
-) -> (bool, Option<String>) {
+fn extract_awaitable_and_type_constant(user_type: StringId) -> (bool, Option<String>) {
     let awaitable_pattern = Regex::new(r"Awaitable<(.*?)>").unwrap();
-    let user_string = unit_state.strings.lookup_bstr(user_type).to_string();
+    let user_string = user_type.as_str();
 
     let (is_awaitable, type_string) = {
         if let Some(captures) = awaitable_pattern.captures(&user_string) {
             if let Some(matched) = captures.get(1) {
-                (true, matched.as_str().to_string())
+                (true, matched.as_str())
             } else {
                 // this should be unreachable, but we can avoid a panic by considering the match
                 // failed.
@@ -107,7 +103,7 @@ fn extract_awaitable_and_type_constant(
         }
     };
     let is_type_const = if type_string.contains("::") {
-        Some(type_string)
+        Some(type_string.to_owned())
     } else {
         None
     };
@@ -119,9 +115,9 @@ fn compute_func_ty<'a>(
     ty: &ir::TypeInfo,
     unit_state: &UnitState,
 ) -> textual::Ty {
-    let (is_awaitable, type_const_opt) = ty.user_type.map_or((false, None), |id| {
-        extract_awaitable_and_type_constant(unit_state, id)
-    });
+    let (is_awaitable, type_const_opt) = ty
+        .user_type
+        .map_or((false, None), extract_awaitable_and_type_constant);
 
     if is_awaitable {
         add_attr(attr, ".awaitable")

@@ -11,10 +11,10 @@ use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
 use crate::SrcLoc;
+use crate::StringId;
 use crate::StringInterner;
 use crate::TypeConstraintFlags;
 use crate::TypedValue;
-use crate::UnitBytesId;
 
 /// As a const fn, given a string removes the leading backslash.
 /// r"\HH\AnyArray" -> r"HH\AnyArray".
@@ -211,7 +211,7 @@ pub struct TypeInfo {
     /// The textual type that the user wrote including generics and special
     /// chars (like '?').  If None then this is directly computable from the
     /// enforced type.
-    pub user_type: Option<UnitBytesId>,
+    pub user_type: Option<StringId>,
     /// The underlying type this TypeInfo is constrained as.
     pub enforced: EnforceableType,
 }
@@ -240,7 +240,7 @@ impl TypeInfo {
     pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         f.write_str("TypeInfo { user_type: ")?;
         if let Some(ut) = self.user_type {
-            write!(f, "\"{}\"", strings.display(ut))?;
+            write!(f, "\"{}\"", ut)?;
         } else {
             f.write_str("none")?;
         }

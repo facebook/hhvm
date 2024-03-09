@@ -707,11 +707,9 @@ pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo>
     } else if !user_type.is_any_string() {
         return Err(user_type.bail(format!("String expected but got '{user_type}'")));
     } else {
-        Some(
-            tokenizer
-                .strings
-                .intern_bytes(user_type.unescaped_string()?),
-        )
+        Some(ir_core::intern(std::str::from_utf8(
+            &user_type.unescaped_string()?,
+        )?))
     };
 
     Ok(TypeInfo {

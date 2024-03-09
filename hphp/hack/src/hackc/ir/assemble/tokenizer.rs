@@ -9,13 +9,11 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::sync::OnceLock;
 
 use anyhow::bail;
 use anyhow::Result;
 use hash::HashSet;
-use ir_core::StringInterner;
 use log::trace;
 
 use crate::util::unescape;
@@ -26,20 +24,16 @@ pub(crate) struct Tokenizer<'a> {
     cur_line: u32,
     next: Option<Token>,
     log_next: bool,
-    // The tokenizer doesn't need this field but it's a convenient place to
-    // stash it for use by the parser.
-    pub strings: Arc<StringInterner>,
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn new(read: &'a mut dyn Read, filename: &'a str, strings: Arc<StringInterner>) -> Self {
+    pub fn new(read: &'a mut dyn Read, filename: &'a str) -> Self {
         Tokenizer {
             buf: BufReader::new(read),
             cur_line: 1,
             filename: Rc::new(filename.to_string()),
             log_next: true,
             next: None,
-            strings,
         }
     }
 

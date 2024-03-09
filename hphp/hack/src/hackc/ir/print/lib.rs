@@ -22,7 +22,6 @@ use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::InstrId;
 use ir_core::InstrIdSet;
-use ir_core::StringInterner;
 pub use print::print_unit;
 pub use util::FmtEscapedString;
 pub use util::FmtOption;
@@ -34,17 +33,15 @@ pub use util::FmtSep;
 pub struct DisplayFunc<'b> {
     pub func: &'b Func,
     /* verbose */ pub verbose: bool,
-    pub strings: &'b StringInterner,
     pub f_pre_block: Option<&'b dyn Fn(&mut dyn fmt::Write, BlockId) -> fmt::Result>,
     pub f_pre_instr: Option<&'b dyn Fn(&mut dyn fmt::Write, InstrId) -> fmt::Result>,
 }
 
 impl<'b> DisplayFunc<'b> {
-    pub fn new(func: &'b Func, verbose: bool, strings: &'b StringInterner) -> Self {
+    pub fn new(func: &'b Func, verbose: bool) -> Self {
         DisplayFunc {
             func,
             verbose,
-            strings,
             f_pre_block: None,
             f_pre_instr: None,
         }
@@ -56,12 +53,11 @@ impl fmt::Display for DisplayFunc<'_> {
         let DisplayFunc {
             func,
             verbose,
-            strings,
             f_pre_block,
             f_pre_instr,
         } = *self;
-        writeln!(w, "func {} {{", formatters::FmtFuncParams(func, strings))?;
-        print::print_func_body(w, func, verbose, strings, f_pre_block, f_pre_instr)?;
+        writeln!(w, "func {} {{", formatters::FmtFuncParams(func))?;
+        print::print_func_body(w, func, verbose, f_pre_block, f_pre_instr)?;
         writeln!(w, "}}")?;
 
         if verbose {

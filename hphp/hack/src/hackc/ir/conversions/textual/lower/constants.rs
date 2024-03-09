@@ -15,7 +15,6 @@ use ir::Func;
 use ir::FuncBuilder;
 use ir::HasEdges;
 use ir::Instr;
-use ir::StringInterner;
 use ir::ValueId;
 use ir::ValueIdMap;
 use log::trace;
@@ -105,7 +104,7 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
     let bids = follow_block_successors(&builder.func, start_bid);
     let constants = compute_live_constants(&builder.func, &bids);
 
-    let constants = sort_and_filter_constants(&builder.func, constants, &builder.strings);
+    let constants = sort_and_filter_constants(&builder.func, constants);
 
     let mut remap = ValueIdMap::default();
     let mut fixups = Vec::default();
@@ -138,11 +137,7 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
 /// Arrays can refer to some prior constants (like Strings) so they need to be
 /// sorted before being written. Right now arrays can't refer to other arrays so
 /// they don't need to be sorted relative to each other.
-fn sort_and_filter_constants(
-    func: &Func,
-    constants: ConstantIdSet,
-    _: &StringInterner,
-) -> Vec<ConstantId> {
+fn sort_and_filter_constants(func: &Func, constants: ConstantIdSet) -> Vec<ConstantId> {
     let mut result = Vec::with_capacity(constants.len());
     let mut arrays = Vec::with_capacity(constants.len());
     for cid in constants {

@@ -2,8 +2,6 @@
 
 //! This module contains shared functions for use by tests.
 
-use std::sync::Arc;
-
 use hash::HashMap;
 use hash::HashSet;
 use ir_core::constant::Constant;
@@ -15,20 +13,13 @@ use ir_core::FunctionName;
 use ir_core::HasEdges;
 use ir_core::Instr;
 use ir_core::LocId;
-use ir_core::StringInterner;
 use ir_core::ValueId;
 
 /// Given a simple CFG description, create a Func that matches it.
-pub fn build_test_func(testcase: &[Block]) -> (Func, Arc<StringInterner>) {
-    let strings = Arc::new(StringInterner::default());
-    let func = build_test_func_with_strings(testcase, Arc::clone(&strings));
-    (func, strings)
-}
-
-pub fn build_test_func_with_strings(testcase: &[Block], strings: Arc<StringInterner>) -> Func {
+pub fn build_test_func(testcase: &[Block]) -> Func {
     // Create a function whose CFG matches testcase.
 
-    FuncBuilder::build_func(strings, |fb| {
+    FuncBuilder::build_func(|fb| {
         let mut name_to_bid = HashMap::with_capacity_and_hasher(testcase.len(), Default::default());
         let mut name_to_vid = HashMap::default();
         for (i, block) in testcase.iter().enumerate() {
@@ -227,13 +218,13 @@ impl Block {
 }
 
 /// Structurally compare two Funcs.
-pub fn assert_func_struct_eq(func_a: &Func, func_b: &Func, strings: &StringInterner) {
+pub fn assert_func_struct_eq(func_a: &Func, func_b: &Func) {
     if let Err(e) = cmp_func_struct_eq(func_a, func_b) {
         panic!(
             "Function mismatch: {}\n{}\n{}",
             e,
-            print::DisplayFunc::new(func_a, true, strings),
-            print::DisplayFunc::new(func_b, true, strings)
+            print::DisplayFunc::new(func_a, true),
+            print::DisplayFunc::new(func_b, true)
         );
     }
 }

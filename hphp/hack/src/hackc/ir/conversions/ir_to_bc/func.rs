@@ -11,7 +11,6 @@ use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
 use crate::pusher;
-use crate::strings::StringCache;
 
 /// Convert an ir::Func to an hhbc::Body.
 ///
@@ -31,40 +30,33 @@ use crate::strings::StringCache;
 /// BlockArgs (phi-nodes) are handled like a split instruction - by pushing args
 /// onto the stack before the jump and popping them off the stack in receiving
 /// block.
-pub(crate) fn convert_func<'a>(
-    mut func: ir::Func,
-    strings: &StringCache,
-    adata: &mut AdataCache,
-) -> hhbc::Body {
+pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataCache) -> hhbc::Body {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
-    trace!(
-        "{}",
-        ir::print::DisplayFunc::new(&func, true, &strings.interner)
-    );
+    trace!("{}", ir::print::DisplayFunc::new(&func, true,));
     trace!("--------------------");
 
     // Start by inserting stack pushes and pops (which are normally not in the
     // IR) into the IR.
     trace!("-- compute spills");
-    func = pusher::run(func, strings);
+    func = pusher::run(func);
 
     trace!(
         "-- after pushes:\n{}",
-        ir::print::DisplayFunc::new(&func, true, &strings.interner)
+        ir::print::DisplayFunc::new(&func, true,)
     );
 
     // Now emit the instructions.
     trace!("-- emit instrs");
     let mut labeler = emitter::Labeler::new(&func);
-    let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, strings, adata);
+    let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, adata);
 
     let return_type_info = crate::types::convert(&func.return_type);
 
     let params = Vec::from_iter(func.params.into_iter().map(|param| {
         let name = param.name;
-        let user_attributes = convert::convert_attributes(param.user_attributes, strings);
+        let user_attributes = convert::convert_attributes(param.user_attributes);
         let default_value = param
             .default_value
             .map(|dv| {
@@ -120,18 +112,13 @@ pub(crate) fn convert_func<'a>(
     }
 }
 
-pub(crate) fn convert_function<'a>(
-    unit: &mut UnitBuilder,
-    mut function: ir::Function,
-    strings: &StringCache,
-) {
+pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Function) {
     trace!("convert_function {}", function.name);
     let span = function.func.loc(function.func.loc_id).to_span();
-    let attributes =
-        convert::convert_attributes(std::mem::take(&mut function.func.attributes), strings);
+    let attributes = convert::convert_attributes(std::mem::take(&mut function.func.attributes));
     let attrs = function.func.attrs;
     let coeffects = convert_coeffects(&function.func.coeffects);
-    let body = convert_func(function.func, strings, &mut unit.adata_cache);
+    let body = convert_func(function.func, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
         attributes: attributes.into(),
         body,
@@ -144,18 +131,13 @@ pub(crate) fn convert_function<'a>(
     unit.functions.push(hhas_func);
 }
 
-pub(crate) fn convert_method<'a>(
-    mut method: ir::Method,
-    strings: &StringCache,
-    adata: &mut AdataCache,
-) -> Method {
+pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataCache) -> Method {
     trace!("convert_method {}", method.name);
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
-    let attributes =
-        convert::convert_attributes(std::mem::take(&mut method.func.attributes), strings);
-    let body = convert_func(method.func, strings, adata);
+    let attributes = convert::convert_attributes(std::mem::take(&mut method.func.attributes));
+    let body = convert_func(method.func, adata);
     hhbc::Method {
         attributes: attributes.into(),
         name: method.name,

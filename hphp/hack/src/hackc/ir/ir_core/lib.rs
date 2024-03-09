@@ -140,7 +140,6 @@ pub use self::newtype::ValueId;
 pub use self::newtype::ValueIdMap;
 pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
-pub use self::string_intern::StringInterner;
 pub use self::string_intern::UnitBytesId;
 pub use self::type_const::TypeConstant;
 pub use self::typed_value::ArrayKey;

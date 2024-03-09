@@ -5,13 +5,12 @@
 
 use ir::BaseType;
 use ir::EnforceableType;
-use ir::StringInterner;
 use ir::TypeConstraintFlags;
 
 use crate::mangle::TypeName;
 use crate::textual;
 
-pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> textual::Ty {
+pub(crate) fn convert_ty(ty: &EnforceableType) -> textual::Ty {
     let mut base = convert_base(&ty.ty);
 
     let mut modifiers = ty.modifiers;
@@ -39,7 +38,7 @@ pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> text
     if modifiers != TypeConstraintFlags::NoFlags {
         textual_todo! {
             message = ("MODIFIERS: {modifiers:?}\n{}",
-                       ir::print::FmtEnforceableType(ty, strings)
+                       ir::print::FmtEnforceableType(ty)
             ),
             base = textual::Ty::Type(TypeName::UnmangledRef("TODO_NoFlags"));
         }

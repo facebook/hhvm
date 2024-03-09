@@ -158,8 +158,6 @@ fn forward_edge(
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     use ir_core::func::DefaultValue;
     use ir_core::BlockId;
     use ir_core::Instr;
@@ -185,7 +183,7 @@ mod test {
     #[test]
     fn test1() {
         // Can't forward because 'b' isn't empty.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp("a", "b").with_target(),
             testutils::Block::jmp("b", "c").with_target(),
             testutils::Block::ret("c"),
@@ -195,13 +193,13 @@ mod test {
         let changed = super::run(&mut func);
         assert!(!changed);
 
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test2() {
         // 'a' forwards directly to 'c'
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp("a", "b").with_target(),
             testutils::Block::jmp("b", "c"),
             testutils::Block::ret("c").with_target(),
@@ -210,20 +208,17 @@ mod test {
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp("a", "c").with_target(),
-                testutils::Block::ret("c").with_target(),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp("a", "c").with_target(),
+            testutils::Block::ret("c").with_target(),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test3() {
         // Can't forward because it would create a critical section.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
             testutils::Block::jmp("b", "d"),
             testutils::Block::jmp("c", "d"),
@@ -234,13 +229,13 @@ mod test {
         let changed = super::run(&mut func);
         assert!(!changed);
 
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test4() {
         // Expect 'c' to be forwarded directly to 'e'.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
             testutils::Block::jmp("b", "e"),
             testutils::Block::jmp("c", "d"),
@@ -251,22 +246,19 @@ mod test {
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
-                testutils::Block::jmp("b", "e"),
-                testutils::Block::jmp("c", "e"),
-                testutils::Block::ret("e").with_target(),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
+            testutils::Block::jmp("b", "e"),
+            testutils::Block::jmp("c", "e"),
+            testutils::Block::ret("e").with_target(),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test5() {
         // Expect 'entry' to be removed.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp("entry", "b"),
             testutils::Block::jmp("b", "c").with_target(),
             testutils::Block::ret("c"),
@@ -275,20 +267,17 @@ mod test {
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp("b", "c").with_target(),
-                testutils::Block::ret("c"),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp("b", "c").with_target(),
+            testutils::Block::ret("c"),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test6() {
         // We can forward c -> e but still need b -> d -> e because of critedge.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]),
             testutils::Block::jmp_op("b", ["d", "e"]),
             testutils::Block::jmp("c", "d"),
@@ -299,23 +288,20 @@ mod test {
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp_op("a", ["b", "c"]),
-                testutils::Block::jmp_op("b", ["d", "e"]),
-                testutils::Block::jmp("c", "e"),
-                testutils::Block::jmp("d", "e"),
-                testutils::Block::ret("e"),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp_op("b", ["d", "e"]),
+            testutils::Block::jmp("c", "e"),
+            testutils::Block::jmp("d", "e"),
+            testutils::Block::ret("e"),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test7() {
         // We expect to skip 'b' and 'c'
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]),
             testutils::Block::jmp("b", "d"),
             testutils::Block::jmp("c", "e"),
@@ -326,21 +312,18 @@ mod test {
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp_op("a", ["d", "e"]),
-                testutils::Block::ret("d"),
-                testutils::Block::ret("e"),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["d", "e"]),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn test8() {
         // We expect to skip the entry block.
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp("a", "c"),
             testutils::Block::jmp("b", "c"),
             testutils::Block::jmp_op("c", ["d", "e"]),
@@ -350,23 +333,20 @@ mod test {
         func.params.push(mk_param("x", BlockId(1)));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
 
-        eprintln!("FUNC:\n{}", print::DisplayFunc::new(&func, true, &strings));
+        eprintln!("FUNC:\n{}", print::DisplayFunc::new(&func, true));
 
         let changed = super::run(&mut func);
         assert!(changed);
 
-        let mut expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp_op("c", ["d", "e"]),
-                testutils::Block::jmp("b", "c"),
-                testutils::Block::ret("d"),
-                testutils::Block::ret("e"),
-            ],
-            Arc::clone(&strings),
-        );
+        let mut expected = testutils::build_test_func(&[
+            testutils::Block::jmp_op("c", ["d", "e"]),
+            testutils::Block::jmp("b", "c"),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
+        ]);
         expected.params.push(mk_param("x", BlockId(1)));
         *expected.instr_mut(InstrId(1)) = Instr::enter(BlockId(0), ir_core::LocId::NONE);
 
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 }

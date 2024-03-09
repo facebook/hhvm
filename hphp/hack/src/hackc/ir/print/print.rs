@@ -34,14 +34,13 @@ use crate::formatters::*;
 use crate::util::FmtSep;
 use crate::FmtEscapedString;
 
-pub(crate) struct FuncContext<'a> {
+pub(crate) struct FuncContext {
     pub(crate) cur_loc_id: LocId,
     pub(crate) live_instrs: InstrIdSet,
-    pub(crate) strings: &'a StringInterner,
     pub(crate) verbose: bool,
 }
 
-fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, op: &Hhbc) -> Result {
+fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext, func: &Func, op: &Hhbc) -> Result {
     let (prefix, infix, lhs, rhs) = match *op {
         Hhbc::Add([lhs, rhs], _) => ("add", ",", lhs, rhs),
         Hhbc::BitAnd([lhs, rhs], _) => ("bit_and", ",", lhs, rhs),
@@ -97,15 +96,14 @@ fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, op: &H
         w,
         "{} {}{} {}",
         prefix,
-        FmtVid(func, lhs, ctx.verbose, ctx.strings),
+        FmtVid(func, lhs, ctx.verbose),
         infix,
-        FmtVid(func, rhs, ctx.verbose, ctx.strings)
+        FmtVid(func, rhs, ctx.verbose)
     )
 }
 
-fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call) -> Result {
+fn print_call(w: &mut dyn Write, ctx: &FuncContext, func: &Func, call: &Call) -> Result {
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     use instr::CallDetail;
     match &call.detail {
         CallDetail::FCallClsMethod { log } => {
@@ -117,8 +115,8 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call cls_method {}::{}{}",
-                FmtVid(func, call.detail.class(&call.operands), verbose, strings),
-                FmtVid(func, call.detail.method(&call.operands), verbose, strings),
+                FmtVid(func, call.detail.class(&call.operands), verbose),
+                FmtVid(func, call.detail.method(&call.operands), verbose),
                 dc
             )?;
         }
@@ -126,8 +124,8 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call cls_method {}::{}",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id()),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         CallDetail::FCallClsMethodM { method, log } => {
@@ -139,8 +137,8 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call cls_method {}::{}{}",
-                FmtVid(func, call.detail.class(&call.operands), verbose, strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtVid(func, call.detail.class(&call.operands), verbose),
+                FmtIdentifierId(method.as_bytes_id()),
                 dc
             )?;
         }
@@ -149,7 +147,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call cls_method {}::{}",
                 FmtSpecialClsRef(*clsref),
-                FmtVid(func, call.detail.method(&call.operands), verbose, strings),
+                FmtVid(func, call.detail.method(&call.operands), verbose),
             )?;
         }
         CallDetail::FCallClsMethodSD { clsref, method } => {
@@ -157,29 +155,25 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
                 w,
                 "call cls_method {}::{}",
                 FmtSpecialClsRef(*clsref),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         CallDetail::FCallCtor => {
             write!(
                 w,
                 "call ctor {}",
-                FmtVid(func, call.detail.obj(&call.operands), verbose, strings)
+                FmtVid(func, call.detail.obj(&call.operands), verbose)
             )?;
         }
         CallDetail::FCallFunc => {
             write!(
                 w,
                 "call func {}",
-                FmtVid(func, call.detail.target(&call.operands), verbose, strings)
+                FmtVid(func, call.detail.target(&call.operands), verbose)
             )?;
         }
         CallDetail::FCallFuncD { func } => {
-            write!(
-                w,
-                "call func {}",
-                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
-            )?;
+            write!(w, "call func {}", FmtIdentifierId(func.as_bytes_id()))?;
         }
         CallDetail::FCallObjMethod { flavor } => {
             let arrow = match *flavor {
@@ -190,8 +184,8 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call obj_method {}{arrow}{}",
-                FmtVid(func, call.detail.obj(&call.operands), verbose, strings),
-                FmtVid(func, call.detail.method(&call.operands), verbose, strings)
+                FmtVid(func, call.detail.obj(&call.operands), verbose),
+                FmtVid(func, call.detail.method(&call.operands), verbose)
             )?;
         }
         CallDetail::FCallObjMethodD { method, flavor } => {
@@ -203,8 +197,8 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
             write!(
                 w,
                 "call obj_method {}{arrow}{}",
-                FmtVid(func, call.detail.obj(&call.operands), verbose, strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings)
+                FmtVid(func, call.detail.obj(&call.operands), verbose),
+                FmtIdentifierId(method.as_bytes_id())
             )?;
         }
     }
@@ -236,13 +230,7 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
         FmtSep::comma(args, |w, (arg, inout, readonly)| {
             let inout = if inout { "inout " } else { "" };
             let readonly = if readonly { "readonly " } else { "" };
-            write!(
-                w,
-                "{}{}{}",
-                readonly,
-                inout,
-                FmtVid(func, *arg, verbose, strings)
-            )
+            write!(w, "{}{}{}", readonly, inout, FmtVid(func, *arg, verbose))
         })
     )?;
 
@@ -289,17 +277,13 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, call: &Call
     if call.flags.contains(FCallArgsFlags::NumArgsStart) {
         write!(w, " num_args_start")?;
     }
-    write!(
-        w,
-        " {}",
-        FmtQuotedStringId(call.context.as_bytes(), ctx.strings)
-    )?;
+    write!(w, " {}", FmtQuotedStringId(call.context.as_bytes()))?;
     Ok(())
 }
 
 fn print_call_async(
     w: &mut dyn Write,
-    ctx: &FuncContext<'_>,
+    ctx: &FuncContext,
     func: &Func,
     call: &Call,
     targets: &[BlockId; 2],
@@ -314,12 +298,12 @@ fn print_call_async(
     )
 }
 
-fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Result {
-    print_top_level_loc(w, Some(&class.src_loc), strings)?;
+fn print_class(w: &mut dyn Write, class: &Class) -> Result {
+    print_top_level_loc(w, Some(&class.src_loc))?;
     writeln!(
         w,
         "class {} {} {{",
-        FmtIdentifierId(class.name.as_bytes_id(), strings),
+        FmtIdentifierId(class.name.as_bytes_id()),
         FmtAttr(class.flags, AttrContext::Class)
     )?;
 
@@ -328,23 +312,19 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     }
 
     if let Some(base) = class.base {
-        writeln!(
-            w,
-            "  extends {}",
-            FmtIdentifierId(base.as_bytes_id(), strings)
-        )?;
+        writeln!(w, "  extends {}", FmtIdentifierId(base.as_bytes_id()))?;
     }
 
     for implement in &class.implements {
         writeln!(
             w,
             "  implements {}",
-            FmtIdentifierId(implement.as_bytes_id(), strings)
+            FmtIdentifierId(implement.as_bytes_id())
         )?;
     }
 
     if let Some(et) = class.enum_type.as_ref() {
-        writeln!(w, "  enum_type {}", FmtTypeInfo(et, strings))?;
+        writeln!(w, "  enum_type {}", FmtTypeInfo(et))?;
     }
 
     if !class.enum_includes.is_empty() {
@@ -353,7 +333,6 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
             "  enum_includes {}",
             FmtSep::comma(class.enum_includes.iter(), |w, ie| FmtIdentifierId(
                 ie.as_bytes_id(),
-                strings
             )
             .fmt(w))
         )?;
@@ -364,7 +343,7 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
             w,
             "  upper_bound {}: [{}]",
             FmtIdentifier(name.as_str().as_bytes()),
-            FmtSep::comma(tys.iter(), |w, ty| FmtTypeInfo(ty, strings).fmt(w))
+            FmtSep::comma(tys.iter(), |w, ty| FmtTypeInfo(ty).fmt(w))
         )?;
     }
 
@@ -373,11 +352,11 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
     }
 
     for tc in &class.type_constants {
-        print_type_constant(w, tc, strings)?;
+        print_type_constant(w, tc)?;
     }
 
     for use_ in &class.uses {
-        writeln!(w, "  uses {}", FmtIdentifierId(use_.as_bytes_id(), strings))?;
+        writeln!(w, "  uses {}", FmtIdentifierId(use_.as_bytes_id()))?;
     }
 
     for req in &class.requirements {
@@ -390,29 +369,25 @@ fn print_class(w: &mut dyn Write, class: &Class, strings: &StringInterner) -> Re
             w,
             "  require {} {}",
             kind,
-            FmtIdentifierId(req.name.as_bytes_id(), strings)
+            FmtIdentifierId(req.name.as_bytes_id())
         )?;
     }
 
     for prop in &class.properties {
-        print_property(w, prop, strings)?;
+        print_property(w, prop)?;
     }
 
     for attr in &class.attributes {
-        writeln!(w, "  attribute {}", FmtAttribute(attr, strings))?;
+        writeln!(w, "  attribute {}", FmtAttribute(attr))?;
     }
 
     for c in &class.constants {
         write!(w, "  ")?;
-        print_hack_constant(w, c, strings)?;
+        print_hack_constant(w, c)?;
     }
 
     for method in &class.methods {
-        writeln!(
-            w,
-            "  method {}",
-            FmtIdentifierId(method.name.as_bytes_id(), strings)
-        )?;
+        writeln!(w, "  method {}", FmtIdentifierId(method.name.as_bytes_id()))?;
     }
 
     writeln!(w, "}}")?;
@@ -510,11 +485,7 @@ fn print_ctx_constant(w: &mut dyn Write, ctx: &CtxConstant) -> Result {
     )
 }
 
-pub(crate) fn print_fatal(
-    w: &mut dyn Write,
-    fatal: Option<&Fatal>,
-    strings: &StringInterner,
-) -> Result {
+pub(crate) fn print_fatal(w: &mut dyn Write, fatal: Option<&Fatal>) -> Result {
     if let Some(Fatal { op, loc, message }) = fatal {
         let what = match *op {
             ir_core::FatalOp::Parse => "parse",
@@ -523,7 +494,7 @@ pub(crate) fn print_fatal(
             _ => unreachable!(),
         };
 
-        print_top_level_loc(w, Some(loc), strings)?;
+        print_top_level_loc(w, Some(loc))?;
         writeln!(w, ".fatal {} {}\n", what, FmtQuotedStr(message))?;
     }
     Ok(())
@@ -533,7 +504,6 @@ pub(crate) fn print_func_body(
     w: &mut dyn Write,
     func: &Func,
     verbose: bool,
-    strings: &StringInterner,
     f_pre_block: Option<&dyn Fn(&mut dyn Write, BlockId) -> Result>,
     f_pre_instr: Option<&dyn Fn(&mut dyn Write, InstrId) -> Result>,
 ) -> Result {
@@ -555,7 +525,7 @@ pub(crate) fn print_func_body(
             w,
             "  .const {} = {}",
             FmtRawVid(ValueId::from_constant(cid)),
-            FmtConstantId(func, cid, strings),
+            FmtConstantId(func, cid),
         )?;
     }
 
@@ -579,7 +549,6 @@ pub(crate) fn print_func_body(
     let mut ctx = FuncContext {
         cur_loc_id: func.loc_id,
         live_instrs,
-        strings,
         verbose,
     };
     for bid in func.blocks.keys() {
@@ -593,7 +562,6 @@ pub(crate) fn print_func_body(
                     func,
                     ValueId::from_instr(*iid),
                     verbose,
-                    strings
                 )
                 .fmt(w))
             )?;
@@ -625,47 +593,38 @@ pub(crate) fn print_func_body(
     Ok(())
 }
 
-fn print_attributes(w: &mut dyn Write, attrs: &[Attribute], strings: &StringInterner) -> Result {
+fn print_attributes(w: &mut dyn Write, attrs: &[Attribute]) -> Result {
     for attr in attrs {
-        writeln!(w, "  .attr {}", FmtAttribute(attr, strings))?;
+        writeln!(w, "  .attr {}", FmtAttribute(attr))?;
     }
     Ok(())
 }
 
-fn print_top_level_loc(
-    w: &mut dyn Write,
-    src_loc: Option<&SrcLoc>,
-    strings: &StringInterner,
-) -> Result {
+fn print_top_level_loc(w: &mut dyn Write, src_loc: Option<&SrcLoc>) -> Result {
     if let Some(loc) = src_loc {
-        writeln!(w, ".srcloc {}", FmtFullLoc(loc, strings))?;
+        writeln!(w, ".srcloc {}", FmtFullLoc(loc))?;
     } else {
         writeln!(w, ".srcloc none")?;
     }
     Ok(())
 }
 
-fn print_function(
-    w: &mut dyn Write,
-    f: &Function,
-    verbose: bool,
-    strings: &StringInterner,
-) -> Result {
-    print_top_level_loc(w, f.func.get_loc(f.func.loc_id), strings)?;
+fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
+    print_top_level_loc(w, f.func.get_loc(f.func.loc_id))?;
     writeln!(
         w,
         "function {name}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {{",
-        name = FmtIdentifierId(f.name.as_bytes_id(), strings),
-        tparams = FmtTParams(&f.func.tparams, strings),
-        shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
-        params = FmtFuncParams(&f.func, strings),
-        ret_type = FmtTypeInfo(&f.func.return_type, strings),
+        name = FmtIdentifierId(f.name.as_bytes_id()),
+        tparams = FmtTParams(&f.func.tparams),
+        shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams),
+        params = FmtFuncParams(&f.func),
+        ret_type = FmtTypeInfo(&f.func.return_type),
         attr = FmtAttr(f.func.attrs, AttrContext::Function),
     )?;
     print_function_flags(w, f.flags)?;
-    print_attributes(w, &f.func.attributes, strings)?;
+    print_attributes(w, &f.func.attributes)?;
     print_coeffects(w, &f.func.coeffects)?;
-    print_func_body(w, &f.func, verbose, strings, None, None)?;
+    print_func_body(w, &f.func, verbose, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }
@@ -682,9 +641,8 @@ fn print_function_flags(w: &mut dyn Write, mut flags: FunctionFlags) -> Result {
     .try_for_each(|f| writeln!(w, "  {f}"))
 }
 
-fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc) -> Result {
+fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) -> Result {
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     match *hhbc {
         Hhbc::Add(..)
         | Hhbc::BitAnd(..)
@@ -706,121 +664,101 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "ak_exists {}, {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings)
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose)
             )?;
         }
         Hhbc::AddElemC(ops, _) => {
             write!(
                 w,
                 "add_elem_c {}[{}] = {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings),
-                FmtVid(func, ops[2], verbose, strings),
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose),
+                FmtVid(func, ops[2], verbose),
             )?;
         }
         Hhbc::AddNewElemC(ops, _) => {
             write!(
                 w,
                 "add_new_elem_c {}[] = {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings),
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose),
             )?;
         }
         Hhbc::ArrayIdx(vids, _) => {
             write!(
                 w,
                 "array_idx {}[{}] or {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings),
-                FmtVid(func, vids[2], verbose, strings)
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose),
+                FmtVid(func, vids[2], verbose)
             )?;
         }
         Hhbc::ArrayMarkLegacy(vids, _) => {
             write!(
                 w,
                 "array_mark_legacy {}, {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings)
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose)
             )?;
         }
         Hhbc::ArrayUnmarkLegacy(vids, _) => {
             write!(
                 w,
                 "array_unmark_legacy {}, {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings)
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose)
             )?;
         }
         Hhbc::Await(vid, _) => {
-            write!(w, "await {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "await {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::AwaitAll(ref range, _) => {
-            write!(w, "await_all {}", FmtLids(range, ctx.strings),)?;
+            write!(w, "await_all {}", FmtLids(range))?;
         }
         Hhbc::BareThis(op, _) => {
             write!(w, "bare_this {}", FmtBareThisOp(op))?;
         }
-        Hhbc::BitNot(vid, _) => write!(w, "bit_not {}", FmtVid(func, vid, ctx.verbose, strings),)?,
-        Hhbc::CGetG(vid, _) => write!(w, "get_global {}", FmtVid(func, vid, verbose, strings))?,
-        Hhbc::CGetL(lid, _) => write!(w, "get_local {}", FmtLid(lid, ctx.strings))?,
-        Hhbc::CGetQuietL(lid, _) => write!(w, "get_local_quiet {}", FmtLid(lid, ctx.strings))?,
+        Hhbc::BitNot(vid, _) => write!(w, "bit_not {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CGetG(vid, _) => write!(w, "get_global {}", FmtVid(func, vid, verbose))?,
+        Hhbc::CGetL(lid, _) => write!(w, "get_local {}", FmtLid(lid))?,
+        Hhbc::CGetQuietL(lid, _) => write!(w, "get_local_quiet {}", FmtLid(lid))?,
         Hhbc::CGetS(vids, readonly, _) => write!(
             w,
             "get_static {}->{} {}",
-            FmtVid(func, vids[1], verbose, strings),
-            FmtVid(func, vids[0], verbose, strings),
+            FmtVid(func, vids[1], verbose),
+            FmtVid(func, vids[0], verbose),
             FmtReadonly(readonly)
         )?,
-        Hhbc::CUGetL(lid, _) => write!(w, "get_local_or_uninit {}", FmtLid(lid, ctx.strings))?,
-        Hhbc::CastBool(vid, _) => {
-            write!(w, "cast_bool {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastDict(vid, _) => {
-            write!(w, "cast_dict {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastDouble(vid, _) => {
-            write!(w, "cast_double {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastInt(vid, _) => {
-            write!(w, "cast_int {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastKeyset(vid, _) => {
-            write!(w, "cast_keyset {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastString(vid, _) => {
-            write!(w, "cast_string {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
-        Hhbc::CastVec(vid, _) => {
-            write!(w, "cast_vec {}", FmtVid(func, vid, ctx.verbose, strings),)?
-        }
+        Hhbc::CUGetL(lid, _) => write!(w, "get_local_or_uninit {}", FmtLid(lid))?,
+        Hhbc::CastBool(vid, _) => write!(w, "cast_bool {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastDict(vid, _) => write!(w, "cast_dict {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastDouble(vid, _) => write!(w, "cast_double {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastInt(vid, _) => write!(w, "cast_int {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastKeyset(vid, _) => write!(w, "cast_keyset {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastString(vid, _) => write!(w, "cast_string {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::CastVec(vid, _) => write!(w, "cast_vec {}", FmtVid(func, vid, ctx.verbose))?,
         Hhbc::ChainFaults(ops, _) => {
             write!(
                 w,
                 "chain_faults {}, {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings)
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose)
             )?;
         }
         Hhbc::CheckClsReifiedGenericMismatch(vid, _) => {
             write!(
                 w,
                 "check_cls_reified_generic_mismatch {}",
-                FmtVid(func, vid, verbose, strings)
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::CheckClsRGSoft(vid, _) => {
-            write!(
-                w,
-                "check_cls_rg_soft {}",
-                FmtVid(func, vid, verbose, strings)
-            )?;
+            write!(w, "check_cls_rg_soft {}", FmtVid(func, vid, verbose))?;
         }
-        Hhbc::CheckProp(prop, _) => write!(
-            w,
-            "check_prop {}",
-            FmtIdentifierId(prop.as_bytes_id(), ctx.strings)
-        )?,
+        Hhbc::CheckProp(prop, _) => {
+            write!(w, "check_prop {}", FmtIdentifierId(prop.as_bytes_id()))?
+        }
         Hhbc::CheckThis(_) => {
             write!(w, "check_this")?;
         }
@@ -828,42 +766,40 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             w,
             "class_get_c {} {}",
             FmtClassGetCMode(mode),
-            FmtVid(func, vid, verbose, strings)
+            FmtVid(func, vid, verbose)
         )?,
-        Hhbc::ClassGetTS(vid, _) => {
-            write!(w, "class_get_ts {}", FmtVid(func, vid, verbose, strings))?
-        }
+        Hhbc::ClassGetTS(vid, _) => write!(w, "class_get_ts {}", FmtVid(func, vid, verbose))?,
         Hhbc::ClassHasReifiedGenerics(vid, _) => write!(
             w,
             "class_has_reified_generics {}",
-            FmtVid(func, vid, verbose, strings)
+            FmtVid(func, vid, verbose)
         )?,
         Hhbc::ClassName(vid, _) => {
-            write!(w, "class_name {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "class_name {}", FmtVid(func, vid, verbose))?;
         }
-        Hhbc::Clone(vid, _) => write!(w, "clone {}", FmtVid(func, vid, ctx.verbose, strings),)?,
+        Hhbc::Clone(vid, _) => write!(w, "clone {}", FmtVid(func, vid, ctx.verbose))?,
         Hhbc::ClsCns(clsid, id, _) => {
             write!(
                 w,
                 "cls_cns {}::{}",
-                FmtVid(func, clsid, verbose, strings),
-                FmtIdentifierId(id.as_bytes_id(), ctx.strings)
+                FmtVid(func, clsid, verbose),
+                FmtIdentifierId(id.as_bytes_id())
             )?;
         }
         Hhbc::ClsCnsD(id, clsid, _) => {
             write!(
                 w,
                 "cls_cns_d {}::{}",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(id.as_bytes_id(), ctx.strings)
+                FmtIdentifierId(clsid.as_bytes_id()),
+                FmtIdentifierId(id.as_bytes_id())
             )?;
         }
         Hhbc::ClsCnsL(vid, lid, _) => {
             write!(
                 w,
                 "cls_cns_l {}::{}",
-                FmtVid(func, vid, verbose, strings),
-                FmtLid(lid, ctx.strings)
+                FmtVid(func, vid, verbose),
+                FmtLid(lid)
             )?;
         }
         Hhbc::ColFromArray(vid, kind, _) => {
@@ -871,27 +807,25 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "col_from_array {} {}",
                 FmtCollectionType(kind),
-                FmtVid(func, vid, verbose, strings)
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::CombineAndResolveTypeStruct(ref vids, _) => {
             write!(
                 w,
                 "combine_and_resolve_type_struct {}",
-                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose, strings)
-                    .fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Hhbc::ConcatN(ref vids, _) => {
             write!(
                 w,
                 "concatn {}",
-                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose, strings)
-                    .fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Hhbc::ConsumeL(lid, _) => {
-            write!(w, "consume_local {}", FmtLid(lid, ctx.strings))?;
+            write!(w, "consume_local {}", FmtLid(lid))?;
         }
         Hhbc::ContCheck(kind, _) => {
             let kind = match kind {
@@ -905,7 +839,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(w, "cont_current")?;
         }
         Hhbc::ContEnter(vid, _) => {
-            write!(w, "cont_enter {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "cont_enter {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::ContGetReturn(_) => {
             write!(w, "cont_get_return")?;
@@ -914,7 +848,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(w, "cont_key")?;
         }
         Hhbc::ContRaise(vid, _) => {
-            write!(w, "cont_raise {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "cont_raise {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::ContValid(_) => {
             write!(w, "cont_valid")?;
@@ -927,11 +861,11 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "create_class {}({})",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id()),
                 FmtSep::comma(operands.iter(), |w, arg| write!(
                     w,
                     "{}",
-                    FmtVid(func, *arg, verbose, strings)
+                    FmtVid(func, *arg, verbose)
                 ))
             )?;
         }
@@ -940,42 +874,34 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "create_special_implicit_context {}, {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings)
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose)
             )?;
         }
         Hhbc::EnumClassLabelName(vid, _) => {
-            write!(
-                w,
-                "enum_class_label_name {}",
-                FmtVid(func, vid, verbose, strings)
-            )?;
+            write!(w, "enum_class_label_name {}", FmtVid(func, vid, verbose))?;
         }
-        Hhbc::GetClsRGProp(vid, _) => write!(
-            w,
-            "get_class_rg_prop {}",
-            FmtVid(func, vid, verbose, strings)
-        )?,
+        Hhbc::GetClsRGProp(vid, _) => {
+            write!(w, "get_class_rg_prop {}", FmtVid(func, vid, verbose))?
+        }
         Hhbc::GetMemoKeyL(lid, _) => {
-            write!(w, "get_memo_key {}", FmtLid(lid, ctx.strings))?;
+            write!(w, "get_memo_key {}", FmtLid(lid))?;
         }
-        Hhbc::HasReifiedParent(vid, _) => write!(
-            w,
-            "has_reified_parent {}",
-            FmtVid(func, vid, verbose, strings)
-        )?,
+        Hhbc::HasReifiedParent(vid, _) => {
+            write!(w, "has_reified_parent {}", FmtVid(func, vid, verbose))?
+        }
         Hhbc::Idx(vids, _) => {
             write!(
                 w,
                 "idx {}[{}] or {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings),
-                FmtVid(func, vids[2], verbose, strings),
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose),
+                FmtVid(func, vids[2], verbose),
             )?;
         }
         Hhbc::IncDecL(lid, op, _) => {
             let (pre, post) = incdec_what(op);
-            let lid = FmtLid(lid, ctx.strings);
+            let lid = FmtLid(lid);
             write!(w, "incdec_local {}{}{}", pre, lid, post)?;
         }
         Hhbc::IncDecS([cls, prop], op, _) => {
@@ -984,8 +910,8 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "incdec_static_prop {}{}::{}{}",
                 pre,
-                FmtVid(func, cls, verbose, strings),
-                FmtVid(func, prop, verbose, strings),
+                FmtVid(func, cls, verbose),
+                FmtVid(func, prop, verbose),
                 post
             )?;
         }
@@ -994,52 +920,43 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "init_prop {}, {}, {}",
-                FmtQuotedStringId(prop.as_bytes_id(), ctx.strings),
-                FmtVid(func, vid, verbose, strings),
+                FmtQuotedStringId(prop.as_bytes_id()),
+                FmtVid(func, vid, verbose),
                 FmtInitPropOp(op)
             )?;
         }
         Hhbc::InstanceOfD(vid, clsid, _) => write!(
             w,
             "instance_of_d {}, {}",
-            FmtVid(func, vid, ctx.verbose, strings),
-            FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
+            FmtVid(func, vid, ctx.verbose),
+            FmtIdentifierId(clsid.as_bytes_id())
         )?,
         Hhbc::IsLateBoundCls(vid, _) => {
-            write!(
-                w,
-                "is_late_bound_cls {}",
-                FmtVid(func, vid, ctx.verbose, strings)
-            )?;
+            write!(w, "is_late_bound_cls {}", FmtVid(func, vid, ctx.verbose))?;
         }
         Hhbc::IsTypeC(vid, op, _) => {
             write!(
                 w,
                 "is_type_c {}, {}",
-                FmtVid(func, vid, ctx.verbose, strings),
+                FmtVid(func, vid, ctx.verbose),
                 FmtIsTypeOp(op)
             )?;
         }
         Hhbc::IsTypeL(lid, op, _) => {
-            write!(
-                w,
-                "is_type_l {}, {}",
-                FmtLid(lid, ctx.strings),
-                FmtIsTypeOp(op)
-            )?;
+            write!(w, "is_type_l {}, {}", FmtLid(lid), FmtIsTypeOp(op))?;
         }
         Hhbc::IssetG(vid, _) => {
-            write!(w, "isset_g {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "isset_g {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::IssetL(lid, _) => {
-            write!(w, "isset_l {}", FmtLid(lid, ctx.strings))?;
+            write!(w, "isset_l {}", FmtLid(lid))?;
         }
         Hhbc::IssetS([cls, prop], _) => {
             write!(
                 w,
                 "isset_s {}::{}",
-                FmtVid(func, cls, verbose, strings),
-                FmtVid(func, prop, verbose, strings)
+                FmtVid(func, cls, verbose),
+                FmtVid(func, prop, verbose)
             )?;
         }
         Hhbc::IterFree(iter_id, _loc) => {
@@ -1049,29 +966,25 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(w, "late_bound_cls")?;
         }
         Hhbc::LazyClassFromClass(vid, _) => {
-            write!(
-                w,
-                "lazy_class_from_class {}",
-                FmtVid(func, vid, verbose, strings)
-            )?;
+            write!(w, "lazy_class_from_class {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::LockObj(vid, _) => {
-            write!(w, "lock_obj {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "lock_obj {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::MemoSet(vid, ref locals, _) => {
             write!(
                 w,
                 "memo_set {}, {}",
-                FmtLids(locals, ctx.strings),
-                FmtVid(func, vid, verbose, strings)
+                FmtLids(locals),
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::MemoSetEager(vid, ref locals, _) => {
             write!(
                 w,
                 "memo_set_eager {}, {}",
-                FmtLids(locals, ctx.strings),
-                FmtVid(func, vid, verbose, strings)
+                FmtLids(locals),
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::NewDictArray(hint, _) => {
@@ -1084,19 +997,15 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 FmtSep::comma(operands.iter(), |w, arg| write!(
                     w,
                     "{}",
-                    FmtVid(func, *arg, verbose, strings)
+                    FmtVid(func, *arg, verbose)
                 ))
             )?;
         }
         Hhbc::NewObj(vid, _) => {
-            write!(w, "new_obj {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "new_obj {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::NewObjD(clsid, _) => {
-            write!(
-                w,
-                "new_obj direct {}",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
-            )?;
+            write!(w, "new_obj direct {}", FmtIdentifierId(clsid.as_bytes_id()))?;
         }
         Hhbc::NewObjS(clsref, _) => {
             write!(w, "new_obj static {}", FmtSpecialClsRef(clsref))?;
@@ -1105,8 +1014,8 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "new_pair {}, {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings)
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose)
             )?;
         }
         Hhbc::NewStructDict(ref keys, ref values, _) => {
@@ -1117,8 +1026,8 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                     write!(
                         w,
                         "{} => {}",
-                        FmtQuotedStringId(*k, ctx.strings),
-                        FmtVid(func, *v, verbose, strings)
+                        FmtQuotedStringId(*k),
+                        FmtVid(func, *v, verbose)
                     )
                 })
             )?;
@@ -1127,11 +1036,10 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "new_vec [{}]",
-                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose, strings)
-                    .fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
-        Hhbc::Not(vid, _) => write!(w, "not {}", FmtVid(func, vid, ctx.verbose, strings))?,
+        Hhbc::Not(vid, _) => write!(w, "not {}", FmtVid(func, vid, ctx.verbose))?,
         Hhbc::OODeclExists(vids, op, _) => {
             let kind = match op {
                 OODeclExistsOp::Class => "class",
@@ -1142,42 +1050,40 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "oo_decl_exists {}, {} {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings),
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose),
                 kind
             )?;
         }
         Hhbc::ParentCls(_) => {
             write!(w, "parent")?;
         }
-        Hhbc::Print(vid, _) => write!(w, "print {}", FmtVid(func, vid, ctx.verbose, strings))?,
+        Hhbc::Print(vid, _) => write!(w, "print {}", FmtVid(func, vid, ctx.verbose))?,
         Hhbc::RaiseClassStringConversionNotice(_) => {
             write!(w, "raise_class_string_conversion_notice")?
         }
         Hhbc::RecordReifiedGeneric(vid, _) => write!(
             w,
             "record_reified_generic {}",
-            FmtVid(func, vid, ctx.verbose, strings)
+            FmtVid(func, vid, ctx.verbose)
         )?,
-        Hhbc::ResolveClass(clsid, _) => write!(
-            w,
-            "resolve_class {}",
-            FmtIdentifierId(clsid.as_bytes_id(), ctx.strings)
-        )?,
+        Hhbc::ResolveClass(clsid, _) => {
+            write!(w, "resolve_class {}", FmtIdentifierId(clsid.as_bytes_id()))?
+        }
         Hhbc::ResolveClsMethod(vid, method, _) => {
             write!(
                 w,
                 "resolve_cls_method {}::{}",
-                FmtVid(func, vid, ctx.verbose, strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtVid(func, vid, ctx.verbose),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         Hhbc::ResolveClsMethodD(clsid, method, _) => {
             write!(
                 w,
                 "resolve_cls_method_d {}::{}",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtIdentifierId(clsid.as_bytes_id()),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         Hhbc::ResolveClsMethodS(clsref, method, _) => {
@@ -1185,16 +1091,16 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_cls_method_s {}::{}",
                 FmtSpecialClsRef(clsref),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         Hhbc::ResolveRClsMethod([clsid, vid], method, _) => {
             write!(
                 w,
                 "resolve_r_cls_method {}::{}, {}",
-                FmtVid(func, clsid, verbose, strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
-                FmtVid(func, vid, verbose, strings),
+                FmtVid(func, clsid, verbose),
+                FmtIdentifierId(method.as_bytes_id()),
+                FmtVid(func, vid, verbose),
             )?;
         }
         Hhbc::ResolveRClsMethodS(vid, clsref, method, _) => {
@@ -1202,39 +1108,35 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
                 w,
                 "resolve_r_cls_method_s {}::{}, {}",
                 FmtSpecialClsRef(clsref),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
-                FmtVid(func, vid, verbose, strings),
+                FmtIdentifierId(method.as_bytes_id()),
+                FmtVid(func, vid, verbose),
             )?;
         }
         Hhbc::ResolveFunc(func, _) => {
-            write!(
-                w,
-                "resolve_func {}",
-                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
-            )?;
+            write!(w, "resolve_func {}", FmtIdentifierId(func.as_bytes_id()))?;
         }
         Hhbc::ResolveRClsMethodD(vid, clsid, method, _) => {
             write!(
                 w,
                 "resolve_r_cls_method_d {}::{}, {}",
-                FmtIdentifierId(clsid.as_bytes_id(), ctx.strings),
-                FmtIdentifierId(method.as_bytes_id(), ctx.strings),
-                FmtVid(func, vid, verbose, strings),
+                FmtIdentifierId(clsid.as_bytes_id()),
+                FmtIdentifierId(method.as_bytes_id()),
+                FmtVid(func, vid, verbose),
             )?;
         }
         Hhbc::ResolveRFunc(rid, fid, _) => {
             write!(
                 w,
                 "resolve_r_func {}, {}",
-                FmtIdentifierId(fid.as_bytes_id(), ctx.strings),
-                FmtVid(func, rid, verbose, strings)
+                FmtIdentifierId(fid.as_bytes_id()),
+                FmtVid(func, rid, verbose)
             )?;
         }
         Hhbc::ResolveMethCaller(func, _) => {
             write!(
                 w,
                 "resolve_meth_caller {}",
-                FmtIdentifierId(func.as_bytes_id(), ctx.strings)
+                FmtIdentifierId(func.as_bytes_id())
             )?;
         }
         Hhbc::SelfCls(_) => {
@@ -1244,50 +1146,50 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "set_global {}, {}",
-                FmtVid(func, target, verbose, strings),
-                FmtVid(func, value, verbose, strings),
+                FmtVid(func, target, verbose),
+                FmtVid(func, value, verbose),
             )?;
         }
         Hhbc::SetImplicitContextByValue(vid, _) => {
             write!(
                 w,
                 "set_implicit_context_by_value {}",
-                FmtVid(func, vid, verbose, strings)
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::SetL(vid, lid, _) => {
             write!(
                 w,
                 "set_local {}, {}",
-                FmtLid(lid, ctx.strings),
-                FmtVid(func, vid, verbose, strings),
+                FmtLid(lid),
+                FmtVid(func, vid, verbose),
             )?;
         }
         Hhbc::SetOpL(vid, lid, op, _) => {
             write!(
                 w,
                 "set_op_local {} {} {}",
-                FmtLid(lid, ctx.strings),
+                FmtLid(lid),
                 FmtSetOpOp(op),
-                FmtVid(func, vid, verbose, strings)
+                FmtVid(func, vid, verbose)
             )?;
         }
         Hhbc::SetOpG([x, y], op, _) => {
             write!(
                 w,
                 "set_op_global {} {} {}",
-                FmtVid(func, x, verbose, strings),
+                FmtVid(func, x, verbose),
                 FmtSetOpOp(op),
-                FmtVid(func, y, verbose, strings)
+                FmtVid(func, y, verbose)
             )?;
         }
         Hhbc::SetOpS(vids, op, _) => {
             write!(
                 w,
                 "set_op_static_property {}, {}, {}, {}",
-                FmtVid(func, vids[0], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings),
-                FmtVid(func, vids[2], verbose, strings),
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose),
+                FmtVid(func, vids[2], verbose),
                 FmtSetOpOp(op),
             )?;
         }
@@ -1295,14 +1197,14 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "set_s {}->{} {} = {}",
-                FmtVid(func, vids[1], verbose, strings),
-                FmtVid(func, vids[0], verbose, strings),
+                FmtVid(func, vids[1], verbose),
+                FmtVid(func, vids[0], verbose),
                 FmtReadonly(readonly),
-                FmtVid(func, vids[2], verbose, strings)
+                FmtVid(func, vids[2], verbose)
             )?;
         }
         Hhbc::Silence(lid, op, _) => {
-            let lid = FmtLid(lid, ctx.strings);
+            let lid = FmtLid(lid);
             let op = match op {
                 SilenceOp::Start => "start",
                 SilenceOp::End => "end",
@@ -1317,10 +1219,10 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(w, "throw_nonexhaustive_switch")?;
         }
         Hhbc::UnsetG(vid, _) => {
-            write!(w, "unset {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "unset {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::UnsetL(lid, _) => {
-            write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
+            write!(w, "unset {}", FmtLid(lid))?;
         }
         Hhbc::VerifyImplicitContextState(_) => {
             write!(w, "verify_implicit_context_state")?;
@@ -1329,66 +1231,62 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func, hhbc: &Hhbc
             write!(
                 w,
                 "verify_out_type {}, {}",
-                FmtVid(func, vid, verbose, strings),
-                FmtLid(lid, ctx.strings),
+                FmtVid(func, vid, verbose),
+                FmtLid(lid),
             )?;
         }
         Hhbc::VerifyParamType(vid, lid, _) => {
             write!(
                 w,
                 "verify_param_type {}, {}",
-                FmtVid(func, vid, verbose, strings),
-                FmtLid(lid, ctx.strings),
+                FmtVid(func, vid, verbose),
+                FmtLid(lid),
             )?;
         }
         Hhbc::VerifyParamTypeTS(vid, lid, _) => {
             write!(
                 w,
                 "verify_param_type_ts {}, {}",
-                FmtVid(func, vid, verbose, strings),
-                FmtLid(lid, ctx.strings),
+                FmtVid(func, vid, verbose),
+                FmtLid(lid),
             )?;
         }
         Hhbc::VerifyRetTypeC(op, _) => {
-            write!(
-                w,
-                "verify_ret_type_c {}",
-                FmtVid(func, op, verbose, strings)
-            )?;
+            write!(w, "verify_ret_type_c {}", FmtVid(func, op, verbose))?;
         }
         Hhbc::VerifyRetTypeTS(ops, _) => {
             write!(
                 w,
                 "verify_ret_type_ts {}, {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings)
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose)
             )?;
         }
         Hhbc::WHResult(vid, _) => {
-            write!(w, "wh_result {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "wh_result {}", FmtVid(func, vid, verbose))?;
         }
-        Hhbc::Yield(vid, _) => write!(w, "yield {}", FmtVid(func, vid, verbose, strings))?,
+        Hhbc::Yield(vid, _) => write!(w, "yield {}", FmtVid(func, vid, verbose))?,
         Hhbc::YieldK(ops, _) => write!(
             w,
             "yield {} => {}",
-            FmtVid(func, ops[0], verbose, strings),
-            FmtVid(func, ops[1], verbose, strings)
+            FmtVid(func, ops[0], verbose),
+            FmtVid(func, ops[1], verbose)
         )?,
     }
     Ok(())
 }
 
-fn print_hack_constant(w: &mut dyn Write, c: &HackConstant, strings: &StringInterner) -> Result {
+fn print_hack_constant(w: &mut dyn Write, c: &HackConstant) -> Result {
     let attr = FmtAttr(c.attrs, AttrContext::Constant);
 
     write!(
         w,
         "constant {attr} {name}",
-        name = FmtIdentifierId(c.name.as_bytes_id(), strings)
+        name = FmtIdentifierId(c.name.as_bytes_id())
     )?;
 
     if let Some(value) = &c.value {
-        write!(w, " = {}", FmtTypedValue(value, strings))?;
+        write!(w, " = {}", FmtTypedValue(value))?;
     }
 
     writeln!(w)?;
@@ -1398,11 +1296,11 @@ fn print_hack_constant(w: &mut dyn Write, c: &HackConstant, strings: &StringInte
 
 fn print_include_eval(
     w: &mut dyn Write,
-    ctx: &FuncContext<'_>,
+    ctx: &FuncContext,
     func: &Func,
     ie: &instr::IncludeEval,
 ) -> Result {
-    let vid = FmtVid(func, ie.vid, ctx.verbose, ctx.strings);
+    let vid = FmtVid(func, ie.vid, ctx.verbose);
     let kind = match ie.kind {
         IncludeKind::Eval => "eval",
         IncludeKind::Include => "include",
@@ -1416,7 +1314,7 @@ fn print_include_eval(
 
 pub(crate) fn print_instr(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     func: &Func,
     iid: InstrId,
     instr: &Instr,
@@ -1439,7 +1337,7 @@ pub(crate) fn print_instr(
         Instr::Hhbc(hhbc) => print_hhbc(w, ctx, func, hhbc)?,
         Instr::MemberOp(op) => print_member_op(w, ctx, func, op)?,
         Instr::Special(Special::Copy(vid)) => {
-            write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose, ctx.strings))?;
+            write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
         Instr::Special(Special::IrToBc(ir_to_bc)) => {
             print_ir_to_bc(w, ctx, func, ir_to_bc)?;
@@ -1453,7 +1351,7 @@ pub(crate) fn print_instr(
                 w,
                 "set_var &{}, {}",
                 var.as_usize(),
-                FmtVid(func, *value, ctx.verbose, ctx.strings)
+                FmtVid(func, *value, ctx.verbose)
             )?;
         }
         Instr::Special(Special::Param) => write!(w, "param")?,
@@ -1461,7 +1359,7 @@ pub(crate) fn print_instr(
             w,
             "select {} from {}",
             index,
-            FmtVid(func, *vid, ctx.verbose, ctx.strings)
+            FmtVid(func, *vid, ctx.verbose)
         )?,
         Instr::Special(Special::Tombstone) => write!(w, "tombstone")?,
         Instr::Terminator(t) => print_terminator(w, ctx, func, iid, t)?,
@@ -1471,30 +1369,21 @@ pub(crate) fn print_instr(
 
 pub(crate) fn print_textual(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     func: &Func,
     textual: &instr::Textual,
 ) -> std::result::Result<(), Error> {
     use instr::Textual;
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     match textual {
         Textual::AssertFalse(vid, _) => {
-            write!(
-                w,
-                "textual::assert_false {}",
-                FmtVid(func, *vid, verbose, strings)
-            )?;
+            write!(w, "textual::assert_false {}", FmtVid(func, *vid, verbose))?;
         }
         Textual::AssertTrue(vid, _) => {
-            write!(
-                w,
-                "textual::assert_true {}",
-                FmtVid(func, *vid, verbose, strings)
-            )?;
+            write!(w, "textual::assert_true {}", FmtVid(func, *vid, verbose))?;
         }
         Textual::Deref(lid) => {
-            write!(w, "textual::deref {}", FmtLid(*lid, ctx.strings),)?;
+            write!(w, "textual::deref {}", FmtLid(*lid))?;
         }
         Textual::HackBuiltin {
             values,
@@ -1503,7 +1392,7 @@ pub(crate) fn print_textual(
         } => {
             write!(w, "textual::hack_builtin({target}")?;
             for vid in values.iter() {
-                write!(w, ", {}", FmtVid(func, *vid, verbose, strings))?
+                write!(w, ", {}", FmtVid(func, *vid, verbose))?
             }
             write!(w, ")")?;
         }
@@ -1511,7 +1400,7 @@ pub(crate) fn print_textual(
             write!(
                 w,
                 "textual::load_global({}, {is_const})",
-                FmtIdentifierId(id.as_bytes_id(), strings)
+                FmtIdentifierId(id.as_bytes_id())
             )?;
         }
         Textual::String(s) => {
@@ -1523,33 +1412,26 @@ pub(crate) fn print_textual(
 
 pub(crate) fn print_ir_to_bc(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     func: &Func,
     ir_to_bc: &IrToBc,
 ) -> std::result::Result<(), Error> {
     match ir_to_bc {
         IrToBc::PopC => write!(w, "popc")?,
-        IrToBc::PopL(lid) => write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?,
+        IrToBc::PopL(lid) => write!(w, "pop_local {}", FmtLid(*lid))?,
         IrToBc::PushL(lid) => {
-            write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
+            write!(w, "push {}", FmtLid(*lid))?;
         }
-        IrToBc::PushConstant(vid) => {
-            write!(w, "push {}", FmtVid(func, *vid, ctx.verbose, ctx.strings))?
-        }
+        IrToBc::PushConstant(vid) => write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?,
         IrToBc::PushUninit => write!(w, "push_uninit")?,
         IrToBc::UnsetL(lid) => {
-            write!(w, "unset_local {}", FmtLid(*lid, ctx.strings))?;
+            write!(w, "unset_local {}", FmtLid(*lid))?;
         }
     }
     Ok(())
 }
 
-fn print_inner_loc(
-    w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
-    func: &Func,
-    loc_id: LocId,
-) -> Result {
+fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
     if ctx.cur_loc_id != loc_id {
         ctx.cur_loc_id = loc_id;
         if let Some(loc) = func.get_loc(loc_id) {
@@ -1559,14 +1441,14 @@ fn print_inner_loc(
     Ok(())
 }
 
-fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext<'_>, func: &Func, loc_id: LocId) -> Result {
+fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
     if ctx.cur_loc_id != loc_id {
         if let Some(loc) = func.get_loc(loc_id) {
             let old_filename = func
                 .get_loc(ctx.cur_loc_id)
                 .map_or(UnitBytesId::EMPTY, |loc| loc.filename.0);
             if old_filename != loc.filename.0 {
-                writeln!(w, "  .srcloc {}", FmtFullLoc(loc, ctx.strings))?;
+                writeln!(w, "  .srcloc {}", FmtFullLoc(loc))?;
             } else {
                 writeln!(w, "  .srcloc {}", FmtLoc(loc))?;
             }
@@ -1578,7 +1460,7 @@ fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext<'_>, func: &Func, loc_id: 
 
 fn print_member_op(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     func: &Func,
     op: &instr::MemberOp,
 ) -> Result {
@@ -1593,7 +1475,6 @@ fn print_member_op(
     write!(w, "{} ", final_op_str)?;
 
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     let mut operands = op.operands.iter().copied();
     let mut locals = op.locals.iter().copied();
 
@@ -1617,14 +1498,14 @@ fn print_member_op(
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
             let vid = operands.next().unwrap();
-            write!(w, "{}", FmtVid(func, vid, true, strings))?;
+            write!(w, "{}", FmtVid(func, vid, true))?;
         }
         BaseOp::BaseGC { mode, .. } => {
             if mode != MOpMode::None {
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
             let vid = operands.next().unwrap();
-            write!(w, "global {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "global {}", FmtVid(func, vid, verbose))?;
         }
         BaseOp::BaseH { .. } => {
             write!(w, "$this")?;
@@ -1637,7 +1518,7 @@ fn print_member_op(
                 write!(w, "{} ", FmtReadonly(readonly))?;
             }
             let lid = locals.next().unwrap();
-            write!(w, "{}", FmtLid(lid, ctx.strings))?;
+            write!(w, "{}", FmtLid(lid))?;
         }
         BaseOp::BaseSC { mode, readonly, .. } => {
             if mode != MOpMode::None {
@@ -1651,8 +1532,8 @@ fn print_member_op(
             write!(
                 w,
                 "{}::{}",
-                FmtVid(func, cls, true, strings),
-                FmtVid(func, prop, verbose, strings)
+                FmtVid(func, cls, true),
+                FmtVid(func, prop, verbose)
             )?;
         }
         BaseOp::BaseST {
@@ -1671,8 +1552,8 @@ fn print_member_op(
             write!(
                 w,
                 "{}::{}",
-                FmtVid(func, cls, true, strings),
-                FmtQuotedStringId(prop.as_bytes_id(), strings)
+                FmtVid(func, cls, true),
+                FmtQuotedStringId(prop.as_bytes_id())
             )?;
         }
     }
@@ -1748,9 +1629,9 @@ fn print_member_op(
             write!(
                 w,
                 " set {}, {}, {} size {} {}",
-                FmtVid(func, s1, verbose, strings),
-                FmtVid(func, s2, verbose, strings),
-                FmtVid(func, s3, verbose, strings),
+                FmtVid(func, s1, verbose),
+                FmtVid(func, s2, verbose),
+                FmtVid(func, s3, verbose),
                 sz,
                 set_range_op
             )?;
@@ -1773,7 +1654,7 @@ fn print_member_op(
         },
         FinalOp::SetM { .. } => {
             let vid = operands.next().unwrap();
-            write!(w, " = {}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, " = {}", FmtVid(func, vid, verbose))?;
         }
         FinalOp::SetOpM { set_op_op, .. } => {
             let vid = operands.next().unwrap();
@@ -1781,7 +1662,7 @@ fn print_member_op(
                 w,
                 " {} {}",
                 FmtSetOpOp(set_op_op),
-                FmtVid(func, vid, verbose, strings)
+                FmtVid(func, vid, verbose)
             )?;
         }
         FinalOp::SetRangeM { .. } | FinalOp::UnsetM { .. } => {}
@@ -1793,7 +1674,7 @@ fn print_member_op(
 
 fn print_member_key(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     operands: &mut impl Iterator<Item = ValueId>,
     locals: &mut impl Iterator<Item = LocalId>,
     func: &Func,
@@ -1803,7 +1684,6 @@ fn print_member_key(
     key: &MemberKey,
 ) -> Result {
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     match *key {
         MemberKey::EC | MemberKey::EI(_) | MemberKey::EL | MemberKey::ET(_) | MemberKey::W => {
             w.write_str("[")?
@@ -1824,53 +1704,47 @@ fn print_member_key(
     match *key {
         MemberKey::EC => {
             let vid = operands.next().unwrap();
-            write!(w, "{}]", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "{}]", FmtVid(func, vid, verbose))?;
         }
         MemberKey::EI(i) => write!(w, "{}]", i)?,
         MemberKey::EL => {
             let lid = locals.next().unwrap();
-            write!(w, "{}]", FmtLid(lid, strings))?
+            write!(w, "{}]", FmtLid(lid))?
         }
-        MemberKey::ET(sid) => write!(w, "{}]", FmtQuotedStringId(sid, strings))?,
+        MemberKey::ET(sid) => write!(w, "{}]", FmtQuotedStringId(sid))?,
         MemberKey::PC => {
             let vid = operands.next().unwrap();
-            write!(w, "{}", FmtVid(func, vid, verbose, strings))?;
+            write!(w, "{}", FmtVid(func, vid, verbose))?;
         }
         MemberKey::PL => {
             let lid = locals.next().unwrap();
-            write!(w, "{}", FmtLid(lid, strings))?
+            write!(w, "{}", FmtLid(lid))?
         }
-        MemberKey::PT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id(), strings))?,
-        MemberKey::QT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id(), strings))?,
+        MemberKey::PT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id()))?,
+        MemberKey::QT(pid) => write!(w, "{}", FmtQuotedStringId(pid.as_bytes_id()))?,
         MemberKey::W => write!(w, "]")?,
     }
     Ok(())
 }
 
-fn print_method(
-    w: &mut dyn Write,
-    clsid: ClassName,
-    method: &Method,
-    verbose: bool,
-    strings: &StringInterner,
-) -> Result {
-    print_top_level_loc(w, method.func.get_loc(method.func.loc_id), strings)?;
+fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: bool) -> Result {
+    print_top_level_loc(w, method.func.get_loc(method.func.loc_id))?;
     writeln!(
         w,
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {vis} {{",
-        clsid = FmtIdentifierId(clsid.as_bytes_id(), strings),
-        method = FmtIdentifierId(method.name.as_bytes_id(), strings),
-        tparams = FmtTParams(&method.func.tparams, strings),
-        shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams, strings),
-        params = FmtFuncParams(&method.func, strings),
-        ret_type = FmtTypeInfo(&method.func.return_type, strings),
+        clsid = FmtIdentifierId(clsid.as_bytes_id()),
+        method = FmtIdentifierId(method.name.as_bytes_id()),
+        tparams = FmtTParams(&method.func.tparams),
+        shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams),
+        params = FmtFuncParams(&method.func),
+        ret_type = FmtTypeInfo(&method.func.return_type),
         vis = FmtVisibility(method.visibility),
         attr = FmtAttr(method.func.attrs, AttrContext::Method),
     )?;
     print_method_flags(w, method.flags)?;
-    print_attributes(w, &method.func.attributes, strings)?;
+    print_attributes(w, &method.func.attributes)?;
     print_coeffects(w, &method.func.coeffects)?;
-    print_func_body(w, &method.func, verbose, strings, None, None)?;
+    print_func_body(w, &method.func, verbose, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }
@@ -1905,12 +1779,7 @@ fn incdec_what(op: IncDecOp) -> (&'static str, &'static str) {
     }
 }
 
-pub(crate) fn print_param(
-    w: &mut dyn Write,
-    strings: &StringInterner,
-    func: &Func,
-    param: &Param,
-) -> Result {
+pub(crate) fn print_param(w: &mut dyn Write, func: &Func, param: &Param) -> Result {
     let Param {
         is_inout,
         is_readonly,
@@ -1932,8 +1801,7 @@ pub(crate) fn print_param(
         write!(
             w,
             "[{}] ",
-            FmtSep::comma(user_attributes.iter(), |w, a| FmtAttribute(a, strings)
-                .fmt(w))
+            FmtSep::comma(user_attributes.iter(), |w, a| FmtAttribute(a).fmt(w))
         )?;
     }
 
@@ -1941,9 +1809,9 @@ pub(crate) fn print_param(
     write!(
         w,
         "{} {}{}",
-        FmtTypeInfo(ty, strings),
+        FmtTypeInfo(ty),
         ellipsis_for_variadic,
-        FmtIdentifierId(name.as_bytes(), strings)
+        FmtIdentifierId(name.as_bytes())
     )?;
     if let Some(dv) = default_value {
         write!(
@@ -1956,29 +1824,29 @@ pub(crate) fn print_param(
     Ok(())
 }
 
-fn print_property(w: &mut dyn Write, property: &Property, strings: &StringInterner) -> Result {
+fn print_property(w: &mut dyn Write, property: &Property) -> Result {
     write!(
         w,
         "  property {name} {flags}{attributes} {vis} : {ty} {doc}",
-        name = FmtIdentifierId(property.name.as_bytes_id(), strings),
+        name = FmtIdentifierId(property.name.as_bytes_id()),
         flags = FmtAttr(property.flags, AttrContext::Property),
         attributes = FmtSep::new(" <", ", ", ">", property.attributes.iter(), |w, attr| {
             write!(
                 w,
                 "{}({})",
-                FmtIdentifierId(attr.name.as_bytes_id(), strings),
+                FmtIdentifierId(attr.name.as_bytes_id()),
                 FmtSep::comma(attr.arguments.iter(), |w, arg| {
-                    FmtTypedValue(arg, strings).fmt(w)
+                    FmtTypedValue(arg).fmt(w)
                 })
             )
         }),
         vis = FmtVisibility(property.visibility),
-        ty = FmtTypeInfo(&property.type_info, strings),
+        ty = FmtTypeInfo(&property.type_info),
         doc = FmtDocComment(property.doc_comment.as_ref().into()),
     )?;
 
     if let Some(iv) = property.initial_value.as_ref() {
-        write!(w, " = {}", FmtTypedValue(iv, strings))?;
+        write!(w, " = {}", FmtTypedValue(iv))?;
     }
 
     writeln!(w)
@@ -2029,18 +1897,17 @@ fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs) -> Result {
 
 fn print_terminator(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_>,
+    ctx: &mut FuncContext,
     func: &Func,
     _iid: InstrId,
     terminator: &Terminator,
 ) -> Result {
     let verbose = ctx.verbose;
-    let strings = ctx.strings;
     match terminator {
         Terminator::CallAsync(call, targets) => print_call_async(w, ctx, func, call, targets)?,
-        Terminator::Enter(bid, _) => write!(w, "enter to {}", FmtBid(func, *bid, verbose),)?,
+        Terminator::Enter(bid, _) => write!(w, "enter to {}", FmtBid(func, *bid, verbose))?,
         Terminator::Exit(vid, _) => {
-            write!(w, "exit {}", FmtVid(func, *vid, verbose, strings))?;
+            write!(w, "exit {}", FmtVid(func, *vid, verbose))?;
         }
         Terminator::Fatal(vid, op, _) => {
             let op = match *op {
@@ -2049,17 +1916,17 @@ fn print_terminator(
                 ir_core::FatalOp::RuntimeOmitFrame => "runtime_omit_frame",
                 _ => panic!("bad FatalOp value"),
             };
-            write!(w, "fatal {}, {}", op, FmtVid(func, *vid, verbose, strings))?
+            write!(w, "fatal {}, {}", op, FmtVid(func, *vid, verbose))?
         }
         Terminator::IterInit(args, vid) => {
             write!(
                 w,
                 "iterator ^{} init from {} jmp to {} else {} with {}",
                 args.iter_id.idx,
-                FmtVid(func, *vid, verbose, strings),
+                FmtVid(func, *vid, verbose),
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
-                FmtOptKeyValue(args.key_lid(), args.value_lid(), strings)
+                FmtOptKeyValue(args.key_lid(), args.value_lid())
             )?;
         }
         Terminator::IterNext(args) => {
@@ -2069,16 +1936,15 @@ fn print_terminator(
                 args.iter_id.idx,
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
-                FmtOptKeyValue(args.key_lid(), args.value_lid(), strings)
+                FmtOptKeyValue(args.key_lid(), args.value_lid())
             )?;
         }
-        Terminator::Jmp(bid, _) => write!(w, "jmp to {}", FmtBid(func, *bid, verbose),)?,
+        Terminator::Jmp(bid, _) => write!(w, "jmp to {}", FmtBid(func, *bid, verbose))?,
         Terminator::JmpArgs(bid, vids, _) => write!(
             w,
             "jmp to {} with ({})",
             FmtBid(func, *bid, verbose),
-            FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose, strings)
-                .fmt(w))
+            FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
         )?,
         Terminator::JmpOp {
             cond,
@@ -2094,7 +1960,7 @@ fn print_terminator(
                 w,
                 "{} {} to {} else {}",
                 pred,
-                FmtVid(func, *cond, verbose, strings),
+                FmtVid(func, *cond, verbose),
                 FmtBid(func, targets[0], verbose),
                 FmtBid(func, targets[1], verbose),
             )?;
@@ -2103,7 +1969,7 @@ fn print_terminator(
             write!(
                 w,
                 "memo_get {} to {} else {}",
-                FmtLids(&get.locals, strings),
+                FmtLids(&get.locals),
                 FmtBid(func, get.value_edge(), verbose),
                 FmtBid(func, get.no_value_edge(), verbose)
             )?;
@@ -2112,7 +1978,7 @@ fn print_terminator(
             write!(
                 w,
                 "memo_get_eager {} to {} eager {} else {}",
-                FmtLids(&get.locals, strings),
+                FmtLids(&get.locals),
                 FmtBid(func, get.suspended_edge(), verbose),
                 FmtBid(func, get.eager_edge(), verbose),
                 FmtBid(func, get.no_value_edge(), verbose)
@@ -2122,21 +1988,16 @@ fn print_terminator(
             write!(w, "native_impl")?;
         }
         Terminator::Ret(vid, _) => {
-            write!(w, "ret {}", FmtVid(func, *vid, verbose, strings))?;
+            write!(w, "ret {}", FmtVid(func, *vid, verbose))?;
         }
         Terminator::RetCSuspended(vid, _) => {
-            write!(
-                w,
-                "ret_c_suspended {}",
-                FmtVid(func, *vid, verbose, strings)
-            )?;
+            write!(w, "ret_c_suspended {}", FmtVid(func, *vid, verbose))?;
         }
         Terminator::RetM(vids, _) => {
             write!(
                 w,
                 "ret [{}]",
-                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose, strings)
-                    .fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Terminator::Switch {
@@ -2155,9 +2016,9 @@ fn print_terminator(
                 w,
                 "switch {} {} {base} [{}]",
                 bounded,
-                FmtVid(func, *cond, verbose, strings),
+                FmtVid(func, *cond, verbose),
                 FmtSep::comma(targets.iter(), |w, target| {
-                    write!(w, "{}", FmtBid(func, *target, verbose),)
+                    write!(w, "{}", FmtBid(func, *target, verbose))
                 })
             )?;
         }
@@ -2170,26 +2031,26 @@ fn print_terminator(
             write!(
                 w,
                 "sswitch {} [{}]",
-                FmtVid(func, *cond, verbose, strings),
+                FmtVid(func, *cond, verbose),
                 FmtSep::comma(cases.iter().zip(targets.iter()), |w, (case, target)| {
                     write!(
                         w,
                         "{} => {}",
-                        FmtQuotedStringId(*case, strings),
+                        FmtQuotedStringId(*case),
                         FmtBid(func, *target, verbose),
                     )
                 })
             )?;
         }
         Terminator::Throw(vid, _) => {
-            write!(w, "throw {}", FmtVid(func, *vid, verbose, strings))?;
+            write!(w, "throw {}", FmtVid(func, *vid, verbose))?;
         }
         Terminator::ThrowAsTypeStructException(ops, kind, _) => {
             write!(
                 w,
                 "throw_as_type_struct_exception {}, {}, {}",
-                FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings),
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose),
                 match *kind {
                     AsTypeStructExceptionKind::Error => "error",
                     AsTypeStructExceptionKind::Typehint => "typehint",
@@ -2202,19 +2063,19 @@ fn print_terminator(
     Ok(())
 }
 
-fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant, strings: &StringInterner) -> Result {
+fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant) -> Result {
     write!(w, "  type_constant ")?;
     if tc.is_abstract {
         write!(w, "abstract ")?;
     }
     write!(w, "{}", FmtIdentifier(tc.name.as_str().as_bytes()))?;
     if let Some(init) = &tc.initializer {
-        write!(w, " = {}", FmtTypedValue(init, strings))?;
+        write!(w, " = {}", FmtTypedValue(init))?;
     }
     writeln!(w)
 }
 
-fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner) -> Result {
+fn print_typedef(w: &mut dyn Write, typedef: &Typedef) -> Result {
     let Typedef {
         attributes,
         attrs,
@@ -2225,29 +2086,26 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         case_type,
     } = typedef;
 
-    print_top_level_loc(w, Some(loc), strings)?;
+    print_top_level_loc(w, Some(loc))?;
 
     writeln!(
         w,
         "typedef {vis} {name}: {ty} = {attributes}{ts} {attrs}",
         vis = if *case_type { "case_type" } else { "alias" },
-        name = FmtIdentifierId(name.as_bytes_id(), strings),
-        ty = FmtSep::comma(type_info_union.iter(), |w, ti| FmtTypeInfo(ti, strings)
-            .fmt(w)),
+        name = FmtIdentifierId(name.as_bytes_id()),
+        ty = FmtSep::comma(type_info_union.iter(), |w, ti| FmtTypeInfo(ti).fmt(w)),
         attributes = FmtSep::new("<", ",", "> ", attributes, |w, attribute| FmtAttribute(
-            attribute, strings
+            attribute,
         )
         .fmt(w)),
-        ts = FmtTypedValue(type_structure, strings),
+        ts = FmtTypedValue(type_structure),
         attrs = FmtAttr(*attrs, AttrContext::Typedef)
     )
 }
 
 pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
-    let strings = &unit.strings;
-
     for attr in &unit.file_attributes {
-        writeln!(w, "attribute {}", FmtAttribute(attr, strings))?;
+        writeln!(w, "attribute {}", FmtAttribute(attr))?;
     }
 
     if !unit.modules.is_empty() {
@@ -2258,13 +2116,12 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
                 src_loc,
                 doc_comment,
             } = module;
-            print_top_level_loc(w, Some(src_loc), strings)?;
+            print_top_level_loc(w, Some(src_loc))?;
             write!(
                 w,
                 "module {name} [{attributes}] ",
-                name = FmtIdentifierId(name.as_bytes_id(), strings),
-                attributes =
-                    FmtSep::comma(attributes.iter(), |w, a| FmtAttribute(a, strings).fmt(w))
+                name = FmtIdentifierId(name.as_bytes_id()),
+                attributes = FmtSep::comma(attributes.iter(), |w, a| FmtAttribute(a).fmt(w))
             )?;
             if let Some(doc_comment) = doc_comment {
                 write!(w, "{}", FmtEscapedString(doc_comment))?;
@@ -2286,31 +2143,31 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
     }
 
     for c in &unit.constants {
-        print_hack_constant(w, c, strings)?;
+        print_hack_constant(w, c)?;
     }
 
     if !unit.typedefs.is_empty() {
         for typedef in &unit.typedefs {
-            print_typedef(w, typedef, strings)?;
+            print_typedef(w, typedef)?;
         }
         writeln!(w)?;
     }
 
     for c in &unit.classes {
-        print_class(w, c, strings)?;
+        print_class(w, c)?;
     }
 
     for f in &unit.functions {
-        print_function(w, f, verbose, strings)?;
+        print_function(w, f, verbose)?;
     }
 
     for c in &unit.classes {
         for m in &c.methods {
-            print_method(w, c.name, m, verbose, strings)?;
+            print_method(w, c.name, m, verbose)?;
         }
     }
 
-    print_fatal(w, unit.fatal.as_ref(), strings)?;
+    print_fatal(w, unit.fatal.as_ref())?;
 
     print_symbol_refs(w, &unit.symbol_refs)?;
 

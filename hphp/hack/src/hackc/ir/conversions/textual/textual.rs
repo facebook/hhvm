@@ -9,7 +9,6 @@
 
 use std::borrow::Cow;
 use std::fmt;
-use std::sync::Arc;
 
 use anyhow::Error;
 use ascii::AsciiString;
@@ -19,7 +18,6 @@ use ir::func::SrcLoc;
 use ir::BlockId;
 use ir::FloatBits;
 use ir::LocalId;
-use ir::StringInterner;
 use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
@@ -41,7 +39,6 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
     pub(crate) hide_static_coeffects: bool,
-    strings: Arc<StringInterner>,
     pub(crate) enable_var_cache: bool,
     pub(crate) internal_functions: HashSet<FunctionName>,
     pub(crate) called_functions: HashSet<FunctionName>,
@@ -53,14 +50,12 @@ pub(crate) struct TextualFile<'a> {
 impl<'a> TextualFile<'a> {
     pub(crate) fn new(
         w: &'a mut dyn std::io::Write,
-        strings: Arc<StringInterner>,
         hide_static_coeffects: bool,
         enable_var_cache: bool,
     ) -> Self {
         TextualFile {
             w,
             hide_static_coeffects,
-            strings,
             enable_var_cache,
             internal_functions: Default::default(),
             called_functions: Default::default(),
@@ -102,7 +97,7 @@ impl TextualFile<'_> {
             write!(self.w, ".abstract ")?;
         }
 
-        write!(self.w, "{}(", name.display(&self.strings))?;
+        write!(self.w, "{}(", name.display())?;
 
         // TODO: For now textual can't handle a mix of types with a trailing
         // ellipsis.
@@ -111,12 +106,12 @@ impl TextualFile<'_> {
         } else {
             let mut sep = "";
             for ty in tys {
-                write!(self.w, "{sep}{}", ty.display(&self.strings))?;
+                write!(self.w, "{sep}{}", ty.display())?;
                 sep = ", ";
             }
         }
 
-        writeln!(self.w, "): {}", ret_ty.display(&self.strings))?;
+        writeln!(self.w, "): {}", ret_ty.display())?;
         Ok(())
     }
 
@@ -124,7 +119,7 @@ impl TextualFile<'_> {
         writeln!(
             self.w,
             "declare {name}(...): *HackMixed",
-            name = name.display(&self.strings)
+            name = name.display()
         )?;
         Ok(())
     }
@@ -133,8 +128,8 @@ impl TextualFile<'_> {
         writeln!(
             self.w,
             "global {name} : {ty}",
-            name = name.display(&self.strings),
-            ty = Ty::SpecialPtr(SpecialTy::Mixed).display(&self.strings)
+            name = name.display(),
+            ty = Ty::SpecialPtr(SpecialTy::Mixed).display()
         )?;
         Ok(())
     }
@@ -190,21 +185,17 @@ impl TextualFile<'_> {
             write!(self.w, " ")?;
         }
 
-        write!(self.w, "{}(", name.display(&self.strings))?;
+        write!(self.w, "{}(", name.display())?;
 
         let mut sep = "";
         for param in params {
-            write!(
-                self.w,
-                "{sep}{name}: ",
-                name = param.name.display(&self.strings),
-            )?;
+            write!(self.w, "{sep}{name}: ", name = param.name.display(),)?;
             if let Some(attrs) = param.attrs.as_ref() {
                 for attr in attrs.iter() {
                     write!(self.w, "{attr} ")?;
                 }
             }
-            write!(self.w, "{ty}", ty = param.ty.display(&self.strings))?;
+            write!(self.w, "{ty}", ty = param.ty.display())?;
             sep = ", ";
         }
         write!(self.w, ") : ")?;
@@ -213,7 +204,7 @@ impl TextualFile<'_> {
                 write!(self.w, "{attr} ")?;
             }
         }
-        writeln!(self.w, "{} {{", ret_ty.ty.display(&self.strings))?;
+        writeln!(self.w, "{} {{", ret_ty.ty.display())?;
 
         if !locals.is_empty() {
             let mut sep = "";
@@ -222,8 +213,8 @@ impl TextualFile<'_> {
                 write!(
                     self.w,
                     "{sep}{name}: {ty}",
-                    name = VarName::Local(*lid).display(&self.strings),
-                    ty = ty.display(&self.strings)
+                    name = VarName::Local(*lid).display(),
+                    ty = ty.display()
                 )?;
                 sep = ", ";
             }
@@ -268,11 +259,11 @@ impl TextualFile<'_> {
             self.write_full_loc(src_loc)?;
         }
 
-        write!(self.w, "type {}", name.display(&self.strings))?;
+        write!(self.w, "type {}", name.display())?;
 
         let mut sep = " extends";
         for base in extends {
-            write!(self.w, "{sep} {}", base.display(&self.strings))?;
+            write!(self.w, "{sep} {}", base.display())?;
             sep = ",";
         }
 
@@ -290,15 +281,15 @@ impl TextualFile<'_> {
             write!(
                 self.w,
                 "{sep}{INDENT}{name}: {vis} ",
-                name = f.name.display(&self.strings),
+                name = f.name.display(),
                 vis = f.visibility.decl()
             )?;
 
             for attr in &f.attributes {
-                write!(self.w, "{} ", attr.display(&self.strings))?;
+                write!(self.w, "{} ", attr.display())?;
             }
 
-            write!(self.w, "{ty}", ty = f.ty.display(&self.strings))?;
+            write!(self.w, "{ty}", ty = f.ty.display())?;
             sep = ";\n";
         }
 
@@ -448,21 +439,19 @@ impl TextualFile<'_> {
         &mut self,
         builtins: &HashMap<FunctionName, T>,
     ) -> Result<HashSet<T>> {
-        let strings = &Arc::clone(&self.strings);
-
         if !self.internal_globals.is_empty() {
             self.write_comment("----- GLOBALS -----")?;
 
             for (name, ty) in self
                 .internal_globals
                 .iter()
-                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, strings))
+                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2))
             {
                 writeln!(
                     self.w,
                     "global {name} : {ty}",
-                    name = name.display(strings),
-                    ty = ty.display(strings)
+                    name = name.display(),
+                    ty = ty.display()
                 )?;
             }
             self.debug_separator()?;
@@ -472,10 +461,7 @@ impl TextualFile<'_> {
             self.write_comment("----- CURRIES -----")?;
 
             let curry_tys = std::mem::take(&mut self.curry_tys);
-            for curry in curry_tys
-                .into_iter()
-                .sorted_by(|a, b| a.name.cmp(&b.name, strings))
-            {
+            for curry in curry_tys.into_iter().sorted_by(|a, b| a.name.cmp(&b.name)) {
                 self.write_curry_definition(curry)?;
             }
 
@@ -489,12 +475,12 @@ impl TextualFile<'_> {
                     Some(b) => itertools::Either::Left(b),
                     None => itertools::Either::Right(f),
                 });
-        non_builtin_fns.sort_by(|a, b| a.cmp(b, strings));
+        non_builtin_fns.sort_by(|a, b| a.cmp(b));
 
         let referenced_globals = (&self.referenced_globals
             - &self.internal_globals.keys().cloned().collect())
             .into_iter()
-            .sorted_by(|a, b| a.cmp(b, strings))
+            .sorted_by(|a, b| a.cmp(b))
             .collect_vec();
 
         if !non_builtin_fns.is_empty() || !referenced_globals.is_empty() {
@@ -559,10 +545,6 @@ impl ExprWriter for TextualFile<'_> {
 
     fn internal_get_writer(&mut self) -> &mut dyn std::io::Write {
         self.w
-    }
-
-    fn strings(&self) -> Arc<StringInterner> {
-        Arc::clone(&self.strings)
     }
 }
 
@@ -660,8 +642,8 @@ pub(crate) enum Ty {
 }
 
 impl Ty {
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtTy(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtTy(self)
     }
 
     pub(crate) fn deref(&self) -> Ty {
@@ -717,21 +699,21 @@ impl<'a> From<&'a Ty> for std::borrow::Cow<'a, Ty> {
     }
 }
 
-struct FmtTy<'a>(&'a StringInterner, &'a Ty);
+struct FmtTy<'a>(&'a Ty);
 
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtTy(strings, ty) = *self;
+        let FmtTy(ty) = *self;
         match ty {
             Ty::Ellipsis => write!(f, "..."),
             Ty::Float => write!(f, "float"),
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
-            Ty::Ptr(sub) => write!(f, "*{}", sub.display(strings)),
-            Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type().display(strings)),
-            Ty::Special(special) => special.user_type().display(strings).fmt(f),
+            Ty::Ptr(sub) => write!(f, "*{}", sub.display()),
+            Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type().display()),
+            Ty::Special(special) => special.user_type().display().fmt(f),
             Ty::String => write!(f, "*string"),
-            Ty::Type(s) => s.display(strings).fmt(f),
+            Ty::Type(s) => s.display().fmt(f),
             Ty::Unknown => f.write_str("?"),
             Ty::Void => f.write_str("void"),
             Ty::VoidPtr => f.write_str("*void"),
@@ -1024,7 +1006,7 @@ impl FuncBuilder<'_, '_> {
             self.txf.w,
             "{INDENT}{dst} = {target}(",
             dst = FmtSid(dst),
-            target = target.display(&self.txf.strings)
+            target = target.display()
         )?;
         self.write_expr(&this)?;
         let params = params.into_exprs();
@@ -1047,7 +1029,7 @@ impl FuncBuilder<'_, '_> {
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
         self.write_expr(&this)?;
-        write!(self.txf.w, ".{}(", target.display(&self.txf.strings))?;
+        write!(self.txf.w, ".{}(", target.display())?;
         let params = params.into_exprs();
         let mut sep = "";
         for param in params {
@@ -1094,12 +1076,11 @@ impl FuncBuilder<'_, '_> {
 
     pub(crate) fn lazy_class_initialize(&mut self, ty: &Ty) -> Result<Sid> {
         let dst = self.alloc_sid();
-        let strings = &self.txf.strings;
         writeln!(
             self.txf.w,
             "{INDENT}{dst} = __sil_lazy_class_initialize(<{ty}>)",
             dst = FmtSid(dst),
-            ty = ty.display(strings),
+            ty = ty.display(),
         )?;
         Ok(dst)
     }
@@ -1117,7 +1098,7 @@ impl FuncBuilder<'_, '_> {
                 self.txf.w,
                 "{INDENT}{dst}: {ty} = load ",
                 dst = FmtSid(dst),
-                ty = ty.display(&self.txf.strings),
+                ty = ty.display(),
             )?;
             self.write_expr(&src)?;
             writeln!(self.txf.w)?;
@@ -1164,7 +1145,7 @@ impl FuncBuilder<'_, '_> {
         self.write_expr(&dst)?;
         self.txf.w.write_all(b" <- ")?;
         self.write_expr(&src)?;
-        writeln!(self.txf.w, ": {ty}", ty = src_ty.display(&self.txf.strings))?;
+        writeln!(self.txf.w, ": {ty}", ty = src_ty.display())?;
         self.cache.store(&dst, src);
         Ok(())
     }
@@ -1320,9 +1301,6 @@ impl ExprWriter for FuncBuilder<'_, '_> {
     fn internal_get_writer(&mut self) -> &mut dyn std::io::Write {
         self.txf.internal_get_writer()
     }
-    fn strings(&self) -> Arc<StringInterner> {
-        self.txf.strings()
-    }
 }
 
 trait ExprWriter {
@@ -1331,12 +1309,10 @@ trait ExprWriter {
     fn register_used_global(&mut self, global: &GlobalName);
 
     fn internal_get_writer(&mut self) -> &mut dyn std::io::Write;
-    fn strings(&self) -> Arc<StringInterner>;
 
     fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
         self.register_called_function(target);
-        let strings = self.strings();
-        write!(self.internal_get_writer(), "{}(", target.display(&strings))?;
+        write!(self.internal_get_writer(), "{}(", target.display())?;
 
         let mut sep = "";
         for param in params.iter() {
@@ -1374,11 +1350,10 @@ trait ExprWriter {
             }
             Const::Int(i) => write!(self.internal_get_writer(), "{i}")?,
             Const::LazyClass(ref s) => {
-                let strings = self.strings();
                 write!(
                     self.internal_get_writer(),
                     "__sil_get_lazy_class(<{}>)",
-                    s.display(&strings)
+                    s.display()
                 )?;
             }
             Const::Null => self.internal_get_writer().write_all(b"null")?,
@@ -1392,12 +1367,11 @@ trait ExprWriter {
     }
 
     fn write_expr(&mut self, expr: &Expr) -> Result {
-        let strings = self.strings();
         match *expr {
             Expr::Alloc(ref ty) => write!(
                 self.internal_get_writer(),
                 "__sil_allocate(<{}>)",
-                ty.display(&strings)
+                ty.display()
             )?,
             Expr::Call(ref target, ref params) => {
                 self.write_call_expr(target, params)?;
@@ -1412,8 +1386,8 @@ trait ExprWriter {
                 write!(
                     self.internal_get_writer(),
                     ".{}.{}",
-                    ty.display(&strings),
-                    name.display(&strings)
+                    ty.display(),
+                    name.display()
                 )?;
             }
             Expr::Index(ref base, ref offset) => {
@@ -1425,7 +1399,7 @@ trait ExprWriter {
             Expr::InstanceOf(ref expr, ref ty) => {
                 write!(self.internal_get_writer(), "__sil_instanceof(")?;
                 self.write_expr(expr)?;
-                write!(self.internal_get_writer(), ", <{}>)", ty.display(&strings))?;
+                write!(self.internal_get_writer(), ", <{}>)", ty.display())?;
             }
             Expr::Sid(sid) => write!(self.internal_get_writer(), "{}", FmtSid(sid))?,
             Expr::Var(ref var) => {
@@ -1435,7 +1409,7 @@ trait ExprWriter {
                     }
                     VarName::Local(_) => {}
                 }
-                write!(self.internal_get_writer(), "{}", var.display(&strings))?
+                write!(self.internal_get_writer(), "{}", var.display())?
             }
         }
         Ok(())
@@ -1559,14 +1533,13 @@ impl FieldAttribute {
         }
     }
 
-    fn display<'a>(&'a self, strings: &'a StringInterner) -> impl fmt::Display + 'a {
+    fn display<'a>(&'a self) -> impl fmt::Display + 'a {
         struct D<'a> {
             attr: &'a FieldAttribute,
-            strings: &'a StringInterner,
         }
         impl fmt::Display for D<'_> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, ".{}", self.attr.name().display(self.strings))?;
+                write!(f, ".{}", self.attr.name().display())?;
                 match self.attr {
                     FieldAttribute::Unparameterized { .. } => {}
                     FieldAttribute::Parameterized {
@@ -1585,10 +1558,7 @@ impl FieldAttribute {
                 Ok(())
             }
         }
-        D {
-            attr: self,
-            strings,
-        }
+        D { attr: self }
     }
 }
 

@@ -34,7 +34,6 @@ pub(crate) fn convert_function<'a>(
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(
-        unit,
         filename,
         &src.body,
         &src.attributes,
@@ -43,7 +42,7 @@ pub(crate) fn convert_function<'a>(
         span,
         unit_state,
     );
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
+    ir::verify::verify_func(&func, &Default::default());
 
     let function = ir::Function {
         func,
@@ -66,7 +65,6 @@ pub(crate) fn convert_method<'a>(
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(
-        unit,
         filename,
         &src.body,
         &src.attributes,
@@ -75,7 +73,7 @@ pub(crate) fn convert_method<'a>(
         span,
         unit_state,
     );
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
+    ir::verify::verify_func(&func, &Default::default());
 
     let method = ir::Method {
         flags: src.flags,
@@ -89,7 +87,6 @@ pub(crate) fn convert_method<'a>(
 
 /// Convert a hhbc::Body to an ir::Func
 fn convert_body<'a>(
-    unit: &mut ir::Unit,
     filename: ir::Filename,
     body: &Body,
     attributes: &[hhbc::Attribute],
@@ -131,7 +128,7 @@ fn convert_body<'a>(
     let attributes = attributes
         .as_ref()
         .iter()
-        .map(|a| convert::convert_attribute(a, &unit.strings))
+        .map(convert::convert_attribute)
         .collect();
 
     let coeffects = convert_coeffects(coeffects);
@@ -156,7 +153,7 @@ fn convert_body<'a>(
         tparams,
     };
 
-    let mut ctx = Context::new(unit, filename, func, body_instrs, unit_state);
+    let mut ctx = Context::new(filename, func, body_instrs, unit_state);
 
     for param in params.as_ref() {
         let ir_param = convert_param(&mut ctx, param);
@@ -201,16 +198,13 @@ fn convert_body<'a>(
 
     ir::passes::rpo_sort(&mut func);
     ir::passes::split_critical_edges(&mut func, true);
-    ir::passes::ssa::run(&mut func, &unit.strings);
+    ir::passes::ssa::run(&mut func);
     ir::passes::control::run(&mut func);
     ir::passes::clean::run(&mut func);
 
-    trace!(
-        "FUNC:\n{}",
-        ir::print::DisplayFunc::new(&func, true, &unit.strings)
-    );
+    trace!("FUNC:\n{}", ir::print::DisplayFunc::new(&func, true,));
 
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
+    ir::verify::verify_func(&func, &Default::default());
 
     func
 }
@@ -233,7 +227,7 @@ fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
     let user_attributes = param
         .user_attributes
         .iter()
-        .map(|a| convert::convert_attribute(a, ctx.strings))
+        .map(convert::convert_attribute)
         .collect();
 
     ir::Param {

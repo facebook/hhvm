@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::Class;
-use ir::StringInterner;
 use itertools::Itertools;
 
 use crate::convert;
@@ -15,7 +14,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .constants
         .as_ref()
         .iter()
-        .map(|c| crate::constant::convert_constant(c, &unit.strings))
+        .map(crate::constant::convert_constant)
         .collect_vec();
 
     let enum_type = cls
@@ -27,7 +26,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
     let type_constants = cls
         .type_constants
         .iter()
-        .map(|c| convert_type_constant(c, &unit.strings))
+        .map(convert_type_constant)
         .collect();
 
     let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
@@ -47,14 +46,14 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         .attributes
         .as_ref()
         .iter()
-        .map(|a| convert::convert_attribute(a, &unit.strings))
+        .map(convert::convert_attribute)
         .collect_vec();
 
     let properties = cls
         .properties
         .as_ref()
         .iter()
-        .map(|prop| convert_property(prop, &unit.strings))
+        .map(convert_property)
         .collect_vec();
 
     unit.classes.push(ir::Class {
@@ -78,11 +77,11 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
     });
 }
 
-fn convert_property(prop: &hhbc::Property, strings: &ir::StringInterner) -> ir::Property {
+fn convert_property(prop: &hhbc::Property) -> ir::Property {
     let attributes = prop
         .attributes
         .iter()
-        .map(|a| convert::convert_attribute(a, strings))
+        .map(convert::convert_attribute)
         .collect_vec();
     ir::Property {
         name: prop.name,
@@ -92,7 +91,7 @@ fn convert_property(prop: &hhbc::Property, strings: &ir::StringInterner) -> ir::
         initial_value: prop
             .initial_value
             .as_ref()
-            .map(|tv| convert::convert_typed_value(tv, strings))
+            .map(convert::convert_typed_value)
             .into(),
         type_info: types::convert_type(&prop.type_info),
         doc_comment: prop.doc_comment.clone().map(|c| c.into()),
@@ -108,11 +107,11 @@ fn convert_ctx_constant(ctx: &hhbc::CtxConstant) -> ir::CtxConstant {
     }
 }
 
-fn convert_type_constant(tc: &hhbc::TypeConstant, strings: &StringInterner) -> ir::TypeConstant {
+fn convert_type_constant(tc: &hhbc::TypeConstant) -> ir::TypeConstant {
     let initializer = tc
         .initializer
         .as_ref()
-        .map(|tv| convert::convert_typed_value(tv, strings))
+        .map(convert::convert_typed_value)
         .into();
     ir::TypeConstant {
         name: tc.name,

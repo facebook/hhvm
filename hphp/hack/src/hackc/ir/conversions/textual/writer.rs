@@ -5,7 +5,6 @@
 
 use std::cmp::Ordering;
 use std::path::Path;
-use std::sync::Arc;
 
 use anyhow::bail;
 use anyhow::Result;
@@ -16,7 +15,6 @@ use strum::IntoEnumIterator;
 use crate::decls;
 use crate::hack;
 use crate::mangle::FunctionName;
-use crate::state::UnitState;
 use crate::textual;
 use crate::textual::TextualFile;
 
@@ -31,12 +29,7 @@ pub fn textual_writer(
     hide_static_coeffects: bool,
     enable_var_cache: bool,
 ) -> Result<()> {
-    let mut txf = TextualFile::new(
-        w,
-        Arc::clone(&unit.strings),
-        hide_static_coeffects,
-        enable_var_cache,
-    );
+    let mut txf = TextualFile::new(w, hide_static_coeffects, enable_var_cache);
 
     let escaped_path = escaper::escape(path.display().to_string());
     txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;
@@ -44,7 +37,6 @@ pub fn textual_writer(
     txf.set_attribute(textual::FileAttribute::SourceLanguage("hack".to_string()))?;
     txf.debug_separator()?;
 
-    let mut state = UnitState::new(Arc::clone(&unit.strings));
     check_fatal(path, unit.fatal.as_ref())?;
 
     // Merge classes and functions so we can sort them and emit in source file
@@ -59,8 +51,8 @@ pub fn textual_writer(
 
     for thing in things {
         match thing {
-            Thing::Class(cls) => crate::class::write_class(&mut txf, &mut state, cls)?,
-            Thing::Func(func) => crate::func::write_function(&mut txf, &mut state, func)?,
+            Thing::Class(cls) => crate::class::write_class(&mut txf, cls)?,
+            Thing::Func(func) => crate::func::write_function(&mut txf, func)?,
         }
     }
 

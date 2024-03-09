@@ -420,10 +420,7 @@ fn remapper(
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     use testutils::build_test_func;
-    use testutils::build_test_func_with_strings;
     use testutils::Block;
 
     use super::*;
@@ -457,7 +454,7 @@ mod test {
 
     #[test]
     fn test_snap() {
-        let (mut f1, strings) = build_test_func(&[
+        let mut f1 = build_test_func(&[
             Block::jmp_arg("b0", "b4", "p0").with_named_target("p0"),
             Block::jmp_op("b1", ["b2", "b3"]).with_param("p3"),
             Block::jmp_arg("b2", "b5", "p3"),
@@ -468,11 +465,8 @@ mod test {
 
         run(&mut f1);
 
-        let f2 = build_test_func_with_strings(
-            &[Block::ret_value("b0", "p0").with_named_target("p0")],
-            Arc::clone(&strings),
-        );
+        let f2 = build_test_func(&[Block::ret_value("b0", "p0").with_named_target("p0")]);
 
-        testutils::assert_func_struct_eq(&f1, &f2, &strings);
+        testutils::assert_func_struct_eq(&f1, &f2);
     }
 }

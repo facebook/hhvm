@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use bstr::ByteSlice;
 use ir::instr;
 // use ir::print::print;
@@ -21,7 +19,6 @@ use ir::MethodName;
 use ir::Param;
 use ir::PropName;
 use ir::Property;
-use ir::StringInterner;
 use ir::TypeConstant;
 use ir::TypeConstraintFlags;
 use ir::TypeInfo;
@@ -37,7 +34,7 @@ pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
 
 pub(crate) const THIS_AS_PROPERTY: &str = "this";
 
-fn typed_value_into_string(tv: &TypedValue, _: &Arc<StringInterner>) -> Option<String> {
+fn typed_value_into_string(tv: &TypedValue) -> Option<String> {
     let ostr = tv
         .get_string()
         .map(|sid| sid.as_bytes().as_bstr().to_string());
@@ -45,11 +42,9 @@ fn typed_value_into_string(tv: &TypedValue, _: &Arc<StringInterner>) -> Option<S
     ostr
 }
 
-fn typed_value_into_strings(tv: &TypedValue, strings: &Arc<StringInterner>) -> Option<Vec<String>> {
+fn typed_value_into_strings(tv: &TypedValue) -> Option<Vec<String>> {
     let ovs = if let TypedValue::Vec(tvs) = tv {
-        tvs.iter()
-            .map(|tv| typed_value_into_string(tv, strings))
-            .collect()
+        tvs.iter().map(typed_value_into_string).collect()
     } else {
         None
     };
@@ -57,7 +52,7 @@ fn typed_value_into_strings(tv: &TypedValue, strings: &Arc<StringInterner>) -> O
     ovs
 }
 
-fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
+fn compute_tc_attribute(typed_value: &TypedValue) -> Option<String> {
     match typed_value {
         TypedValue::Dict(dict) => {
             let kind_key = ir::ArrayKey::String(ir::intern("kind").as_bytes());
@@ -70,18 +65,13 @@ fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>)
                     let type_access: i64 = ir::TypeStructureKind::T_typeaccess.into();
                     if i == unresolved {
                         let class_name = ir::ArrayKey::String(ir::intern("classname").as_bytes());
-                        dict.get(&class_name)
-                            .and_then(|cn| typed_value_into_string(cn, strings))
+                        dict.get(&class_name).and_then(typed_value_into_string)
                     } else if i == type_access {
                         let root_name = ir::ArrayKey::String(ir::intern("root_name").as_bytes());
                         let access_list =
                             ir::ArrayKey::String(ir::intern("access_list").as_bytes());
-                        let root_name = dict
-                            .get(&root_name)
-                            .and_then(|rn| typed_value_into_string(rn, strings));
-                        let access_list = dict
-                            .get(&access_list)
-                            .and_then(|al| typed_value_into_strings(al, strings));
+                        let root_name = dict.get(&root_name).and_then(typed_value_into_string);
+                        let access_list = dict.get(&access_list).and_then(typed_value_into_strings);
                         match (root_name, access_list) {
                             (Some(root), Some(access)) => {
                                 if access.is_empty() {
@@ -101,7 +91,7 @@ fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>)
     }
 }
 
-pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Class {
+pub(crate) fn lower_class(mut class: Class) -> Class {
     if !class.ctx_constants.is_empty() {
         textual_todo! {
             trace!("TODO: class.ctx_constants");
@@ -151,21 +141,11 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
     // HHVM is okay with implicit 86pinit and 86sinit but we need to make them
     // explicit so we can put trivial initializers in them (done later in func
     // lowering).
-    create_method_if_missing(
-        &mut class,
-        MethodName::_86pinit(),
-        IsStatic::NonStatic,
-        Arc::clone(&strings),
-    );
-    create_method_if_missing(
-        &mut class,
-        MethodName::_86sinit(),
-        IsStatic::Static,
-        Arc::clone(&strings),
-    );
+    create_method_if_missing(&mut class, MethodName::_86pinit(), IsStatic::NonStatic);
+    create_method_if_missing(&mut class, MethodName::_86sinit(), IsStatic::Static);
 
     if class.flags.contains(Attr::AttrIsClosureClass) {
-        create_default_closure_constructor(&mut class, Arc::clone(&strings));
+        create_default_closure_constructor(&mut class);
     }
 
     // Turn class constants into properties.
@@ -203,7 +183,7 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
         } = tc;
         let arguments: Vec<TypedValue> = initializer
             .as_ref()
-            .and_then(|init| compute_tc_attribute(init, &strings))
+            .and_then(compute_tc_attribute)
             .map(|s| TypedValue::String(ir::intern(s).as_bytes()))
             .into_iter()
             .collect();
@@ -238,10 +218,10 @@ pub(crate) fn lower_class(mut class: Class, strings: Arc<StringInterner>) -> Cla
     class
 }
 
-fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInterner>) {
+fn create_default_closure_constructor(class: &mut Class) {
     let name = MethodName::constructor();
 
-    let func = FuncBuilder::build_func(Arc::clone(&strings), |fb| {
+    let func = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(class.src_loc.clone());
         fb.func.loc_id = loc;
 
@@ -276,17 +256,12 @@ fn create_default_closure_constructor(class: &mut Class, strings: Arc<StringInte
     class.methods.push(method);
 }
 
-fn create_method_if_missing(
-    class: &mut Class,
-    name: MethodName,
-    is_static: IsStatic,
-    strings: Arc<StringInterner>,
-) {
+fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsStatic) {
     if class.methods.iter().any(|m| m.name == name) {
         return;
     }
 
-    let func = FuncBuilder::build_func(strings, |fb| {
+    let func = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(class.src_loc.clone());
         fb.func.loc_id = loc;
         fb.func.attrs = is_static.as_attr();

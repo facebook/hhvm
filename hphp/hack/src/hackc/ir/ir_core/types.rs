@@ -12,7 +12,6 @@ use crate::Attribute;
 use crate::ClassName;
 use crate::SrcLoc;
 use crate::StringId;
-use crate::StringInterner;
 use crate::TypeConstraintFlags;
 use crate::TypedValue;
 
@@ -84,7 +83,7 @@ pub enum BaseType {
 }
 
 impl BaseType {
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, _: &StringInterner) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             BaseType::AnyArray => f.write_str("AnyArray"),
             BaseType::Arraykey => f.write_str("Arraykey"),
@@ -149,9 +148,9 @@ impl EnforceableType {
         }
     }
 
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Constraint { ty: ")?;
-        self.ty.write(f, strings)?;
+        self.ty.write(f)?;
         f.write_str(", modifiers: ")?;
 
         if self.modifiers == TypeConstraintFlags::NoFlags {
@@ -235,7 +234,7 @@ impl TypeInfo {
         )
     }
 
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("TypeInfo { user_type: ")?;
         if let Some(ut) = self.user_type {
             write!(f, "\"{}\"", ut)?;
@@ -243,26 +242,22 @@ impl TypeInfo {
             f.write_str("none")?;
         }
         f.write_str(", constraint: ")?;
-        self.enforced.write(f, strings)?;
+        self.enforced.write(f)?;
         f.write_str("}")
     }
 
-    pub fn display<'a>(&'a self, strings: &'a StringInterner) -> impl fmt::Display + 'a {
+    pub fn display<'a>(&'a self) -> impl fmt::Display + 'a {
         struct D<'a> {
-            strings: &'a StringInterner,
             self_: &'a TypeInfo,
         }
 
         impl fmt::Display for D<'_> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                self.self_.write(f, self.strings)
+                self.self_.write(f)
             }
         }
 
-        D {
-            strings,
-            self_: self,
-        }
+        D { self_: self }
     }
 }
 

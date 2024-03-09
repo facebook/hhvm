@@ -73,11 +73,9 @@ struct WorkItem {
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     #[test]
     fn basic_no_split() {
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]),
             testutils::Block::jmp("b", "d"),
             testutils::Block::jmp("c", "d"),
@@ -86,12 +84,12 @@ mod test {
         let expected = func.clone();
 
         super::split_critical_edges(&mut func, true);
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 
     #[test]
     fn basic_split() {
-        let (mut func, strings) = testutils::build_test_func(&[
+        let mut func = testutils::build_test_func(&[
             testutils::Block::jmp_op("a", ["b", "c"]),
             testutils::Block::jmp("b", "d"),
             testutils::Block::jmp_op("c", ["d", "e"]),
@@ -101,17 +99,14 @@ mod test {
 
         super::split_critical_edges(&mut func, true);
 
-        let expected = testutils::build_test_func_with_strings(
-            &[
-                testutils::Block::jmp_op("a", ["b", "c"]),
-                testutils::Block::jmp("b", "d"),
-                testutils::Block::jmp_op("c", ["f", "e"]),
-                testutils::Block::jmp("f", "d").unnamed(),
-                testutils::Block::ret("d"),
-                testutils::Block::ret("e"),
-            ],
-            Arc::clone(&strings),
-        );
-        testutils::assert_func_struct_eq(&func, &expected, &strings);
+        let expected = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp("b", "d"),
+            testutils::Block::jmp_op("c", ["f", "e"]),
+            testutils::Block::jmp("f", "d").unnamed(),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
+        ]);
+        testutils::assert_func_struct_eq(&func, &expected);
     }
 }

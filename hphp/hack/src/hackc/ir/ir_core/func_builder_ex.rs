@@ -215,9 +215,8 @@ impl FuncBuilderEx for FuncBuilder {
                 BaseType::VecOrDict => is_type_op(IsTypeOp::Dict, vid, loc),
 
                 BaseType::Class(cid) => {
-                    let constant = Constant::Array(Arc::new(
-                        TypeStruct::Unresolved(cid).into_typed_value(&self.strings),
-                    ));
+                    let constant =
+                        Constant::Array(Arc::new(TypeStruct::Unresolved(cid).into_typed_value()));
                     let adata = self.emit_constant(constant);
                     Instr::Hhbc(Hhbc::IsTypeStructC(
                         [vid, adata],

@@ -6,7 +6,6 @@
 use hack::Builtin;
 use hack::Hhbc;
 use ir::ArrayKey;
-use ir::StringInterner;
 use ir::TypedValue;
 use itertools::Itertools;
 use textual::Const;
@@ -17,7 +16,7 @@ use crate::mangle::TypeName;
 use crate::textual;
 use crate::util;
 
-pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Expr {
+pub(crate) fn typed_value_expr(tv: &TypedValue) -> Expr {
     match *tv {
         TypedValue::Uninit => textual::Expr::null(),
         TypedValue::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
@@ -31,25 +30,19 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
         }
         TypedValue::Null => textual::Expr::null(),
         TypedValue::Vec(ref v) => {
-            let args: Vec<Expr> = v
-                .iter()
-                .map(|value| typed_value_expr(value, strings))
-                .collect_vec();
+            let args: Vec<Expr> = v.iter().map(typed_value_expr).collect_vec();
             hack::expr_builtin(Builtin::Hhbc(Hhbc::NewVec), args)
         }
         TypedValue::Keyset(ir::KeysetValue(ref k)) => {
-            let args: Vec<Expr> = k
-                .iter()
-                .map(|value| array_key_expr(value, strings))
-                .collect_vec();
+            let args: Vec<Expr> = k.iter().map(array_key_expr).collect_vec();
             hack::expr_builtin(Builtin::Hhbc(Hhbc::NewKeysetArray), args)
         }
         TypedValue::Dict(ir::DictValue(ref d)) => {
             let args = d
                 .iter()
                 .flat_map(|(k, v)| {
-                    let k = array_key_expr(k, strings);
-                    let v = typed_value_expr(v, strings);
+                    let k = array_key_expr(k);
+                    let v = typed_value_expr(v);
                     [k, v]
                 })
                 .collect_vec();
@@ -58,7 +51,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
     }
 }
 
-pub(crate) fn array_key_expr(ak: &ArrayKey, _: &StringInterner) -> Expr {
+pub(crate) fn array_key_expr(ak: &ArrayKey) -> Expr {
     match *ak {
         ArrayKey::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
         ArrayKey::String(s) => {

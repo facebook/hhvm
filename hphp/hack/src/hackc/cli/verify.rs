@@ -268,17 +268,15 @@ impl IrOpts {
         let mut as_string = String::new();
         ir::print::print_unit(&mut as_string, ir, false)
             .map_err(|err| VerifyError::PrintError(err.to_string()))?;
-        let strings2 = Arc::new(ir::StringInterner::default());
-        let ir2 =
-            ir::assemble::unit_from_string(&as_string, Arc::clone(&strings2)).map_err(|err| {
-                let mut err = err.root_cause().to_string();
-                let err = if let Some(idx) = err.find(':') {
-                    err.split_off(idx)
-                } else {
-                    err
-                };
-                VerifyError::AssembleError(err)
-            })?;
+        let ir2 = ir::assemble::unit_from_string(&as_string).map_err(|err| {
+            let mut err = err.root_cause().to_string();
+            let err = if let Some(idx) = err.find(':') {
+                err.split_off(idx)
+            } else {
+                err
+            };
+            VerifyError::AssembleError(err)
+        })?;
         cmp::cmp_ir::cmp_ir(ir, &ir2)
             .map_err(|err| VerifyError::IrUnitMismatchError(err.to_string()))
     }

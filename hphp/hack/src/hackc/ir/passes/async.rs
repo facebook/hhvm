@@ -26,7 +26,7 @@ pub fn unasync(func: &mut Func) {
 
     let mut changed = false;
 
-    FuncBuilder::borrow_func_no_strings(func, |builder| {
+    FuncBuilder::borrow_func(func, |builder| {
         for bid in builder.func.block_ids() {
             builder.start_block(bid);
 
@@ -64,17 +64,14 @@ fn rewrite_async_call(builder: &mut FuncBuilder, call: Call, [_lazy, eager]: [Bl
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     use testutils::build_test_func;
-    use testutils::build_test_func_with_strings;
     use testutils::Block;
 
     use super::*;
 
     #[test]
     fn basic() {
-        let (mut f1, strings) = build_test_func(&[
+        let mut f1 = build_test_func(&[
             Block::call_async("b0", "bar", ["b1", "b4"]),
             Block::jmp_op("b1", ["b2", "b3"]).with_param("p1"),
             Block::jmp_arg("b2", "b5", "p1"),
@@ -85,11 +82,8 @@ mod test {
 
         unasync(&mut f1);
 
-        let f2 = build_test_func_with_strings(
-            &[Block::ret_value("b0", "p0").with_named_target("p0")],
-            Arc::clone(&strings),
-        );
+        let f2 = build_test_func(&[Block::ret_value("b0", "p0").with_named_target("p0")]);
 
-        testutils::assert_func_struct_eq(&f1, &f2, &strings);
+        testutils::assert_func_struct_eq(&f1, &f2);
     }
 }

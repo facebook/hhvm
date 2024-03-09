@@ -32,12 +32,10 @@ use log::trace;
 use crate::adata::AdataCache;
 use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
-use crate::strings::StringCache;
 
 pub(crate) fn emit_func(
     func: &ir::Func,
     labeler: &mut Labeler,
-    strings: &StringCache,
     adata_cache: &mut AdataCache,
 ) -> (InstrSeq, Vec<StringId>) {
     let adata_id_map = func
@@ -48,7 +46,7 @@ pub(crate) fn emit_func(
             let cid = ir::ConstantId::from_usize(idx);
             match constant {
                 ir::Constant::Array(tv) => {
-                    let id = adata_cache.intern(Arc::clone(tv), strings);
+                    let id = adata_cache.intern(Arc::clone(tv));
                     let kind = match **tv {
                         ir::TypedValue::Dict(_) => AdataKind::Dict,
                         ir::TypedValue::Keyset(_) => AdataKind::Keyset,
@@ -62,7 +60,7 @@ pub(crate) fn emit_func(
         })
         .collect();
 
-    let mut ctx = InstrEmitter::new(func, labeler, strings, &adata_id_map);
+    let mut ctx = InstrEmitter::new(func, labeler, &adata_id_map);
 
     // Collect the Blocks, grouping them into TryCatch sections.
     let root = crate::ex_frame::collect_tc_sections(func);
@@ -187,7 +185,6 @@ pub(crate) struct InstrEmitter<'b> {
     instrs: Vec<Instruct>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
-    strings: &'b StringCache,
     locals: HashMap<LocalId, hhbc::Local>,
     adata_id_map: &'b AdataIdMap,
 }
@@ -206,12 +203,7 @@ fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bo
 }
 
 impl<'b> InstrEmitter<'b> {
-    fn new(
-        func: &'b ir::Func,
-        labeler: &'b mut Labeler,
-        strings: &'b StringCache,
-        adata_id_map: &'b AdataIdMap,
-    ) -> Self {
+    fn new(func: &'b ir::Func, labeler: &'b mut Labeler, adata_id_map: &'b AdataIdMap) -> Self {
         let locals = Self::prealloc_locals(func);
 
         Self {
@@ -221,7 +213,6 @@ impl<'b> InstrEmitter<'b> {
             labeler,
             loc_id: ir::LocId::NONE,
             locals,
-            strings,
             adata_id_map,
         }
     }
@@ -618,10 +609,7 @@ impl<'b> InstrEmitter<'b> {
     fn emit_instr(&mut self, iid: ir::InstrId, instr: &ir::Instr) {
         self.emit_loc(instr.loc_id());
 
-        trace!(
-            "    Instr: {}",
-            ir::print::FmtInstr(self.func, &self.strings.interner, iid)
-        );
+        trace!("    Instr: {}", ir::print::FmtInstr(self.func, iid));
 
         use ir::Instr;
         match instr {

@@ -3,12 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use bstr::BString;
 
 use crate::func::SrcLoc;
-use crate::string_intern::StringInterner;
 use crate::Attribute;
 use crate::Class;
 use crate::FatalOp;
@@ -74,9 +71,6 @@ pub struct Unit {
 
     /// What module is this unit declared to be part of
     pub module_use: Option<ModuleName>,
-
-    /// The unit string interning table.
-    pub strings: Arc<StringInterner>,
 
     /// The list of all external symbols referenced by this Unit.
     //

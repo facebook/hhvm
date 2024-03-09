@@ -287,7 +287,7 @@ mod tests {
             let mut c = blocks.clone();
             c[1..].shuffle(&mut rng);
 
-            let (mut func, _) = testutils::build_test_func(&c);
+            let mut func = testutils::build_test_func(&c);
             rpo_sort(&mut func);
 
             let order = func
@@ -341,10 +341,10 @@ mod tests {
                 rblocks.push(testutils::Block::ret(names[i]).with_terminator(rterm));
             }
 
-            let (mut func, _) = testutils::build_test_func(&blocks);
+            let mut func = testutils::build_test_func(&blocks);
             rpo_sort(&mut func);
 
-            let (mut rfunc, _) = testutils::build_test_func(&rblocks);
+            let mut rfunc = testutils::build_test_func(&rblocks);
             rpo_sort(&mut rfunc);
 
             fn bname<'a>(func: &'a Func, bid: BlockId) -> &'a str {

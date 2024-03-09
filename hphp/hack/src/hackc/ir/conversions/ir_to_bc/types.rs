@@ -9,8 +9,6 @@ use hhbc::TypeInfo;
 use ir::BaseType;
 use ir::TypeConstraintFlags;
 
-use crate::strings::StringCache;
-
 fn convert_type(ty: &ir::TypeInfo) -> TypeInfo {
     let mut user_type = ty.user_type;
     let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
@@ -94,7 +92,7 @@ pub(crate) fn convert(ty: &ir::TypeInfo) -> Maybe<TypeInfo> {
     }
 }
 
-pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache) -> hhbc::Typedef {
+pub(crate) fn convert_typedef(td: ir::Typedef) -> hhbc::Typedef {
     let ir::Typedef {
         name,
         attributes,
@@ -109,9 +107,9 @@ pub(crate) fn convert_typedef(td: ir::Typedef, strings: &StringCache) -> hhbc::T
         line_begin: loc.line_begin,
         line_end: loc.line_end,
     };
-    let attributes = crate::convert::convert_attributes(attributes, strings);
+    let attributes = crate::convert::convert_attributes(attributes);
     let type_info_union = convert_types(type_info_union.as_ref());
-    let type_structure = crate::convert::convert_typed_value(&type_structure, strings);
+    let type_structure = crate::convert::convert_typed_value(&type_structure);
 
     hhbc::Typedef {
         name,

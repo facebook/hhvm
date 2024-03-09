@@ -5,7 +5,6 @@
 
 use std::io::Read;
 use std::path::Path;
-use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -20,7 +19,6 @@ use ir_core::MethodName;
 use ir_core::Module;
 use ir_core::ModuleName;
 use ir_core::SrcLoc;
-use ir_core::StringInterner;
 use ir_core::Typedef;
 use ir_core::Unit;
 use parse_macro_ir::parse;
@@ -40,23 +38,19 @@ use crate::parse::parse_typed_value;
 use crate::parse::parse_user_id;
 use crate::tokenizer::Tokenizer;
 
-pub fn unit_from_path(path: &Path, strings: Arc<StringInterner>) -> Result<Unit> {
+pub fn unit_from_path(path: &Path) -> Result<Unit> {
     use std::fs::File;
     let mut file = File::open(path)?;
-    read_unit(&mut file, &format!("{}", path.display()), strings)
+    read_unit(&mut file, &format!("{}", path.display()))
 }
 
-pub fn unit_from_string(input: &str, strings: Arc<StringInterner>) -> Result<Unit> {
+pub fn unit_from_string(input: &str) -> Result<Unit> {
     let mut input = input.as_bytes();
-    read_unit(&mut input, "<string>", strings)
+    read_unit(&mut input, "<string>")
 }
 
-pub fn read_unit<'a>(
-    read: &mut dyn Read,
-    filename: &str,
-    strings: Arc<StringInterner>,
-) -> Result<Unit> {
-    let mut tokenizer = Tokenizer::new(read, filename, strings);
+pub fn read_unit(read: &mut dyn Read, filename: &str) -> Result<Unit> {
+    let mut tokenizer = Tokenizer::new(read, filename);
     let unit = UnitParser::parse(&mut tokenizer)?;
     Ok(unit)
 }
@@ -74,11 +68,8 @@ impl UnitParser {
 
 impl UnitParser {
     fn parse(tokenizer: &mut Tokenizer<'_>) -> Result<Unit> {
-        let strings = Arc::clone(&tokenizer.strings);
-
         let mut state = UnitParser {
             unit: Unit {
-                strings,
                 ..Default::default()
             },
             src_loc: None,

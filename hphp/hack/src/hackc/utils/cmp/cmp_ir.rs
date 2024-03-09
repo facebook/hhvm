@@ -33,29 +33,14 @@ pub fn cmp_ir(a: &Unit, b: &Unit) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }
 
-fn cmp_attribute(
-    (a, a_strings): (&Attribute, &StringInterner),
-    (b, b_strings): (&Attribute, &StringInterner),
-) -> Result {
+fn cmp_attribute(a: &Attribute, b: &Attribute) -> Result {
     cmp_eq(a.name, b.name).qualified("name")?;
-    cmp_slice(
-        a.arguments.iter().map(|a| (a, a_strings)),
-        b.arguments.iter().map(|b| (b, b_strings)),
-        cmp_typed_value,
-    )
-    .qualified("arguments")?;
+    cmp_slice(&a.arguments, &b.arguments, cmp_typed_value).qualified("arguments")?;
     Ok(())
 }
 
-fn cmp_attributes(
-    (a, a_strings): (&[Attribute], &StringInterner),
-    (b, b_strings): (&[Attribute], &StringInterner),
-) -> Result {
-    cmp_map_t(
-        a.iter().map(|a| (a, a_strings)),
-        b.iter().map(|b| (b, b_strings)),
-        cmp_attribute,
-    )
+fn cmp_attributes(a: &[Attribute], b: &[Attribute]) -> Result {
+    cmp_map_t(a, b, cmp_attribute)
 }
 
 fn cmp_block(a_block: &Block, b_block: &Block) -> Result {
@@ -100,10 +85,7 @@ fn cmp_cc_this(a: &CcThis, b: &CcThis) -> Result {
     Ok(())
 }
 
-fn cmp_class(
-    (a, a_strings): (&Class, &StringInterner),
-    (b, b_strings): (&Class, &StringInterner),
-) -> Result {
+fn cmp_class(a: &Class, b: &Class) -> Result {
     let Class {
         attributes: a_attributes,
         base: a_base,
@@ -143,57 +125,22 @@ fn cmp_class(
         uses: b_uses,
     } = b;
 
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_option(a_base.as_ref(), b_base.as_ref(), cmp_eq).qualified("base")?;
-    cmp_map_t(
-        a_constants.iter().map(|a| (a, a_strings)),
-        b_constants.iter().map(|b| (b, b_strings)),
-        cmp_hack_constant,
-    )
-    .qualified("constants")?;
-    cmp_map_t(
-        a_ctx_constants.iter(),
-        b_ctx_constants.iter(),
-        cmp_ctx_constant,
-    )
-    .qualified("ctx_constants")?;
+    cmp_map_t(a_constants, b_constants, cmp_hack_constant).qualified("constants")?;
+    cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_ctx_constant).qualified("ctx_constants")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_option(a_enum_type.as_ref(), b_enum_type.as_ref(), cmp_type_info).qualified("enum_type")?;
     cmp_slice(a_enum_includes.iter(), b_enum_includes.iter(), cmp_eq).qualified("enum_includes")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_slice(a_implements.iter(), b_implements.iter(), cmp_eq).qualified("implements")?;
-    cmp_map_t(
-        a_methods.iter().map(|i| (i, a_strings)),
-        b_methods.iter().map(|i| (i, b_strings)),
-        cmp_method,
-    )
-    .qualified("methods")?;
+    cmp_map_t(a_methods, b_methods, cmp_method).qualified("methods")?;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_map_t(
-        a_properties.iter().map(|i| (i, a_strings)),
-        b_properties.iter().map(|i| (i, b_strings)),
-        cmp_property,
-    )
-    .qualified("properties")?;
-    cmp_slice(
-        a_requirements.iter(),
-        b_requirements.iter(),
-        cmp_requirement,
-    )
-    .qualified("requirements")?;
-    cmp_src_loc((a_src_loc, a_strings), (b_src_loc, b_strings)).qualified("src_loc")?;
-    cmp_slice(
-        a_type_constants.iter().map(|i| (i, a_strings)),
-        b_type_constants.iter().map(|i| (i, b_strings)),
-        cmp_type_constant,
-    )
-    .qualified("type_constants")?;
-    cmp_slice(
-        a_upper_bounds.iter(),
-        b_upper_bounds.iter(),
-        cmp_upper_bounds,
-    )
-    .qualified("upper_bounds")?;
+    cmp_map_t(a_properties, b_properties, cmp_property).qualified("properties")?;
+    cmp_slice(a_requirements, b_requirements, cmp_requirement).qualified("requirements")?;
+    cmp_src_loc(a_src_loc, b_src_loc).qualified("src_loc")?;
+    cmp_slice(a_type_constants, b_type_constants, cmp_type_constant).qualified("type_constants")?;
+    cmp_slice(a_upper_bounds, b_upper_bounds, cmp_upper_bounds).qualified("upper_bounds")?;
     cmp_slice(a_uses.iter(), b_uses.iter(), cmp_eq).qualified("uses")?;
     Ok(())
 }
@@ -246,21 +193,14 @@ fn cmp_coeffects(a: &Coeffects, b: &Coeffects) -> Result {
     Ok(())
 }
 
-fn cmp_constant(
-    (a_const, a_strings): (&Constant, &StringInterner),
-    (b_const, b_strings): (&Constant, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_constant(a_const: &Constant, b_const: &Constant) -> Result {
     cmp_eq(
         std::mem::discriminant(a_const),
         std::mem::discriminant(b_const),
     )?;
 
     match (a_const, b_const) {
-        (Constant::Array(a), Constant::Array(b)) => {
-            cmp_typed_value((a, a_strings), (b, b_strings)).qualified("array")?
-        }
+        (Constant::Array(a), Constant::Array(b)) => cmp_typed_value(a, b).qualified("array")?,
         (Constant::Bool(a), Constant::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (Constant::EnumClassLabel(a), Constant::EnumClassLabel(b)) => {
             cmp_id(*a, *b).qualified("enum_class_label")?
@@ -329,10 +269,7 @@ fn cmp_ex_frame(a_frame: (&ExFrameId, &ExFrame), b_frame: (&ExFrameId, &ExFrame)
     Ok(())
 }
 
-fn cmp_fatal(
-    (a, a_strings): (&Fatal, &StringInterner),
-    (b, b_strings): (&Fatal, &StringInterner),
-) -> Result {
+fn cmp_fatal(a: &Fatal, b: &Fatal) -> Result {
     let Fatal {
         op: a_op,
         loc: a_loc,
@@ -344,15 +281,12 @@ fn cmp_fatal(
         message: b_message,
     } = b;
     cmp_eq(a_op, b_op).qualified("op")?;
-    cmp_src_loc((a_loc, a_strings), (b_loc, b_strings)).qualified("loc")?;
+    cmp_src_loc(a_loc, b_loc).qualified("loc")?;
     cmp_eq(a_message, b_message).qualified("message")?;
     Ok(())
 }
 
-fn cmp_func(
-    (a, a_strings): (&Func, &StringInterner),
-    (b, b_strings): (&Func, &StringInterner),
-) -> Result {
+fn cmp_func(a: &Func, b: &Func) -> Result {
     let Func {
         attributes: a_attributes,
         attrs: a_attrs,
@@ -392,7 +326,7 @@ fn cmp_func(
         tparams: b_tparams,
     } = b;
 
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
@@ -400,41 +334,28 @@ fn cmp_func(
     cmp_eq(a_is_memoize_wrapper_lsb, b_is_memoize_wrapper_lsb)
         .qualified("is_memoize_wrapper_lsb")?;
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
-    cmp_slice(
-        a_params.iter().map(|a| (a, a_strings)),
-        b_params.iter().map(|b| (b, b_strings)),
-        cmp_param,
-    )
-    .qualified("params")?;
+    cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
     cmp_type_info(a_return_type, b_return_type).qualified("return_type")?;
     cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
         .qualified("shadowed_tparams")?;
 
-    cmp_map_t(
-        a_tparams.iter().map(|(i, j)| (i, j, a_strings)),
-        b_tparams.iter().map(|(i, j)| (i, j, b_strings)),
-        cmp_tparam_bounds,
-    )
-    .qualified("tparams")?;
+    cmp_map_t(a_tparams, b_tparams, cmp_tparam_bounds).qualified("tparams")?;
 
     cmp_slice(a_blocks.iter(), b_blocks.iter(), cmp_block).qualified("blocks")?;
     cmp_map_t(a_ex_frames.iter(), b_ex_frames.iter(), cmp_ex_frame).qualified("ex_frames")?;
     cmp_slice(
-        a_instrs.iter().map(|i| (i, a, a_strings)),
-        b_instrs.iter().map(|i| (i, b, b_strings)),
+        a_instrs.iter().map(|i| (i, a)),
+        b_instrs.iter().map(|i| (i, b)),
         cmp_instr,
     )
     .qualified("instrs")?;
 
-    cmp_loc_id((*a_loc_id, a, a_strings), (*b_loc_id, b, b_strings)).qualified("loc_id")?;
+    cmp_loc_id((*a_loc_id, a), (*b_loc_id, b)).qualified("loc_id")?;
 
     Ok(())
 }
 
-fn cmp_function(
-    (a, a_strings): (&Function, &StringInterner),
-    (b, b_strings): (&Function, &StringInterner),
-) -> Result {
+fn cmp_function(a: &Function, b: &Function) -> Result {
     let Function {
         flags: a_flags,
         name: a_name,
@@ -448,15 +369,12 @@ fn cmp_function(
 
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
+    cmp_func(a_func, b_func).qualified("func")?;
 
     Ok(())
 }
 
-fn cmp_hack_constant(
-    (a, a_strings): (&HackConstant, &StringInterner),
-    (b, b_strings): (&HackConstant, &StringInterner),
-) -> Result {
+fn cmp_hack_constant(a: &HackConstant, b: &HackConstant) -> Result {
     let HackConstant {
         name: a_name,
         value: a_value,
@@ -468,20 +386,12 @@ fn cmp_hack_constant(
         attrs: b_attrs,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_option(
-        a_value.as_ref().map(|i| (i, a_strings)),
-        b_value.as_ref().map(|i| (i, b_strings)),
-        cmp_typed_value,
-    )
-    .qualified("value")?;
+    cmp_option(a_value.as_ref(), b_value.as_ref(), cmp_typed_value).qualified("value")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())
 }
 
-fn cmp_id(
-    (a, _): (UnitBytesId, &StringInterner),
-    (b, _): (UnitBytesId, &StringInterner),
-) -> Result {
+fn cmp_id(a: UnitBytesId, b: UnitBytesId) -> Result {
     match (a, b) {
         (UnitBytesId::EMPTY, UnitBytesId::EMPTY) => {}
         (UnitBytesId::EMPTY, b) => {
@@ -499,10 +409,7 @@ fn cmp_id(
     Ok(())
 }
 
-fn cmp_instr(
-    (a_instr, a_func, a_strings): (&Instr, &Func, &StringInterner),
-    (b_instr, b_func, b_strings): (&Instr, &Func, &StringInterner),
-) -> Result {
+fn cmp_instr((a_instr, a_func): (&Instr, &Func), (b_instr, b_func): (&Instr, &Func)) -> Result {
     use ir::instr::HasLoc;
     use ir::instr::HasLocals;
     use ir::instr::HasOperands;
@@ -518,13 +425,13 @@ fn cmp_instr(
     .qualified("discriminant")?;
 
     fn cmp_instr_(
-        (a_instr, a_func, a_strings): (&Instr, &Func, &StringInterner),
-        (b_instr, b_func, b_strings): (&Instr, &Func, &StringInterner),
+        (a_instr, a_func): (&Instr, &Func),
+        (b_instr, b_func): (&Instr, &Func),
     ) -> Result {
         cmp_eq(a_instr.operands().len(), b_instr.operands().len()).qualified("operands.len")?;
         cmp_slice(
-            a_instr.operands().iter().map(|i| (*i, a_func, a_strings)),
-            b_instr.operands().iter().map(|i| (*i, b_func, b_strings)),
+            a_instr.operands().iter().map(|i| (*i, a_func)),
+            b_instr.operands().iter().map(|i| (*i, b_func)),
             cmp_operand,
         )
         .qualified("operands")?;
@@ -538,24 +445,19 @@ fn cmp_instr(
         .qualified("locals")?;
         cmp_slice(a_instr.edges(), b_instr.edges(), cmp_eq).qualified("edges")?;
 
-        cmp_loc_id(
-            (a_instr.loc_id(), a_func, a_strings),
-            (b_instr.loc_id(), b_func, b_strings),
-        )
-        .qualified("loc_id")?;
+        cmp_loc_id((a_instr.loc_id(), a_func), (b_instr.loc_id(), b_func)).qualified("loc_id")?;
 
         match (a_instr, b_instr) {
             (Instr::Call(a), Instr::Call(b)) => cmp_instr_call(a, b).qualified("call"),
             (Instr::Hhbc(a), Instr::Hhbc(b)) => {
-                cmp_instr_hhbc((a, a_func, a_strings), (b, b_func, b_strings)).qualified("hhbc")
+                cmp_instr_hhbc((a, a_func), (b, b_func)).qualified("hhbc")
             }
             (Instr::MemberOp(a), Instr::MemberOp(b)) => {
-                cmp_instr_member_op((a, a_func, a_strings), (b, b_func, b_strings))
-                    .qualified("member_op")
+                cmp_instr_member_op((a, a_func), (b, b_func)).qualified("member_op")
             }
             (Instr::Special(a), Instr::Special(b)) => cmp_instr_special(a, b).qualified("special"),
             (Instr::Terminator(a), Instr::Terminator(b)) => {
-                cmp_instr_terminator((a, a_strings), (b, b_strings)).qualified("terminator")
+                cmp_instr_terminator(a, b).qualified("terminator")
             }
 
             // these should never happen
@@ -570,7 +472,7 @@ fn cmp_instr(
         }
     }
 
-    cmp_instr_((a_instr, a_func, a_strings), (b_instr, b_func, b_strings))
+    cmp_instr_((a_instr, a_func), (b_instr, b_func))
         .with_raw(|| format!("::<{:?}>", std::mem::discriminant(a_instr)))
 }
 
@@ -587,10 +489,7 @@ fn cmp_local(a: LocalId, b: LocalId) -> Result {
     }
 }
 
-fn cmp_operand(
-    (a, a_func, a_strings): (ValueId, &Func, &StringInterner),
-    (b, b_func, b_strings): (ValueId, &Func, &StringInterner),
-) -> Result {
+fn cmp_operand((a, a_func): (ValueId, &Func), (b, b_func): (ValueId, &Func)) -> Result {
     use FullInstrId as I;
     match (a.full(), b.full()) {
         (I::None, I::None) => {}
@@ -599,11 +498,9 @@ fn cmp_operand(
         (I::Instr(a), I::Instr(b)) => cmp_eq(a, b).qualified("instr")?,
         (I::Instr(_), _) => bail!("Mismatch in ValueId (instr)"),
 
-        (I::Constant(a), I::Constant(b)) => cmp_constant(
-            (a_func.constant(a), a_strings),
-            (b_func.constant(b), b_strings),
-        )
-        .qualified("constant")?,
+        (I::Constant(a), I::Constant(b)) => {
+            cmp_constant(a_func.constant(a), b_func.constant(b)).qualified("constant")?
+        }
         (I::Constant(_), _) => bail!("Mismatch in ValueId (const)"),
     }
 
@@ -704,12 +601,7 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
     Ok(())
 }
 
-fn cmp_instr_hhbc(
-    (a, a_func, a_strings): (&Hhbc, &Func, &StringInterner),
-    (b, b_func, b_strings): (&Hhbc, &Func, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
     // Ignore LocId, ValueIds and LocalIds - those are checked elsewhere.
@@ -771,8 +663,7 @@ fn cmp_instr_hhbc(
                 loc: b_loc,
             } = x1;
             cmp_eq(a_kind, b_kind).qualified("kind")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings))
-                .qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (Hhbc::InitProp(_, x0, y0, _), Hhbc::InitProp(_, x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("InitProp param x")?;
@@ -1005,10 +896,7 @@ fn cmp_instr_hhbc(
     Ok(())
 }
 
-fn cmp_instr_member_op(
-    (a, a_func, a_strings): (&MemberOp, &Func, &StringInterner),
-    (b, b_func, b_strings): (&MemberOp, &Func, &StringInterner),
-) -> Result {
+fn cmp_instr_member_op((a, a_func): (&MemberOp, &Func), (b, b_func): (&MemberOp, &Func)) -> Result {
     let MemberOp {
         base_op: a_base_op,
         intermediate_ops: a_intermediate_ops,
@@ -1024,28 +912,20 @@ fn cmp_instr_member_op(
         locals: _,
     } = b;
 
-    cmp_instr_member_op_base(
-        (a_base_op, a_func, a_strings),
-        (b_base_op, b_func, b_strings),
-    )
-    .qualified("base")?;
+    cmp_instr_member_op_base((a_base_op, a_func), (b_base_op, b_func)).qualified("base")?;
     cmp_slice(
-        a_intermediate_ops.iter().map(|i| (i, a_func, a_strings)),
-        b_intermediate_ops.iter().map(|i| (i, b_func, b_strings)),
+        a_intermediate_ops.iter().map(|i| (i, a_func)),
+        b_intermediate_ops.iter().map(|i| (i, b_func)),
         cmp_instr_member_op_intermediate,
     )
     .qualified("intermediate")?;
-    cmp_instr_member_op_final(
-        (a_final_op, a_func, a_strings),
-        (b_final_op, b_func, b_strings),
-    )
-    .qualified("final")?;
+    cmp_instr_member_op_final((a_final_op, a_func), (b_final_op, b_func)).qualified("final")?;
     Ok(())
 }
 
 fn cmp_instr_member_op_base(
-    (a, a_func, a_strings): (&BaseOp, &Func, &StringInterner),
-    (b, b_func, b_strings): (&BaseOp, &Func, &StringInterner),
+    (a, a_func): (&BaseOp, &Func),
+    (b, b_func): (&BaseOp, &Func),
 ) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
@@ -1056,11 +936,11 @@ fn cmp_instr_member_op_base(
         (BaseOp::BaseGC { mode: a_mode, loc: a_loc },
          BaseOp::BaseGC { mode: b_mode, loc: b_loc }) => {
             cmp_eq(a_mode, b_mode).qualified("mode")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (BaseOp::BaseH { loc: a_loc },
          BaseOp::BaseH { loc: b_loc }) => {
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (BaseOp::BaseL { mode: a_mode, readonly: a_readonly, loc: a_loc },
          BaseOp::BaseL { mode: b_mode, readonly: b_readonly, loc: b_loc }) |
@@ -1068,13 +948,13 @@ fn cmp_instr_member_op_base(
          BaseOp::BaseSC { mode: b_mode, readonly: b_readonly, loc: b_loc }) => {
             cmp_eq(a_mode, b_mode).qualified("mode")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (BaseOp::BaseST { mode: a_mode, readonly: a_readonly, loc: a_loc, prop: a_prop },
          BaseOp::BaseST { mode: b_mode, readonly: b_readonly, loc: b_loc, prop: b_prop }) => {
             cmp_eq(a_mode, b_mode).qualified("mode")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
             cmp_eq(a_prop, b_prop).qualified("prop")?;
         }
 
@@ -1094,8 +974,8 @@ fn cmp_instr_member_op_base(
 }
 
 fn cmp_instr_member_op_intermediate(
-    (a, a_func, a_strings): (&IntermediateOp, &Func, &StringInterner),
-    (b, b_func, b_strings): (&IntermediateOp, &Func, &StringInterner),
+    (a, a_func): (&IntermediateOp, &Func),
+    (b, b_func): (&IntermediateOp, &Func),
 ) -> Result {
     let IntermediateOp {
         key: a_key,
@@ -1110,17 +990,17 @@ fn cmp_instr_member_op_intermediate(
         loc: b_loc,
     } = b;
 
-    cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+    cmp_member_key(a_key, b_key).qualified("key")?;
     cmp_eq(a_mode, b_mode).qualified("mode")?;
     cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
-    cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+    cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
 
     Ok(())
 }
 
 fn cmp_instr_member_op_final(
-    (a, a_func, a_strings): (&FinalOp, &Func, &StringInterner),
-    (b, b_func, b_strings): (&FinalOp, &Func, &StringInterner),
+    (a, a_func): (&FinalOp, &Func),
+    (b, b_func): (&FinalOp, &Func),
 ) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
@@ -1128,42 +1008,42 @@ fn cmp_instr_member_op_final(
     match (a, b) {
         (FinalOp::IncDecM { key: a_key, readonly: a_readonly, inc_dec_op: a_inc_dec_op, loc: a_loc },
          FinalOp::IncDecM { key: b_key, readonly: b_readonly, inc_dec_op: b_inc_dec_op, loc: b_loc }) => {
-            cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+            cmp_member_key(a_key, b_key).qualified("key")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
             cmp_eq(a_inc_dec_op, b_inc_dec_op).qualified("inc_dec_op")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (FinalOp::QueryM { key: a_key, readonly: a_readonly, query_m_op: a_query_m_op, loc: a_loc },
          FinalOp::QueryM { key: b_key, readonly: b_readonly, query_m_op: b_query_m_op, loc: b_loc }) => {
-            cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+            cmp_member_key(a_key, b_key).qualified("key")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
             cmp_eq(a_query_m_op, b_query_m_op).qualified("query_m_op")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (FinalOp::SetM { key: a_key, readonly: a_readonly, loc: a_loc },
          FinalOp::SetM { key: b_key, readonly: b_readonly, loc: b_loc }) => {
-            cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+            cmp_member_key(a_key, b_key).qualified("key")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (FinalOp::SetRangeM { sz: a_sz, set_range_op: a_set_range_op, loc: a_loc },
          FinalOp::SetRangeM { sz: b_sz, set_range_op: b_set_range_op, loc: b_loc }) => {
             cmp_eq(a_sz, b_sz).qualified("sz")?;
             cmp_eq(a_set_range_op, b_set_range_op).qualified("set_range_op")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (FinalOp::SetOpM { key: a_key, readonly: a_readonly, set_op_op: a_set_op_op, loc: a_loc },
          FinalOp::SetOpM { key: b_key, readonly: b_readonly, set_op_op: b_set_op_op, loc: b_loc }) => {
-            cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+            cmp_member_key(a_key, b_key).qualified("key")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
             cmp_eq(a_set_op_op, b_set_op_op).qualified("set_op_op")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
         (FinalOp::UnsetM { key: a_key, readonly: a_readonly, loc: a_loc },
          FinalOp::UnsetM { key: b_key, readonly: b_readonly, loc: b_loc }) => {
-            cmp_member_key((a_key, a_strings), (b_key, b_strings)).qualified("key")?;
+            cmp_member_key(a_key, b_key).qualified("key")?;
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
-            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
 
         // these should never happen
@@ -1181,12 +1061,7 @@ fn cmp_instr_member_op_final(
     Ok(())
 }
 
-fn cmp_member_key(
-    (a, a_strings): (&MemberKey, &StringInterner),
-    (b, b_strings): (&MemberKey, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_member_key(a: &MemberKey, b: &MemberKey) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
     match (a, b) {
@@ -1244,16 +1119,10 @@ fn cmp_instr_special(a: &Special, b: &Special) -> Result {
     Ok(())
 }
 
-fn cmp_instr_terminator(
-    (a, a_strings): (&Terminator, &StringInterner),
-    (b, b_strings): (&Terminator, &StringInterner),
-) -> Result {
+fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 
-    fn cmp_instr_terminator_(
-        (a, a_strings): (&Terminator, &StringInterner),
-        (b, b_strings): (&Terminator, &StringInterner),
-    ) -> Result {
+    fn cmp_instr_terminator_(a: &Terminator, b: &Terminator) -> Result {
         // Ignore LocId, ValueIds, LocalIds and BlockIds - those are checked elsewhere.
         #[rustfmt::skip]
         match (a, b) {
@@ -1282,7 +1151,7 @@ fn cmp_instr_terminator(
             }
             (Terminator::SSwitch { cond: _, cases: a_cases, targets: _, loc: _, },
              Terminator::SSwitch { cond: _, cases: b_cases, targets: _, loc: _, }, ) => {
-                cmp_slice(a_cases.iter().map(|i| (*i, a_strings)), b_cases.iter().map(|i| (*i, b_strings)), cmp_id)?;
+                cmp_slice(a_cases.iter().copied(), b_cases.iter().copied(), cmp_id)?;
             }
 
             // These are ONLY made of LocId, ValueIds, LocalIds and BlockIds.
@@ -1316,8 +1185,7 @@ fn cmp_instr_terminator(
         Ok(())
     }
 
-    cmp_instr_terminator_((a, a_strings), (b, b_strings))
-        .with_raw(|| format!("::<{:?}>", std::mem::discriminant(a)))
+    cmp_instr_terminator_(a, b).with_raw(|| format!("::<{:?}>", std::mem::discriminant(a)))
 }
 
 fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
@@ -1338,23 +1206,13 @@ fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
     Ok(())
 }
 
-fn cmp_loc_id(
-    (a, a_func, a_strings): (LocId, &Func, &StringInterner),
-    (b, b_func, b_strings): (LocId, &Func, &StringInterner),
-) -> Result {
+fn cmp_loc_id((a, a_func): (LocId, &Func), (b, b_func): (LocId, &Func)) -> Result {
     let a_src_loc = a_func.get_loc(a);
     let b_src_loc = b_func.get_loc(b);
-    cmp_option(
-        a_src_loc.map(|i| (i, a_strings)),
-        b_src_loc.map(|i| (i, b_strings)),
-        cmp_src_loc,
-    )
+    cmp_option(a_src_loc, b_src_loc, cmp_src_loc)
 }
 
-fn cmp_method(
-    (a, a_strings): (&Method, &StringInterner),
-    (b, b_strings): (&Method, &StringInterner),
-) -> Result {
+fn cmp_method(a: &Method, b: &Method) -> Result {
     let Method {
         flags: a_flags,
         func: a_func,
@@ -1368,16 +1226,13 @@ fn cmp_method(
         visibility: b_visibility,
     } = b;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
+    cmp_func(a_func, b_func).qualified("func")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     Ok(())
 }
 
-fn cmp_module(
-    (a, a_strings): (&Module, &StringInterner),
-    (b, b_strings): (&Module, &StringInterner),
-) -> Result {
+fn cmp_module(a: &Module, b: &Module) -> Result {
     let Module {
         attributes: a_attributes,
         name: a_name,
@@ -1391,16 +1246,13 @@ fn cmp_module(
         doc_comment: b_doc_comment,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
-    cmp_src_loc((a_src_loc, a_strings), (b_src_loc, b_strings)).qualified("src_loc")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
+    cmp_src_loc(a_src_loc, b_src_loc).qualified("src_loc")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     Ok(())
 }
 
-fn cmp_param(
-    (a, a_strings): (&Param, &StringInterner),
-    (b, b_strings): (&Param, &StringInterner),
-) -> Result {
+fn cmp_param(a: &Param, b: &Param) -> Result {
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,
@@ -1424,11 +1276,7 @@ fn cmp_param(
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
-    cmp_attributes(
-        (a_user_attributes, a_strings),
-        (b_user_attributes, b_strings),
-    )
-    .qualified("user_attributes")?;
+    cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_type_info(a_ty, b_ty).qualified("ty")?;
     cmp_option(
         a_default_value.as_ref(),
@@ -1453,10 +1301,7 @@ fn cmp_default_value(a: &DefaultValue, b: &DefaultValue) -> Result {
     Ok(())
 }
 
-fn cmp_property(
-    (a, a_strings): (&Property, &StringInterner),
-    (b, b_strings): (&Property, &StringInterner),
-) -> Result {
+fn cmp_property(a: &Property, b: &Property) -> Result {
     let Property {
         name: a_name,
         flags: a_flags,
@@ -1478,11 +1323,11 @@ fn cmp_property(
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_flags, b_flags).qualified("flagsr")?;
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_option(
-        a_initial_value.as_ref().map(|i| (i, a_strings)),
-        b_initial_value.as_ref().map(|i| (i, b_strings)),
+        a_initial_value.as_ref(),
+        b_initial_value.as_ref(),
         cmp_typed_value,
     )
     .qualified("initial_value")?;
@@ -1510,12 +1355,7 @@ fn cmp_requirement(a: &Requirement, b: &Requirement) -> Result {
     Ok(())
 }
 
-fn cmp_src_loc(
-    (a, a_strings): (&SrcLoc, &StringInterner),
-    (b, b_strings): (&SrcLoc, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_src_loc(a: &SrcLoc, b: &SrcLoc) -> Result {
     cmp_id(a.filename.0, b.filename.0).qualified("filename")?;
     cmp_eq(a.line_begin, b.line_begin).qualified("line_begin")?;
     cmp_eq(a.line_end, b.line_end).qualified("line_end")?;
@@ -1546,8 +1386,8 @@ fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
 }
 
 fn cmp_tparam_bounds(
-    (a_id, a, _): (&ClassName, &TParamBounds, &StringInterner),
-    (b_id, b, _): (&ClassName, &TParamBounds, &StringInterner),
+    (a_id, a): (&ClassName, &TParamBounds),
+    (b_id, b): (&ClassName, &TParamBounds),
 ) -> Result {
     cmp_eq(a_id, b_id).qualified("0")?;
     cmp_slice(a.bounds.iter(), b.bounds.iter(), cmp_type_info)
@@ -1556,10 +1396,7 @@ fn cmp_tparam_bounds(
     Ok(())
 }
 
-fn cmp_type_constant(
-    (a, a_strings): (&TypeConstant, &StringInterner),
-    (b, b_strings): (&TypeConstant, &StringInterner),
-) -> Result {
+fn cmp_type_constant(a: &TypeConstant, b: &TypeConstant) -> Result {
     let TypeConstant {
         name: a_name,
         initializer: a_initializer,
@@ -1572,8 +1409,8 @@ fn cmp_type_constant(
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_option(
-        a_initializer.as_ref().map(|i| (i, a_strings)),
-        b_initializer.as_ref().map(|i| (i, b_strings)),
+        a_initializer.as_ref(),
+        b_initializer.as_ref(),
         cmp_typed_value,
     )
     .qualified("initializer")?;
@@ -1647,12 +1484,7 @@ fn cmp_base_ty(a: &BaseType, b: &BaseType) -> Result {
     }
 }
 
-fn cmp_typed_value(
-    (a, a_strings): (&TypedValue, &StringInterner),
-    (b, b_strings): (&TypedValue, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
     cmp_eq(std::mem::discriminant(a), std::mem::discriminant(b))?;
 
     match (a, b) {
@@ -1665,34 +1497,14 @@ fn cmp_typed_value(
             cmp_eq(*a, *b).qualified("lazy_class")?
         }
         (TypedValue::Vec(a), TypedValue::Vec(b)) => {
-            cmp_slice(
-                a.iter().map(|i| (i, a_strings)),
-                b.iter().map(|i| (i, b_strings)),
-                cmp_typed_value,
-            )
-            .qualified("vec")?;
+            cmp_slice(a, b, cmp_typed_value).qualified("vec")?;
         }
         (TypedValue::Keyset(a), TypedValue::Keyset(b)) => {
-            cmp_slice(
-                a.0.iter().map(|i| (i, a_strings)),
-                b.0.iter().map(|i| (i, b_strings)),
-                cmp_array_key,
-            )
-            .qualified("keyset")?;
+            cmp_slice(a.0.iter(), b.0.iter(), cmp_array_key).qualified("keyset")?;
         }
         (TypedValue::Dict(a), TypedValue::Dict(b)) => {
-            cmp_slice(
-                a.0.keys().map(|i| (i, a_strings)),
-                b.0.keys().map(|i| (i, b_strings)),
-                cmp_array_key,
-            )
-            .qualified("dict keys")?;
-            cmp_slice(
-                a.0.values().map(|i| (i, a_strings)),
-                b.0.values().map(|i| (i, b_strings)),
-                cmp_typed_value,
-            )
-            .qualified("dict values")?;
+            cmp_slice(a.0.keys(), b.0.keys(), cmp_array_key).qualified("dict keys")?;
+            cmp_slice(a.0.values(), b.0.values(), cmp_typed_value).qualified("dict values")?;
         }
 
         // these should never happen
@@ -1714,12 +1526,7 @@ fn cmp_typed_value(
     Ok(())
 }
 
-fn cmp_array_key(
-    (a, a_strings): (&ArrayKey, &StringInterner),
-    (b, b_strings): (&ArrayKey, &StringInterner),
-) -> Result {
-    let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
-
+fn cmp_array_key(a: &ArrayKey, b: &ArrayKey) -> Result {
     cmp_eq(std::mem::discriminant(a), std::mem::discriminant(b))?;
 
     match (a, b) {
@@ -1739,10 +1546,7 @@ fn cmp_array_key(
     Ok(())
 }
 
-fn cmp_typedef(
-    (a, a_strings): (&Typedef, &StringInterner),
-    (b, b_strings): (&Typedef, &StringInterner),
-) -> Result {
+fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
     let Typedef {
         name: a_name,
         attributes: a_attributes,
@@ -1762,15 +1566,14 @@ fn cmp_typedef(
         case_type: b_case_type,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_slice(
         a_type_info_union.iter(),
         b_type_info_union.iter(),
         cmp_type_info,
     )?;
-    cmp_typed_value((a_type_structure, a_strings), (b_type_structure, b_strings))
-        .qualified("type_structure")?;
-    cmp_src_loc((a_loc, a_strings), (b_loc, b_strings)).qualified("loc")?;
+    cmp_typed_value(a_type_structure, b_type_structure).qualified("type_structure")?;
+    cmp_src_loc(a_loc, b_loc).qualified("loc")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     cmp_eq(a_case_type, b_case_type).qualified("case_type")?;
     Ok(())
@@ -1785,7 +1588,6 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         fatal: a_fatal,
         modules: a_modules,
         module_use: a_module_use,
-        strings: a_strings,
         symbol_refs: a_symbol_refs,
         typedefs: a_typedefs,
     } = a_unit;
@@ -1797,65 +1599,19 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         fatal: b_fatal,
         modules: b_modules,
         module_use: b_module_use,
-        strings: b_strings,
         symbol_refs: b_symbol_refs,
         typedefs: b_typedefs,
     } = b_unit;
 
-    let a_strings = a_strings.as_ref();
-    let b_strings = b_strings.as_ref();
-
-    cmp_map_t(
-        a_classes.iter().map(|a| (a, a_strings)),
-        b_classes.iter().map(|b| (b, b_strings)),
-        cmp_class,
-    )
-    .qualified("classes")?;
-
-    cmp_map_t(
-        a_constants.iter().map(|a| (a, a_strings)),
-        b_constants.iter().map(|b| (b, b_strings)),
-        cmp_hack_constant,
-    )
-    .qualified("constants")?;
-
-    cmp_attributes(
-        (a_file_attributes, a_strings),
-        (b_file_attributes, b_strings),
-    )
-    .qualified("file_attributes")?;
-
-    cmp_map_t(
-        a_functions.iter().map(|a| (a, a_strings)),
-        b_functions.iter().map(|b| (b, b_strings)),
-        cmp_function,
-    )
-    .qualified("functions")?;
-
-    cmp_option(
-        a_fatal.as_ref().map(|a| (a, a_strings)),
-        b_fatal.as_ref().map(|b| (b, b_strings)),
-        cmp_fatal,
-    )
-    .qualified("fatal")?;
-
-    cmp_map_t(
-        a_modules.iter().map(|a| (a, a_strings)),
-        b_modules.iter().map(|b| (b, b_strings)),
-        cmp_module,
-    )
-    .qualified("modules")?;
-
+    cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
+    cmp_map_t(a_constants, b_constants, cmp_hack_constant).qualified("constants")?;
+    cmp_attributes(a_file_attributes, b_file_attributes).qualified("file_attributes")?;
+    cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
+    cmp_option(a_fatal.as_ref(), b_fatal.as_ref(), cmp_fatal).qualified("fatal")?;
+    cmp_map_t(a_modules, b_modules, cmp_module).qualified("modules")?;
     cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), cmp_eq).qualified("module_use")?;
-
     cmp_symbol_refs(a_symbol_refs, b_symbol_refs).qualified("symbol_refs")?;
-
-    cmp_map_t(
-        a_typedefs.iter().map(|a| (a, a_strings)),
-        b_typedefs.iter().map(|b| (b, b_strings)),
-        cmp_typedef,
-    )
-    .qualified("typedefs")?;
+    cmp_map_t(a_typedefs, b_typedefs, cmp_typedef).qualified("typedefs")?;
 
     Ok(())
 }
@@ -1869,15 +1625,15 @@ fn cmp_upper_bounds(a: &(StringId, Vec<TypeInfo>), b: &(StringId, Vec<TypeInfo>)
 mod mapping {
     use super::*;
 
-    impl MapName for (&Attribute, &StringInterner) {
+    impl MapName for &Attribute {
         fn get_name(&self) -> String {
-            self.0.name.as_str().to_owned()
+            self.name.as_str().to_owned()
         }
     }
 
-    impl MapName for (&Class, &StringInterner) {
+    impl MapName for &Class {
         fn get_name(&self) -> String {
-            self.0.name.as_str().to_owned()
+            self.name.as_str().to_owned()
         }
     }
 
@@ -1887,45 +1643,45 @@ mod mapping {
         }
     }
 
-    impl MapName for (&Function, &StringInterner) {
+    impl MapName for &Function {
         fn get_name(&self) -> String {
-            self.0.name.as_str().to_owned()
+            self.name.as_str().to_owned()
         }
     }
 
-    impl MapName for (&HackConstant, &StringInterner) {
+    impl MapName for &HackConstant {
         fn get_name(&self) -> String {
-            self.0.name.as_str().to_owned()
+            self.name.as_str().to_owned()
         }
     }
 
-    impl MapName for (&Method, &StringInterner) {
+    impl MapName for &Method {
         fn get_name(&self) -> String {
-            self.0.name.into_string()
+            self.name.into_string()
         }
     }
 
-    impl MapName for (&Module, &StringInterner) {
+    impl MapName for &Module {
         fn get_name(&self) -> String {
-            self.0.name.into_string()
+            self.name.into_string()
         }
     }
 
-    impl MapName for (&Property, &StringInterner) {
+    impl MapName for &Property {
         fn get_name(&self) -> String {
-            self.0.name.into_string()
+            self.name.into_string()
         }
     }
 
-    impl MapName for (&ClassName, &TParamBounds, &StringInterner) {
+    impl MapName for (&ClassName, &TParamBounds) {
         fn get_name(&self) -> String {
             self.0.as_str().to_owned()
         }
     }
 
-    impl MapName for (&Typedef, &StringInterner) {
+    impl MapName for &Typedef {
         fn get_name(&self) -> String {
-            self.0.name.as_str().to_owned()
+            self.name.as_str().to_owned()
         }
     }
 }

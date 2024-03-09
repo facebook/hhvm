@@ -16,7 +16,6 @@ use ir_core::Func;
 use ir_core::FuncBuilder;
 use ir_core::Instr;
 use ir_core::InstrId;
-use ir_core::StringInterner;
 use ir_core::ValueId;
 use ir_core::VarId;
 use itertools::Itertools;
@@ -140,19 +139,17 @@ struct Decl {
     set_value: SetValue,
 }
 
-struct MakeSSA<'a> {
+struct MakeSSA {
     predecessors: Predecessors,
 
     block_info: IdVec<BlockId, BlockInfo>,
 
     // Values from Local::Declare we have seen.
     decls: VarIdMap<Decl>,
-
-    strings: &'a StringInterner,
 }
 
-impl<'a> MakeSSA<'a> {
-    fn new(func: &Func, strings: &'a StringInterner) -> MakeSSA<'a> {
+impl MakeSSA {
+    fn new(func: &Func) -> MakeSSA {
         let predecessors = compute_predecessor_blocks(
             func,
             PredecessorFlags {
@@ -166,7 +163,6 @@ impl<'a> MakeSSA<'a> {
             predecessors,
             block_info,
             decls: Default::default(),
-            strings,
         }
     }
 
@@ -229,8 +225,8 @@ impl<'a> MakeSSA<'a> {
                 // get_local_iid.
                 panic!(
                     "Local variable may be used uninitialized by '{}' in\n{}",
-                    print::FmtInstr(func, self.strings, get_local_iid),
-                    print::DisplayFunc::new(func, true, self.strings),
+                    print::FmtInstr(func, get_local_iid),
+                    print::DisplayFunc::new(func, true,),
                 );
             };
 
@@ -335,7 +331,7 @@ impl<'a> MakeSSA<'a> {
 
     // Step (4).
     fn rewrite_instrs(&mut self, func: &mut Func) {
-        FuncBuilder::borrow_func_no_strings(func, |rw| {
+        FuncBuilder::borrow_func(func, |rw| {
             for bid in rw.func.block_ids() {
                 let info = &mut self.block_info[bid];
 
@@ -355,7 +351,7 @@ impl<'a> MakeSSA<'a> {
     }
 }
 
-impl<'a> TransformInstr for MakeSSA<'a> {
+impl TransformInstr for MakeSSA {
     fn apply(
         &mut self,
         _iid: InstrId,
@@ -436,11 +432,11 @@ pub(crate) fn is_ssa(func: &Func) -> bool {
         .any(|i| matches!(i, Instr::Special(Special::Tmp(..))))
 }
 
-pub fn run(func: &mut Func, strings: &StringInterner) -> bool {
+pub fn run(func: &mut Func) -> bool {
     if is_ssa(func) {
         false
     } else {
-        let mut pass = MakeSSA::new(func, strings);
+        let mut pass = MakeSSA::new(func);
         pass.run(func);
         true
     }
@@ -448,8 +444,6 @@ pub fn run(func: &mut Func, strings: &StringInterner) -> bool {
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     use ir_core::instr::HasOperands;
     use ir_core::instr::Predicate;
     use ir_core::instr::Terminator;
@@ -457,15 +451,13 @@ mod test {
     use ir_core::FuncBuilder;
     use ir_core::FunctionName;
     use ir_core::LocId;
-    use ir_core::StringInterner;
 
     use super::*;
 
     #[test]
     fn already_ssa() {
         let loc = LocId::NONE;
-        let strings = Arc::new(StringInterner::default());
-        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
+        let mut func = FuncBuilder::build_func(|builder| {
             // %0 = call("my_fn", [42])
             // %1 = ret null
             let value = builder.emit_constant(Constant::Int(42));
@@ -474,17 +466,16 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings);
+        verify::verify_func(&func, &Default::default());
         assert!(is_ssa(&func));
-        let res = run(&mut func, &strings);
+        let res = run(&mut func);
         assert!(!res);
     }
 
     #[test]
     fn basic() {
         let loc = LocId::NONE;
-        let strings = Arc::new(StringInterner::default());
-        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
+        let mut func = FuncBuilder::build_func(|builder| {
             // %0 = declare
             // %1 = set(%0, 42)
             // %2 = get(%0)
@@ -499,9 +490,9 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings);
+        verify::verify_func(&func, &Default::default());
         assert!(!is_ssa(&func));
-        let res = run(&mut func, &strings);
+        let res = run(&mut func);
         assert!(res);
 
         assert_eq!(func.blocks.len(), 1);
@@ -526,8 +517,7 @@ mod test {
     #[test]
     fn diamond() {
         let loc = LocId::NONE;
-        let strings = Arc::new(StringInterner::default());
-        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
+        let mut func = FuncBuilder::build_func(|builder| {
             //   %0 = declare
             //   %1 = declare
             //   %2 = declare
@@ -596,9 +586,9 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings);
+        verify::verify_func(&func, &Default::default());
         assert!(!is_ssa(&func));
-        let res = run(&mut func, &strings);
+        let res = run(&mut func);
         assert!(res);
         crate::clean::run(&mut func);
 

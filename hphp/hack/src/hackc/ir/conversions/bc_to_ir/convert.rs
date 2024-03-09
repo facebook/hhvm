@@ -10,7 +10,6 @@ use ffi::Maybe;
 use hash::HashMap;
 use hhbc::Fatal;
 use hhbc::Unit;
-use ir::StringInterner;
 
 /// Convert a hhbc::Unit to an ir::Unit.
 ///
@@ -19,8 +18,6 @@ use ir::StringInterner;
 /// when converting functions and methods (see `convert_body` in func.rs).
 pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
     use std::os::unix::ffi::OsStrExt;
-    let strings = Arc::new(ir::StringInterner::default());
-
     let filename = ir::Filename(ir::intern_bytes(filename.as_os_str().as_bytes()));
 
     // Traditionally the HHBC AdataIds are named A_# - but let's not rely on
@@ -28,7 +25,7 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
     let adata_lookup = unit
         .adata
         .iter()
-        .map(|hhbc::Adata { id, value }| (*id, Arc::new(convert_typed_value(value, &strings))))
+        .map(|hhbc::Adata { id, value }| (*id, Arc::new(convert_typed_value(value))))
         .collect();
 
     let unit_state = UnitState { adata_lookup };
@@ -37,24 +34,16 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
         .constants
         .as_ref()
         .iter()
-        .map(|c| crate::constant::convert_constant(c, &strings))
+        .map(crate::constant::convert_constant)
         .collect();
 
-    let file_attributes: Vec<_> = unit
-        .file_attributes
-        .iter()
-        .map(|a| convert_attribute(a, &strings))
-        .collect();
+    let file_attributes: Vec<_> = unit.file_attributes.iter().map(convert_attribute).collect();
 
     let modules: Vec<ir::Module> = unit
         .modules
         .iter()
         .map(|module| ir::Module {
-            attributes: module
-                .attributes
-                .iter()
-                .map(|a| convert_attribute(a, &strings))
-                .collect(),
+            attributes: module.attributes.iter().map(convert_attribute).collect(),
             name: module.name,
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
             doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
@@ -64,7 +53,7 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
     let typedefs: Vec<_> = unit
         .typedefs
         .iter()
-        .map(|td| crate::types::convert_typedef(td, filename, &strings))
+        .map(|td| crate::types::convert_typedef(td, filename))
         .collect();
 
     let mut ir_unit = ir::Unit {
@@ -75,7 +64,6 @@ pub fn bc_to_ir(unit: &Unit, filename: &Path) -> ir::Unit {
         functions: Default::default(),
         module_use: unit.module_use.into(),
         modules,
-        strings,
         symbol_refs: unit.symbol_refs.clone(),
         typedefs,
     };
@@ -115,22 +103,15 @@ pub(crate) struct UnitState {
     pub(crate) adata_lookup: HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
 }
 
-pub(crate) fn convert_attribute(attr: &hhbc::Attribute, strings: &StringInterner) -> ir::Attribute {
-    let arguments = attr
-        .arguments
-        .iter()
-        .map(|tv| convert_typed_value(tv, strings))
-        .collect();
+pub(crate) fn convert_attribute(attr: &hhbc::Attribute) -> ir::Attribute {
+    let arguments = attr.arguments.iter().map(convert_typed_value).collect();
     ir::Attribute {
         name: ir::ClassName::new(attr.name),
         arguments,
     }
 }
 
-pub(crate) fn convert_typed_value(
-    tv: &hhbc::TypedValue,
-    strings: &StringInterner,
-) -> ir::TypedValue {
+pub(crate) fn convert_typed_value(tv: &hhbc::TypedValue) -> ir::TypedValue {
     match tv {
         hhbc::TypedValue::Uninit => ir::TypedValue::Uninit,
         hhbc::TypedValue::Int(v) => ir::TypedValue::Int(*v),
@@ -139,19 +120,17 @@ pub(crate) fn convert_typed_value(
         hhbc::TypedValue::String(v) => ir::TypedValue::String(*v),
         hhbc::TypedValue::LazyClass(v) => ir::TypedValue::LazyClass(ir::ClassName::new(*v)),
         hhbc::TypedValue::Null => ir::TypedValue::Null,
-        hhbc::TypedValue::Vec(vs) => ir::TypedValue::Vec(
-            vs.iter()
-                .map(|tv| convert_typed_value(tv, strings))
-                .collect(),
-        ),
+        hhbc::TypedValue::Vec(vs) => {
+            ir::TypedValue::Vec(vs.iter().map(convert_typed_value).collect())
+        }
         hhbc::TypedValue::Keyset(vs) => {
-            ir::TypedValue::Keyset(vs.iter().map(|tv| convert_array_key(tv, strings)).collect())
+            ir::TypedValue::Keyset(vs.iter().map(convert_array_key).collect())
         }
         hhbc::TypedValue::Dict(vs) => ir::TypedValue::Dict(
             vs.iter()
                 .map(|hhbc::Entry { key, value }| {
-                    let key = convert_array_key(key, strings);
-                    let value = convert_typed_value(value, strings);
+                    let key = convert_array_key(key);
+                    let value = convert_typed_value(value);
                     (key, value)
                 })
                 .collect(),
@@ -159,7 +138,7 @@ pub(crate) fn convert_typed_value(
     }
 }
 
-pub(crate) fn convert_array_key(tv: &hhbc::TypedValue, _: &StringInterner) -> ir::ArrayKey {
+pub(crate) fn convert_array_key(tv: &hhbc::TypedValue) -> ir::ArrayKey {
     match *tv {
         hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),
         hhbc::TypedValue::LazyClass(v) => ir::ArrayKey::LazyClass(ir::ClassName::new(v)),

@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
@@ -205,17 +203,14 @@ impl<'b> FunctionParser<'b> {
 
         parse!(tokenizer, "{" "\n");
 
-        let mut builder = FuncBuilder::with_func(
-            Func {
-                return_type,
-                params,
-                tparams,
-                shadowed_tparams,
-                attrs,
-                ..Default::default()
-            },
-            Arc::clone(&unit_state.unit.strings),
-        );
+        let mut builder = FuncBuilder::with_func(Func {
+            return_type,
+            params,
+            tparams,
+            shadowed_tparams,
+            attrs,
+            ..Default::default()
+        });
 
         let cur_loc = if let Some(src_loc) = unit_state.src_loc.as_ref() {
             let loc = builder.add_loc(src_loc.clone());

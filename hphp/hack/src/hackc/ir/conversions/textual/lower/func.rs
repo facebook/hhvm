@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use ir::instr::Hhbc;
 use ir::ClassGetCMode;
 use ir::Constant;
@@ -18,7 +16,6 @@ use ir::MethodFlags;
 use ir::MethodName;
 use ir::ReadonlyOp;
 use ir::SpecialClsRef;
-use ir::StringInterner;
 use ir::TypedValue;
 use log::trace;
 
@@ -26,15 +23,11 @@ use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 use crate::lower::class::THIS_AS_PROPERTY;
 
-pub(crate) fn lower_func(
-    mut func: Func,
-    func_info: &mut FuncInfo<'_>,
-    strings: Arc<StringInterner>,
-) -> Func {
+pub(crate) fn lower_func(mut func: Func, func_info: &mut FuncInfo<'_>) -> Func {
     trace!(
         "{} Before Lower: {}",
         func_info.name_id(),
-        ir::print::DisplayFunc::new(&func, true, &strings)
+        ir::print::DisplayFunc::new(&func, true,)
     );
 
     // In a closure we implicitly load all the properties as locals - so start
@@ -42,7 +35,7 @@ pub(crate) fn lower_func(
     match *func_info {
         FuncInfo::Method(ref mut method_info) => {
             if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
-                load_closure_vars(&mut func, method_info, &strings);
+                load_closure_vars(&mut func, method_info);
             }
         }
         FuncInfo::Function(_) => {}
@@ -51,7 +44,7 @@ pub(crate) fn lower_func(
     // If the function is reified then make the implied 0ReifiedGenerics
     // parameter explicit.
     if func.is_reified() {
-        add_reified_parameter(&mut func, &strings);
+        add_reified_parameter(&mut func);
     }
 
     if func_info.declared_in_trait() {
@@ -62,10 +55,10 @@ pub(crate) fn lower_func(
     ir::passes::unasync(&mut func);
     trace!(
         "After unasync: {}",
-        ir::print::DisplayFunc::new(&func, true, &strings)
+        ir::print::DisplayFunc::new(&func, true,)
     );
 
-    let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
+    let mut builder = FuncBuilder::with_func(func);
 
     match func_info {
         FuncInfo::Method(mi) if mi.name.is_86pinit() => {
@@ -82,7 +75,7 @@ pub(crate) fn lower_func(
 
     trace!(
         "After lower_instrs: {}",
-        ir::print::DisplayFunc::new(&builder.func, true, &strings)
+        ir::print::DisplayFunc::new(&builder.func, true,)
     );
 
     // Write the complex constants out as a prelude to the function.
@@ -94,15 +87,12 @@ pub(crate) fn lower_func(
 
     ir::passes::clean::run(&mut func);
 
-    trace!(
-        "After Lower: {}",
-        ir::print::DisplayFunc::new(&func, true, &strings)
-    );
+    trace!("After Lower: {}", ir::print::DisplayFunc::new(&func, true,));
 
     func
 }
 
-fn add_reified_parameter(func: &mut Func, _: &StringInterner) {
+fn add_reified_parameter(func: &mut Func) {
     func.params.push(ir::Param {
         name: ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
         is_variadic: false,
@@ -246,7 +236,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     builder.cur_block_mut().iids.extend(saved);
 }
 
-fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>, _: &StringInterner) {
+fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>) {
     let mut instrs = Vec::new();
 
     let loc = func.loc_id;

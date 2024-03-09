@@ -17,7 +17,6 @@ use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocId;
 use ir::LocalId;
-use ir::StringInterner;
 use ir::ValueId;
 use ir::VarId;
 use newtype::newtype_int;
@@ -60,20 +59,18 @@ pub(crate) struct Context<'b> {
     pub(crate) member_op: Option<MemberOpBuilder>,
     pub(crate) named_local_lookup: Vec<LocalId>,
     pub(crate) stack: VecDeque<ir::ValueId>,
-    pub(crate) strings: &'b StringInterner,
     pub(crate) work_queue_pending: VecDeque<Addr>,
     work_queue_inserted: AddrIndexSet,
 }
 
 impl<'b> Context<'b> {
     pub(crate) fn new(
-        unit: &'b mut ir::Unit,
         filename: ir::Filename,
         func: ir::Func,
         instrs: &'b [Instruct],
         unit_state: &'b UnitState,
     ) -> Self {
-        let mut builder = FuncBuilder::with_func(func, Arc::clone(&unit.strings));
+        let mut builder = FuncBuilder::with_func(func);
         let (label_to_addr, bid_to_addr, addr_to_seq) =
             Sequence::compute(&mut builder, filename, instrs);
 
@@ -89,7 +86,6 @@ impl<'b> Context<'b> {
             member_op: None,
             named_local_lookup: Default::default(),
             stack: Default::default(),
-            strings: &mut unit.strings,
             work_queue_pending: Default::default(),
             work_queue_inserted: Default::default(),
         };

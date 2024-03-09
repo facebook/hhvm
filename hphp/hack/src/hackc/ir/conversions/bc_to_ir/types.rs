@@ -8,7 +8,6 @@ use std::sync::OnceLock;
 use ffi::Maybe;
 use hhbc::StringId;
 use ir::BaseType;
-use ir::StringInterner;
 use itertools::Itertools;
 use maplit::hashmap;
 
@@ -93,11 +92,7 @@ fn cvt_constraint_type(name: StringId) -> BaseType {
         .unwrap_or_else(|| BaseType::Class(ir::ClassName::new(name)))
 }
 
-pub(crate) fn convert_typedef<'a>(
-    td: &hhbc::Typedef,
-    filename: ir::Filename,
-    strings: &StringInterner,
-) -> ir::Typedef {
+pub(crate) fn convert_typedef(td: &hhbc::Typedef, filename: ir::Filename) -> ir::Typedef {
     let hhbc::Typedef {
         name,
         attributes,
@@ -111,13 +106,13 @@ pub(crate) fn convert_typedef<'a>(
     let loc = ir::SrcLoc::from_span(filename, span);
     let attributes = attributes
         .iter()
-        .map(|a| convert::convert_attribute(a, strings))
+        .map(convert::convert_attribute)
         .collect_vec();
     let type_info_union = type_info_union
         .iter()
         .map(types::convert_type)
         .collect_vec();
-    let type_structure = convert::convert_typed_value(type_structure, strings);
+    let type_structure = convert::convert_typed_value(type_structure);
 
     ir::Typedef {
         name: *name,

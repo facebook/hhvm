@@ -111,7 +111,7 @@ impl Base {
                 prop: PropKey::Name(ref key),
                 op: PropOp::NullSafe,
             } => {
-                let key = key.display(&state.strings).to_string();
+                let key = key.display().to_string();
                 let prop = Expr::Const(Const::String(
                     AsciiString::from_ascii(key.as_bytes()).unwrap(),
                 ));
@@ -156,7 +156,7 @@ impl Base {
                 prop: PropKey::Name(ref key),
                 op: PropOp::NullSafe,
             } => {
-                let key = key.display(&state.strings).to_string();
+                let key = key.display().to_string();
                 let prop = Expr::Const(Const::String(
                     AsciiString::from_ascii(key.as_bytes()).unwrap(),
                 ));

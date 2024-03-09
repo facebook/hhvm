@@ -31,7 +31,6 @@ use ir::MethodFlags;
 use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringId;
-use ir::StringInterner;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
@@ -49,7 +48,6 @@ use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
 use crate::mangle::VarName;
 use crate::member_op;
-use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Expr;
 use crate::textual::Sid;
@@ -63,11 +61,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// Functions are defined as taking a param bundle.
 ///
 /// f(params: HackParams): mixed;
-pub(crate) fn write_function(
-    txf: &mut TextualFile<'_>,
-    state: &mut UnitState,
-    function: ir::Function,
-) -> Result {
+pub(crate) fn write_function(txf: &mut TextualFile<'_>, function: ir::Function) -> Result {
     trace!("Convert Function {}", function.name);
 
     let func_info = FuncInfo::Function(FunctionInfo {
@@ -76,7 +70,7 @@ pub(crate) fn write_function(
         flags: function.flags,
     });
 
-    lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
+    lower_and_write_func(txf, textual::Ty::VoidPtr, function.func, func_info)
 }
 
 fn add_attr<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, s: impl Into<Cow<'a, str>>) {
@@ -111,11 +105,7 @@ fn extract_awaitable_and_type_constant(user_type: StringId) -> (bool, Option<Str
     (is_awaitable, is_type_const)
 }
 
-fn compute_func_ty<'a>(
-    attr: &mut Option<Vec<Cow<'a, str>>>,
-    ty: &ir::TypeInfo,
-    unit_state: &UnitState,
-) -> textual::Ty {
+fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) -> textual::Ty {
     let (is_awaitable, type_const_opt) = ty
         .user_type
         .map_or((false, None), extract_awaitable_and_type_constant);
@@ -140,21 +130,16 @@ fn compute_func_ty<'a>(
             ir::BaseType::Class(cid) => TypeName::Class(cid),
             _ => unreachable!(),
         };
-        let text = format!(
-            "{}=\"{}\"",
-            textual::TYPEVAR,
-            name.display(&unit_state.strings)
-        );
+        let text = format!("{}=\"{}\"", textual::TYPEVAR, name.display());
         add_attr(attr, text);
         textual::Ty::mixed_ptr()
     } else {
-        convert_ty(&ty.enforced, &unit_state.strings)
+        convert_ty(&ty.enforced)
     }
 }
 
 fn compute_func_params<'a, 'b>(
     params: &Vec<ir::Param>,
-    unit_state: &'a mut UnitState,
     this_ty: textual::Ty,
 ) -> Vec<(textual::Param<'b>, LocalId)> {
     let mut result = Vec::new();
@@ -173,7 +158,7 @@ fn compute_func_params<'a, 'b>(
         if p.is_variadic {
             add_attr(&mut attrs, textual::VARIADIC);
         }
-        let ty = compute_func_ty(&mut attrs, &p.ty, unit_state);
+        let ty = compute_func_ty(&mut attrs, &p.ty);
         let lid = LocalId::Named(p.name);
         let param = textual::Param {
             name: VarName::Local(lid),
@@ -186,9 +171,9 @@ fn compute_func_params<'a, 'b>(
     result
 }
 
-fn compute_func_ret_ty<'a>(ti: &ir::TypeInfo, unit_state: &UnitState) -> textual::Return<'a> {
+fn compute_func_ret_ty<'a>(ti: &ir::TypeInfo) -> textual::Return<'a> {
     let mut attrs = None;
-    let ty = compute_func_ty(&mut attrs, ti, unit_state);
+    let ty = compute_func_ty(&mut attrs, ti);
     textual::Return {
         attrs: attrs.map(Vec::into_boxed_slice),
         ty,
@@ -197,22 +182,20 @@ fn compute_func_ret_ty<'a>(ti: &ir::TypeInfo, unit_state: &UnitState) -> textual
 
 pub(crate) fn lower_and_write_func(
     txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
     this_ty: textual::Ty,
     func: ir::Func,
     func_info: FuncInfo<'_>,
 ) -> Result {
     fn lower_and_write_func_(
         txf: &mut TextualFile<'_>,
-        unit_state: &mut UnitState,
         this_ty: textual::Ty,
         func: ir::Func,
         mut func_info: FuncInfo<'_>,
     ) -> Result {
-        let func = lower::lower_func(func, &mut func_info, Arc::clone(&unit_state.strings));
-        ir::verify::verify_func(&func, &Default::default(), &unit_state.strings);
+        let func = lower::lower_func(func, &mut func_info);
+        ir::verify::verify_func(&func, &Default::default());
 
-        write_func(txf, unit_state, this_ty, func, Arc::new(func_info))
+        write_func(txf, this_ty, func, Arc::new(func_info))
     }
 
     let has_defaults = func.params.iter().any(|p| p.default_value.is_some());
@@ -221,14 +204,14 @@ pub(crate) fn lower_and_write_func(
         // functions which each take a different number of parameters,
         // initialize them and then forward on to the function that takes all
         // the parameters.
-        if let Some(inits) = split_default_func(&func, &func_info, &unit_state.strings) {
+        if let Some(inits) = split_default_func(&func, &func_info) {
             for init in inits {
-                lower_and_write_func_(txf, unit_state, this_ty.clone(), init, func_info.clone())?;
+                lower_and_write_func_(txf, this_ty.clone(), init, func_info.clone())?;
             }
         }
     }
 
-    lower_and_write_func_(txf, unit_state, this_ty, func, func_info)
+    lower_and_write_func_(txf, this_ty, func, func_info)
 }
 
 const WRAPPER_ATTRIBUTE_NAME: &str = "__wrapperattribute";
@@ -244,11 +227,7 @@ fn is_wrapper_attribute(classid: ClassName) -> bool {
 /// Given a Func that has default parameters make a version of the function with
 /// those parameters stripped out (one version is returned with each successive
 /// parameter removed).
-fn split_default_func(
-    orig_func: &Func,
-    func_info: &FuncInfo<'_>,
-    _: &StringInterner,
-) -> Option<Vec<Func>> {
+fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<Func>> {
     let mut result = Vec::new();
     let loc = orig_func.loc_id;
 
@@ -358,20 +337,15 @@ fn split_default_func(
 
 fn write_func(
     txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
     this_ty: textual::Ty,
     mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
-    let strings = Arc::clone(&unit_state.strings);
-
     let params = std::mem::take(&mut func.params);
     let (tx_params, param_lids): (Vec<_>, Vec<_>) =
-        compute_func_params(&params, unit_state, this_ty)
-            .into_iter()
-            .unzip();
+        compute_func_params(&params, this_ty).into_iter().unzip();
 
-    let ret_ty = compute_func_ret_ty(&func.return_type, unit_state);
+    let ret_ty = compute_func_ret_ty(&func.return_type);
 
     let lids = func
         .body_instrs()
@@ -383,7 +357,7 @@ fn write_func(
     let locals = lids
         .into_iter()
         .filter(|lid| !param_lids.contains(lid))
-        .sorted_by(|x, y| cmp_lid(&strings, x, y))
+        .sorted_by(cmp_lid)
         .zip(std::iter::repeat(&local_ty))
         .collect::<Vec<_>>();
 
@@ -431,7 +405,7 @@ fn write_func(
                 let mut func = rewrite_jmp_ops(func);
                 ir::passes::clean::run(&mut func);
 
-                let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
+                let mut state = FuncState::new(fb, &func, func_info);
 
                 for bid in func.block_ids() {
                     write_block(&mut state, bid)?;
@@ -465,18 +439,17 @@ fn write_func(
 
 pub(crate) fn write_func_decl(
     txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
     this_ty: textual::Ty,
     mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let params = std::mem::take(&mut func.params);
-    let param_tys = compute_func_params(&params, unit_state, this_ty)
+    let param_tys = compute_func_params(&params, this_ty)
         .into_iter()
         .map(|(param, _)| textual::Ty::clone(&param.ty))
         .collect_vec();
 
-    let ret_ty = compute_func_ret_ty(&func.return_type, unit_state).ty;
+    let ret_ty = compute_func_ret_ty(&func.return_type).ty;
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
@@ -823,7 +796,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // else should be handled in lower().
             textual_todo! {
                 message = ("Non-lowered hhbc instr: {hhbc:?} (from {})",
-                           ir::print::formatters::FmtFullLoc(state.func.loc(hhbc.loc_id()), &state.strings)),
+                           ir::print::formatters::FmtFullLoc(state.func.loc(hhbc.loc_id()))),
                 use ir::instr::HasOperands;
                 let name = mangle::FunctionName::Unmangled(format!("TODO_hhbc_{}", hhbc));
                 let operands = instr
@@ -852,7 +825,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
         ir::FullInstrId::Constant(cid) => {
             let constant = state.func.constant(cid);
             let expr = match constant {
-                Constant::Array(tv) => typed_value_expr(tv, &state.strings),
+                Constant::Array(tv) => typed_value_expr(tv),
                 Constant::Bool(false) => Expr::Const(Const::False),
                 Constant::Bool(true) => Expr::Const(Const::True),
                 Constant::Dir => todo!(),
@@ -1258,13 +1231,11 @@ pub(crate) struct FuncState<'a, 'b, 'c> {
     pub(crate) func: &'a ir::Func,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     func_info: Arc<FuncInfo<'a>>,
-    pub(crate) strings: Arc<StringInterner>,
 }
 
 impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     fn new(
         fb: &'a mut textual::FuncBuilder<'b, 'c>,
-        strings: Arc<StringInterner>,
         func: &'a ir::Func,
         func_info: Arc<FuncInfo<'a>>,
     ) -> Self {
@@ -1273,7 +1244,6 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
             func,
             iid_mapping: Default::default(),
             func_info,
-            strings,
         }
     }
 
@@ -1575,7 +1545,7 @@ impl MethodInfo<'_> {
 /// Unnamed locals have only their id which may differ accross runs. In which
 /// case the IR would be non-deterministic and hence unstable ordering would be
 /// the least of our concerns.
-fn cmp_lid(_: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
+fn cmp_lid(x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
     match (x, y) {
         (LocalId::Named(x_id), LocalId::Named(y_id)) => x_id.cmp(y_id),
         (LocalId::Named(_), LocalId::Unnamed(_)) => std::cmp::Ordering::Less,

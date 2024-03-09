@@ -6,14 +6,9 @@
 use hhbc::Constant;
 
 use crate::convert;
-use crate::strings::StringCache;
 
-pub(crate) fn convert_hack_constant(constant: ir::HackConstant, strings: &StringCache) -> Constant {
+pub(crate) fn convert_hack_constant(constant: ir::HackConstant) -> Constant {
     let ir::HackConstant { name, value, attrs } = constant;
-
-    let value = value
-        .map(|v| convert::convert_typed_value(&v, strings))
-        .into();
-
+    let value = value.map(|v| convert::convert_typed_value(&v)).into();
     Constant { name, value, attrs }
 }

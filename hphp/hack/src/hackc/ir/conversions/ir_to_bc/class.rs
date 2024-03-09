@@ -7,10 +7,9 @@ use ffi::Maybe;
 
 use crate::convert;
 use crate::convert::UnitBuilder;
-use crate::strings::StringCache;
 use crate::types;
 
-pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &StringCache) {
+pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
     let ir::Class {
         attributes,
         base,
@@ -38,11 +37,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
         .map(|et| types::convert(et).unwrap())
         .into();
 
-    let type_constants = Vec::from_iter(
-        type_constants
-            .into_iter()
-            .map(|tc| convert_type_constant(tc, strings)),
-    );
+    let type_constants = Vec::from_iter(type_constants.into_iter().map(convert_type_constant));
 
     let upper_bounds = Vec::from_iter(upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
         name: *name,
@@ -52,16 +47,16 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
     let methods = Vec::from_iter(
         methods
             .into_iter()
-            .map(|method| crate::func::convert_method(method, strings, &mut unit.adata_cache)),
+            .map(|method| crate::func::convert_method(method, &mut unit.adata_cache)),
     );
 
     let class = hhbc::Class {
-        attributes: convert::convert_attributes(attributes, strings).into(),
+        attributes: convert::convert_attributes(attributes).into(),
         base: base.into(),
         constants: Vec::from_iter(
             constants
                 .into_iter()
-                .map(|c| crate::constant::convert_hack_constant(c, strings)),
+                .map(crate::constant::convert_hack_constant),
         )
         .into(),
         ctx_constants: ctx_constants.into(),
@@ -72,12 +67,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
         implements: implements.into(),
         methods: methods.into(),
         name,
-        properties: Vec::from_iter(
-            properties
-                .into_iter()
-                .map(|prop| convert_property(prop, strings)),
-        )
-        .into(),
+        properties: Vec::from_iter(properties.into_iter().map(convert_property)).into(),
         requirements: requirements.clone().into(),
         span: src_loc.to_span(),
         type_constants: type_constants.into(),
@@ -87,15 +77,15 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class, strings: &
     unit.classes.push(class);
 }
 
-fn convert_property(src: ir::Property, strings: &StringCache) -> hhbc::Property {
+fn convert_property(src: ir::Property) -> hhbc::Property {
     hhbc::Property {
         name: src.name,
         flags: src.flags,
-        attributes: convert::convert_attributes(src.attributes, strings).into(),
+        attributes: convert::convert_attributes(src.attributes).into(),
         visibility: src.visibility,
         initial_value: src
             .initial_value
-            .map(|tv| convert::convert_typed_value(&tv, strings))
+            .map(|tv| convert::convert_typed_value(&tv))
             .into(),
         type_info: types::convert(&src.type_info).unwrap(),
         doc_comment: src.doc_comment.map(|c| c.into()),
@@ -111,12 +101,12 @@ fn convert_ctx_constant(ctx: &ir::CtxConstant) -> hhbc::CtxConstant {
     }
 }
 
-fn convert_type_constant(tc: ir::TypeConstant, strings: &StringCache) -> hhbc::TypeConstant {
+fn convert_type_constant(tc: ir::TypeConstant) -> hhbc::TypeConstant {
     hhbc::TypeConstant {
         name: tc.name,
         initializer: tc
             .initializer
-            .map(|init| convert::convert_typed_value(&init, strings))
+            .map(|init| convert::convert_typed_value(&init))
             .into(),
         is_abstract: tc.is_abstract,
     }

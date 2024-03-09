@@ -17,7 +17,6 @@ use ir_core::instr::Hhbc;
 use ir_core::instr::IrToBc;
 use ir_core::instr::Special;
 use ir_core::instr::Terminator;
-use ir_core::string_intern::StringInterner;
 use ir_core::Block;
 use ir_core::BlockId;
 use ir_core::BlockIdMap;
@@ -70,11 +69,10 @@ struct VerifyFunc<'b> {
     #[allow(dead_code)]
     flags: &'b Flags,
     predecessors: Predecessors,
-    strings: &'b StringInterner,
 }
 
 impl<'b> VerifyFunc<'b> {
-    fn new(func: &'b Func, flags: &'b Flags, strings: &'b StringInterner) -> Self {
+    fn new(func: &'b Func, flags: &'b Flags) -> Self {
         // Catch unwind so we can print the function before continuing the
         // panic.
         let predecessors = std::panic::catch_unwind(|| {
@@ -83,13 +81,7 @@ impl<'b> VerifyFunc<'b> {
         let predecessors = match predecessors {
             Ok(predecessors) => predecessors,
             Err(e) => {
-                Self::report_func_error(
-                    "compute_predecessor_blocks panic'd",
-                    func,
-                    None,
-                    None,
-                    strings,
-                );
+                Self::report_func_error("compute_predecessor_blocks panic'd", func, None, None);
                 std::panic::resume_unwind(e);
             }
         };
@@ -98,7 +90,6 @@ impl<'b> VerifyFunc<'b> {
             func,
             flags,
             predecessors,
-            strings,
         }
     }
 
@@ -107,7 +98,6 @@ impl<'b> VerifyFunc<'b> {
         func: &Func,
         predecessors: Option<&Predecessors>,
         dominated_iids: Option<&BlockIdMap<InstrIdSet>>,
-        strings: &StringInterner,
     ) {
         eprintln!("VERIFY FAILED: {why}");
         use print::FmtSep;
@@ -117,7 +107,7 @@ impl<'b> VerifyFunc<'b> {
                 writeln!(
                     w,
                     "  Predecessor BlockIds: [{}]",
-                    FmtSep::comma(pds.iter().sorted(), |w, bid| FmtBid(func, *bid, true,)
+                    FmtSep::comma(pds.iter().sorted(), |w, bid| FmtBid(func, *bid, true)
                         .fmt(w))
                 )?;
             }
@@ -129,14 +119,13 @@ impl<'b> VerifyFunc<'b> {
                         func,
                         (*vid).into(),
                         true,
-                        strings
                     )
                     .fmt(w))
                 )?;
             }
             Ok(())
         };
-        let mut df = print::DisplayFunc::new(func, true, strings);
+        let mut df = print::DisplayFunc::new(func, true);
         df.f_pre_block = Some(&f_pre_block);
         eprintln!("{}", df);
     }
@@ -147,7 +136,6 @@ impl<'b> VerifyFunc<'b> {
             self.func,
             Some(&self.predecessors),
             Some(&self.dominated_iids),
-            self.strings,
         );
         panic!("VERIFY FAILED: {}", why);
     }
@@ -321,8 +309,8 @@ impl<'b> VerifyFunc<'b> {
                     self,
                     dominated_iids.contains(&op_iid),
                     "iid {} doesn't dominate use at {}",
-                    FmtVid(self.func, op_vid, true, self.strings),
-                    FmtVid(self.func, ValueId::from_instr(src_iid), true, self.strings),
+                    FmtVid(self.func, op_vid, true),
+                    FmtVid(self.func, ValueId::from_instr(src_iid), true),
                 );
                 match op_instr.unwrap() {
                     Instr::Special(Special::Tombstone) => {
@@ -332,7 +320,7 @@ impl<'b> VerifyFunc<'b> {
                             "iid {} operand {} ({})is a tombstone",
                             src_iid,
                             op_idx,
-                            FmtVid(self.func, op_vid, true, self.strings)
+                            FmtVid(self.func, op_vid, true)
                         );
                     }
                     _ => {}
@@ -550,7 +538,7 @@ impl<'b> VerifyFunc<'b> {
     }
 }
 
-pub fn verify_func(func: &Func, flags: &Flags, strings: &StringInterner) {
-    let mut verify = VerifyFunc::new(func, flags, strings);
+pub fn verify_func(func: &Func, flags: &Flags) {
+    let mut verify = VerifyFunc::new(func, flags);
     verify.verify_func_body();
 }

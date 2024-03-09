@@ -278,7 +278,7 @@ impl LowerInstrs<'_> {
         // if %n jmp b1 else b2
 
         let loc = args.loc;
-        let iter_lid = iter_var_name(args.iter_id, &builder.strings);
+        let iter_lid = iter_var_name(args.iter_id);
 
         let iter_var = builder.emit(Textual::deref(iter_lid));
 
@@ -312,7 +312,7 @@ impl LowerInstrs<'_> {
         // if %n jmp b1 else b2
 
         let loc = args.loc;
-        let iter_lid = iter_var_name(args.iter_id, &builder.strings);
+        let iter_lid = iter_var_name(args.iter_id);
 
         let value_var = builder.emit(Textual::deref(args.value_lid()));
 
@@ -357,7 +357,7 @@ impl LowerInstrs<'_> {
 
         let mut ops = Vec::new();
 
-        let name = format!("{}", name.display(&builder.strings));
+        let name = format!("{}", name.display());
         let name = GlobalId::new(ir::intern(format!(
             "memocache::{}",
             crate::util::escaped_ident(name.into())
@@ -788,7 +788,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 Instr::tombstone()
             }
             Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
-                let lid = iter_var_name(id, &builder.strings);
+                let lid = iter_var_name(id);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
                 builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
             }
@@ -962,7 +962,7 @@ fn rewrite_nullsafe_call(
     }
 }
 
-fn iter_var_name(id: ir::IterId, _: &ir::StringInterner) -> LocalId {
+fn iter_var_name(id: ir::IterId) -> LocalId {
     let name = ir::intern(format!("iter{}", id.idx));
     LocalId::Named(name)
 }
@@ -978,7 +978,7 @@ fn rewrite_constant_type_check(
 ) -> Option<Instr> {
     let typestruct = lookup_constant(&builder.func, typestruct)?;
     let typestruct = match typestruct {
-        Constant::Array(tv) => TypeStruct::try_from_typed_value(tv, &builder.strings)?,
+        Constant::Array(tv) => TypeStruct::try_from_typed_value(tv)?,
         _ => return None,
     };
     match typestruct {

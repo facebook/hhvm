@@ -31,7 +31,6 @@ use crate::mangle::FunctionName;
 use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
 use crate::mangle::VarName;
-use crate::state::UnitState;
 use crate::textual::FieldAttribute;
 use crate::textual::TextualFile;
 use crate::types::convert_ty;
@@ -41,14 +40,10 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// Classes are defined as:
 ///
 /// type NAME = [ properties*; ]
-pub(crate) fn write_class(
-    txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
-    class: ir::Class,
-) -> Result {
+pub(crate) fn write_class(txf: &mut TextualFile<'_>, class: ir::Class) -> Result {
     trace!("Convert Class {}", class.name);
-    let class = crate::lower::lower_class(class, Arc::clone(&unit_state.strings));
-    let mut state = ClassState::new(txf, unit_state, class);
+    let class = crate::lower::lower_class(class);
+    let mut state = ClassState::new(txf, class);
     state.write_class()
 }
 
@@ -75,11 +70,10 @@ struct ClassState<'a, 'b> {
     class: ir::Class,
     needs_factory: bool,
     txf: &'a mut TextualFile<'b>,
-    unit_state: &'a mut UnitState,
 }
 
 impl<'a, 'b> ClassState<'a, 'b> {
-    fn new(txf: &'a mut TextualFile<'b>, unit_state: &'a mut UnitState, class: ir::Class) -> Self {
+    fn new(txf: &'a mut TextualFile<'b>, class: ir::Class) -> Self {
         let needs_factory = !class.flags.is_interface()
             && !class.flags.is_trait()
             && !class.flags.is_enum()
@@ -88,7 +82,6 @@ impl<'a, 'b> ClassState<'a, 'b> {
             class,
             needs_factory,
             txf,
-            unit_state,
         }
     }
 }
@@ -234,7 +227,7 @@ impl ClassState<'_, '_> {
             }
         }
 
-        let ty = convert_ty(&type_info.enforced, &self.unit_state.strings);
+        let ty = convert_ty(&type_info.enforced);
 
         fields.push(textual::Field {
             name,
@@ -301,15 +294,9 @@ impl ClassState<'_, '_> {
         });
 
         if method.func.attrs.is_abstract() {
-            func::write_func_decl(
-                self.txf,
-                self.unit_state,
-                this_ty,
-                method.func,
-                Arc::new(func_info),
-            )?;
+            func::write_func_decl(self.txf, this_ty, method.func, Arc::new(func_info))?;
         } else {
-            func::lower_and_write_func(self.txf, self.unit_state, this_ty, method.func, func_info)?;
+            func::lower_and_write_func(self.txf, this_ty, method.func, func_info)?;
         }
 
         Ok(())

@@ -6,7 +6,6 @@
 use std::cmp::Ordering;
 use std::fmt;
 
-use ir::StringInterner;
 use naming_special_names_rust::members;
 
 use crate::class::IsStatic;
@@ -15,7 +14,7 @@ pub(crate) const TOP_LEVELS_CLASS: &str = "$root";
 
 /// Used for things that can mangle themselves directly.
 pub(crate) trait Mangle {
-    fn mangle(&self, strings: &StringInterner) -> String;
+    fn mangle(&self) -> String;
 }
 
 fn is_textual_ident(name: &[u8]) -> bool {
@@ -36,7 +35,7 @@ fn add_mangling_prefix(name: &[u8]) -> String {
 }
 
 impl Mangle for [u8] {
-    fn mangle(&self, _strings: &StringInterner) -> String {
+    fn mangle(&self) -> String {
         // Handle some reserved tokens.
         match self {
             b"declare" | b"define" | b"else" | b"extends" | b"false" | b"float" | b"global"
@@ -75,16 +74,16 @@ impl Mangle for [u8] {
 }
 
 impl Mangle for str {
-    fn mangle(&self, strings: &StringInterner) -> String {
-        self.as_bytes().mangle(strings)
+    fn mangle(&self) -> String {
+        self.as_bytes().mangle()
     }
 }
 
 // Classes and functions live in different namespaces.
 
 impl Mangle for ir::PropName {
-    fn mangle(&self, strings: &StringInterner) -> String {
-        self.as_bytes().mangle(strings)
+    fn mangle(&self) -> String {
+        self.as_bytes().mangle()
     }
 }
 
@@ -127,18 +126,18 @@ impl FieldName {
         FieldName::Raw(name.into_owned())
     }
 
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtFieldName(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtFieldName(self)
     }
 }
 
-struct FmtFieldName<'a>(&'a StringInterner, &'a FieldName);
+struct FmtFieldName<'a>(&'a FieldName);
 
 impl fmt::Display for FmtFieldName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtFieldName(strings, name) = *self;
+        let FmtFieldName(name) = *self;
         match name {
-            FieldName::Prop(p) => f.write_str(&p.as_bytes().mangle(strings)),
+            FieldName::Prop(p) => f.write_str(&p.as_bytes().mangle()),
             FieldName::Raw(s) => f.write_str(s),
         }
     }
@@ -168,13 +167,13 @@ impl FunctionName {
         Self::Method(TypeName::Unknown, method)
     }
 
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtFunctionName(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtFunctionName(self)
     }
 
-    pub(crate) fn cmp(&self, other: &Self, strings: &StringInterner) -> Ordering {
-        let a = self.display(strings).to_string();
-        let b = other.display(strings).to_string();
+    pub(crate) fn cmp(&self, other: &Self) -> Ordering {
+        let a = self.display().to_string();
+        let b = other.display().to_string();
         a.cmp(&b)
     }
 
@@ -189,18 +188,16 @@ impl FunctionName {
     }
 }
 
-struct FmtFunctionName<'a>(&'a StringInterner, &'a FunctionName);
+struct FmtFunctionName<'a>(&'a FunctionName);
 
 impl fmt::Display for FmtFunctionName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtFunctionName(strings, name) = *self;
+        let FmtFunctionName(name) = *self;
         match name {
             FunctionName::Builtin(b) => b.as_str().fmt(f)?,
-            FunctionName::Function(fid) => write!(
-                f,
-                "{TOP_LEVELS_CLASS}.{}",
-                fid.as_str().as_bytes().mangle(strings)
-            )?,
+            FunctionName::Function(fid) => {
+                write!(f, "{TOP_LEVELS_CLASS}.{}", fid.as_str().as_bytes().mangle())?
+            }
             FunctionName::Intrinsic(intrinsic) => {
                 let tn;
                 let (ty, name) = match intrinsic {
@@ -227,18 +224,13 @@ impl fmt::Display for FmtFunctionName<'_> {
                     }
                 };
                 if let Some(ty) = ty {
-                    write!(f, "{}.{}", ty.display(strings), name)?;
+                    write!(f, "{}.{}", ty.display(), name)?;
                 } else {
                     f.write_str(name)?;
                 }
             }
             FunctionName::Method(class, mid) => {
-                write!(
-                    f,
-                    "{}.{}",
-                    class.display(strings),
-                    mid.as_bytes().mangle(strings)
-                )?;
+                write!(f, "{}.{}", class.display(), mid.as_bytes().mangle())?;
             }
             FunctionName::Unmangled(s) => s.fmt(f)?,
         }
@@ -253,28 +245,28 @@ pub(crate) enum GlobalName {
 }
 
 impl GlobalName {
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtGlobalName(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtGlobalName(self)
     }
 
-    pub(crate) fn cmp(&self, other: &Self, strings: &StringInterner) -> Ordering {
-        let a = self.display(strings).to_string();
-        let b = other.display(strings).to_string();
+    pub(crate) fn cmp(&self, other: &Self) -> Ordering {
+        let a = self.display().to_string();
+        let b = other.display().to_string();
         a.cmp(&b)
     }
 }
 
-struct FmtGlobalName<'a>(&'a StringInterner, &'a GlobalName);
+struct FmtGlobalName<'a>(&'a GlobalName);
 
 impl fmt::Display for FmtGlobalName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtGlobalName(strings, name) = *self;
+        let FmtGlobalName(name) = *self;
         match name {
             GlobalName::Global(id) => {
-                write!(f, "global::{}", id.as_bytes().mangle(strings))
+                write!(f, "global::{}", id.as_bytes().mangle())
             }
             GlobalName::GlobalConst(id) => {
-                write!(f, "gconst::{}", id.as_bytes().mangle(strings))
+                write!(f, "gconst::{}", id.as_bytes().mangle())
             }
         }
     }
@@ -297,33 +289,28 @@ impl TypeName {
         }
     }
 
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtTypeName(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtTypeName(self)
     }
 }
 
-struct FmtTypeName<'a>(&'a StringInterner, &'a TypeName);
+struct FmtTypeName<'a>(&'a TypeName);
 
 impl fmt::Display for FmtTypeName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtTypeName(strings, name) = *self;
+        let FmtTypeName(name) = *self;
         match name {
-            TypeName::Class(cid) => f.write_str(&cid.as_str().as_bytes().mangle(strings)),
+            TypeName::Class(cid) => f.write_str(&cid.as_str().as_bytes().mangle()),
             TypeName::Curry(box FunctionName::Function(fid)) => {
-                write!(f, "{}$curry", fid.as_str().as_bytes().mangle(strings))
+                write!(f, "{}$curry", fid.as_str().as_bytes().mangle())
             }
             TypeName::Curry(box FunctionName::Method(ty, mid)) => {
-                write!(
-                    f,
-                    "{}_{}$curry",
-                    ty.display(strings),
-                    mid.as_bytes().mangle(strings)
-                )
+                write!(f, "{}_{}$curry", ty.display(), mid.as_bytes().mangle())
             }
             TypeName::Curry(_) => panic!("Unable to name curry type {name:?}"),
             TypeName::Unknown => f.write_str("?"),
             TypeName::StaticClass(cid) => {
-                f.write_str(&cid.as_str().as_bytes().mangle(strings))?;
+                f.write_str(&cid.as_str().as_bytes().mangle())?;
                 f.write_str("$static")
             }
             TypeName::UnmangledRef(s) => s.fmt(f),
@@ -342,8 +329,8 @@ impl VarName {
         Self::Global(s)
     }
 
-    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
-        FmtVarName(strings, self)
+    pub(crate) fn display<'r>(&'r self) -> impl fmt::Display + 'r {
+        FmtVarName(self)
     }
 }
 
@@ -353,26 +340,26 @@ impl From<ir::LocalId> for VarName {
     }
 }
 
-struct FmtVarName<'a>(&'a StringInterner, &'a VarName);
+struct FmtVarName<'a>(&'a VarName);
 
 impl fmt::Display for FmtVarName<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtVarName(strings, var) = *self;
+        let FmtVarName(var) = *self;
         match *var {
-            VarName::Global(ref s) => s.display(strings).fmt(f),
-            VarName::Local(lid) => FmtLid(strings, lid).fmt(f),
+            VarName::Global(ref s) => s.display().fmt(f),
+            VarName::Local(lid) => FmtLid(lid).fmt(f),
         }
     }
 }
 
-struct FmtLid<'a>(pub &'a StringInterner, pub ir::LocalId);
+struct FmtLid(pub ir::LocalId);
 
-impl fmt::Display for FmtLid<'_> {
+impl fmt::Display for FmtLid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtLid(strings, lid) = *self;
+        let FmtLid(lid) = *self;
         match lid {
             ir::LocalId::Named(id) => {
-                let name = id.as_str().mangle(strings);
+                let name = id.as_str().mangle();
                 f.write_str(&name)
             }
             ir::LocalId::Unnamed(id) => {

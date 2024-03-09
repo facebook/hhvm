@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use ir::analysis;
 use ir::instr;
 use ir::instr::HasLocals;
@@ -30,7 +28,6 @@ use log::trace;
 use smallvec::SmallVec;
 
 use crate::push_count::PushCount;
-use crate::strings::StringCache;
 
 /// Run through a Func and insert pushes and pops for instructions in
 /// preparation of emitting bytecode. In general no attempt is made to optimize
@@ -44,7 +41,7 @@ use crate::strings::StringCache;
 /// In the future we should probably have a pass that attempts to move common
 /// pushes up to common locations (so if there's a common push in both targets
 /// of a branch, move the push before the branch).
-pub(crate) fn run(func: Func, strings: &StringCache) -> Func {
+pub(crate) fn run(func: Func) -> Func {
     let liveness = analysis::LiveInstrs::compute(&func);
     trace!("LIVENESS: {liveness:?}");
 
@@ -52,9 +49,8 @@ pub(crate) fn run(func: Func, strings: &StringCache) -> Func {
     trace!("First temporary local is {}", next_temp_idx);
 
     let mut pusher = PushInserter {
-        builder: FuncBuilder::with_func(func, Arc::clone(&strings.interner)),
+        builder: FuncBuilder::with_func(func),
         liveness,
-        strings,
         next_temp_idx,
         instr_ids: Default::default(),
     };
@@ -79,15 +75,14 @@ struct BlockInput {
 
 /// Helper class to compute where we need to insert stack pushes and pops before
 /// we convert to bytecode.
-struct PushInserter<'b> {
+struct PushInserter {
     builder: FuncBuilder,
     liveness: analysis::LiveInstrs,
-    strings: &'b StringCache,
     next_temp_idx: usize,
     instr_ids: InstrIdMap<ir::LocalId>,
 }
 
-impl<'b> PushInserter<'b> {
+impl PushInserter {
     fn alloc_temp(&mut self, iid: InstrId) -> ir::LocalId {
         let temp = ir::LocalId::Unnamed(UnnamedLocalId::from_usize(self.next_temp_idx));
         self.next_temp_idx += 1;
@@ -128,7 +123,7 @@ impl<'b> PushInserter<'b> {
         for &iid in &dead_on_entry {
             // This iid is dead on entry to the block - we need to unset it.
             if let Some(lid) = self.consume_temp(iid) {
-                trace!("  UNSET {}", ir::print::FmtLid(lid, &self.strings.interner));
+                trace!("  UNSET {}", ir::print::FmtLid(lid,));
                 self.builder
                     .emit(Instr::Special(Special::IrToBc(IrToBc::UnsetL(lid))));
             }
@@ -158,7 +153,7 @@ impl<'b> PushInserter<'b> {
         trace!(
             "  INSTR {}: {}",
             iid,
-            ir::print::FmtInstr(&self.builder.func, &self.strings.interner, iid)
+            ir::print::FmtInstr(&self.builder.func, iid)
         );
 
         let instr = self.builder.func.instr(iid);
@@ -215,7 +210,7 @@ impl<'b> PushInserter<'b> {
         trace!(
             "  TERMINATOR {}: {}",
             iid,
-            ir::print::FmtInstr(&self.builder.func, &self.strings.interner, iid)
+            ir::print::FmtInstr(&self.builder.func, iid)
         );
 
         self.push_operands(iid);

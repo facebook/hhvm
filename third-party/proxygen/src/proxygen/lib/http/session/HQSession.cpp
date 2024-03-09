@@ -2146,7 +2146,7 @@ HQSession::createStreamTransport(quic::StreamId streamId) {
           getNumTxnServed(),
           std::move(codec),
           WheelTimerInstance(transactionsTimeout_, getEventBase()),
-          nullptr, /*   HTTPSessionStats* sessionStats_ */
+          sessionStats_,
           hqDefaultPriority,
           folly::none /* assocStreamId */));
   incrementSeqNo();

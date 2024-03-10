@@ -38,11 +38,11 @@ class HTTPCodecFactory {
     useStrictValidationFn_ = useStrictValidationFn;
   }
 
- protected:
   bool useStrictValidation() {
     return useStrictValidationFn_();
   }
 
+ protected:
   // Default to false for now to match existing behavior
   std::function<bool()> useStrictValidationFn_{[] { return false; }};
 };

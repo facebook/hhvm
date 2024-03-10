@@ -17,6 +17,19 @@ namespace proxygen { namespace hq {
 class HQMultiCodec : public HQControlCodec {
 
  public:
+  class Factory {
+   public:
+    static std::unique_ptr<HQMultiCodec> getCodec(
+        TransportDirection direction,
+        bool useStrictValidation,
+        const HeaderIndexingStrategy* strat) {
+      auto codec = std::make_unique<HQMultiCodec>(direction);
+      codec->setStrictValidation(useStrictValidation);
+      codec->getQPACKCodec().setHeaderIndexingStrategy(strat);
+      return codec;
+    }
+  };
+
   explicit HQMultiCodec(TransportDirection direction)
       : HQControlCodec(HTTPCodec::MaxStreamID,
                        direction,

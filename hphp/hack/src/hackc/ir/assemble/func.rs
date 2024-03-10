@@ -26,6 +26,7 @@ use ir_core::instr::Special;
 use ir_core::instr::Terminator;
 use ir_core::Block;
 use ir_core::BlockId;
+use ir_core::BytesId;
 use ir_core::CcParam;
 use ir_core::CcReified;
 use ir_core::CcThis;
@@ -54,7 +55,6 @@ use ir_core::StringId;
 use ir_core::SwitchKind;
 use ir_core::TParamBounds;
 use ir_core::TryCatchId;
-use ir_core::UnitBytesId;
 use ir_core::UnnamedLocalId;
 use ir_core::ValueId;
 use ir_core::Visibility;
@@ -123,7 +123,7 @@ enum OpKind {
     C,
     I(i64),
     L,
-    T(UnitBytesId),
+    T(BytesId),
     W,
 }
 
@@ -752,7 +752,7 @@ impl FunctionParser<'_> {
     ) -> Result<Instr> {
         tokenizer.expect_identifier("[")?;
 
-        let mut keys: Vec<UnitBytesId> = Vec::new();
+        let mut keys: Vec<BytesId> = Vec::new();
         let mut values: Vec<ValueId> = Vec::new();
 
         loop {
@@ -785,7 +785,7 @@ impl FunctionParser<'_> {
 
     fn parse_sswitch(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
         parse!(tokenizer, <cond:self.vid> "[" <cases:self.parse_sswitch_case,*> "]");
-        let (cases, targets): (Vec<UnitBytesId>, Vec<BlockId>) = cases.into_iter().unzip();
+        let (cases, targets): (Vec<BytesId>, Vec<BlockId>) = cases.into_iter().unzip();
         Ok(Instr::Terminator(Terminator::SSwitch {
             cond,
             cases: cases.into(),
@@ -808,10 +808,7 @@ impl FunctionParser<'_> {
         }))
     }
 
-    fn parse_sswitch_case(
-        &mut self,
-        tokenizer: &mut Tokenizer<'_>,
-    ) -> Result<(UnitBytesId, BlockId)> {
+    fn parse_sswitch_case(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<(BytesId, BlockId)> {
         parse!(tokenizer, <key:parse_string_id> "=>" <bid:parse_bid>);
         Ok((key, bid))
     }

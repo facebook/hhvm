@@ -1592,7 +1592,7 @@ pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Cons
     }
 }
 
-pub(crate) fn lookup_constant_string(func: &Func, vid: ValueId) -> Option<ir::UnitBytesId> {
+pub(crate) fn lookup_constant_string(func: &Func, vid: ValueId) -> Option<ir::BytesId> {
     match lookup_constant(func, vid) {
         Some(Constant::String(id)) => Some(*id),
         _ => None,

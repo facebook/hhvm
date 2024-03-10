@@ -8,11 +8,11 @@ use std::sync::Arc;
 use hash::IndexMap;
 use hash::IndexSet;
 
+use crate::BytesId;
 use crate::ClassName;
 use crate::Constant;
 use crate::FloatBits;
 use crate::TypeInfo;
-use crate::UnitBytesId;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TypedValue {
@@ -23,7 +23,7 @@ pub enum TypedValue {
     Keyset(KeysetValue),
     LazyClass(ClassName),
     Null,
-    String(UnitBytesId),
+    String(BytesId),
     Uninit,
     Vec(Vec<TypedValue>),
 }
@@ -59,7 +59,7 @@ impl TypedValue {
         }
     }
 
-    pub fn get_string(&self) -> Option<UnitBytesId> {
+    pub fn get_string(&self) -> Option<BytesId> {
         match self {
             TypedValue::String(str) => Some(*str),
             _ => None,
@@ -87,7 +87,7 @@ impl From<TypedValue> for Constant {
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ArrayKey {
     Int(i64),
-    String(UnitBytesId),
+    String(BytesId),
     LazyClass(ClassName),
 }
 

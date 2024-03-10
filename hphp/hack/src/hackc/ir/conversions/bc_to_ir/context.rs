@@ -161,7 +161,7 @@ impl<'b> Context<'b> {
         }
     }
 
-    pub(crate) fn intern_bytes_id(&mut self, s: BytesId) -> ir::UnitBytesId {
+    pub(crate) fn intern_bytes_id(&mut self, s: BytesId) -> BytesId {
         s
     }
 

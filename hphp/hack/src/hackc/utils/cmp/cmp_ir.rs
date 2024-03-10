@@ -391,16 +391,16 @@ fn cmp_hack_constant(a: &HackConstant, b: &HackConstant) -> Result {
     Ok(())
 }
 
-fn cmp_id(a: UnitBytesId, b: UnitBytesId) -> Result {
+fn cmp_id(a: BytesId, b: BytesId) -> Result {
     match (a, b) {
-        (UnitBytesId::EMPTY, UnitBytesId::EMPTY) => {}
-        (UnitBytesId::EMPTY, b) => {
+        (BytesId::EMPTY, BytesId::EMPTY) => {}
+        (BytesId::EMPTY, b) => {
             let b = b.as_bytes();
-            bail!("UnitBytesId NONE vs \"{}\"", String::from_utf8_lossy(&b));
+            bail!("BytesId NONE vs \"{}\"", String::from_utf8_lossy(b));
         }
-        (a, UnitBytesId::EMPTY) => {
+        (a, BytesId::EMPTY) => {
             let a = a.as_bytes();
-            bail!("UnitBytesId \"{}\" vs NONE", String::from_utf8_lossy(&a));
+            bail!("BytesId \"{}\" vs NONE", String::from_utf8_lossy(a));
         }
         (a, b) => {
             cmp_eq(a, b)?;

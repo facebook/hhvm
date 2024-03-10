@@ -18,11 +18,11 @@ use ir::print::FmtLocId;
 use ir::print::FmtRawBid;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
+use ir::BytesId;
 use ir::FCallArgsFlags;
 use ir::Instr;
 use ir::LocalId;
 use ir::TryCatchId;
-use ir::UnitBytesId;
 use ir::ValueId;
 use log::trace;
 
@@ -1148,7 +1148,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
         Opcode::NewStructDict(keys) => {
-            let keys: Box<[UnitBytesId]> = keys.iter().copied().collect();
+            let keys: Box<[BytesId]> = keys.iter().copied().collect();
             let values = collect_args(ctx, keys.len() as u32);
             Action::Push(Instr::Hhbc(Hhbc::NewStructDict(keys, values.into(), loc)))
         }

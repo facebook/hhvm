@@ -334,7 +334,7 @@ impl Display for FmtIdentifier<'_> {
     }
 }
 
-pub(crate) struct FmtIdentifierId(pub UnitBytesId);
+pub(crate) struct FmtIdentifierId(pub BytesId);
 
 impl Display for FmtIdentifierId {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -602,7 +602,7 @@ impl Display for FmtQuotedStr<'_> {
     }
 }
 
-pub(crate) struct FmtQuotedStringId(pub(crate) UnitBytesId);
+pub(crate) struct FmtQuotedStringId(pub(crate) BytesId);
 
 impl Display for FmtQuotedStringId {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

@@ -5,12 +5,12 @@ use std::sync::Arc;
 use hhvm_types_ffi::Attr;
 
 use crate::instr::HasOperands;
+use crate::BytesId;
 use crate::ClassName;
 use crate::CollectionType;
 use crate::ConstName;
 use crate::FloatBits;
 use crate::TypedValue;
-use crate::UnitBytesId;
 use crate::ValueId;
 
 /// A constant value.
@@ -19,7 +19,7 @@ pub enum Constant {
     Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
-    EnumClassLabel(UnitBytesId),
+    EnumClassLabel(BytesId),
     File,
     Float(FloatBits),
     FuncCred,
@@ -29,7 +29,7 @@ pub enum Constant {
     Named(ConstName),
     NewCol(CollectionType),
     Null,
-    String(UnitBytesId),
+    String(BytesId),
     Uninit,
 }
 

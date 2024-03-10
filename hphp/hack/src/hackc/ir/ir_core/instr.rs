@@ -12,6 +12,7 @@ use strum::Display;
 use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::BlockId;
+use crate::BytesId;
 use crate::ClassGetCMode;
 use crate::ClassName;
 use crate::CollectionType;
@@ -42,7 +43,6 @@ use crate::StringId;
 use crate::SwitchKind;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
-use crate::UnitBytesId;
 use crate::ValueId;
 use crate::VarId;
 
@@ -191,7 +191,7 @@ pub enum Terminator {
     },
     SSwitch {
         cond: ValueId,
-        cases: Box<[UnitBytesId]>,
+        cases: Box<[BytesId]>,
         targets: Box<[BlockId]>,
         loc: LocId,
     },
@@ -513,7 +513,7 @@ pub enum Hhbc {
     #[has_operands(none)]
     NewObjS(SpecialClsRef, LocId),
     NewPair([ValueId; 2], LocId),
-    NewStructDict(Box<[UnitBytesId]>, Box<[ValueId]>, LocId),
+    NewStructDict(Box<[BytesId]>, Box<[ValueId]>, LocId),
     NewVec(Box<[ValueId]>, LocId),
     Not(ValueId, LocId),
     #[has_locals(none)]
@@ -940,7 +940,7 @@ pub enum MemberKey {
     EL,
     // literal string as index
     //   $a["hello"]
-    ET(UnitBytesId),
+    ET(BytesId),
     // cell from stack as property
     //   $a->(foo())
     PC,
@@ -1157,7 +1157,7 @@ pub enum Textual {
     #[has_operands(none)]
     #[has_loc(none)]
     #[has_locals(none)]
-    String(UnitBytesId),
+    String(BytesId),
 }
 
 impl Textual {

@@ -14,6 +14,7 @@ use ir_core::Attribute;
 use ir_core::BareThisOp;
 use ir_core::BaseType;
 use ir_core::BlockId;
+use ir_core::BytesId;
 use ir_core::ClassGetCMode;
 use ir_core::ClassName;
 use ir_core::CollectionType;
@@ -50,7 +51,6 @@ use ir_core::TypeInfo;
 use ir_core::TypeStructEnforceKind;
 use ir_core::TypeStructResolveOp;
 use ir_core::TypedValue;
-use ir_core::UnitBytesId;
 use ir_core::Visibility;
 use parse_macro_ir::parse;
 
@@ -690,7 +690,7 @@ pub(crate) fn parse_silence_op(tokenizer: &mut Tokenizer<'_>) -> Result<SilenceO
     })
 }
 
-pub(crate) fn parse_string_id(tokenizer: &mut Tokenizer<'_>) -> Result<UnitBytesId> {
+pub(crate) fn parse_string_id(tokenizer: &mut Tokenizer<'_>) -> Result<BytesId> {
     let name = tokenizer.expect_any_string()?;
     let name = name.unescaped_string()?;
     Ok(ir_core::intern_bytes(name))

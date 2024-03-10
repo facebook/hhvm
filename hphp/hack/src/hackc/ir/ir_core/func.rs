@@ -13,6 +13,7 @@ use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
+use crate::BytesId;
 use crate::ClassName;
 use crate::ClassNameMap;
 use crate::Coeffects;
@@ -29,22 +30,21 @@ use crate::MethodFlags;
 use crate::MethodName;
 use crate::StringId;
 use crate::TypeInfo;
-use crate::UnitBytesId;
 use crate::ValueId;
 use crate::ValueIdMap;
 use crate::Visibility;
 
 #[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
-pub struct Filename(pub UnitBytesId);
+pub struct Filename(pub BytesId);
 
 impl Default for Filename {
     fn default() -> Self {
-        Self(UnitBytesId::EMPTY)
+        Self(BytesId::EMPTY)
     }
 }
 
 impl Filename {
-    pub const NONE: Filename = Filename(UnitBytesId::EMPTY);
+    pub const NONE: Filename = Filename(BytesId::EMPTY);
 }
 
 #[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]

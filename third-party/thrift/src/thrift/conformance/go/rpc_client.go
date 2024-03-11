@@ -60,7 +60,7 @@ func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClie
 		return nil, fmt.Errorf("unable to connect to %s", addr)
 	}
 	proto := thrift.NewHeaderProtocol(thrift.NewHeaderTransport(transport))
-	return rpc.NewRPCConformanceServiceClient(transport, proto, proto), nil
+	return rpc.NewRPCConformanceServiceClientFromProtocol(proto), nil
 }
 
 func (t *rpcClientConformanceTester) execute() {
@@ -105,11 +105,11 @@ func (t *rpcClientConformanceTester) RequestResponseBasic() error {
 		return err
 	}
 
-	responseValue := rpc.NewRequestResponseBasicClientTestResult_().
+	responseValue := rpc.NewRequestResponseBasicClientTestResult().
 		SetResponse(response)
-	clientTestResult := rpc.NewClientTestResult_().
+	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseBasic(responseValue)
-	return t.client.SendTestResult_(clientTestResult)
+	return t.client.SendTestResult(clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
@@ -118,10 +118,10 @@ func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
 		return err
 	}
 
-	responseValue := rpc.NewRequestResponseNoArgVoidResponseClientTestResult_()
-	clientTestResult := rpc.NewClientTestResult_().
+	responseValue := rpc.NewRequestResponseNoArgVoidResponseClientTestResult()
+	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseNoArgVoidResponse(responseValue)
-	return t.client.SendTestResult_(clientTestResult)
+	return t.client.SendTestResult(clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseTimeout() error {
@@ -135,11 +135,11 @@ func (t *rpcClientConformanceTester) RequestResponseDeclaredException() error {
 		t.instruction.RequestResponseDeclaredException.Request,
 	)
 
-	responseValue := rpc.NewRequestResponseDeclaredExceptionClientTestResult_().
+	responseValue := rpc.NewRequestResponseDeclaredExceptionClientTestResult().
 		SetUserException(err.(*rpc.UserException))
-	clientTestResult := rpc.NewClientTestResult_().
+	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseDeclaredException(responseValue)
-	return t.client.SendTestResult_(clientTestResult)
+	return t.client.SendTestResult(clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseUndeclaredException() error {
@@ -147,9 +147,9 @@ func (t *rpcClientConformanceTester) RequestResponseUndeclaredException() error 
 		t.instruction.RequestResponseUndeclaredException.Request,
 	)
 
-	responseValue := rpc.NewRequestResponseUndeclaredExceptionClientTestResult_().
+	responseValue := rpc.NewRequestResponseUndeclaredExceptionClientTestResult().
 		SetExceptionMessage(err.Error())
-	clientTestResult := rpc.NewClientTestResult_().
+	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseUndeclaredException(responseValue)
-	return t.client.SendTestResult_(clientTestResult)
+	return t.client.SendTestResult(clientTestResult)
 }

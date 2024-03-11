@@ -10,7 +10,6 @@
 (** Check member access, both static and instance.
  *   [obj_pos] is position of the object expression i.e. expr in expr->m
  *   [is_method] is true if this is a method invocation rather than property access
- *   [inst_meth] is true if this is an inst_meth expression
  *   [nullsafe] is Some r for null-safe calls such as expr?->m
  *   [parent_ty] is the type of the parent, in the case of a parent call (class_id = CIparent)
  *   [explicit_targs]  is a list of explicit type argument expressions, if present
@@ -20,7 +19,6 @@
 val obj_get :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
-  inst_meth:bool ->
   meth_caller:bool ->
   nullsafe:Typing_reason.t option ->
   coerce_from_ty:
@@ -41,7 +39,6 @@ val obj_get :
 val obj_get_with_mismatches :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
-  inst_meth:bool ->
   meth_caller:bool ->
   nullsafe:Typing_reason.t option ->
   coerce_from_ty:

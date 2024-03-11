@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b89ad7650c339b7909f5d78cb651ba0>>
+// @generated SignedSource<<36ca1abf5b9ac8383a048d42f94a5c54>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -323,10 +323,8 @@ pub enum Typing {
     ParentUndefined = 4076,
     PreviousDefault = 4077,
     PrivateClassMeth = 4078,
-    PrivateInstMeth = 4079,
     PrivateOverride = 4080,
     ProtectedClassMeth = 4081,
-    ProtectedInstMeth = 4082,
     ReadBeforeWrite = 4083,
     ReturnInVoid = 4084,
     ShapeFieldClassMismatch = 4085,

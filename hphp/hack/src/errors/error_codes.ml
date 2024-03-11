@@ -365,10 +365,10 @@ module Typing = struct
     | ParentUndefined [@value 4076]
     | PreviousDefault [@value 4077]
     | PrivateClassMeth [@value 4078]
-    | PrivateInstMeth [@value 4079]
+    (* | PrivateInstMethDEPRECATED [@value 4079] *)
     | PrivateOverride [@value 4080]
     | ProtectedClassMeth [@value 4081]
-    | ProtectedInstMeth [@value 4082]
+    (* | ProtectedInstMethDEPRECATED [@value 4082] *)
     | ReadBeforeWrite [@value 4083]
     | ReturnInVoid [@value 4084]
     | ShapeFieldClassMismatch [@value 4085]

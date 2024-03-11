@@ -328,19 +328,6 @@ let check_expression_tree_vis ~use_pos ~def_pos env vis =
   else
     None
 
-let check_inst_meth_access ~use_pos ~def_pos vis =
-  let open Typing_error in
-  match vis with
-  | Vprivate _ ->
-    Some
-      (primary
-      @@ Primary.Private_inst_meth { decl_pos = def_pos; pos = use_pos })
-  | Vprotected _ ->
-    Some
-      (primary
-      @@ Primary.Protected_inst_meth { decl_pos = def_pos; pos = use_pos })
-  | _ -> None
-
 let check_meth_caller_access ~use_pos ~def_pos vis =
   let open Typing_error in
   match vis with

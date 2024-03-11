@@ -893,7 +893,6 @@ let xhp_attribute_decl_ty env sid obj attr =
     TOG.obj_get
       ~obj_pos:(fst sid)
       ~is_method:false
-      ~inst_meth:false
       ~meth_caller:false
       ~nullsafe:None
       ~coerce_from_ty:None
@@ -3197,7 +3196,6 @@ end = struct
         TOG.obj_get
           ~obj_pos:pe
           ~is_method:true
-          ~inst_meth:false
           ~meth_caller:false
           ~nullsafe:None
           ~coerce_from_ty:None
@@ -3404,7 +3402,6 @@ end = struct
             ~obj_pos:pos
             ~is_method:true
             ~nullsafe:None
-            ~inst_meth:false
             ~meth_caller:true
             ~coerce_from_ty:None
             ~explicit_targs:[]
@@ -5318,7 +5315,6 @@ end = struct
            * defined on the parent class, but $this is still the child class.
            *)
           TOG.obj_get
-            ~inst_meth:false
             ~meth_caller:false
             ~is_method:true
             ~nullsafe:None
@@ -5738,7 +5734,6 @@ end = struct
         TOG.obj_get_with_mismatches
           ~obj_pos:p1
           ~is_method:true
-          ~inst_meth:false
           ~meth_caller:false
           ~nullsafe:(Option.map ~f:(fun p -> Reason.Rnullsafe_op p) nullsafe)
           ~coerce_from_ty:None
@@ -10188,7 +10183,6 @@ end = struct
       TOG.obj_get
         ~obj_pos
         ~is_method:true
-        ~inst_meth:false
         ~meth_caller:false
         ~nullsafe:None
         ~coerce_from_ty:None
@@ -10449,7 +10443,6 @@ end = struct
             ~obj_pos:p1
             ~is_method:false
             ~nullsafe
-            ~inst_meth:false
             ~meth_caller:false
             ~coerce_from_ty:(Some (p, ur, ty2))
             ~explicit_targs:[]

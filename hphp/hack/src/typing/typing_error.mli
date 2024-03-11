@@ -975,14 +975,6 @@ module Primary : sig
       }
     | This_var_outside_class of Pos.t
     | Unbound_global of Pos.t
-    | Private_inst_meth of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
-      }
-    | Protected_inst_meth of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
-      }
     | Private_meth_caller of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;

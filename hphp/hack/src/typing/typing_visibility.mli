@@ -37,12 +37,6 @@ val check_top_level_access :
   string option ->
   Typing_error.t option
 
-val check_inst_meth_access :
-  use_pos:Pos.t ->
-  def_pos:Pos_or_decl.t ->
-  ce_visibility ->
-  Typing_error.t option
-
 val check_meth_caller_access :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->

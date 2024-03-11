@@ -39,7 +39,6 @@ let merge_ty_err
 
 (** Common arguments to internal `obj_get_...` functions *)
 type obj_get_args = {
-  inst_meth: bool;
   meth_caller: bool;
   is_method: bool;
   is_nonnull: bool;
@@ -710,10 +709,6 @@ and obj_get_concrete_class_with_member_info
       else
         None);
       TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
-      (if args.inst_meth then
-        TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis
-      else
-        None);
       (if
        args.meth_caller
        && TypecheckerOptions.meth_caller_only_public_visibility
@@ -1408,7 +1403,6 @@ and obj_get_inner_intersection args env on_error id reason tys =
 let obj_get_with_mismatches_helper
     ~obj_pos
     ~is_method
-    ~inst_meth
     ~meth_caller
     ~nullsafe
     ~coerce_from_ty
@@ -1463,7 +1457,6 @@ let obj_get_with_mismatches_helper
   let is_parent_call = Nast.equal_class_id_ class_id Aast.CIparent in
   let args =
     {
-      inst_meth;
       meth_caller;
       is_method;
       nullsafe;
@@ -1512,7 +1505,6 @@ let obj_get_with_mismatches_helper
 let obj_get_with_mismatches
     ~obj_pos
     ~is_method
-    ~inst_meth
     ~meth_caller
     ~nullsafe
     ~coerce_from_ty
@@ -1527,7 +1519,6 @@ let obj_get_with_mismatches
     obj_get_with_mismatches_helper
       ~obj_pos
       ~is_method
-      ~inst_meth
       ~meth_caller
       ~nullsafe
       ~coerce_from_ty
@@ -1613,7 +1604,6 @@ let obj_get_with_mismatches
       obj_get_with_mismatches_helper
         ~obj_pos
         ~is_method
-        ~inst_meth
         ~meth_caller
         ~nullsafe
         ~coerce_from_ty
@@ -1639,7 +1629,6 @@ let obj_get_with_mismatches
 let obj_get
     ~obj_pos
     ~is_method
-    ~inst_meth
     ~meth_caller
     ~nullsafe
     ~coerce_from_ty
@@ -1654,7 +1643,6 @@ let obj_get
     obj_get_with_mismatches
       ~obj_pos
       ~is_method
-      ~inst_meth
       ~meth_caller
       ~nullsafe
       ~coerce_from_ty

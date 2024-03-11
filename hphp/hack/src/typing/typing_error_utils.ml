@@ -3880,26 +3880,6 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let private_inst_meth use_pos def_pos =
-    ( Error_code.PrivateInstMeth,
-      lazy
-        ( use_pos,
-          "You cannot use this method with `inst_meth` (whether you are in the same class or not)."
-        ),
-      lazy [(def_pos, "It is declared as `private` here")],
-      [],
-      User_error_flags.empty )
-
-  let protected_inst_meth use_pos def_pos =
-    ( Error_code.ProtectedInstMeth,
-      lazy
-        ( use_pos,
-          "You cannot use this method with `inst_meth` (whether you are in the same class hierarchy or not)."
-        ),
-      lazy [(def_pos, "It is declared as `protected` here")],
-      [],
-      User_error_flags.empty )
-
   let private_meth_caller use_pos def_pos =
     ( Error_code.PrivateMethCaller,
       lazy
@@ -5271,8 +5251,6 @@ end = struct
     | Return_in_void { pos; decl_pos } -> return_in_void pos decl_pos
     | This_var_outside_class pos -> this_var_outside_class pos
     | Unbound_global pos -> unbound_global pos
-    | Private_inst_meth { pos; decl_pos } -> private_inst_meth pos decl_pos
-    | Protected_inst_meth { pos; decl_pos } -> protected_inst_meth pos decl_pos
     | Private_meth_caller { pos; decl_pos } -> private_meth_caller pos decl_pos
     | Protected_meth_caller { pos; decl_pos } ->
       protected_meth_caller pos decl_pos

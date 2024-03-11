@@ -5928,7 +5928,6 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~fail
-          ~nullsafe:None
           ity_sub
           (r, has_member_ty)
           env
@@ -6729,7 +6728,6 @@ and Has_member : sig
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    nullsafe:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
     Typing_defs.internal_type ->
     Typing_defs.Reason.t * Typing_defs.has_member ->
     Typing_env_types.env ->
@@ -6782,14 +6780,8 @@ end = struct
     | _ -> on_error
 
   let rec simplify_subtype_has_member
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~fail
-      ~nullsafe
-      ty_sub
-      (r, has_member_ty)
-      env =
+      ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub (r, has_member_ty) env
+      =
     let {
       hm_name = (name_pos, name_) as name;
       hm_type = member_ty;
@@ -6799,18 +6791,6 @@ end = struct
       has_member_ty
     in
     let is_method = Option.is_some explicit_targs in
-    (* If `nullsafe` is `Some _`, we are allowing the object type on LHS to be nullable. *)
-    let mk_maybe_nullable env ty =
-      match nullsafe with
-      | None -> (env, ty)
-      | Some r_null ->
-        let null_ty = MakeType.null r_null in
-        Typing_union.union_i env r_null ty null_ty
-    in
-    let (env, maybe_nullable_ty_super) =
-      let ty_super = mk_constraint_type (r, Thas_member has_member_ty) in
-      mk_maybe_nullable env (ConstraintType ty_super)
-    in
 
     Logging.log_subtype_i
       ~level:2
@@ -6818,7 +6798,7 @@ end = struct
       ~function_name:"simplify_subtype_has_member"
       env
       ty_sub
-      maybe_nullable_ty_super;
+      (ConstraintType (mk_constraint_type (r, Thas_member has_member_ty)));
     let (env, ety_sub) = Env.expand_internal_type env ty_sub in
     let default_subtype_help env =
       Subtype.default_subtype
@@ -6829,7 +6809,7 @@ end = struct
         ~fail
         env
         ety_sub
-        maybe_nullable_ty_super
+        (ConstraintType (mk_constraint_type (r, Thas_member has_member_ty)))
     in
     match ety_sub with
     | ConstraintType cty ->
@@ -6914,7 +6894,6 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~fail
-          ~nullsafe
           (LoclType newtype_ty)
           (r, has_member_ty)
           env
@@ -6935,7 +6914,7 @@ end = struct
             ~is_method
             ~meth_caller:false
             ~coerce_from_ty:None
-            ~nullsafe
+            ~nullsafe:None
             ~explicit_targs
             ~class_id
             ~member_id:name

@@ -208,6 +208,17 @@ func (t *HeaderProtocol) GetFlags() HeaderFlags {
 	return t.trans.GetFlags()
 }
 
+// Deprecated: SetFlags() is a deprecated method.
+func (p *HeaderProtocol) SetFlags(flags HeaderFlags) {
+	p.trans.SetFlags(flags)
+}
+
 func (p *HeaderProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
+}
+
+// Deprecated: HeaderProtocolFlags is a deprecated type, temporarily introduced to ease transition to new API.
+type HeaderProtocolFlags interface {
+	GetFlags() HeaderFlags
+	SetFlags(flags HeaderFlags)
 }

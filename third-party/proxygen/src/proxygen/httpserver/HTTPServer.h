@@ -14,6 +14,7 @@
 #include <proxygen/httpserver/HTTPServerOptions.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/session/HTTPSession.h>
+#include <proxygen/lib/services/AcceptorConfiguration.h>
 #include <thread>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -83,6 +84,11 @@ class HTTPServer final {
     folly::Optional<folly::SocketOptionMap> acceptorSocketOptions;
   };
 
+  struct AcceptorFactoryConfig {
+    AcceptorConfiguration accConfig;
+    std::shared_ptr<HTTPCodecFactory> codecFactory;
+  };
+
   /**
    * Create a new HTTPServer
    */
@@ -114,7 +120,7 @@ class HTTPServer final {
    * `onError` callback will be invoked if some errors occurs while starting the
    * server instead of throwing exception.
    *
-   * `acceptorfactory` will be used as the acceptor factory if it is set.
+   * `getAcceptorFactory` will be used to get the acceptor factory if it is set.
    * Otherwise, we will create an HTTPAcceptorFactory.
    *
    * `ioExecutor` will be used for for IO threads if it is set. Otherwise, we
@@ -123,7 +129,8 @@ class HTTPServer final {
   void start(
       std::function<void()> onSuccess = nullptr,
       std::function<void(std::exception_ptr)> onError = nullptr,
-      std::shared_ptr<wangle::AcceptorFactory> acceptorFactory = nullptr,
+      std::function<std::shared_ptr<wangle::AcceptorFactory>(
+          AcceptorFactoryConfig)> getAcceptorFactory = nullptr,
       std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor = nullptr);
 
   /**
@@ -184,13 +191,14 @@ class HTTPServer final {
   /**
    * Start TCP HTTP server.
    *
-   * @param acceptorFactory - the acceptor factory to use. If it is null, we
-   * will create one to use.
+   * @param getAcceptorFactory - provides the acceptor factory to use. If it is
+   * null we will create an HTTPAcceptorFactory.
    * @param executor - io executor to use for IO threads. If it is null, we will
    * create one to use.
    */
   folly::Expected<folly::Unit, std::exception_ptr> startTcpServer(
-      std::shared_ptr<wangle::AcceptorFactory> acceptorFactory,
+      const std::function<std::shared_ptr<wangle::AcceptorFactory>(
+          AcceptorFactoryConfig)>& getAcceptorFactory,
       std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor);
 
  private:

@@ -125,7 +125,8 @@ class HandlerCallbacks : public IOThreadPoolExecutorBase::IOObserver {
 };
 
 folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
-    std::shared_ptr<wangle::AcceptorFactory> inputAcceptorFactory,
+    const std::function<std::shared_ptr<wangle::AcceptorFactory>(
+        AcceptorFactoryConfig)>& getAcceptorFactory,
     std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor) {
   auto accExe = std::make_shared<IOThreadPoolExecutor>(1);
   if (!ioExecutor) {
@@ -140,22 +141,20 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
   try {
     FOR_EACH_RANGE(i, 0, addresses_.size()) {
       auto accConfig = HTTPServerAcceptor::makeConfig(addresses_[i], *options_);
-      // If user specified an acceptor factory to use, we will use it.
-      // Otherwise, we create one for each address.
-      auto acceptorFactory = inputAcceptorFactory;
-      if (!acceptorFactory) {
-        auto codecFactory = addresses_[i].codecFactory;
-        acceptorFactory = std::make_shared<AcceptorFactory>(
-            options_, codecFactory, accConfig, sessionInfoCb_);
-      }
+      auto codecFactory = addresses_[i].codecFactory;
+      auto acceptorFactory =
+          getAcceptorFactory
+              ? getAcceptorFactory({accConfig, std::move(codecFactory)})
+              : std::make_shared<AcceptorFactory>(
+                    options_, codecFactory, accConfig, sessionInfoCb_);
       bootstrap_.push_back(wangle::ServerBootstrap<wangle::DefaultPipeline>());
       bootstrap_[i].childHandler(acceptorFactory);
       bootstrap_[i].useZeroCopy(options_->useZeroCopy);
       if (accConfig.enableTCPFastOpen) {
-        // We need to do this because wangle's bootstrap has 2 acceptor configs
-        // and the socketConfig gets passed to the SocketFactory. The number of
-        // configs should really be one, and when that happens, we can remove
-        // this code path.
+        // We need to do this because wangle's bootstrap has 2 acceptor
+        // configs and the socketConfig gets passed to the SocketFactory. The
+        // number of configs should really be one, and when that happens, we
+        // can remove this code path.
         bootstrap_[i].socketConfig.enableTCPFastOpen = true;
         bootstrap_[i].socketConfig.fastOpenQueueSize =
             accConfig.fastOpenQueueSize;
@@ -182,11 +181,12 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
 void HTTPServer::start(
     std::function<void()> onSuccess,
     std::function<void(std::exception_ptr)> onError,
-    std::shared_ptr<wangle::AcceptorFactory> acceptorFactory,
+    std::function<std::shared_ptr<wangle::AcceptorFactory>(
+        AcceptorFactoryConfig)> getAcceptorFactory,
     std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor) {
   mainEventBase_ = EventBaseManager::get()->getEventBase();
 
-  auto tcpStarted = startTcpServer(acceptorFactory, ioExecutor);
+  auto tcpStarted = startTcpServer(getAcceptorFactory, ioExecutor);
   if (tcpStarted.hasError()) {
     if (onError) {
       onError(tcpStarted.error());
@@ -232,8 +232,8 @@ void HTTPServer::stop() {
 
   if (mainEventBase_) {
     // This HTTPServer object may be destoyed by the main thread once
-    // terminateLoopSoon() is called, so terminateLoopSoon() should be the last
-    // operation here.
+    // terminateLoopSoon() is called, so terminateLoopSoon() should be the
+    // last operation here.
     std::exchange(mainEventBase_, nullptr)->terminateLoopSoon();
   }
 }

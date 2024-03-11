@@ -104,7 +104,8 @@ class WaitableServerThread {
   }
 
   bool start(
-      std::shared_ptr<wangle::AcceptorFactory> acceptorFactory = nullptr,
+      std::function<std::shared_ptr<wangle::AcceptorFactory>(
+          HTTPServer::AcceptorFactoryConfig)> getAcceptorFactory = nullptr,
       std::shared_ptr<folly::IOThreadPoolExecutor> ioExecutor = nullptr) {
     bool throws = false;
     t_ = std::thread([&]() {
@@ -114,7 +115,7 @@ class WaitableServerThread {
                        server_ = nullptr;
                        barrier_.wait();
                      },
-                     acceptorFactory,
+                     getAcceptorFactory,
                      ioExecutor);
       baton_.wait();
     });
@@ -236,9 +237,11 @@ class AcceptorFactoryForTest : public wangle::AcceptorFactory {
 TEST(HttpServerStartStop, TestUseExistingAcceptorFactory) {
   HTTPServerOptions options;
   auto server = std::make_unique<HTTPServer>(std::move(options));
-  auto acceptorFactory = std::make_shared<AcceptorFactoryForTest>();
+  auto getAcceptorFactory = [](auto) {
+    return std::make_shared<AcceptorFactoryForTest>();
+  };
   auto st = std::make_unique<WaitableServerThread>(server.get());
-  EXPECT_TRUE(st->start(acceptorFactory));
+  EXPECT_TRUE(st->start(getAcceptorFactory));
 
   server->stop();
   // Let the WaitableServerThread exit

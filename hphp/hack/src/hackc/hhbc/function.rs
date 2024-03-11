@@ -56,16 +56,6 @@ impl Function {
         self.flags.contains(FunctionFlags::MEMOIZE_IMPL)
     }
 
-    pub fn with_body<F, T>(&mut self, body: Body, f: F) -> T
-    where
-        F: FnOnce() -> T,
-    {
-        let old_body = std::mem::replace(&mut self.body, body);
-        let ret = f();
-        self.body = old_body;
-        ret
-    }
-
     pub fn params(&self) -> &[Param] {
         self.body.params.as_ref()
     }

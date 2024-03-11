@@ -1007,14 +1007,6 @@ module Primary = struct
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Private_class_meth of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
-      }
-    | Protected_class_meth of {
-        pos: Pos.t;
-        decl_pos: Pos_or_decl.t;
-      }
     | Array_cast of Pos.t
     | String_cast of {
         pos: Pos.t;

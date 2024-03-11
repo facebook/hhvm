@@ -3900,26 +3900,6 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let private_class_meth use_pos def_pos =
-    ( Error_code.PrivateClassMeth,
-      lazy
-        ( use_pos,
-          "You cannot use this method with `class_meth` (whether you are in the same class or not)."
-        ),
-      lazy [(def_pos, "It is declared as `private` here")],
-      [],
-      User_error_flags.empty )
-
-  let protected_class_meth use_pos def_pos =
-    ( Error_code.ProtectedClassMeth,
-      lazy
-        ( use_pos,
-          "You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not)."
-        ),
-      lazy [(def_pos, "It is declared as `protected` here")],
-      [],
-      User_error_flags.empty )
-
   let array_cast pos =
     ( Error_code.ArrayCast,
       lazy
@@ -5254,9 +5234,6 @@ end = struct
     | Private_meth_caller { pos; decl_pos } -> private_meth_caller pos decl_pos
     | Protected_meth_caller { pos; decl_pos } ->
       protected_meth_caller pos decl_pos
-    | Private_class_meth { pos; decl_pos } -> private_class_meth pos decl_pos
-    | Protected_class_meth { pos; decl_pos } ->
-      protected_class_meth pos decl_pos
     | Array_cast pos -> array_cast pos
     | String_cast { pos; ty_name } -> string_cast pos @@ Lazy.force ty_name
     | Static_outside_class pos -> static_outside_class pos

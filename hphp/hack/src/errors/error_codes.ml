@@ -364,10 +364,10 @@ module Typing = struct
     | ParentOutsideClass [@value 4075]
     | ParentUndefined [@value 4076]
     | PreviousDefault [@value 4077]
-    | PrivateClassMeth [@value 4078]
+    (* | PrivateClassMethDEPRECATED [@value 4078] *)
     (* | PrivateInstMethDEPRECATED [@value 4079] *)
     | PrivateOverride [@value 4080]
-    | ProtectedClassMeth [@value 4081]
+    (* | ProtectedClassMethDEPRECATED [@value 4081] *)
     (* | ProtectedInstMethDEPRECATED [@value 4082] *)
     | ReadBeforeWrite [@value 4083]
     | ReturnInVoid [@value 4084]

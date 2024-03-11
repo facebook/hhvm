@@ -1050,7 +1050,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   if (runtimeServerActions_.checkComplete) {
     auto result = !runtimeDisableResourcePoolsSet();
     LOG(INFO)
-        << "runtimeResourcePoolsChecks() is aleady completed and result is "
+        << "runtimeResourcePoolsChecks() is already completed and result is "
         << result;
     return result;
   }

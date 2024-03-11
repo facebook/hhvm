@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <fmt/format.h>
@@ -55,15 +56,16 @@ class t_const_value {
     CV_IDENTIFIER
   };
 
-  t_const_value() : kind_(CV_BOOL), int_val_(0) {}
-  t_const_value(const t_const_value& other);
-  ~t_const_value() { reset(); }
+  t_const_value() : kind_(CV_BOOL), value_(int64_t()) {}
 
   explicit t_const_value(int64_t val) noexcept { set_integer(val); }
 
-  explicit t_const_value(std::string val) : kind_(CV_STRING) {
-    new (&string_val_) std::string(std::move(val));
-  }
+  explicit t_const_value(std::string val)
+      : kind_(CV_STRING), value_(std::string(std::move(val))) {}
+
+  t_const_value(const t_const_value&) = default;
+  t_const_value(t_const_value&&) = default;
+  t_const_value& operator=(t_const_value&&) = default;
 
   std::unique_ptr<t_const_value> clone() const {
     return std::make_unique<t_const_value>(*this);
@@ -81,14 +83,14 @@ class t_const_value {
 
   static std::unique_ptr<t_const_value> make_map() {
     auto value = std::make_unique<t_const_value>();
-    new (&value->map_val_) map_value();
+    value->value_ = map_value();
     value->kind_ = CV_MAP;
     return value;
   }
 
   static std::unique_ptr<t_const_value> make_list() {
     auto value = std::make_unique<t_const_value>();
-    new (&value->list_val_) list_value();
+    value->value_ = list_value();
     value->kind_ = CV_LIST;
     return value;
   }
@@ -97,17 +99,17 @@ class t_const_value {
 
   const std::string& get_string() const {
     check_kind(CV_STRING);
-    return string_val_;
+    return std::get<std::string>(value_);
   }
 
   const std::string& get_identifier() const {
     check_kind(CV_IDENTIFIER);
-    return string_val_;
+    return std::get<std::string>(value_);
   }
 
   void set_integer(int64_t val) {
     kind_ = CV_INTEGER;
-    int_val_ = val;
+    value_ = val;
   }
 
   int64_t get_integer() const {
@@ -115,53 +117,50 @@ class t_const_value {
       throw std::runtime_error(fmt::format(
           "invalid const value access: {}", fmt::underlying(kind_)));
     }
-    return int_val_;
+    return std::get<int64_t>(value_);
   }
 
   void set_double(double val) {
     kind_ = CV_DOUBLE;
-    double_val_ = val;
+    value_ = val;
   }
 
   double get_double() const {
     check_kind(CV_DOUBLE);
-    return double_val_;
+    return std::get<double>(value_);
   }
 
   void set_bool(bool val) {
     kind_ = CV_BOOL;
-    // Added to support backward compatibility with generators that
-    // look for the integer value to determine the boolean value
-    int_val_ = val;
+    // Bool is stored as an integer for compatibility with legacy generators.
+    value_ = static_cast<int64_t>(val);
   }
 
   bool get_bool() const {
     check_kind(CV_BOOL);
-    return int_val_ != 0;
+    return std::get<int64_t>(value_);
   }
 
   void add_map(
       std::unique_ptr<t_const_value> key, std::unique_ptr<t_const_value> val) {
     check_kind(CV_MAP);
-    map_val_.raw.emplace_back(key.get(), val.get());
-    map_val_.elements.emplace_back(std::move(key), std::move(val));
+    std::get<map_value>(value_).add(std::move(key), std::move(val));
   }
 
   const std::vector<std::pair<t_const_value*, t_const_value*>>& get_map()
       const {
     check_kind(CV_MAP);
-    return map_val_.raw;
+    return std::get<map_value>(value_).raw;
   }
 
   void add_list(std::unique_ptr<t_const_value> val) {
     check_kind(CV_LIST);
-    list_val_.raw.push_back(val.get());
-    list_val_.elements.push_back(std::move(val));
+    std::get<list_value>(value_).add(std::move(val));
   }
 
   const std::vector<t_const_value*>& get_list() const {
     check_kind(CV_LIST);
-    return list_val_.raw;
+    return std::get<list_value>(value_).raw;
   }
 
   // Returns list elements if this is a list or empty vector if this is a map.
@@ -177,15 +176,13 @@ class t_const_value {
 
   void convert_empty_map_to_list() {
     check_kind(CV_MAP);
-    reset();
-    new (&list_val_) list_value();
+    value_ = list_value();
     kind_ = CV_LIST;
   }
 
   void convert_empty_list_to_map() {
     check_kind(CV_LIST);
-    reset();
-    new (&map_val_) map_value();
+    value_ = map_value();
     kind_ = CV_MAP;
   }
 
@@ -194,11 +191,11 @@ class t_const_value {
   bool is_empty() const {
     switch (kind_) {
       case CV_MAP:
-        return map_val_.elements.empty();
+        return std::get<map_value>(value_).elements.empty();
       case CV_LIST:
-        return list_val_.elements.empty();
+        return std::get<list_value>(value_).elements.empty();
       case CV_STRING:
-        return string_val_.empty();
+        return std::get<std::string>(value_).empty();
       default:
         return false;
     }
@@ -244,20 +241,50 @@ class t_const_value {
         std::unique_ptr<t_const_value>>>
         elements;
     std::vector<std::pair<t_const_value*, t_const_value*>> raw;
+
+    void add(
+        std::unique_ptr<t_const_value> key,
+        std::unique_ptr<t_const_value> val) {
+      raw.emplace_back(key.get(), val.get());
+      elements.emplace_back(std::move(key), std::move(val));
+    }
+
+    map_value() = default;
+    map_value(map_value&&) = default;
+    map_value(const map_value& other) {
+      for (auto& elem : other.elements) {
+        add(elem.first->clone(), elem.second->clone());
+      }
+    }
+    map_value& operator=(map_value&&) = default;
   };
 
   struct list_value {
     std::vector<std::unique_ptr<t_const_value>> elements;
     std::vector<t_const_value*> raw;
+
+    void add(std::unique_ptr<t_const_value> val) {
+      raw.push_back(val.get());
+      elements.push_back(std::move(val));
+    }
+
+    list_value() = default;
+    list_value(list_value&&) = default;
+    list_value(const list_value& other) {
+      for (auto& elem : other.elements) {
+        add(elem->clone());
+      }
+    }
+    list_value& operator=(list_value&&) = default;
   };
 
-  union {
-    int64_t int_val_;
-    double double_val_;
-    std::string string_val_; // a string or an identifier
-    map_value map_val_;
-    list_value list_val_;
-  };
+  std::variant<
+      int64_t, // a bool or an integer
+      double,
+      std::string, // a string or an identifier
+      map_value,
+      list_value>
+      value_;
 
   t_const* owner_ = nullptr;
   const t_program* program_ = nullptr; // If this is an identifier, the program
@@ -279,16 +306,6 @@ class t_const_value {
           fmt::underlying(expected)));
     }
   }
-
-  // Replaces the contents of this value with other. CV is a qualified
-  // t_const_value and is a template parameter to enable forwarding and avoid
-  // duplication.
-  template <typename CV>
-  void do_assign(CV&& other);
-
-  void reset();
-
-  t_const_value& operator=(t_const_value&& other);
 
  public:
   // TODO(afuller): Delete everything below here. It is only provided for

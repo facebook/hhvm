@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the "hack" directory of this source tree.
 
+# pyre-unsafe
+
 # fixme.py -- Adds HH_FIXME annotations in your code to clean up after a new
 #             check in the typechecker or after an upgrade. Takes two arguments:
 #               1) A Filename, which is the output of `hh_client --json`.

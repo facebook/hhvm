@@ -1,3 +1,4 @@
+# pyre-unsafe
 import os
 
 import common_tests

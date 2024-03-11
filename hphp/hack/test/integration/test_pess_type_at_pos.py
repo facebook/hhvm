@@ -1,3 +1,4 @@
+# pyre-unsafe
 import common_tests
 from test_case import TestCase
 

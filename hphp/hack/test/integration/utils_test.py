@@ -1,3 +1,4 @@
+# pyre-unsafe
 import unittest
 
 from utils import interpolate_variables, uninterpolate_variables

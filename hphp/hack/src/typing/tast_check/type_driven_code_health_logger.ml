@@ -70,18 +70,25 @@ let is_toplevelish_dynamic env (ty, hint_opt) =
       None
   | _ -> None
 
+let log_explicit_dynamic env hint =
+  match is_toplevelish_dynamic env hint with
+  | Some pos -> log pos EXPLICIT_DYNAMIC
+  | None -> ()
+
+let log_callable_def env ret params =
+  log_explicit_dynamic env ret;
+  List.iter params ~f:(fun param ->
+      log_explicit_dynamic env param.Aast.param_type_hint)
+
 let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 
+    method! at_fun_ env Aast.{ f_ret; f_params; _ } =
+      log_callable_def env f_ret f_params
+
     method! at_method_ env Aast.{ m_ret; m_params; _ } =
-      let log hint =
-        match is_toplevelish_dynamic env hint with
-        | Some pos -> log pos EXPLICIT_DYNAMIC
-        | None -> ()
-      in
-      log m_ret;
-      List.iter m_params ~f:(fun param -> log param.Aast.param_type_hint)
+      log_callable_def env m_ret m_params
 
     method! at_expr _env (_, pos, expr) =
       if not @@ is_generated pos then

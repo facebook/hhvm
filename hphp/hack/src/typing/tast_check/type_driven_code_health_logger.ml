@@ -44,6 +44,10 @@ let create_handler _ctx =
       | Some (pos, _) when not @@ is_generated pos ->
         let rec is_toplevelish_dynamic ty =
           let (_env, ty) = Tast_env.expand_type env ty in
+          let ty =
+            Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
+          in
+          let (_env, ty) = Tast_env.expand_type env ty in
           match T.get_node ty with
           | T.Tdynamic -> true
           | T.Toption ty -> is_toplevelish_dynamic ty

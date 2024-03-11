@@ -35,41 +35,53 @@ let is_generated pos =
     ~substring:"generated"
     (Pos.to_relative_string pos |> Pos.filename)
 
+let is_toplevelish_dynamic env (ty, hint_opt) =
+  match hint_opt with
+  | Some (pos, _) when not @@ is_generated pos ->
+    let rec is_toplevelish_dynamic ty =
+      let (_env, ty) = Tast_env.expand_type env ty in
+      let ty =
+        Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
+      in
+      let (_env, ty) = Tast_env.expand_type env ty in
+      match T.get_node ty with
+      | T.Tdynamic -> true
+      | T.Toption ty -> is_toplevelish_dynamic ty
+      | T.Tclass ((_, id), _, [ty]) when String.equal id SN.Classes.cAwaitable
+        ->
+        is_toplevelish_dynamic ty
+      | T.Tclass ((_, id), _, [ty])
+        when List.mem
+               ~equal:String.equal
+               [SN.Collections.cVec; SN.Collections.cVector]
+               id ->
+        is_toplevelish_dynamic ty
+      | T.Tclass ((_, id), _, [_; ty])
+        when List.mem
+               ~equal:String.equal
+               [SN.Collections.cDict; SN.Collections.cMap]
+               id ->
+        is_toplevelish_dynamic ty
+      | _ -> false
+    in
+    if is_toplevelish_dynamic ty then
+      Some pos
+    else
+      None
+  | _ -> None
+
 let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_method_ env Aast.{ m_ret = (ty, hint_opt); _ } =
-      match hint_opt with
-      | Some (pos, _) when not @@ is_generated pos ->
-        let rec is_toplevelish_dynamic ty =
-          let (_env, ty) = Tast_env.expand_type env ty in
-          let ty =
-            Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
-          in
-          let (_env, ty) = Tast_env.expand_type env ty in
-          match T.get_node ty with
-          | T.Tdynamic -> true
-          | T.Toption ty -> is_toplevelish_dynamic ty
-          | T.Tclass ((_, id), _, [ty])
-            when String.equal id SN.Classes.cAwaitable ->
-            is_toplevelish_dynamic ty
-          | T.Tclass ((_, id), _, [ty])
-            when List.mem
-                   ~equal:String.equal
-                   [SN.Collections.cVec; SN.Collections.cVector]
-                   id ->
-            is_toplevelish_dynamic ty
-          | T.Tclass ((_, id), _, [_; ty])
-            when List.mem
-                   ~equal:String.equal
-                   [SN.Collections.cDict; SN.Collections.cMap]
-                   id ->
-            is_toplevelish_dynamic ty
-          | _ -> false
-        in
-        if is_toplevelish_dynamic ty then log pos EXPLICIT_DYNAMIC
-      | _ -> ()
+    method! at_method_ env Aast.{ m_ret; m_params; _ } =
+      let log hint =
+        match is_toplevelish_dynamic env hint with
+        | Some pos -> log pos EXPLICIT_DYNAMIC
+        | None -> ()
+      in
+      log m_ret;
+      List.iter m_params ~f:(fun param -> log param.Aast.param_type_hint)
 
     method! at_expr _env (_, pos, expr) =
       if not @@ is_generated pos then

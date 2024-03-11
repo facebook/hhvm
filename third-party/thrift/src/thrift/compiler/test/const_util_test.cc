@@ -34,17 +34,14 @@ std::unique_ptr<t_const_value> val(Enum val) {
 } // namespace
 
 TEST(ConstUtilTest, HydrateConst) {
-  auto outer = val();
-  outer->set_map();
+  auto outer = t_const_value::make_map();
   auto dbl = val();
   dbl->set_double(42.0);
   outer->add_map(val("floatField"), std::move(dbl));
 
-  auto list = val();
-  list->set_list();
+  auto list = t_const_value::make_list();
   list->add_list(val(42));
-  auto inner = val();
-  inner->set_map();
+  auto inner = t_const_value::make_map();
   inner->add_map(val("listField"), std::move(list));
   outer->add_map(val("unionField"), std::move(inner));
 
@@ -62,8 +59,7 @@ TEST(ConstUtilTest, ConstToValue) {
   auto str = val("foo");
   EXPECT_EQ(const_to_value(*str).as_string(), "foo");
 
-  auto map = val();
-  map->set_map();
+  auto map = t_const_value::make_map();
   map->add_map(val("answer"), val(42));
   auto value = const_to_value(*map);
   EXPECT_EQ(value.as_map().at(const_to_value(*val("answer"))).as_i64(), 42);

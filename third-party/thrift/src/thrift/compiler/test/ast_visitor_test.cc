@@ -44,8 +44,7 @@ class base_program_test : public testing::Test {
   }
 
   std::unique_ptr<t_const> create_const(const t_struct& type) {
-    auto value = std::make_unique<t_const_value>();
-    value->set_map();
+    auto value = t_const_value::make_map();
     value->set_ttype(type);
     return std::make_unique<t_const>(&program_, type, "", std::move(value));
   }

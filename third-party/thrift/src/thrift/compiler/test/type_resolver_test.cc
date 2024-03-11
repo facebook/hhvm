@@ -44,8 +44,7 @@ struct ref_builder : base_thrift_annotation_builder {
       : base_thrift_annotation_builder(p, lang, "Ref") {}
 
   std::unique_ptr<t_const> make(const int64_t type) {
-    auto map = std::make_unique<t_const_value>();
-    map->set_map();
+    auto map = t_const_value::make_map();
     map->add_map(make_string("type"), make_integer(type));
     return make_inst(std::move(map));
   }

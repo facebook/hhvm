@@ -45,24 +45,30 @@ void match_type_with_const_value(
   switch (type->get_type_value()) {
     case t_type::type::t_list: {
       auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-      for (auto list_val : value->get_list()) {
-        match_type_with_const_value(ctx, program, elem_type, list_val);
+      if (value->kind() == t_const_value::CV_LIST) {
+        for (auto list_val : value->get_list()) {
+          match_type_with_const_value(ctx, program, elem_type, list_val);
+        }
       }
       break;
     }
     case t_type::type::t_set: {
       auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
-      for (auto set_val : value->get_list()) {
-        match_type_with_const_value(ctx, program, elem_type, set_val);
+      if (value->kind() == t_const_value::CV_LIST) {
+        for (auto set_val : value->get_list()) {
+          match_type_with_const_value(ctx, program, elem_type, set_val);
+        }
       }
       break;
     }
     case t_type::type::t_map: {
       auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
       auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
-      for (auto map_val : value->get_map()) {
-        match_type_with_const_value(ctx, program, key_type, map_val.first);
-        match_type_with_const_value(ctx, program, val_type, map_val.second);
+      if (value->kind() == t_const_value::CV_MAP) {
+        for (auto map_val : value->get_map()) {
+          match_type_with_const_value(ctx, program, key_type, map_val.first);
+          match_type_with_const_value(ctx, program, val_type, map_val.second);
+        }
       }
       break;
     }
@@ -88,19 +94,21 @@ void match_type_with_const_value(
         }
         value->assign(t_const_value(*constant->value()));
       }
-      for (const auto& [map_key, map_val] : value->get_map()) {
-        bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
-        auto name =
-            resolved ? map_key->get_string() : map_key->get_identifier();
-        auto field = structured->get_field_by_name(name);
-        if (!field) {
-          // Error reported by const_checker.
-          return;
+      if (value->kind() == t_const_value::CV_MAP) {
+        for (const auto& [map_key, map_val] : value->get_map()) {
+          bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
+          auto name =
+              resolved ? map_key->get_string() : map_key->get_identifier();
+          auto field = structured->get_field_by_name(name);
+          if (!field) {
+            // Error reported by const_checker.
+            return;
+          }
+          if (!resolved) {
+            map_key->convert_identifier_to_string();
+          }
+          match_type_with_const_value(ctx, program, field->get_type(), map_val);
         }
-        if (!resolved) {
-          map_key->set_string(name);
-        }
-        match_type_with_const_value(ctx, program, field->get_type(), map_val);
       }
       break;
     }

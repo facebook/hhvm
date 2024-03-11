@@ -560,8 +560,7 @@ class ast_builder : public parser_actions {
 
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::string_view name) override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_map();
+    auto const_value = t_const_value::make_map();
     t_type_ref type = new_type_ref(fmt::to_string(name), nullptr, range);
     // Once Thrift Patch is decoupled from the compiler we will be able to
     // always resolve external types. Until then just resolve annotation types.
@@ -945,21 +944,16 @@ class ast_builder : public parser_actions {
   }
 
   std::unique_ptr<t_const_value> on_list_initializer() override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_list();
-    return const_value;
+    return t_const_value::make_list();
   }
 
   std::unique_ptr<t_const_value> on_map_initializer() override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_map();
-    return const_value;
+    return t_const_value::make_map();
   }
 
   std::unique_ptr<t_const_value> on_struct_initializer(
       source_range range, std::string_view name) override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_map();
+    auto const_value = t_const_value::make_map();
     const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
     const_value->set_ref_range(range);
     return const_value;

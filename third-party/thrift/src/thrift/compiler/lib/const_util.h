@@ -71,7 +71,7 @@ folly::void_t<decltype(std::declval<T>().emplace_back())> hydrate_const(
 template <typename T> // set
 std::enable_if_t<std::is_same_v<typename T::key_type, typename T::value_type>>
 hydrate_const(T& out, const t_const_value& val) {
-  for (auto* item : val.get_list()) {
+  for (auto* item : val.get_list_or_empty_map()) {
     typename T::key_type value;
     hydrate_const(value, *item);
     out.emplace(std::move(value));
@@ -214,21 +214,24 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       break;
     case t_type::type::t_list:
       ret.ensure_list();
-      for (const auto& list_elem : val.get_list()) {
+      for (const auto& list_elem : val.get_list_or_empty_map()) {
         ret.as_list().push_back(const_to_value(*list_elem));
       }
       break;
     case t_type::type::t_set:
       ret.ensure_set();
-      for (const auto& list_elem : val.get_list()) {
+      for (const auto& list_elem : val.get_list_or_empty_map()) {
         ret.as_set().insert(const_to_value(*list_elem));
       }
       break;
     case t_type::type::t_map:
       ret.ensure_map();
-      for (const auto& map_elem : val.get_map()) {
-        ret.as_map().emplace(
-            const_to_value(*map_elem.first), const_to_value(*map_elem.second));
+      if (val.kind() == t_const_value::CV_MAP) {
+        for (const auto& map_elem : val.get_map()) {
+          ret.as_map().emplace(
+              const_to_value(*map_elem.first),
+              const_to_value(*map_elem.second));
+        }
       }
       break;
     case t_type::type::t_enum:

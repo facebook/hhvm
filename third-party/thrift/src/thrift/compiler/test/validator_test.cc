@@ -77,8 +77,7 @@ class StandardValidatorTest : public ::testing::Test {
   }
 
   std::unique_ptr<t_const> inst(const t_struct* ttype, int lineno) {
-    auto value = std::make_unique<t_const_value>();
-    value->set_map();
+    auto value = t_const_value::make_map();
     value->set_ttype(t_type_ref::from_ptr(ttype));
     auto result =
         std::make_unique<t_const>(&program_, ttype, "", std::move(value));
@@ -637,8 +636,7 @@ class ScopeValidatorTest : public ::testing::Test {
   t_program program{"path/to/file.thrift"};
 
   std::unique_ptr<t_const> inst(const t_type* ttype) {
-    auto value = std::make_unique<t_const_value>();
-    value->set_map();
+    auto value = t_const_value::make_map();
     value->set_ttype(t_type_ref::from_ptr(ttype));
     auto result =
         std::make_unique<t_const>(&program, ttype, "", std::move(value));

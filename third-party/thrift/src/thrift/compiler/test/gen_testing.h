@@ -33,15 +33,11 @@ struct base_annotation_builder {
   t_struct& type;
 
   static std::unique_ptr<t_const_value> make_string(const char* value) {
-    auto name = std::make_unique<t_const_value>();
-    name->set_string(value);
-    return name;
+    return std::make_unique<t_const_value>(value);
   }
 
-  static std::unique_ptr<t_const_value> make_integer(const int64_t value) {
-    auto name = std::make_unique<t_const_value>();
-    name->set_integer(value);
-    return name;
+  static std::unique_ptr<t_const_value> make_integer(int64_t value) {
+    return std::make_unique<t_const_value>(value);
   }
 
   const std::string& uri() { return type.uri(); }
@@ -81,8 +77,7 @@ struct adapter_builder : base_thrift_annotation_builder {
       : base_thrift_annotation_builder(p, lang, "Adapter") {}
 
   std::unique_ptr<t_const> make(const char* name) {
-    auto map = std::make_unique<t_const_value>();
-    map->set_map();
+    auto map = t_const_value::make_map();
     map->add_map(make_string("name"), make_string(name));
     return make_inst(std::move(map));
   }
@@ -93,8 +88,7 @@ struct inject_metadata_fields_builder : base_thrift_annotation_builder {
       : base_thrift_annotation_builder(p, "InjectMetadataFields") {}
 
   std::unique_ptr<t_const> make(const char* type_name) {
-    auto map = std::make_unique<t_const_value>();
-    map->set_map();
+    auto map = t_const_value::make_map();
     map->add_map(make_string("type"), make_string(type_name));
     return make_inst(std::move(map));
   }

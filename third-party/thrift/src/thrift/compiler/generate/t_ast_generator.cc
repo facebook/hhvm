@@ -354,12 +354,12 @@ void t_ast_generator::generate_program() {
               val->get_owner() ? val->get_owner()->name()
                                : "unnamed const val");
         }
-      } else if (const auto& list = val->get_list(); !list.empty()) {
-        for (auto item : list) {
+      } else if (val->kind() == t_const_value::CV_LIST) {
+        for (auto item : val->get_list()) {
           recurse(item, recurse);
         }
-      } else if (const auto& map = val->get_map(); !map.empty()) {
-        for (auto [k, v] : map) {
+      } else if (val->kind() == t_const_value::CV_MAP) {
+        for (auto [k, v] : val->get_map()) {
           recurse(k, recurse);
           recurse(v, recurse);
         }

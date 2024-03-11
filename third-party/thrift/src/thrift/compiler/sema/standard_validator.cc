@@ -937,7 +937,7 @@ class reserved_ids_checker {
           ids->kind() == t_const_value::t_const_value_kind::CV_LIST,
           "Field ids must be a list of integers, annotated on {}",
           node.name());
-      for (const auto* id : ids->get_list()) {
+      for (const auto* id : ids->get_list_or_empty_map()) {
         ctx_.check(
             id->kind() == t_const_value::t_const_value_kind::CV_INTEGER,
             "Field ids must be a list of integers, annotated on {}",

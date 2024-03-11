@@ -1176,14 +1176,17 @@ string t_py_generator::render_const_value(
     const t_type* vtype = ((t_map*)type)->get_val_type();
     out << "{" << endl;
     indent_up();
-    const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
-    vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      out << indent();
-      out << render_const_value(ktype, v_iter->first);
-      out << " : ";
-      out << render_const_value(vtype, v_iter->second);
-      out << "," << endl;
+    if (value->kind() == t_const_value::CV_MAP) {
+      const vector<pair<t_const_value*, t_const_value*>>& val =
+          value->get_map();
+      vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
+      for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
+        out << indent();
+        out << render_const_value(ktype, v_iter->first);
+        out << " : ";
+        out << render_const_value(vtype, v_iter->second);
+        out << "," << endl;
+      }
     }
     indent_down();
     indent(out) << "}";
@@ -1199,11 +1202,9 @@ string t_py_generator::render_const_value(
     }
     out << "[" << endl;
     indent_up();
-    const vector<t_const_value*>& val = value->get_list();
-    vector<t_const_value*>::const_iterator v_iter;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
+    for (const t_const_value* elem : value->get_list_or_empty_map()) {
       out << indent();
-      out << render_const_value(etype, *v_iter);
+      out << render_const_value(etype, elem);
       out << "," << endl;
     }
     indent_down();

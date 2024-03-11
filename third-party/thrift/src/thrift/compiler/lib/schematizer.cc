@@ -42,11 +42,6 @@ std::unique_ptr<t_const_value> val(Enm val) {
 std::unique_ptr<t_const_value> val(std::string_view s) {
   return val(std::string{s});
 }
-std::unique_ptr<t_const_value> mapval() {
-  auto ret = val();
-  ret->set_map();
-  return ret;
-}
 std::string uri_or_name(const t_named& node) {
   if (!node.uri().empty()) {
     return node.uri();
@@ -65,7 +60,7 @@ t_type_ref schematizer::stdType(std::string_view uri) {
 }
 
 std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
-  auto ret = mapval();
+  auto ret = t_const_value::make_map();
   if (!type.uri().empty()) {
     ret->add_map(val("uri"), val(type.uri()));
   } else {
@@ -82,8 +77,7 @@ void schematizer::add_definition(
     const t_named& node,
     const t_program* program,
     schematizer::InternFunc& intern_value) {
-  auto definition = val();
-  definition->set_map();
+  auto definition = t_const_value::make_map();
   definition->add_map(val("name"), val(node.name()));
   if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
@@ -96,18 +90,16 @@ void schematizer::add_definition(
 
   auto structured = node.structured_annotations();
   if (!structured.empty()) {
-    auto annots = mapval();
-    auto structured_annots = val();
-    structured_annots->set_list();
+    auto annots = t_const_value::make_map();
+    auto structured_annots = t_const_value::make_list();
 
     for (const auto& item : structured) {
-      auto annot = mapval();
+      auto annot = t_const_value::make_map();
       if (!item.value()->is_empty()) {
         static const std::string kProtocolValueUri =
             "facebook.com/thrift/protocol/Value";
         auto protocol_value_ttype = stdType(kProtocolValueUri);
-        auto fields = val();
-        fields->set_map();
+        auto fields = t_const_value::make_map();
         for (const auto& pair : item.value()->get_map()) {
           fields->add_map(
               pair.first->clone(),
@@ -137,8 +129,7 @@ void schematizer::add_definition(
 
   const auto& unstructured = node.annotations();
   if (!unstructured.empty()) {
-    auto annots = val();
-    annots->set_map();
+    auto annots = t_const_value::make_map();
 
     for (const auto& pair : unstructured) {
       annots->add_map(val(pair.first), val(pair.second.value));
@@ -148,7 +139,7 @@ void schematizer::add_definition(
   }
 
   if (node.has_doc()) {
-    auto docs = mapval();
+    auto docs = t_const_value::make_map();
     docs->add_map(val("contents"), val(node.doc()));
     definition->add_map(val("docs"), std::move(docs));
   }
@@ -160,8 +151,7 @@ void add_as_definition(
     t_const_value& defns_schema,
     const std::string& defn_field,
     std::unique_ptr<t_const_value> schema) {
-  auto defn_schema = val();
-  defn_schema->set_map();
+  auto defn_schema = t_const_value::make_map();
   defn_schema->add_map(val(defn_field), std::move(schema));
 
   defns_schema.add_list(std::move(defn_schema));
@@ -174,10 +164,8 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
     const t_program* program,
     t_const_value* defns_schema,
     const t_type& type) {
-  auto schema = val();
-  schema->set_map();
-  auto type_name = val();
-  type_name->set_map();
+  auto schema = t_const_value::make_map();
+  auto type_name = t_const_value::make_map();
   std::unique_ptr<t_const_value> params;
 
   auto* resolved_type = &type;
@@ -224,8 +212,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
       break;
     case t_type::type::t_list:
       type_name->add_map(val("listType"), val(0));
-      params = val();
-      params->set_list();
+      params = t_const_value::make_list();
       params->add_list(gen_type(
           generator,
           program,
@@ -234,8 +221,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
       break;
     case t_type::type::t_set:
       type_name->add_map(val("setType"), val(0));
-      params = val();
-      params->set_list();
+      params = t_const_value::make_list();
       params->add_list(gen_type(
           generator,
           program,
@@ -244,8 +230,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
       break;
     case t_type::type::t_map:
       type_name->add_map(val("mapType"), val(0));
-      params = val();
-      params->set_list();
+      params = t_const_value::make_list();
       {
         const auto& map = static_cast<const t_map&>(*resolved_type);
         params->add_list(
@@ -309,8 +294,8 @@ void schematize_recursively(
     const t_program* program,
     t_const_value* defns_schema,
     const t_type& type) {
-  auto schema = mapval();
-  auto type_name = mapval();
+  auto schema = t_const_value::make_map();
+  auto type_name = t_const_value::make_map();
   std::unique_ptr<t_const_value> params;
 
   auto* resolved_type = &type;
@@ -405,15 +390,13 @@ void schematizer::add_fields(
     const std::string& fields_name,
     node_list_view<const t_field> fields,
     schematizer::InternFunc& intern_value) {
-  auto fields_schema = val();
-  fields_schema->set_list();
+  auto fields_schema = t_const_value::make_list();
 
   const auto* field_qualifier_enum =
       find_enum(program, "facebook.com/thrift/type/FieldQualifier");
 
   for (const auto& field : fields) {
-    auto field_schema = val();
-    field_schema->set_map();
+    auto field_schema = t_const_value::make_map();
     add_definition(*field_schema, field, program, intern_value);
     field_schema->add_map(val("id"), val(field.id()));
 
@@ -449,8 +432,7 @@ void schematizer::add_fields(
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(
     const t_structured& node) {
-  auto schema = val();
-  schema->set_map();
+  auto schema = t_const_value::make_map();
   add_definition(*schema, node, node.program(), intern_value_);
   add_fields(
       this,
@@ -473,11 +455,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
 
 std::unique_ptr<t_const_value> schematizer::gen_full_schema(
     const t_service& node) {
-  auto schema = val();
-  schema->set_map();
-
-  auto dfns_schema = val();
-  dfns_schema->set_list();
+  auto schema = t_const_value::make_map();
+  auto dfns_schema = t_const_value::make_list();
 
   auto svc_schema = gen_schema(node);
   add_as_definition(*dfns_schema, "serviceDef", std::move(svc_schema));
@@ -512,19 +491,16 @@ std::unique_ptr<t_const_value> schematizer::gen_full_schema(
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
-  auto svc_schema = val();
-  svc_schema->set_map();
+  auto svc_schema = t_const_value::make_map();
   add_definition(*svc_schema, node, node.program(), intern_value_);
 
-  auto functions_schema = val();
-  functions_schema->set_list();
+  auto functions_schema = t_const_value::make_list();
 
   const auto* func_qualifier_enum =
       find_enum(node.program(), "facebook.com/thrift/type/FunctionQualifier");
 
   for (const auto& func : node.functions()) {
-    auto func_schema = val();
-    func_schema->set_map();
+    auto func_schema = t_const_value::make_map();
     add_definition(*func_schema, func, node.program(), intern_value_);
 
     add_qualifier(func_qualifier_enum, *func_schema, [&] {
@@ -543,7 +519,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     }());
 
     if (const auto& interaction = func.interaction()) {
-      auto ref = mapval();
+      auto ref = t_const_value::make_map();
       ref->add_map(val("uri"), typeUri(*interaction));
       func_schema->add_map(val("interactionType"), std::move(ref));
     }
@@ -557,9 +533,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         func_schema->add_map(
             val("returnType"), gen_type(*type, node.program()));
         // Double write of return type for backwards compatibility (T161963504).
-        auto return_types_schema = val();
-        return_types_schema->set_list();
-        auto schema = mapval();
+        auto return_types_schema = t_const_value::make_list();
+        auto schema = t_const_value::make_map();
         schema->add_map(val("thriftType"), gen_type(*type, node.program()));
         return_types_schema->add_list(std::move(schema));
         func_schema->add_map(
@@ -568,7 +543,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     }
 
     if (auto stream = func.stream()) {
-      auto stream_schema = mapval();
+      auto stream_schema = t_const_value::make_map();
       stream_schema->add_map(
           val("payload"), gen_type(*stream->elem_type(), node.program()));
       if (auto throws = stream->exceptions()) {
@@ -581,11 +556,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
             throws->fields(),
             intern_value_);
       }
-      auto return_type = mapval();
+      auto return_type = t_const_value::make_map();
       return_type->add_map(val("streamType"), std::move(stream_schema));
       func_schema->add_map(val("streamOrSink"), std::move(return_type));
     } else if (auto sink = func.sink()) {
-      auto sink_schema = mapval();
+      auto sink_schema = t_const_value::make_map();
       sink_schema->add_map(
           val("payload"), gen_type(*sink->elem_type(), node.program()));
       if (auto throws = sink->sink_exceptions()) {
@@ -611,13 +586,12 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
             throws->fields(),
             intern_value_);
       }
-      auto return_type = mapval();
+      auto return_type = t_const_value::make_map();
       return_type->add_map(val("sinkType"), std::move(sink_schema));
       func_schema->add_map(val("streamOrSink"), std::move(return_type));
     }
 
-    auto param_list_schema = val();
-    param_list_schema->set_map();
+    auto param_list_schema = t_const_value::make_map();
     add_fields(
         this,
         node.program(),
@@ -644,7 +618,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   svc_schema->add_map(val("functions"), std::move(functions_schema));
 
   if (auto parent = node.extends()) {
-    auto ref = mapval();
+    auto ref = t_const_value::make_map();
     ref->add_map(val("uri"), typeUri(*parent));
     svc_schema->add_map(val("baseService"), std::move(ref));
   }
@@ -656,8 +630,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
   const auto* program = node.program();
   assert(program);
 
-  auto schema = val();
-  schema->set_map();
+  auto schema = t_const_value::make_map();
   add_definition(*schema, node, program, intern_value_);
 
   schema->add_map(val("type"), gen_type(*node.type(), program));
@@ -671,16 +644,13 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
-  auto schema = val();
-  schema->set_map();
+  auto schema = t_const_value::make_map();
   add_definition(*schema, node, node.program(), intern_value_);
 
-  auto values = val();
-  values->set_list();
+  auto values = t_const_value::make_list();
 
   for (const auto& value : node.values()) {
-    auto value_schema = val();
-    value_schema->set_map();
+    auto value_schema = t_const_value::make_map();
     add_definition(*value_schema, value, node.program(), intern_value_);
     value_schema->add_map(val("value"), val(value.get_value()));
     values->add_list(std::move(value_schema));
@@ -692,17 +662,15 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
-  auto schema = val();
-  schema->set_map();
+  auto schema = t_const_value::make_map();
   add_definition(*schema, node, &node, intern_value_);
 
   schema->add_map(val("path"), val(node.path()));
 
   if (!node.language_includes().empty()) {
-    auto langs = mapval();
+    auto langs = t_const_value::make_map();
     for (const auto& [lang, incs] : node.language_includes()) {
-      auto includes = val();
-      includes->set_list();
+      auto includes = t_const_value::make_list();
       for (const auto& inc : incs) {
         includes->add_list(val(inc));
       }
@@ -712,7 +680,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
   }
 
   if (!node.namespaces().empty()) {
-    auto langs = mapval();
+    auto langs = t_const_value::make_map();
     for (const auto& [lang, langNamespace] : node.namespaces()) {
       langs->add_map(val(lang), val(langNamespace));
     }
@@ -726,7 +694,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
-  auto schema = mapval();
+  auto schema = t_const_value::make_map();
   add_definition(*schema, node, node.program(), intern_value_);
   schema->add_map(val("type"), gen_type(*node.type(), node.program()));
   return schema;
@@ -739,8 +707,7 @@ t_program::value_id schematizer::default_intern_value(
 
 std::unique_ptr<t_const_value> wrap_with_protocol_value(
     const t_const_value& value, t_type_ref ttype) {
-  auto ret = val();
-  ret->set_map();
+  auto ret = t_const_value::make_map();
   ret->set_ttype(ttype);
   switch (value.kind()) {
     case t_const_value::CV_BOOL:
@@ -756,8 +723,7 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
       ret->add_map(val("stringValue"), value.clone());
       break;
     case t_const_value::CV_MAP: {
-      auto map = val();
-      map->set_map();
+      auto map = t_const_value::make_map();
       for (const auto& map_elem : value.get_map()) {
         map->add_map(
             wrap_with_protocol_value(*map_elem.first, ttype),
@@ -767,8 +733,7 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
       break;
     }
     case t_const_value::CV_LIST: {
-      auto list = val();
-      list->set_list();
+      auto list = t_const_value::make_list();
       for (const auto& list_elem : value.get_list()) {
         list->add_list(wrap_with_protocol_value(*list_elem, ttype));
       }

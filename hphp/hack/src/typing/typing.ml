@@ -5717,8 +5717,7 @@ end = struct
         (result, s)
       | _ -> ((env, expr, ty), s))
     (* Call instance method *)
-    | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method)
-      when not (TCO.method_call_inference (Env.get_tcopt env)) ->
+    | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method) ->
       let (env, te1, ty1) =
         expr
           ~expected:None
@@ -5779,149 +5778,6 @@ end = struct
                Is_method ))
       in
       let result = make_call env te tal tel typed_unpack_element ty in
-      (result, should_forget_fakes)
-    (* Call instance method using new method call inference *)
-    | Obj_get (receiver, (_, pos_id, Id meth), nullflavor, Is_method) ->
-      (*****
-          Typecheck `Obj_get` by enforcing that:
-          - `<instance_type>` <: `Thas_member(m, #1)`
-          where #1 is a fresh type variable.
-        *****)
-      let (env, typed_receiver, receiver_ty) =
-        expr
-          ~expected:None
-          ~ctxt:Context.{ default with accept_using_var = true }
-          env
-          receiver
-      in
-      let env = might_throw ~join_pos:p env in
-      let nullsafe =
-        match nullflavor with
-        | OG_nullthrows -> None
-        | OG_nullsafe -> Some p
-      in
-      (* Generate a fresh type `method_ty` for the type of the
-         instance method, i.e. #1 *)
-      let (env, method_ty) = Env.fresh_type env p in
-      (* Create `Thas_member` constraint type *)
-      let (_, receiver_p, _) = receiver in
-      let reason = Reason.Rwitness receiver_p in
-      let has_method_ty =
-        MakeType.has_member
-          reason
-          ~name:meth
-          ~ty:method_ty
-          ~class_id:(CIexpr receiver)
-          ~explicit_targs:(Some explicit_targs)
-      in
-      let env = Env.set_tyvar_variance env method_ty in
-      let (env, has_method_super_ty) =
-        if Option.is_none nullsafe then
-          (env, has_method_ty)
-        else
-          (* If null-safe, then `receiver_ty` <: `?Thas_member(m, #1)`,
-             but *unlike* property access typing in `expr_`, we still use `#1` as
-             our "result" if `receiver_ty` is nullable  (as opposed to `?#1`),
-             deferring null-safety handling to after `call` *)
-          let r = Reason.Rnullsafe_op p in
-          let null_ty = MakeType.null r in
-          Union.union_i env r has_method_ty null_ty
-      in
-      let (_, receiver_pos, _) = receiver in
-      let (env, ty_err_opt) =
-        Type.sub_type_i
-          receiver_pos
-          Reason.URnone
-          env
-          (LoclType receiver_ty)
-          has_method_super_ty
-          Typing_error.Callback.unify_error
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-      let ty_nothing = MakeType.nothing Reason.none in
-      let ty_mismatch_opt =
-        mk_ty_mismatch_opt receiver_ty ty_nothing ty_err_opt
-      in
-
-      (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
-         here - type parameters are localised to fresh type variables over the
-         course of subtyping above, and we do not want to solve these until later.
-         Once we typecheck all function calls with a subtyping of function types,
-         we should not need to solve early at all - transitive closure of
-         subtyping should give enough information. *)
-      let (env, ty_err_opt1) =
-        match get_var method_ty with
-        | Some var ->
-          Typing_solver.solve_to_equal_bound_or_wrt_variance
-            env
-            Reason.Rnone
-            var
-        | None -> (env, None)
-      in
-      let localize_targ env (_, targ) = Phase.localize_targ env targ in
-      let ((env, ty_err_opt), typed_targs) =
-        List.map_env_ty_err_opt
-          env
-          ~f:(localize_targ ~check_well_kinded:true)
-          explicit_targs
-          ~combine_ty_errs:Typing_error.multiple_opt
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-      check_disposable_in_return env method_ty;
-      let ( env,
-            (typed_params, typed_unpack_element, ret_ty, should_forget_fakes) )
-          =
-        call
-          ~nullsafe
-          ~expected
-          ~in_await:ctxt.Context.in_await
-          ~expr_pos:p
-          ~recv_pos:fpos
-          env
-          method_ty
-          el
-          unpacked_element
-      in
-      (* If the call is nullsafe AND the receiver is nullable,
-         make the return type nullable too *)
-      let (env, ret_ty) =
-        if Option.is_some nullsafe then
-          let r = Reason.Rnullsafe_op p in
-          let null_ty = MakeType.null r in
-          let (env, null_or_nothing_ty) =
-            Inter.intersect env ~r null_ty receiver_ty
-          in
-          let (env, ret_option_ty) =
-            Union.union env null_or_nothing_ty ret_ty
-          in
-          (env, ret_option_ty)
-        else
-          (env, ret_ty)
-      in
-      let (env, inner_te1) =
-        TUtils.make_simplify_typed_expr env pos_id method_ty (Aast.Id meth)
-      in
-      let (env, inner_te2) =
-        TUtils.make_simplify_typed_expr
-          env
-          fpos
-          method_ty
-          (Aast.Obj_get
-             ( hole_on_ty_mismatch ~ty_mismatch_opt typed_receiver,
-               inner_te1,
-               nullflavor,
-               Is_method ))
-      in
-      let result =
-        make_call
-          env
-          inner_te2
-          typed_targs
-          typed_params
-          typed_unpack_element
-          ret_ty
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
       (result, should_forget_fakes)
     (* Function invocation *)
     | Id id -> dispatch_id env id
@@ -6192,15 +6048,11 @@ end = struct
     end else
       let (env, fty) = Inter.intersect_list env (get_reason fty) tyl in
       let ((env, ty_err_opt), efty) =
-        if TCO.method_call_inference (Env.get_tcopt env) then
-          let (env, ty) = Env.expand_type env fty in
-          ((env, None), ty)
-        else
-          Typing_solver.expand_type_and_solve
-            ~description_of_expected:"a function value"
-            env
-            expr_pos
-            fty
+        Typing_solver.expand_type_and_solve
+          ~description_of_expected:"a function value"
+          env
+          expr_pos
+          fty
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       match TUtils.try_strip_dynamic env efty with
@@ -6916,123 +6768,6 @@ end = struct
             | _ -> ft.ft_ret
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
-        | (r, Tvar _) when TCO.method_call_inference (Env.get_tcopt env) ->
-          (*
-            Typecheck calls with unresolved function type by constructing a
-            suitable function type from the arguments and invoking subtyping.
-          *)
-          let (env, typed_el, type_of_el) =
-            argument_list_exprs
-              (expr
-                 ~expected:None
-                 ~ctxt:Context.{ default with accept_using_var = true })
-              env
-              el
-          in
-          let (env, typed_unpacked_element, type_of_unpacked_element) =
-            match unpacked_element with
-            | Some unpacked ->
-              let (env, typed_unpacked, type_of_unpacked) =
-                expr
-                  ~expected:None
-                  ~ctxt:Context.{ default with accept_using_var = true }
-                  env
-                  unpacked
-              in
-              (env, Some typed_unpacked, Some type_of_unpacked)
-            | None -> (env, None, None)
-          in
-          let mk_function_supertype
-              env pos (type_of_el, type_of_unpacked_element) =
-            let mk_fun_param ty =
-              let flags =
-                (* Keep supertype as permissive as possible: *)
-                make_fp_flags
-                  ~mode:FPnormal (* TODO: deal with `inout` parameters *)
-                  ~accept_disposable:false (* TODO: deal with disposables *)
-                  ~has_default:false
-                  ~readonly:false
-              in
-              {
-                fp_pos = Pos_or_decl.of_raw_pos pos;
-                fp_name = None;
-                fp_type = ty;
-                fp_flags = flags;
-                fp_def_value = None;
-              }
-            in
-            let ft_arity =
-              match type_of_unpacked_element with
-              | Some type_of_unpacked ->
-                let fun_param = mk_fun_param type_of_unpacked in
-                [fun_param]
-              | None -> []
-            in
-            (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
-            let ft_tparams = [] in
-            let ft_where_constraints = [] in
-            let ft_cross_package = None in
-            let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params =
-              {
-                capability =
-                  CapDefaults (Pos_or_decl.of_raw_pos pos)
-                  (* TODO(coeffects) should this be a different type? *);
-              }
-            in
-            let (env, return_ty) = Env.fresh_type env pos in
-            let return_ty =
-              match in_await with
-              | None -> return_ty
-              | Some r -> MakeType.awaitable r return_ty
-            in
-            let ft_ret = return_ty in
-            let ft_flags =
-              (* Keep supertype as permissive as possible: *)
-              Typing_defs_flags.Fun.make
-                Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
-                ~return_disposable:false (* TODO: deal with disposable return *)
-                ~returns_readonly:false
-                ~readonly_this:false
-                ~support_dynamic_type:false
-                ~is_memoized:false
-                ~variadic:(not (List.is_empty ft_arity))
-            in
-            let fun_locl_type =
-              {
-                ft_tparams;
-                ft_where_constraints;
-                ft_params = ft_params @ ft_arity;
-                ft_implicit_params;
-                ft_ret;
-                ft_flags;
-                ft_cross_package;
-              }
-            in
-            let fun_type = mk (r, Tfun fun_locl_type) in
-            let env = Env.set_tyvar_variance env fun_type in
-            (env, fun_type, return_ty)
-          in
-          let (env, fun_type, return_ty) =
-            mk_function_supertype
-              env
-              expr_pos
-              (type_of_el, type_of_unpacked_element)
-          in
-          let (env, ty_err_opt) =
-            Type.sub_type
-              expr_pos
-              Reason.URnone
-              env
-              efty
-              fun_type
-              Typing_error.Callback.unify_error
-          in
-          let should_forget_fakes = true in
-          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-          ( env,
-            (typed_el, typed_unpacked_element, return_ty, should_forget_fakes)
-          )
         | (_, Tnewtype (name, [ty], _))
           when String.equal name SN.Classes.cSupportDyn ->
           let (env, ty) = Env.expand_type env ty in

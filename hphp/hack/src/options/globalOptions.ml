@@ -149,7 +149,6 @@ type t = {
   po_keep_user_attributes: bool;
   tco_is_systemlib: bool;
   tco_higher_kinded_types: bool;
-  tco_method_call_inference: bool;
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
@@ -281,7 +280,6 @@ let default =
     po_keep_user_attributes = false;
     tco_is_systemlib = false;
     tco_higher_kinded_types = false;
-    tco_method_call_inference = false;
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
@@ -412,7 +410,6 @@ let set
     ?po_allow_unstable_features
     ?tco_is_systemlib
     ?tco_higher_kinded_types
-    ?tco_method_call_inference
     ?tco_report_pos_from_reason
     ?tco_typecheck_sample_rate
     ?tco_enable_sound_dynamic
@@ -666,8 +663,6 @@ let set
     tco_is_systemlib = setting tco_is_systemlib options.tco_is_systemlib;
     tco_higher_kinded_types =
       setting tco_higher_kinded_types options.tco_higher_kinded_types;
-    tco_method_call_inference =
-      setting tco_method_call_inference options.tco_method_call_inference;
     tco_report_pos_from_reason =
       setting tco_report_pos_from_reason options.tco_report_pos_from_reason;
     tco_typecheck_sample_rate =

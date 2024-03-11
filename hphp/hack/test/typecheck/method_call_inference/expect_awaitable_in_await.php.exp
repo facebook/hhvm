@@ -1,6 +1,0 @@
-File "expect_awaitable_in_await.php", line 25, characters 24-25:
-Invalid argument (Typing[4110])
-  File "expect_awaitable_in_await.php", line 24, characters 41-59:
-  Expected `Awaitable<_>`
-  File "expect_awaitable_in_await.php", line 10, characters 27-30:
-  But got `bool`

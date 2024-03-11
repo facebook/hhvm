@@ -270,7 +270,6 @@ let parse_options () =
   let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
-  let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref true in
   let always_pessimise_return = ref false in
@@ -648,10 +647,6 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
         " List of fixmes that are allowed in declarations." );
-      ( "--method-call-inference",
-        Arg.Set method_call_inference,
-        " Infer constraints for method calls. NB: incompatible with like types."
-      );
       ( "--report-pos-from-reason",
         Arg.Set report_pos_from_reason,
         " Flag errors whose position is derived from reason information in types."
@@ -911,7 +906,6 @@ let parse_options () =
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
       ~po_allow_unstable_features:true
-      ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic

@@ -516,7 +516,6 @@ let () =
         Arg.Tuple [Arg.String (fun _ -> ()); Arg.String (fun _ -> ())],
         "(ignored)" );
       ignored_flag "--is-systemlib";
-      ignored_flag "--method-call-inference";
       ignored_flag "--no-builtins";
       ignored_flag "--no-strict-contexts";
       ignored_flag "--report-pos-from-reason";

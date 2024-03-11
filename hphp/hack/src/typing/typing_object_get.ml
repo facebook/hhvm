@@ -1171,15 +1171,11 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   in
   let ((env, expand_ty_err_opt), ety1) =
     if args.is_method then
-      if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
-        let (env, ty) = Env.expand_type env receiver_ty in
-        ((env, None), ty)
-      else
-        Typing_solver.expand_type_and_solve
-          env
-          ~description_of_expected:"an object"
-          args.obj_pos
-          receiver_ty
+      Typing_solver.expand_type_and_solve
+        env
+        ~description_of_expected:"an object"
+        args.obj_pos
+        receiver_ty
     else
       Typing_solver.expand_type_and_narrow
         env

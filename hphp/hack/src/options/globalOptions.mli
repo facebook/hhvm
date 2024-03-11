@@ -201,8 +201,6 @@ type t = {
   tco_is_systemlib: bool;  (** Enable features used to typecheck systemlib *)
   tco_higher_kinded_types: bool;
       (** Controls if higher-kinded types are supported *)
-  tco_method_call_inference: bool;
-      (** Controls if method-call inference is supported *)
   tco_report_pos_from_reason: bool;
       (** If set, then positions derived from reason information are tainted, and primary errors
          with such positions are flagged *)
@@ -386,7 +384,6 @@ val set :
   ?po_allow_unstable_features:bool ->
   ?tco_is_systemlib:bool ->
   ?tco_higher_kinded_types:bool ->
-  ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->

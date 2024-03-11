@@ -158,8 +158,6 @@ let is_systemlib t = t.GlobalOptions.tco_is_systemlib
 
 let higher_kinded_types t = t.GlobalOptions.tco_higher_kinded_types
 
-let method_call_inference t = t.GlobalOptions.tco_method_call_inference
-
 let report_pos_from_reason t = t.GlobalOptions.tco_report_pos_from_reason
 
 let enable_sound_dynamic t = t.GlobalOptions.tco_enable_sound_dynamic

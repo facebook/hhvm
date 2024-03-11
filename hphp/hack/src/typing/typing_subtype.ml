@@ -6037,9 +6037,6 @@ end = struct
       r_sup
       (lty_sup, cty_sup)
       env =
-    let using_new_method_call_inference =
-      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
-    in
     let default_subtype_help env =
       Subtype.default_subtype
         ~subtype_env
@@ -6055,28 +6052,6 @@ end = struct
     let ( ||| ) = ( ||| ) ~fail in
 
     match (lty_sup, cty_sup) with
-    | (maybe_null, maybe_has_member)
-      when using_new_method_call_inference
-           && is_has_member maybe_has_member
-           &&
-           let (_, maybe_null) = Env.expand_type env maybe_null in
-           is_prim Aast.Tnull maybe_null ->
-      (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
-      let (env, null_ty) = Env.expand_type env maybe_null in
-      let r_null = get_reason null_ty in
-      let (r, has_member_ty) = deref_constraint_type maybe_has_member in
-      (match has_member_ty with
-      | Thas_member has_member_ty ->
-        Has_member.simplify_subtype_has_member
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~nullsafe:(Some r_null)
-          ~fail
-          ity_sub
-          (r, has_member_ty)
-          env
-      | _ -> invalid_env env (* Not possible due to guard in parent match *))
     | (lty_super, cty_super) ->
       (match ity_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
@@ -6815,9 +6790,6 @@ end = struct
       ty_sub
       (r, has_member_ty)
       env =
-    let using_new_method_call_inference =
-      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
-    in
     let {
       hm_name = (name_pos, name_) as name;
       hm_type = member_ty;
@@ -6896,89 +6868,6 @@ end = struct
     | LoclType ty_sub ->
       (match deref ty_sub with
       | (_, (Tvar _ | Tunion _)) -> default_subtype_help env
-      | (r_null, Tprim Aast.Tnull) when using_new_method_call_inference ->
-        if Option.is_some nullsafe then
-          valid env
-        else
-          invalid
-            env
-            ~fail:
-              (Some
-                 Typing_error.(
-                   primary
-                   @@ Primary.Null_member
-                        {
-                          pos = name_pos;
-                          obj_pos_opt = None;
-                          member_name = name_;
-                          reason =
-                            lazy (Reason.to_string "This can be null" r_null);
-                          kind =
-                            (if is_method then
-                              `method_
-                            else
-                              `property);
-                          ctxt = `read;
-                        }))
-      | (r_option, Toption option_ty) when using_new_method_call_inference ->
-        if Option.is_some nullsafe then
-          simplify_subtype_has_member
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            ~nullsafe
-            (LoclType option_ty)
-            (r, has_member_ty)
-            env
-        else
-          let (env, option_ty) = Env.expand_type env option_ty in
-          (match get_node option_ty with
-          | Tnonnull ->
-            invalid
-              env
-              ~fail:
-                (Some
-                   Typing_error.(
-                     primary
-                     @@ Primary.Top_member
-                          {
-                            pos = name_pos;
-                            name = name_;
-                            ctxt = `read;
-                            kind =
-                              (if is_method then
-                                `method_
-                              else
-                                `property);
-                            is_nullable = true;
-                            decl_pos = Reason.to_pos r_option;
-                            ty_name = lazy (Typing_print.error env ty_sub);
-                            (* Subtyping already gives these reasons *)
-                            ty_reasons = lazy [];
-                          }))
-          | _ ->
-            invalid
-              env
-              ~fail:
-                (Some
-                   Typing_error.(
-                     primary
-                     @@ Primary.Null_member
-                          {
-                            pos = name_pos;
-                            obj_pos_opt = None;
-                            member_name = name_;
-                            reason =
-                              lazy
-                                (Reason.to_string "This can be null" r_option);
-                            kind =
-                              (if is_method then
-                                `method_
-                              else
-                                `property);
-                            ctxt = `read;
-                          })))
       | (_, Tintersection tyl)
         when let (_, non_ty_opt, _) =
                Subtype_negation.find_type_with_exact_negation env tyl
@@ -7010,64 +6899,6 @@ end = struct
                         (* Subtyping already gives these reasons *)
                         ty_reasons = lazy [];
                       }))
-      | (r_inter, Tintersection tyl) when using_new_method_call_inference ->
-        let (env, tyl) = List.map_env ~f:Env.expand_type env tyl in
-        let subtype_fresh_has_member_ty env ty_sub =
-          let (env, fresh_tyvar) = Env.fresh_type env name_pos in
-          let env = Env.set_tyvar_variance env fresh_tyvar in
-          let fresh_has_member_ty =
-            mk_constraint_type
-              (r, Thas_member { has_member_ty with hm_type = fresh_tyvar })
-          in
-          let (env, maybe_nullable_fresh_has_member_ty) =
-            mk_maybe_nullable env (ConstraintType fresh_has_member_ty)
-          in
-          let (env, ty_err_opt) =
-            Subtype_tell.sub_type_inner
-              env
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              (LoclType ty_sub)
-              maybe_nullable_fresh_has_member_ty
-          in
-          match ty_err_opt with
-          | None ->
-            let (env, _ty_err_opt) =
-              match get_var fresh_tyvar with
-              | Some var ->
-                (* TODO: can this actually generate an error? *)
-                Typing_solver.solve_to_equal_bound_or_wrt_variance
-                  env
-                  Reason.Rnone
-                  var
-              | None -> (env, None)
-            in
-            ((env, None), Some fresh_tyvar)
-          | Some _ -> ((env, ty_err_opt), None)
-        in
-        let ((env, ty_err_opt), fresh_tyvar_opts) =
-          TUtils.run_on_intersection_with_ty_err
-            env
-            tyl
-            ~f:subtype_fresh_has_member_ty
-        in
-        let fresh_tyvars = List.filter_map ~f:Fn.id fresh_tyvar_opts in
-        if List.is_empty fresh_tyvars then
-          invalid ~fail:ty_err_opt env
-        else
-          let (env, intersection_ty) =
-            Inter.intersect_list env r_inter fresh_tyvars
-          in
-          Subtype.simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like:false
-            ~super_supportdyn:false
-            intersection_ty
-            member_ty
-            env
       | (r1, Tnewtype (n, _, newtype_ty)) ->
         let sub_supportdyn =
           match sub_supportdyn with

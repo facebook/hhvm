@@ -1,4 +1,0 @@
-File "intersection_receiver_calls.php", line 55, characters 20-25:
-You are trying to access the method `x_to_y` but this object can be null. (Typing[4064])
-  File "intersection_receiver_calls.php", line 53, characters 51-52:
-  This can be null

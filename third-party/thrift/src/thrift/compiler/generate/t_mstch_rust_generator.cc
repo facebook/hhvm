@@ -2400,7 +2400,6 @@ void t_mstch_rust_generator::generate_program() {
   set_mstch_factories();
 
   const auto& prog = cached_program(program_);
-  render_to_file(prog, "lib.rs", "lib.rs");
   render_to_file(prog, "types.rs", "types.rs");
   render_to_file(prog, "services.rs", "services.rs");
   render_to_file(prog, "errors.rs", "errors.rs");

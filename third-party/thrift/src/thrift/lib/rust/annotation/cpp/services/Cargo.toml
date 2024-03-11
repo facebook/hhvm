@@ -20,13 +20,13 @@ anyhow = "1.0.75"
 async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 const-cstr = "0.3.0"
-cpp__types = { package = "cpp_types", version = "0.0.1+unstable", path = "../types" }
+cpp__types = { package = "cpp_types", version = "0.0.1+unstable", path = ".." }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 scope_services = { version = "0.0.1+unstable", path = "../../scope/services" }
-scope_types = { version = "0.0.1+unstable", path = "../../scope/types" }
+scope_types = { version = "0.0.1+unstable", path = "../../scope" }
 thrift_services = { version = "0.0.1+unstable", path = "../../thrift/services" }
-thrift_types = { version = "0.0.1+unstable", path = "../../thrift/types" }
+thrift_types = { version = "0.0.1+unstable", path = "../../thrift" }
 tracing = "0.1.40"
 
 [build-dependencies]

@@ -7,8 +7,7 @@
 
 pub mod errors;
 
-#[allow(unused_imports)]
-pub(crate) use crate as types;
+pub use crate as types;
 
 pub type MyInteger = ::std::primitive::i32;
 

@@ -9,8 +9,7 @@ pub mod services;
 
 pub mod errors;
 
-#[allow(unused_imports)]
-pub(crate) use crate as types;
+pub use crate as types;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FooStreamEx {

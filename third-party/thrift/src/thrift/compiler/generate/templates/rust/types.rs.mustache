@@ -52,8 +52,7 @@ pub mod services;
 pub mod errors;
 
 {{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
-#[allow(unused_imports)]
-pub(crate) use {{program:crate}} as types;
+pub use {{program:crate}} as types;
 {{!
 
 }}{{#program:typedefs}}{{>lib/typedef}}{{/program:typedefs}}{{!

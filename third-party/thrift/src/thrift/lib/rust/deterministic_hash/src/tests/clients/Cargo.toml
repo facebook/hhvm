@@ -22,7 +22,7 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-teststructs__types = { package = "teststructs_types", version = "0.0.1+unstable", path = "../types" }
+teststructs__types = { package = "teststructs_types", version = "0.0.1+unstable", path = ".." }
 tracing = "0.1.40"
 
 [build-dependencies]

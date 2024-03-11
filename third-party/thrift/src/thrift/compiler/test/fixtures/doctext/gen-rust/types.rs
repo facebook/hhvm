@@ -12,8 +12,7 @@ pub mod services;
 
 pub mod errors;
 
-#[allow(unused_imports)]
-pub(crate) use crate as types;
+pub use crate as types;
 
 #[doc = "Cool new name for string"]
 pub type lanyard = ::std::string::String;

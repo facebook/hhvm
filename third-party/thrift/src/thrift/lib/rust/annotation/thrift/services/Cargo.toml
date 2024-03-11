@@ -23,8 +23,8 @@ const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 scope_services = { version = "0.0.1+unstable", path = "../../scope/services" }
-scope_types = { version = "0.0.1+unstable", path = "../../scope/types" }
-thrift__types = { package = "thrift_types", version = "0.0.1+unstable", path = "../types" }
+scope_types = { version = "0.0.1+unstable", path = "../../scope" }
+thrift__types = { package = "thrift_types", version = "0.0.1+unstable", path = ".." }
 tracing = "0.1.40"
 
 [build-dependencies]

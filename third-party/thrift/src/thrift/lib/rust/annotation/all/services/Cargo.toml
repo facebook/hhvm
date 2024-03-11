@@ -16,31 +16,31 @@ doctest = false
 doc = false
 
 [dependencies]
-all__types = { package = "all_types", version = "0.0.1+unstable", path = "../types" }
+all__types = { package = "all_types", version = "0.0.1+unstable", path = ".." }
 anyhow = "1.0.75"
 async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 compat_services = { version = "0.0.1+unstable", path = "../../compat/services" }
-compat_types = { version = "0.0.1+unstable", path = "../../compat/types" }
+compat_types = { version = "0.0.1+unstable", path = "../../compat" }
 const-cstr = "0.3.0"
 cpp_services = { version = "0.0.1+unstable", path = "../../cpp/services" }
-cpp_types = { version = "0.0.1+unstable", path = "../../cpp/types" }
+cpp_types = { version = "0.0.1+unstable", path = "../../cpp" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 go_services = { version = "0.0.1+unstable", path = "../../go/services" }
-go_types = { version = "0.0.1+unstable", path = "../../go/types" }
+go_types = { version = "0.0.1+unstable", path = "../../go" }
 hack_services = { version = "0.0.1+unstable", path = "../../hack/services" }
-hack_types = { version = "0.0.1+unstable", path = "../../hack/types" }
+hack_types = { version = "0.0.1+unstable", path = "../../hack" }
 java_services = { version = "0.0.1+unstable", path = "../../java/services" }
-java_types = { version = "0.0.1+unstable", path = "../../java/types" }
+java_types = { version = "0.0.1+unstable", path = "../../java" }
 python_services = { version = "0.0.1+unstable", path = "../../python/services" }
-python_types = { version = "0.0.1+unstable", path = "../../python/types" }
+python_types = { version = "0.0.1+unstable", path = "../../python" }
 rust_services = { version = "0.0.1+unstable", path = "../../rust/services" }
-rust_types = { version = "0.0.1+unstable", path = "../../rust/types" }
+rust_types = { version = "0.0.1+unstable", path = "../../rust" }
 scope_services = { version = "0.0.1+unstable", path = "../../scope/services" }
-scope_types = { version = "0.0.1+unstable", path = "../../scope/types" }
+scope_types = { version = "0.0.1+unstable", path = "../../scope" }
 thrift_services = { version = "0.0.1+unstable", path = "../../thrift/services" }
-thrift_types = { version = "0.0.1+unstable", path = "../../thrift/types" }
+thrift_types = { version = "0.0.1+unstable", path = "../../thrift" }
 tracing = "0.1.40"
 
 [build-dependencies]

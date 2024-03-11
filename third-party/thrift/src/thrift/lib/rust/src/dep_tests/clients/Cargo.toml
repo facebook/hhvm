@@ -22,7 +22,7 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-test_deprecated_optional_with_default_is_some_if__types = { package = "test_deprecated_optional_with_default_is_some_if_types", version = "0.0.1+unstable", path = "../types" }
+test_deprecated_optional_with_default_is_some_if__types = { package = "test_deprecated_optional_with_default_is_some_if_types", version = "0.0.1+unstable", path = ".." }
 tracing = "0.1.40"
 
 [build-dependencies]

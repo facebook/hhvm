@@ -77,8 +77,7 @@ struct rust_codegen_options {
   // True if we are generating a submodule rather than the whole crate.
   bool multifile_mode = false;
 
-  // List of extra sources to include at top-level of each crate.
-  mstch::array lib_include_srcs;
+  // List of extra sources to include at top level of crate.
   mstch::array types_include_srcs;
 
   // The current program being generated and its Rust module path.
@@ -622,8 +621,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_nonstandard_fields},
             {"program:docs?", &rust_mstch_program::rust_has_docs},
             {"program:docs", &rust_mstch_program::rust_docs},
-            {"program:lib_include_srcs",
-             &rust_mstch_program::rust_lib_include_srcs},
             {"program:types_include_srcs",
              &rust_mstch_program::rust_types_include_srcs},
             {"program:has_default_tests?",
@@ -795,7 +792,6 @@ class rust_mstch_program : public mstch_program {
   }
   mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }
-  mstch::node rust_lib_include_srcs() { return options_.lib_include_srcs; }
   mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
   mstch::node rust_has_default_tests() {
     for (const t_structured* strct : program_->structs_and_unions()) {
@@ -2345,7 +2341,6 @@ void t_mstch_rust_generator::generate_program() {
     program_->set_include_prefix(*include_prefix_flag);
   }
 
-  parse_include_srcs(options_.lib_include_srcs, get_option("lib_include_srcs"));
   parse_include_srcs(
       options_.types_include_srcs, get_option("types_include_srcs"));
 
@@ -2553,8 +2548,6 @@ THRIFT_REGISTER_GENERATOR(
     "    deprecated_optional_with_default_is_some:\n"
     "                     Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions\n"
     "    include_prefix=: Set program:include_prefix.\n"
-    "    lib_include_srcs=:\n"
-    "                     Additional Rust source files to include in lib crate, `:` separated\n"
     "    types_include_srcs=:\n"
     "                     Additional Rust source files to include in types crate, `:` separated\n"
     "    cratemap=map:    Mapping file from services to crate names\n"

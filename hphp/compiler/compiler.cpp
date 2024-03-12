@@ -516,6 +516,8 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
   gd.StrictUtf8Mode = RuntimeOption::EvalStrictUtf8Mode;
+  gd.LogTsameCollisions = RuntimeOption::EvalLogTsameCollisions;
+  gd.LogFsameCollisions = RuntimeOption::EvalLogFsameCollisions;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(Cfg::Server::SourceRoot);

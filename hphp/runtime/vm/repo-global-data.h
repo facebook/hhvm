@@ -187,6 +187,10 @@ struct RepoGlobalData {
   // see RuntimeOptions::EvalStrictUtf8Mode
   int StrictUtf8Mode = 0;
 
+  // see RuntimeOptions::EvalLog{T,F}sameCollisions
+  int LogTsameCollisions = 0;
+  int LogFsameCollisions = 0;
+
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
 
@@ -232,6 +236,8 @@ struct RepoGlobalData {
       (ModuleLevelTraits)
       (TreatCaseTypesAsMixed)
       (StrictUtf8Mode)
+      (LogTsameCollisions)
+      (LogFsameCollisions)
       ;
 
 #define C(_, Name, ...) sd(Name);

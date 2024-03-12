@@ -59,6 +59,8 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::RenamableFunctions                           = RenamableFunctions;
   RO::NonInterceptableFunctions                    = NonInterceptableFunctions;
   RO::EvalStrictUtf8Mode                           = StrictUtf8Mode;
+  RO::EvalLogTsameCollisions                       = LogTsameCollisions;
+  RO::EvalLogFsameCollisions                       = LogFsameCollisions;
 
   if (!RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
     RO::EvalNoticeOnMethCallerHelperIsObject = false;
@@ -117,6 +119,8 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(ModuleLevelTraits);
   SHOW(TreatCaseTypesAsMixed);
   SHOW(StrictUtf8Mode);
+  SHOW(LogTsameCollisions);
+  SHOW(LogFsameCollisions);
 #undef SHOW
 
 #define C(_, Name, ...) folly::format(&out, "  {}: {}\n", #Name, gd.Name);

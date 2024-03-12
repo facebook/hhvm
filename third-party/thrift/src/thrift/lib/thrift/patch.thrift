@@ -40,10 +40,20 @@ typedef id.FieldId FieldId
 /**
  * An annotation that indicates a patch representation should be generated for
  * the associated definition.
+ *
+ * This is deprecated and we should use the new codegen workflow instead.
  */
 @scope.Program
 @scope.Structured
 struct GeneratePatch {}
+
+/**
+ * An annotation that indicates a patch representation should be generated for
+ * the associated definition. Similar to `GeneratePatch` but only works for new
+ * codegen workflow and it won't work on package level.
+ */
+@scope.Structured
+struct GeneratePatchNew {}
 
 @scope.Field
 @scope.Structured

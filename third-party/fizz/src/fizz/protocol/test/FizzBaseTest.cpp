@@ -185,7 +185,13 @@ class FizzBaseTest : public Test {
     testFizz_.reset(new TestFizzBase());
   }
 
-  static Callback errCallback;
+  Callback errCallback;
+
+  void writeErrorCallback(
+      const folly::AsyncSocketException& ex,
+      void* writeToken) {
+    errCallback.cb(0, ex, writeToken);
+  }
 
  protected:
   std::unique_ptr<TestFizzBase, DelayedDestruction::Destructor> testFizz_;
@@ -193,13 +199,6 @@ class FizzBaseTest : public Test {
   MockWriteCallback writeCallback_;
   MockWriteCallback earlyWriteCallback_;
 }; // namespace test
-
-Callback FizzBaseTest::errCallback;
-
-constexpr auto writeErrorCallback = [](const folly::AsyncSocketException& ex,
-                                       void* writeToken) {
-  FizzBaseTest::errCallback.cb(0, ex, writeToken);
-};
 
 TEST_F(FizzBaseTest, TestReadSingle) {
   EXPECT_CALL(*TestStateMachine::instance, processSocketData(_, _, _))
@@ -617,7 +616,7 @@ TEST_F(FizzBaseTest, TestErrorPendingEvents) {
   EXPECT_CALL(
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write2")))
       .WillOnce(InvokeWithoutArgs([this]() {
-        testFizz_->moveToErrorState([](void* token) {
+        testFizz_->moveToErrorState([this](void* token) {
           writeErrorCallback(
               AsyncSocketException{AsyncSocketException::UNKNOWN, "unit test"},
               token);
@@ -660,14 +659,14 @@ TEST_F(FizzBaseTest, TestErrorWhileErroring) {
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2()).WillOnce(Invoke([&]() {
-    testFizz_->moveToErrorState([](void* token) {
+    testFizz_->moveToErrorState([this](void* token) {
       writeErrorCallback(
           AsyncSocketException{AsyncSocketException::UNKNOWN, "unit test"},
           token);
     });
   }));
   EXPECT_CALL(errCallback, cb(0, _, &wcb3)).WillOnce(InvokeWithoutArgs([&]() {
-    testFizz_->moveToErrorState([](void* token) {
+    testFizz_->moveToErrorState([this](void* token) {
       writeErrorCallback(
           AsyncSocketException{AsyncSocketException::UNKNOWN, "unit test"},
           token);
@@ -685,7 +684,7 @@ TEST_F(FizzBaseTest, TestErrorWhileErroring) {
 TEST_F(FizzBaseTest, EventAfterErrorState) {
   EXPECT_CALL(*TestStateMachine::instance, processSocketData(_, _, _))
       .WillOnce(InvokeWithoutArgs([this]() {
-        testFizz_->moveToErrorState([](void* token) {
+        testFizz_->moveToErrorState([this](void* token) {
           writeErrorCallback(
               AsyncSocketException{AsyncSocketException::UNKNOWN, "unit test"},
               token);
@@ -721,7 +720,7 @@ TEST_F(FizzBaseTest, TestMoveToErrorStateOnVisit) {
       }));
 
   EXPECT_CALL(testFizz_->visitor_, a1()).WillOnce(Invoke([this]() {
-    testFizz_->moveToErrorState([](void* token) {
+    testFizz_->moveToErrorState([this](void* token) {
       writeErrorCallback(
           folly::AsyncSocketException(
               folly::AsyncSocketException::NOT_OPEN, "Transport is not good"),

@@ -288,6 +288,8 @@ class ParallelConcurrencyControllerTest
 // the Executor, the count should return 2.
 // When the tasks all finish, the count should return 0
 TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
+  Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
+
   folly::EventBase eb;
   auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
 
@@ -295,12 +297,10 @@ TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
   folly::Baton baton2;
 
   auto blockingAP = makeAP(blockingTaskGen(baton1));
-
   auto endingAP = makeAP(endingTaskGen(baton2));
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
-  Cpp2RequestContextStorage contextStorage;
   pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
 
@@ -316,7 +316,10 @@ TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
 // This tests when the concurrency limit is set to 2
 // In this case only 2 tasks can run concurrently
 TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
+  Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
+
   folly::EventBase eb;
+
   auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
 
   holder.controller->setExecutionLimitRequests(2);
@@ -326,14 +329,11 @@ TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
   folly::Baton baton3;
 
   auto staringBlockingAP = makeAP(blockingTaskGen(baton1));
-
   auto blockingAP = makeAP(blockingTaskGen(baton2));
-
   auto endingAP = makeAP(endingTaskGen(baton3));
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
-  Cpp2RequestContextStorage contextStorage;
   pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
   pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
@@ -398,6 +398,8 @@ class LatchedParallelConcurrencyController
 };
 
 TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
+  Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
+
   folly::EventBase eb;
 
   folly::CPUThreadPoolExecutor ex(2);
@@ -416,7 +418,6 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   auto mockAP2 = getEdgeTaskAP(latch, baton2, controller);
   auto mockAP3 = getEdgeTaskAP(latch, baton3, controller);
 
-  Cpp2RequestContextStorage contextStorage;
   // one scenario is right after one task finishes
   // we push another task into the queue
   pool.enqueue(getRequest(mockAP1.get(), contextStorage.makeContext(), &eb));
@@ -440,6 +441,8 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
 }
 
 TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
+  Cpp2RequestContextStorage contextStorage; // Must be destroyed last.
+
   folly::EventBase eb;
 
   folly::CPUThreadPoolExecutor ex(2);
@@ -458,7 +461,6 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   auto mockAP2 = getEdgeTaskAP(latch, baton2, controller);
   auto mockAP3 = getEdgeTaskAP(latch, baton3, controller);
 
-  Cpp2RequestContextStorage contextStorage;
   // another scenario is right before one task finishes
   // we push another task into the queue
   pool.enqueue(getRequest(mockAP1.get(), contextStorage.makeContext(), &eb));

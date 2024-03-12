@@ -4953,6 +4953,19 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                     _ => p.clone(),
                 };
                 let e = |expr_: Expr_| -> ast::Expr { ast::Expr::new((), p.clone(), expr_) };
+                let prop_type_hint = match &param.type_hint.1 {
+                    Some(h) if param.is_variadic => ast::TypeHint(
+                        (),
+                        Some(ast::Hint::new(
+                            param.pos.clone(),
+                            ast::Hint_::mk_happly(
+                                ast::Id(param.pos.clone(), String::from("vec")),
+                                vec![h.clone()],
+                            ),
+                        )),
+                    ),
+                    _ => param.type_hint.clone(),
+                };
                 let lid = |s: &str| -> ast::Lid { ast::Lid(p.clone(), (0, s.to_string())) };
                 (
                     ast::Stmt::new(
@@ -4978,7 +4991,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                         // multiple types of readonlyness
                         readonly: param.readonly.is_some(),
                         visibility: param.visibility.unwrap(),
-                        type_: param.type_hint.clone(),
+                        type_: prop_type_hint,
                         id: ast::Id(p.clone(), cvname.to_string()),
                         expr: None,
                         user_attributes: param.user_attributes.clone(),

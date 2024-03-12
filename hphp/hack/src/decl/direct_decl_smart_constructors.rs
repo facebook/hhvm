@@ -1966,6 +1966,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let type_ = self
                                 .node_to_ty(hint)
                                 .unwrap_or_else(|| self.tany_with_pos(pos));
+                            // A promoted variadic parameter t... gives rise to a property of type vec<t>
+                            let prop_type_ = if variadic {
+                                let ty_ = Ty_::Tapply(self.alloc((
+                                    (pos, naming_special_names::collections::VEC),
+                                    self.alloc([type_]),
+                                )));
+                                self.alloc(Ty(self.alloc(Reason::RvarParamFromDecl(pos)), ty_))
+                            } else {
+                                type_
+                            };
                             if let Some(visibility) = visibility.as_visibility() {
                                 let name = name.unwrap_or("");
                                 let name = strip_dollar_prefix(name);
@@ -1982,7 +1992,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
-                                    type_,
+                                    type_: prop_type_,
                                     visibility,
                                     flags,
                                 });

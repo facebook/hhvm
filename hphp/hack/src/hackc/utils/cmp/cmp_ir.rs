@@ -203,14 +203,14 @@ fn cmp_constant(a_const: &Constant, b_const: &Constant) -> Result {
         (Constant::Array(a), Constant::Array(b)) => cmp_typed_value(a, b).qualified("array")?,
         (Constant::Bool(a), Constant::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (Constant::EnumClassLabel(a), Constant::EnumClassLabel(b)) => {
-            cmp_id(*a, *b).qualified("enum_class_label")?
+            cmp_eq(*a, *b).qualified("enum_class_label")?
         }
         (Constant::Float(a), Constant::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (Constant::Int(a), Constant::Int(b)) => cmp_eq(a, b).qualified("int")?,
         (Constant::LazyClass(a), Constant::LazyClass(b)) => cmp_eq(a, b).qualified("lazy_class")?,
         (Constant::Named(a), Constant::Named(b)) => cmp_eq(a, b).qualified("named")?,
         (Constant::NewCol(a), Constant::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
-        (Constant::String(a), Constant::String(b)) => cmp_id(*a, *b).qualified("string")?,
+        (Constant::String(a), Constant::String(b)) => cmp_eq(*a, *b).qualified("string")?,
         (Constant::Dir, Constant::Dir)
         | (Constant::File, Constant::File)
         | (Constant::FuncCred, Constant::FuncCred)
@@ -388,24 +388,6 @@ fn cmp_hack_constant(a: &HackConstant, b: &HackConstant) -> Result {
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_option(a_value.as_ref(), b_value.as_ref(), cmp_typed_value).qualified("value")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
-    Ok(())
-}
-
-fn cmp_id(a: BytesId, b: BytesId) -> Result {
-    match (a, b) {
-        (BytesId::EMPTY, BytesId::EMPTY) => {}
-        (BytesId::EMPTY, b) => {
-            let b = b.as_bytes();
-            bail!("BytesId NONE vs \"{}\"", String::from_utf8_lossy(b));
-        }
-        (a, BytesId::EMPTY) => {
-            let a = a.as_bytes();
-            bail!("BytesId \"{}\" vs NONE", String::from_utf8_lossy(a));
-        }
-        (a, b) => {
-            cmp_eq(a, b)?;
-        }
-    }
     Ok(())
 }
 
@@ -695,7 +677,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             cmp_eq(x0, x1).qualified("NewObjS param x")?;
         }
         (Hhbc::NewStructDict(x0, _, _), Hhbc::NewStructDict(x1, _, _)) => {
-            cmp_slice(x0.iter().copied(), x1.iter().copied(), cmp_id)
+            cmp_slice(x0.iter().copied(), x1.iter().copied(), cmp_eq)
                 .qualified("NewStructDict param x")?;
         }
         (Hhbc::OODeclExists(_, x0, _), Hhbc::OODeclExists(_, x1, _)) => {
@@ -1067,7 +1049,7 @@ fn cmp_member_key(a: &MemberKey, b: &MemberKey) -> Result {
     match (a, b) {
         (MemberKey::EI(a), MemberKey::EI(b)) => cmp_eq(a, b)?,
         (MemberKey::ET(a), MemberKey::ET(b)) => {
-            cmp_id(*a, *b)?;
+            cmp_eq(*a, *b)?;
         }
         (MemberKey::PT(a), MemberKey::PT(b)) | (MemberKey::QT(a), MemberKey::QT(b)) => {
             cmp_eq(a, b)?;
@@ -1151,7 +1133,7 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
             }
             (Terminator::SSwitch { cond: _, cases: a_cases, targets: _, loc: _, },
              Terminator::SSwitch { cond: _, cases: b_cases, targets: _, loc: _, }, ) => {
-                cmp_slice(a_cases.iter().copied(), b_cases.iter().copied(), cmp_id)?;
+                cmp_slice(a_cases.iter().copied(), b_cases.iter().copied(), cmp_eq)?;
             }
 
             // These are ONLY made of LocId, ValueIds, LocalIds and BlockIds.
@@ -1356,7 +1338,7 @@ fn cmp_requirement(a: &Requirement, b: &Requirement) -> Result {
 }
 
 fn cmp_src_loc(a: &SrcLoc, b: &SrcLoc) -> Result {
-    cmp_id(a.filename.0, b.filename.0).qualified("filename")?;
+    cmp_eq(a.filename.0, b.filename.0).qualified("filename")?;
     cmp_eq(a.line_begin, b.line_begin).qualified("line_begin")?;
     cmp_eq(a.line_end, b.line_end).qualified("line_end")?;
     cmp_eq(a.col_begin, b.col_begin).qualified("col_begin")?;
@@ -1492,7 +1474,7 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
         (TypedValue::Int(a), TypedValue::Int(b)) => cmp_eq(a, b).qualified("int")?,
         (TypedValue::Bool(a), TypedValue::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (TypedValue::Float(a), TypedValue::Float(b)) => cmp_eq(a, b).qualified("float")?,
-        (TypedValue::String(a), TypedValue::String(b)) => cmp_id(*a, *b).qualified("string")?,
+        (TypedValue::String(a), TypedValue::String(b)) => cmp_eq(*a, *b).qualified("string")?,
         (TypedValue::LazyClass(a), TypedValue::LazyClass(b)) => {
             cmp_eq(*a, *b).qualified("lazy_class")?
         }
@@ -1531,7 +1513,7 @@ fn cmp_array_key(a: &ArrayKey, b: &ArrayKey) -> Result {
 
     match (a, b) {
         (ArrayKey::Int(a), ArrayKey::Int(b)) => cmp_eq(a, b).qualified("int")?,
-        (ArrayKey::String(a), ArrayKey::String(b)) => cmp_id(*a, *b).qualified("string")?,
+        (ArrayKey::String(a), ArrayKey::String(b)) => cmp_eq(*a, *b).qualified("string")?,
 
         (ArrayKey::LazyClass(a), ArrayKey::LazyClass(b)) => {
             cmp_eq(*a, *b).qualified("lazy_class")?

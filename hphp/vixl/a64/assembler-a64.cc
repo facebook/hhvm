@@ -1371,6 +1371,22 @@ void Assembler::frintz(const FPRegister& fd,
 }
 
 
+void Assembler::fcmeqz(const FPRegister& fd,
+                      const FPRegister& fn) {
+  assert(fd.size() == fn.size());
+  Emit(FPType(fn) | FCMEQZ | Rn(fn) | Rd(fd));
+}
+
+
+void Assembler::fcmeq(const FPRegister& fd,
+                      const FPRegister& fn,
+                      const FPRegister& fm) {
+  assert(fd.size() == fn.size());
+  assert(fn.size() == fm.size());
+  Emit(FPType(fn) | Rm(fm) | FCMEQ | Rn(fn) | Rd(fd));
+}
+
+
 void Assembler::fcmp(const FPRegister& fn,
                      const FPRegister& fm) {
   assert(fn.size() == fm.size());

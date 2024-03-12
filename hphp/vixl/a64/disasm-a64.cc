@@ -1215,6 +1215,91 @@ void Disassembler::VisitFPFixedPointConvert(Instruction* instr) {
 }
 
 
+void Disassembler::VisitSIMDScalarThreeSame(Instruction* instr) {
+  const char *mnemonic = "";
+  const char *form = "'Fd, 'Fn, 'Fm";
+
+  switch (instr->Mask(SIMDScalarThreeSameMask)) {
+    case SQADDop: mnemonic = "sqadd"; break;
+    case UQADDop: mnemonic = "uqadd"; break;
+    case SQSUBop: mnemonic = "sqsub"; break;
+    case UQSUBop: mnemonic = "uqsub"; break;
+    case CMGTop: mnemonic = "cmgt"; break;
+    case CMHIop: mnemonic = "cmhi"; break;
+    case CMGEop: mnemonic = "cmge"; break;
+    case CMHSop: mnemonic = "cmhs"; break;
+    case SSHLop: mnemonic = "sshl"; break;
+    case USHLop: mnemonic = "ushl"; break;
+    case SQSHLop: mnemonic = "sqshl"; break;
+    case UQSHLop: mnemonic = "uqshl"; break;
+    case SRSHLop: mnemonic = "srshl"; break;
+    case URSHLop: mnemonic = "urshl"; break;
+    case SQRSHLop: mnemonic = "sqrshl"; break;
+    case UQRSHLop: mnemonic = "uqrshl"; break;
+    case STSADDop: mnemonic = "add"; break;
+    case STSSUBop: mnemonic = "sub"; break;
+    case CMEQop: mnemonic = "cmeq"; break;
+    case CMTSTop: mnemonic = "cmtst"; break;
+    case SQDMULHop: mnemonic = "sqdmulh"; break;
+    case SQRDMULHop: mnemonic = "sqrdmulh"; break;
+    case FABDop: mnemonic = "fabd"; break;
+    case FMULXop: mnemonic = "fmulx"; break;
+    case FCMEQop: mnemonic = "fcmeq"; break;
+    case FCMGEop: mnemonic = "fcmge"; break;
+    case FCMGTop: mnemonic = "fcmgt"; break;
+    case FACGEop: mnemonic = "facge"; break;
+    case FACGTop: mnemonic = "facgt"; break;
+    default: not_reached();
+  }
+  Format(instr, mnemonic, form);
+}
+
+
+void Disassembler::VisitSIMDScalarTwoMisc(Instruction* instr) {
+  const char *mnemonic = "";
+  const char *form = "'Fd, 'Fn";
+  const char *form_zero = "'Fd, 'Fn, #0.0";
+
+  switch (instr->Mask(SIMDScalarTwoMiscMask)) {
+    case  SUQADDop: mnemonic ="suqadd"; break;
+    case  USQADDop: mnemonic ="usqadd"; break;
+    case  SQABSop: mnemonic ="sqabs"; break;
+    case  SQNEGop: mnemonic ="sqneg"; break;
+    case  CMGEZop: mnemonic ="cmge"; form = form_zero; break;
+    case  CMGTZop: mnemonic ="cmgt"; form = form_zero; break;
+    case  CMEQZop: mnemonic ="cmeq"; form = form_zero; break;
+    case  CMLEZop: mnemonic ="cmle"; form = form_zero; break;
+    case  CMLTZop: mnemonic ="cmlt"; form = form_zero; break;
+    case  STMABSop: mnemonic ="abs"; break;
+    case  STMNEGop: mnemonic ="neg"; break;
+    case  FCMGEZop: mnemonic ="fcmge"; form = form_zero; break;
+    case  FCMGTZop: mnemonic ="fcmgt"; form = form_zero; break;
+    case  FCMEQZop: mnemonic ="fcmeq"; form = form_zero; break;
+    case  FCMLEZop: mnemonic ="fcmle"; form = form_zero; break;
+    case  FCMLTZop: mnemonic ="fcmlt"; form = form_zero; break;
+    case  SQXTUNop: mnemonic ="sqxtun"; break;
+    case  FCVTXNop: mnemonic ="fcvtxn"; break;
+    case  FCVTNSop: mnemonic ="fcvtns"; break;
+    case  FCVTNUop: mnemonic ="fcvtnu"; break;
+    case  FCVTPSop: mnemonic ="fcvtps"; break;
+    case  FCVTPUop: mnemonic ="fcvtpu"; break;
+    case  FCVTMSop: mnemonic ="fcvtms"; break;
+    case  FCVTMUop: mnemonic ="fcvtmu"; break;
+    case  FCVTZSop: mnemonic ="fcvtzs"; break;
+    case  FCVTZUop: mnemonic ="fcvtzu"; break;
+    case  FCVTASop: mnemonic ="fcvtas"; break;
+    case  FCVTAUop: mnemonic ="fcvtau"; break;
+    case  FRECPEop: mnemonic ="frecpe"; break;
+    case  FRSQRTEop: mnemonic ="frsqrte"; break;
+    case  STMSCVTFop: mnemonic ="scvtf"; break;
+    case  UCVTFop: mnemonic ="ucvtf"; break;
+    case  FRECPXop: mnemonic ="frecpx"; break;
+    default: not_reached();
+  }
+  Format(instr, mnemonic, form);
+}
+
+
 void Disassembler::VisitSystem(Instruction* instr) {
   // Some system instructions hijack their Op and Cp fields to represent a
   // range of immediates instead of indicating a different instruction. This

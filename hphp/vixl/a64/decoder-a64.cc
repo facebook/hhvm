@@ -696,9 +696,14 @@ void Decoder::DecodeAdvSIMDLoadStore(Instruction* instr) {
 
 
 void Decoder::DecodeAdvSIMDDataProcessing(Instruction* instr) {
-  // TODO: Implement Advanced SIMD data processing instruction decode.
   assert(instr->Bits(27, 25) == 0x7);
-  VisitUnimplemented(instr);
+  if (instr->Mask(SIMDScalarThreeSameFMask) == SIMDScalarThreeSameFixed) {
+    VisitSIMDScalarThreeSame(instr);
+  } else if (instr->Mask(SIMDScalarTwoMiscFMask) == SIMDScalarTwoMiscFixed) {
+    VisitSIMDScalarTwoMisc(instr);
+  } else {
+    VisitUnimplemented(instr);
+  }
 }
 
 

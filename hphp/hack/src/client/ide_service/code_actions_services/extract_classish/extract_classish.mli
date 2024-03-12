@@ -7,4 +7,4 @@
  *)
 (** Provide refactors for when the user selects class members
 such as "Extract method" *)
-val find : Code_action_types.Refactor.find
+val find : Code_action_types.find_refactor

@@ -151,7 +151,8 @@ let edits_of_candidate source_text ~path candidate : Code_action_types.edits =
 
 let to_refactor source_text ~path candidate =
   let edits = lazy (edits_of_candidate source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = title_of_candidate candidate; edits }
+  Code_action_types.
+    { title = title_of_candidate candidate; edits; kind = `Refactor }
 
 let find ~entry selection ctx =
   let source_text = Ast_provider.compute_source_text ~entry in

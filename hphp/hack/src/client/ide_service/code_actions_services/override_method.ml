@@ -87,12 +87,13 @@ let to_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
 
 let refactor_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Code_action_types.Refactor.t =
+    Code_action_types.refactor =
   let edits =
     lazy (Relative_path.Map.singleton path (to_edits classish_starts quickfix))
   in
 
-  Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edits }
+  Code_action_types.
+    { title = Quickfix.get_title quickfix; edits; kind = `Refactor }
 
 let find ~entry pos ctx =
   let (start_line, start_col) = Pos.line_column pos in

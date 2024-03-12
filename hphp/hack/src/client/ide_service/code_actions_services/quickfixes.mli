@@ -5,8 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val find :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Pos.t ->
-  Code_action_types.Quickfix.t list
+val find : Code_action_types.find_quickfix

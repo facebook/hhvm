@@ -90,7 +90,7 @@ let edits_of_candidate ~path { lhs_var; lhs_type_string; lhs_pos } :
 let to_refactor ~path candidate =
   let edits = lazy (edits_of_candidate ~path candidate) in
   let title = Printf.sprintf "Add local type hint for %s" candidate.lhs_var in
-  Code_action_types.Refactor.{ title; edits }
+  Code_action_types.{ title; edits; kind = `Refactor }
 
 let has_typed_local_variables_enabled root_node =
   let open Full_fidelity_positioned_syntax in

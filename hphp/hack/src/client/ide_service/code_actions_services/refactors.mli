@@ -5,4 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val find : Code_action_types.Refactor.find
+val find : Code_action_types.find_refactor

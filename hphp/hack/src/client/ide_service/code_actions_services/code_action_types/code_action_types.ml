@@ -14,22 +14,21 @@ type edit = {
 
 type edits = edit list Relative_path.Map.t
 
-module Refactor = struct
-  type t = {
-    title: string;
-    edits: edits Lazy.t;
-  }
+type 'kind t = {
+  title: string;
+  edits: edits Lazy.t;
+  kind: [< `Refactor | `Quickfix ] as 'kind;
+}
 
-  type find =
-    entry:Provider_context.entry -> Pos.t -> Provider_context.t -> t list
-end
+type refactor = [ `Refactor ] t
 
-module Quickfix = struct
-  type t = {
-    title: string;
-    edits: edits Lazy.t;
-  }
-end
+type quickfix = [ `Quickfix ] t
+
+type find_refactor =
+  entry:Provider_context.entry -> Pos.t -> Provider_context.t -> refactor list
+
+type find_quickfix =
+  entry:Provider_context.entry -> Pos.t -> Provider_context.t -> quickfix list
 
 module Type_string = struct
   type t = string Lazy.t

@@ -9,4 +9,4 @@ val to_refactors :
   Full_fidelity_source_text.t ->
   Relative_path.t ->
   Extract_classish_types.candidate ->
-  Code_action_types.Refactor.t list
+  Code_action_types.refactor list

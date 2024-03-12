@@ -10,4 +10,4 @@ val of_candidate :
   source_text:Full_fidelity_source_text.t ->
   path:Relative_path.t ->
   Extract_method_types.candidate ->
-  Code_action_types.Refactor.t
+  Code_action_types.refactor

@@ -103,10 +103,10 @@ let edits_of_candidate source_text path candidate : Code_action_types.edits =
   in
   Relative_path.Map.singleton path edits
 
-let to_refactor source_text path candidate : Code_action_types.Refactor.t =
+let to_refactor source_text path candidate : Code_action_types.refactor =
   let edits = lazy (edits_of_candidate source_text path candidate) in
-  Code_action_types.Refactor.{ title = "Extract interface"; edits }
+  Code_action_types.{ title = "Extract interface"; edits; kind = `Refactor }
 
 let to_refactors (source_text : Full_fidelity_source_text.t) path candidate :
-    Code_action_types.Refactor.t list =
+    Code_action_types.refactor list =
   [to_refactor source_text path candidate]

@@ -72,23 +72,25 @@ let workspace_edit_of_code_action_edits
   in
   Lsp.WorkspaceEdit.{ changes }
 
+let to_action Code_action_types.{ title; edits; kind } =
+  let workspace_edit = Lazy.map edits ~f:workspace_edit_of_code_action_edits in
+  let lsp_kind =
+    match kind with
+    | `Refactor -> Lsp.CodeActionKind.refactor
+    | `Quickfix -> Lsp.CodeActionKind.quickfix
+  in
+  Lsp.CodeAction.Action
+    {
+      Lsp.CodeAction.title;
+      kind = lsp_kind;
+      diagnostics = [];
+      action = Lsp.CodeAction.UnresolvedEdit workspace_edit;
+    }
+
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(range : Lsp.range) : resolvable_command_or_action list =
-  let to_action
-      ~title (lazy_code_action_edits : Code_action_types.edits Lazy.t) ~kind =
-    let workspace_edit =
-      Lazy.map lazy_code_action_edits ~f:workspace_edit_of_code_action_edits
-    in
-    Lsp.CodeAction.Action
-      {
-        Lsp.CodeAction.title;
-        kind;
-        diagnostics = [];
-        action = Lsp.CodeAction.UnresolvedEdit workspace_edit;
-      }
-  in
   let pos =
     let source_text = Ast_provider.compute_source_text ~entry in
     let line_to_offset line =
@@ -97,22 +99,17 @@ let find
     let path = entry.Provider_context.path in
     Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
   in
-  let quickfixes = Quickfixes.find ~ctx ~entry pos in
-  let lsp_quickfixes =
-    List.map quickfixes ~f:(fun Code_action_types.Quickfix.{ title; edits } ->
-        to_action ~title edits ~kind:Lsp.CodeActionKind.quickfix)
-  in
+  let quickfixes = Quickfixes.find ~entry pos ctx in
+  let lsp_quickfixes = List.map quickfixes ~f:to_action in
   let quickfix_titles =
-    SSet.of_list
-    @@ List.map quickfixes ~f:(fun q -> q.Code_action_types.Quickfix.title)
+    SSet.of_list @@ List.map quickfixes ~f:(fun q -> q.Code_action_types.title)
   in
   let lsp_refactors =
     Refactors.find ~entry pos ctx
     (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
-    |> List.filter ~f:(fun Code_action_types.Refactor.{ title; _ } ->
+    |> List.filter ~f:(fun Code_action_types.{ title; _ } ->
            not (SSet.mem title quickfix_titles))
-    |> List.map ~f:(fun Code_action_types.Refactor.{ title; edits } ->
-           to_action ~title edits ~kind:Lsp.CodeActionKind.refactor)
+    |> List.map ~f:to_action
   in
   lsp_quickfixes @ lsp_refactors
 

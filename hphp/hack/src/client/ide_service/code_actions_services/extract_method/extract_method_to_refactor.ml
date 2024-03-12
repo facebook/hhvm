@@ -290,4 +290,4 @@ let edits_of_candidate
 
 let of_candidate ~source_text ~path candidate =
   let edits = lazy (edits_of_candidate ~source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = "Extract into method"; edits }
+  Code_action_types.{ title = "Extract into method"; edits; kind = `Refactor }

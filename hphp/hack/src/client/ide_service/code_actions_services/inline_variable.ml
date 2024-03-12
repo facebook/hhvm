@@ -299,8 +299,12 @@ let edits_of_candidate ~path ~source_text { def; use_pos; _ } :
 
 let refactor_of_candidate ~path ~source_text candidate =
   let edits = lazy (edits_of_candidate ~path ~source_text candidate) in
-  Code_action_types.Refactor.
-    { title = Printf.sprintf "Inline variable %s" candidate.name; edits }
+  Code_action_types.
+    {
+      title = Printf.sprintf "Inline variable %s" candidate.name;
+      edits;
+      kind = `Refactor;
+    }
 
 let find ~entry selection ctx =
   let source_text = Ast_provider.compute_source_text ~entry in

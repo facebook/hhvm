@@ -13,7 +13,7 @@ open Hh_prelude
  *)
 
 let select_refactoring_from_parse_error (e : Errors.error) :
-    Code_action_types.Refactor.find option =
+    Code_action_types.find_refactor option =
   let msg_str =
     let User_error.{ claim; _ } = e in
     Message.get_message_str claim
@@ -29,13 +29,13 @@ let select_refactoring_from_parse_error (e : Errors.error) :
   | _ -> None
 
 let select_refactoring_from_type_error (e : Errors.error) :
-    Code_action_types.Refactor.find option =
+    Code_action_types.find_refactor option =
   match Error_codes.Typing.of_enum e.User_error.code with
   | Some Error_codes.Typing.DiscardedAwaitable -> Some Await_expression.find
   | _ -> None
 
 let select_refactoring (e : Errors.error) :
-    Code_action_types.Refactor.find option =
+    Code_action_types.find_refactor option =
   match select_refactoring_from_parse_error e with
   | Some fn -> Some fn
   | None -> select_refactoring_from_type_error e
@@ -49,5 +49,6 @@ let find ctx entry (e : Errors.error) =
            refactors
            ~f:
              Code_action_types.(
-               (fun Refactor.{ title; edits } -> Quickfix.{ title; edits })))
+               fun { title; edits; kind = `Refactor } ->
+                 { title; edits; kind = `Quickfix }))
   |> Option.value ~default:[]

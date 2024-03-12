@@ -14,13 +14,14 @@ let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
 
 let convert_quickfix
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Code_action_types.Quickfix.t =
+    Code_action_types.quickfix =
   let edits =
     lazy
       (Relative_path.Map.singleton path (text_edits classish_starts quickfix))
   in
 
-  Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edits }
+  Code_action_types.
+    { title = Quickfix.get_title quickfix; edits; kind = `Quickfix }
 
 let errors_to_quickfixes
     (ctx : Provider_context.t)
@@ -28,7 +29,7 @@ let errors_to_quickfixes
     (errors : Errors.t)
     (path : Relative_path.t)
     (classish_starts : Pos.t SMap.t)
-    (selection : Pos.t) : Code_action_types.Quickfix.t list =
+    (selection : Pos.t) : Code_action_types.quickfix list =
   let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
@@ -44,7 +45,7 @@ let errors_to_quickfixes
   in
   standard_quickfixes @ quickfixes_from_refactors
 
-let find ~ctx ~entry pos : Code_action_types.Quickfix.t list =
+let find ~entry pos ctx : Code_action_types.quickfix list =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
 

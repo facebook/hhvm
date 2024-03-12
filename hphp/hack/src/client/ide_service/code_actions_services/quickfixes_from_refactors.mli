@@ -20,4 +20,4 @@ val find :
   Provider_context.t ->
   Provider_context.entry ->
   Errors.error ->
-  Code_action_types.Quickfix.t list
+  Code_action_types.quickfix list

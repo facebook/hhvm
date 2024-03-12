@@ -13,7 +13,7 @@ path = "hh_codegen.rs"
 
 [dependencies]
 anyhow = "1.0.75"
-clap = { version = "4.4.12", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.5.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 hash = { version = "0.0.0", path = "../utils/hash" }
 proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
 quote = "1.0.29"

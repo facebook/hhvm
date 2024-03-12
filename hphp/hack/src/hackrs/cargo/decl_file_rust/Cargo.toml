@@ -12,7 +12,7 @@ name = "decl_file_rust"
 path = "../../decl_file_rust.rs"
 
 [dependencies]
-clap = { version = "4.4.12", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.5.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_parser = { version = "0.0.0", path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_provider" }
 folded_decl_provider = { version = "0.0.0", path = "../../folded_decl_provider/cargo/folded_decl_provider" }

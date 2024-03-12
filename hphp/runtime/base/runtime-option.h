@@ -507,7 +507,7 @@ struct RuntimeOption {
   /* Sample rate for logging non-utf8 in eval for StrictUtf8Mode=1 */   \
   F(uint32_t, EvalNonUtf8SampleRate, 0)                                 \
   /* 0=Relaxed, 1=Strict User, Allow Eval, 2=Never Allowed */           \
-  F(int, StrictUtf8Mode, 0)                                             \
+  F(int, StrictUtf8Mode, 2)                                             \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \

@@ -46,7 +46,7 @@ let default =
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
     nameof_precedence = false;
-    strict_utf8 = false;
+    strict_utf8 = true;
   }
 
 let make

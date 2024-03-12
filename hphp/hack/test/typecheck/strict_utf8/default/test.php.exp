@@ -1,1 +1,2 @@
-No errors
+File "test.php", line 5, characters 10-10:
+Invalid utf8 sequence (Parsing[1002])

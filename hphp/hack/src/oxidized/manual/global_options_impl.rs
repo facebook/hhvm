@@ -162,7 +162,7 @@ impl Default for GlobalOptions {
             tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,
             po_nameof_precedence: false,
-            po_strict_utf8: false,
+            po_strict_utf8: true,
             po_stack_size: 32 * 1024 * 1024, // 32 MiB is the largest stack size we can use without requiring sudo
         }
     }

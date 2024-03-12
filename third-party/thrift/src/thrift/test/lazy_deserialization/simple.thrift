@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test
 namespace py3 thrift.test.lazy_deserialization
@@ -49,6 +50,19 @@ struct OptionalLazyFoo {
   @cpp.Lazy
   3: optional list<double> field3;
   @cpp.Lazy
+  4: optional list<i32> field4;
+}
+
+struct OptionalBoxedLazyFoo {
+  @thrift.Box
+  1: optional list<double> field1;
+  @thrift.Box
+  2: optional list<i32> field2;
+  @thrift.Box
+  @cpp.Lazy
+  3: optional list<double> field3;
+  @cpp.Lazy
+  @thrift.Box
   4: optional list<i32> field4;
 }
 

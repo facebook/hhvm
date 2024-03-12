@@ -600,4 +600,48 @@ TYPED_TEST(LazyDeserialization, TestGFlags) {
   EXPECT_FALSE(get_field4(lazyFoo).empty());
 }
 
+TEST(LazyDeserialization, BoxedLazyFoo) {
+  auto foo = gen<OptionalFoo>();
+  auto s = CompactSerializer::serialize<std::string>(foo);
+  OptionalBoxedLazyFoo lazyFoo;
+  CompactSerializer::deserialize(s, lazyFoo);
+
+  EXPECT_EQ(foo.field1_ref().has_value(), lazyFoo.field1_ref().has_value());
+  EXPECT_EQ(foo.field2_ref().has_value(), lazyFoo.field2_ref().has_value());
+  EXPECT_EQ(foo.field3_ref().has_value(), lazyFoo.field3_ref().has_value());
+  EXPECT_EQ(foo.field4_ref().has_value(), lazyFoo.field4_ref().has_value());
+  if (foo.field1_ref()) {
+    EXPECT_EQ(*foo.field1_ref(), lazyFoo.field1_ref());
+  }
+  if (foo.field2_ref()) {
+    EXPECT_EQ(*foo.field2_ref(), lazyFoo.field2_ref());
+  }
+  if (foo.field3_ref()) {
+    EXPECT_EQ(*foo.field3_ref(), lazyFoo.field3_ref());
+  }
+  if (foo.field4_ref()) {
+    EXPECT_EQ(*foo.field4_ref(), lazyFoo.field4_ref());
+  }
+}
+
+TEST(LazyDeserialization, BoxedLazyFooSerializedSize) {
+  auto foo = gen<OptionalFoo>();
+  auto s = CompactSerializer::serialize<std::string>(foo);
+  OptionalBoxedLazyFoo lazyFoo;
+  CompactSerializer::deserialize(s, lazyFoo);
+
+  CompactProtocolWriter w;
+
+  // The estimation should be larger than actual size
+  EXPECT_LE(s.size(), lazyFoo.serializedSize(&w));
+
+  // With zero-copy, we don't need to allocate memory for undeserialized fields.
+  // Thus the serialized size would be smaller.
+  EXPECT_LT(lazyFoo.serializedSizeZC(&w), lazyFoo.serializedSize(&w));
+
+  // Sinze lazy field can have more accurate estimation, the size should be more
+  // accurate than non-lazy field.
+  EXPECT_GE(foo.serializedSize(&w), lazyFoo.serializedSize(&w));
+}
+
 } // namespace apache::thrift::test

@@ -18,6 +18,18 @@
 <%#field:type%>
 <% > module_types_tcc/if_should_write%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += prot_->serializedFieldSize("<%field:name%>", apache::thrift::protocol::<% > module_types_tcc/struct_type%>, <%field:key%>);
+<%#field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    if constexpr (Protocol_::kHasIndexSupport()) {
+<%#struct:union?%>  <%/struct:union?%>      if (prot_->protocolType() == __fbthrift_protocol_) {
+<%#struct:union?%>  <%/struct:union?%>        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+<%#struct:union?%>  <%/struct:union?%>        if (__fbthrift_isDeserialized_.<%field:cpp_name%>.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+<%#struct:union?%>  <%/struct:union?%>          goto written_lazy_field_<%field:cpp_name%>;
+<%#struct:union?%>  <%/struct:union?%>        }
+<%#struct:union?%>  <%/struct:union?%>      }
+<%#struct:union?%>  <%/struct:union?%>    }
+<%#struct:union?%>  <%/struct:union?%>
+<%#struct:union?%>  <%/struct:union?%>    std::as_const(*this).__fbthrift_read_field_<%field:cpp_name%>();
+<%/field:lazy?%>
 <%^field:non_opt_cpp_ref?%>
 <%#field:use_op_encode?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::op::serialized_size<<%field:zero_copy_arg%>, <%field:type_tag%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>);
@@ -56,5 +68,8 @@
 <%/type:struct?%>
 <%#struct:union?%>  <%/struct:union?%>    }
 <%/field:non_opt_cpp_ref?%>
+<%#field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    written_lazy_field_<%field:cpp_name%>:;
+<%/field:lazy?%>
 <% > module_types_tcc/if_should_write_end%>
 <%/field:type%>

@@ -615,7 +615,7 @@ cdef class Struct(StructOrUnion):
                     self,
                     transitive_annotation=transitive_annotation(),
                 )
-            
+
             self.try_set_struct_field(
                     field_index,
                     struct_info,
@@ -625,10 +625,10 @@ cdef class Struct(StructOrUnion):
         self._fbthrift_populate_primitive_fields()
 
     def try_set_struct_field(
-        Struct self, 
-        int field_index, 
-        StructInfo struct_info, 
-        str name, 
+        Struct self,
+        int field_index,
+        StructInfo struct_info,
+        str name,
         object value
     ) -> None:
         """Try to set a structure's field, and indicate what field failed to be
@@ -1756,6 +1756,8 @@ class Flag(Enum):
             res ^= m._fbthrift_value_
         return cls(res)
 
+
+@cython.auto_pickle(False)
 cdef class ServiceInterface:
     @staticmethod
     def service_name():

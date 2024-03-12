@@ -4408,7 +4408,7 @@ TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
   // Arrange integration test setup
   auto handler = std::make_shared<TestInterface>();
   auto server = std::make_shared<ScopedServerInterfaceThread>(
-      handler, "::1", 9989, [](ThriftServer& server) {
+      handler, [](ThriftServer& server) {
         {
           server.requireResourcePools();
 

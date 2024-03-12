@@ -10,17 +10,15 @@ use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
 
-struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
-    phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl ())>,
+struct RewriteXmlVisitor<'emitter, 'decl> {
+    phantom: std::marker::PhantomData<&'emitter &'decl ()>,
 }
 
 struct Ctx<'emitter, 'decl> {
     emitter: &'emitter mut Emitter<'decl>,
 }
 
-impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
-    for RewriteXmlVisitor<'emitter, 'arena, 'decl>
-{
+impl<'ast, 'emitter, 'decl> VisitorMut<'ast> for RewriteXmlVisitor<'emitter, 'decl> {
     type Params = AstParams<Ctx<'emitter, 'decl>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -38,7 +36,7 @@ impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
     }
 }
 
-pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
+pub fn rewrite_xml<'p, 'emitter, 'decl>(
     emitter: &'emitter mut Emitter<'decl>,
     prog: &'p mut ast::Program,
 ) -> Result<()> {
@@ -50,7 +48,7 @@ pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
     visit_mut(&mut xml_visitor, &mut c, prog)
 }
 
-fn rewrite_xml_<'arena, 'decl>(
+fn rewrite_xml_<'decl>(
     e: &mut Emitter<'decl>,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),

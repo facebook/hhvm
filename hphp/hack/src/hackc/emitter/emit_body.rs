@@ -77,7 +77,7 @@ bitflags! {
     }
 }
 
-pub fn emit_body<'b, 'arena, 'decl>(
+pub fn emit_body<'b, 'decl>(
     emitter: &mut Emitter<'decl>,
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
@@ -172,7 +172,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     ))
 }
 
-fn make_body_instrs<'a, 'arena, 'decl>(
+fn make_body_instrs<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -214,7 +214,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     Ok(body_instrs)
 }
 
-fn make_header_content<'a, 'arena, 'decl>(
+fn make_header_content<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -247,7 +247,7 @@ fn make_header_content<'a, 'arena, 'decl>(
     ]))
 }
 
-fn make_decl_vars<'a, 'arena, 'decl>(
+fn make_decl_vars<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     scope: &Scope<'a>,
     immediate_tparams: &[ast::Tparam],
@@ -331,7 +331,7 @@ pub fn make_env<'a>(
     env
 }
 
-fn make_params<'a, 'arena, 'decl>(
+fn make_params<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     tp_names: &mut Vec<&str>,
     ast_params: &[ast::FunParam],
@@ -342,7 +342,7 @@ fn make_params<'a, 'arena, 'decl>(
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
 
-pub fn make_body<'a, 'arena, 'decl>(
+pub fn make_body<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     mut body_instrs: InstrSeq,
     decl_vars: Vec<StringId>,
@@ -416,7 +416,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     })
 }
 
-pub fn has_type_constraint<'a, 'arena>(
+pub fn has_type_constraint<'a>(
     env: &Env<'a>,
     ti: Option<&TypeInfo>,
     ast_param: &ast::FunParam,
@@ -432,7 +432,7 @@ pub fn has_type_constraint<'a, 'arena>(
     }
 }
 
-pub fn emit_method_prolog<'a, 'arena, 'decl>(
+pub fn emit_method_prolog<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -584,7 +584,7 @@ pub fn emit_deprecation_info<'a>(
     })
 }
 
-fn set_emit_statement_state<'arena, 'decl>(
+fn set_emit_statement_state<'decl>(
     emitter: &mut Emitter<'decl>,
     default_return_value: InstrSeq,
     params: &[(Param, Option<(Label, ast::Expr)>)],

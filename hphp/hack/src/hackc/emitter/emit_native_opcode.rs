@@ -18,7 +18,7 @@ use oxidized::pos::Pos;
 use crate::emit_body;
 use crate::emit_param;
 
-pub fn emit_body<'a, 'arena, 'decl>(
+pub fn emit_body<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     scope: &Scope<'a>,
     class_name: &ast::Sid,
@@ -62,7 +62,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     })
 }
 
-fn emit_native_opcode_impl<'arena>(
+fn emit_native_opcode_impl(
     name: &str,
     params: &[ast::FunParam],
     class_name: &str,

@@ -395,7 +395,7 @@ fn assemble_requirement(token_iter: &mut Lexer<'_>) -> Result<hhbc::Requirement>
     Ok(hhbc::Requirement { name, kind })
 }
 
-fn assemble_const_or_type_const<'arena>(
+fn assemble_const_or_type_const(
     token_iter: &mut Lexer<'_>,
     consts: &mut Vec<hhbc::Constant>,
     type_consts: &mut Vec<hhbc::TypeConstant>,
@@ -887,7 +887,7 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
             }
         }
         /// v:vec.len():{(tv;)*} or k:keyset.len():{(tv;)*}
-        fn deserialize_vec_or_keyset<'arena, 'a>(
+        fn deserialize_vec_or_keyset<'a>(
             src: &'a [u8],
             v_or_k: VecOrKeyset,
         ) -> Result<(&'a [u8], hhbc::TypedValue)> {
@@ -970,7 +970,7 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
 /// .functionrefs {
 ///    (identifier)+
 /// }
-fn assemble_refs<'arena, 'a, T: 'arena, F>(
+fn assemble_refs<T, F>(
     token_iter: &mut Lexer<'_>,
     name_str: &str,
     assemble_name: F,
@@ -1331,7 +1331,7 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
 }
 
 /// { (.doc ...)? (.ismemoizewrapper)? (.ismemoizewrapperlsb)? (.numiters)? (.declvars)? (instructions)* }
-fn assemble_body<'arena>(
+fn assemble_body(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     params: Vec<hhbc::Param>,
@@ -1612,7 +1612,7 @@ fn assemble_opcode(
 
 /// Opcodes and Pseudos
 #[allow(clippy::todo)]
-fn assemble_instr<'arena>(
+fn assemble_instr(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd

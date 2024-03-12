@@ -173,11 +173,11 @@ fn sem_diff_attributes(path: &CodePath<'_>, a: &[Attribute], b: &[Attribute]) ->
     sem_diff_slice(path, a, b, sem_diff_attribute)
 }
 
-fn sem_diff_body<'arena, 'a>(
+fn sem_diff_body<'a>(
     path: &CodePath<'_>,
-    a: &'arena Body,
+    a: &Body,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    b: &'arena Body,
+    b: &Body,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Body {
@@ -292,11 +292,11 @@ fn sem_diff_param(path: &CodePath<'_>, a: &Param, b: &Param) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_class<'arena, 'a>(
+fn sem_diff_class<'a>(
     path: &CodePath<'_>,
-    a: &'arena Class,
+    a: &Class,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    b: &'arena Class,
+    b: &Class,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Class {
@@ -500,11 +500,11 @@ fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal, b: &Fatal) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_function<'arena, 'a>(
+fn sem_diff_function<'a>(
     path: &CodePath<'_>,
-    a: &'arena Function,
+    a: &Function,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    b: &'arena Function,
+    b: &Function,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Function {
@@ -537,11 +537,11 @@ fn sem_diff_function<'arena, 'a>(
     Ok(())
 }
 
-fn sem_diff_method<'arena, 'a>(
+fn sem_diff_method<'a>(
     path: &CodePath<'_>,
-    a: &'arena Method,
+    a: &Method,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    b: &'arena Method,
+    b: &Method,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Method {

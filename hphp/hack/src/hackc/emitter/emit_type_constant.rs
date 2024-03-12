@@ -118,7 +118,7 @@ fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
     }
 }
 
-fn shape_field_to_entry<'arena>(
+fn shape_field_to_entry(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
@@ -140,7 +140,7 @@ fn shape_field_to_entry<'arena>(
     Ok(encode_entry(&name, TypedValue::dict(r)))
 }
 
-fn shape_info_to_typed_value<'arena>(
+fn shape_info_to_typed_value(
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,

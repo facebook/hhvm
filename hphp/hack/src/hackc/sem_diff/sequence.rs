@@ -11,15 +11,15 @@ use crate::node::Input;
 use crate::node::Node;
 use crate::node::NodeInstr;
 
-pub(crate) struct Sequence<'arena> {
+pub(crate) struct Sequence<'a> {
     pub(crate) debug_name: String,
-    pub(crate) instrs: Vec<Node<'arena>>,
+    pub(crate) instrs: Vec<Node<'a>>,
     // If the sequence ends on a loopback (so we terminate it early to avoid
     // infinite loops) then this tells us where it looped back to.
     pub(crate) loopback: Option<usize>,
 }
 
-impl<'arena> Sequence<'arena> {
+impl<'a> Sequence<'a> {
     pub(crate) fn compare(path: &CodePath<'_>, a: Self, b: Self) -> Result<()> {
         trace!("--- Compare {} and {}", a.debug_name, b.debug_name);
 
@@ -532,10 +532,7 @@ due to a try/catch mismatch",
     );
 }
 
-fn collect_sequence<'arena, 'a>(
-    seq: &'a Sequence<'arena>,
-    min_len: usize,
-) -> Vec<&'a Node<'arena>> {
+fn collect_sequence<'a>(seq: &'a Sequence<'a>, min_len: usize) -> Vec<&'a Node<'a>> {
     if min_len <= seq.instrs.len() || seq.loopback.is_none() {
         return seq.instrs.iter().collect_vec();
     }

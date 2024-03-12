@@ -39,7 +39,7 @@ pub fn has_variadic(params: &[Param]) -> bool {
     params.iter().any(|v| v.is_variadic)
 }
 
-pub fn from_asts<'a, 'arena, 'decl>(
+pub fn from_asts<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -59,7 +59,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
         .map(rename_params)
 }
 
-fn rename_params<'arena>(
+fn rename_params(
     mut params: Vec<(Param, Option<(Label, a::Expr)>)>,
 ) -> Vec<(Param, Option<(Label, a::Expr)>)> {
     let mut param_counts = StringIdMap::default();
@@ -89,7 +89,7 @@ fn rename_params<'arena>(
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'arena, 'decl>(
+fn from_ast<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -138,8 +138,7 @@ fn from_ast<'a, 'arena, 'decl>(
     aast_visitor::visit(
         &mut ResolverVisitor {
             phantom_a: PhantomData,
-            phantom_b: PhantomData,
-            phantom_c: PhantomData,
+            phantom_d: PhantomData,
         },
         &mut Ctx { emitter, scope },
         &param.expr,
@@ -175,7 +174,7 @@ fn from_ast<'a, 'arena, 'decl>(
     )))
 }
 
-pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
+pub fn emit_param_default_value_setter<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     env: &Env<'a>,
     pos: &Pos,
@@ -210,10 +209,9 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     }
 }
 
-struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
+struct ResolverVisitor<'a, 'decl: 'a> {
     phantom_a: PhantomData<&'a ()>,
-    phantom_b: PhantomData<&'arena ()>,
-    phantom_c: PhantomData<&'decl ()>,
+    phantom_d: PhantomData<&'decl ()>,
 }
 
 #[allow(dead_code)]
@@ -222,7 +220,7 @@ struct Ctx<'a, 'decl> {
     scope: &'a Scope<'a>,
 }
 
-impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {
+impl<'ast, 'a, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'decl> {
     type Params = AstParams<Ctx<'a, 'decl>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
@@ -236,7 +234,7 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
 }
 
 // Return None if it passes type check, otherwise return error msg
-fn default_type_check<'arena>(
+fn default_type_check(
     param_name: &str,
     param_type_info: Option<&TypeInfo>,
     param_expr: Option<&a::Expr>,

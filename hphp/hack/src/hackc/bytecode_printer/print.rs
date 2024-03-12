@@ -456,7 +456,7 @@ fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class) -> Result<()> 
     Ok(())
 }
 
-fn print_doc_comment<'arena>(
+fn print_doc_comment(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     doc_comment: Maybe<&Vector<u8>>,
@@ -962,7 +962,7 @@ fn find_dv_labels(params: &[Param]) -> HashSet<Label> {
         .collect()
 }
 
-fn print_params<'arena>(
+fn print_params(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     params: &[Param],
@@ -973,7 +973,7 @@ fn print_params<'arena>(
     })
 }
 
-fn print_param<'arena>(
+fn print_param(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     param: &Param,
@@ -993,7 +993,7 @@ fn print_param<'arena>(
     })
 }
 
-fn print_param_default_value<'arena>(
+fn print_param_default_value(
     w: &mut dyn Write,
     label: Label,
     php_code: &[u8],

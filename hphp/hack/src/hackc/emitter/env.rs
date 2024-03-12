@@ -37,8 +37,7 @@ bitflags! {
     }
 }
 
-/// `'a` is an AST lifetime, `'arena` the lifetime of the `InstrSeq`
-/// arena.
+/// `'s` is an AST lifetime
 #[derive(Clone, Debug)]
 pub struct Env<'s> {
     pub flags: Flags,

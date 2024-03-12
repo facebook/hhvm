@@ -48,21 +48,21 @@ use crate::value::ValueBuilder;
 
 /// A State is an abstract interpreter over HHVM bytecode.
 #[derive(Clone)]
-pub(crate) struct State<'arena, 'a> {
-    body: &'a Body<'arena>,
+pub(crate) struct State<'a> {
+    body: &'a Body<'a>,
     debug_name: &'static str,
     pub(crate) ip: InstrPtr,
     pub(crate) iterators: IterIdMap<IterState>,
     pub(crate) locals: HashMap<Local, Value>,
     pub(crate) stack: Vec<Value>,
-    adata: &'a HashMap<AdataId, &'arena TypedValue>,
+    adata: &'a HashMap<AdataId, &'a TypedValue>,
 }
 
-impl<'arena, 'a> State<'arena, 'a> {
+impl<'a> State<'a> {
     pub(crate) fn new(
-        body: &'a Body<'arena>,
+        body: &'a Body<'a>,
         debug_name: &'static str,
-        adata: &'a HashMap<AdataId, &'arena TypedValue>,
+        adata: &'a HashMap<AdataId, &'a TypedValue>,
     ) -> Self {
         Self {
             body,
@@ -77,7 +77,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     /// Return an Input for a Value where the Input represents a non-COW
     /// datatype.
-    fn non_cow(&self, value: Value) -> Input<'arena> {
+    fn non_cow(&self, value: Value) -> Input<'a> {
         match value {
             Value::Constant(c) => Input::Constant(c),
             Value::Defined(v) => Input::Read(v),
@@ -87,7 +87,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     /// Compute the ownership for a Value and return an Input representing that
     /// Value with its ownership.
-    fn reffy(&self, value: Value) -> Input<'arena> {
+    fn reffy(&self, value: Value) -> Input<'a> {
         match value {
             Value::Constant(c) => Input::Constant(c),
             Value::Defined(v) => {
@@ -116,8 +116,8 @@ impl<'arena, 'a> State<'arena, 'a> {
     /// are also returned.
     pub(crate) fn collect(
         mut self,
-        value_builder: &mut ValueBuilder<'arena>,
-    ) -> Result<StateCollect<'arena, 'a>> {
+        value_builder: &mut ValueBuilder<'a>,
+    ) -> Result<StateCollect<'a>> {
         let debug_name = format!("{}{}", self.debug_name, self.ip);
         trace!("--- Collecting sequence {}", debug_name);
         self.debug_state();
@@ -200,17 +200,17 @@ impl<'arena, 'a> State<'arena, 'a> {
         })
     }
 
-    fn fork(&self, builder: &mut InstrSeqBuilder<'arena, 'a, '_>, targets: &[Label]) {
+    fn fork(&self, builder: &mut InstrSeqBuilder<'a, '_>, targets: &[Label]) {
         self.fork_and_adjust(builder, targets, |_, _, _| {})
     }
 
     fn fork_and_adjust<F>(
         &self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         targets: &[Label],
         and_then: F,
     ) where
-        F: Fn(&mut Self, &mut InstrSeqBuilder<'arena, 'a, '_>, usize),
+        F: Fn(&mut Self, &mut InstrSeqBuilder<'a, '_>, usize),
     {
         for (idx, target) in targets.iter().enumerate() {
             let mut fork = self.clone_with_jmp(target);
@@ -302,7 +302,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     /// Step the abstract virtual machine forward one instruction. See
     /// Self::step_default_handler() for the common handler.
-    fn step(&mut self, builder: &mut InstrSeqBuilder<'arena, 'a, '_>) -> Result<()> {
+    fn step(&mut self, builder: &mut InstrSeqBuilder<'a, '_>) -> Result<()> {
         let instr = self.instr().unwrap();
 
         match *instr {
@@ -471,7 +471,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         Ok(())
     }
 
-    fn step_member_op(&mut self, builder: &mut InstrSeqBuilder<'arena, 'a, '_>) -> Result<()> {
+    fn step_member_op(&mut self, builder: &mut InstrSeqBuilder<'a, '_>) -> Result<()> {
         let mut inputs = Vec::new();
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
 
@@ -526,8 +526,8 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_base(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        inputs: &mut Vec<Input<'arena>>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
+        inputs: &mut Vec<Input<'a>>,
     ) -> Result<node::BaseOp> {
         let instr = self.instr().unwrap();
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
@@ -570,10 +570,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         })
     }
 
-    fn step_dim(
-        &mut self,
-        inputs: &mut Vec<Input<'arena>>,
-    ) -> Result<Option<node::IntermediateOp>> {
+    fn step_dim(&mut self, inputs: &mut Vec<Input<'a>>) -> Result<Option<node::IntermediateOp>> {
         // Loop because we may have to skip intermediate SrcLoc.
         loop {
             let instr = self.instr();
@@ -597,7 +594,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         }
     }
 
-    fn step_final(&mut self, inputs: &mut Vec<Input<'arena>>) -> Result<node::FinalOp> {
+    fn step_final(&mut self, inputs: &mut Vec<Input<'a>>) -> Result<node::FinalOp> {
         let instr = self
             .instr()
             .ok_or_else(|| anyhow!("Early end in MemberOp sequence"))?;
@@ -654,7 +651,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_create_cl(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         num_params: NumParams,
         classname: &ClassName,
     ) -> Result<()> {
@@ -672,7 +669,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_constant(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         opcode: &Opcode,
     ) -> Result<()> {
         let clean_instr = NodeInstr::Opcode(clean_opcode(opcode));
@@ -705,12 +702,12 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_default_handler(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         opcode: &Opcode,
     ) -> Result<()> {
         // Start by computing the inputs for this opcode. For a 'default'
         // opcode we can handle stack and locals.
-        let mut inputs: Vec<Input<'arena>> = self
+        let mut inputs: Vec<Input<'a>> = self
             .stack_pop_n(opcode.num_inputs())?
             .into_iter()
             .map(|v| self.reffy(v))
@@ -779,7 +776,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn push_member_key_inputs(
         &mut self,
-        inputs: &mut Vec<Input<'arena>>,
+        inputs: &mut Vec<Input<'a>>,
         member_key: &MemberKey,
     ) -> Result<MemberKey> {
         match *member_key {
@@ -800,7 +797,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_fcall_handler(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         opcode: &Opcode,
     ) -> Result<()> {
         let data = crate::body::lookup_data_for_opcode(opcode);
@@ -919,7 +916,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_inc_dec_l(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         local: Local,
         inc_dec_op: IncDecOp,
     ) {
@@ -942,7 +939,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_iter_init(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
         target: Label,
     ) {
@@ -975,7 +972,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_iter_next(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         iter_args: &IterArgs,
         target: Label,
     ) {
@@ -1003,7 +1000,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_memo_get_eager(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         targets: [Label; 2],
         range: LocalRange,
     ) -> Result<()> {
@@ -1036,7 +1033,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         Ok(())
     }
 
-    fn step_pop_l(&mut self, builder: &mut InstrSeqBuilder<'arena, 'a, '_>, local: Local) {
+    fn step_pop_l(&mut self, builder: &mut InstrSeqBuilder<'a, '_>, local: Local) {
         let value = self.stack_pop();
         self.local_set(&local, value);
 
@@ -1055,7 +1052,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_s_switch(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         cases: &[BytesId],
         targets: &[Label],
     ) {
@@ -1071,7 +1068,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_switch(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         bounded: SwitchKind,
         base: i64,
         targets: &[Label],
@@ -1086,7 +1083,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         self.ip = InstrPtr::None;
     }
 
-    fn step_set_l(&mut self, builder: &mut InstrSeqBuilder<'arena, 'a, '_>, local: Local) {
+    fn step_set_l(&mut self, builder: &mut InstrSeqBuilder<'a, '_>, local: Local) {
         let value = self.stack_top();
         self.local_set(&local, value);
 
@@ -1099,7 +1096,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_set_op_l(
         &mut self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         local: Local,
         set_op_op: SetOpOp,
     ) {
@@ -1117,9 +1114,9 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn seq_push(
         &self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         instr: NodeInstr,
-        inputs: impl Into<Box<[Input<'arena>]>>,
+        inputs: impl Into<Box<[Input<'a>]>>,
     ) {
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
         self.seq_push_with_loc(builder, instr, inputs, src_loc);
@@ -1127,9 +1124,9 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn seq_push_with_loc(
         &self,
-        builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
+        builder: &mut InstrSeqBuilder<'a, '_>,
         instr: NodeInstr,
-        inputs: impl Into<Box<[Input<'arena>]>>,
+        inputs: impl Into<Box<[Input<'a>]>>,
         src_loc: Rc<SrcLoc>,
     ) {
         let inputs = inputs.into();
@@ -1144,11 +1141,11 @@ impl<'arena, 'a> State<'arena, 'a> {
         });
     }
 
-    pub(crate) fn instr(&self) -> Option<&'arena Instruct> {
+    pub(crate) fn instr(&self) -> Option<&'a Instruct> {
         self.instr_at(self.ip)
     }
 
-    pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'arena Instruct> {
+    pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'a Instruct> {
         ip.into_option().and_then(|ip| {
             let idx = ip.as_usize();
             self.body.hhbc_body.body_instrs.get(idx)
@@ -1216,14 +1213,14 @@ pub(crate) struct IterState {
 
 type IterIdMap<V> = std::collections::HashMap<IterId, V, BuildIdHasher<u32>>;
 
-struct InstrSeqBuilder<'arena, 'a, 'b> {
-    seq: Vec<Node<'arena>>,
-    forks: Vec<State<'arena, 'a>>,
-    value_builder: &'b mut ValueBuilder<'arena>,
+struct InstrSeqBuilder<'a, 'b> {
+    seq: Vec<Node<'a>>,
+    forks: Vec<State<'a>>,
+    value_builder: &'b mut ValueBuilder<'a>,
 }
 
-impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
-    fn compute_value(&mut self, instr: &NodeInstr, idx: usize, inputs: &[Input<'arena>]) -> Value {
+impl<'a, 'b> InstrSeqBuilder<'a, 'b> {
+    fn compute_value(&mut self, instr: &NodeInstr, idx: usize, inputs: &[Input<'a>]) -> Value {
         // The Instruct used to compute the value shouldn't have any
         // non-comparable bits: Local or Target
         for local in LocalInfo::for_node(instr).locals().iter() {
@@ -1249,10 +1246,10 @@ impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
     }
 }
 
-pub(crate) struct StateCollect<'arena, 'a> {
-    pub(crate) seq: Sequence<'arena>,
-    pub(crate) forks: Vec<State<'arena, 'a>>,
-    pub(crate) catch_state: Option<State<'arena, 'a>>,
+pub(crate) struct StateCollect<'a> {
+    pub(crate) seq: Sequence<'a>,
+    pub(crate) forks: Vec<State<'a>>,
+    pub(crate) catch_state: Option<State<'a>>,
 }
 
 /// Returns true if the Instruct is one where we should stop and compare state

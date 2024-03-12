@@ -15,10 +15,10 @@ use hhbc::Targets;
 use hhbc::TypedValue;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
-pub(crate) enum Input<'arena> {
+pub(crate) enum Input<'a> {
     Class(String),
     Constant(u32),
-    ConstantArray(&'arena TypedValue),
+    ConstantArray(&'a TypedValue),
     // A value that appears exactly once in the stack or locals.
     Owned(u32),
     // A value that is guaranteed to be used in a read-only context.
@@ -30,8 +30,8 @@ pub(crate) enum Input<'arena> {
     Unowned(u32),
 }
 
-impl<'arena> Input<'arena> {
-    pub(crate) fn to_read_only(&self) -> Input<'arena> {
+impl<'a> Input<'a> {
+    pub(crate) fn to_read_only(&self) -> Input<'a> {
         match *self {
             Input::Owned(idx) | Input::Read(idx) | Input::Shared(idx) | Input::Unowned(idx) => {
                 Input::Read(idx)
@@ -129,8 +129,8 @@ impl Targets for NodeInstr {
 }
 
 #[derive(Debug)]
-pub(crate) struct Node<'arena> {
+pub(crate) struct Node<'a> {
     pub(crate) instr: NodeInstr,
-    pub(crate) inputs: Box<[Input<'arena>]>,
+    pub(crate) inputs: Box<[Input<'a>]>,
     pub(crate) src_loc: Rc<SrcLoc>,
 }

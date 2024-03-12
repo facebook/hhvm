@@ -34,14 +34,14 @@ impl fmt::Display for Value {
 }
 
 #[derive(Clone)]
-pub(crate) struct ValueBuilder<'arena> {
+pub(crate) struct ValueBuilder<'a> {
     next_value_idx: u32,
     // Store a hash to the Instruct instead of ref so that we don't run into
     // lifetime annoyances.
-    values: HashMap<(u64, usize, Box<[Input<'arena>]>), Value>,
+    values: HashMap<(u64, usize, Box<[Input<'a>]>), Value>,
 }
 
-impl<'arena> ValueBuilder<'arena> {
+impl<'a> ValueBuilder<'a> {
     pub(crate) fn new() -> Self {
         Self {
             next_value_idx: 0,
@@ -66,7 +66,7 @@ impl<'arena> ValueBuilder<'arena> {
         &mut self,
         instr: &NodeInstr,
         output_idx: usize,
-        mut inputs: Box<[Input<'arena>]>,
+        mut inputs: Box<[Input<'a>]>,
     ) -> Value {
         // Instruct doesn't support `==`. :(
         let hash = compute_hash(instr);

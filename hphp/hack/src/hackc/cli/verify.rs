@@ -396,7 +396,7 @@ pub struct Opts {
     mode: Mode,
 }
 
-fn compile_php_file<'a, 'arena>(
+fn compile_php_file<'a>(
     path: &'a Path,
     content: Vec<u8>,
     single_file_opts: &'a SingleFileOpts,

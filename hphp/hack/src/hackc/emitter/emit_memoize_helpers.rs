@@ -115,7 +115,7 @@ pub fn ic_restore(local: Local, should_make_ic_inaccessible: Option<bool>) -> In
     }
 }
 
-pub fn with_possible_ic<'arena>(
+pub fn with_possible_ic(
     label_gen: &mut LabelGen,
     local: Local,
     instrs: InstrSeq,

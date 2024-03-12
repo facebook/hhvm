@@ -24,7 +24,7 @@ use oxidized::ast;
 use crate::emit_body;
 use crate::emit_expression;
 
-fn emit_constant_cinit<'a, 'arena, 'decl>(
+fn emit_constant_cinit<'a, 'decl>(
     e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
@@ -82,7 +82,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     .transpose()
 }
 
-fn emit_constant<'a, 'arena, 'decl>(
+fn emit_constant<'a, 'decl>(
     e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
@@ -92,7 +92,7 @@ fn emit_constant<'a, 'arena, 'decl>(
     Ok((c, f))
 }
 
-pub fn emit_constants_from_program<'a, 'arena, 'decl>(
+pub fn emit_constants_from_program<'a, 'decl>(
     e: &mut Emitter<'decl>,
     env: &mut Env<'a>,
     defs: &'a [ast::Def],
@@ -105,7 +105,7 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
     Ok((contants, inits.into_iter().flatten().collect()))
 }
 
-pub fn from_ast<'a, 'arena, 'decl>(
+pub fn from_ast<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     env: &Env<'a>,
     id: &'a ast::Id,

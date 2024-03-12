@@ -218,7 +218,7 @@ pub fn from_text<'decl>(
     Ok(())
 }
 
-fn rewrite_and_emit<'p, 'arena, 'decl>(
+fn rewrite_and_emit<'p, 'decl>(
     emitter: &mut Emitter<'decl>,
     namespace_env: Arc<NamespaceEnv>,
     ast: &'p mut ast::Program,
@@ -246,7 +246,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     unit
 }
 
-pub fn unit_from_text<'arena, 'decl>(
+pub fn unit_from_text<'decl>(
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
@@ -261,7 +261,7 @@ pub fn unit_from_text<'arena, 'decl>(
     )
 }
 
-pub fn unit_from_text_with_opts<'arena, 'decl>(
+pub fn unit_from_text_with_opts<'decl>(
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
@@ -302,7 +302,7 @@ pub fn unit_to_string(
     Ok(())
 }
 
-fn emit_unit_from_ast<'arena, 'decl>(
+fn emit_unit_from_ast<'decl>(
     emitter: &mut Emitter<'decl>,
     namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
@@ -323,7 +323,7 @@ fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
     )
 }
 
-fn emit_unit_from_text<'arena, 'decl>(
+fn emit_unit_from_text<'decl>(
     emitter: &mut Emitter<'decl>,
     flags: &EnvFlags,
     source_text: SourceText<'_>,
@@ -617,7 +617,7 @@ fn emit_fatal(fatal_op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<Uni
     emit_unit::emit_fatal_unit(fatal_op, pos, msg)
 }
 
-fn create_emitter<'arena, 'decl>(
+fn create_emitter<'decl>(
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
 ) -> Emitter<'decl> {

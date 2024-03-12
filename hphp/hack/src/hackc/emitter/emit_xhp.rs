@@ -18,7 +18,7 @@ use crate::emit_method;
 use crate::emit_property;
 use crate::xhp_attribute::XhpAttribute;
 
-pub fn properties_for_cache<'a, 'arena, 'decl>(
+pub fn properties_for_cache<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     class: &'a Class_,
     class_is_const: bool,
@@ -45,7 +45,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     )
 }
 
-pub fn from_attribute_declaration<'a, 'arena, 'decl>(
+pub fn from_attribute_declaration<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     class: &'a Class_,
     xal: &[XhpAttribute<'_>],
@@ -95,7 +95,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     )
 }
 
-pub fn from_children_declaration<'a, 'arena, 'decl>(
+pub fn from_children_declaration<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
@@ -118,7 +118,7 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     )
 }
 
-pub fn from_category_declaration<'a, 'arena, 'decl>(
+pub fn from_category_declaration<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
@@ -300,10 +300,7 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
             ))))),
         }
     }
-    fn get_attribute_array_values<'arena>(
-        id: &str,
-        enum_opt: Option<&Vec<Expr>>,
-    ) -> Result<(Expr, Expr)> {
+    fn get_attribute_array_values(id: &str, enum_opt: Option<&Vec<Expr>>) -> Result<(Expr, Expr)> {
         let id = hhbc::ClassName::from_ast_name_and_mangle(id).as_str();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
@@ -314,10 +311,7 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
         };
         Ok((class_name, type_ident))
     }
-    fn extract_from_hint<'arena>(
-        hint: &Hint,
-        enum_opt: Option<&Vec<Expr>>,
-    ) -> Result<(Expr, Expr)> {
+    fn extract_from_hint(hint: &Hint, enum_opt: Option<&Vec<Expr>>) -> Result<(Expr, Expr)> {
         match &*(hint.1) {
             Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(h, enum_opt),
             Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
@@ -366,7 +360,7 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
     )))))
 }
 
-fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
+fn from_xhp_attribute_declaration_method<'a, 'decl>(
     emitter: &mut Emitter<'decl>,
     class: &'a Class_,
     pos: Option<Pos>,

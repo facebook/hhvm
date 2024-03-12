@@ -60,7 +60,7 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     }
 }
 
-pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
+pub fn rewrite_program<'p, 'emitter, 'decl>(
     emitter: &'emitter mut Emitter<'decl>,
     prog: &'p mut ast::Program,
     namespace_env: Arc<namespace_env::Env>,

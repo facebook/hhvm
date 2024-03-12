@@ -17,19 +17,19 @@ use crate::state::State;
 use crate::value::ValueBuilder;
 
 #[derive(Default)]
-pub(crate) struct WorkQueue<'arena, 'a> {
-    queue: Vec<(State<'arena, 'a>, State<'arena, 'a>)>,
+pub(crate) struct WorkQueue<'a> {
+    queue: Vec<(State<'a>, State<'a>)>,
     processed: HashSet<(InstrPtr, InstrPtr)>,
 }
 
-impl<'arena, 'a> WorkQueue<'arena, 'a> {
+impl<'a> WorkQueue<'a> {
     pub(crate) fn init_from_bodies(
         &mut self,
-        value_builder: &mut ValueBuilder<'arena>,
-        a: &'a Body<'arena>,
-        a_adata: &'a HashMap<AdataId, &'arena TypedValue>,
-        b: &'a Body<'arena>,
-        b_adata: &'a HashMap<AdataId, &'arena TypedValue>,
+        value_builder: &mut ValueBuilder<'a>,
+        a: &'a Body<'a>,
+        a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+        b: &'a Body<'a>,
+        b_adata: &'a HashMap<AdataId, &'a TypedValue>,
     ) {
         let mut a_state = State::new(a, "A", a_adata);
         let mut b_state = State::new(b, "B", b_adata);
@@ -68,7 +68,7 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
         self.add(a_state, b_state);
     }
 
-    pub(crate) fn add(&mut self, a: State<'arena, 'a>, b: State<'arena, 'a>) {
+    pub(crate) fn add(&mut self, a: State<'a>, b: State<'a>) {
         if self.processed.insert((a.ip, b.ip)) {
             trace!("Added");
             self.queue.push((a, b));
@@ -77,7 +77,7 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
         }
     }
 
-    pub(crate) fn pop(&mut self) -> Option<(State<'arena, 'a>, State<'arena, 'a>)> {
+    pub(crate) fn pop(&mut self) -> Option<(State<'a>, State<'a>)> {
         self.queue.pop()
     }
 }

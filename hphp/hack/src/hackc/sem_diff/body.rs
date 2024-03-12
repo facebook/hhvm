@@ -45,11 +45,11 @@ use crate::work_queue::WorkQueue;
 ///
 /// Finally we compare the two sequences to make sure that they're equal or we
 /// return an Err (see `Sequence::compare()`).
-pub(crate) fn compare_bodies<'arena, 'a>(
+pub(crate) fn compare_bodies<'a>(
     path: &CodePath<'_>,
-    body_a: &'arena hhbc::Body,
+    body_a: &hhbc::Body,
     a_adata: &'a HashMap<AdataId, &'a TypedValue>,
-    body_b: &'arena hhbc::Body,
+    body_b: &hhbc::Body,
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();

@@ -491,12 +491,10 @@ fn int_expr_to_typed_value(s: &str) -> Result<TypedValue, Error> {
     ))
 }
 
-fn update_duplicates_in_map<'arena>(
+fn update_duplicates_in_map(
     kvs: Vec<(TypedValue, TypedValue)>,
-) -> impl IntoIterator<
-    Item = DictEntry,
-    IntoIter = impl Iterator<Item = DictEntry> + ExactSizeIterator + 'arena,
-> + 'arena {
+) -> impl IntoIterator<Item = DictEntry, IntoIter = impl Iterator<Item = DictEntry> + ExactSizeIterator>
+{
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()
@@ -538,7 +536,7 @@ fn unop_on_value(unop: &ast_defs::Uop, v: TypedValue) -> Result<TypedValue, Erro
     .ok_or(Error::NotLiteral)
 }
 
-fn binop_on_values<'arena>(
+fn binop_on_values(
     binop: &ast_defs::Bop,
     v1: TypedValue,
     v2: TypedValue,
@@ -668,7 +666,7 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitorMut<'_, 'decl> {
     }
 }
 
-pub fn fold_expr<'a, 'arena: 'a, 'decl: 'a>(
+pub fn fold_expr<'a, 'decl: 'a>(
     expr: &mut ast::Expr,
     scope: &'a Scope<'a>,
     e: &'a mut Emitter<'decl>,
@@ -676,10 +674,7 @@ pub fn fold_expr<'a, 'arena: 'a, 'decl: 'a>(
     visit_mut(&mut FolderVisitor::new(e, scope), &mut (), expr)
 }
 
-pub fn fold_program<'arena, 'decl>(
-    p: &mut ast::Program,
-    e: &mut Emitter<'decl>,
-) -> Result<(), Error> {
+pub fn fold_program<'decl>(p: &mut ast::Program, e: &mut Emitter<'decl>) -> Result<(), Error> {
     visit_mut(
         &mut FolderVisitorMut::new(e, &mut ast_scope::Scope::default()),
         &mut (),
@@ -687,7 +682,7 @@ pub fn fold_program<'arena, 'decl>(
     )
 }
 
-pub fn literals_from_exprs<'arena, 'decl>(
+pub fn literals_from_exprs<'decl>(
     exprs: &mut [ast::Expr],
     scope: &Scope<'_>,
     e: &mut Emitter<'decl>,

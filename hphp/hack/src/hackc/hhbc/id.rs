@@ -3,10 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// Note: `$type<'arena>` is a newtype over a `&'arena str`
-// (`class::Type<'arena>`, `function::Type<'arena>`, ...). We intend that these
-// types borrow strings stored in `InstrSeq` arenas.
-
 use bstr::BStr;
 use bstr::ByteSlice;
 use naming_special_names_rust::members;
@@ -14,6 +10,8 @@ use serde::Serialize;
 
 use crate::StringId;
 
+/// Generates `$type` as a newtype `StringId`, which is a globally interned
+/// unique reference to a &'static str.
 macro_rules! impl_intern_id {
     ($type: ident) => {
         impl $type {

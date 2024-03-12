@@ -852,7 +852,7 @@ struct ClosureVisitor<'a, 'b> {
     phantom: std::marker::PhantomData<&'b ()>,
 }
 
-impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
+impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
     type Params = AstParams<Scope<'b>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -1096,7 +1096,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
     }
 }
 
-impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b> {
+impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
     /// Calls a function in the scope of a sub-Scope as a child of `scope`.
     fn with_subscope<'s, F, R>(
         &mut self,
@@ -1674,7 +1674,7 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
     class_count as usize
 }
 
-pub fn convert_toplevel_prog<'arena, 'decl>(
+pub fn convert_toplevel_prog<'decl>(
     e: &mut Emitter<'decl>,
     defs: &mut Vec<Def>,
     namespace_env: Arc<namespace_env::Env>,

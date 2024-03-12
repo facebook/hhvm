@@ -88,8 +88,8 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
 }
 
 /// This is the entry point from hh_single_compile
-pub fn emit_unit<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_unit<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,
@@ -120,11 +120,8 @@ fn record_error(
     }
 }
 
-fn scan_types<'decl, F>(
-    p: &dyn DeclProvider<'decl>,
-    q: &mut VecDeque<(StringId, u64)>,
-    mut efunc: F,
-) where
+fn scan_types<'d, F>(p: &dyn DeclProvider<'d>, q: &mut VecDeque<(StringId, u64)>, mut efunc: F)
+where
     F: FnMut(StringId, decl_provider::Error),
 {
     use typing_defs::Ty_;
@@ -156,8 +153,8 @@ fn scan_types<'decl, F>(
     }
 }
 
-fn emit_unit_<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_unit_<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
     invalid_utf8_offset: Option<usize>,

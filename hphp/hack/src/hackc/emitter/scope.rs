@@ -19,13 +19,9 @@ use oxidized::local_id;
 /// blocks. If emit () registered any unnamed locals, the block will unset these
 /// temporaries at the end, and also be wrapped in a try/catch that will unset
 /// these unnamed locals upon exception.
-pub fn with_unnamed_temps<'decl, F>(
-    e: &mut Emitter<'decl>,
-    lids: &[Lid],
-    emit: F,
-) -> Result<InstrSeq>
+pub fn with_unnamed_temps<'d, F>(e: &mut Emitter<'d>, lids: &[Lid], emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'decl>) -> Result<InstrSeq>,
+    F: FnOnce(&mut Emitter<'d>) -> Result<InstrSeq>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();

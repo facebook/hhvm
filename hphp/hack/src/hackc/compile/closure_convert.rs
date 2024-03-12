@@ -1674,8 +1674,8 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
     class_count as usize
 }
 
-pub fn convert_toplevel_prog<'decl>(
-    e: &mut Emitter<'decl>,
+pub fn convert_toplevel_prog<'d>(
+    e: &mut Emitter<'d>,
     defs: &mut Vec<Def>,
     namespace_env: Arc<namespace_env::Env>,
 ) -> Result<()> {

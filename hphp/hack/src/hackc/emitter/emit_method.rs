@@ -33,8 +33,8 @@ use crate::emit_memoize_helpers;
 use crate::emit_native_opcode;
 use crate::emit_param;
 
-pub fn from_asts<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn from_asts<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
 ) -> Result<Vec<Method>> {
@@ -77,8 +77,8 @@ pub fn get_attrs_for_method(
     attrs
 }
 
-pub fn from_ast<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn from_ast<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     class: &'a ast::Class_,
     method_: impl Into<Cow<'a, ast::Method_>>,
 ) -> Result<Method> {

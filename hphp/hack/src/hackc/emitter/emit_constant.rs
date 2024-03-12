@@ -24,8 +24,8 @@ use oxidized::ast;
 use crate::emit_body;
 use crate::emit_expression;
 
-fn emit_constant_cinit<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_constant_cinit<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
     init: Option<InstrSeq>,
@@ -82,8 +82,8 @@ fn emit_constant_cinit<'a, 'decl>(
     .transpose()
 }
 
-fn emit_constant<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_constant<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
 ) -> Result<(Constant, Option<Function>)> {
@@ -92,8 +92,8 @@ fn emit_constant<'a, 'decl>(
     Ok((c, f))
 }
 
-pub fn emit_constants_from_program<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_constants_from_program<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     defs: &'a [ast::Def],
 ) -> Result<(Vec<Constant>, Vec<Function>)> {
@@ -105,8 +105,8 @@ pub fn emit_constants_from_program<'a, 'decl>(
     Ok((contants, inits.into_iter().flatten().collect()))
 }
 
-pub fn from_ast<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn from_ast<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     id: &'a ast::Id,
     is_abstract: bool,

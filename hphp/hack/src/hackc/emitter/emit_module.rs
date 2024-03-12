@@ -31,8 +31,8 @@ fn emit_rule(rule: &ast::MdNameKind) -> Rule {
     }
 }
 
-pub fn emit_module<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_module<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     ast_module: &'a ast::ModuleDef,
 ) -> Result<Module> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
@@ -62,8 +62,8 @@ pub fn emit_module<'a, 'decl>(
     })
 }
 
-pub fn emit_modules_from_program<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_modules_from_program<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Module>> {
     ast.iter()

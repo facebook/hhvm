@@ -574,29 +574,29 @@ fn value_to_expr_(v: TypedValue) -> Result<ast::Expr_, Error> {
     }
 }
 
-struct FolderVisitorMut<'a, 'decl> {
-    emitter: &'a Emitter<'decl>,
+struct FolderVisitorMut<'a, 'd> {
+    emitter: &'a Emitter<'d>,
     scope: &'a mut Scope<'a>,
 }
 
-impl<'a, 'decl> FolderVisitorMut<'a, 'decl> {
-    fn new(emitter: &'a Emitter<'decl>, scope: &'a mut Scope<'a>) -> Self {
+impl<'a, 'd> FolderVisitorMut<'a, 'd> {
+    fn new(emitter: &'a Emitter<'d>, scope: &'a mut Scope<'a>) -> Self {
         Self { emitter, scope }
     }
 }
 
-struct FolderVisitor<'a, 'decl> {
-    emitter: &'a Emitter<'decl>,
+struct FolderVisitor<'a, 'd> {
+    emitter: &'a Emitter<'d>,
     scope: &'a Scope<'a>,
 }
 
-impl<'a, 'decl> FolderVisitor<'a, 'decl> {
-    fn new(emitter: &'a Emitter<'decl>, scope: &'a Scope<'a>) -> Self {
+impl<'a, 'd> FolderVisitor<'a, 'd> {
+    fn new(emitter: &'a Emitter<'d>, scope: &'a Scope<'a>) -> Self {
         Self { emitter, scope }
     }
 }
 
-impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, 'decl> {
+impl<'ast, 'd> VisitorMut<'ast> for FolderVisitor<'_, 'd> {
     type Params = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -629,7 +629,7 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, 'decl> {
     }
 }
 
-impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitorMut<'_, 'decl> {
+impl<'ast, 'd> VisitorMut<'ast> for FolderVisitorMut<'_, 'd> {
     type Params = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -666,15 +666,15 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitorMut<'_, 'decl> {
     }
 }
 
-pub fn fold_expr<'a, 'decl: 'a>(
+pub fn fold_expr<'a, 'd: 'a>(
     expr: &mut ast::Expr,
     scope: &'a Scope<'a>,
-    e: &'a mut Emitter<'decl>,
+    e: &'a mut Emitter<'d>,
 ) -> Result<(), Error> {
     visit_mut(&mut FolderVisitor::new(e, scope), &mut (), expr)
 }
 
-pub fn fold_program<'decl>(p: &mut ast::Program, e: &mut Emitter<'decl>) -> Result<(), Error> {
+pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter<'d>) -> Result<(), Error> {
     visit_mut(
         &mut FolderVisitorMut::new(e, &mut ast_scope::Scope::default()),
         &mut (),
@@ -682,10 +682,10 @@ pub fn fold_program<'decl>(p: &mut ast::Program, e: &mut Emitter<'decl>) -> Resu
     )
 }
 
-pub fn literals_from_exprs<'decl>(
+pub fn literals_from_exprs<'d>(
     exprs: &mut [ast::Expr],
     scope: &Scope<'_>,
-    e: &mut Emitter<'decl>,
+    e: &mut Emitter<'d>,
 ) -> Result<Vec<TypedValue>, Error> {
     for expr in exprs.iter_mut() {
         fold_expr(expr, scope, e)?;

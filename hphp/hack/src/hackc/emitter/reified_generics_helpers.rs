@@ -145,8 +145,8 @@ pub(crate) fn convert_awaitable<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint 
     }
 }
 
-pub(crate) fn simplify_verify_type<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub(crate) fn simplify_verify_type<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     check: InstrSeq,
@@ -233,9 +233,9 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
 /// Warning: Experimental usage of decl-directed bytecode compilation.
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
-pub(crate) fn happly_decl_has_reified_generics<'a, 'decl>(
+pub(crate) fn happly_decl_has_reified_generics<'a, 'd>(
     env: &Env<'a>,
-    emitter: &mut Emitter<'decl>,
+    emitter: &mut Emitter<'d>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
     use aast::Hint_;

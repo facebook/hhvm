@@ -37,7 +37,7 @@ use crate::LabelGen;
 use crate::LocalGen;
 
 #[derive(Debug)]
-pub struct Emitter<'decl> {
+pub struct Emitter<'d> {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
 
@@ -66,23 +66,23 @@ pub struct Emitter<'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    pub decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
+    pub decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
 }
 
-impl<'decl> Emitter<'decl> {
+impl<'d> Emitter<'d> {
     pub fn new(
         opts: Options,
         systemlib: bool,
         for_debugger_eval: bool,
-        decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
+        decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
         filepath: RelativePath,
-    ) -> Emitter<'decl> {
+    ) -> Emitter<'d> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
             decl_provider: decl_provider
-                .map(|p| Arc::new(MemoProvider::new(p)) as Arc<dyn DeclProvider<'decl> + 'decl>),
+                .map(|p| Arc::new(MemoProvider::new(p)) as Arc<dyn DeclProvider<'d> + 'd>),
 
             label_gen: LabelGen::new(),
             local_gen: LocalGen::new(),
@@ -245,7 +245,7 @@ impl<'decl> Emitter<'decl> {
     }
 }
 
-impl<'decl> print_expr::SpecialClassResolver for Emitter<'decl> {
+impl<'d> print_expr::SpecialClassResolver for Emitter<'d> {
     fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_>>, id: &'a str) -> Cow<'a, str> {
         let class_expr = ClassExpr::expr_to_class_expr(
             self,

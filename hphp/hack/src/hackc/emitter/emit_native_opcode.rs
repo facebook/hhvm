@@ -18,8 +18,8 @@ use oxidized::pos::Pos;
 use crate::emit_body;
 use crate::emit_param;
 
-pub fn emit_body<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_body<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     scope: &Scope<'a>,
     class_name: &ast::Sid,
     class_attrs: &[ast::UserAttribute],

@@ -123,8 +123,8 @@ impl ClassExpr {
         }
     }
 
-    pub fn class_id_to_class_expr<'a, 'decl>(
-        emitter: &Emitter<'decl>,
+    pub fn class_id_to_class_expr<'a, 'd>(
+        emitter: &Emitter<'d>,
         scope: &Scope<'a>,
         check_traits: bool,
         resolve_self: bool,

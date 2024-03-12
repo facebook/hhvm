@@ -64,8 +64,8 @@ pub(crate) fn get_attrs_for_fun(
     attrs
 }
 
-pub(crate) fn emit_wrapper_function<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub(crate) fn emit_wrapper_function<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     original_id: hhbc::FunctionName,
     renamed_id: hhbc::FunctionName,
     deprecation_info: Option<&[TypedValue]>,
@@ -141,8 +141,8 @@ pub(crate) fn emit_wrapper_function<'a, 'decl>(
     })
 }
 
-fn make_memoize_function_code<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn make_memoize_function_code<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -182,8 +182,8 @@ fn make_memoize_function_code<'a, 'decl>(
     Ok((emit_pos_then(pos, fun), decl_vars))
 }
 
-fn make_memoize_function_with_params_code<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn make_memoize_function_with_params_code<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -304,8 +304,8 @@ fn make_memoize_function_with_params_code<'a, 'decl>(
     Ok((instrs, decl_vars))
 }
 
-fn make_memoize_function_no_params_code<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn make_memoize_function_no_params_code<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName,
@@ -368,8 +368,8 @@ fn make_memoize_function_no_params_code<'a, 'decl>(
     Ok((instrs, Vec::new()))
 }
 
-fn make_wrapper_body<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_wrapper_body<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: Env<'a>,
     return_type_info: TypeInfo,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,

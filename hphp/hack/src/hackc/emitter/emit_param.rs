@@ -39,8 +39,8 @@ pub fn has_variadic(params: &[Param]) -> bool {
     params.iter().any(|v| v.is_variadic)
 }
 
-pub fn from_asts<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn from_asts<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -89,8 +89,8 @@ fn rename_params(
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn from_ast<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -174,8 +174,8 @@ fn from_ast<'a, 'decl>(
     )))
 }
 
-pub fn emit_param_default_value_setter<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_param_default_value_setter<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
@@ -209,25 +209,25 @@ pub fn emit_param_default_value_setter<'a, 'decl>(
     }
 }
 
-struct ResolverVisitor<'a, 'decl: 'a> {
+struct ResolverVisitor<'a, 'd: 'a> {
     phantom_a: PhantomData<&'a ()>,
-    phantom_d: PhantomData<&'decl ()>,
+    phantom_d: PhantomData<&'d ()>,
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'decl> {
-    emitter: &'a mut Emitter<'decl>,
+struct Ctx<'a, 'd> {
+    emitter: &'a mut Emitter<'d>,
     scope: &'a Scope<'a>,
 }
 
-impl<'ast, 'a, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'decl> {
-    type Params = AstParams<Ctx<'a, 'decl>, ()>;
+impl<'ast, 'a, 'd> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'd> {
+    type Params = AstParams<Ctx<'a, 'd>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'a, 'decl>, p: &a::Expr) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a, 'd>, p: &a::Expr) -> Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }

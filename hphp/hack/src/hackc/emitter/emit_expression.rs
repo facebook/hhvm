@@ -344,8 +344,8 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub(crate) fn get_type_structure_for_hint<'decl>(
-    e: &mut Emitter<'decl>,
+pub(crate) fn get_type_structure_for_hint<'d>(
+    e: &mut Emitter<'d>,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
     type_refinement_in_hint: TypeRefinementInHint,
@@ -429,8 +429,8 @@ enum ArrayGetBase {
     },
 }
 
-pub fn emit_nameof<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_nameof<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     class_id: &ast::ClassId,
 ) -> Result<InstrSeq> {
@@ -453,8 +453,8 @@ pub fn emit_nameof<'a, 'decl>(
     }
 }
 
-pub fn emit_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     expression: &ast::Expr,
 ) -> Result<InstrSeq> {
@@ -544,8 +544,8 @@ pub fn emit_expr<'a, 'decl>(
     })
 }
 
-fn emit_exprs_and_error_on_inout<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_exprs_and_error_on_inout<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     exprs: &[(ParamKind, ast::Expr)],
     fn_name: &str,
@@ -571,11 +571,7 @@ fn emit_exprs_and_error_on_inout<'a, 'decl>(
     }
 }
 
-fn emit_exprs<'a, 'decl>(
-    e: &mut Emitter<'decl>,
-    env: &Env<'a>,
-    exprs: &[ast::Expr],
-) -> Result<InstrSeq> {
+fn emit_exprs<'a, 'd>(e: &mut Emitter<'d>, env: &Env<'a>, exprs: &[ast::Expr]) -> Result<InstrSeq> {
     if exprs.is_empty() {
         Ok(instr::empty())
     } else {
@@ -588,11 +584,7 @@ fn emit_exprs<'a, 'decl>(
     }
 }
 
-fn emit_id<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
-    env: &Env<'a>,
-    id: &ast::Sid,
-) -> Result<InstrSeq> {
+fn emit_id<'a, 'd>(emitter: &mut Emitter<'d>, env: &Env<'a>, id: &ast::Sid) -> Result<InstrSeq> {
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
         pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcode::File))),
@@ -624,8 +616,8 @@ fn emit_id<'a, 'decl>(
     }
 }
 
-fn emit_exit<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_exit<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     expr_opt: Option<&ast::Expr>,
 ) -> Result<InstrSeq> {
@@ -635,8 +627,8 @@ fn emit_exit<'a, 'decl>(
     ]))
 }
 
-fn emit_yield<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_yield<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     af: &ast::Afield,
@@ -728,8 +720,8 @@ fn text_of_prop(prop: &ast::ClassGetExpr) -> String {
     }
 }
 
-fn emit_import<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_import<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     flavor: &ast::ImportFlavor,
@@ -759,8 +751,8 @@ fn emit_import<'a, 'decl>(
     ]))
 }
 
-fn emit_string2<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_string2<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     es: &[ast::Expr],
@@ -796,19 +788,15 @@ fn emit_string2<'a, 'decl>(
     }
 }
 
-fn emit_clone<'a, 'decl>(
-    e: &mut Emitter<'decl>,
-    env: &Env<'a>,
-    expr: &ast::Expr,
-) -> Result<InstrSeq> {
+fn emit_clone<'a, 'd>(e: &mut Emitter<'d>, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
         instr::clone(),
     ]))
 }
 
-fn emit_lambda<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_lambda<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     ids: &[ast::CaptureLid],
     closure_class_name: &Option<String>,
@@ -857,8 +845,8 @@ fn emit_lambda<'a, 'decl>(
     ]))
 }
 
-pub fn emit_await<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_await<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -896,8 +884,8 @@ pub fn emit_await<'a, 'decl>(
     }
 }
 
-fn inline_gena_call<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn inline_gena_call<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     arg: &ast::Expr,
 ) -> Result<InstrSeq> {
@@ -999,8 +987,8 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
     })
 }
 
-fn emit_shape<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_shape<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     fl: &[(ast_defs::ShapeFieldName, ast::Expr)],
@@ -1055,8 +1043,8 @@ fn emit_shape<'a, 'decl>(
     )
 }
 
-fn emit_vec_collection<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_vec_collection<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1072,8 +1060,8 @@ fn emit_vec_collection<'a, 'decl>(
     }
 }
 
-fn emit_named_collection<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_named_collection<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -1117,8 +1105,8 @@ fn emit_named_collection<'a, 'decl>(
     }
 }
 
-fn emit_named_collection_str<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_named_collection_str<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     (ast_defs::Id(pos, name), _, fields): &(
@@ -1156,8 +1144,8 @@ fn mk_afvalues(es: &[ast::Expr]) -> Vec<ast::Afield> {
     es.iter().cloned().map(ast::Afield::mk_afvalue).collect()
 }
 
-fn emit_collection<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_collection<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     fields: &[ast::Afield],
@@ -1190,8 +1178,8 @@ fn emit_static_collection<'a>(
     ]))
 }
 
-fn expr_and_new<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn expr_and_new<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     instr_to_add_new: InstrSeq,
@@ -1211,8 +1199,8 @@ fn expr_and_new<'a, 'decl>(
     }
 }
 
-fn emit_container<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_container<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1243,8 +1231,8 @@ fn emit_container<'a, 'decl>(
     ]))
 }
 
-fn emit_keyvalue_collection<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_keyvalue_collection<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1266,8 +1254,8 @@ fn emit_keyvalue_collection<'a, 'decl>(
     )
 }
 
-fn emit_array<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_array<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1364,8 +1352,8 @@ fn non_numeric(s: &[u8]) -> bool {
     int_from_str(&s).is_err() && float_from_str(&s).is_err()
 }
 
-fn is_struct_init<'decl>(
-    e: &mut Emitter<'decl>,
+fn is_struct_init<'d>(
+    e: &mut Emitter<'d>,
     env: &Env<'_>,
     fields: &[ast::Afield],
     allow_numerics: bool,
@@ -1397,8 +1385,8 @@ fn is_struct_init<'decl>(
         && num_keys != 0)
 }
 
-fn emit_struct_array<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_struct_array<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1433,8 +1421,8 @@ fn emit_struct_array<'a, 'decl>(
     ]))
 }
 
-fn emit_dynamic_collection<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_dynamic_collection<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     fields: &[ast::Afield],
@@ -1505,8 +1493,8 @@ fn emit_dynamic_collection<'a, 'decl>(
     }
 }
 
-fn emit_value_only_collection<'a, 'decl, F: FnOnce(u32) -> Instruct>(
-    e: &mut Emitter<'decl>,
+fn emit_value_only_collection<'a, 'd, F: FnOnce(u32) -> Instruct>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fields: &[ast::Afield],
@@ -1545,8 +1533,8 @@ fn emit_value_only_collection<'a, 'decl, F: FnOnce(u32) -> Instruct>(
     })
 }
 
-fn emit_call_isset_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_call_isset_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     pk: &ParamKind,
@@ -1618,8 +1606,8 @@ fn emit_call_isset_expr<'a, 'decl>(
     ]))
 }
 
-fn emit_call_isset_exprs<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_call_isset_exprs<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     exprs: &[(ParamKind, ast::Expr)],
@@ -1659,8 +1647,8 @@ fn emit_call_isset_exprs<'a, 'decl>(
     }
 }
 
-fn emit_tag_provenance_here<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_tag_provenance_here<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     es: &[(ParamKind, ast::Expr)],
@@ -1677,8 +1665,8 @@ fn emit_tag_provenance_here<'a, 'decl>(
     ]))
 }
 
-fn emit_array_mark_legacy<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_array_mark_legacy<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     es: &[(ParamKind, ast::Expr)],
@@ -1702,8 +1690,8 @@ fn emit_array_mark_legacy<'a, 'decl>(
     ]))
 }
 
-fn emit_idx<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_idx<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     es: &[(ParamKind, ast::Expr)],
@@ -1721,8 +1709,8 @@ fn emit_idx<'a, 'decl>(
     ]))
 }
 
-fn emit_call<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_call<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -1763,8 +1751,8 @@ fn emit_call<'a, 'decl>(
     }
 }
 
-fn emit_call_default<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_call_default<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -1806,8 +1794,8 @@ fn is_soft(ual: &[ast::UserAttribute]) -> bool {
     ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
 }
 
-pub fn emit_reified_targs<'a, 'decl, I>(
-    e: &mut Emitter<'decl>,
+pub fn emit_reified_targs<'a, 'd, I>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     targs: I,
@@ -1896,8 +1884,8 @@ fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjMethodOp {
     }
 }
 
-fn emit_object_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_object_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq> {
@@ -1907,8 +1895,8 @@ fn emit_object_expr<'a, 'decl>(
     }
 }
 
-fn emit_call_lhs_and_fcall<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_call_lhs_and_fcall<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     mut fcall_args: FCallArgs,
@@ -2270,8 +2258,8 @@ fn get_reified_var_cexpr<'a>(
     ]))
 }
 
-fn emit_args_inout_setters<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_args_inout_setters<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     args: &[(ParamKind, ast::Expr)],
 ) -> Result<(InstrSeq, InstrSeq)> {
@@ -2280,8 +2268,8 @@ fn emit_args_inout_setters<'a, 'decl>(
     } else {
         inout_locals::new_alias_info_map()
     };
-    fn emit_arg_and_inout_setter<'a, 'decl>(
-        e: &mut Emitter<'decl>,
+    fn emit_arg_and_inout_setter<'a, 'd>(
+        e: &mut Emitter<'d>,
         env: &Env<'a>,
         i: usize,
         pk: &ParamKind,
@@ -2490,8 +2478,8 @@ fn has_inout_arg(es: &[(ParamKind, ast::Expr)]) -> bool {
     es.iter().any(|(pk, _)| pk.is_pinout())
 }
 
-fn emit_special_function<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_special_function<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     targs: &[ast::Targ],
@@ -2808,8 +2796,8 @@ fn emit_special_function<'a, 'decl>(
     }
 }
 
-fn emit_class_meth_native<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_class_meth_native<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     cid: &ast::ClassId,
@@ -2885,8 +2873,8 @@ fn get_call_builtin_func_info(
     }
 }
 
-fn emit_function_pointer<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_function_pointer<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     fpid: &ast::FunctionPtrId,
@@ -2906,8 +2894,8 @@ fn emit_function_pointer<'a, 'decl>(
     Ok(emit_pos_then(pos, instrs))
 }
 
-fn emit_hh_fun<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_hh_fun<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     targs: &[ast::Targ],
@@ -2925,8 +2913,8 @@ fn emit_hh_fun<'a, 'decl>(
     }
 }
 
-fn emit_is<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_is<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     h: &ast::Hint,
@@ -2934,8 +2922,8 @@ fn emit_is<'a, 'decl>(
     emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Deep)
 }
 
-fn emit_is_shallow<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_is_shallow<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     h: &ast::Hint,
@@ -2943,7 +2931,7 @@ fn emit_is_shallow<'a, 'decl>(
     emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Shallow)
 }
 
-fn hint_to_type_op<'decl>(e: &Emitter<'decl>, h: &ast::Hint) -> Option<IsTypeOp> {
+fn hint_to_type_op<'d>(e: &Emitter<'d>, h: &ast::Hint) -> Option<IsTypeOp> {
     use aast_defs::Hint_::*;
     use aast_defs::Tprim;
 
@@ -2973,8 +2961,8 @@ fn hint_to_type_op<'decl>(e: &Emitter<'decl>, h: &ast::Hint) -> Option<IsTypeOp>
     }
 }
 
-fn emit_is_with_kind<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_is_with_kind<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     h: &ast::Hint,
@@ -3055,8 +3043,8 @@ fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<ast::Hint> {
     }
 }
 
-fn emit_eval<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_eval<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -3080,8 +3068,8 @@ fn has_reified_types<'a>(env: &Env<'a>) -> bool {
     false
 }
 
-fn emit_lvar<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_lvar<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     _pos: &Pos,
     e: &aast_defs::Lid,
@@ -3094,8 +3082,8 @@ fn emit_lvar<'a, 'decl>(
     ]))
 }
 
-fn emit_lit<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_lit<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expression: &ast::Expr,
@@ -3108,8 +3096,8 @@ fn emit_lit<'a, 'decl>(
     ))
 }
 
-fn emit_is_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_is_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     is_expr: &(ast::Expr, aast::Hint),
@@ -3119,8 +3107,8 @@ fn emit_is_expr<'a, 'decl>(
     Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
 }
 
-fn emit_array_get_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_array_get_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e: &(ast::Expr, Option<ast::Expr>),
@@ -3140,8 +3128,8 @@ fn emit_array_get_expr<'a, 'decl>(
     .0)
 }
 
-fn emit_pair<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_pair<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e: &(Option<(ast::Targ, ast::Targ)>, ast::Expr, ast::Expr),
@@ -3152,8 +3140,8 @@ fn emit_pair<'a, 'decl>(
     emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
 }
 
-fn emit_keyval_collection_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_keyval_collection_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e: &(
@@ -3180,8 +3168,8 @@ fn emit_keyval_collection_expr<'a, 'decl>(
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
-fn emit_val_collection<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_val_collection<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
@@ -3202,8 +3190,8 @@ fn emit_val_collection<'a, 'decl>(
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
-fn emit_class_get_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_class_get_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     _pos: &Pos,
     e: &(ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod),
@@ -3219,8 +3207,8 @@ fn emit_class_get_expr<'a, 'decl>(
     )
 }
 
-fn emit_obj_get_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_obj_get_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e: &(
@@ -3244,8 +3232,8 @@ fn emit_obj_get_expr<'a, 'decl>(
     .0)
 }
 
-fn emit_label<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_label<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     label: &(Option<aast_defs::ClassName>, String),
@@ -3454,8 +3442,8 @@ fn emit_known_class_id(e: &mut Emitter<'_>, id: &ast_defs::Id) -> InstrSeq {
     instr::resolve_class(cid)
 }
 
-fn emit_load_class_ref<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_load_class_ref<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     cexpr: ClassExpr,
@@ -3490,8 +3478,8 @@ enum NewObjOpInfo<'a> {
     NewObjS(hhbc::SpecialClsRef),
 }
 
-fn emit_new<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_new<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     (cid, targs, args, uarg, _): &(
@@ -3604,8 +3592,8 @@ fn emit_new<'a, 'decl>(
     }
 }
 
-fn emit_new_obj_reified_instrs<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_new_obj_reified_instrs<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     op: NewObjOpInfo<'_>,
@@ -3776,8 +3764,8 @@ fn emit_new_obj_reified_instrs<'a, 'decl>(
     })
 }
 
-fn emit_obj_get<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_obj_get<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     query_op: QueryMOp,
@@ -3875,8 +3863,8 @@ fn emit_obj_get<'a, 'decl>(
 // Get the member key for a property, and return any instructions and
 // the size of the stack in the case that the property cannot be
 // placed inline in the instruction.
-fn emit_prop_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_prop_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     nullflavor: &ast_defs::OgNullFlavor,
     stack_index: StackIndex,
@@ -3942,8 +3930,8 @@ fn emit_prop_expr<'a, 'decl>(
     })
 }
 
-fn emit_xhp_obj_get<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_xhp_obj_get<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -3977,8 +3965,8 @@ fn emit_xhp_obj_get<'a, 'decl>(
     emit_call(e, env, pos, &f, &[], &args[..], None, None, false)
 }
 
-fn emit_array_get<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_array_get<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     mode: Option<MOpMode>,
@@ -4006,8 +3994,8 @@ fn emit_array_get<'a, 'decl>(
     }
 }
 
-fn emit_array_get_<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_array_get_<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     mode: Option<MOpMode>,
@@ -4219,8 +4207,8 @@ fn is_special_class_constant_accessed_with_class_id(
     matches!(expr, ClassExpr::Id(_))
 }
 
-fn emit_elem<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_elem<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     elem: Option<&ast::Expr>,
     local_temp_kind: Option<StoredValueKind>,
@@ -4255,8 +4243,8 @@ fn emit_elem<'a, 'decl>(
     })
 }
 
-fn get_elem_member_key<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn get_elem_member_key<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     stack_index: StackIndex,
     elem: Option<&ast::Expr>,
@@ -4326,8 +4314,8 @@ fn get_elem_member_key<'a, 'decl>(
     }
 }
 
-fn emit_store_for_simple_base<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_store_for_simple_base<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     elem_stack_size: StackIndex,
@@ -4370,8 +4358,8 @@ fn get_querym_op_mode(query_op: &QueryMOp) -> MOpMode {
     }
 }
 
-fn emit_class_get<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_class_get<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     query_op: QueryMOp,
     cid: &ast::ClassId,
@@ -4395,8 +4383,8 @@ fn emit_class_get<'a, 'decl>(
     ]))
 }
 
-fn emit_conditional_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_conditional_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     etest: &ast::Expr,
@@ -4452,8 +4440,8 @@ fn emit_conditional_expr<'a, 'decl>(
     })
 }
 
-fn emit_local<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_local<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     notice: BareThisOp,
     lid: &aast_defs::Lid,
@@ -4478,8 +4466,8 @@ fn emit_local<'a, 'decl>(
     }
 }
 
-fn emit_class_const<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_class_const<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     cid: &ast::ClassId,
@@ -4512,8 +4500,8 @@ fn emit_class_const<'a, 'decl>(
     }
 }
 
-fn emit_unop<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_unop<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     (uop, expr): &(ast_defs::Uop, ast::Expr),
@@ -4609,7 +4597,7 @@ fn binop_to_setopop(op: &ast_defs::Bop) -> Option<SetOpOp> {
     }
 }
 
-fn optimize_null_checks<'decl>(e: &Emitter<'decl>) -> bool {
+fn optimize_null_checks<'d>(e: &Emitter<'d>) -> bool {
     e.options().compiler_flags.optimize_null_checks
 }
 
@@ -4653,8 +4641,8 @@ fn from_binop(op: &ast_defs::Bop) -> Result<InstrSeq> {
     })
 }
 
-fn emit_first_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_first_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
 ) -> Result<(InstrSeq, bool)> {
@@ -4672,8 +4660,8 @@ fn emit_first_expr<'a, 'decl>(
     })
 }
 
-pub fn emit_two_exprs<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_two_exprs<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     e1: &ast::Expr,
@@ -4695,8 +4683,8 @@ pub fn emit_two_exprs<'a, 'decl>(
     }))
 }
 
-fn emit_readonly_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_readonly_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &aast::Expr<(), ()>,
@@ -4713,8 +4701,8 @@ fn emit_readonly_expr<'a, 'decl>(
     }
 }
 
-fn emit_quiet_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_quiet_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -4751,8 +4739,8 @@ fn emit_quiet_expr<'a, 'decl>(
     }
 }
 
-fn emit_null_coalesce_assignment<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_null_coalesce_assignment<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     e1: &ast::Expr,
@@ -4788,8 +4776,8 @@ fn emit_null_coalesce_assignment<'a, 'decl>(
     ]))
 }
 
-fn emit_short_circuit_op<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_short_circuit_op<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -4822,8 +4810,8 @@ fn emit_short_circuit_op<'a, 'decl>(
     })
 }
 
-fn emit_binop<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_binop<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -4886,8 +4874,8 @@ fn emit_binop<'a, 'decl>(
     }
 }
 
-fn emit_pipe<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_pipe<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     (_, e1, e2): &(aast_defs::Lid, ast::Expr, ast::Expr),
 ) -> Result<InstrSeq> {
@@ -4906,8 +4894,8 @@ fn emit_pipe<'a, 'decl>(
     })
 }
 
-fn emit_as<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_as<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     as_: &ast::As_,
@@ -5006,8 +4994,8 @@ fn emit_as<'a, 'decl>(
     })
 }
 
-fn emit_cast<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_cast<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     hint: &aast_defs::Hint_,
@@ -5039,8 +5027,8 @@ fn emit_cast<'a, 'decl>(
     ]))
 }
 
-pub fn emit_unset_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_unset_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq> {
@@ -5057,8 +5045,8 @@ pub fn emit_unset_expr<'a, 'decl>(
     )
 }
 
-pub fn emit_set_range_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_set_range_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     name: &str,
@@ -5147,8 +5135,8 @@ pub fn emit_set_range_expr<'a, 'decl>(
 ///   Dim Warn EI:3
 ///   # Section 3, indexing the array using the value at stack position 0 (EC:0)
 ///   QueryM 1 CGet EC:0
-fn emit_base<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_base<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     mode: MOpMode,
@@ -5224,8 +5212,8 @@ fn get_local_temp_kind<'a>(
     }
 }
 
-fn emit_base_<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_base_<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     mode: MOpMode,
@@ -5275,7 +5263,7 @@ fn emit_base_<'a, 'decl>(
         }
     };
     // Called when emitting a base with MOpMode::Define on a Readonly expression
-    let emit_readonly_lval_base = |e: &mut Emitter<'decl>,
+    let emit_readonly_lval_base = |e: &mut Emitter<'d>,
                                    env: &Env<'a>,
                                    // expression inside of readonly expression
                                    inner_expr: &ast::Expr|
@@ -5628,8 +5616,8 @@ fn emit_base_<'a, 'decl>(
     }
 }
 
-pub fn emit_ignored_exprs<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_ignored_exprs<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     exprs: &[ast::Expr],
@@ -5641,8 +5629,8 @@ pub fn emit_ignored_exprs<'a, 'decl>(
         .map(InstrSeq::gather)
 }
 
-pub fn emit_ignored_expr<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_ignored_expr<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     expr: &ast::Expr,
@@ -5653,8 +5641,8 @@ pub fn emit_ignored_expr<'a, 'decl>(
     ]))
 }
 
-fn emit_lval_op<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_lval_op<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
     op: LValOp,
@@ -5811,8 +5799,8 @@ fn emit_array_get_fixed(last_usage: bool, local: Local, indices: &[isize]) -> In
 ///  this is necessary to handle cases like:
 ///  list($a[$f()]) = b();
 ///  here f() should be invoked before b()
-pub fn emit_lval_op_list<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_lval_op_list<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     local: Option<&Local>,
@@ -5910,8 +5898,8 @@ pub fn emit_lval_op_list<'a, 'decl>(
     }
 }
 
-pub fn emit_lval_op_nonlist<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_lval_op_nonlist<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     op: LValOp,
@@ -5997,8 +5985,8 @@ fn emit_final_static_op(
     })
 }
 
-pub fn emit_lval_op_nonlist_steps<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_lval_op_nonlist_steps<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
     op: LValOp,
@@ -6220,8 +6208,8 @@ pub fn emit_lval_op_nonlist_steps<'a, 'decl>(
     }
 }
 
-fn emit_class_expr<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+fn emit_class_expr<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     cexpr: ClassExpr,
     prop: &ast::ClassGetExpr,
@@ -6357,8 +6345,8 @@ fn fixup_type_arg<'a, 'b>(
     }
 }
 
-pub fn emit_reified_arg<'b, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_reified_arg<'b, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'b>,
     pos: &Pos,
     isas: bool,
@@ -6456,12 +6444,7 @@ pub fn emit_reified_arg<'b, 'decl>(
     }
 }
 
-pub fn get_local<'a, 'decl>(
-    e: &mut Emitter<'decl>,
-    env: &Env<'a>,
-    pos: &Pos,
-    s: &str,
-) -> Result<Local> {
+pub fn get_local<'a, 'd>(e: &mut Emitter<'d>, env: &Env<'a>, pos: &Pos, s: &str) -> Result<Local> {
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
             None => Err(Error::fatal_runtime(
@@ -6477,8 +6460,8 @@ pub fn get_local<'a, 'decl>(
     }
 }
 
-pub fn emit_is_null<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_is_null<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq> {
@@ -6497,8 +6480,8 @@ pub fn emit_is_null<'a, 'decl>(
     ]))
 }
 
-pub fn emit_jmpnz<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_jmpnz<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     label: Label,
@@ -6638,8 +6621,8 @@ pub fn emit_jmpnz<'a, 'decl>(
     )
 }
 
-pub fn emit_jmpz<'a, 'decl>(
-    e: &mut Emitter<'decl>,
+pub fn emit_jmpz<'a, 'd>(
+    e: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     label: Label,

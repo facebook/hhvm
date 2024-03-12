@@ -77,8 +77,8 @@ bitflags! {
     }
 }
 
-pub fn emit_body<'b, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_body<'b, 'd>(
+    emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
     return_value: InstrSeq,
@@ -172,8 +172,8 @@ pub fn emit_body<'b, 'decl>(
     ))
 }
 
-fn make_body_instrs<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_body_instrs<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
@@ -214,8 +214,8 @@ fn make_body_instrs<'a, 'decl>(
     Ok(body_instrs)
 }
 
-fn make_header_content<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_header_content<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
@@ -247,8 +247,8 @@ fn make_header_content<'a, 'decl>(
     ]))
 }
 
-fn make_decl_vars<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_decl_vars<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     scope: &Scope<'a>,
     immediate_tparams: &[ast::Tparam],
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -331,8 +331,8 @@ pub fn make_env<'a>(
     env
 }
 
-fn make_params<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_params<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     tp_names: &mut Vec<&str>,
     ast_params: &[ast::FunParam],
     scope: &Scope<'a>,
@@ -342,8 +342,8 @@ fn make_params<'a, 'decl>(
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
 
-pub fn make_body<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn make_body<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     mut body_instrs: InstrSeq,
     decl_vars: Vec<StringId>,
     is_memoize_wrapper: bool,
@@ -432,8 +432,8 @@ pub fn has_type_constraint<'a>(
     }
 }
 
-pub fn emit_method_prolog<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_method_prolog<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -584,8 +584,8 @@ pub fn emit_deprecation_info<'a>(
     })
 }
 
-fn set_emit_statement_state<'decl>(
-    emitter: &mut Emitter<'decl>,
+fn set_emit_statement_state<'d>(
+    emitter: &mut Emitter<'d>,
     default_return_value: InstrSeq,
     params: &[(Param, Option<(Label, ast::Expr)>)],
     return_type_info: &TypeInfo,

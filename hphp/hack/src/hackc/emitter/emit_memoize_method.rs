@@ -99,8 +99,8 @@ pub fn make_info(
     })
 }
 
-pub fn emit_wrapper_methods<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+pub fn emit_wrapper_methods<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
@@ -121,8 +121,8 @@ pub fn emit_wrapper_methods<'a, 'decl>(
 }
 
 // This is cut-and-paste from emit_method, with special casing for wrappers
-fn make_memoize_wrapper_method<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_memoize_wrapper_method<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
@@ -204,8 +204,8 @@ fn make_memoize_wrapper_method<'a, 'decl>(
     })
 }
 
-fn emit_memoize_wrapper_body<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit_memoize_wrapper_body<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
 ) -> Result<Body> {
@@ -226,8 +226,8 @@ fn emit_memoize_wrapper_body<'a, 'decl>(
     emit(emitter, env, hhas_params, return_type_info, args)
 }
 
-fn emit<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn emit<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
@@ -247,8 +247,8 @@ fn emit<'a, 'decl>(
     )
 }
 
-fn make_memoize_method_code<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_memoize_method_code<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -265,8 +265,8 @@ fn make_memoize_method_code<'a, 'decl>(
 }
 
 // method is the already-renamed memoize method that must be wrapped
-fn make_memoize_method_with_params_code<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_memoize_method_with_params_code<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -414,8 +414,8 @@ fn make_memoize_method_with_params_code<'a, 'decl>(
     Ok((instrs, decl_vars))
 }
 
-fn make_memoize_method_no_params_code<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_memoize_method_no_params_code<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     args: &Args<'_, 'a>,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
@@ -504,8 +504,8 @@ fn make_memoize_method_no_params_code<'a, 'decl>(
 }
 
 // Construct the wrapper function
-fn make_wrapper<'a, 'decl>(
-    emitter: &mut Emitter<'decl>,
+fn make_wrapper<'a, 'd>(
+    emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     instrs: InstrSeq,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,

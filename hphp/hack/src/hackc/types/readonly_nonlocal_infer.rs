@@ -29,8 +29,8 @@ use crate::subtype;
 use crate::tyx;
 use crate::tyx::Tyx;
 
-struct Infer<'decl> {
-    decl_provider: Arc<dyn DeclProvider<'decl> + 'decl>,
+struct Infer<'d> {
+    decl_provider: Arc<dyn DeclProvider<'d> + 'd>,
     stats: Stats,
 }
 
@@ -62,7 +62,7 @@ macro_rules! box_tup {
     }
 }
 
-impl<'decl> Infer<'decl> {
+impl<'d> Infer<'d> {
     #[allow(clippy::todo)]
     fn infer_expr(
         &mut self,

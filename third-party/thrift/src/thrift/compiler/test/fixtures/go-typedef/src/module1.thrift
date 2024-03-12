@@ -15,13 +15,15 @@
  */
 
 include "module0.thrift"
+include "thrift/annotation/go.thrift"
 
 typedef string Plate
 typedef string State
 typedef i32 Year
 typedef list<string> Drivers
 typedef module0.Accessory Accessory
-typedef module0.PartName PartName (go.name = "CarPartName")
+@go.Name{name = "CarPartName"}
+typedef module0.PartName PartName
 
 struct Automobile {
   1: Plate plate;

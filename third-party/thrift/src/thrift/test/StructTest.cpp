@@ -744,4 +744,8 @@ TEST_F(StructTest, RefsWithStringAndContainerTerseWrites) {
     EXPECT_TRUE(apache::thrift::empty(obj));
   }
 }
+
+TEST_F(StructTest, NotEligibleForConstexpr) {
+  [[maybe_unused]] NotEligibleForConstexpr foo;
+}
 } // namespace

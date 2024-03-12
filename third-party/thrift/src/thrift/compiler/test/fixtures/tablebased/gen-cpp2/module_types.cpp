@@ -110,9 +110,10 @@ TrivialTypesStruct::TrivialTypesStruct(const TrivialTypesStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(TrivialTypesStruct& lhs, TrivialTypesStruct& rhs) { swap(lhs, rhs); }
 TrivialTypesStruct& TrivialTypesStruct::operator=(const TrivialTypesStruct& other) {
   TrivialTypesStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

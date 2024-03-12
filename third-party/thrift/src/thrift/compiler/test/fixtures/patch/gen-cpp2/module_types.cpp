@@ -1225,9 +1225,10 @@ Bar::Bar(const Bar& srcObj) :
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_loop)) {
 }
 
+static void __fbthrift_swap(Bar& lhs, Bar& rhs) { swap(lhs, rhs); }
 Bar& Bar::operator=(const Bar& other) {
   Bar tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1450,9 +1451,10 @@ RefFields::RefFields(const RefFields& srcObj) :
     __fbthrift_field_opt_box(srcObj.__fbthrift_field_opt_box) {
 }
 
+static void __fbthrift_swap(RefFields& lhs, RefFields& rhs) { swap(lhs, rhs); }
 RefFields& RefFields::operator=(const RefFields& other) {
   RefFields tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1604,9 +1606,10 @@ MyDataPatchStruct::MyDataPatchStruct(const MyDataPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(MyDataPatchStruct& lhs, MyDataPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataPatchStruct& MyDataPatchStruct::operator=(const MyDataPatchStruct& other) {
   MyDataPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1788,9 +1791,10 @@ MyDataFieldPatchStruct::MyDataFieldPatchStruct(const MyDataFieldPatchStruct& src
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
 
+static void __fbthrift_swap(MyDataFieldPatchStruct& lhs, MyDataFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=(const MyDataFieldPatchStruct& other) {
   MyDataFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2035,9 +2039,10 @@ MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(const MyD
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(MyDataWithCustomDefaultPatchStruct& lhs, MyDataWithCustomDefaultPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataWithCustomDefaultPatchStruct& MyDataWithCustomDefaultPatchStruct::operator=(const MyDataWithCustomDefaultPatchStruct& other) {
   MyDataWithCustomDefaultPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2219,9 +2224,10 @@ MyDataWithCustomDefaultFieldPatchStruct::MyDataWithCustomDefaultFieldPatchStruct
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
 
+static void __fbthrift_swap(MyDataWithCustomDefaultFieldPatchStruct& lhs, MyDataWithCustomDefaultFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataWithCustomDefaultFieldPatchStruct& MyDataWithCustomDefaultFieldPatchStruct::operator=(const MyDataWithCustomDefaultFieldPatchStruct& other) {
   MyDataWithCustomDefaultFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2464,9 +2470,10 @@ InnerUnionPatchStruct::InnerUnionPatchStruct(const InnerUnionPatchStruct& srcObj
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
 
+static void __fbthrift_swap(InnerUnionPatchStruct& lhs, InnerUnionPatchStruct& rhs) { swap(lhs, rhs); }
 InnerUnionPatchStruct& InnerUnionPatchStruct::operator=(const InnerUnionPatchStruct& other) {
   InnerUnionPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2629,9 +2636,10 @@ InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(const InnerUnionFieldPatc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, 1>(*__fbthrift_field_innerOption, *this);
 }
 
+static void __fbthrift_swap(InnerUnionFieldPatchStruct& lhs, InnerUnionFieldPatchStruct& rhs) { swap(lhs, rhs); }
 InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=(const InnerUnionFieldPatchStruct& other) {
   InnerUnionFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2749,9 +2757,10 @@ MyUnionPatchStruct::MyUnionPatchStruct(const MyUnionPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
 
+static void __fbthrift_swap(MyUnionPatchStruct& lhs, MyUnionPatchStruct& rhs) { swap(lhs, rhs); }
 MyUnionPatchStruct& MyUnionPatchStruct::operator=(const MyUnionPatchStruct& other) {
   MyUnionPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2918,9 +2927,10 @@ MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(const MyUnionFieldPatchStruct& 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, 3>(*__fbthrift_field_option3, *this);
 }
 
+static void __fbthrift_swap(MyUnionFieldPatchStruct& lhs, MyUnionFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=(const MyUnionFieldPatchStruct& other) {
   MyUnionFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3072,9 +3082,10 @@ MyStructPatchStruct::MyStructPatchStruct(const MyStructPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(MyStructPatchStruct& lhs, MyStructPatchStruct& rhs) { swap(lhs, rhs); }
 MyStructPatchStruct& MyStructPatchStruct::operator=(const MyStructPatchStruct& other) {
   MyStructPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -4545,9 +4556,10 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(const MyStructFieldPatchStruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, 1>(*__fbthrift_field_structWithFieldCustomDefault, *this);
 }
 
+static void __fbthrift_swap(MyStructFieldPatchStruct& lhs, MyStructFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(const MyStructFieldPatchStruct& other) {
   MyStructFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -5594,9 +5606,10 @@ LateDefStructPatchStruct::LateDefStructPatchStruct(const LateDefStructPatchStruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(LateDefStructPatchStruct& lhs, LateDefStructPatchStruct& rhs) { swap(lhs, rhs); }
 LateDefStructPatchStruct& LateDefStructPatchStruct::operator=(const LateDefStructPatchStruct& other) {
   LateDefStructPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -5926,9 +5939,10 @@ RecursivePatchStruct::RecursivePatchStruct(const RecursivePatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(RecursivePatchStruct& lhs, RecursivePatchStruct& rhs) { swap(lhs, rhs); }
 RecursivePatchStruct& RecursivePatchStruct::operator=(const RecursivePatchStruct& other) {
   RecursivePatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -6231,9 +6245,10 @@ RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(const RecursiveFieldPatchSt
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, -1>(*__fbthrift_field_nodes, *this);
 }
 
+static void __fbthrift_swap(RecursiveFieldPatchStruct& lhs, RecursiveFieldPatchStruct& rhs) { swap(lhs, rhs); }
 RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=(const RecursiveFieldPatchStruct& other) {
   RecursiveFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -6468,9 +6483,10 @@ BarPatchStruct::BarPatchStruct(const BarPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(BarPatchStruct& lhs, BarPatchStruct& rhs) { swap(lhs, rhs); }
 BarPatchStruct& BarPatchStruct::operator=(const BarPatchStruct& other) {
   BarPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -6650,9 +6666,10 @@ BarFieldPatchStruct::BarFieldPatchStruct(const BarFieldPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, -1>(*__fbthrift_field_loop, *this);
 }
 
+static void __fbthrift_swap(BarFieldPatchStruct& lhs, BarFieldPatchStruct& rhs) { swap(lhs, rhs); }
 BarFieldPatchStruct& BarFieldPatchStruct::operator=(const BarFieldPatchStruct& other) {
   BarFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -6984,9 +7001,10 @@ RefFieldsPatchStruct::RefFieldsPatchStruct(const RefFieldsPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(RefFieldsPatchStruct& lhs, RefFieldsPatchStruct& rhs) { swap(lhs, rhs); }
 RefFieldsPatchStruct& RefFieldsPatchStruct::operator=(const RefFieldsPatchStruct& other) {
   RefFieldsPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -7611,9 +7629,10 @@ RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(const RefFieldsFieldPatchSt
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
 }
 
+static void __fbthrift_swap(RefFieldsFieldPatchStruct& lhs, RefFieldsFieldPatchStruct& rhs) { swap(lhs, rhs); }
 RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=(const RefFieldsFieldPatchStruct& other) {
   RefFieldsFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

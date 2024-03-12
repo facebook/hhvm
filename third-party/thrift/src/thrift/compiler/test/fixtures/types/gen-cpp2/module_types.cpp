@@ -1311,9 +1311,10 @@ MinPaddingWithCustomType::MinPaddingWithCustomType(const MinPaddingWithCustomTyp
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
 }
 
+static void __fbthrift_swap(MinPaddingWithCustomType& lhs, MinPaddingWithCustomType& rhs) { swap(lhs, rhs); }
 MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(const MinPaddingWithCustomType& other) {
   MinPaddingWithCustomType tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1837,9 +1838,10 @@ ForwardUsageRoot::ForwardUsageRoot(const ForwardUsageRoot& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(ForwardUsageRoot& lhs, ForwardUsageRoot& rhs) { swap(lhs, rhs); }
 ForwardUsageRoot& ForwardUsageRoot::operator=(const ForwardUsageRoot& other) {
   ForwardUsageRoot tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1973,9 +1975,10 @@ ForwardUsageStruct::ForwardUsageStruct(const ForwardUsageStruct& srcObj) :
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
 }
 
+static void __fbthrift_swap(ForwardUsageStruct& lhs, ForwardUsageStruct& rhs) { swap(lhs, rhs); }
 ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct& other) {
   ForwardUsageStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2084,9 +2087,10 @@ ForwardUsageByRef::ForwardUsageByRef(const ForwardUsageByRef& srcObj) :
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
 }
 
+static void __fbthrift_swap(ForwardUsageByRef& lhs, ForwardUsageByRef& rhs) { swap(lhs, rhs); }
 ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef& other) {
   ForwardUsageByRef tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3402,9 +3406,10 @@ AllocatorAware::AllocatorAware(const AllocatorAware& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(AllocatorAware& lhs, AllocatorAware& rhs) { swap(lhs, rhs); }
 AllocatorAware& AllocatorAware::operator=(const AllocatorAware& other) {
   AllocatorAware tmp(other, get_allocator());
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   ::apache::thrift::detail::copy_allocator(__fbthrift_alloc, other.__fbthrift_alloc);
   return *this;
 }
@@ -3584,9 +3589,10 @@ AllocatorAware2::AllocatorAware2(const AllocatorAware2& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(AllocatorAware2& lhs, AllocatorAware2& rhs) { swap(lhs, rhs); }
 AllocatorAware2& AllocatorAware2::operator=(const AllocatorAware2& other) {
   AllocatorAware2 tmp(other, get_allocator());
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   ::apache::thrift::detail::copy_allocator(__fbthrift_alloc, other.__fbthrift_alloc);
   return *this;
 }

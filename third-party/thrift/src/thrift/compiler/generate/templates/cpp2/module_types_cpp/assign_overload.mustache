@@ -14,9 +14,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%struct:cpp_underlying_name%>& <%struct:cpp_underlying_name%>::operator=(const <%struct:cpp_underlying_name%>& other) {
+%>static void __fbthrift_swap(<%struct:cpp_underlying_name%>& lhs, <%struct:cpp_underlying_name%>& rhs) { swap(lhs, rhs); }
+<%struct:cpp_underlying_name%>& <%struct:cpp_underlying_name%>::operator=(const <%struct:cpp_underlying_name%>& other) {
   <%struct:cpp_underlying_name%> tmp(other<%#struct:cpp_allocator%>, get_allocator()<%/struct:cpp_allocator%>);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
 <%#struct:cpp_allocator%>
 <%^struct:cpp_allocator_via%>
   ::apache::thrift::detail::copy_allocator(__fbthrift_alloc, other.__fbthrift_alloc);

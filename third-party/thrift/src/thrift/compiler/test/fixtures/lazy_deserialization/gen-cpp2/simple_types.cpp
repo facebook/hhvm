@@ -213,9 +213,10 @@ LazyFoo::LazyFoo(const LazyFoo& srcObj) :
   }
 }
 
+static void __fbthrift_swap(LazyFoo& lhs, LazyFoo& rhs) { swap(lhs, rhs); }
 LazyFoo& LazyFoo::operator=(const LazyFoo& other) {
   LazyFoo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -627,9 +628,10 @@ OptionalLazyFoo::OptionalLazyFoo(const OptionalLazyFoo& srcObj) :
   }
 }
 
+static void __fbthrift_swap(OptionalLazyFoo& lhs, OptionalLazyFoo& rhs) { swap(lhs, rhs); }
 OptionalLazyFoo& OptionalLazyFoo::operator=(const OptionalLazyFoo& other) {
   OptionalLazyFoo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -893,9 +895,10 @@ OptionalBoxedLazyFoo::OptionalBoxedLazyFoo(const OptionalBoxedLazyFoo& srcObj) :
   }
 }
 
+static void __fbthrift_swap(OptionalBoxedLazyFoo& lhs, OptionalBoxedLazyFoo& rhs) { swap(lhs, rhs); }
 OptionalBoxedLazyFoo& OptionalBoxedLazyFoo::operator=(const OptionalBoxedLazyFoo& other) {
   OptionalBoxedLazyFoo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1149,9 +1152,10 @@ LazyCppRef::LazyCppRef(const LazyCppRef& srcObj) :
   }
 }
 
+static void __fbthrift_swap(LazyCppRef& lhs, LazyCppRef& rhs) { swap(lhs, rhs); }
 LazyCppRef& LazyCppRef::operator=(const LazyCppRef& other) {
   LazyCppRef tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

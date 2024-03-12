@@ -357,9 +357,10 @@ structured_annotation_recursive::structured_annotation_recursive(const structure
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(structured_annotation_recursive& lhs, structured_annotation_recursive& rhs) { swap(lhs, rhs); }
 structured_annotation_recursive& structured_annotation_recursive::operator=(const structured_annotation_recursive& other) {
   structured_annotation_recursive tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

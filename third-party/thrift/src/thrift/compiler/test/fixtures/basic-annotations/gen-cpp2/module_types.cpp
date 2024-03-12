@@ -376,9 +376,10 @@ YourStruct::YourStruct(const YourStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
+static void __fbthrift_swap(YourStruct& lhs, YourStruct& rhs) { swap(lhs, rhs); }
 YourStruct& YourStruct::operator=(const YourStruct& other) {
   YourStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

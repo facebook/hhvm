@@ -170,9 +170,10 @@ containerStruct::containerStruct(const containerStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(containerStruct& lhs, containerStruct& rhs) { swap(lhs, rhs); }
 containerStruct& containerStruct::operator=(const containerStruct& other) {
   containerStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

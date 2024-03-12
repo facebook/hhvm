@@ -359,9 +359,10 @@ MyStruct::MyStruct(const MyStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
 
+static void __fbthrift_swap(MyStruct& lhs, MyStruct& rhs) { swap(lhs, rhs); }
 MyStruct& MyStruct::operator=(const MyStruct& other) {
   MyStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1164,9 +1165,10 @@ AnException::AnException(const AnException& srcObj) :
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
 }
 
+static void __fbthrift_swap(AnException& lhs, AnException& rhs) { swap(lhs, rhs); }
 AnException& AnException::operator=(const AnException& other) {
   AnException tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2206,9 +2208,10 @@ MyIncludedStruct::MyIncludedStruct(const MyIncludedStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(MyIncludedStruct& lhs, MyIncludedStruct& rhs) { swap(lhs, rhs); }
 MyIncludedStruct& MyIncludedStruct::operator=(const MyIncludedStruct& other) {
   MyIncludedStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2827,9 +2830,10 @@ ComplexContainerStruct::ComplexContainerStruct(const ComplexContainerStruct& src
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(ComplexContainerStruct& lhs, ComplexContainerStruct& rhs) { swap(lhs, rhs); }
 ComplexContainerStruct& ComplexContainerStruct::operator=(const ComplexContainerStruct& other) {
   ComplexContainerStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

@@ -2155,9 +2155,10 @@ struct4::struct4(const struct4& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(struct4& lhs, struct4& rhs) { swap(lhs, rhs); }
 struct4& struct4::operator=(const struct4& other) {
   struct4 tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3520,9 +3521,10 @@ StructWithFieldAdapter::StructWithFieldAdapter(const StructWithFieldAdapter& src
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
 }
 
+static void __fbthrift_swap(StructWithFieldAdapter& lhs, StructWithFieldAdapter& rhs) { swap(lhs, rhs); }
 StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldAdapter& other) {
   StructWithFieldAdapter tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

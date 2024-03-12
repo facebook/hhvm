@@ -101,3 +101,8 @@ struct OptionalFieldsStruct {
   @thrift.Box
   6: optional HasInt boxed_field;
 }
+
+struct NotEligibleForConstexpr {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional i32 swap;
+}

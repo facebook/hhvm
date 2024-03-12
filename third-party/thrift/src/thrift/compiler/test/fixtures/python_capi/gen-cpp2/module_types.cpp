@@ -556,9 +556,10 @@ StringPair::StringPair(const StringPair& srcObj) :
   ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
 }
 
+static void __fbthrift_swap(StringPair& lhs, StringPair& rhs) { swap(lhs, rhs); }
 StringPair& StringPair::operator=(const StringPair& other) {
   StringPair tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -767,9 +768,10 @@ PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(PrimitiveStruct& lhs, PrimitiveStruct& rhs) { swap(lhs, rhs); }
 PrimitiveStruct& PrimitiveStruct::operator=(const PrimitiveStruct& other) {
   PrimitiveStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1010,9 +1012,10 @@ AdaptedFields::AdaptedFields(const AdaptedFields& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
 }
 
+static void __fbthrift_swap(AdaptedFields& lhs, AdaptedFields& rhs) { swap(lhs, rhs); }
 AdaptedFields& AdaptedFields::operator=(const AdaptedFields& other) {
   AdaptedFields tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1566,9 +1569,10 @@ MapStruct::MapStruct(const MapStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(MapStruct& lhs, MapStruct& rhs) { swap(lhs, rhs); }
 MapStruct& MapStruct::operator=(const MapStruct& other) {
   MapStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2243,9 +2247,10 @@ MyStructPatchStruct::MyStructPatchStruct(const MyStructPatchStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(MyStructPatchStruct& lhs, MyStructPatchStruct& rhs) { swap(lhs, rhs); }
 MyStructPatchStruct& MyStructPatchStruct::operator=(const MyStructPatchStruct& other) {
   MyStructPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3024,9 +3029,10 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(const MyStructFieldPatchStruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::python_capi::MyStructField8PatchStruct>, 8>(*__fbthrift_field_intSetty, *this);
 }
 
+static void __fbthrift_swap(MyStructFieldPatchStruct& lhs, MyStructFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(const MyStructFieldPatchStruct& other) {
   MyStructFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3440,9 +3446,10 @@ MyDataItemPatchStruct::MyDataItemPatchStruct(const MyDataItemPatchStruct& srcObj
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
+static void __fbthrift_swap(MyDataItemPatchStruct& lhs, MyDataItemPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(const MyDataItemPatchStruct& other) {
   MyDataItemPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3622,9 +3629,10 @@ MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct(const MyDataItemFieldPatc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_s, *this);
 }
 
+static void __fbthrift_swap(MyDataItemFieldPatchStruct& lhs, MyDataItemFieldPatchStruct& rhs) { swap(lhs, rhs); }
 MyDataItemFieldPatchStruct& MyDataItemFieldPatchStruct::operator=(const MyDataItemFieldPatchStruct& other) {
   MyDataItemFieldPatchStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

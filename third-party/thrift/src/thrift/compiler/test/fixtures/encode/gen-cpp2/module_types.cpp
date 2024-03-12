@@ -395,9 +395,10 @@ OpEncodeStruct::OpEncodeStruct(const OpEncodeStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }
 
+static void __fbthrift_swap(OpEncodeStruct& lhs, OpEncodeStruct& rhs) { swap(lhs, rhs); }
 OpEncodeStruct& OpEncodeStruct::operator=(const OpEncodeStruct& other) {
   OpEncodeStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

@@ -213,9 +213,10 @@ Foo::Foo(const Foo& srcObj) :
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
 }
 
+static void __fbthrift_swap(Foo& lhs, Foo& rhs) { swap(lhs, rhs); }
 Foo& Foo::operator=(const Foo& other) {
   Foo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -598,9 +599,10 @@ Bar::Bar(const Bar& srcObj) :
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
 }
 
+static void __fbthrift_swap(Bar& lhs, Bar& rhs) { swap(lhs, rhs); }
 Bar& Bar::operator=(const Bar& other) {
   Bar tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -980,9 +982,10 @@ StructWithFieldAdapter::StructWithFieldAdapter(const StructWithFieldAdapter& src
   if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
 }
 
+static void __fbthrift_swap(StructWithFieldAdapter& lhs, StructWithFieldAdapter& rhs) { swap(lhs, rhs); }
 StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldAdapter& other) {
   StructWithFieldAdapter tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1121,9 +1124,10 @@ TerseAdaptedFields::TerseAdaptedFields(const TerseAdaptedFields& srcObj) :
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
+static void __fbthrift_swap(TerseAdaptedFields& lhs, TerseAdaptedFields& rhs) { swap(lhs, rhs); }
 TerseAdaptedFields& TerseAdaptedFields::operator=(const TerseAdaptedFields& other) {
   TerseAdaptedFields tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1252,9 +1256,10 @@ B::B(const B& srcObj) :
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
 }
 
+static void __fbthrift_swap(B& lhs, B& rhs) { swap(lhs, rhs); }
 B& B::operator=(const B& other) {
   B tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1541,9 +1546,10 @@ MyStruct::MyStruct(const MyStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
 }
 
+static void __fbthrift_swap(MyStruct& lhs, MyStruct& rhs) { swap(lhs, rhs); }
 MyStruct& MyStruct::operator=(const MyStruct& other) {
   MyStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1679,9 +1685,10 @@ AdaptTestStruct::AdaptTestStruct(const AdaptTestStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::AdapterWithContext, 10>(__fbthrift_field_binary_data, *this);
 }
 
+static void __fbthrift_swap(AdaptTestStruct& lhs, AdaptTestStruct& rhs) { swap(lhs, rhs); }
 AdaptTestStruct& AdaptTestStruct::operator=(const AdaptTestStruct& other) {
   AdaptTestStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1918,9 +1925,10 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct(const AdaptTemplatedTestStruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 22>(__fbthrift_field_doubleTypedefBool, *this);
 }
 
+static void __fbthrift_swap(AdaptTemplatedTestStruct& lhs, AdaptTemplatedTestStruct& rhs) { swap(lhs, rhs); }
 AdaptTemplatedTestStruct& AdaptTemplatedTestStruct::operator=(const AdaptTemplatedTestStruct& other) {
   AdaptTemplatedTestStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2658,9 +2666,10 @@ StructFieldAdaptedStruct::StructFieldAdaptedStruct(const StructFieldAdaptedStruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_typedefOfAdapted, *this);
 }
 
+static void __fbthrift_swap(StructFieldAdaptedStruct& lhs, StructFieldAdaptedStruct& rhs) { swap(lhs, rhs); }
 StructFieldAdaptedStruct& StructFieldAdaptedStruct::operator=(const StructFieldAdaptedStruct& other) {
   StructFieldAdaptedStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2922,9 +2931,10 @@ CircularStruct::CircularStruct(const CircularStruct& srcObj) :
   if (__fbthrift_field_field) ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MemberAccessAdapter, 1>(*__fbthrift_field_field, *this);
 }
 
+static void __fbthrift_swap(CircularStruct& lhs, CircularStruct& rhs) { swap(lhs, rhs); }
 CircularStruct& CircularStruct::operator=(const CircularStruct& other) {
   CircularStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3036,9 +3046,10 @@ ReorderedStruct::ReorderedStruct(const ReorderedStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
 }
 
+static void __fbthrift_swap(ReorderedStruct& lhs, ReorderedStruct& rhs) { swap(lhs, rhs); }
 ReorderedStruct& ReorderedStruct::operator=(const ReorderedStruct& other) {
   ReorderedStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3469,9 +3480,10 @@ MoveOnly::MoveOnly(const MoveOnly& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
 }
 
+static void __fbthrift_swap(MoveOnly& lhs, MoveOnly& rhs) { swap(lhs, rhs); }
 MoveOnly& MoveOnly::operator=(const MoveOnly& other) {
   MoveOnly tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3569,9 +3581,10 @@ AlsoMoveOnly::AlsoMoveOnly(const AlsoMoveOnly& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
 }
 
+static void __fbthrift_swap(AlsoMoveOnly& lhs, AlsoMoveOnly& rhs) { swap(lhs, rhs); }
 AlsoMoveOnly& AlsoMoveOnly::operator=(const AlsoMoveOnly& other) {
   AlsoMoveOnly tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -3820,9 +3833,10 @@ CountingStruct::CountingStruct(const CountingStruct& srcObj) :
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, std::string>, 3>(__fbthrift_field_regularString, *this);
 }
 
+static void __fbthrift_swap(CountingStruct& lhs, CountingStruct& rhs) { swap(lhs, rhs); }
 CountingStruct& CountingStruct::operator=(const CountingStruct& other) {
   CountingStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

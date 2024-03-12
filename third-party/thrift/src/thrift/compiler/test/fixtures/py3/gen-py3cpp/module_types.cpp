@@ -195,9 +195,10 @@ OptionalRefStruct::OptionalRefStruct(const OptionalRefStruct& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(OptionalRefStruct& lhs, OptionalRefStruct& rhs) { swap(lhs, rhs); }
 OptionalRefStruct& OptionalRefStruct::operator=(const OptionalRefStruct& other) {
   OptionalRefStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -437,9 +438,10 @@ HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(const HiddenTypeFieldsStruct& src
   ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
 }
 
+static void __fbthrift_swap(HiddenTypeFieldsStruct& lhs, HiddenTypeFieldsStruct& rhs) { swap(lhs, rhs); }
 HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=(const HiddenTypeFieldsStruct& other) {
   HiddenTypeFieldsStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

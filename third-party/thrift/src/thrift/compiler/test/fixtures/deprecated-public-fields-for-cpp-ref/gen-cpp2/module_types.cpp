@@ -49,9 +49,10 @@ Foo::Foo(const Foo& srcObj) :
     __fbthrift_field_bar(srcObj.__fbthrift_field_bar) {
 }
 
+static void __fbthrift_swap(Foo& lhs, Foo& rhs) { swap(lhs, rhs); }
 Foo& Foo::operator=(const Foo& other) {
   Foo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

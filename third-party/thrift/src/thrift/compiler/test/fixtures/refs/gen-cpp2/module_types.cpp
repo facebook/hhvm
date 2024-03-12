@@ -359,9 +359,10 @@ MyField::MyField(const MyField& srcObj) :
           ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_req_str_value)) {
 }
 
+static void __fbthrift_swap(MyField& lhs, MyField& rhs) { swap(lhs, rhs); }
 MyField& MyField::operator=(const MyField& other) {
   MyField tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -510,9 +511,10 @@ MyStruct::MyStruct(const MyStruct& srcObj) :
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_ref)) {
 }
 
+static void __fbthrift_swap(MyStruct& lhs, MyStruct& rhs) { swap(lhs, rhs); }
 MyStruct& MyStruct::operator=(const MyStruct& other) {
   MyStruct tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -645,9 +647,10 @@ StructWithUnion::StructWithUnion(const StructWithUnion& srcObj) :
     __isset(srcObj.__isset) {
 }
 
+static void __fbthrift_swap(StructWithUnion& lhs, StructWithUnion& rhs) { swap(lhs, rhs); }
 StructWithUnion& StructWithUnion::operator=(const StructWithUnion& other) {
   StructWithUnion tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -902,9 +905,10 @@ StructWithContainers::StructWithContainers(const StructWithContainers& srcObj) :
     __fbthrift_field_list_ref_shared_const(srcObj.__fbthrift_field_list_ref_shared_const) {
 }
 
+static void __fbthrift_swap(StructWithContainers& lhs, StructWithContainers& rhs) { swap(lhs, rhs); }
 StructWithContainers& StructWithContainers::operator=(const StructWithContainers& other) {
   StructWithContainers tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1231,9 +1235,10 @@ StructWithRef::StructWithRef(const StructWithRef& srcObj) :
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_field)) {
 }
 
+static void __fbthrift_swap(StructWithRef& lhs, StructWithRef& rhs) { swap(lhs, rhs); }
 StructWithRef& StructWithRef::operator=(const StructWithRef& other) {
   StructWithRef tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1700,9 +1705,10 @@ AdaptedStructWithInternBox::AdaptedStructWithInternBox(const AdaptedStructWithIn
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
 }
 
+static void __fbthrift_swap(AdaptedStructWithInternBox& lhs, AdaptedStructWithInternBox& rhs) { swap(lhs, rhs); }
 AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=(const AdaptedStructWithInternBox& other) {
   AdaptedStructWithInternBox tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1831,9 +1837,10 @@ AdaptedStructWithTerseInternBox::AdaptedStructWithTerseInternBox(const AdaptedSt
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
 }
 
+static void __fbthrift_swap(AdaptedStructWithTerseInternBox& lhs, AdaptedStructWithTerseInternBox& rhs) { swap(lhs, rhs); }
 AdaptedStructWithTerseInternBox& AdaptedStructWithTerseInternBox::operator=(const AdaptedStructWithTerseInternBox& other) {
   AdaptedStructWithTerseInternBox tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -1960,9 +1967,10 @@ StructWithRefTypeUnique::StructWithRefTypeUnique(const StructWithRefTypeUnique& 
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_field)) {
 }
 
+static void __fbthrift_swap(StructWithRefTypeUnique& lhs, StructWithRefTypeUnique& rhs) { swap(lhs, rhs); }
 StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(const StructWithRefTypeUnique& other) {
   StructWithRefTypeUnique tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2326,9 +2334,10 @@ StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCt
           ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_def_field)) {
 }
 
+static void __fbthrift_swap(StructWithRefAndAnnotCppNoexceptMoveCtor& lhs, StructWithRefAndAnnotCppNoexceptMoveCtor& rhs) { swap(lhs, rhs); }
 StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCtor::operator=(const StructWithRefAndAnnotCppNoexceptMoveCtor& other) {
   StructWithRefAndAnnotCppNoexceptMoveCtor tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -2438,9 +2447,10 @@ StructWithString::StructWithString(const StructWithString& srcObj) :
     __fbthrift_field_shared_string_ref(srcObj.__fbthrift_field_shared_string_ref) {
 }
 
+static void __fbthrift_swap(StructWithString& lhs, StructWithString& rhs) { swap(lhs, rhs); }
 StructWithString& StructWithString::operator=(const StructWithString& other) {
   StructWithString tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

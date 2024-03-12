@@ -214,9 +214,10 @@ TerseLazyFoo::TerseLazyFoo(const TerseLazyFoo& srcObj) :
   }
 }
 
+static void __fbthrift_swap(TerseLazyFoo& lhs, TerseLazyFoo& rhs) { swap(lhs, rhs); }
 TerseLazyFoo& TerseLazyFoo::operator=(const TerseLazyFoo& other) {
   TerseLazyFoo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 
@@ -631,9 +632,10 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo(const TerseOptionalLazyFoo& srcObj) :
   }
 }
 
+static void __fbthrift_swap(TerseOptionalLazyFoo& lhs, TerseOptionalLazyFoo& rhs) { swap(lhs, rhs); }
 TerseOptionalLazyFoo& TerseOptionalLazyFoo::operator=(const TerseOptionalLazyFoo& other) {
   TerseOptionalLazyFoo tmp(other);
-  swap(*this, tmp);
+  __fbthrift_swap(*this, tmp);
   return *this;
 }
 

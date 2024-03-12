@@ -135,6 +135,33 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("simple.OptionalBoxedLazyFoo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& simple_OptionalBoxedLazyFoo = res.first->second;
+  simple_OptionalBoxedLazyFoo.name() = "simple.OptionalBoxedLazyFoo";
+  simple_OptionalBoxedLazyFoo.is_union() = false;
+  static const auto* const
+  simple_OptionalBoxedLazyFoo_fields = new std::array<EncodedThriftField, 4>{{
+    {1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+    {2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+    {3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), *cvStruct("cpp.Lazy", {}).cv_struct_ref(), }},
+    {4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Lazy", {}).cv_struct_ref(), *cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *simple_OptionalBoxedLazyFoo_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    simple_OptionalBoxedLazyFoo.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("simple.LazyCppRef", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

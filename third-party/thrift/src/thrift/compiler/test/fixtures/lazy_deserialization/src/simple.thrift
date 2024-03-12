@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
@@ -49,6 +50,19 @@ struct OptionalLazyFoo {
   @cpp.Lazy
   3: optional list<double> field3;
   @cpp.Lazy
+  4: optional list<i32> field4;
+}
+
+struct OptionalBoxedLazyFoo {
+  @thrift.Box
+  1: optional list<double> field1;
+  @thrift.Box
+  2: optional list<i32> field2;
+  @thrift.Box
+  @cpp.Lazy
+  3: optional list<double> field3;
+  @cpp.Lazy
+  @thrift.Box
   4: optional list<i32> field4;
 }
 

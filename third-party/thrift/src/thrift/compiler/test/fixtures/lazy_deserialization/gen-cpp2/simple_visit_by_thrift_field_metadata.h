@@ -90,6 +90,25 @@ struct VisitByFieldId<::apache::thrift::test::OptionalLazyFoo> {
 };
 
 template <>
+struct VisitByFieldId<::apache::thrift::test::OptionalBoxedLazyFoo> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field1_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).field2_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).field3_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).field4_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::test::OptionalBoxedLazyFoo");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::apache::thrift::test::LazyCppRef> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {

@@ -38,6 +38,11 @@ class StructMetadata<::apache::thrift::test::OptionalLazyFoo> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::apache::thrift::test::LazyCppRef> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

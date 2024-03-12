@@ -161,6 +161,38 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::name = "OptionalBoxedLazyFoo";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::fields_names = {{
+  "field1",
+  "field2",
+  "field3",
+  "field4",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::fields_types = {{
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::test::OptionalBoxedLazyFoo>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+}};
+
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::LazyCppRef>::name = "LazyCppRef";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyCppRef>::fields_names = {{
   "field1",

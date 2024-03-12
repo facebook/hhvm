@@ -12,6 +12,7 @@ class Foo;
 class LazyFoo;
 class OptionalFoo;
 class OptionalLazyFoo;
+class OptionalBoxedLazyFoo;
 class LazyCppRef;
 class IndexedFoo;
 class OptionalIndexedFoo;

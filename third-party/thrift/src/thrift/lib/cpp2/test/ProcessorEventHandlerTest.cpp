@@ -77,7 +77,6 @@ CO_TEST(TProcessorEventHandlerTest, BasicRead) {
       });
   EXPECT_NE(scopedTestEventHandler, nullptr);
 
-  std::string ret;
   auto client =
       runner.newClient<apache::thrift::Client<test::HandlerGeneric>>();
   co_await client->co_get_string();
@@ -104,7 +103,6 @@ CO_TEST(TProcessorEventHandlerTest, ClearEventHandlers) {
       });
   EXPECT_NE(scopedTestEventHandler, nullptr);
 
-  std::string ret;
   auto client =
       runner.newClient<apache::thrift::Client<test::HandlerGeneric>>();
   co_await client->co_get_string();

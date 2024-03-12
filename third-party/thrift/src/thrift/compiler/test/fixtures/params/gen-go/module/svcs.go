@@ -96,12 +96,6 @@ func (c *NestedContainersClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewNestedContainersClientFromProtocol() instead.
-func NewNestedContainersClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersClient {
-  return NewNestedContainersClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int32][]int32) (error) {
     in := &reqNestedContainersMapList{
         Foo: foo,

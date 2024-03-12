@@ -147,12 +147,6 @@ func (c *GetEntityClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewGetEntityClientFromProtocol() instead.
-func NewGetEntityClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityClient {
-  return NewGetEntityClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
     in := &reqGetEntityGetEntity{
         R: r,

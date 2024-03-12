@@ -92,12 +92,6 @@ func (c *FinderClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewFinderClientFromProtocol() instead.
-func NewFinderClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderClient {
-  return NewFinderClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
     in := &reqFinderByPlate{
         Plate: plate,

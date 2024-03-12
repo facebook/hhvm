@@ -84,12 +84,6 @@ func (c *TestServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewTestServiceClientFromProtocol() instead.
-func NewTestServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceClient {
-  return NewTestServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64, error) {
     in := &reqTestServiceInit{
         Int1: int1,

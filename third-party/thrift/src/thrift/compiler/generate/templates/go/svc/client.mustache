@@ -82,12 +82,6 @@ func New{{service:go_name}}ClientFromProtocol(prot thrift.Protocol) *{{service:g
 func (c *{{service:go_name}}Client) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
-func New{{service:go_name}}ClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}Client {
-  return New{{service:go_name}}ClientFromProtocol(pf.GetProtocol(t))
-}
-
 {{#service:functions}}
 {{#function:go_supported?}}
 

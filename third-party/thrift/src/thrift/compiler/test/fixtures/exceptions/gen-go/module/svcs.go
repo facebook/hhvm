@@ -93,12 +93,6 @@ func (c *RaiserClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewRaiserClientFromProtocol() instead.
-func NewRaiserClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserClient {
-  return NewRaiserClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
     in := &reqRaiserDoBland{
     }

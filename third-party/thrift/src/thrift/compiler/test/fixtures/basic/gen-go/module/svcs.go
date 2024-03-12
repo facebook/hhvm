@@ -84,12 +84,6 @@ func (c *FooServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewFooServiceClientFromProtocol() instead.
-func NewFooServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooServiceClient {
-  return NewFooServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *FooServiceChannelClient) SimpleRPC(ctx context.Context) (error) {
     in := &reqFooServiceSimpleRPC{
     }
@@ -465,12 +459,6 @@ func NewFB303ServiceClientFromProtocol(prot thrift.Protocol) *FB303ServiceClient
 func (c *FB303ServiceClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
-func NewFB303ServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FB303ServiceClient {
-  return NewFB303ServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *FB303ServiceChannelClient) SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error) {
     in := &reqFB303ServiceSimpleRPC{
@@ -1029,12 +1017,6 @@ func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
 func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewMyServiceClientFromProtocol() instead.
-func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
     in := &reqMyServicePing{
@@ -4697,12 +4679,6 @@ func NewDbMixedStackArgumentsClientFromProtocol(prot thrift.Protocol) *DbMixedSt
 func (c *DbMixedStackArgumentsClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
-func NewDbMixedStackArgumentsClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *DbMixedStackArgumentsClient {
-  return NewDbMixedStackArgumentsClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *DbMixedStackArgumentsChannelClient) GetDataByKey0(ctx context.Context, key string) ([]byte, error) {
     in := &reqDbMixedStackArgumentsGetDataByKey0{

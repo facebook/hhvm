@@ -102,12 +102,6 @@ func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyServiceClientFromProtocol() instead.
-func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
     in := &reqMyServicePing{
     }
@@ -2830,12 +2824,6 @@ func (c *MyServicePrioParentClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
-func NewMyServicePrioParentClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioParentClient {
-  return NewMyServicePrioParentClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) (error) {
     in := &reqMyServicePrioParentPing{
     }
@@ -3490,12 +3478,6 @@ func (c *MyServicePrioChildClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
-func NewMyServicePrioChildClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioChildClient {
-  return NewMyServicePrioChildClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) (error) {
     in := &reqMyServicePrioChildPang{
     }
@@ -3845,12 +3827,6 @@ func NewBadServiceClientFromProtocol(prot thrift.Protocol) *BadServiceClient {
 func (c *BadServiceClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewBadServiceClientFromProtocol() instead.
-func NewBadServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *BadServiceClient {
-  return NewBadServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     in := &reqBadServiceBar{
@@ -4315,12 +4291,6 @@ func NewFooBarBazServiceClientFromProtocol(prot thrift.Protocol) *FooBarBazServi
 func (c *FooBarBazServiceClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
-func NewFooBarBazServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooBarBazServiceClient {
-  return NewFooBarBazServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *FooBarBazServiceChannelClient) FooStructured(ctx context.Context) (error) {
     in := &reqFooBarBazServiceFooStructured{

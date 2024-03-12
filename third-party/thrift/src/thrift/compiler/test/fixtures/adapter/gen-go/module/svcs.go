@@ -84,12 +84,6 @@ func (c *ServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewServiceClientFromProtocol() instead.
-func NewServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *ServiceClient {
-  return NewServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *ServiceChannelClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
     in := &reqServiceFunc{
         Arg1: arg1,
@@ -775,12 +769,6 @@ func NewAdapterServiceClientFromProtocol(prot thrift.Protocol) *AdapterServiceCl
 func (c *AdapterServiceClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
-func NewAdapterServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *AdapterServiceClient {
-  return NewAdapterServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *AdapterServiceChannelClient) Count(ctx context.Context) (*CountingStruct, error) {
     in := &reqAdapterServiceCount{

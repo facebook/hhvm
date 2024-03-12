@@ -87,12 +87,6 @@ func (c *CClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewCClientFromProtocol() instead.
-func NewCClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CClient {
-  return NewCClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *CChannelClient) F(ctx context.Context) (error) {
     in := &reqCF{
     }

@@ -89,12 +89,6 @@ func (c *SomeServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
-func NewSomeServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceClient {
-  return NewSomeServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
     in := &reqSomeServiceBounceMap{
         M: m,

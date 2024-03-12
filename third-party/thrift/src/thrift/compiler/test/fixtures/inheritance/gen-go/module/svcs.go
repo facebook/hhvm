@@ -84,12 +84,6 @@ func (c *MyRootClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyRootClientFromProtocol() instead.
-func NewMyRootClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootClient {
-  return NewMyRootClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
     in := &reqMyRootDoRoot{
     }
@@ -478,12 +472,6 @@ func (c *MyNodeClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyNodeClientFromProtocol() instead.
-func NewMyNodeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeClient {
-  return NewMyNodeClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
     in := &reqMyNodeDoMid{
     }
@@ -845,12 +833,6 @@ func NewMyLeafClientFromProtocol(prot thrift.Protocol) *MyLeafClient {
 func (c *MyLeafClient) Close() error {
     return c.chClient.Close()
 }
-
-// Deprecated: Use NewMyLeafClientFromProtocol() instead.
-func NewMyLeafClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafClient {
-  return NewMyLeafClientFromProtocol(pf.GetProtocol(t))
-}
-
 
 func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
     in := &reqMyLeafDoLeaf{

@@ -84,12 +84,6 @@ func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
 }
 
-// Deprecated: Use NewMyServiceClientFromProtocol() instead.
-func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
-}
-
-
 func (c *MyServiceChannelClient) Foo(ctx context.Context) (error) {
     in := &reqMyServiceFoo{
     }

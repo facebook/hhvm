@@ -139,22 +139,33 @@ def _add_processes_for_fixture(
     """
     fixture_dir_abspath = fixtures_root_dir_abspath / fixture_name
 
-    # Delete all existing fixture files (except "cmd", "src", ".*")
-    for existing_fixture_filename in {p.name for p in fixture_dir_abspath.iterdir()} - {
-        "cmd",
-        "src",
-    }:
-        if existing_fixture_filename.startswith("."):
-            continue
-        shutil.rmtree(fixture_dir_abspath / existing_fixture_filename)
+    enable_dedicated_output_dir = fixture_utils.is_dedicated_output_dir_enabled(
+        fixture_dir_abspath
+    )
+
+    # The root directory for all the output(s) generated for this fixture.
+    # Each unique command for this fixture (from `cmd`) will generate output
+    # either in a dedicated sub-directory of this directory (if
+    # `output_dedicated_folder` is True) or directly in this directory (otherwise).
+    fixture_output_root_dir_abspath = (
+        fixture_dir_abspath / "out"
+        if enable_dedicated_output_dir
+        else fixture_dir_abspath
+    )
+    if enable_dedicated_output_dir:
+        shutil.rmtree(fixture_output_root_dir_abspath, ignore_errors=True)
+        os.mkdir(fixture_output_root_dir_abspath)
 
     for fixture_cmd in fixture_utils.parse_fixture_cmds(
         repo_root_dir_abspath,
         fixture_name,
         fixture_dir_abspath,
-        fixture_dir_abspath,  # fixture_output_root_dir_abspath
+        fixture_output_root_dir_abspath,
         thrift_bin_path,
+        enable_dedicated_output_dir,
     ):
+        if enable_dedicated_output_dir:
+            os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
         processes.append(
             _run_subprocess(
                 subprocess_semaphore,

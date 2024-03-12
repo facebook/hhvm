@@ -7,10 +7,10 @@
 
 #include "ThreadLocalSSLContextProvider.h"
 
-#include <unordered_map>
-
 #include <folly/Singleton.h>
+#include <folly/container/F14Map.h>
 #include <folly/hash/Hash.h>
+#include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/io/async/SSLOptions.h>
 #include <folly/portability/OpenSSL.h>
@@ -371,11 +371,14 @@ std::shared_ptr<SSLContext> createClientSSLContext(
 }
 
 ClientContextInfo& getClientContextInfo(
+    folly::EventBase& evb,
     const SecurityOptions& opts,
     SecurityMech mech) {
-  thread_local std::
-      unordered_map<ContextKey, ClientContextInfo, ContextKeyHasher>
-          localContexts;
+  static folly::EventBaseLocal<folly::F14FastMap<
+      ContextKey,
+      std::unique_ptr<ClientContextInfo>,
+      ContextKeyHasher>>
+      localContexts;
 
   ContextKey key;
   key.pemCertPath = opts.sslPemCertPath;
@@ -383,33 +386,37 @@ ClientContextInfo& getClientContextInfo(
   key.pemCaPath = opts.sslPemCaPath;
   key.mech = mech;
 
-  auto iter = localContexts.find(key);
-  if (iter == localContexts.end()) {
+  auto& map = localContexts.try_emplace(evb);
+  auto iter = map.find(key);
+  if (iter == map.end()) {
     // Copy strings.
-    ClientContextInfo info;
-    info.pemCertPath = opts.sslPemCertPath;
-    info.pemKeyPath = opts.sslPemKeyPath;
-    info.pemCaPath = opts.sslPemCaPath;
-    info.mech = mech;
+    auto info = std::make_unique<ClientContextInfo>();
+    info->pemCertPath = opts.sslPemCertPath;
+    info->pemKeyPath = opts.sslPemKeyPath;
+    info->pemCaPath = opts.sslPemCaPath;
+    info->mech = mech;
 
     // Point all StringPiece's to our own strings.
-    key.pemCertPath = info.pemCertPath;
-    key.pemKeyPath = info.pemKeyPath;
-    key.pemCaPath = info.pemCaPath;
-    iter = localContexts.insert(std::make_pair(key, std::move(info))).first;
+    key.pemCertPath = info->pemCertPath;
+    key.pemKeyPath = info->pemKeyPath;
+    key.pemCaPath = info->pemCaPath;
+    iter = map.try_emplace(key, std::move(info)).first;
   }
 
-  return iter->second;
+  return *iter->second;
 }
 
 ServerContextInfo& getServerContextInfo(
+    folly::EventBase& evb,
     folly::StringPiece pemCertPath,
     folly::StringPiece pemKeyPath,
     folly::StringPiece pemCaPath,
     bool requireClientVerification) {
-  thread_local std::
-      unordered_map<ContextKey, ServerContextInfo, ContextKeyHasher>
-          localContexts;
+  static folly::EventBaseLocal<folly::F14FastMap<
+      ContextKey,
+      std::unique_ptr<ServerContextInfo>,
+      ContextKeyHasher>>
+      localContexts;
 
   ContextKey key;
   key.pemCertPath = pemCertPath;
@@ -417,22 +424,23 @@ ServerContextInfo& getServerContextInfo(
   key.pemCaPath = pemCaPath;
   key.requireClientVerification = requireClientVerification;
 
-  auto iter = localContexts.find(key);
-  if (iter == localContexts.end()) {
+  auto& map = localContexts.try_emplace(evb);
+  auto iter = map.find(key);
+  if (iter == map.end()) {
     // Copy strings.
-    ServerContextInfo info;
-    info.pemCertPath = pemCertPath.toString();
-    info.pemKeyPath = pemKeyPath.toString();
-    info.pemCaPath = pemCaPath.toString();
+    auto info = std::make_unique<ServerContextInfo>();
+    info->pemCertPath = pemCertPath.toString();
+    info->pemKeyPath = pemKeyPath.toString();
+    info->pemCaPath = pemCaPath.toString();
 
     // Point all StringPiece's to our own strings.
-    key.pemCertPath = info.pemCertPath;
-    key.pemKeyPath = info.pemKeyPath;
-    key.pemCaPath = info.pemCaPath;
-    iter = localContexts.insert(std::make_pair(key, std::move(info))).first;
+    key.pemCertPath = info->pemCertPath;
+    key.pemKeyPath = info->pemKeyPath;
+    key.pemCaPath = info->pemCaPath;
+    iter = map.try_emplace(key, std::move(info)).first;
   }
 
-  return iter->second;
+  return *iter->second;
 }
 
 } // namespace
@@ -442,8 +450,10 @@ bool isAsyncSSLSocketMech(SecurityMech mech) {
       mech == SecurityMech::KTLS12;
 }
 
-FizzContextAndVerifier getFizzClientConfig(const SecurityOptions& opts) {
-  auto& info = getClientContextInfo(opts, SecurityMech::TLS13_FIZZ);
+FizzContextAndVerifier getFizzClientConfig(
+    folly::EventBase& evb,
+    const SecurityOptions& opts) {
+  auto& info = getClientContextInfo(evb, opts, SecurityMech::TLS13_FIZZ);
   auto now = std::chrono::steady_clock::now();
   if (info.needsFizzContext(now)) {
     auto certData = readFile(opts.sslPemCertPath);
@@ -459,6 +469,7 @@ FizzContextAndVerifier getFizzClientConfig(const SecurityOptions& opts) {
 }
 
 std::shared_ptr<folly::SSLContext> getClientContext(
+    folly::EventBase& evb,
     const SecurityOptions& opts,
     SecurityMech mech) {
   if (!isAsyncSSLSocketMech(mech)) {
@@ -469,7 +480,7 @@ std::shared_ptr<folly::SSLContext> getClientContext(
         static_cast<uint8_t>(mech));
     return nullptr;
   }
-  auto& info = getClientContextInfo(opts, mech);
+  auto& info = getClientContextInfo(evb, opts, mech);
   auto now = std::chrono::steady_clock::now();
   if (info.needsContext(now)) {
     auto ctx = createClientSSLContext(opts, mech);
@@ -479,6 +490,7 @@ std::shared_ptr<folly::SSLContext> getClientContext(
 }
 
 ServerContextPair getServerContexts(
+    folly::EventBase& evb,
     folly::StringPiece pemCertPath,
     folly::StringPiece pemKeyPath,
     folly::StringPiece pemCaPath,
@@ -486,7 +498,7 @@ ServerContextPair getServerContexts(
     folly::Optional<wangle::TLSTicketKeySeeds> seeds,
     bool preferOcbCipher) {
   auto& info = getServerContextInfo(
-      pemCertPath, pemKeyPath, pemCaPath, requireClientCerts);
+      evb, pemCertPath, pemKeyPath, pemCaPath, requireClientCerts);
   auto now = std::chrono::steady_clock::now();
   if (info.needsContexts(now)) {
     auto certData = readFile(pemCertPath);

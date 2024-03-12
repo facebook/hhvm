@@ -49,10 +49,12 @@ class ClientSSLContext : public folly::SSLContext {
 };
 
 /**
- * The following methods return thread local managed SSL Contexts.  Contexts are
- * reloaded on demand if they are 30 minutes old on a per thread basis.
+ * The following methods return EventBase-local managed SSL Contexts.  Contexts
+ * are reloaded on demand if they are 30 minutes old on a per evb basis.
  */
-FizzContextAndVerifier getFizzClientConfig(const SecurityOptions& opts);
+FizzContextAndVerifier getFizzClientConfig(
+    folly::EventBase& evb,
+    const SecurityOptions& opts);
 
 /**
  * Determine if we are to use a AsyncSSLSocket with the provided mech.
@@ -67,6 +69,7 @@ bool isAsyncSSLSocketMech(SecurityMech mech);
  * opts.
  */
 std::shared_ptr<folly::SSLContext> getClientContext(
+    folly::EventBase& evb,
     const SecurityOptions& opts,
     SecurityMech mech);
 
@@ -81,6 +84,7 @@ using ServerContextPair = std::pair<
  * during the handshake will be rejected.
  */
 ServerContextPair getServerContexts(
+    folly::EventBase& evb,
     folly::StringPiece pemCertPath,
     folly::StringPiece pemKeyPath,
     folly::StringPiece pemCaPath,

@@ -904,6 +904,8 @@ TEST(AsyncMcClient, caretGoAway) {
 }
 
 TEST(AsyncMcClient, contextProviders) {
+  folly::EventBase evb;
+
   auto clientCtxPaths = validClientSsl();
   auto serverCtxPaths = validSsl();
 
@@ -912,25 +914,27 @@ TEST(AsyncMcClient, contextProviders) {
   opts.sslPemKeyPath = clientCtxPaths.sslKeyPath;
   opts.sslPemCaPath = clientCtxPaths.sslCaPath;
   auto mech = SecurityMech::TLS;
-  auto clientCtx1 = getClientContext(opts, mech);
-  auto clientCtx2 = getClientContext(opts, mech);
+  auto clientCtx1 = getClientContext(evb, opts, mech);
+  auto clientCtx2 = getClientContext(evb, opts, mech);
 
   // make sure mech changes the context
   mech = SecurityMech::TLS_TO_PLAINTEXT;
-  auto clientCtx3 = getClientContext(opts, mech);
-  auto clientCtx4 = getClientContext(opts, mech);
+  auto clientCtx3 = getClientContext(evb, opts, mech);
+  auto clientCtx4 = getClientContext(evb, opts, mech);
 
-  auto fizzCfg1 = getFizzClientConfig(opts);
-  auto fizzCfg2 = getFizzClientConfig(opts);
+  auto fizzCfg1 = getFizzClientConfig(evb, opts);
+  auto fizzCfg2 = getFizzClientConfig(evb, opts);
   EXPECT_EQ(fizzCfg1, fizzCfg2);
 
   auto serverCtxs1 = getServerContexts(
+      evb,
       serverCtxPaths.sslCertPath,
       serverCtxPaths.sslKeyPath,
       serverCtxPaths.sslCaPath,
       true,
       folly::none);
   auto serverCtxs2 = getServerContexts(
+      evb,
       serverCtxPaths.sslCertPath,
       serverCtxPaths.sslKeyPath,
       serverCtxPaths.sslCaPath,
@@ -938,7 +942,7 @@ TEST(AsyncMcClient, contextProviders) {
       folly::none);
 
   // client contexts should be the same since they are
-  // thread local cached
+  // EventBase-local
   EXPECT_EQ(clientCtx1, clientCtx2);
   EXPECT_EQ(clientCtx3, clientCtx4);
   EXPECT_NE(clientCtx1, clientCtx3);

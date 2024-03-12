@@ -145,7 +145,7 @@ createSocketCommon(
   const auto& sessionKey = getSessionKey(connectionOptions);
   if (isAsyncSSLSocketMech(mech)) {
     // openssl based tls
-    auto sslContext = getClientContext(securityOpts, mech);
+    auto sslContext = getClientContext(eventBase, securityOpts, mech);
     if (!sslContext) {
       return folly::makeUnexpected(folly::AsyncSocketException(
           folly::AsyncSocketException::SSL_ERROR,
@@ -174,7 +174,7 @@ createSocketCommon(
   }
 
   // tls 13 fizz
-  auto fizzContextAndVerifier = getFizzClientConfig(securityOpts);
+  auto fizzContextAndVerifier = getFizzClientConfig(eventBase, securityOpts);
   if (!fizzContextAndVerifier.first) {
     return folly::makeUnexpected(folly::AsyncSocketException(
         folly::AsyncSocketException::SSL_ERROR,

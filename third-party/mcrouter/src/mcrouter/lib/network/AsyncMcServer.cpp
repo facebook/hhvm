@@ -422,6 +422,7 @@ class McServerThread {
         }
 
         auto contextPair = getServerContexts(
+            mcServerThread_->eventBase(),
             opts.pemCertPath,
             opts.pemKeyPath,
             opts.pemCaPath,

@@ -16,7 +16,7 @@ namespace HPHP {
 namespace Decl {
 
 struct ExtractorConfig {
-  int cacheSize;
+  size_t cacheSize; // 0 means no cache
   bool enableExternExtractor;
 };
 

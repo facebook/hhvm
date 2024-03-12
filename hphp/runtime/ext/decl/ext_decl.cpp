@@ -754,7 +754,7 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   auto sha1 = computeSHA1(filePath, root);
   {
     FileDeclsCache::ConstAccessor acc;
-    if (declCachePtr->find(acc, filePath.native())) {
+    if (declCachePtr && declCachePtr->find(acc, filePath.native())) {
       FileDeclsCacheEntry entry = *acc;
       auto& [expectedSha1, decls] = entry;
       if (expectedSha1 == sha1) {
@@ -781,8 +781,10 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
     data->error = ex.what();
   }
 
-  auto ptr = data->declsHolder;
-  declCachePtr->insert(filePath.native(), {sha1, ptr});
+  if (declCachePtr) {
+    auto ptr = data->declsHolder;
+    declCachePtr->insert(filePath.native(), {sha1, ptr});
+  }
   return obj;
 }
 
@@ -1152,7 +1154,9 @@ struct DeclExtension final : Extension {
         Config::GetBool(ini, hdf, "Ext.Decl.EnableExternExtractor", false);
     s_extractorConfig.cacheSize =
         Config::GetInt32(ini, hdf, "Ext.Decl.CacheSize", 500000);
-    declCachePtr.reset(new FileDeclsCache(s_extractorConfig.cacheSize));
+    if (s_extractorConfig.cacheSize > 0) {
+      declCachePtr.reset(new FileDeclsCache(s_extractorConfig.cacheSize));
+    }
   }
 
   void moduleShutdown() override {

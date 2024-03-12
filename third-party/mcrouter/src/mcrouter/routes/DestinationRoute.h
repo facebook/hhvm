@@ -316,7 +316,7 @@ class DestinationRoute {
     }
 
     const auto& reqToSend = newReq ? *newReq : req;
-    auto bucketIdOptional = getBucketId(reqToSend);
+    auto bucketIdOptional = carbon::getBucketIdFromRequest(reqToSend);
     std::string_view bucketId;
     if (bucketIdOptional.has_value()) {
       bucketId = *bucketIdOptional;

@@ -120,24 +120,6 @@ getFullKey(const Request&) {
   return "";
 }
 
-template <class Request>
-typename std::enable_if_t<
-    facebook::memcache::HasBucketIdTrait<Request>::value,
-    std::optional<std::string>>
-getBucketId(const Request& req) {
-  if (req.bucketId_ref().has_value()) {
-    return std::make_optional(*req.bucketId_ref());
-  }
-  return std::nullopt;
-}
-template <class Request>
-typename std::enable_if_t<
-    !facebook::memcache::HasBucketIdTrait<Request>::value,
-    std::optional<std::string>>
-getBucketId(const Request&) {
-  return std::nullopt;
-}
-
 template <typename Reply>
 typename std::enable_if_t<
     detail::HasAppSpecificErrorCode<Reply>::value,
@@ -252,6 +234,18 @@ class IsRequestTrait {
  public:
   static constexpr bool value = decltype(check<Msg>(0))::value;
 };
+
+template <class Request>
+std::optional<std::string> getBucketIdFromRequest(const Request& req) {
+  static_assert(IsRequestTrait<Request>::value);
+  if constexpr (facebook::memcache::HasBucketIdTrait<Request>::value) {
+    if (req.bucketId_ref().has_value()) {
+      return std::make_optional(*req.bucketId_ref());
+    }
+    return std::nullopt;
+  }
+  return std::nullopt;
+}
 
 template <class R>
 typename std::enable_if<facebook::memcache::HasFlagsTrait<R>::value, uint64_t>::

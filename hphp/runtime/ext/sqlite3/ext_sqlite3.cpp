@@ -70,7 +70,7 @@ static Variant get_value(sqlite3_value *argv) {
   Variant value;
   switch (sqlite3_value_type(argv)) {
   case SQLITE_INTEGER:
-    value = (int64_t)sqlite3_value_int(argv);
+    value = (int64_t)sqlite3_value_int64(argv);
     break;
   case SQLITE_FLOAT:
     value = (double)sqlite3_value_double(argv);
@@ -115,7 +115,7 @@ static void sqlite3_do_callback(sqlite3_context *context,
     /* only set the sqlite return value if we are a scalar function,
      * or if we are finalizing an aggregate */
     if (ret.isInteger()) {
-      sqlite3_result_int(context, ret.toInt64());
+      sqlite3_result_int64(context, ret.toInt64());
     } else if (ret.isNull()) {
       sqlite3_result_null(context);
     } else if (ret.isDouble()) {
@@ -596,7 +596,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
 
     switch (p.type) {
     case SQLITE_INTEGER:
-      sqlite3_bind_int(data->m_raw_stmt, p.index, p.value.toInt64());
+      sqlite3_bind_int64(data->m_raw_stmt, p.index, p.value.toInt64());
       break;
     case SQLITE_FLOAT:
       sqlite3_bind_double(data->m_raw_stmt, p.index, p.value.toDouble());

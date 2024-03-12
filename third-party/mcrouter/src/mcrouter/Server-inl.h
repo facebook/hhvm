@@ -134,7 +134,7 @@ void serverInit(
   if (standaloneOpts.enable_server_compression) {
     auto codecManager = router.getCodecManager();
     if (codecManager) {
-      worker.setCompressionCodecMap(codecManager->getCodecMap());
+      worker.setCompressionCodecMap(codecManager->getCodecMap(evb));
     } else {
       LOG(WARNING) << "Compression is enabled but couldn't find CodecManager. "
                    << "Compression will be disabled.";
@@ -446,7 +446,8 @@ bool runServerDual(
           if (standaloneOpts.enable_server_compression) {
             auto codecManager = router->getCodecManager();
             if (codecManager) {
-              worker.setCompressionCodecMap(codecManager->getCodecMap());
+              worker.setCompressionCodecMap(
+                  codecManager->getCodecMap(vevb.getEventBase()));
             } else {
               LOG(WARNING)
                   << "Compression is enabled but couldn't find CodecManager. "

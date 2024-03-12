@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <folly/ThreadLocal.h>
+#include <folly/io/async/EventBaseLocal.h>
 
 #include "mcrouter/lib/Compression.h"
 
@@ -58,18 +58,16 @@ class CompressionCodecManager {
    * Return the compression codec map.
    * Note: thread-safe.
    */
-  const CompressionCodecMap* getCodecMap() const;
+  const CompressionCodecMap* getCodecMap(folly::EventBase& evb) const;
 
  private:
   // Storage of compression codec configs (codecId -> codecConfig).
   std::unordered_map<uint32_t, CodecConfigPtr> codecConfigs_;
-  // ThreadLocal of compression codec map, as codecs are not thread-safe.
-  folly::ThreadLocal<CompressionCodecMap> compressionCodecMap_;
+  // EventBaseLocal of compression codec map, as codecs are not thread-safe.
+  mutable folly::EventBaseLocal<CompressionCodecMap> compressionCodecMap_;
   // Codec id range
   uint32_t smallestCodecId_{0};
   uint32_t size_{0};
-
-  CompressionCodecMap* buildCodecMap();
 };
 
 /**

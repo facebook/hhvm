@@ -11,6 +11,7 @@
 
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBaseManager.h>
 
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/network/CarbonMessageDispatcher.h"
@@ -146,7 +147,8 @@ class ClientServerMcParser {
         kReadBufferSizeMin,
         kReadBufferSizeMax,
         false /* useJemallocNodumpAllocator */,
-        getCompressionCodecMap());
+        getCompressionCodecMap(
+            *folly::EventBaseManager::get()->getEventBase()));
     expectNextDispatcher_.setReplyParser(replyParser_.get());
 
     requestParser_ = std::make_unique<ServerMcParser<RequestCallback>>(

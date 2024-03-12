@@ -206,6 +206,10 @@ class AsyncMcServerWorker {
    */
   bool writesPending() const;
 
+  folly::EventBase* getEventBase() const {
+    return virtualEventBase_ ? &virtualEventBase_->getEventBase() : eventBase_;
+  }
+
  private:
   bool addClientSocket(
       folly::AsyncTransportWrapper::UniquePtr socket,
@@ -214,10 +218,6 @@ class AsyncMcServerWorker {
   AsyncMcServerWorkerOptions opts_;
   folly::EventBase* eventBase_;
   folly::VirtualEventBase* virtualEventBase_;
-
-  folly::EventBase* getEventBase() {
-    return virtualEventBase_ ? &virtualEventBase_->getEventBase() : eventBase_;
-  }
 
   std::shared_ptr<McServerOnRequest> onRequest_;
 

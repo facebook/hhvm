@@ -305,7 +305,8 @@ void ProxyDestination<Transport>::initializeTransport() {
   options.useJemallocNodumpAllocator = opts.jemalloc_nodump_buffers;
   if (accessPoint()->compressed()) {
     if (auto codecManager = proxy().router().getCodecManager()) {
-      options.compressionCodecMap = codecManager->getCodecMap();
+      options.compressionCodecMap =
+          codecManager->getCodecMap(proxy().eventBase().getEventBase());
       options.thriftCompression = true;
       options.thriftCompressionThreshold = opts.thrift_compression_threshold;
     }

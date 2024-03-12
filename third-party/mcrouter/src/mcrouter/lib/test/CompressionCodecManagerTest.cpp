@@ -46,7 +46,8 @@ TEST(CompressionCodecManager, basic) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(1, codecMap->getIdRange().firstId);
@@ -70,7 +71,8 @@ TEST(CompressionCodecManager, basicNotEnabledWithFilters) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(1, codecMap->getIdRange().firstId);
@@ -105,7 +107,8 @@ TEST(CompressionCodecManager, basicEnabled) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(1, codecMap->getIdRange().firstId);
@@ -131,7 +134,8 @@ TEST(CompressionCodecManager, missingStart) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(10, codecMap->getIdRange().firstId);
@@ -161,7 +165,8 @@ TEST(CompressionCodecManager, missingMiddle) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(50, codecMap->getIdRange().firstId);
@@ -185,7 +190,8 @@ TEST(CompressionCodecManager, missingEnd) {
   }
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(1, codecMap->getIdRange().firstId);
@@ -215,7 +221,8 @@ TEST(CompressionCodecManager, invalidDictionary) {
           3, CompressionCodecType::LZ4, createBinaryData(64 * 1024)));
 
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(3, codecMap->getIdRange().firstId);
@@ -229,7 +236,8 @@ TEST(CompressionCodecManager, invalidDictionary) {
 TEST(CompressionCodecManager, getBest_validateCodecs) {
   auto codecConfigs = testCodecConfigs();
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
 
   EXPECT_TRUE(codecMap);
   EXPECT_EQ(1, codecMap->getIdRange().firstId);
@@ -243,7 +251,8 @@ TEST(CompressionCodecManager, getBest_validateCodecs) {
 TEST(CompressionCodecManager, getBest_noMatches) {
   auto codecConfigs = testCodecConfigs();
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
   // client doesn't have codecs
   EXPECT_EQ(
       nullptr,
@@ -279,7 +288,8 @@ TEST(CompressionCodecManager, getBest_noMatches) {
 TEST(CompressionCodecManager, getBest_matches) {
   auto codecConfigs = testCodecConfigs();
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
   EXPECT_EQ(
       codecMap->get(10),
       codecMap->getBest(
@@ -324,7 +334,8 @@ TEST(CompressionCodecManager, getBest_matches) {
 TEST(CompressionCodecManager, getBest_serverWithoutCodecs) {
   std::unordered_map<uint32_t, CodecConfigPtr> codecConfigs;
   CompressionCodecManager codecManager(std::move(codecConfigs));
-  auto codecMap = codecManager.getCodecMap();
+  folly::EventBase evb;
+  auto codecMap = codecManager.getCodecMap(evb);
   EXPECT_EQ(
       nullptr,
       codecMap->getBest(

@@ -39,10 +39,7 @@ bool isApplicable(const CompressionCodec* codec, const size_t bodySize) {
  ***************************/
 CompressionCodecManager::CompressionCodecManager(
     std::unordered_map<uint32_t, CodecConfigPtr> codecConfigs)
-    : codecConfigs_(std::move(codecConfigs)), compressionCodecMap_([this]() {
-        return folly::fibers::runInMainContext(
-            [this]() { return buildCodecMap(); });
-      }) {
+    : codecConfigs_(std::move(codecConfigs)) {
   // Validate all dictionaries
   std::vector<uint32_t> badCodecConfigs;
   int64_t largestId = 0;
@@ -86,15 +83,17 @@ CompressionCodecManager::CompressionCodecManager(
   }
 }
 
-const CompressionCodecMap* CompressionCodecManager::getCodecMap() const {
-  return compressionCodecMap_.get();
-}
-
-CompressionCodecMap* CompressionCodecManager::buildCodecMap() {
-  if (size_ == 0) {
-    return new CompressionCodecMap();
-  }
-  return new CompressionCodecMap(codecConfigs_, smallestCodecId_, size_);
+const CompressionCodecMap* CompressionCodecManager::getCodecMap(
+    folly::EventBase& evb) const {
+  const auto& map = compressionCodecMap_.try_emplace_with(evb, [this] {
+    return folly::fibers::runInMainContext([this]() {
+      if (size_ == 0) {
+        return CompressionCodecMap{};
+      }
+      return CompressionCodecMap{codecConfigs_, smallestCodecId_, size_};
+    });
+  });
+  return &map;
 }
 
 /****************

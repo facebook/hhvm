@@ -45,7 +45,7 @@ bool initCompression() {
   return false;
 }
 
-const CompressionCodecMap* getCompressionCodecMap() {
+const CompressionCodecMap* getCompressionCodecMap(folly::EventBase& /* evb */) {
   return nullptr;
 }
 

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <folly/io/async/EventBase.h>
 #include <memory>
 #include <string>
 
@@ -53,7 +54,7 @@ bool initCompression();
  * Gets compression codec map.
  * If compression is not initialized, return nullptr.
  */
-const CompressionCodecMap* getCompressionCodecMap();
+const CompressionCodecMap* getCompressionCodecMap(folly::EventBase& evb);
 
 /**
  * Adds SnifferParser based on protocol to the parser map

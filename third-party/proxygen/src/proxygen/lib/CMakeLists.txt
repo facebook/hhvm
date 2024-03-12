@@ -165,8 +165,8 @@ add_library(
     http/ProxygenErrorEnum.cpp
     http/ProxyStatus.cpp
     http/RFC2616.cpp
-    http/sink/HTTPTransactionSink.cpp
     http/observer/HTTPSessionObserverInterface.cpp
+    http/observer/HTTPTransactionObserverInterface.cpp
     http/session/ByteEvents.cpp
     http/session/ByteEventTracker.cpp
     http/session/CodecErrorResponseHandler.cpp
@@ -186,6 +186,7 @@ add_library(
     http/session/HTTPUpstreamSession.cpp
     http/session/SecondaryAuthManager.cpp
     http/session/SimpleController.cpp
+    http/sink/HTTPTransactionSink.cpp
     http/structuredheaders/StructuredHeadersBuffer.cpp
     http/structuredheaders/StructuredHeadersDecoder.cpp
     http/structuredheaders/StructuredHeadersEncoder.cpp

@@ -21,6 +21,10 @@ cdef class GeneratePatch_Builder(thrift.py3.builder.StructBuilder):
     pass
 
 
+cdef class GeneratePatchNew_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+
 cdef class AssignOnlyPatch_Builder(thrift.py3.builder.StructBuilder):
     pass
 

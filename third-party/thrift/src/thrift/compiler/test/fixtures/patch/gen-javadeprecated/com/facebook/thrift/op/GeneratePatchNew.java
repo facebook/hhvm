@@ -25,13 +25,12 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * An annotation that indicates a patch representation should be generated for
- * the associated definition.
- * 
- * This is deprecated and we should use the new codegen workflow instead.
+ * the associated definition. Similar to `GeneratePatch` but only works for new
+ * codegen workflow and it won't work on package level.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Comparable<GeneratePatch> {
-  private static final TStruct STRUCT_DESC = new TStruct("GeneratePatch");
+public class GeneratePatchNew implements TBase, java.io.Serializable, Cloneable, Comparable<GeneratePatchNew> {
+  private static final TStruct STRUCT_DESC = new TStruct("GeneratePatchNew");
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -41,10 +40,10 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(GeneratePatch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(GeneratePatchNew.class, metaDataMap);
   }
 
-  public GeneratePatch() {
+  public GeneratePatchNew() {
   }
 
   public static class Builder {
@@ -52,8 +51,8 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
     public Builder() {
     }
 
-    public GeneratePatch build() {
-      GeneratePatch result = new GeneratePatch();
+    public GeneratePatchNew build() {
+      GeneratePatchNew result = new GeneratePatchNew();
       return result;
     }
   }
@@ -65,11 +64,11 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public GeneratePatch(GeneratePatch other) {
+  public GeneratePatchNew(GeneratePatchNew other) {
   }
 
-  public GeneratePatch deepCopy() {
-    return new GeneratePatch(this);
+  public GeneratePatchNew deepCopy() {
+    return new GeneratePatchNew(this);
   }
 
   public void setFieldValue(int fieldID, Object __value) {
@@ -92,9 +91,9 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof GeneratePatch))
+    if (!(_that instanceof GeneratePatchNew))
       return false;
-    GeneratePatch that = (GeneratePatch)_that;
+    GeneratePatchNew that = (GeneratePatchNew)_that;
 
     return true;
   }
@@ -105,7 +104,7 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
   }
 
   @Override
-  public int compareTo(GeneratePatch other) {
+  public int compareTo(GeneratePatchNew other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -161,7 +160,7 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable, Co
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("GeneratePatch");
+    StringBuilder sb = new StringBuilder("GeneratePatchNew");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

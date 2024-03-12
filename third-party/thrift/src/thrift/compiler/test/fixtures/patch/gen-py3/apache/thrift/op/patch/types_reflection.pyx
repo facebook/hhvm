@@ -38,6 +38,19 @@ cdef __StructSpec get_reflection__GeneratePatch():
         },
     )
     return spec
+cdef __StructSpec get_reflection__GeneratePatchNew():
+    cdef _apache_thrift_op_patch_types.GeneratePatchNew defaults = _apache_thrift_op_patch_types.GeneratePatchNew._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_op_patch_types.cGeneratePatchNew](
+            default_inst[_apache_thrift_op_patch_types.cGeneratePatchNew]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="GeneratePatchNew",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
 cdef __StructSpec get_reflection__AssignOnlyPatch():
     cdef _apache_thrift_op_patch_types.AssignOnlyPatch defaults = _apache_thrift_op_patch_types.AssignOnlyPatch._fbthrift_create(
         constant_shared_ptr[_apache_thrift_op_patch_types.cAssignOnlyPatch](

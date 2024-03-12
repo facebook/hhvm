@@ -14,6 +14,7 @@ namespace op {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::StructMetadata<GeneratePatch>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<GeneratePatchNew>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AssignOnlyPatch>::gen(metadata);
   return metadata;
 }

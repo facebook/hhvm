@@ -11,6 +11,8 @@ namespace facebook\thrift\op;
 /**
  * An annotation that indicates a patch representation should be generated for
  * the associated definition.
+ * 
+ * This is deprecated and we should use the new codegen workflow instead.
  *
  * Original thrift struct:-
  * GeneratePatch
@@ -64,6 +66,93 @@ class GeneratePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * An annotation that indicates a patch representation should be generated for
+ * the associated definition. Similar to `GeneratePatch` but only works for new
+ * codegen workflow and it won't work on package level.
+ *
+ * Original thrift struct:-
+ * GeneratePatchNew
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/GeneratePatchNew'))>>
+class GeneratePatchNew implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'GeneratePatchNew';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "patch.GeneratePatchNew",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
         '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )

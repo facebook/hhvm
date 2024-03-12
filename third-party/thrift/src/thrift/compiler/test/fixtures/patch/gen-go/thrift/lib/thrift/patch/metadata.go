@@ -76,6 +76,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("patch.GeneratePatch").
     SetIsUnion(false),
     metadata.NewThriftStruct().
+    SetName("patch.GeneratePatchNew").
+    SetIsUnion(false),
+    metadata.NewThriftStruct().
     SetName("patch.AssignOnlyPatch").
     SetIsUnion(false),
     metadata.NewThriftStruct().

@@ -16,4 +16,6 @@ from thrift.py3.reflection cimport (
 
 cdef __StructSpec get_reflection__GeneratePatch()
 
+cdef __StructSpec get_reflection__GeneratePatchNew()
+
 cdef __StructSpec get_reflection__AssignOnlyPatch()

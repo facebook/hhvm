@@ -23,26 +23,25 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * An annotation that indicates a patch representation should be generated for
- * the associated definition.
- * 
- * This is deprecated and we should use the new codegen workflow instead.
+ * the associated definition. Similar to `GeneratePatch` but only works for new
+ * codegen workflow and it won't work on package level.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class GeneratePatch implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("GeneratePatch");
+public class GeneratePatchNew implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("GeneratePatchNew");
 
 
-  public GeneratePatch() {
+  public GeneratePatchNew() {
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public GeneratePatch(GeneratePatch other) {
+  public GeneratePatchNew(GeneratePatchNew other) {
   }
 
-  public GeneratePatch deepCopy() {
-    return new GeneratePatch(this);
+  public GeneratePatchNew deepCopy() {
+    return new GeneratePatchNew(this);
   }
 
   @Override
@@ -51,9 +50,9 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable {
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof GeneratePatch))
+    if (!(_that instanceof GeneratePatchNew))
       return false;
-    GeneratePatch that = (GeneratePatch)_that;
+    GeneratePatchNew that = (GeneratePatchNew)_that;
 
     return true;
   }
@@ -68,7 +67,7 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable {
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static GeneratePatch deserialize(TProtocol iprot) throws TException {
+  public static GeneratePatchNew deserialize(TProtocol iprot) throws TException {
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -87,8 +86,8 @@ public class GeneratePatch implements TBase, java.io.Serializable, Cloneable {
     }
     iprot.readStructEnd();
 
-    GeneratePatch _that;
-    _that = new GeneratePatch(
+    GeneratePatchNew _that;
+    _that = new GeneratePatchNew(
     );
     _that.validate();
     return _that;

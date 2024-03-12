@@ -27,6 +27,13 @@ inline void reset_field<::apache::thrift::op::GeneratePatch>(
 }
 
 template<>
+inline void reset_field<::apache::thrift::op::GeneratePatchNew>(
+    ::apache::thrift::op::GeneratePatchNew& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline void reset_field<::apache::thrift::op::AssignOnlyPatch>(
     ::apache::thrift::op::AssignOnlyPatch& obj, uint16_t index) {
   switch (index) {
@@ -36,6 +43,16 @@ inline void reset_field<::apache::thrift::op::AssignOnlyPatch>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::op::GeneratePatch>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::op::GeneratePatchNew>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

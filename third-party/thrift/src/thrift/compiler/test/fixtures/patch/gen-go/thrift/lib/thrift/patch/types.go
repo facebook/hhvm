@@ -195,6 +195,99 @@ func (x *GeneratePatch) String() string {
     return sb.String()
 }
 
+type GeneratePatchNew struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &GeneratePatchNew{}
+
+func NewGeneratePatchNew() *GeneratePatchNew {
+    return (&GeneratePatchNew{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatchNew().Set<FieldNameFoo>().Set<FieldNameBar>()
+type GeneratePatchNewBuilder struct {
+    obj *GeneratePatchNew
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatchNew().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewGeneratePatchNewBuilder() *GeneratePatchNewBuilder {
+    return &GeneratePatchNewBuilder{
+        obj: NewGeneratePatchNew(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatchNew().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *GeneratePatchNewBuilder) Emit() *GeneratePatchNew {
+    var objCopy GeneratePatchNew = *x.obj
+    return &objCopy
+}
+
+func (x *GeneratePatchNew) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("GeneratePatchNew"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *GeneratePatchNew) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *GeneratePatchNew) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("GeneratePatchNew({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type AssignOnlyPatch struct {
 }
 // Compile time interface enforcer
@@ -3196,6 +3289,7 @@ func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/op/GeneratePatch", func() any { return NewGeneratePatch() })
+    registry.RegisterType("facebook.com/thrift/op/GeneratePatchNew", func() any { return NewGeneratePatchNew() })
     registry.RegisterType("facebook.com/thrift/op/AssignOnlyPatch", func() any { return NewAssignOnlyPatch() })
     registry.RegisterType("facebook.com/thrift/op/BoolPatch", func() any { return NewBoolPatch() })
     registry.RegisterType("facebook.com/thrift/op/BytePatch", func() any { return NewBytePatch() })

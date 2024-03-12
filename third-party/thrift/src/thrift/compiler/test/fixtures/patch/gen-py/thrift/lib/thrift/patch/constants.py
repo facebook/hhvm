@@ -20,5 +20,5 @@ import thrift.lib.thrift.standard.ttypes
 import thrift.lib.thrift.id.ttypes
 
 
-from .ttypes import UTF8STRINGS, GeneratePatch, AssignOnlyPatch, BoolPatch, BytePatch, I16Patch, I32Patch, I64Patch, FloatPatch, DoublePatch, StringPatch, BinaryPatch, FieldId, FieldIdList
+from .ttypes import UTF8STRINGS, GeneratePatch, GeneratePatchNew, AssignOnlyPatch, BoolPatch, BytePatch, I16Patch, I32Patch, I64Patch, FloatPatch, DoublePatch, StringPatch, BinaryPatch, FieldId, FieldIdList
 

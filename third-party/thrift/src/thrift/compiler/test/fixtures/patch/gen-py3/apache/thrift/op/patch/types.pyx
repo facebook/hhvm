@@ -165,6 +165,106 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratePatch, self)
 @__cython.auto_pickle(False)
+cdef class GeneratePatchNew(thrift.py3.types.Struct):
+    def __init__(GeneratePatchNew self, **kwargs):
+        self._cpp_obj = make_shared[cGeneratePatchNew]()
+        self._fields_setter = _fbthrift_types_fields.__GeneratePatchNew_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(GeneratePatchNew self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("GeneratePatchNew", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cGeneratePatchNew] cpp_obj):
+        __fbthrift_inst = <GeneratePatchNew>GeneratePatchNew.__new__(GeneratePatchNew)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(GeneratePatchNew self):
+        return super().__hash__()
+
+    def __repr__(GeneratePatchNew self):
+        return super().__repr__()
+
+    def __str__(GeneratePatchNew self):
+        return super().__str__()
+
+
+    def __copy__(GeneratePatchNew self):
+        cdef shared_ptr[cGeneratePatchNew] cpp_obj = make_shared[cGeneratePatchNew](
+            deref(self._cpp_obj)
+        )
+        return GeneratePatchNew._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cGeneratePatchNew](
+            self._cpp_obj,
+            (<GeneratePatchNew>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__GeneratePatchNew()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cGeneratePatchNew].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "patch.GeneratePatchNew"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cGeneratePatchNew](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(GeneratePatchNew self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cGeneratePatchNew](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(GeneratePatchNew self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cGeneratePatchNew]()
+        with nogil:
+            needed = serializer.cdeserialize[cGeneratePatchNew](buf, self._cpp_obj.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "apache.thrift.op.patch.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.GeneratePatchNew, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratePatchNew, self)
+@__cython.auto_pickle(False)
 cdef class AssignOnlyPatch(thrift.py3.types.Struct):
     def __init__(AssignOnlyPatch self, **kwargs):
         self._cpp_obj = make_shared[cAssignOnlyPatch]()

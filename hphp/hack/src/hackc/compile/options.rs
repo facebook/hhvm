@@ -64,12 +64,6 @@ impl Default for Options {
     }
 }
 
-impl Options {
-    pub fn array_provenance(&self) -> bool {
-        self.hhbc.array_provenance
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HhbcFlags {
     /// PHP7 left-to-right assignment semantics
@@ -82,7 +76,6 @@ pub struct HhbcFlags {
     pub enable_intrinsics_extension: bool,
     pub emit_cls_meth_pointers: bool,
     pub emit_meth_caller_func_pointers: bool,
-    pub array_provenance: bool,
     pub fold_lazy_class_keys: bool,
     pub optimize_reified_param_checks: bool,
     pub stress_shallow_decl_deps: bool,
@@ -103,7 +96,6 @@ impl Default for HhbcFlags {
             enable_intrinsics_extension: false,
             emit_cls_meth_pointers: true,
             emit_meth_caller_func_pointers: true,
-            array_provenance: false,
             fold_lazy_class_keys: true,
             optimize_reified_param_checks: false,
             stress_shallow_decl_deps: false,

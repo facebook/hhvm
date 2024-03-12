@@ -295,12 +295,7 @@ pub fn unit_to_string(
     } else {
         let print_result;
         (print_result, profile.printing_t) = profile_rust::time(|| {
-            let opts = NativeEnv::to_options(native_env);
-            bytecode_printer::print_unit(
-                &Context::new(Some(&native_env.filepath), opts.array_provenance()),
-                writer,
-                program,
-            )
+            bytecode_printer::print_unit(&Context::new(Some(&native_env.filepath)), writer, program)
         });
         print_result?;
     }

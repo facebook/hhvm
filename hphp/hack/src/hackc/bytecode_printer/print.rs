@@ -57,7 +57,6 @@ use hhbc::UpperBound;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
-use oxidized::ast_defs;
 use write_bytes::write_bytes;
 
 use crate::coeffects;
@@ -659,36 +658,10 @@ fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -
     newline(w)
 }
 
-fn print_pos_as_prov_tag(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    loc: Option<&ast_defs::Pos>,
-) -> Result<()> {
-    match loc {
-        Some(l) if ctx.array_provenance => {
-            let (line, ..) = l.info_pos();
-            let filename = l.filename().path(); // consider: should we also show prefix?
-            let filename = match filename.to_str().unwrap() {
-                "" => "(unknown hackc filename)",
-                x => x,
-            };
-            write!(
-                w,
-                r#"p:i:{};s:{}:\"{}\";"#,
-                line,
-                filename.len(),
-                escaper::escape(filename)
-            )
-        }
-        _ => Ok(()),
-    }
-}
-
 fn print_adata_mapped_argument<F, V>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
     values: &[V],
     f: F,
 ) -> Result<()>
@@ -696,7 +669,6 @@ where
     F: Fn(&Context<'_>, &mut dyn Write, &V) -> Result<()>,
 {
     write!(w, "{}:{}:{{", col_type, values.len(),)?;
-    print_pos_as_prov_tag(ctx, w, loc)?;
     for v in values {
         f(ctx, w, v)?
     }
@@ -707,20 +679,18 @@ fn print_adata_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
     values: &[TypedValue],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, values, print_adata)
+    print_adata_mapped_argument(ctx, w, col_type, values, print_adata)
 }
 
 fn print_adata_dict_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
     pairs: &[DictEntry],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, e| {
+    print_adata_mapped_argument(ctx, w, col_type, pairs, |ctx, w, e| {
         print_adata(ctx, w, &e.key)?;
         print_adata(ctx, w, &e.value)
     })
@@ -754,13 +724,13 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
         TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, Adata::VEC_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, Adata::VEC_PREFIX, values.as_ref())
         }
         TypedValue::Dict(entries) => {
-            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, None, entries.as_ref())
+            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, entries.as_ref())
         }
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, Adata::KEYSET_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, Adata::KEYSET_PREFIX, values.as_ref())
         }
     }
 }

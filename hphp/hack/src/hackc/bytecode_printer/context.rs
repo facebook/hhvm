@@ -40,18 +40,14 @@ impl fmt::Display for Indent {
 #[derive(Clone)]
 pub struct Context<'a> {
     pub(crate) path: Option<&'a RelativePath>,
-
     indent: Indent,
-
-    pub(crate) array_provenance: bool,
 }
 
 impl<'a> Context<'a> {
-    pub fn new(path: Option<&'a RelativePath>, array_provenance: bool) -> Self {
+    pub fn new(path: Option<&'a RelativePath>) -> Self {
         Self {
             path,
             indent: Indent::new(),
-            array_provenance,
         }
     }
 

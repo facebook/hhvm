@@ -14,10 +14,6 @@ pub struct AdataState {
 }
 
 impl AdataState {
-    pub fn push(&mut self, value: TypedValue) -> AdataId {
-        push(&mut self.adata, value)
-    }
-
     pub fn intern(&mut self, tv: TypedValue) -> AdataId {
         *self
             .shared

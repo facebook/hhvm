@@ -500,7 +500,6 @@ dependencies = [
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "itertools 0.11.0",
- "oxidized",
  "print_opcode",
  "relative_path",
  "thiserror",

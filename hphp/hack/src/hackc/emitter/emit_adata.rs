@@ -23,24 +23,20 @@ pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<Ins
         TypedValue::LazyClass(s) => Ok(instr::lazy_class(ClassName::from_ast_name_and_mangle(s))),
         TypedValue::Float(f) => Ok(instr::double(f)),
         TypedValue::Keyset(_) => {
-            let arrayid = get_array_identifier(e, tv);
+            let arrayid = intern_array(e, tv);
             Ok(instr::keyset(arrayid))
         }
         TypedValue::Vec(_) => {
-            let arrayid = get_array_identifier(e, tv);
+            let arrayid = intern_array(e, tv);
             Ok(instr::vec(arrayid))
         }
         TypedValue::Dict(_) => {
-            let arrayid = get_array_identifier(e, tv);
+            let arrayid = intern_array(e, tv);
             Ok(instr::dict(arrayid))
         }
     }
 }
 
-fn get_array_identifier(e: &mut Emitter<'_>, tv: TypedValue) -> AdataId {
-    if e.options().hhbc.array_provenance {
-        e.adata_state.push(tv)
-    } else {
-        e.adata_state.intern(tv)
-    }
+fn intern_array(e: &mut Emitter<'_>, tv: TypedValue) -> AdataId {
+    e.adata_state.intern(tv)
 }

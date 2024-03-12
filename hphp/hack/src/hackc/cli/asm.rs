@@ -50,7 +50,7 @@ pub fn run(opts: Opts) -> Result<()> {
 pub fn process_one_file(f: &Path, w: &SyncWrite) -> Result<()> {
     let (hcu, fp) = assemble::assemble(f)?;
     let filepath = RelativePath::make(relative_path::Prefix::Dummy, fp);
-    let ctxt = bytecode_printer::Context::new(Some(&filepath), false);
+    let ctxt = bytecode_printer::Context::new(Some(&filepath));
     let mut output = Vec::new();
     match bytecode_printer::print_unit(&ctxt, &mut output, &hcu) {
         Err(e) => {

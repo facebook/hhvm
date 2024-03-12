@@ -55,12 +55,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         .get_bool("Eval.EmitNativeEnumClassLabels")?
         .unwrap_or(false);
 
-    // ini might use hhvm.array_provenance
-    // hdf might use Eval.ArrayProvenance
-    // But super unclear here
-    init(&mut flags.array_provenance, "Eval.ArrayProvenance")?;
-    init(&mut flags.array_provenance, "array_provenance")?;
-
     // Only hdf version
     flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
     Ok(flags)

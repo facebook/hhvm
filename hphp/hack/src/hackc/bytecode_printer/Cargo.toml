@@ -21,7 +21,6 @@ hhbc_string_utils = { version = "0.0.0", path = "../utils/cargo/hhbc_string_util
 hhvm_hhbc_defs_ffi = { version = "0.0.0", path = "../hhvm_cxx/hhvm_hhbc_defs" }
 hhvm_types_ffi = { version = "0.0.0", path = "../hhvm_cxx/hhvm_types" }
 itertools = "0.11.0"
-oxidized = { version = "0.0.0", path = "../../oxidized" }
 print_opcode = { version = "0.0.0", path = "print_opcode/cargo/lib" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 thiserror = "1.0.49"

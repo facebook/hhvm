@@ -26,7 +26,7 @@ pub struct MyStructNestedAnnotation {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
-    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
@@ -41,7 +41,7 @@ pub struct MyException {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
-    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
@@ -77,7 +77,7 @@ pub struct MyStruct {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
-    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
@@ -89,7 +89,7 @@ pub struct SecretStruct {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
-    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }

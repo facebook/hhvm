@@ -23,6 +23,7 @@
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/FailoverWithExptimeRouteFactory.h"
 #include "mcrouter/routes/HashRouteFactory.h"
+#include "mcrouter/routes/HashStopAllowListRoute.h"
 #include "mcrouter/routes/HostIdRouteFactory.h"
 #include "mcrouter/routes/KeyParseRoute.h"
 #include "mcrouter/routes/KeySplitRoute.h"
@@ -268,6 +269,8 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
        [](McRouteHandleFactory& factory, const folly::dynamic& json) {
          return makeHashRoute<McrouterRouterInfo>(factory, json);
        }},
+      {"HashStopAllowListRoute",
+       &makeHashStopAllowListRoute<MemcacheRouterInfo>},
       {"HostIdRoute", &makeHostIdRoute<MemcacheRouterInfo>},
       {"LatencyInjectionRoute", &makeLatencyInjectionRoute<MemcacheRouterInfo>},
       {"L1L2CacheRoute", &makeL1L2CacheRoute<MemcacheRouterInfo>},

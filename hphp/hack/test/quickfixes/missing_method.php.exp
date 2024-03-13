@@ -8,9 +8,9 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
+  public function otherMethod(): void {}
+
   public function bar(): void {}
 
   public function baz(): void {}
-
-  public function otherMethod(): void {}
 }

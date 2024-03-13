@@ -2192,10 +2192,10 @@ let handle_mode
     let cst = Ast_provider.compute_cst ~ctx ~entry in
     let tree = Provider_context.PositionedSyntaxTree.root cst in
 
-    let classish_starts =
+    let classish_information =
       match entry.Provider_context.source_text with
       | Some source_text ->
-        Quickfix_ffp.classish_starts
+        Quickfix_ffp.classish_information
           tree
           source_text
           entry.Provider_context.path
@@ -2207,7 +2207,9 @@ let handle_mode
         Printf.printf "%s\n" (Quickfix.get_title qf));
 
     (* Print the source code after applying all these quickfixes. *)
-    Printf.printf "\n%s" (Quickfix.apply_all src classish_starts quickfixes)
+    Printf.printf
+      "\n%s"
+      (Quickfix.apply_all src classish_information quickfixes)
   | CountImpreciseTypes ->
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents

@@ -11,7 +11,7 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"\n  public function someMethod(): void {}\n",
-          "range":{"end":{"character":61,"line":6},"start":{"character":61,"line":6}}
+          "range":{"end":{"character":0,"line":10},"start":{"character":0,"line":10}}
         }
       ]
     }
@@ -29,10 +29,10 @@ interface TheInterface {
 }
 
 class C implements /*range-start*/TheInterface/*range-end*/ {
-  public function someMethod(): void {}
-
   public function bar(): void {
     3 + true;
   }
+
+  public function someMethod(): void {}
 }
 

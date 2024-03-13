@@ -9,14 +9,30 @@
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 
-let classish_body_brace_offset s : int option =
+type classish_body_offsets = {
+  classish_start_offset: int;
+  classish_end_offset: int;
+}
+
+let classish_body_braces_offsets s : classish_body_offsets option =
   let open Syntax in
+  let brace_to_offset brace (f : offset:int -> width:int -> int) : int option =
+    match brace.syntax with
+    | Token t -> Some (f ~offset:t.Token.offset ~width:t.Token.width)
+    | _ -> None
+  in
   match s.syntax with
   | ClassishBody cb ->
-    let open_brace = cb.classish_body_left_brace in
-    (match open_brace.syntax with
-    | Token t -> Some (t.Token.offset + t.Token.width)
-    | _ -> None)
+    let open Option.Let_syntax in
+    let* classish_start_offset =
+      brace_to_offset cb.classish_body_left_brace @@ fun ~offset ~width ->
+      offset + width
+    in
+    let* classish_end_offset =
+      brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width:_ ->
+      offset
+    in
+    Some { classish_start_offset; classish_end_offset }
   | _ -> None
 
 let namespace_name (s : Syntax.t) : string option =
@@ -35,9 +51,10 @@ let namespace_name (s : Syntax.t) : string option =
 let name_from_parts (parts : string list) : string =
   String.concat (List.map parts ~f:(fun p -> "\\" ^ p))
 
-let classish_start_offsets (s : Syntax.t) : int SMap.t =
+let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
   let open Syntax in
-  let rec aux (acc : int SMap.t * string list) (s : Syntax.t) =
+  let rec aux (acc : classish_body_offsets SMap.t * string list) (s : Syntax.t)
+      =
     let (offsets, namespace) = acc in
     match s.syntax with
     | Syntax.Script s -> aux acc s.script_declarations
@@ -66,10 +83,10 @@ let classish_start_offsets (s : Syntax.t) : int SMap.t =
         (offsets, namespace)
       | _ -> acc)
     | Syntax.ClassishDeclaration c ->
-      (match classish_body_brace_offset c.classish_body with
-      | Some offset ->
+      (match classish_body_braces_offsets c.classish_body with
+      | Some class_offsets ->
         let name = name_from_parts (namespace @ [text c.classish_name]) in
-        let offsets = SMap.add name offset offsets in
+        let offsets = SMap.add name class_offsets offsets in
         (offsets, namespace)
       | _ -> acc)
     | _ -> acc
@@ -79,12 +96,19 @@ let classish_start_offsets (s : Syntax.t) : int SMap.t =
 
 (** Return the position of the start "{" in every classish in this
     file. *)
-let classish_starts
+let classish_information
     (s : Syntax.t)
     (source_text : Full_fidelity_source_text.t)
-    (filename : Relative_path.t) : Pos.t SMap.t =
+    (filename : Relative_path.t) : Quickfix.classish_information SMap.t =
   let offsets = classish_start_offsets s in
   let to_pos offset =
     Full_fidelity_source_text.relative_pos filename source_text offset offset
   in
-  SMap.map to_pos offsets
+  SMap.map
+    (fun { classish_start_offset; classish_end_offset } ->
+      Quickfix.
+        {
+          classish_start = to_pos classish_start_offset;
+          classish_end = to_pos classish_end_offset;
+        })
+    offsets

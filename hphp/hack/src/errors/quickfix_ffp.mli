@@ -6,8 +6,8 @@
  *
  *)
 
-val classish_starts :
+val classish_information :
   Full_fidelity_positioned_syntax.t ->
   Full_fidelity_source_text.t ->
   Relative_path.t ->
-  Pos.t SMap.t
+  Quickfix.classish_information SMap.t

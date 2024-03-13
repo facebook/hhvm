@@ -15,6 +15,8 @@ trait MyTrait {
 }
 
 class MyClass extends MyParent {
+  use MyTrait;
+
   <<__Override>>
   public function methodInGrandParent(): void {}
 
@@ -23,6 +25,4 @@ class MyClass extends MyParent {
 
   <<__Override>>
   public function methodInTrait(): void {}
-
-  use MyTrait;
 }

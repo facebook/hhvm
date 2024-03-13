@@ -21,7 +21,7 @@ let stub_method_action
       (Utils.strip_ns parent_name)
       meth_name
   in
-  Quickfix.make_classish ~title ~new_text ~classish_name:class_name
+  Quickfix.make_classish_start ~title ~new_text ~classish_name:class_name
 
 (* Return a list of quickfixes for [cls] which add a method that
    overrides one in [parent_name]. *)
@@ -80,16 +80,21 @@ let override_method_refactorings_at ~start_line ~start_col =
       List.concat meth_actions @ acc
   end
 
-let to_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Code_action_types.edit list =
-  let edits = Quickfix.get_edits ~classish_starts quickfix in
+let to_edits
+    (classish_information : Quickfix.classish_information SMap.t)
+    (quickfix : Pos.t Quickfix.t) : Code_action_types.edit list =
+  let edits = Quickfix.get_edits ~classish_information quickfix in
   List.map edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
 
 let refactor_action
-    path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Code_action_types.refactor =
+    path
+    (classish_information : Quickfix.classish_information SMap.t)
+    (quickfix : Pos.t Quickfix.t) : Code_action_types.refactor =
   let edits =
-    lazy (Relative_path.Map.singleton path (to_edits classish_starts quickfix))
+    lazy
+      (Relative_path.Map.singleton
+         path
+         (to_edits classish_information quickfix))
   in
 
   Code_action_types.
@@ -102,7 +107,9 @@ let find ~entry pos ctx =
   let path = entry.Provider_context.path in
   let source_text = Ast_provider.compute_source_text ~entry in
 
-  let classish_starts = Quickfix_ffp.classish_starts tree source_text path in
+  let classish_information =
+    Quickfix_ffp.classish_information tree source_text path
+  in
 
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
@@ -115,4 +122,4 @@ let find ~entry pos ctx =
   in
   List.map
     override_method_refactorings
-    ~f:(refactor_action path classish_starts)
+    ~f:(refactor_action path classish_information)

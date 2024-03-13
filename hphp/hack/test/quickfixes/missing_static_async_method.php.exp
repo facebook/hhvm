@@ -7,7 +7,7 @@ abstract class MyClass {
 }
 
 class MyChild extends MyClass {
+
   <<__Override>>
   public static async function foo(): Awaitable<void> {}
-
 }

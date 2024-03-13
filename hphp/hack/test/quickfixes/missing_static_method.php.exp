@@ -7,7 +7,7 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
-  public static function bar(): void {}
-
   public function other(): void {}
+
+  public static function bar(): void {}
 }

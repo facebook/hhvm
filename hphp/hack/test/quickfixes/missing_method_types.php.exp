@@ -7,7 +7,7 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
-  public function bar(int $x, shape("y" => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, mixed $_, int ...$args): void {}
-
   public function otherMethod(): void {}
+
+  public function bar(int $x, shape("y" => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, mixed $_, int ...$args): void {}
 }

@@ -7,7 +7,7 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
-  public async function genBar(): Awaitable<int> {}
-
   public function otherMethod(): void {}
+
+  public async function genBar(): Awaitable<int> {}
 }

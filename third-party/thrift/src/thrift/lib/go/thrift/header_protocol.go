@@ -225,3 +225,8 @@ type HeaderProtocolFlags interface {
 	GetFlags() HeaderFlags
 	SetFlags(flags HeaderFlags)
 }
+
+// Deprecated: HeaderProtocolProtocolID is a deprecated type, temporarily introduced to ease transition to new API.
+type HeaderProtocolProtocolID interface {
+	ProtocolID() ProtocolID
+}

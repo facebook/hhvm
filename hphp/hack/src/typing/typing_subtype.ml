@@ -6846,12 +6846,12 @@ end = struct
     has_type_member: has_type_member;
   }
 
-  let simplify
+  let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ sub_supportdyn; ty_sub }
-      ~rhs:{ reason_super = r; has_type_member = htm }
+      ~rhs:({ reason_super = r; has_type_member = htm } as rhs)
       env =
     let { htm_id = memid; htm_lower = memloty; htm_upper = memupty } = htm in
     let htmty = ConstraintType (mk_constraint_type (r, Thas_type_member htm)) in
@@ -6863,17 +6863,7 @@ end = struct
       ty_sub
       htmty;
     let (env, ety_sub) = Env.expand_internal_type env ty_sub in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ety_sub }
-          ~rhs:
-            { super_like = false; super_supportdyn = false; ty_super = htmty }
-          env)
-    in
+
     let simplify_subtype_bound kind ~bound ty env =
       let on_error =
         Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
@@ -6999,9 +6989,52 @@ end = struct
           Typing_set.elements (Env.get_upper_bounds env s ty_args)
         in
         concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
-      | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _)) ->
-        default_subtype_help env
-      | _ -> invalid ~fail env)
+      | (_, Tvar _) ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          htmty
+      | (_, Tunion ty_subs) ->
+        Common.simplify_union_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      | (_, Tintersection ty_subs) ->
+        Common.simplify_intersection_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
+        let lift_rhs { reason_super; has_type_member } =
+          ConstraintType
+            (mk_constraint_type
+               (reason_super, Thas_type_member has_type_member))
+        in
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          ~lift_rhs
+          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+          rhs
+          rhs
+          env
+      | ( _,
+          ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
+          | Tunapplied_alias _ ) ) ->
+        invalid ~fail env)
 end
 
 and Has_member : sig

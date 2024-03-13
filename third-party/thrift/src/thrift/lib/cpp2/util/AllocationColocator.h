@@ -114,9 +114,15 @@
  * manage the memory.
  *
  * `object<T>` produces T* for trivially destructible types. For other types, it
- * returns a AllocationColocator<>::Ptr<T> which will call the destructor but
+ * returns an AllocationColocator<>::Ptr<T> which will call the destructor but
  * won't free the underlying memory. This pattern works nicely if `RootObject`
  * stores this smart pointer as a data member.
+ *
+ * `array<T>` similarly produces T* for trivially constructible + destructible
+ * types. For other types, a generator function must be provided which will be
+ * called to initialize each element in the array, and an
+ * `AllocationColocator<>::ArrayPtr<T>` will be produced. The generator function
+ * has the same requirements as std::generate.
  *
  * It may not always be possible to store pointers to colocated objects, for
  * example, to preserve memory. For such cases, the colocated objects can be
@@ -141,9 +147,6 @@
  *   - The reservation methods reserve space in the order in which they are
  *     called.
  *   - Locator objects can only be used to access objects once.
- *   - array<T> is only allowed if T is trivially constructible and
- *     destructible. This is not a fundamental limitation but it simplifies the
- *     access API.
  *   - allocate() returns a smart pointer (AllocationColocator<Root>::Ptr) which
  *     will call operator delete[] correctly.
  *   - strings are always null-terminated.
@@ -182,7 +185,7 @@ struct LocatorBase {
 };
 
 template <typename T>
-static constexpr bool IsValidColocatedArrayType =
+static constexpr bool IsTrivialColocatedArrayType =
     std::is_trivially_constructible_v<T>&& std::is_trivially_destructible_v<T>;
 
 template <bool kIsConst>
@@ -239,7 +242,9 @@ class AllocationColocator<void> {
 
   template <typename T>
   struct ArrayLocator : public detail::LocatorBase {
-    using detail::LocatorBase::LocatorBase;
+    ArrayLocator(std::ptrdiff_t offset, std::size_t countValue)
+        : LocatorBase(offset), count(countValue) {}
+    std::size_t count;
   };
 
   struct StringLocator : public detail::LocatorBase {
@@ -257,8 +262,45 @@ class AllocationColocator<void> {
       }
     }
   };
+  /**
+   * A "managed" pointer to a colocated (non-root) object. This effectively
+   * functions like any other `unique_ptr` except that it does not deallocate
+   * the underlying memory.
+   *
+   * In this context, "managed" means that the destructor
+   * of the contained object will be invoked when this object goes out of scope.
+   */
   template <typename T>
   using Ptr = std::unique_ptr<T, Deleter<T>>;
+
+  template <typename T>
+  struct ArrayDeleter {
+    static_assert(std::is_nothrow_destructible_v<T>);
+
+    void operator()(T* pointer) const noexcept {
+      if (pointer) {
+        // In C++, objects in an array are... first constructed, last destructed
+        for (auto i = std::ptrdiff_t(size) - 1; i >= 0; --i) {
+          pointer[i].~T();
+        }
+      }
+    }
+
+    std::size_t size = 0;
+  };
+  /**
+   * A "managed" pointer to a colocated (non-root) array of objects. This
+   * effectively functions like any other `unique_ptr` except that it does not
+   * deallocate the underlying memory.
+   *
+   * In this context, "managed" means that the destructor
+   * of the contained object will be invoked when this object goes out of scope.
+   *
+   * To limit complexity of implementation, noexcept(false) destructors are not
+   * supported.
+   */
+  template <typename T>
+  using ArrayPtr = std::unique_ptr<T[], ArrayDeleter<T>>;
 
   class Builder {
    public:
@@ -272,9 +314,36 @@ class AllocationColocator<void> {
 
     template <
         typename T,
-        typename = std::enable_if_t<detail::IsValidColocatedArrayType<T>>>
+        typename = std::enable_if_t<detail::IsTrivialColocatedArrayType<T>>>
     T* array(ArrayLocator<T> locator) const noexcept {
       return reinterpret_cast<T*>(this->uninitialized(std::move(locator)));
+    }
+
+    template <
+        typename T,
+        typename GeneratorFunc,
+        typename = std::enable_if_t<!detail::IsTrivialColocatedArrayType<T>>>
+    AllocationColocator<>::ArrayPtr<T> array(
+        ArrayLocator<T> locator, GeneratorFunc&& generator) const {
+      static_assert(std::is_nothrow_destructible_v<T>);
+      auto size = locator.count;
+      T* array = reinterpret_cast<T*>(this->uninitialized(std::move(locator)));
+
+      for (std::ptrdiff_t i = 0; i < std::ptrdiff_t(size); ++i) {
+        try {
+          new (array + i) T(generator());
+        } catch (...) {
+          // Destroy any objects that were successfully constructed. Since we
+          // require that destructors are noexcept, we can assume that our
+          // "catch" will not throw again and cause std::terminate().
+          while (--i >= 0) {
+            array[i].~T();
+          }
+          throw;
+        }
+      }
+
+      return AllocationColocator<>::ArrayPtr<T>(array, {size});
     }
 
     template <
@@ -317,9 +386,16 @@ class AllocationColocator<void> {
       return this->object(std::move(locator), std::forward<Args>(args)...);
     }
 
-    template <typename T, typename... Args>
+    template <typename T>
     decltype(auto) operator()(ArrayLocator<T>&& locator) const noexcept {
       return this->array(std::move(locator));
+    }
+
+    template <typename T, typename GeneratorFunc>
+    decltype(auto) operator()(
+        ArrayLocator<T>&& locator, GeneratorFunc&& generator) const {
+      return this->array(
+          std::move(locator), std::forward<GeneratorFunc>(generator));
     }
 
     decltype(auto) operator()(
@@ -386,13 +462,11 @@ class AllocationColocator {
     bytes_ = detail::align(bytes_, std::align_val_t(alignof(T)));
     auto offset = std::ptrdiff_t(bytes_);
     bytes_ += sizeof(T) * count;
-    return ArrayLocator<T>(offset);
+    return ArrayLocator<T>(offset, count);
   }
 
  public:
-  template <
-      typename T,
-      typename = std::enable_if_t<detail::IsValidColocatedArrayType<T>>>
+  template <typename T>
   ArrayLocator<T> array(std::size_t count) noexcept {
     return arrayImpl<T>(count);
   }

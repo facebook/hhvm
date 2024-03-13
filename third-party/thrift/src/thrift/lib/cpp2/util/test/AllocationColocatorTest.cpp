@@ -208,3 +208,84 @@ TEST(AllocationColocatorTest, NonTrivialDestructor) {
   foo.reset();
   EXPECT_EQ(ref, 42);
 }
+
+TEST(AllocationColocatorTest, NonTrivialDestructorArray) {
+  struct Foo {
+    struct NonTrivial {
+      int& destructorCount;
+
+      NonTrivial(int& constructorCount, int& destructorCount)
+          : destructorCount(destructorCount) {
+        constructorCount++;
+      }
+      ~NonTrivial() noexcept { ++destructorCount; }
+    };
+    AllocationColocator<>::ArrayPtr<NonTrivial> nonTrivials;
+  };
+
+  int constructorCount = 0;
+  int destructorCount = 0;
+  AllocationColocator<Foo> alloc;
+  auto foo = alloc.allocate(
+      [&, nonTrivial = alloc.array<Foo::NonTrivial>(2)](auto make) mutable {
+        Foo foo;
+        foo.nonTrivials = make(std::move(nonTrivial), [&] {
+          return Foo::NonTrivial(constructorCount, destructorCount);
+        });
+        return foo;
+      });
+
+  EXPECT_EQ(constructorCount, 2);
+  EXPECT_EQ(destructorCount, 0);
+  EXPECT_EQ(&destructorCount, &foo->nonTrivials[0].destructorCount);
+  EXPECT_EQ(&destructorCount, &foo->nonTrivials[1].destructorCount);
+
+  auto cursor = AllocationColocator<Foo>::unsafeCursor(
+      static_cast<const Foo*>(foo.get()));
+  EXPECT_EQ(
+      &cursor.object<Foo::NonTrivial>()->destructorCount, &destructorCount);
+  EXPECT_EQ(
+      &cursor.object<Foo::NonTrivial>()->destructorCount, &destructorCount);
+
+  foo.reset();
+  EXPECT_EQ(constructorCount, 2);
+  EXPECT_EQ(destructorCount, 2);
+}
+
+TEST(AllocationColocatorTest, NonTrivialDestructorArrayWithException) {
+  struct Foo {
+    struct NonTrivial {
+      int& destructorCount;
+
+      NonTrivial(int& constructorCount, int& destructorCount)
+          : destructorCount(destructorCount) {
+        constructorCount++;
+        if (constructorCount == 3) {
+          throw std::runtime_error("this is the third object!");
+        }
+      }
+      ~NonTrivial() noexcept { ++destructorCount; }
+    };
+    AllocationColocator<>::ArrayPtr<NonTrivial> nonTrivials;
+  };
+
+  int constructorCount = 0;
+  int destructorCount = 0;
+  AllocationColocator<Foo> alloc;
+  EXPECT_THROW(
+      {
+        auto foo =
+            alloc.allocate([&, nonTrivial = alloc.array<Foo::NonTrivial>(3)](
+                               auto make) mutable {
+              Foo foo;
+              foo.nonTrivials = make(std::move(nonTrivial), [&] {
+                return Foo::NonTrivial(constructorCount, destructorCount);
+              });
+              return foo;
+            });
+      },
+      std::runtime_error);
+
+  EXPECT_EQ(constructorCount, 3);
+  EXPECT_EQ(destructorCount, 2);
+}

@@ -67,11 +67,6 @@ type ServiceClient struct {
 var _ ServiceClientInterface = &ServiceClient{}
 var _ ServiceContextClientInterface = &ServiceClient{}
 
-// Deprecated: Use NewServiceClientFromProtocol() instead.
-func NewServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *ServiceClient {
-    return NewServiceClientFromProtocol(iprot)
-}
-
 func NewServiceClientFromProtocol(prot thrift.Protocol) *ServiceClient {
     return &ServiceClient{
         chClient: NewServiceChannelClient(
@@ -752,11 +747,6 @@ type AdapterServiceClient struct {
 // Compile time interface enforcer
 var _ AdapterServiceClientInterface = &AdapterServiceClient{}
 var _ AdapterServiceContextClientInterface = &AdapterServiceClient{}
-
-// Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
-func NewAdapterServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *AdapterServiceClient {
-    return NewAdapterServiceClientFromProtocol(iprot)
-}
 
 func NewAdapterServiceClientFromProtocol(prot thrift.Protocol) *AdapterServiceClient {
     return &AdapterServiceClient{

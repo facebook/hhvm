@@ -60,12 +60,6 @@ type {{service:go_name}}Client struct {
 var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
 var _ {{service:go_name}}ContextClientInterface = &{{service:go_name}}Client{}
 
-{{! COMPAT: backwards compatibility - remove once all code is migrated to a Client with Context. }}
-// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
-func New{{service:go_name}}Client(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}Client {
-    return New{{service:go_name}}ClientFromProtocol(iprot)
-}
-
 func New{{service:go_name}}ClientFromProtocol(prot thrift.Protocol) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{
         {{#service:extends?}}

@@ -76,11 +76,6 @@ type RaiserClient struct {
 var _ RaiserClientInterface = &RaiserClient{}
 var _ RaiserContextClientInterface = &RaiserClient{}
 
-// Deprecated: Use NewRaiserClientFromProtocol() instead.
-func NewRaiserClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *RaiserClient {
-    return NewRaiserClientFromProtocol(iprot)
-}
-
 func NewRaiserClientFromProtocol(prot thrift.Protocol) *RaiserClient {
     return &RaiserClient{
         chClient: NewRaiserChannelClient(

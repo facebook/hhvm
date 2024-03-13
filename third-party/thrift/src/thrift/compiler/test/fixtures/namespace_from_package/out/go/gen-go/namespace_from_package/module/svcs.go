@@ -67,11 +67,6 @@ type TestServiceClient struct {
 var _ TestServiceClientInterface = &TestServiceClient{}
 var _ TestServiceContextClientInterface = &TestServiceClient{}
 
-// Deprecated: Use NewTestServiceClientFromProtocol() instead.
-func NewTestServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *TestServiceClient {
-    return NewTestServiceClientFromProtocol(iprot)
-}
-
 func NewTestServiceClientFromProtocol(prot thrift.Protocol) *TestServiceClient {
     return &TestServiceClient{
         chClient: NewTestServiceChannelClient(

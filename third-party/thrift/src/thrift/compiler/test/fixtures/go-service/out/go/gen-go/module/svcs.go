@@ -130,11 +130,6 @@ type GetEntityClient struct {
 var _ GetEntityClientInterface = &GetEntityClient{}
 var _ GetEntityContextClientInterface = &GetEntityClient{}
 
-// Deprecated: Use NewGetEntityClientFromProtocol() instead.
-func NewGetEntityClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *GetEntityClient {
-    return NewGetEntityClientFromProtocol(iprot)
-}
-
 func NewGetEntityClientFromProtocol(prot thrift.Protocol) *GetEntityClient {
     return &GetEntityClient{
         chClient: NewGetEntityChannelClient(

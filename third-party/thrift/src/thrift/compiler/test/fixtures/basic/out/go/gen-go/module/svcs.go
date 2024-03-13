@@ -67,11 +67,6 @@ type FooServiceClient struct {
 var _ FooServiceClientInterface = &FooServiceClient{}
 var _ FooServiceContextClientInterface = &FooServiceClient{}
 
-// Deprecated: Use NewFooServiceClientFromProtocol() instead.
-func NewFooServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooServiceClient {
-    return NewFooServiceClientFromProtocol(iprot)
-}
-
 func NewFooServiceClientFromProtocol(prot thrift.Protocol) *FooServiceClient {
     return &FooServiceClient{
         chClient: NewFooServiceChannelClient(
@@ -442,11 +437,6 @@ type FB303ServiceClient struct {
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = &FB303ServiceClient{}
 var _ FB303ServiceContextClientInterface = &FB303ServiceClient{}
-
-// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
-func NewFB303ServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FB303ServiceClient {
-    return NewFB303ServiceClientFromProtocol(iprot)
-}
 
 func NewFB303ServiceClientFromProtocol(prot thrift.Protocol) *FB303ServiceClient {
     return &FB303ServiceClient{
@@ -1000,11 +990,6 @@ type MyServiceClient struct {
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
 var _ MyServiceContextClientInterface = &MyServiceClient{}
-
-// Deprecated: Use NewMyServiceClientFromProtocol() instead.
-func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
-    return NewMyServiceClientFromProtocol(iprot)
-}
 
 func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -4662,11 +4647,6 @@ type DbMixedStackArgumentsClient struct {
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}
 var _ DbMixedStackArgumentsContextClientInterface = &DbMixedStackArgumentsClient{}
-
-// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
-func NewDbMixedStackArgumentsClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *DbMixedStackArgumentsClient {
-    return NewDbMixedStackArgumentsClientFromProtocol(iprot)
-}
 
 func NewDbMixedStackArgumentsClientFromProtocol(prot thrift.Protocol) *DbMixedStackArgumentsClient {
     return &DbMixedStackArgumentsClient{

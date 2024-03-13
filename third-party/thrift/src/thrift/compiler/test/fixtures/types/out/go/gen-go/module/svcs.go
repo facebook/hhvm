@@ -72,11 +72,6 @@ type SomeServiceClient struct {
 var _ SomeServiceClientInterface = &SomeServiceClient{}
 var _ SomeServiceContextClientInterface = &SomeServiceClient{}
 
-// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
-func NewSomeServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *SomeServiceClient {
-    return NewSomeServiceClientFromProtocol(iprot)
-}
-
 func NewSomeServiceClientFromProtocol(prot thrift.Protocol) *SomeServiceClient {
     return &SomeServiceClient{
         chClient: NewSomeServiceChannelClient(

@@ -75,11 +75,6 @@ type FinderClient struct {
 var _ FinderClientInterface = &FinderClient{}
 var _ FinderContextClientInterface = &FinderClient{}
 
-// Deprecated: Use NewFinderClientFromProtocol() instead.
-func NewFinderClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FinderClient {
-    return NewFinderClientFromProtocol(iprot)
-}
-
 func NewFinderClientFromProtocol(prot thrift.Protocol) *FinderClient {
     return &FinderClient{
         chClient: NewFinderChannelClient(

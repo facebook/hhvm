@@ -85,11 +85,6 @@ type MyServiceClient struct {
 var _ MyServiceClientInterface = &MyServiceClient{}
 var _ MyServiceContextClientInterface = &MyServiceClient{}
 
-// Deprecated: Use NewMyServiceClientFromProtocol() instead.
-func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
-    return NewMyServiceClientFromProtocol(iprot)
-}
-
 func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(
@@ -2807,11 +2802,6 @@ type MyServicePrioParentClient struct {
 var _ MyServicePrioParentClientInterface = &MyServicePrioParentClient{}
 var _ MyServicePrioParentContextClientInterface = &MyServicePrioParentClient{}
 
-// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
-func NewMyServicePrioParentClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioParentClient {
-    return NewMyServicePrioParentClientFromProtocol(iprot)
-}
-
 func NewMyServicePrioParentClientFromProtocol(prot thrift.Protocol) *MyServicePrioParentClient {
     return &MyServicePrioParentClient{
         chClient: NewMyServicePrioParentChannelClient(
@@ -3460,11 +3450,6 @@ type MyServicePrioChildClient struct {
 var _ MyServicePrioChildClientInterface = &MyServicePrioChildClient{}
 var _ MyServicePrioChildContextClientInterface = &MyServicePrioChildClient{}
 
-// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
-func NewMyServicePrioChildClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioChildClient {
-    return NewMyServicePrioChildClientFromProtocol(iprot)
-}
-
 func NewMyServicePrioChildClientFromProtocol(prot thrift.Protocol) *MyServicePrioChildClient {
     return &MyServicePrioChildClient{
         MyServicePrioParentClient: NewMyServicePrioParentClientFromProtocol(prot),
@@ -3810,11 +3795,6 @@ type BadServiceClient struct {
 // Compile time interface enforcer
 var _ BadServiceClientInterface = &BadServiceClient{}
 var _ BadServiceContextClientInterface = &BadServiceClient{}
-
-// Deprecated: Use NewBadServiceClientFromProtocol() instead.
-func NewBadServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *BadServiceClient {
-    return NewBadServiceClientFromProtocol(iprot)
-}
 
 func NewBadServiceClientFromProtocol(prot thrift.Protocol) *BadServiceClient {
     return &BadServiceClient{
@@ -4274,11 +4254,6 @@ type FooBarBazServiceClient struct {
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = &FooBarBazServiceClient{}
 var _ FooBarBazServiceContextClientInterface = &FooBarBazServiceClient{}
-
-// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
-func NewFooBarBazServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooBarBazServiceClient {
-    return NewFooBarBazServiceClientFromProtocol(iprot)
-}
 
 func NewFooBarBazServiceClientFromProtocol(prot thrift.Protocol) *FooBarBazServiceClient {
     return &FooBarBazServiceClient{

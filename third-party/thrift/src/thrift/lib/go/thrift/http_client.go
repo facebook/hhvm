@@ -26,7 +26,7 @@ import (
 
 // Default to using the shared http client. Library users are
 // free to change this global client or specify one through
-// HTTPClientOptions.
+// httpClientOptions.
 var DefaultHTTPClient *http.Client = http.DefaultClient
 
 type HTTPClient struct {
@@ -41,7 +41,7 @@ type HTTPClient struct {
 }
 
 type HTTPClientTransportFactory struct {
-	options HTTPClientOptions
+	options httpClientOptions
 	url     string
 	isPost  bool
 }
@@ -51,43 +51,35 @@ func (p *HTTPClientTransportFactory) GetTransport(trans Transport) Transport {
 		t, ok := trans.(*HTTPClient)
 		if ok && t.url != nil {
 			if t.requestBuffer != nil {
-				t2, _ := NewHTTPPostClientWithOptions(t.url.String(), p.options)
+				t2, _ := newHTTPPostClientWithOptions(t.url.String(), p.options)
 				return t2
 			}
-			t2, _ := NewHTTPClientWithOptions(t.url.String(), p.options)
+			t2, _ := newHTTPClientWithOptions(t.url.String(), p.options)
 			return t2
 		}
 	}
 	if p.isPost {
-		s, _ := NewHTTPPostClientWithOptions(p.url, p.options)
+		s, _ := newHTTPPostClientWithOptions(p.url, p.options)
 		return s
 	}
-	s, _ := NewHTTPClientWithOptions(p.url, p.options)
+	s, _ := newHTTPClientWithOptions(p.url, p.options)
 	return s
 }
 
-type HTTPClientOptions struct {
+type httpClientOptions struct {
 	// If nil, DefaultHTTPClient is used
 	Client *http.Client
 }
 
-func NewHTTPClientTransportFactory(url string) *HTTPClientTransportFactory {
-	return NewHTTPClientTransportFactoryWithOptions(url, HTTPClientOptions{})
-}
-
-func NewHTTPClientTransportFactoryWithOptions(url string, options HTTPClientOptions) *HTTPClientTransportFactory {
-	return &HTTPClientTransportFactory{url: url, isPost: false, options: options}
-}
-
 func NewHTTPPostClientTransportFactory(url string) *HTTPClientTransportFactory {
-	return NewHTTPPostClientTransportFactoryWithOptions(url, HTTPClientOptions{})
+	return newHTTPPostClientTransportFactoryWithOptions(url, httpClientOptions{})
 }
 
-func NewHTTPPostClientTransportFactoryWithOptions(url string, options HTTPClientOptions) *HTTPClientTransportFactory {
+func newHTTPPostClientTransportFactoryWithOptions(url string, options httpClientOptions) *HTTPClientTransportFactory {
 	return &HTTPClientTransportFactory{url: url, isPost: true, options: options}
 }
 
-func NewHTTPClientWithOptions(urlstr string, options HTTPClientOptions) (Transport, error) {
+func newHTTPClientWithOptions(urlstr string, options httpClientOptions) (Transport, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
@@ -104,10 +96,10 @@ func NewHTTPClientWithOptions(urlstr string, options HTTPClientOptions) (Transpo
 }
 
 func NewHTTPClient(urlstr string) (Transport, error) {
-	return NewHTTPClientWithOptions(urlstr, HTTPClientOptions{})
+	return newHTTPClientWithOptions(urlstr, httpClientOptions{})
 }
 
-func NewHTTPPostClientWithOptions(urlstr string, options HTTPClientOptions) (Transport, error) {
+func newHTTPPostClientWithOptions(urlstr string, options httpClientOptions) (Transport, error) {
 	parsedURL, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
@@ -121,7 +113,7 @@ func NewHTTPPostClientWithOptions(urlstr string, options HTTPClientOptions) (Tra
 }
 
 func NewHTTPPostClient(urlstr string) (Transport, error) {
-	return NewHTTPPostClientWithOptions(urlstr, HTTPClientOptions{})
+	return newHTTPPostClientWithOptions(urlstr, httpClientOptions{})
 }
 
 // Set the HTTP Header for this specific Thrift Transport

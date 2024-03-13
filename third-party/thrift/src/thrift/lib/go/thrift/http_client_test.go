@@ -55,7 +55,7 @@ func TestHTTPCustomClient(t *testing.T) {
 
 	httpTransport := &customHTTPTransport{}
 
-	trans, err := NewHTTPPostClientWithOptions("http://"+l.Addr().String(), HTTPClientOptions{
+	trans, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpClientOptions{
 		Client: &http.Client{
 			Transport: httpTransport,
 		},

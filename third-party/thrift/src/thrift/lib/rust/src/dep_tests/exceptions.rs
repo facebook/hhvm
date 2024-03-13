@@ -17,9 +17,9 @@
 use std::error::Error;
 
 use anyhow::Result;
-use fbthrift_test_if::types::TestException;
-use fbthrift_test_if::types::TestExceptionMsgOverride;
-use fbthrift_test_if::types::TestExceptionMsgOverrideOptional;
+use fbthrift_test_if::TestException;
+use fbthrift_test_if::TestExceptionMsgOverride;
+use fbthrift_test_if::TestExceptionMsgOverrideOptional;
 
 #[test]
 fn test_should_implement_error() -> Result<()> {

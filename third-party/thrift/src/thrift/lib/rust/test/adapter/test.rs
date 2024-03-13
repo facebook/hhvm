@@ -21,15 +21,15 @@ use adapters::CustomString;
 use adapters::SortedVec;
 use fbthrift::simplejson_protocol;
 use thrift_test::consts;
-use thrift_test::types::Asset;
-use thrift_test::types::Bar;
-use thrift_test::types::Foo;
-use thrift_test::types::TransitiveStructWrapper;
-use thrift_test::types::WrappedAdaptedBytes;
-use thrift_test::types::WrappedAdaptedString;
-use thrift_test::types::WrappedAdaptedWrappedAdaptedBytes;
 use thrift_test::AdaptedListNewType;
+use thrift_test::Asset;
 use thrift_test::AssetType;
+use thrift_test::Bar;
+use thrift_test::Foo;
+use thrift_test::TransitiveStructWrapper;
+use thrift_test::WrappedAdaptedBytes;
+use thrift_test::WrappedAdaptedString;
+use thrift_test::WrappedAdaptedWrappedAdaptedBytes;
 
 #[test]
 fn test_foo_default() {

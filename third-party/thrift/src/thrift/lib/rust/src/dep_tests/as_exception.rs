@@ -15,7 +15,7 @@
  */
 
 use anyhow::Result;
-use fbthrift_test_if::types::TestException;
+use fbthrift_test_if::TestException;
 use fbthrift_test_if_clients::errors::AsTestException;
 use fbthrift_test_if_clients::errors::Method1Error;
 

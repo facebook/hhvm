@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use get_struct_name::types::GetStructName as GetStructNameThrift;
+use get_struct_name::GetStructName as GetStructNameThrift;
 use get_struct_name::GetStructNameT;
 use get_struct_name::Wrapper;
-use thrift_test::types::Foo;
+use thrift_test::Foo;
 
 #[test]
 fn test_struct_name() {

@@ -23,8 +23,6 @@ use anyhow::Context;
 use fbthrift::adapter::ThriftAdapter;
 use fbthrift::metadata::ThriftAnnotations;
 
-use crate::types as crate_types;
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Wrapper<T: Clone + Debug + PartialEq + Sync + Send>(pub T);
 
@@ -133,7 +131,7 @@ pub struct Asset {
 pub struct AssetAdapter {}
 
 impl ThriftAdapter for AssetAdapter {
-    type StandardType = crate_types::unadapted::Asset;
+    type StandardType = crate::unadapted::Asset;
     type Error = anyhow::Error;
 
     type AdaptedType = Asset;
@@ -141,8 +139,8 @@ impl ThriftAdapter for AssetAdapter {
     fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(Asset {
             type_: match value.type_ {
-                crate_types::ThriftAssetType::LAPTOP => AssetType::Laptop,
-                crate_types::ThriftAssetType::SERVER => AssetType::Server,
+                crate::ThriftAssetType::LAPTOP => AssetType::Laptop,
+                crate::ThriftAssetType::SERVER => AssetType::Server,
                 // Rust Thrift will NOT use 0 as the default enum value by default, but instead
                 // will use i32::MIN.
                 _ => AssetType::Unknown,
@@ -152,11 +150,11 @@ impl ThriftAdapter for AssetAdapter {
     }
 
     fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
-        crate_types::unadapted::Asset {
+        crate::unadapted::Asset {
             type_: match value.type_ {
-                AssetType::Unknown => crate_types::ThriftAssetType::UNKNOWN,
-                AssetType::Laptop => crate_types::ThriftAssetType::LAPTOP,
-                AssetType::Server => crate_types::ThriftAssetType::SERVER,
+                AssetType::Unknown => crate::ThriftAssetType::UNKNOWN,
+                AssetType::Laptop => crate::ThriftAssetType::LAPTOP,
+                AssetType::Server => crate::ThriftAssetType::SERVER,
             },
             id: value.id.into(),
             ..Default::default()
@@ -223,18 +221,18 @@ impl ThriftAdapter for AnnotationTestAdapter {
     ) -> Result<Self::AdaptedType, Self::Error> {
         assert_eq!(field_id, 1);
         assert_eq!(
-            std::any::TypeId::of::<crate_types::unadapted::TransitiveStruct>(),
+            std::any::TypeId::of::<crate::unadapted::TransitiveStruct>(),
             std::any::TypeId::of::<T>()
         );
 
         assert_eq!(
-            T::get_structured_annotation::<crate_types::unadapted::TransitiveAdapterAnnotation>()
+            T::get_structured_annotation::<crate::unadapted::TransitiveAdapterAnnotation>()
                 .unwrap()
                 .payload,
             "hello_world"
         );
         assert_eq!(
-            T::get_structured_annotation::<crate_types::FirstAnnotation>()
+            T::get_structured_annotation::<crate::FirstAnnotation>()
                 .unwrap()
                 .uri,
             "thrift/test"
@@ -249,18 +247,18 @@ impl ThriftAdapter for AnnotationTestAdapter {
     ) -> Self::StandardType {
         assert_eq!(field_id, 1);
         assert_eq!(
-            std::any::TypeId::of::<crate_types::unadapted::TransitiveStruct>(),
+            std::any::TypeId::of::<crate::unadapted::TransitiveStruct>(),
             std::any::TypeId::of::<T>()
         );
 
         assert_eq!(
-            T::get_structured_annotation::<crate_types::unadapted::TransitiveAdapterAnnotation>()
+            T::get_structured_annotation::<crate::unadapted::TransitiveAdapterAnnotation>()
                 .unwrap()
                 .payload,
             "hello_world"
         );
         assert_eq!(
-            T::get_structured_annotation::<crate_types::FirstAnnotation>()
+            T::get_structured_annotation::<crate::FirstAnnotation>()
                 .unwrap()
                 .uri,
             "thrift/test"
@@ -295,18 +293,18 @@ where
     ) -> Result<Self::AdaptedType, Self::Error> {
         assert_eq!(field_id, 2);
         assert_eq!(
-            std::any::TypeId::of::<crate_types::unadapted::TransitiveStruct>(),
+            std::any::TypeId::of::<crate::unadapted::TransitiveStruct>(),
             std::any::TypeId::of::<S>()
         );
 
         assert_eq!(
-            S::get_structured_annotation::<crate_types::unadapted::TransitiveAdapterAnnotation>()
+            S::get_structured_annotation::<crate::unadapted::TransitiveAdapterAnnotation>()
                 .unwrap()
                 .payload,
             "hello_world"
         );
         assert_eq!(
-            S::get_structured_annotation::<crate_types::FirstAnnotation>()
+            S::get_structured_annotation::<crate::FirstAnnotation>()
                 .unwrap()
                 .uri,
             "thrift/test"
@@ -314,14 +312,14 @@ where
 
         assert_eq!(
             S::get_field_structured_annotation::<
-                crate_types::unadapted::TransitiveFieldAdapterAnnotation,
+                crate::unadapted::TransitiveFieldAdapterAnnotation,
             >(field_id)
             .unwrap()
             .payload,
             "foobar"
         );
         assert_eq!(
-            S::get_field_structured_annotation::<crate_types::FirstAnnotation>(field_id)
+            S::get_field_structured_annotation::<crate::FirstAnnotation>(field_id)
                 .unwrap()
                 .uri,
             "thrift/transitive_field_test"
@@ -336,18 +334,18 @@ where
     ) -> Self::StandardType {
         assert_eq!(field_id, 2);
         assert_eq!(
-            std::any::TypeId::of::<crate_types::unadapted::TransitiveStruct>(),
+            std::any::TypeId::of::<crate::unadapted::TransitiveStruct>(),
             std::any::TypeId::of::<S>()
         );
 
         assert_eq!(
-            S::get_structured_annotation::<crate_types::unadapted::TransitiveAdapterAnnotation>()
+            S::get_structured_annotation::<crate::unadapted::TransitiveAdapterAnnotation>()
                 .unwrap()
                 .payload,
             "hello_world"
         );
         assert_eq!(
-            S::get_structured_annotation::<crate_types::FirstAnnotation>()
+            S::get_structured_annotation::<crate::FirstAnnotation>()
                 .unwrap()
                 .uri,
             "thrift/test"
@@ -355,14 +353,14 @@ where
 
         assert_eq!(
             S::get_field_structured_annotation::<
-                crate_types::unadapted::TransitiveFieldAdapterAnnotation,
+                crate::unadapted::TransitiveFieldAdapterAnnotation,
             >(field_id)
             .unwrap()
             .payload,
             "foobar"
         );
         assert_eq!(
-            S::get_field_structured_annotation::<crate_types::FirstAnnotation>(field_id)
+            S::get_field_structured_annotation::<crate::FirstAnnotation>(field_id)
                 .unwrap()
                 .uri,
             "thrift/transitive_field_test"

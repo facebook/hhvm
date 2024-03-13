@@ -22,9 +22,9 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-python__types = { package = "python_types", version = "0.0.1+unstable", path = ".." }
+python__types = { package = "python", version = "0.0.1+unstable", path = ".." }
+scope = { version = "0.0.1+unstable", path = "../../scope" }
 scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
-scope_types = { version = "0.0.1+unstable", path = "../../scope" }
 tracing = "0.1.40"
 
 [build-dependencies]

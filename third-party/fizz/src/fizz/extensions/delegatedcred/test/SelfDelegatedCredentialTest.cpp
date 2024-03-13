@@ -59,8 +59,8 @@ class SelfDelegatedCredentialTest : public Test {
 
 #if FIZZ_OPENSSL_HAS_ED25519
   folly::ssl::EvpPkeyUniquePtr generateEd25519PrivKey() {
-    EVP_PKEY* pkey = NULL;
-    EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+    EVP_PKEY* pkey = nullptr;
+    EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, nullptr);
     EVP_PKEY_keygen_init(pctx);
     EVP_PKEY_keygen(pctx, &pkey);
     EVP_PKEY_CTX_free(pctx);

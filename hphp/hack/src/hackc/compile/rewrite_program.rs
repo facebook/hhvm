@@ -60,9 +60,9 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     }
 }
 
-pub fn rewrite_program<'p, 'emitter, 'd>(
-    emitter: &'emitter mut Emitter<'d>,
-    prog: &'p mut ast::Program,
+pub fn rewrite_program<'d>(
+    emitter: &mut Emitter<'d>,
+    prog: &mut ast::Program,
     namespace_env: Arc<namespace_env::Env>,
 ) -> Result<()> {
     let for_debugger_eval =

@@ -645,6 +645,15 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   throw_object(inst);
 }
 
+namespace {
+
+static Variant get_module_from_name(const StringData* name) {
+  if (!name || Module::isDefault(name)) return init_null_variant;
+  return String::attach(const_cast<StringData*>(name));
+}
+
+} // namespace
+
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionFuncHandle
@@ -905,9 +914,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
 
 static Variant HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  auto const name = func->moduleName();
-  if (!name || Module::isDefault(name)) return init_null_variant;
-  return String::attach(const_cast<StringData*>(name));
+  return get_module_from_name(func->moduleName());
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
@@ -1125,6 +1132,12 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
   return ai.toArray();
 }
 
+static Variant HHVM_METHOD(ReflectionFile, getModule) {
+  auto const unit = ReflectionFileHandle::GetUnitFor(this_);
+  assertx(unit);
+  return get_module_from_name(unit->moduleName());
+}
+
 // ------------------------- class ReflectionModule
 
 // helper for __construct
@@ -1315,9 +1328,7 @@ static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
 
 static Variant HHVM_METHOD(ReflectionClass, getModule) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  auto const name = cls->moduleName();
-  if (!name || Module::isDefault(name)) return init_null_variant;
-  return String::attach(const_cast<StringData*>(name));
+  return get_module_from_name(cls->moduleName());
 }
 
 static bool HHVM_METHOD(ReflectionClass, isAbstract) {
@@ -2379,6 +2390,7 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionFile, __init);
     HHVM_ME(ReflectionFile, getAttributesNamespaced);
+    HHVM_ME(ReflectionFile, getModule);
 
     HHVM_ME(ReflectionFunction, __initName);
     HHVM_ME(ReflectionFunction, __initClosure);

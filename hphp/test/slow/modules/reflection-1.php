@@ -14,4 +14,5 @@ function main() :mixed{
   var_dump((new ReflectionFunction('g'))->getModule());
   var_dump((new ReflectionMethod('C', 'f'))->getModule());
   var_dump((new ReflectionClass('C'))->getModule());
+  var_dump((new ReflectionFile(__FILE__))->getModule());
 }

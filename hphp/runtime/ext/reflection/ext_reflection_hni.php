@@ -2536,6 +2536,15 @@ final class ReflectionFile implements Reflector {
     return "File [ {$this->name} ]\n";
   }
 
+  /*
+   * Get the module of the file.
+   *
+   * @return     ?string  Returns the module name if the file has a module
+   *                      membership statement, null otherwise.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

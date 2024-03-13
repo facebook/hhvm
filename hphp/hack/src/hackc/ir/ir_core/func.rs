@@ -28,6 +28,7 @@ use crate::LocId;
 use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
+use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeInfo;
 use crate::ValueId;
@@ -45,53 +46,6 @@ impl Default for Filename {
 
 impl Filename {
     pub const NONE: Filename = Filename(BytesId::EMPTY);
-}
-
-#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
-pub struct SrcLoc {
-    pub filename: Filename,
-    pub line_begin: i32,
-    pub col_begin: i32,
-    pub line_end: i32,
-    pub col_end: i32,
-}
-
-impl SrcLoc {
-    pub fn to_hhbc(&self) -> hhbc::SrcLoc {
-        hhbc::SrcLoc {
-            line_begin: self.line_begin,
-            col_begin: self.col_begin,
-            line_end: self.line_end,
-            col_end: self.col_end,
-        }
-    }
-
-    pub fn to_span(&self) -> hhbc::Span {
-        hhbc::Span {
-            line_begin: self.line_begin,
-            line_end: self.line_end,
-        }
-    }
-
-    pub fn from_hhbc(filename: Filename, src_loc: &hhbc::SrcLoc) -> Self {
-        Self {
-            filename,
-            line_begin: src_loc.line_begin,
-            col_begin: src_loc.col_begin,
-            line_end: src_loc.line_end,
-            col_end: src_loc.col_end,
-        }
-    }
-
-    pub fn from_span(filename: Filename, span: &hhbc::Span) -> Self {
-        Self {
-            filename,
-            line_begin: span.line_begin,
-            col_begin: 0,
-            line_end: span.line_end,
-            col_end: 0,
-        }
-    }
 }
 
 /// Func parameters.

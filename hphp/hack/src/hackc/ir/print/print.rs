@@ -1444,14 +1444,7 @@ fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id
 fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
     if ctx.cur_loc_id != loc_id {
         if let Some(loc) = func.get_loc(loc_id) {
-            let old_filename = func
-                .get_loc(ctx.cur_loc_id)
-                .map_or(BytesId::EMPTY, |loc| loc.filename.0);
-            if old_filename != loc.filename.0 {
-                writeln!(w, "  .srcloc {}", FmtFullLoc(loc))?;
-            } else {
-                writeln!(w, "  .srcloc {}", FmtLoc(loc))?;
-            }
+            writeln!(w, "  .srcloc {}", FmtLoc(loc))?;
         }
         ctx.cur_loc_id = loc_id;
     }

@@ -25,6 +25,24 @@ impl Default for SrcLoc {
     }
 }
 
+impl SrcLoc {
+    pub fn to_span(&self) -> Span {
+        Span {
+            line_begin: self.line_begin,
+            line_end: self.line_end,
+        }
+    }
+
+    pub fn from_span(span: &Span) -> Self {
+        Self {
+            line_begin: span.line_begin,
+            col_begin: 0,
+            line_end: span.line_end,
+            col_end: 0,
+        }
+    }
+}
+
 impl std::convert::From<oxidized::pos::Pos> for SrcLoc {
     fn from(p: oxidized::pos::Pos) -> Self {
         if p.is_none() || !p.is_valid() {

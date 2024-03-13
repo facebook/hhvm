@@ -167,8 +167,7 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
             textual_remove_memoize: !opts.keep_memo,
         },
     )?;
-    let ir = bc_to_ir::bc_to_ir(&unit, path);
-
+    let ir = bc_to_ir::bc_to_ir(&unit);
     Ok(ir)
 }
 

@@ -9,15 +9,16 @@
 
 use std::borrow::Cow;
 use std::fmt;
+use std::path::Path;
 
 use anyhow::Error;
 use ascii::AsciiString;
 use hash::HashMap;
 use hash::HashSet;
-use ir::func::SrcLoc;
 use ir::BlockId;
 use ir::FloatBits;
 use ir::LocalId;
+use ir::SrcLoc;
 use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
@@ -40,6 +41,7 @@ pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
     pub(crate) hide_static_coeffects: bool,
     pub(crate) enable_var_cache: bool,
+    filename: &'a Path,
     pub(crate) internal_functions: HashSet<FunctionName>,
     pub(crate) called_functions: HashSet<FunctionName>,
     pub(crate) internal_globals: HashMap<GlobalName, Ty>,
@@ -52,11 +54,13 @@ impl<'a> TextualFile<'a> {
         w: &'a mut dyn std::io::Write,
         hide_static_coeffects: bool,
         enable_var_cache: bool,
+        filename: &'a Path,
     ) -> Self {
         TextualFile {
             w,
             hide_static_coeffects,
             enable_var_cache,
+            filename,
             internal_functions: Default::default(),
             called_functions: Default::default(),
             internal_globals: Default::default(),
@@ -498,9 +502,7 @@ impl TextualFile<'_> {
     }
 
     fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
-        use bstr::ByteSlice;
-        let filename = src_loc.filename.0.as_bytes().as_bstr();
-        writeln!(self.w, "// .file \"{filename}\"")?;
+        writeln!(self.w, "// .file \"{}\"", self.filename.display())?;
         self.write_line_loc(src_loc)?;
         Ok(())
     }
@@ -1266,14 +1268,9 @@ impl FuncBuilder<'_, '_> {
     }
 
     pub(crate) fn write_loc(&mut self, src_loc: &SrcLoc) -> Result {
-        if let Some(cur_loc) = self.cur_loc.as_ref() {
-            if src_loc.filename != cur_loc.filename {
-                self.txf.write_full_loc(src_loc)?;
-                self.cur_loc = Some(src_loc.clone());
-            } else if src_loc.line_begin != cur_loc.line_begin {
-                self.txf.write_line_loc(src_loc)?;
-                self.cur_loc = Some(src_loc.clone());
-            }
+        if self.cur_loc.as_ref().is_some() {
+            self.txf.write_line_loc(src_loc)?;
+            self.cur_loc = Some(src_loc.clone());
         } else {
             self.txf.write_full_loc(src_loc)?;
             self.cur_loc = Some(src_loc.clone());

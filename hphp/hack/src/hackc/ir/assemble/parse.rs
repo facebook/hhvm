@@ -24,7 +24,6 @@ use ir_core::ConstantId;
 use ir_core::DictValue;
 use ir_core::EnforceableType;
 use ir_core::FatalOp;
-use ir_core::Filename;
 use ir_core::FloatBits;
 use ir_core::FunctionName;
 use ir_core::HackConstant;
@@ -639,20 +638,10 @@ pub(crate) fn parse_special_cls_ref_opt(
     })
 }
 
-pub(crate) fn parse_src_loc(tokenizer: &mut Tokenizer<'_>, cur: Option<&SrcLoc>) -> Result<SrcLoc> {
-    parse!(tokenizer, <line_begin:parse_i32> ":" <col_begin:parse_i32> "," <line_end:parse_i32> ":" <col_end:parse_i32> <filename:string?>);
-
-    let filename = if let Some(filename) = filename {
-        let filename = filename.unescaped_string()?;
-        Filename(ir_core::intern_bytes(filename))
-    } else if let Some(cur) = cur {
-        cur.filename
-    } else {
-        Filename::NONE
-    };
+pub(crate) fn parse_src_loc(tokenizer: &mut Tokenizer<'_>) -> Result<SrcLoc> {
+    parse!(tokenizer, <line_begin:parse_i32> ":" <col_begin:parse_i32> "," <line_end:parse_i32> ":" <col_end:parse_i32>);
 
     Ok(SrcLoc {
-        filename,
         line_begin,
         col_begin,
         line_end,

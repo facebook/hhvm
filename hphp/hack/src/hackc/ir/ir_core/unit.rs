@@ -5,7 +5,6 @@
 
 use bstr::BString;
 
-use crate::func::SrcLoc;
 use crate::Attribute;
 use crate::Class;
 use crate::FatalOp;
@@ -13,6 +12,7 @@ use crate::Function;
 use crate::HackConstant;
 use crate::Module;
 use crate::ModuleName;
+use crate::SrcLoc;
 use crate::SymbolRefs;
 use crate::Typedef;
 

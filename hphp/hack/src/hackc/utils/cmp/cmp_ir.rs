@@ -1338,7 +1338,6 @@ fn cmp_requirement(a: &Requirement, b: &Requirement) -> Result {
 }
 
 fn cmp_src_loc(a: &SrcLoc, b: &SrcLoc) -> Result {
-    cmp_eq(a.filename.0, b.filename.0).qualified("filename")?;
     cmp_eq(a.line_begin, b.line_begin).qualified("line_begin")?;
     cmp_eq(a.line_end, b.line_end).qualified("line_end")?;
     cmp_eq(a.col_begin, b.col_begin).qualified("col_begin")?;

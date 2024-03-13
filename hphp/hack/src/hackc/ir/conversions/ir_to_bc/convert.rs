@@ -64,7 +64,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         };
         unit.fatal = Maybe::Just(Fatal {
             op,
-            loc: loc.to_hhbc(),
+            loc: *loc,
             message: message.to_vec().into(),
         });
     }

@@ -24,17 +24,11 @@ use crate::convert::UnitState;
 use crate::types;
 
 /// Convert a hhbc::Function to an ir::Function
-pub(crate) fn convert_function<'a>(
-    unit: &mut ir::Unit,
-    filename: ir::Filename,
-    src: &Function,
-    unit_state: &UnitState,
-) {
+pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let span = ir::SrcLoc::from_span(&src.span);
     let func = convert_body(
-        filename,
         &src.body,
         &src.attributes,
         src.attrs,
@@ -56,16 +50,14 @@ pub(crate) fn convert_function<'a>(
 /// Convert a hhbc::Method to an ir::Method
 pub(crate) fn convert_method<'a>(
     unit: &mut ir::Unit,
-    filename: ir::Filename,
     clsidx: usize,
     src: &Method,
     unit_state: &UnitState,
 ) {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let span = ir::SrcLoc::from_span(&src.span);
     let func = convert_body(
-        filename,
         &src.body,
         &src.attributes,
         src.attrs,
@@ -87,7 +79,6 @@ pub(crate) fn convert_method<'a>(
 
 /// Convert a hhbc::Body to an ir::Func
 fn convert_body<'a>(
-    filename: ir::Filename,
     body: &Body,
     attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
@@ -153,7 +144,7 @@ fn convert_body<'a>(
         tparams,
     };
 
-    let mut ctx = Context::new(filename, func, body_instrs, unit_state);
+    let mut ctx = Context::new(func, body_instrs, unit_state);
 
     for param in params.as_ref() {
         let ir_param = convert_param(&mut ctx, param);

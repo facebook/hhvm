@@ -5,7 +5,6 @@
 
 use hash::HashMap;
 
-use crate::func::SrcLoc;
 use crate::instr::BaseOp;
 use crate::instr::FinalOp;
 use crate::instr::HasLoc;
@@ -29,6 +28,7 @@ use crate::MOpMode;
 use crate::PropName;
 use crate::QueryMOp;
 use crate::ReadonlyOp;
+use crate::SrcLoc;
 use crate::ValueId;
 
 pub struct FuncBuilder {

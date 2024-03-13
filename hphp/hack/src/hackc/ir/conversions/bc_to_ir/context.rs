@@ -53,7 +53,6 @@ pub(crate) struct Context<'b> {
     pub(crate) addr_to_seq: AddrMap<Sequence>,
     pub(crate) builder: FuncBuilder,
     bid_to_addr: BlockIdMap<Addr>,
-    pub(crate) filename: ir::Filename,
     pub(crate) label_to_addr: LabelMap<Addr>,
     pub(crate) loc: ir::LocId,
     pub(crate) member_op: Option<MemberOpBuilder>,
@@ -64,15 +63,9 @@ pub(crate) struct Context<'b> {
 }
 
 impl<'b> Context<'b> {
-    pub(crate) fn new(
-        filename: ir::Filename,
-        func: ir::Func,
-        instrs: &'b [Instruct],
-        unit_state: &'b UnitState,
-    ) -> Self {
+    pub(crate) fn new(func: ir::Func, instrs: &'b [Instruct], unit_state: &'b UnitState) -> Self {
         let mut builder = FuncBuilder::with_func(func);
-        let (label_to_addr, bid_to_addr, addr_to_seq) =
-            Sequence::compute(&mut builder, filename, instrs);
+        let (label_to_addr, bid_to_addr, addr_to_seq) = Sequence::compute(&mut builder, instrs);
 
         let mut ctx = Context {
             adata_lookup: &unit_state.adata_lookup,
@@ -81,7 +74,6 @@ impl<'b> Context<'b> {
             label_to_addr,
             bid_to_addr,
             builder,
-            filename,
             loc: ir::LocId::NONE,
             member_op: None,
             named_local_lookup: Default::default(),
@@ -247,11 +239,6 @@ impl MemberOpBuilder {
     }
 }
 
-pub(crate) fn add_loc(
-    builder: &mut FuncBuilder,
-    filename: ir::Filename,
-    loc: &hhbc::SrcLoc,
-) -> LocId {
-    let loc = ir::func::SrcLoc::from_hhbc(filename, loc);
-    builder.add_loc(loc)
+pub(crate) fn add_loc(builder: &mut FuncBuilder, loc: &hhbc::SrcLoc) -> LocId {
+    builder.add_loc(*loc)
 }

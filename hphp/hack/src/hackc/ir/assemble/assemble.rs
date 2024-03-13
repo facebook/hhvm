@@ -218,7 +218,7 @@ impl UnitParser {
     }
 
     fn parse_src_loc(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let src_loc = parse_src_loc(tokenizer, None)?;
+        let src_loc = parse_src_loc(tokenizer)?;
         self.src_loc = Some(src_loc);
         Ok(())
     }

@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::func::SrcLoc;
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
@@ -12,6 +11,7 @@ use crate::HackConstant;
 use crate::Method;
 use crate::PropName;
 use crate::Requirement;
+use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeConstant;
 use crate::TypeInfo;

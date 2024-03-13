@@ -92,7 +92,7 @@ fn cvt_constraint_type(name: StringId) -> BaseType {
         .unwrap_or_else(|| BaseType::Class(ir::ClassName::new(name)))
 }
 
-pub(crate) fn convert_typedef(td: &hhbc::Typedef, filename: ir::Filename) -> ir::Typedef {
+pub(crate) fn convert_typedef(td: &hhbc::Typedef) -> ir::Typedef {
     let hhbc::Typedef {
         name,
         attributes,
@@ -103,7 +103,7 @@ pub(crate) fn convert_typedef(td: &hhbc::Typedef, filename: ir::Filename) -> ir:
         case_type,
     } = td;
 
-    let loc = ir::SrcLoc::from_span(filename, span);
+    let loc = ir::SrcLoc::from_span(span);
     let attributes = attributes
         .iter()
         .map(convert::convert_attribute)

@@ -29,7 +29,7 @@ pub fn textual_writer(
     hide_static_coeffects: bool,
     enable_var_cache: bool,
 ) -> Result<()> {
-    let mut txf = TextualFile::new(w, hide_static_coeffects, enable_var_cache);
+    let mut txf = TextualFile::new(w, hide_static_coeffects, enable_var_cache, path);
 
     let escaped_path = escaper::escape(path.display().to_string());
     txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;

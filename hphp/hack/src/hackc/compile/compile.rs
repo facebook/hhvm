@@ -194,7 +194,6 @@ pub fn from_text<'d>(
     decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
     profile: &mut Profile,
 ) -> Result<()> {
-    let path = source_text.file_path().path().to_path_buf();
     let mut emitter = create_emitter(native_env, decl_provider);
     let mut unit = emit_unit_from_text(
         &mut emitter,
@@ -206,7 +205,7 @@ pub fn from_text<'d>(
 
     if native_env.flags.enable_ir {
         let bc_to_ir_t = Instant::now();
-        let ir = bc_to_ir::bc_to_ir(&unit, &path);
+        let ir = bc_to_ir::bc_to_ir(&unit);
         profile.bc_to_ir_t = bc_to_ir_t.elapsed();
 
         let ir_to_bc_t = Instant::now();
@@ -279,7 +278,7 @@ pub fn unit_to_string(
     profile: &mut Profile,
 ) -> Result<()> {
     if native_env.flags.dump_ir {
-        let ir = bc_to_ir::bc_to_ir(program, native_env.filepath.path());
+        let ir = bc_to_ir::bc_to_ir(program);
         struct FmtFromIo<'a>(&'a mut dyn std::io::Write);
         impl fmt::Write for FmtFromIo<'_> {
             fn write_str(&mut self, s: &str) -> fmt::Result {

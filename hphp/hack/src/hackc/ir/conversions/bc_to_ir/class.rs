@@ -9,7 +9,7 @@ use itertools::Itertools;
 use crate::convert;
 use crate::types;
 
-pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &Class) {
+pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
     let constants = cls
         .constants
         .as_ref()
@@ -70,7 +70,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, filename: ir::Filename, cls: &C
         name: cls.name,
         properties,
         requirements: cls.requirements.clone().into(),
-        src_loc: ir::SrcLoc::from_span(filename, &cls.span),
+        src_loc: ir::SrcLoc::from_span(&cls.span),
         type_constants,
         upper_bounds,
         uses: cls.uses.clone().into(),

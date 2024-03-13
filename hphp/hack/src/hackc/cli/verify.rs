@@ -235,7 +235,7 @@ impl IrOpts {
             true,
         )?;
 
-        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit, path));
+        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit));
 
         self.verify_print_roundtrip(&ir)?;
 
@@ -308,7 +308,7 @@ impl InferOpts {
             &mut compile_profile,
             true,
         )?;
-        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&unit, path));
+        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&unit));
 
         let (result, textual_t) = Timing::time(path, || {
             let mut out = Vec::new();

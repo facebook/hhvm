@@ -335,9 +335,7 @@ impl Tokenizer<'_> {
         }
         Ok(t)
     }
-}
 
-impl Tokenizer<'_> {
     pub fn peek_loc(&self) -> TokenLoc {
         TokenLoc {
             filename: Rc::clone(&self.filename),
@@ -352,18 +350,6 @@ impl Tokenizer<'_> {
         } else {
             bail!("Expected any token at {}", cur_line);
         }
-    }
-}
-
-impl Tokenizer<'_> {
-    pub fn peek_if_any_string(&mut self) -> Result<Option<&Token>> {
-        if let Some(t) = self.peek_token()? {
-            if t.is_any_string() {
-                return Ok(Some(t));
-            }
-        }
-
-        Ok(None)
     }
 
     pub fn peek_if_any_identifier(&mut self) -> Result<Option<&Token>> {
@@ -385,9 +371,7 @@ impl Tokenizer<'_> {
 
         Ok(None)
     }
-}
 
-impl Tokenizer<'_> {
     pub fn peek_is_identifier(&mut self, expect: &str) -> Result<bool> {
         Ok(self.peek_if_identifier(expect)?.is_some())
     }
@@ -399,9 +383,7 @@ impl Tokenizer<'_> {
             Ok(false)
         }
     }
-}
 
-impl Tokenizer<'_> {
     pub fn next_if_predicate<F>(&mut self, f: F) -> Result<Option<Token>>
     where
         F: FnOnce(&Token) -> bool,
@@ -415,14 +397,6 @@ impl Tokenizer<'_> {
         Ok(None)
     }
 
-    pub fn next_if_any_string(&mut self) -> Result<Option<Token>> {
-        Ok(if self.peek_if_any_string()?.is_some() {
-            Some(self.expect_any_token()?)
-        } else {
-            None
-        })
-    }
-
     pub fn next_if_identifier(&mut self, expect: &str) -> Result<Option<Token>> {
         Ok(if self.peek_if_identifier(expect)?.is_some() {
             Some(self.expect_any_token()?)
@@ -430,9 +404,7 @@ impl Tokenizer<'_> {
             None
         })
     }
-}
 
-impl Tokenizer<'_> {
     pub fn next_is_identifier(&mut self, expect: &str) -> Result<bool> {
         Ok(self.next_if_identifier(expect)?.is_some())
     }

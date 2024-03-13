@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::func::SrcLoc;
 use crate::Attribute;
 use crate::ModuleName;
+use crate::SrcLoc;
 
 #[derive(Debug)]
 pub struct Module {

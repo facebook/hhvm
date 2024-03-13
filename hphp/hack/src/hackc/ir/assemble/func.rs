@@ -1482,13 +1482,7 @@ impl FunctionParser<'_> {
     }
 
     fn parse_src_loc(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<LocId> {
-        let old = if self.cur_loc == LocId::NONE {
-            None
-        } else {
-            self.builder.func.get_loc(self.cur_loc)
-        };
-        let src_loc = parse_src_loc(tokenizer, old)?;
-
+        let src_loc = parse_src_loc(tokenizer)?;
         self.cur_loc = self.builder.add_loc(src_loc);
         Ok(self.cur_loc)
     }

@@ -546,9 +546,6 @@ impl Display for FmtFullLoc<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtFullLoc(loc) = self;
         FmtLoc(loc).fmt(f)?;
-        if loc.filename != Filename::NONE {
-            write!(f, " {}", FmtQuotedStringId(loc.filename.0))?;
-        }
         Ok(())
     }
 }

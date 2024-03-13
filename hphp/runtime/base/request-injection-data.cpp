@@ -345,7 +345,7 @@ void RequestInjectionData::threadInit() {
   // zlib.output_handler ini setting as well.
   // http://php.net/zlib.configuration.php
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
-                   "zlib.output_compression", &m_gzipCompression);
+                   "zlib.output_compression", &m_gzipCompressionEnabled);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 

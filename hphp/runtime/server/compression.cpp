@@ -21,6 +21,7 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/configs/server.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
@@ -47,19 +48,17 @@ const StaticString s_zstdC("zstd.compression");
 const StaticString s_zlibOCL("zlib.output_compression_level");
 const StaticString s_zlibOC("zlib.output_compression");
 
-bool isOff(const String& s) {
-  return s.size() == 3 && bstrcaseeq(s.data(), "off", 3);
+bool isOff(const std::string& s) {
+  return s.size() == 3 && bstrcaseeq(s.c_str(), "off", 3);
 }
-bool isOn(const String& s) {
-  return s.size() == 2 && bstrcaseeq(s.data(), "on", 2);
+bool isOn(const std::string& s) {
+  return s.size() == 2 && bstrcaseeq(s.c_str(), "on", 2);
 }
-void finalizeCompressionOnOff(int8_t& state, const StaticString& ini_key) {
+void finalizeCompressionOnOff(int8_t& state, const std::string& value) {
   if (state == 0) {
     return;
   }
 
-  String value;
-  IniSetting::Get(ini_key, value);
   if (state == -1) {
     /* default off, can opt in */
     state = isOn(value) ? 1 : 0;
@@ -224,14 +223,12 @@ void GzipResponseCompressor::disable() {
 
 GzipCompressor* GzipResponseCompressor::getCompressor() {
   if (!m_compressor) {
-    finalizeCompressionOnOff(m_enabled, s_zlibOC);
+    finalizeCompressionOnOff(m_enabled, RID().getGzipCompressionEnabled());
     if (!isEnabled()) {
       return nullptr;
     }
     int compressionLevel = Cfg::Server::GzipCompressionLevel;
-    String compressionLevelStr;
-    IniSetting::Get(s_zlibOCL, compressionLevelStr);
-    int level = compressionLevelStr.toInt64();
+    auto level = RID().getGzipCompressionLevel();
     if (level > compressionLevel &&
         level <= Cfg::Server::GzipMaxCompressionLevel) {
       compressionLevel = level;
@@ -284,11 +281,11 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
     int size, bool last) {
   if (!m_compressor) {
     if (last) {
-      finalizeCompressionOnOff(m_enabled, s_brotliC);
+      finalizeCompressionOnOff(m_enabled, RID().getBrotliEnabled());
       m_chunkedEnabled = false;
     } else {
       m_enabled = false;
-      finalizeCompressionOnOff(m_chunkedEnabled, s_brotliCC);
+      finalizeCompressionOnOff(m_chunkedEnabled, RID().getBrotliChunkedEnabled());
     }
     if (!isEnabled()) {
       return nullptr;
@@ -296,14 +293,8 @@ BrotliCompressor* BrotliResponseCompressor::getCompressor(
     BrotliEncoderMode mode =
         (BrotliEncoderMode)Cfg::Server::BrotliCompressionMode;
 
-    Variant qualityVar;
-    IniSetting::Get(s_brotliCQ, qualityVar);
-    uint32_t quality = static_cast<uint32_t>(qualityVar.asInt64Val());
-
-
-    Variant windowSizeVar;
-    IniSetting::Get(s_brotliCL, windowSizeVar);
-    uint32_t windowSize = static_cast<uint32_t>(windowSizeVar.asInt64Val());
+    auto quality = RID().getBrotliQuality();
+    auto windowSize = RID().getBrotliLgWindowSize();
     if (size && !m_chunkedEnabled) {
       // If there is only one block (i.e. non-chunked content) set a maximum
       // brotli window of ceil(log2(size)). This way the reader doesn't have
@@ -362,25 +353,14 @@ void ZstdResponseCompressor::disable() {
 
 ZstdCompressor* ZstdResponseCompressor::getCompressor() {
   if (!m_compressor) {
-    finalizeCompressionOnOff(m_enabled, s_zstdC);
+    finalizeCompressionOnOff(m_enabled, RID().getZstdEnabled());
     if (!isEnabled()) {
       return nullptr;
     }
-    Variant quality;
-    IniSetting::Get(s_zstdCL, quality);
-    auto compression_level = quality.asInt64Val();
-
-    Variant checksumRate;
-    IniSetting::Get(s_zstdCR, checksumRate);
-    auto checksum_rate = checksumRate.asInt64Val();
-
-    Variant windowLog;
-    IniSetting::Get(s_zstdWL, windowLog);
-    auto window_log = windowLog.asInt64Val();
-
-    Variant targetBlockSize;
-    IniSetting::Get(s_zstdBS, targetBlockSize);
-    auto target_block_size = targetBlockSize.asInt64Val();
+    auto compression_level = RID().getZstdLevel();
+    auto checksum_rate = RID().getZstdChecksumRate();
+    auto window_log = RID().getZstdWindowLog();
+    auto target_block_size = RID().getZstdTargetBlockSize();
 
     m_compressor = std::make_unique<ZstdCompressor>(
         compression_level, folly::Random::oneIn(checksum_rate), window_log, target_block_size);

@@ -332,6 +332,28 @@ struct RequestInjectionData {
 
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
 
+  const std::string& getBrotliEnabled() const { return m_brotliEnabled; }
+
+  const std::string& getBrotliChunkedEnabled() const { return m_brotliChunkedEnabled; }
+
+  uint32_t getBrotliLgWindowSize() const { return m_brotliLgWindowSize; }
+
+  uint32_t getBrotliQuality() const { return m_brotliQuality; }
+
+  const std::string& getZstdEnabled() const { return m_zstdEnabled; }
+
+  int64_t getZstdLevel() const { return m_zstdLevel; }
+
+  int64_t getZstdChecksumRate() const { return m_zstdChecksumRate; }
+
+  int64_t getZstdWindowLog() const { return m_zstdWindowLog; }
+
+  int64_t getZstdTargetBlockSize() const { return m_zstdTargetBlockSize; }
+
+  const std::string& getGzipCompressionEnabled() const { return m_gzipCompressionEnabled; }
+
+  int64_t getGzipCompressionLevel() const { return m_gzipCompressionLevel; }
+
   // When safe file access is enabled only whitelisted by setAllowedDirectories
   // may be modified
   void setSafeFileAccess(bool b);
@@ -410,11 +432,6 @@ private:
   std::string m_maxMemory;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
-  std::string m_brotliEnabled;
-  std::string m_brotliChunkedEnabled;
-  std::string m_zstdEnabled;
-  std::string m_gzipCompressionLevel = "-1";
-  std::string m_gzipCompression;
   std::string m_errorLog;
   std::string m_userAgent;
   std::string m_timezone;
@@ -430,12 +447,23 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;
-  int64_t m_brotliLgWindowSize;
-  int64_t m_brotliQuality;
+
+  /* Brotli */
+  std::string m_brotliEnabled;
+  std::string m_brotliChunkedEnabled;
+  uint32_t m_brotliLgWindowSize;
+  uint32_t m_brotliQuality;
+
+  /* Zstd */
+  std::string m_zstdEnabled;
   int64_t m_zstdLevel;
   int64_t m_zstdChecksumRate;
   int64_t m_zstdWindowLog;
   int64_t m_zstdTargetBlockSize;
+
+  /* Gzip */
+  std::string m_gzipCompressionEnabled;
+  int64_t m_gzipCompressionLevel = -1;
 
   /*
    * Instead of using several surprise flags, we can track the timeout info

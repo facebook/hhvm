@@ -1421,6 +1421,10 @@ void ThriftServer::cleanUp() {
 
   // Now clear all the handlers
   routingHandlers_.clear();
+
+  // Clear the service description so that it's re-created if the server
+  // is restarted.
+  processedServiceDescription_.reset();
 }
 
 uint64_t ThriftServer::getNumDroppedConnections() const {
@@ -1595,10 +1599,6 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
     }
   });
 
-  // Clear the service description so that it's re-created if the server
-  // is restarted.
-  processedServiceDescription_.reset();
-
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }
 
@@ -1616,7 +1616,8 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
     processedServiceDescription_ =
-        std::make_unique<ProcessedServiceDescription>(
+        ProcessedServiceDescription::createAndActivate(
+            *this,
             ProcessedServiceDescription{
                 std::move(modules), std::move(decoratedProcessorFactory)});
   }

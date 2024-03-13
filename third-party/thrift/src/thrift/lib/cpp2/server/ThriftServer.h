@@ -424,8 +424,59 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   struct ProcessedServiceDescription {
     ProcessedModuleSet modules;
     std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory;
+
+    ProcessedServiceDescription(
+        ProcessedModuleSet moduleSet,
+        std::unique_ptr<AsyncProcessorFactory> processorFactory)
+        : modules(std::move(moduleSet)),
+          decoratedProcessorFactory(std::move(processorFactory)) {}
+
+    ProcessedServiceDescription(ProcessedServiceDescription&& modules) =
+        default;
+    ProcessedServiceDescription& operator=(ProcessedServiceDescription&&) =
+        default;
+
+    /**
+     * TServerEventHandler objects are added by mutating the ThriftServer
+     * instance via addServerEventHandler. So we use RAII to ensure that they
+     * are appropriately removed.
+     */
+    class Deleter : private std::default_delete<ProcessedServiceDescription> {
+     public:
+      Deleter() noexcept = default;
+      explicit Deleter(ThriftServer& server) : server_(&server) {}
+
+      void operator()(ProcessedServiceDescription* ptr) const {
+        SCOPE_EXIT {
+          std::default_delete<ProcessedServiceDescription>::operator()(ptr);
+        };
+        if (server_ == nullptr || ptr == nullptr) {
+          return;
+        }
+        for (auto eventHandler :
+             ptr->modules.coalescedLegacyServerEventHandlers) {
+          server_->removeServerEventHandler(std::move(eventHandler));
+        }
+      }
+
+     private:
+      ThriftServer* server_{nullptr};
+    };
+
+    using UniquePtr = std::unique_ptr<ProcessedServiceDescription, Deleter>;
+
+    static UniquePtr createAndActivate(
+        ThriftServer& server, ProcessedServiceDescription object) {
+      auto ptr = UniquePtr(
+          new ProcessedServiceDescription(std::move(object)), Deleter(server));
+      for (auto serverEventHandler :
+           ptr->modules.coalescedLegacyServerEventHandlers) {
+        server.addServerEventHandler(std::move(serverEventHandler));
+      }
+      return ptr;
+    }
   };
-  std::unique_ptr<ProcessedServiceDescription> processedServiceDescription_;
+  ProcessedServiceDescription::UniquePtr processedServiceDescription_{nullptr};
 
   /**
    * Collects service handlers of the current service of a specific type.

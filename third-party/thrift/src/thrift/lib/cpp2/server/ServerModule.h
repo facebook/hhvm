@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
+#include <thrift/lib/cpp/server/TServerEventHandler.h>
 
 namespace apache::thrift {
 
@@ -28,6 +29,11 @@ class ServerModule {
 
   virtual std::vector<std::shared_ptr<TProcessorEventHandler>>
   getLegacyEventHandlers() {
+    return {};
+  }
+
+  virtual std::vector<std::shared_ptr<server::TServerEventHandler>>
+  getLegacyServerEventHandlers() {
     return {};
   }
 };

@@ -90,14 +90,21 @@ BaseThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   ProcessedModuleSet result;
 
   for (auto& info : specs.infos) {
-    auto legacyEventHandlers = info.module->getLegacyEventHandlers();
+    std::vector<std::shared_ptr<TProcessorEventHandler>> legacyEventHandlers =
+        info.module->getLegacyEventHandlers();
+    std::vector<std::shared_ptr<server::TServerEventHandler>>
+        legacyServerEventHandlers = info.module->getLegacyServerEventHandlers();
+
     result.modules.emplace_back(std::move(info));
-    if (!legacyEventHandlers.empty()) {
-      result.coalescedLegacyEventHandlers.insert(
-          result.coalescedLegacyEventHandlers.end(),
-          std::make_move_iterator(legacyEventHandlers.begin()),
-          std::make_move_iterator(legacyEventHandlers.end()));
-    }
+
+    result.coalescedLegacyEventHandlers.insert(
+        result.coalescedLegacyEventHandlers.end(),
+        std::make_move_iterator(legacyEventHandlers.begin()),
+        std::make_move_iterator(legacyEventHandlers.end()));
+    result.coalescedLegacyServerEventHandlers.insert(
+        result.coalescedLegacyServerEventHandlers.end(),
+        std::make_move_iterator(legacyServerEventHandlers.begin()),
+        std::make_move_iterator(legacyServerEventHandlers.end()));
   }
 
   return result;

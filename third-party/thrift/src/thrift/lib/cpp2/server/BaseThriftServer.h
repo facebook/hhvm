@@ -507,6 +507,13 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     eventHandlers_.push_back(eventHandler);
   }
 
+  void removeServerEventHandler(
+      std::shared_ptr<server::TServerEventHandler> eventHandler) {
+    eventHandlers_.erase(
+        std::remove(eventHandlers_.begin(), eventHandlers_.end(), eventHandler),
+        eventHandlers_.end());
+  }
+
   /**
    * Returns a reference to the custom allocator used by the server when parsing
    * Thrift frames.
@@ -1718,6 +1725,8 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
      */
     std::vector<std::shared_ptr<TProcessorEventHandler>>
         coalescedLegacyEventHandlers;
+    std::vector<std::shared_ptr<server::TServerEventHandler>>
+        coalescedLegacyServerEventHandlers;
   };
   static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
 

@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+
+#include "hphp/runtime/base/configs/pcre.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -459,11 +461,11 @@ struct PcreExtension final : Extension {
   void threadInit() override {
     IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.backtrack_limit",
-                     std::to_string(RuntimeOption::PregBacktrackLimit).c_str(),
+                     std::to_string(Cfg::PCRE::BacktrackLimit).c_str(),
                      &tl_pcre_globals->preg_backtrack_limit);
     IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.recursion_limit",
-                     std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
+                     std::to_string(Cfg::PCRE::RecursionLimit).c_str(),
                      &tl_pcre_globals->preg_recursion_limit);
   }
 

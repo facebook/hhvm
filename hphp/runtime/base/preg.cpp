@@ -73,8 +73,8 @@ PCREglobals::PCREglobals() {
   jit_stack = pcre_jit_stack_alloc(32768, 524288);
   // Set these to handle uses of pcre prior to PcreExtension::threadInit
   // In particular, for matching tier overrides during RuntimeOption::Load
-  preg_backtrack_limit = RuntimeOption::PregBacktrackLimit;
-  preg_recursion_limit = RuntimeOption::PregRecursionLimit;
+  preg_backtrack_limit = Cfg::PCRE::BacktrackLimit;
+  preg_recursion_limit = Cfg::PCRE::RecursionLimit;
 }
 
 PCREglobals::~PCREglobals() {
@@ -990,7 +990,7 @@ static Array str_offset_pair(const String& str, int offset) {
 }
 
 static inline bool pcre_need_log_error(int pcre_code) {
-  return RuntimeOption::EnablePregErrorLog &&
+  return Cfg::PCRE::ErrorLog &&
          (pcre_code == PCRE_ERROR_MATCHLIMIT ||
           pcre_code == PCRE_ERROR_RECURSIONLIMIT);
 }

@@ -932,10 +932,6 @@ std::string RuntimeOption::SandboxHostAlias;
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
-int64_t RuntimeOption::PregBacktrackLimit = 1000000;
-int64_t RuntimeOption::PregRecursionLimit = 100000;
-bool RuntimeOption::EnablePregErrorLog = true;
-
 bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
@@ -2024,18 +2020,6 @@ void RuntimeOption::Load(
                  "/usr/lib/sendmail -t -i");
     Config::Bind(MailForceExtraParameters, ini, config,
                  "Mail.ForceExtraParameters");
-  }
-  {
-    // Preg
-    // TODO: T58241504 delete this default once config is migrated.
-    auto const backtrackDefault = Config::GetInt64(
-        ini, config, "Preg.BacktraceLimit", 1000000
-    );
-    Config::Bind(PregBacktrackLimit, ini, config, "Preg.BacktrackLimit",
-                 backtrackDefault);
-    Config::Bind(PregRecursionLimit, ini, config, "Preg.RecursionLimit",
-                 100000);
-    Config::Bind(EnablePregErrorLog, ini, config, "Preg.ErrorLog", true);
   }
   {
     // SimpleXML

@@ -1098,11 +1098,6 @@ public:
   static std::string SendmailPath;
   static std::string MailForceExtraParameters;
 
-  // preg stack depth and debug support options
-  static int64_t PregBacktrackLimit;
-  static int64_t PregRecursionLimit;
-  static bool EnablePregErrorLog;
-
   // SimpleXML options
   static bool SimpleXMLEmptyNamespaceMatchesAll;
 

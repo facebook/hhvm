@@ -379,6 +379,22 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   Need to be staticdefault because it is used in the init of a static
   variable. It will then be reinited after we read the config
 
+- int64_t PCRE.BacktraceLimit = 1000000, UNKNOWN, private|lookuppath(Preg.BacktraceLimit)
+
+  TODO: T58241504 delete this default once config is migrated.
+  This one is just a misspelled version of Preg.BacktrackLimit
+
+- int64_t PCRE.BacktrackLimit = PCRE.BacktraceLimit, UNKNOWN, staticdefault(1000000)|lookuppath(Preg.BacktrackLimit)
+
+  It has to use static default because we read the value before configs has loaded.
+  See BacktraceLimit for why it is the default value
+
+- int64_t PCRE.RecursionLimit = PCRE.RecursionLimit, UNKNOWN, staticdefault(100000)|lookuppath(Preg.RecursionLimit)
+
+  It has to use static default because we read the value before configs has loaded
+
+- bool PCRE.ErrorLog = PCRE.ErrorLog, UNKNOWN, staticdefault(true)|lookuppath(Preg.ErrorLog)
+
 # PageletServer
 
 - int PageletServer.ThreadCount = 0, UNKNOWN

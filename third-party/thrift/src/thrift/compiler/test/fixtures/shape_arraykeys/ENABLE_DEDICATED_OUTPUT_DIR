@@ -1,2 +1,0 @@
-# DO_BEFORE(aristidis,20240410): Delete this file when all fixtures use dedicated output dirs.
-The existence of this file enables the generation of the 'shape_arraykeys' fixture output to a dedicated folder (see D54811021). The contents of this file are irrelevant.

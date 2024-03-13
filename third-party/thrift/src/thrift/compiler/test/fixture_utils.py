@@ -97,30 +97,12 @@ def _should_build_included_files_recursively(generator_spec: str) -> bool:
     )
 
 
-# DO_BEFORE(aristidis,20240410): Remove tempo ENABLE_DEDICATED_OUTPUT_DIR
-# capability (after updating all fixtures to use dedicated output dirs).
-def is_dedicated_output_dir_enabled(fixture_dir_abspath: Path) -> bool:
-    """
-    Returns True iff the fixture at the given path has dedicated output dirs enabled.
-
-    If True, the corresponding commands for this fixture should write their
-    output in a dedicated output directory (rather than risk clobbering each
-    other).
-
-    This is added as a temporary migration mechanism, to allow enabling the
-    feature for fixtures individually and in parallel (rather than in a single
-    change with thousands of affected files.
-    """
-    return (fixture_dir_abspath / "ENABLE_DEDICATED_OUTPUT_DIR").is_file()
-
-
 def parse_fixture_cmds(
     repo_root_dir_abspath: Path,
     fixture_name: str,
     fixture_dir_abspath: Path,
     fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
-    enable_dedicated_output_dir: bool,
 ) -> list[FixtureCmd]:
     assert repo_root_dir_abspath.is_absolute()
     assert fixture_dir_abspath.is_absolute()
@@ -139,7 +121,6 @@ def parse_fixture_cmds(
             fixture_dir_abspath,
             fixture_output_root_dir_abspath,
             thrift_bin_path,
-            enable_dedicated_output_dir,
         )
         if fixture_cmd is None:
             continue
@@ -167,7 +148,6 @@ def _parse_fixture_cmd(
     fixture_dir_abspath: Path,
     fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
-    enable_dedicated_output_dir: bool,
 ) -> typing.Optional[FixtureCmd]:
     """
     Parses the given line from a `cmd` file and returns the command arguments
@@ -228,14 +208,9 @@ def _parse_fixture_cmd(
         if _should_build_included_files_recursively(generator_spec):
             base_args.append("-r")
 
-        fixture_cmd_output_abspath = (
-            (fixture_output_root_dir_abspath / cmd_name)
-            if enable_dedicated_output_dir
-            else fixture_output_root_dir_abspath
-        )
         base_args += [
             "-o",
-            fixture_cmd_output_abspath,
+            fixture_output_root_dir_abspath / cmd_name,
             "--gen",
         ]
 

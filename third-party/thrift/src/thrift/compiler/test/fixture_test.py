@@ -60,7 +60,6 @@ class FixtureTest(unittest.TestCase):
         gen_code_path: Path,
         fixture_code_path: Path,
         cmd: typing.List[str],
-        enable_dedicated_output_dir: bool,
     ) -> None:
         """
         Checks that the contents of the files under the two given paths are
@@ -68,20 +67,9 @@ class FixtureTest(unittest.TestCase):
         """
         gen_file_relpaths: list[Path] = sorted(_gen_find_recursive_files(gen_code_path))
 
-        # TODO: Remove the filtering logic of the non-output files in the source
-        # fixture as soon as outputs are moved into a dedicated folder
-        #  (eg ".../out/...") - i.e., as soon as `enable_dedicated_output_dir`
-        # is always True.
-        if enable_dedicated_output_dir:
-            fixture_file_relpaths: list[Path] = sorted(
-                _gen_find_recursive_files(fixture_code_path)
-            )
-        else:
-            fixture_file_relpaths: list[Path] = sorted(
-                file_relpath
-                for file_relpath in _gen_find_recursive_files(fixture_code_path)
-                if file_relpath.name != "cmd" and file_relpath.parts[0] != "src"
-            )
+        fixture_file_relpaths: list[Path] = sorted(
+            _gen_find_recursive_files(fixture_code_path)
+        )
 
         try:
             # Compare that the generated files are the same
@@ -124,18 +112,8 @@ class FixtureTest(unittest.TestCase):
             repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name
         )
 
-        enable_dedicated_output_dir = fixture_utils.is_dedicated_output_dir_enabled(
-            fixture_dir_abspath
-        )
-
-        fixture_output_root_dir_abspath = (
-            self.tmp_dir_abspath / "out"
-            if enable_dedicated_output_dir
-            else self.tmp_dir_abspath
-        )
-
-        if enable_dedicated_output_dir or not fixture_output_root_dir_abspath.exists():
-            fixture_output_root_dir_abspath.mkdir()
+        fixture_output_root_dir_abspath = self.tmp_dir_abspath / "out"
+        fixture_output_root_dir_abspath.mkdir()
 
         fixture_cmds = fixture_utils.parse_fixture_cmds(
             repo_root_dir_abspath,
@@ -143,13 +121,11 @@ class FixtureTest(unittest.TestCase):
             fixture_dir_abspath,
             fixture_output_root_dir_abspath,
             _THRIFT_BIN_PATH,
-            enable_dedicated_output_dir,
         )
 
         # Run thrift compiler and generate files
         for fixture_cmd in fixture_cmds:
-            if enable_dedicated_output_dir:
-                os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
+            os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
 
             subprocess.check_call(
                 fixture_cmd.build_command_args,
@@ -159,13 +135,8 @@ class FixtureTest(unittest.TestCase):
         # Compare generated code to fixture code
         self._compare_code(
             fixture_output_root_dir_abspath,
-            (
-                fixture_dir_abspath / "out"
-                if enable_dedicated_output_dir
-                else fixture_dir_abspath
-            ),
+            fixture_dir_abspath / "out",
             fixture_cmd.build_command_args,
-            enable_dedicated_output_dir,
         )
 
 

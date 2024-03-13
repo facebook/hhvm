@@ -567,11 +567,6 @@ func (p *SimpleJSONProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-// Deprecated: Transport() is a deprecated method.
-func (p *SimpleJSONProtocol) Transport() Transport {
-	return p.trans
-}
-
 func (p *SimpleJSONProtocol) Close() error {
 	return p.trans.Close()
 }

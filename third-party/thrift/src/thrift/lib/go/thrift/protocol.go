@@ -105,9 +105,6 @@ type Protocol interface {
 	Skip(fieldType Type) (err error)
 	Flush() (err error)
 
-	// Deprecated: Transport() is deprecated and will no longer be supported in future
-	Transport() Transport
-
 	// used by SerialChannel and generated thrift Clients
 	Close() error
 }

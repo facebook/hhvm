@@ -75,10 +75,6 @@ func (f *fakeOproto) WriteMessageEnd() error {
 	return nil
 }
 
-func (f *fakeOproto) Transport() Transport {
-	return NewMemoryBuffer()
-}
-
 func (f *fakeOproto) Flush() error {
 	if f.errOnFlush {
 		return errFakeOprotoFlush

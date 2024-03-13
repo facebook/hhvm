@@ -27,12 +27,6 @@ type ClientConn struct {
 	seqID int32
 }
 
-// Deprecated: Transport returns the underlying Transport object inside the ClientConn
-// object
-func (cc *ClientConn) Transport() Transport {
-	return nil
-}
-
 // NewClientConnFromProtocol creates a new ClientConn object using a protocol
 func NewClientConnFromProtocol(proto Protocol) ClientConn {
 	return ClientConn{

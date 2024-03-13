@@ -488,11 +488,6 @@ func (p *BinaryProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-// Deprecated: Transport() is a deprecated method.
-func (p *BinaryProtocol) Transport() Transport {
-	return p.origTransport
-}
-
 func (p *BinaryProtocol) Close() error {
 	return p.origTransport.Close()
 }

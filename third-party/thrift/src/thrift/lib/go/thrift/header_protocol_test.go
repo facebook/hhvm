@@ -23,8 +23,8 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	proto1 := NewHeaderProtocol(tmb)
 	proto2 := NewHeaderProtocol(tmb)
 
-	proto1.SetHeader("preferred_cheese", "cheddar")
-	if v, _ := proto1.Header("preferred_cheese"); v != "cheddar" {
+	proto1.SetRequestHeader("preferred_cheese", "cheddar")
+	if v, _ := proto1.GetRequestHeader("preferred_cheese"); v != "cheddar" {
 		t.Fatalf("failed to set header")
 	}
 	if len(proto1.Headers()) != 1 {

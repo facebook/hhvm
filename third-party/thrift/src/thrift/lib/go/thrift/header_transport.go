@@ -138,15 +138,38 @@ func (t *HeaderTransport) ClearPersistentHeaders() {
 	}
 }
 
+// SetRequestHeader sets a request header
+func (t *HeaderTransport) SetRequestHeader(key, value string) {
+	t.writeInfoHeaders[key] = value
+}
+
+// Deprecated SetHeader is deprecated rather use SetRequestHeader
 func (t *HeaderTransport) SetHeader(key, value string) {
 	t.writeInfoHeaders[key] = value
 }
 
+// GetRequestHeader returns a request header if the key exists, otherwise false
+func (t *HeaderTransport) GetRequestHeader(key string) (string, bool) {
+	v, ok := t.writeInfoHeaders[key]
+	return v, ok
+}
+
+// Deprecated Header is deprecated rather use GetRequestHeader
 func (t *HeaderTransport) Header(key string) (string, bool) {
 	v, ok := t.writeInfoHeaders[key]
 	return v, ok
 }
 
+// GetRequestHeaders returns all the request headers
+func (t *HeaderTransport) GetRequestHeaders() map[string]string {
+	res := map[string]string{}
+	for k, v := range t.writeInfoHeaders {
+		res[k] = v
+	}
+	return res
+}
+
+// Deprecated Headers is deprecated rather use GetRequestHeaders
 func (t *HeaderTransport) Headers() map[string]string {
 	res := map[string]string{}
 	for k, v := range t.writeInfoHeaders {

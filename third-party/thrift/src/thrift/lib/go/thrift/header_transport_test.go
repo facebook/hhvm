@@ -168,15 +168,15 @@ func TestHeaderHeaders(t *testing.T) {
 	assertEq(t, 0, len(trans1.GetResponseHeaders()))
 
 	trans1.SetIdentity("localhost")
-	trans1.SetHeader("thrift_protocol", "compact")
-	trans1.SetHeader("thrift_transport", "header")
-	trans1.SetHeader("preferred_cheese", "cheddar")
+	trans1.SetRequestHeader("thrift_protocol", "compact")
+	trans1.SetRequestHeader("thrift_transport", "header")
+	trans1.SetRequestHeader("preferred_cheese", "cheddar")
 	trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 	assertEq(t, 3, len(trans1.Headers()))
 	assertEq(t, 1, len(trans1.GetPersistentHeaders()))
 
-	headerval, _ := trans1.Header("preferred_cheese")
+	headerval, _ := trans1.GetRequestHeader("preferred_cheese")
 	assertEq(t, "cheddar", headerval)
 	headerval, _ = trans1.GetPersistentHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
@@ -371,9 +371,9 @@ func BenchmarkHeaderFlush(b *testing.B) {
 		trans1 := NewHeaderTransport(tmb)
 
 		trans1.SetIdentity("localhost")
-		trans1.SetHeader("thrift_protocol", "compact")
-		trans1.SetHeader("thrift_transport", "header")
-		trans1.SetHeader("preferred_cheese", "cheddar")
+		trans1.SetRequestHeader("thrift_protocol", "compact")
+		trans1.SetRequestHeader("thrift_transport", "header")
+		trans1.SetRequestHeader("preferred_cheese", "cheddar")
 		trans1.SetPersistentHeader("preferred_cheese", "gouda")
 
 		_, err := trans1.Write(data)

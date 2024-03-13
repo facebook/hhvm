@@ -177,8 +177,8 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 			switch oprotHeader := oprot.(type) {
 			case *HeaderProtocol:
 				// set header for ServiceRouter
-				oprotHeader.SetHeader("uex", errorType(err))
-				oprotHeader.SetHeader("uexw", err.Error())
+				oprotHeader.SetRequestHeader("uex", errorType(err))
+				oprotHeader.SetRequestHeader("uexw", err.Error())
 			}
 			// it's an application generated error, so serialize it
 			// to the client
@@ -190,8 +190,8 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 			switch oprotHeader := oprot.(type) {
 			case *HeaderProtocol:
 				terr := rr.Exception()
-				oprotHeader.SetHeader("uex", errorType(terr))
-				oprotHeader.SetHeader("uexw", terr.Error())
+				oprotHeader.SetRequestHeader("uex", errorType(terr))
+				oprotHeader.SetRequestHeader("uexw", terr.Error())
 			}
 		}
 

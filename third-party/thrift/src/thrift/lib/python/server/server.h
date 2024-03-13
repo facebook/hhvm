@@ -187,10 +187,11 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
         std::move(serializedCompressedRequest).uncompress();
 
     static_assert(ProtocolIn_::protocolType() == ProtocolOut_::protocolType());
-    apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(
+    auto ctxStack = apache::thrift::ContextStack::create(
+        this->getEventHandlersSharedPtr(),
         serviceName_.c_str(),
         functionFullNameMap_.at(ctx->getMethodName()).c_str(),
-        ctx));
+        ctx);
 
     if (ctxStack) {
       ctxStack->preRead();

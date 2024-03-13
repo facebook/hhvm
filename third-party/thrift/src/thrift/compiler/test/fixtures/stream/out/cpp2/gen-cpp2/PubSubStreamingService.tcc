@@ -76,7 +76,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   args.get<0>().value = &uarg_i32_from;
   ::std::int32_t uarg_i32_to{0};
   args.get<1>().value = &uarg_i32_to;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.returnstream", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.returnstream",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "returnstream", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -149,7 +153,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   ::cpp2::PubSubStreamingService_streamthrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.streamthrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.streamthrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "streamthrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -232,7 +240,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   ::cpp2::PubSubStreamingService_servicethrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.servicethrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.servicethrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "servicethrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -322,7 +334,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
   ::cpp2::PubSubStreamingService_servicethrows2_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.servicethrows2", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.servicethrows2",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "servicethrows2", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -422,7 +438,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   ::cpp2::PubSubStreamingService_boththrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.boththrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.boththrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "boththrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -522,7 +542,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   ::cpp2::PubSubStreamingService_responseandstreamstreamthrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.responseandstreamstreamthrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.responseandstreamstreamthrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamstreamthrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -607,7 +631,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   ::cpp2::PubSubStreamingService_responseandstreamservicethrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.responseandstreamservicethrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.responseandstreamservicethrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamservicethrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -699,7 +727,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   ::cpp2::PubSubStreamingService_responseandstreamboththrows_pargs args;
   ::std::int32_t uarg_foo{0};
   args.get<0>().value = &uarg_foo;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.responseandstreamboththrows", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.responseandstreamboththrows",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamboththrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -806,7 +838,11 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
   args.get<0>().value = &uarg_i32_from;
   ::std::int32_t uarg_i32_to{0};
   args.get<1>().value = &uarg_i32_to;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PubSubStreamingService.returnstreamFast", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PubSubStreamingService.returnstreamFast",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "returnstreamFast", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

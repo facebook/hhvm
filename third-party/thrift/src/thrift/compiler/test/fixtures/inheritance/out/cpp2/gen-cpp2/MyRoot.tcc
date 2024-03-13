@@ -29,7 +29,11 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyRoot_do_root_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyRoot.do_root", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyRoot.do_root",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "do_root", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

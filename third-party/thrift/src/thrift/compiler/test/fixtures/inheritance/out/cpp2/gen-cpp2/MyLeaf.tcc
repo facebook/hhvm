@@ -29,7 +29,11 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyLeaf_do_leaf_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyLeaf.do_leaf", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyLeaf.do_leaf",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "do_leaf", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

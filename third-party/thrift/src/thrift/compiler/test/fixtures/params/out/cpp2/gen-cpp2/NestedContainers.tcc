@@ -39,7 +39,11 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   ::cpp2::NestedContainers_mapList_pargs args;
   auto uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>>();
   args.get<0>().value = uarg_foo.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "NestedContainers.mapList", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "NestedContainers.mapList",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "mapList", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -107,7 +111,11 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   ::cpp2::NestedContainers_mapSet_pargs args;
   auto uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::set<::std::int32_t>>>();
   args.get<0>().value = uarg_foo.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "NestedContainers.mapSet", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "NestedContainers.mapSet",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "mapSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -175,7 +183,11 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   ::cpp2::NestedContainers_listMap_pargs args;
   auto uarg_foo = std::make_unique<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>();
   args.get<0>().value = uarg_foo.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "NestedContainers.listMap", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "NestedContainers.listMap",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "listMap", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -243,7 +255,11 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   ::cpp2::NestedContainers_listSet_pargs args;
   auto uarg_foo = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
   args.get<0>().value = uarg_foo.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "NestedContainers.listSet", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "NestedContainers.listSet",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "listSet", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -311,7 +327,11 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   ::cpp2::NestedContainers_turtles_pargs args;
   auto uarg_foo = std::make_unique<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>>();
   args.get<0>().value = uarg_foo.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "NestedContainers.turtles", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "NestedContainers.turtles",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "turtles", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

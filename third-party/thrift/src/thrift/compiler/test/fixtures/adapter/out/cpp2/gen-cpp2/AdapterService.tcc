@@ -31,7 +31,11 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::facebook::thrift::test::AdapterService_count_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "AdapterService.count", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "AdapterService.count",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "count", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -101,7 +105,11 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   ::facebook::thrift::test::AdapterService_adaptedTypes_pargs args;
   auto uarg_arg = std::make_unique<::facebook::thrift::test::HeapAllocated>();
   args.get<0>().value = uarg_arg.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "AdapterService.adaptedTypes", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "AdapterService.adaptedTypes",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "adaptedTypes", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

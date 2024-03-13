@@ -35,7 +35,11 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   args.get<1>().value = uarg_arg2.get();
   auto uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
   args.get<2>().value = uarg_arg3.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "Service.func", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "Service.func",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "func", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

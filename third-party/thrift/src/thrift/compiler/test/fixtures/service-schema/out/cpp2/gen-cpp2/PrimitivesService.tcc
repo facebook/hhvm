@@ -37,7 +37,11 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   args.get<0>().value = &uarg_param0;
   ::std::int64_t uarg_param1{0};
   args.get<1>().value = &uarg_param1;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PrimitivesService.init", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PrimitivesService.init",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "init", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -105,7 +109,11 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::PrimitivesService_method_that_throws_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PrimitivesService.method_that_throws", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PrimitivesService.method_that_throws",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "method_that_throws", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -192,7 +200,11 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   ::cpp2::PrimitivesService_return_void_method_pargs args;
   ::std::int64_t uarg_id{0};
   args.get<0>().value = &uarg_id;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PrimitivesService.return_void_method", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "PrimitivesService.return_void_method",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "return_void_method", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

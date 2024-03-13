@@ -31,7 +31,11 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   ::test::fixtures::basic::FB303Service_simple_rpc_pargs args;
   ::std::int32_t uarg_int_parameter{0};
   args.get<0>().value = &uarg_int_parameter;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "FB303Service.simple_rpc", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "FB303Service.simple_rpc",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "simple_rpc", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

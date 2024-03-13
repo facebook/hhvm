@@ -29,7 +29,11 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::ServerR
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test::fixtures::basic::FooService_simple_rpc_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "FooService.simple_rpc", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "FooService.simple_rpc",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "simple_rpc", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

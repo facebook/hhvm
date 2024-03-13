@@ -29,7 +29,11 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyServicePrioChild_pang_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyServicePrioChild.pang", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyServicePrioChild.pang",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "pang", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

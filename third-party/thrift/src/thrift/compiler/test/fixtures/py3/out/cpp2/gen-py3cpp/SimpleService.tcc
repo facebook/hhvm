@@ -111,7 +111,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_get_five_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_five", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_five",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_five", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -181,7 +185,11 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(apache::thrift::Server
   ::py3::simple::SimpleService_add_five_pargs args;
   ::std::int32_t uarg_num{0};
   args.get<0>().value = &uarg_num;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.add_five", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.add_five",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "add_five", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -249,7 +257,11 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_do_nothing_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.do_nothing", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.do_nothing",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "do_nothing", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -319,7 +331,11 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(apache::thrift::ServerRe
   args.get<0>().value = uarg_first.get();
   auto uarg_second = std::make_unique<::std::string>();
   args.get<1>().value = uarg_second.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.concat", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.concat",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "concat", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -389,7 +405,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(apache::thrift::Serve
   ::py3::simple::SimpleService_get_value_pargs args;
   auto uarg_simple_struct = std::make_unique<::py3::simple::SimpleStruct>();
   args.get<0>().value = uarg_simple_struct.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_value", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_value",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_value", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -459,7 +479,11 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(apache::thrift::ServerRe
   ::py3::simple::SimpleService_negate_pargs args;
   bool uarg_input{0};
   args.get<0>().value = &uarg_input;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.negate", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.negate",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "negate", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -529,7 +553,11 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(apache::thrift::ServerRequ
   ::py3::simple::SimpleService_tiny_pargs args;
   ::std::int8_t uarg_input{0};
   args.get<0>().value = &uarg_input;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.tiny", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.tiny",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "tiny", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -599,7 +627,11 @@ void SimpleServiceAsyncProcessor::executeRequest_small(apache::thrift::ServerReq
   ::py3::simple::SimpleService_small_pargs args;
   ::std::int16_t uarg_input{0};
   args.get<0>().value = &uarg_input;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.small", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.small",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "small", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -669,7 +701,11 @@ void SimpleServiceAsyncProcessor::executeRequest_big(apache::thrift::ServerReque
   ::py3::simple::SimpleService_big_pargs args;
   ::std::int64_t uarg_input{0};
   args.get<0>().value = &uarg_input;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.big", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.big",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "big", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -739,7 +775,11 @@ void SimpleServiceAsyncProcessor::executeRequest_two(apache::thrift::ServerReque
   ::py3::simple::SimpleService_two_pargs args;
   double uarg_input{0};
   args.get<0>().value = &uarg_input;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.two", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.two",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "two", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -807,7 +847,11 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_expected_exception_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.expected_exception", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.expected_exception",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "expected_exception", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -890,7 +934,11 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_unexpected_exception_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.unexpected_exception", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.unexpected_exception",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "unexpected_exception", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -960,7 +1008,11 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(apache::thrift::Se
   ::py3::simple::SimpleService_sum_i16_list_pargs args;
   auto uarg_numbers = std::make_unique<::std::vector<::std::int16_t>>();
   args.get<0>().value = uarg_numbers.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.sum_i16_list", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.sum_i16_list",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "sum_i16_list", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1030,7 +1082,11 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(apache::thrift::Se
   ::py3::simple::SimpleService_sum_i32_list_pargs args;
   auto uarg_numbers = std::make_unique<::std::vector<::std::int32_t>>();
   args.get<0>().value = uarg_numbers.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.sum_i32_list", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.sum_i32_list",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "sum_i32_list", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1100,7 +1156,11 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(apache::thrift::Se
   ::py3::simple::SimpleService_sum_i64_list_pargs args;
   auto uarg_numbers = std::make_unique<::std::vector<::std::int64_t>>();
   args.get<0>().value = uarg_numbers.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.sum_i64_list", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.sum_i64_list",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "sum_i64_list", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1170,7 +1230,11 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(apache::thrift::Ser
   ::py3::simple::SimpleService_concat_many_pargs args;
   auto uarg_words = std::make_unique<::std::vector<::std::string>>();
   args.get<0>().value = uarg_words.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.concat_many", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.concat_many",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "concat_many", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1240,7 +1304,11 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(apache::thrift::S
   ::py3::simple::SimpleService_count_structs_pargs args;
   auto uarg_items = std::make_unique<::std::vector<::py3::simple::SimpleStruct>>();
   args.get<0>().value = uarg_items.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.count_structs", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.count_structs",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "count_structs", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1310,7 +1378,11 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(apache::thrift::ServerR
   ::py3::simple::SimpleService_sum_set_pargs args;
   auto uarg_numbers = std::make_unique<::std::set<::std::int32_t>>();
   args.get<0>().value = uarg_numbers.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.sum_set", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.sum_set",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "sum_set", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1382,7 +1454,11 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(apache::thrift::S
   args.get<0>().value = uarg_words.get();
   auto uarg_word = std::make_unique<::std::string>();
   args.get<1>().value = uarg_word.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.contains_word", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.contains_word",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "contains_word", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1454,7 +1530,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(apache::thrift::S
   args.get<0>().value = uarg_words.get();
   auto uarg_key = std::make_unique<::std::string>();
   args.get<1>().value = uarg_key.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_map_value", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_map_value",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_map_value", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1524,7 +1604,11 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(apache::thrift::Serv
   ::py3::simple::SimpleService_map_length_pargs args;
   auto uarg_items = std::make_unique<::std::map<::std::string, ::py3::simple::SimpleStruct>>();
   args.get<0>().value = uarg_items.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.map_length", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.map_length",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "map_length", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1594,7 +1678,11 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(apache::thrift::
   ::py3::simple::SimpleService_sum_map_values_pargs args;
   auto uarg_items = std::make_unique<::std::map<::std::string, ::std::int16_t>>();
   args.get<0>().value = uarg_items.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.sum_map_values", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.sum_map_values",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "sum_map_values", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1664,7 +1752,11 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(apache::thrift:
   ::py3::simple::SimpleService_complex_sum_i32_pargs args;
   auto uarg_counter = std::make_unique<::py3::simple::ComplexStruct>();
   args.get<0>().value = uarg_counter.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.complex_sum_i32", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.complex_sum_i32",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "complex_sum_i32", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1734,7 +1826,11 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(apache::thrift::Ser
   ::py3::simple::SimpleService_repeat_name_pargs args;
   auto uarg_counter = std::make_unique<::py3::simple::ComplexStruct>();
   args.get<0>().value = uarg_counter.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.repeat_name", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.repeat_name",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "repeat_name", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1802,7 +1898,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_get_struct_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_struct", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_struct",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_struct", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1872,7 +1972,11 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(apache::thrift::ServerReque
   ::py3::simple::SimpleService_fib_pargs args;
   ::std::int16_t uarg_n{0};
   args.get<0>().value = &uarg_n;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.fib", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.fib",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "fib", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1942,7 +2046,11 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(apache::thrift::Se
   ::py3::simple::SimpleService_unique_words_pargs args;
   auto uarg_words = std::make_unique<::std::vector<::std::string>>();
   args.get<0>().value = uarg_words.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.unique_words", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.unique_words",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "unique_words", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2012,7 +2120,11 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(apache::thrift::Ser
   ::py3::simple::SimpleService_words_count_pargs args;
   auto uarg_words = std::make_unique<::std::vector<::std::string>>();
   args.get<0>().value = uarg_words.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.words_count", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.words_count",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "words_count", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2082,7 +2194,11 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(apache::thrift::Server
   ::py3::simple::SimpleService_set_enum_pargs args;
   ::py3::simple::AnEnum uarg_in_enum{static_cast<::py3::simple::AnEnum>(0)};
   args.get<0>().value = &uarg_in_enum;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.set_enum", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.set_enum",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "set_enum", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2154,7 +2270,11 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(apache::thrift::S
   args.get<0>().value = &uarg_num_lists;
   ::std::int16_t uarg_num_items{0};
   args.get<1>().value = &uarg_num_items;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.list_of_lists", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.list_of_lists",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "list_of_lists", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2224,7 +2344,11 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(apache
   ::py3::simple::SimpleService_word_character_frequency_pargs args;
   auto uarg_sentence = std::make_unique<::std::string>();
   args.get<0>().value = uarg_sentence.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.word_character_frequency", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.word_character_frequency",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "word_character_frequency", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2294,7 +2418,11 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(apache::thrift::Se
   ::py3::simple::SimpleService_list_of_sets_pargs args;
   auto uarg_some_words = std::make_unique<::std::string>();
   args.get<0>().value = uarg_some_words.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.list_of_sets", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.list_of_sets",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "list_of_sets", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2364,7 +2492,11 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(apache::thr
   ::py3::simple::SimpleService_nested_map_argument_pargs args;
   auto uarg_struct_map = std::make_unique<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>>();
   args.get<0>().value = uarg_struct_map.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.nested_map_argument", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.nested_map_argument",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "nested_map_argument", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2434,7 +2566,11 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(apache::thrift::S
   ::py3::simple::SimpleService_make_sentence_pargs args;
   auto uarg_word_chars = std::make_unique<::std::vector<::std::vector<::std::string>>>();
   args.get<0>().value = uarg_word_chars.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.make_sentence", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.make_sentence",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "make_sentence", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2504,7 +2640,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(apache::thrift::Serve
   ::py3::simple::SimpleService_get_union_pargs args;
   auto uarg_sets = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
   args.get<0>().value = uarg_sets.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_union", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_union",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_union", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2574,7 +2714,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(apache::thrift::Server
   ::py3::simple::SimpleService_get_keys_pargs args;
   auto uarg_string_map = std::make_unique<::std::vector<::std::map<::std::string, ::std::string>>>();
   args.get<0>().value = uarg_string_map.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_keys", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_keys",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_keys", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2644,7 +2788,11 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(apache::thrift::S
   ::py3::simple::SimpleService_lookup_double_pargs args;
   ::std::int32_t uarg_key{0};
   args.get<0>().value = &uarg_key;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.lookup_double", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.lookup_double",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "lookup_double", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2714,7 +2862,11 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(apache::thrift:
   ::py3::simple::SimpleService_retrieve_binary_pargs args;
   auto uarg_something = std::make_unique<::std::string>();
   args.get<0>().value = uarg_something.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.retrieve_binary", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.retrieve_binary",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "retrieve_binary", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2784,7 +2936,11 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(apache::thrift::
   ::py3::simple::SimpleService_contain_binary_pargs args;
   auto uarg_binaries = std::make_unique<::std::vector<::std::string>>();
   args.get<0>().value = uarg_binaries.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.contain_binary", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.contain_binary",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "contain_binary", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2854,7 +3010,11 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(apache::thrift::Se
   ::py3::simple::SimpleService_contain_enum_pargs args;
   auto uarg_the_enum = std::make_unique<::std::vector<::py3::simple::AnEnum>>();
   args.get<0>().value = uarg_the_enum.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.contain_enum", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.contain_enum",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "contain_enum", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2924,7 +3084,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(apache:
   ::py3::simple::SimpleService_get_binary_union_struct_pargs args;
   auto uarg_u = std::make_unique<::py3::simple::BinaryUnion>();
   args.get<0>().value = uarg_u.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_binary_union_struct", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_binary_union_struct",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_binary_union_struct", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2992,7 +3156,11 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::SimpleService_get_struct_hidden_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_struct_hidden", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SimpleService.get_struct_hidden",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_struct_hidden", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

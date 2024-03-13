@@ -36,7 +36,11 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::C_f_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "C.f", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "C.f",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "f", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -102,7 +106,11 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::C_numbers_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "C.numbers", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "C.numbers",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "numbers", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -179,7 +187,11 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
   args.get<1>().value = uarg_b.get();
   auto uarg_c = std::make_unique<::std::set<::std::int32_t>>();
   args.get<2>().value = uarg_c.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "C.thing", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "C.thing",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "thing", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

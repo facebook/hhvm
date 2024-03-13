@@ -31,7 +31,11 @@ void MyServiceAsyncProcessor::executeRequest_first(apache::thrift::ServerRequest
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test::fixtures::basic-structured-annotations::MyService_first_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.first", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyService.first",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "first", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -101,7 +105,11 @@ void MyServiceAsyncProcessor::executeRequest_second(apache::thrift::ServerReques
   ::test::fixtures::basic-structured-annotations::MyService_second_pargs args;
   ::std::int64_t uarg_count{0};
   args.get<0>().value = &uarg_count;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.second", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyService.second",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "second", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

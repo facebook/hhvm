@@ -33,7 +33,11 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   ::cpp2::DbMixedStackArguments_getDataByKey0_pargs args;
   auto uarg_key = std::make_unique<::std::string>();
   args.get<0>().value = uarg_key.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "DbMixedStackArguments.getDataByKey0", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "DbMixedStackArguments.getDataByKey0",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "getDataByKey0", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -103,7 +107,11 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   ::cpp2::DbMixedStackArguments_getDataByKey1_pargs args;
   auto uarg_key = std::make_unique<::std::string>();
   args.get<0>().value = uarg_key.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "DbMixedStackArguments.getDataByKey1", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "DbMixedStackArguments.getDataByKey1",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "getDataByKey1", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

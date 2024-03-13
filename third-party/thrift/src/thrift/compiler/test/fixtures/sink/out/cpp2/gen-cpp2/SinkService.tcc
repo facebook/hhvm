@@ -69,7 +69,11 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_method_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.method", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.method",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "method", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -149,7 +153,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodAndReponse_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodAndReponse", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodAndReponse",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodAndReponse", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -231,7 +239,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodThrow_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodThrow", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodThrow",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodThrow", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -328,7 +340,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodSinkThrow_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodSinkThrow", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodSinkThrow",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodSinkThrow", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -408,7 +424,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodFinalThrow_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodFinalThrow", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodFinalThrow",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodFinalThrow", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -498,7 +518,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodBothThrow_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodBothThrow", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodBothThrow",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodBothThrow", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -591,7 +615,11 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::SinkService_methodFast_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SinkService.methodFast", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "SinkService.methodFast",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "methodFast", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

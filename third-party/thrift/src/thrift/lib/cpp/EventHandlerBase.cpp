@@ -41,6 +41,11 @@ EventHandlerBase::getEventHandlers() const {
   return folly::range(*handlers_);
 }
 
+const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
+EventHandlerBase::getEventHandlersSharedPtr() const {
+  return handlers_;
+}
+
 TProcessorBase::TProcessorBase() {
   std::shared_lock lock{getRWMutex()};
 

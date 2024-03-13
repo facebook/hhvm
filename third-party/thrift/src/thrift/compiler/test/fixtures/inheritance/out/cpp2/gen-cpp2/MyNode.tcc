@@ -29,7 +29,11 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyNode_do_mid_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyNode.do_mid", serverRequest.requestContext()));
+  auto ctxStack = apache::thrift::ContextStack::create(
+    this->getEventHandlersSharedPtr(),
+    this->getServiceName(),
+    "MyNode.do_mid",
+    serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "do_mid", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

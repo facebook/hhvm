@@ -35,15 +35,15 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
   Sample rate for Autoload & Facts API latency logging
 
-- std::string Autoload.Query = "" (Query), UNKNOWN, repooptionsflag(Autoload)
-- std::string Autoload.TrustedDBPath = "" (TrustedDBPath), UNKNOWN, repooptionsflag(Autoload)
-- std::vector<std::string> Autoload.IndexedMethodAttributes = {} (IndexedMethodAttributes), UNKNOWN, repooptionsflag(Autoload)
-- std::vector<std::string> Autoload.RepoBuildSearchDirs = {} (RepoBuildSearchDirs), UNKNOWN, repooptionsflag(Autoload)
+- std::string Autoload.Query = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(Query)
+- std::string Autoload.TrustedDBPath = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(TrustedDBPath)
+- std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
+- std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)
 
 # Debugger (Eval.Debugger.)
 
-- bool Debugger.EnableHphpd = false (Eval.Debugger.EnableDebugger), UNKNOWN
-- bool Debugger.EnableVSDebugger = EnableVSDebugger (Eval.Debugger.VSDebugEnable), UNKNOWN
+- bool Debugger.EnableHphpd = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebugger)
+- bool Debugger.EnableVSDebugger = Debugger.EnableVSDebugger, UNKNOWN, lookuppath(Eval.Debugger.VSDebugEnable)
 
   Yes the default value is itself. That is because between the static initiation and the
   Config::Bind call https://fburl.com/code/f7wryx1z sets it to a different value sometimes.
@@ -51,12 +51,12 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int Debugger.VSDebuggerListenPort = -1, UNKNOWN, nobind
 - std::string Debugger.VSDebuggerDomainSocketPath = "", UNKNOWN, nobind
 - bool Debugger.VSDebuggerNoWait = false, UNKNOWN, nobind
-- bool Debugger.EnableColor = true (Eval.Debugger.EnableDebuggerColor), UNKNOWN
-- bool Debugger.EnablePrompt = true (Eval.Debugger.EnableDebuggerPrompt), UNKNOWN
-- bool Debugger.EnableServer = false (Eval.Debugger.EnableDebuggerServer), UNKNOWN
-- bool Debugger.EnableUsageLog = false (Eval.Debugger.EnableDebuggerUsageLog), UNKNOWN
-- std::string Debugger.ServerIP = "" (Eval.Debugger.IP), UNKNOWN
-- int Debugger.ServerPort = 8089 (Eval.Debugger.Port), UNKNOWN
+- bool Debugger.EnableColor = true, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerColor)
+- bool Debugger.EnablePrompt = true, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerPrompt)
+- bool Debugger.EnableServer = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerServer)
+- bool Debugger.EnableUsageLog = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerUsageLog)
+- std::string Debugger.ServerIP = "", UNKNOWN, lookuppath(Eval.Debugger.IP)
+- int Debugger.ServerPort = 8089, UNKNOWN, lookuppath(Eval.Debugger.Port)
 - bool Debugger.DisableIPv6 = false, UNKNOWN
 - std::string Debugger.DefaultSandboxPath = "", UNKNOWN
 - std::string Debugger.StartupDocument = "", UNKNOWN
@@ -101,7 +101,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   Make it so referencing superglobals directly via their $_[A-Z]+ "variable"
   name hard-fails rather than emitting, e.g., CgetG
 
-- std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {} (AliasedNamespaces), UNKNOWN, repooptionsflag(Parser)
+- std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {}, UNKNOWN, repooptionsflag(Parser)|lookuppath(AliasedNamespaces)
 
 - bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)
 - bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)
@@ -125,7 +125,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   IsTypeStructC for primitive types that are trivially checkable.
 
 - bool Hack.Lang.LookForTypechecker = false, UNKNOWN
-- bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
+- bool Hack.Lang.AutoTypecheck = Hack.Lang.LookForTypechecker, UNKNOWN
 
   If you turn off LookForTypechecker, you probably want to turn this off
   too -- basically, make the two look like the same option to external
@@ -218,7 +218,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 # Jit (Eval.Jit)
 
-- bool Jit.Enabled = true (Eval.Jit), UNKNOWN
+- bool Jit.Enabled = true, UNKNOWN, lookuppath(Eval.Jit)
 - bool Jit.EvaledCode = true, UNKNOWN
 - bool Jit.RequireWriteLease = false, UNKNOWN
 - uint64_t Jit.RelocationSize = 1 << 20, UNKNOWN
@@ -364,19 +364,19 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 # PCRE (Eval.PCRE)
 
-- uint32_t PCRE.TableSize = 96 * 1024, UNKNOWN, defaultearly
+- uint32_t PCRE.TableSize = PCRE.TableSize, UNKNOWN, staticdefault(96 * 1024)
 
-  Need to be defaultearly because it is used in the init of a static
+  Need to be staticdefault because it is used in the init of a static
   variable. It will then be reinited after we read the config
 
-- uint64_t PCRE.ExpireInterval = 2 * 60 * 60, UNKNOWN, defaultearly
+- uint64_t PCRE.ExpireInterval = PCRE.ExpireInterval, UNKNOWN, staticdefault(2 * 60 * 60)
 
-  Need to be defaultearly because it is used in the init of a static
+  Need to be staticdefault because it is used in the init of a static
   variable. It will then be reinited after we read the config
 
-- std::string PCRE.CacheType = "static", UNKNOWN, defaultearly
+- std::string PCRE.CacheType = PCRE.CacheType, UNKNOWN, staticdefault("static")
 
-  Need to be defaultearly because it is used in the init of a static
+  Need to be staticdefault because it is used in the init of a static
   variable. It will then be reinited after we read the config
 
 # PageletServer
@@ -386,7 +386,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int PageletServer.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
 - int PageletServer.QueueLimit = 0, UNKNOWN
 - bool PageletServer.ThreadDropStack = false, UNKNOWN
-- uint64_t PageletServer.HeaderCheck = 0 (Eval.PageletServerHeaderCheck), UNKNOWN
+- uint64_t PageletServer.HeaderCheck = 0, UNKNOWN, lookuppath(Eval.PageletServerHeaderCheck)
 
   When starting a pagelet server the specified headers are passed as
   a dictionary that can contain both "key => value" fields and
@@ -399,7 +399,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   2 - throw if any header is set using the deprecated "key: value"
       format
 
-- uint64_t PageletServer.HeaderCollide = 0 (Eval.PageletServerHeaderCollide), UNKNOWN
+- uint64_t PageletServer.HeaderCollide = 0, UNKNOWN, lookuppath(Eval.PageletServerHeaderCollide)
 
   Similar to the above option this setting controls the behavior of
   hhvm when collisions occur in the pagelet header fields.
@@ -411,26 +411,26 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 # PHP7
 
 - bool PHP7.all, UNKNOWN, private
-- bool PHP7.NoHexNumerics = all, UNKNOWN, globaldata|unitcacheflag
+- bool PHP7.NoHexNumerics = PHP7.all, UNKNOWN, globaldata|unitcacheflag
 
   Indicates whether hex strings (e.g. "0x20") can be used for numeric
   operations, e.g. ("0x20" + 1)
 
-- bool PHP7.Builtins = all, UNKNOWN, globaldata|unitcacheflag
+- bool PHP7.Builtins = PHP7.all, UNKNOWN, globaldata|unitcacheflag
 
   Indicates whether the repo was compiled with PHP7 builtins enabled.
 
-- bool PHP7.EngineExceptions = all, UNKNOWN
-- bool PHP7.Substr = all, UNKNOWN, globaldata|unitcacheflag
+- bool PHP7.EngineExceptions = PHP7.all, UNKNOWN
+- bool PHP7.Substr = PHP7.all, UNKNOWN, globaldata|unitcacheflag
 
   Indicates whether the repo was compiled with PHP7 substr behavior which
   returns an empty string if the stringi length is equal to start characters
   long, instead of PHP5's false.
 
-- bool PHP7.DisallowUnsafeCurlUploads = all, UNKNOWN
+- bool PHP7.DisallowUnsafeCurlUploads = PHP7.all, UNKNOWN
 
-- bool PHP7.UVS = all, UNKNOWN, repooptionsflag(Parser, false)
-- bool PHP7.LTRAssign = all, UNKNOWN, repooptionsflag(Parser, false)
+- bool PHP7.UVS = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
+- bool PHP7.LTRAssign = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
 
 # Server
 
@@ -468,7 +468,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int Server.Backlog = 128, UNKNOWN
 - int Server.ConnectionLimit = 0, UNKNOWN
 - int Server.ThreadCount, UNKNOWN
-- int Server.QueueCount = ThreadCount, UNKNOWN
+- int Server.QueueCount = Server.ThreadCount, UNKNOWN
 - int Server.IOThreadCount = 1, UNKNOWN
 - int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
 - bool Server.LegacyBehavior = true, UNKNOWN
@@ -511,8 +511,8 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int64_t Server.RSSNeededMb = 4096, UNKNOWN
 - int64_t Server.CriticalFreeMb = 512, UNKNOWN
 - int Server.CacheFreeFactor = 50, UNKNOWN, postprocess
-- bool Server.Five0ThreeOnShutdownAbort = false (Server.503OnShutdownAbort), UNKNOWN
-- int Server.Five0ThreeRetryAfterSeconds = -1 (Server.503RetryAfterSeconds), UNKNOWN
+- bool Server.Five0ThreeOnShutdownAbort = false, UNKNOWN, lookuppath(Server.503OnShutdownAbort)
+- int Server.Five0ThreeRetryAfterSeconds = -1, UNKNOWN, lookuppath(Server.503RetryAfterSeconds)
 - std::vector<std::string> Server.SSLNextProtocols = {}, UNKNOWN
 - bool Server.EnableH2C = false, UNKNOWN
 - bool Server.EnableKeepAlive = true, UNKNOWN
@@ -646,8 +646,8 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
   Allow running hhvm as root
 
-- int64_t Server.Upload.MaxFileSize = 100 (Server.Upload.UploadMaxFileSize), UNKNOWN, postprocess
-- std::string Server.Upload.TmpDir = "/tmp" (Server.Upload.UploadTmpDir), UNKNOWN
+- int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
+- std::string Server.Upload.TmpDir = "/tmp", UNKNOWN, lookuppath(Server.Upload.UploadsTmpDir)
 - bool Server.Upload.EnableFileUploads = true, UNKNOWN
 - int64_t Server.Upload.MaxFileUploads = 20, UNKNOWN
 - bool Server.Upload.EnableUploadProgress = false, UNKNOWN

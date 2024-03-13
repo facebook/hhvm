@@ -81,6 +81,12 @@ class BaseStats {
       tlStat->add(value);
     }
   }
+  template <typename StatT>
+  static void addValueToOptionalStat(StatT& tlStat, int64_t value) {
+    if (tlStat) {
+      tlStat->addValue(value);
+    }
+  }
 
   template <typename StatT>
   static void incrementOptionalCounter(std::optional<StatT>& tlCounter,

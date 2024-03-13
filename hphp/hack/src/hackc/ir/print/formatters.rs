@@ -22,6 +22,7 @@ use ir_core::instr::HasLoc;
 use ir_core::instr::Special;
 use ir_core::BareThisOp;
 use ir_core::CollectionType;
+use ir_core::DictEntry;
 use ir_core::IncDecOp;
 use ir_core::InitPropOp;
 use ir_core::IsTypeOp;
@@ -751,34 +752,17 @@ impl Display for FmtTypedValue<'_> {
                 write!(
                     f,
                     "keyset[{}]",
-                    FmtSep::comma(values.iter(), |f, v| { FmtArrayKey(v).fmt(f) })
+                    FmtSep::comma(values.iter(), |f, v| { FmtTypedValue(v).fmt(f) })
                 )
             }
             TypedValue::Dict(values) => {
                 write!(
                     f,
                     "dict[{}]",
-                    FmtSep::comma(values.iter(), |f, (key, value)| {
-                        write!(f, "{} => {}", FmtArrayKey(key), FmtTypedValue(value))
+                    FmtSep::comma(values.iter(), |f, DictEntry { key, value }| {
+                        write!(f, "{} => {}", FmtTypedValue(key), FmtTypedValue(value))
                     })
                 )
-            }
-        }
-    }
-}
-
-pub(crate) struct FmtArrayKey<'a>(pub &'a ArrayKey);
-
-impl Display for FmtArrayKey<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtArrayKey(tv) = *self;
-        match tv {
-            ArrayKey::Int(v) => {
-                write!(f, "{}", v)
-            }
-            ArrayKey::String(v) => FmtEscapedString(v.as_bytes()).fmt(f),
-            ArrayKey::LazyClass(v) => {
-                write!(f, "lazy({})", FmtQuotedStringId(v.as_bytes_id()))
             }
         }
     }

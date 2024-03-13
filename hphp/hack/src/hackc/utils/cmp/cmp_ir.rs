@@ -1481,11 +1481,21 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
             cmp_slice(a, b, cmp_typed_value).qualified("vec")?;
         }
         (TypedValue::Keyset(a), TypedValue::Keyset(b)) => {
-            cmp_slice(a.0.iter(), b.0.iter(), cmp_array_key).qualified("keyset")?;
+            cmp_slice(a.iter(), b.iter(), cmp_typed_value).qualified("keyset")?;
         }
         (TypedValue::Dict(a), TypedValue::Dict(b)) => {
-            cmp_slice(a.0.keys(), b.0.keys(), cmp_array_key).qualified("dict keys")?;
-            cmp_slice(a.0.values(), b.0.values(), cmp_typed_value).qualified("dict values")?;
+            cmp_slice(
+                a.iter().map(|e| &e.key),
+                b.iter().map(|e| &e.key),
+                cmp_typed_value,
+            )
+            .qualified("dict keys")?;
+            cmp_slice(
+                a.iter().map(|e| &e.value),
+                b.iter().map(|e| &e.value),
+                cmp_typed_value,
+            )
+            .qualified("dict values")?;
         }
 
         // these should never happen
@@ -1502,26 +1512,6 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
             | TypedValue::Dict(_),
             _,
         ) => unreachable!(),
-    }
-
-    Ok(())
-}
-
-fn cmp_array_key(a: &ArrayKey, b: &ArrayKey) -> Result {
-    cmp_eq(std::mem::discriminant(a), std::mem::discriminant(b))?;
-
-    match (a, b) {
-        (ArrayKey::Int(a), ArrayKey::Int(b)) => cmp_eq(a, b).qualified("int")?,
-        (ArrayKey::String(a), ArrayKey::String(b)) => cmp_eq(*a, *b).qualified("string")?,
-
-        (ArrayKey::LazyClass(a), ArrayKey::LazyClass(b)) => {
-            cmp_eq(*a, *b).qualified("lazy_class")?
-        }
-
-        // these should never happen
-        (ArrayKey::Int(_) | ArrayKey::String(_) | ArrayKey::LazyClass(_), _) => {
-            unreachable!()
-        }
     }
 
     Ok(())

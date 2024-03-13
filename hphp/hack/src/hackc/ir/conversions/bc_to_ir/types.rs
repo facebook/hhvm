@@ -112,13 +112,12 @@ pub(crate) fn convert_typedef(td: &hhbc::Typedef) -> ir::Typedef {
         .iter()
         .map(types::convert_type)
         .collect_vec();
-    let type_structure = convert::convert_typed_value(type_structure);
 
     ir::Typedef {
         name: *name,
         attributes,
         type_info_union,
-        type_structure,
+        type_structure: type_structure.clone(),
         loc,
         attrs: *attrs,
         case_type: *case_type,

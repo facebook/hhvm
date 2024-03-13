@@ -7,7 +7,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use ir_core::func::DefaultValue;
-use ir_core::ArrayKey;
 use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
 use ir_core::Attribute;
@@ -21,7 +20,7 @@ use ir_core::CollectionType;
 use ir_core::ConstName;
 use ir_core::Constant;
 use ir_core::ConstantId;
-use ir_core::DictValue;
+use ir_core::DictEntry;
 use ir_core::EnforceableType;
 use ir_core::FatalOp;
 use ir_core::FloatBits;
@@ -32,7 +31,6 @@ use ir_core::InitPropOp;
 use ir_core::InstrId;
 use ir_core::IsLogAsDynamicCallOp;
 use ir_core::IsTypeOp;
-use ir_core::KeysetValue;
 use ir_core::MOpMode;
 use ir_core::MethodName;
 use ir_core::ModuleName;
@@ -70,18 +68,18 @@ pub(crate) fn is_vid(id: &[u8]) -> bool {
     id.starts_with(b"%") || id.starts_with(b"#")
 }
 
-fn parse_array_key(tokenizer: &mut Tokenizer<'_>) -> Result<ArrayKey> {
+fn parse_array_key(tokenizer: &mut Tokenizer<'_>) -> Result<TypedValue> {
     let t = tokenizer.expect_any_token()?;
     Ok(match t {
         Token::Identifier(s, _) if s == "lazy" => {
             parse!(tokenizer, "(" <id:parse_class_name> ")");
-            ArrayKey::LazyClass(id)
+            TypedValue::LazyClass(id)
         }
         Token::Identifier(s, _) if is_int(s.as_bytes()) => {
             let i = s.parse()?;
-            ArrayKey::Int(i)
+            TypedValue::Int(i)
         }
-        Token::QuotedString(_, s, _) => ArrayKey::String(ir_core::intern_bytes(unescape(&s)?)),
+        Token::QuotedString(_, s, _) => TypedValue::String(ir_core::intern_bytes(unescape(&s)?)),
         _ => return Err(t.bail(format!("Expected string or int but got {t}"))),
     })
 }
@@ -769,18 +767,25 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
     let t = tokenizer.expect_any_token()?;
     Ok(match t {
         Token::Identifier(s, _) if s == "dict" => {
-            fn parse_arrow_tuple(tokenizer: &mut Tokenizer<'_>) -> Result<(ArrayKey, TypedValue)> {
+            fn parse_arrow_tuple(
+                tokenizer: &mut Tokenizer<'_>,
+            ) -> Result<(TypedValue, TypedValue)> {
                 parse!(tokenizer, <k:parse_array_key> "=>" <v:parse_typed_value>);
                 Ok((k, v))
             }
             parse!(tokenizer, "[" <values:parse_arrow_tuple,*> "]");
-            TypedValue::Dict(DictValue(values.into_iter().collect()))
+            TypedValue::Dict(
+                values
+                    .into_iter()
+                    .map(|(key, value)| DictEntry { key, value })
+                    .collect(),
+            )
         }
         Token::Identifier(s, _) if s == "false" => TypedValue::Bool(false),
         Token::Identifier(s, _) if s == "inf" => TypedValue::Float(FloatBits(f64::INFINITY)),
         Token::Identifier(s, _) if s == "keyset" => {
             parse!(tokenizer, "[" <values:parse_array_key,*> "]");
-            TypedValue::Keyset(KeysetValue(values.into_iter().collect()))
+            TypedValue::Keyset(values.into())
         }
         Token::Identifier(s, _) if s == "lazy" => {
             parse!(tokenizer, "(" <id:parse_class_name> ")");
@@ -792,7 +797,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
         Token::Identifier(s, _) if s == "uninit" => TypedValue::Uninit,
         Token::Identifier(s, _) if s == "vec" => {
             parse!(tokenizer, "[" <values:parse_typed_value,*> "]");
-            TypedValue::Vec(values)
+            TypedValue::Vec(values.into())
         }
         Token::Identifier(s, _) if s == "-" && tokenizer.next_is_identifier("inf")? => {
             TypedValue::Float(FloatBits(f64::NEG_INFINITY))

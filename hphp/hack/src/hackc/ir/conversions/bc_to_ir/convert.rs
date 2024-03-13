@@ -19,7 +19,7 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
     let adata_lookup = unit
         .adata
         .iter()
-        .map(|hhbc::Adata { id, value }| (*id, Arc::new(convert_typed_value(value))))
+        .map(|hhbc::Adata { id, value }| (*id, Arc::new(value.clone())))
         .collect();
 
     let unit_state = UnitState { adata_lookup };
@@ -90,45 +90,9 @@ pub(crate) struct UnitState {
 }
 
 pub(crate) fn convert_attribute(attr: &hhbc::Attribute) -> ir::Attribute {
-    let arguments = attr.arguments.iter().map(convert_typed_value).collect();
+    let arguments = attr.arguments.clone().into();
     ir::Attribute {
         name: ir::ClassName::new(attr.name),
         arguments,
-    }
-}
-
-pub(crate) fn convert_typed_value(tv: &hhbc::TypedValue) -> ir::TypedValue {
-    match tv {
-        hhbc::TypedValue::Uninit => ir::TypedValue::Uninit,
-        hhbc::TypedValue::Int(v) => ir::TypedValue::Int(*v),
-        hhbc::TypedValue::Bool(v) => ir::TypedValue::Bool(*v),
-        hhbc::TypedValue::Float(v) => ir::TypedValue::Float(*v),
-        hhbc::TypedValue::String(v) => ir::TypedValue::String(*v),
-        hhbc::TypedValue::LazyClass(v) => ir::TypedValue::LazyClass(*v),
-        hhbc::TypedValue::Null => ir::TypedValue::Null,
-        hhbc::TypedValue::Vec(vs) => {
-            ir::TypedValue::Vec(vs.iter().map(convert_typed_value).collect())
-        }
-        hhbc::TypedValue::Keyset(vs) => {
-            ir::TypedValue::Keyset(vs.iter().map(convert_array_key).collect())
-        }
-        hhbc::TypedValue::Dict(vs) => ir::TypedValue::Dict(
-            vs.iter()
-                .map(|hhbc::Entry { key, value }| {
-                    let key = convert_array_key(key);
-                    let value = convert_typed_value(value);
-                    (key, value)
-                })
-                .collect(),
-        ),
-    }
-}
-
-pub(crate) fn convert_array_key(tv: &hhbc::TypedValue) -> ir::ArrayKey {
-    match *tv {
-        hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),
-        hhbc::TypedValue::LazyClass(v) => ir::ArrayKey::LazyClass(v),
-        hhbc::TypedValue::String(v) => ir::ArrayKey::String(v),
-        _ => panic!("Unable to convert {tv:?} to ArrayKey"),
     }
 }

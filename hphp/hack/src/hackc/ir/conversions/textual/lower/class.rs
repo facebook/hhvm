@@ -55,8 +55,8 @@ fn typed_value_into_strings(tv: &TypedValue) -> Option<Vec<String>> {
 fn compute_tc_attribute(typed_value: &TypedValue) -> Option<String> {
     match typed_value {
         TypedValue::Dict(dict) => {
-            let kind_key = ir::ArrayKey::String(ir::intern("kind").as_bytes());
-            dict.get(&kind_key)
+            let kind_key = ir::TypedValue::String(ir::intern("kind").as_bytes());
+            ir::dict_get(dict, &kind_key)
                 .and_then(|tv| tv.get_int())
                 .and_then(|i| {
                     // TODO(dpichardie) Incomplete support for type constant definitions.
@@ -64,14 +64,16 @@ fn compute_tc_attribute(typed_value: &TypedValue) -> Option<String> {
                     let unresolved: i64 = ir::TypeStructureKind::T_unresolved.into();
                     let type_access: i64 = ir::TypeStructureKind::T_typeaccess.into();
                     if i == unresolved {
-                        let class_name = ir::ArrayKey::String(ir::intern("classname").as_bytes());
-                        dict.get(&class_name).and_then(typed_value_into_string)
+                        let class_name = ir::TypedValue::String(ir::intern("classname").as_bytes());
+                        ir::dict_get(dict, &class_name).and_then(typed_value_into_string)
                     } else if i == type_access {
-                        let root_name = ir::ArrayKey::String(ir::intern("root_name").as_bytes());
+                        let root_name = ir::TypedValue::String(ir::intern("root_name").as_bytes());
                         let access_list =
-                            ir::ArrayKey::String(ir::intern("access_list").as_bytes());
-                        let root_name = dict.get(&root_name).and_then(typed_value_into_string);
-                        let access_list = dict.get(&access_list).and_then(typed_value_into_strings);
+                            ir::TypedValue::String(ir::intern("access_list").as_bytes());
+                        let root_name =
+                            ir::dict_get(dict, &root_name).and_then(typed_value_into_string);
+                        let access_list =
+                            ir::dict_get(dict, &access_list).and_then(typed_value_into_strings);
                         match (root_name, access_list) {
                             (Some(root), Some(access)) => {
                                 if access.is_empty() {
@@ -159,7 +161,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             arguments: Vec::new(),
         }];
         let type_info = if let Some(value) = value.as_ref() {
-            value.type_info()
+            TypeInfo::from_typed_value(value)
         } else {
             TypeInfo::empty()
         };

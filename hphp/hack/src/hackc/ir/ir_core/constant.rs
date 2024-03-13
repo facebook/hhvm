@@ -45,6 +45,23 @@ impl HasOperands for Constant {
     }
 }
 
+impl From<TypedValue> for Constant {
+    fn from(tv: TypedValue) -> Self {
+        match tv {
+            TypedValue::Bool(b) => Self::Bool(b),
+            TypedValue::Float(f) => Self::Float(f),
+            TypedValue::Int(i) => Self::Int(i),
+            TypedValue::LazyClass(id) => Self::String(id.as_bytes_id()),
+            TypedValue::Null => Self::Null,
+            TypedValue::String(id) => Self::String(id),
+            TypedValue::Uninit => Self::Uninit,
+            TypedValue::Dict(_) | TypedValue::Keyset(_) | TypedValue::Vec(_) => {
+                Self::Array(Arc::new(tv))
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct HackConstant {
     pub name: ConstName,

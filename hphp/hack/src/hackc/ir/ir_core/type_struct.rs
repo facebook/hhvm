@@ -3,9 +3,9 @@
 pub use hhvm_types_ffi::ffi::TypeStructureKind;
 use intern::bytes_id;
 
-use crate::ArrayKey;
 use crate::BytesId;
 use crate::ClassName;
+use crate::DictEntry;
 use crate::TypedValue;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
@@ -17,41 +17,61 @@ pub enum TypeStruct {
 
 impl TypeStruct {
     pub fn into_typed_value(self) -> TypedValue {
-        let kind_key = ArrayKey::String(bytes_id!(b"kind"));
+        let kind_key = TypedValue::String(bytes_id!(b"kind"));
 
         match self {
             TypeStruct::Unresolved(cid) => {
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
-                let classname_key = ArrayKey::String(bytes_id!(b"classname"));
+                let classname_key = TypedValue::String(bytes_id!(b"classname"));
                 let name = TypedValue::String(cid.as_bytes_id());
                 TypedValue::Dict(
-                    [(kind_key, kind), (classname_key, name)]
-                        .into_iter()
-                        .collect(),
+                    vec![
+                        DictEntry {
+                            key: kind_key,
+                            value: kind,
+                        },
+                        DictEntry {
+                            key: classname_key,
+                            value: name,
+                        },
+                    ]
+                    .into(),
                 )
             }
             TypeStruct::Null => {
                 let kind = TypedValue::Int(TypeStructureKind::T_null.repr as i64);
-                TypedValue::Dict([(kind_key, kind)].into_iter().collect())
+                TypedValue::Dict(
+                    vec![DictEntry {
+                        key: kind_key,
+                        value: kind,
+                    }]
+                    .into(),
+                )
             }
             TypeStruct::Nonnull => {
                 let kind = TypedValue::Int(TypeStructureKind::T_nonnull.repr as i64);
-                TypedValue::Dict([(kind_key, kind)].into_iter().collect())
+                TypedValue::Dict(
+                    vec![DictEntry {
+                        key: kind_key,
+                        value: kind,
+                    }]
+                    .into(),
+                )
             }
         }
     }
 
     pub fn try_from_typed_value(tv: &TypedValue) -> Option<TypeStruct> {
         let dv = tv.get_dict()?;
-        let kind_key = ArrayKey::String(bytes_id!(b"kind"));
-        let kind = dv.get(&kind_key)?.get_int()?;
+        let kind_key = TypedValue::String(bytes_id!(b"kind"));
+        let kind = hhbc::dict_get(dv, &kind_key)?.get_int()?;
         if kind == i64::from(TypeStructureKind::T_null) {
             Some(TypeStruct::Null)
         } else if kind == i64::from(TypeStructureKind::T_nonnull) {
             Some(TypeStruct::Nonnull)
         } else if kind == i64::from(TypeStructureKind::T_unresolved) {
-            let classname_key = ArrayKey::String(bytes_id!(b"classname"));
-            let classname = dv.get(&classname_key)?.get_string()?;
+            let classname_key = TypedValue::String(bytes_id!(b"classname"));
+            let classname = hhbc::dict_get(dv, &classname_key)?.get_string()?;
             if classname == BytesId::EMPTY {
                 None
             } else {

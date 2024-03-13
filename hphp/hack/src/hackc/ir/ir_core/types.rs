@@ -259,6 +259,21 @@ impl TypeInfo {
 
         D { self_: self }
     }
+
+    pub fn from_typed_value(v: &TypedValue) -> Self {
+        match v {
+            TypedValue::Bool(_) => BaseType::Bool.into(),
+            TypedValue::Dict(_) => BaseType::Dict.into(),
+            TypedValue::Float(_) => BaseType::Float.into(),
+            TypedValue::Int(_) => BaseType::Int.into(),
+            TypedValue::Keyset(_) => BaseType::Keyset.into(),
+            TypedValue::LazyClass(_) => BaseType::String.into(),
+            TypedValue::Null => BaseType::Null.into(),
+            TypedValue::String(_) => BaseType::String.into(),
+            TypedValue::Uninit => TypeInfo::empty(),
+            TypedValue::Vec(_) => BaseType::Vec.into(),
+        }
+    }
 }
 
 impl From<EnforceableType> for TypeInfo {

@@ -5,7 +5,6 @@
 
 use hack::Builtin;
 use hack::Hhbc;
-use ir::ArrayKey;
 use ir::TypedValue;
 use itertools::Itertools;
 use textual::Const;
@@ -33,34 +32,20 @@ pub(crate) fn typed_value_expr(tv: &TypedValue) -> Expr {
             let args: Vec<Expr> = v.iter().map(typed_value_expr).collect_vec();
             hack::expr_builtin(Builtin::Hhbc(Hhbc::NewVec), args)
         }
-        TypedValue::Keyset(ir::KeysetValue(ref k)) => {
-            let args: Vec<Expr> = k.iter().map(array_key_expr).collect_vec();
+        TypedValue::Keyset(ref k) => {
+            let args: Vec<Expr> = k.iter().map(typed_value_expr).collect_vec();
             hack::expr_builtin(Builtin::Hhbc(Hhbc::NewKeysetArray), args)
         }
-        TypedValue::Dict(ir::DictValue(ref d)) => {
+        TypedValue::Dict(ref d) => {
             let args = d
                 .iter()
-                .flat_map(|(k, v)| {
-                    let k = array_key_expr(k);
-                    let v = typed_value_expr(v);
+                .flat_map(|e| {
+                    let k = typed_value_expr(&e.key);
+                    let v = typed_value_expr(&e.value);
                     [k, v]
                 })
                 .collect_vec();
             hack::expr_builtin(Builtin::NewDict, args)
-        }
-    }
-}
-
-pub(crate) fn array_key_expr(ak: &ArrayKey) -> Expr {
-    match *ak {
-        ArrayKey::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
-        ArrayKey::String(s) => {
-            let s = util::escaped_string(s.as_bytes());
-            hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
-        }
-        ArrayKey::LazyClass(c) => {
-            let s = util::escaped_string(c.as_bytes());
-            hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }
     }
 }

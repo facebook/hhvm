@@ -272,8 +272,9 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
-                let new_vec =
-                    func.alloc_constant(Constant::Array(Arc::new(ir::TypedValue::Vec(Vec::new()))));
+                let new_vec = func.alloc_constant(Constant::Array(Arc::new(ir::TypedValue::Vec(
+                    vec![].into(),
+                ))));
                 let lid = LocalId::Named(orig_func.params[variadic_idx].name);
                 let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);

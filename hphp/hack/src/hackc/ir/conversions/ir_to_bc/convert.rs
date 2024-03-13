@@ -120,47 +120,8 @@ pub(crate) fn convert_attributes(attrs: Vec<ir::Attribute>) -> Vec<hhbc::Attribu
     attrs
         .into_iter()
         .map(|attr| {
-            let arguments = Vec::from_iter(
-                attr.arguments
-                    .into_iter()
-                    .map(|arg| convert_typed_value(&arg)),
-            );
-            // XXX attribute names are class names
+            let arguments = attr.arguments.clone();
             hhbc::Attribute::new(attr.name.as_string_id(), arguments)
         })
         .collect()
-}
-
-pub(crate) fn convert_typed_value(tv: &ir::TypedValue) -> hhbc::TypedValue {
-    match tv {
-        ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
-        ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
-        ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
-        ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
-        ir::TypedValue::String(v) => hhbc::TypedValue::String(*v),
-        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(*v),
-        ir::TypedValue::Null => hhbc::TypedValue::Null,
-        ir::TypedValue::Vec(ref vs) => {
-            hhbc::TypedValue::Vec(Vec::from_iter(vs.iter().map(convert_typed_value)).into())
-        }
-        ir::TypedValue::Keyset(ref vs) => {
-            hhbc::TypedValue::Keyset(Vec::from_iter(vs.iter().map(convert_array_key)).into())
-        }
-        ir::TypedValue::Dict(ref vs) => hhbc::TypedValue::Dict(
-            Vec::from_iter(vs.iter().map(|(k, v)| {
-                let key = convert_array_key(k);
-                let value = convert_typed_value(v);
-                hhbc::Entry { key, value }
-            }))
-            .into(),
-        ),
-    }
-}
-
-pub(crate) fn convert_array_key(tv: &ir::ArrayKey) -> hhbc::TypedValue {
-    match *tv {
-        ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
-        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(v),
-        ir::ArrayKey::String(v) => hhbc::TypedValue::String(v),
-    }
 }

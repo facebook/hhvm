@@ -109,7 +109,6 @@ pub(crate) fn convert_typedef(td: ir::Typedef) -> hhbc::Typedef {
     };
     let attributes = crate::convert::convert_attributes(attributes);
     let type_info_union = convert_types(type_info_union.as_ref());
-    let type_structure = crate::convert::convert_typed_value(&type_structure);
 
     hhbc::Typedef {
         name,

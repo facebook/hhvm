@@ -5,10 +5,8 @@
 
 use hhbc::Constant;
 
-use crate::convert;
-
 pub(crate) fn convert_hack_constant(constant: ir::HackConstant) -> Constant {
     let ir::HackConstant { name, value, attrs } = constant;
-    let value = value.map(|v| convert::convert_typed_value(&v)).into();
+    let value = value.into();
     Constant { name, value, attrs }
 }

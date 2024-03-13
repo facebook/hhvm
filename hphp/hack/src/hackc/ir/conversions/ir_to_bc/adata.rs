@@ -20,7 +20,7 @@ impl AdataCache {
         let idx = self.lookup.entry(tv).or_insert_with_key(|tv| {
             let idx = self.adata.len();
             let id = hhbc::AdataId::new(idx);
-            let value = crate::convert::convert_typed_value(tv);
+            let value = (**tv).clone();
             self.adata.push(hhbc::Adata { id, value });
             idx
         });

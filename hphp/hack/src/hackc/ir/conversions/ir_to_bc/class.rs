@@ -83,10 +83,7 @@ fn convert_property(src: ir::Property) -> hhbc::Property {
         flags: src.flags,
         attributes: convert::convert_attributes(src.attributes).into(),
         visibility: src.visibility,
-        initial_value: src
-            .initial_value
-            .map(|tv| convert::convert_typed_value(&tv))
-            .into(),
+        initial_value: src.initial_value.into(),
         type_info: types::convert(&src.type_info).unwrap(),
         doc_comment: src.doc_comment.map(|c| c.into()),
     }
@@ -104,10 +101,7 @@ fn convert_ctx_constant(ctx: &ir::CtxConstant) -> hhbc::CtxConstant {
 fn convert_type_constant(tc: ir::TypeConstant) -> hhbc::TypeConstant {
     hhbc::TypeConstant {
         name: tc.name,
-        initializer: tc
-            .initializer
-            .map(|init| convert::convert_typed_value(&init))
-            .into(),
+        initializer: tc.initializer.into(),
         is_abstract: tc.is_abstract,
     }
 }

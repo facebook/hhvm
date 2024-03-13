@@ -109,4 +109,34 @@ impl TypedValue {
     pub fn float(f: f64) -> Self {
         Self::Float(f.into())
     }
+
+    pub fn get_string(&self) -> Option<BytesId> {
+        match self {
+            TypedValue::String(str) => Some(*str),
+            _ => None,
+        }
+    }
+
+    pub fn get_int(&self) -> Option<i64> {
+        match self {
+            TypedValue::Int(num) => Some(*num),
+            _ => None,
+        }
+    }
+
+    pub fn get_dict(&self) -> Option<&[DictEntry]> {
+        match self {
+            TypedValue::Dict(dv) => Some(dv),
+            _ => None,
+        }
+    }
+}
+
+pub fn dict_get<'d>(d: &'d [DictEntry], q: &TypedValue) -> Option<&'d TypedValue> {
+    for e in d {
+        if &e.key == q {
+            return Some(&e.value);
+        }
+    }
+    None
 }

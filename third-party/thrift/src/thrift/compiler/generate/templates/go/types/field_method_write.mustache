@@ -19,7 +19,7 @@
   This template creates a writeField* method for a field in a Thrift struct.
 
 }}
-func (x *{{struct:go_name}}) writeField{{field:key_str}}(p thrift.Protocol) error {  // {{field:go_name}}
+func (x *{{struct:go_name}}) writeField{{field:key_str}}(p thrift.Format) error {  // {{field:go_name}}
     {{#field:must_be_set_to_serialize?}}
     if !x.IsSet{{field:go_name}}() {
         return nil

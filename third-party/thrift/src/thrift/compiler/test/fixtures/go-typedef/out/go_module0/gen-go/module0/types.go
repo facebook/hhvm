@@ -65,7 +65,7 @@ func (x *Accessory) SetName(value string) *Accessory {
     return x
 }
 
-func (x *Accessory) writeField1(p thrift.Protocol) error {  // InventoryId
+func (x *Accessory) writeField1(p thrift.Format) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -81,7 +81,7 @@ func (x *Accessory) writeField1(p thrift.Protocol) error {  // InventoryId
     return nil
 }
 
-func (x *Accessory) writeField2(p thrift.Protocol) error {  // Name
+func (x *Accessory) writeField2(p thrift.Format) error {  // Name
     if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -97,7 +97,7 @@ func (x *Accessory) writeField2(p thrift.Protocol) error {  // Name
     return nil
 }
 
-func (x *Accessory) readField1(p thrift.Protocol) error {  // InventoryId
+func (x *Accessory) readField1(p thrift.Format) error {  // InventoryId
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -107,7 +107,7 @@ if err != nil {
     return nil
 }
 
-func (x *Accessory) readField2(p thrift.Protocol) error {  // Name
+func (x *Accessory) readField2(p thrift.Format) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -161,7 +161,7 @@ func (x *AccessoryBuilder) Emit() *Accessory {
     return &objCopy
 }
 
-func (x *Accessory) Write(p thrift.Protocol) error {
+func (x *Accessory) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Accessory"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -184,7 +184,7 @@ func (x *Accessory) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Accessory) Read(p thrift.Protocol) error {
+func (x *Accessory) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -290,7 +290,7 @@ func (x *PartName) SetName(value string) *PartName {
     return x
 }
 
-func (x *PartName) writeField1(p thrift.Protocol) error {  // InventoryId
+func (x *PartName) writeField1(p thrift.Format) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -306,7 +306,7 @@ func (x *PartName) writeField1(p thrift.Protocol) error {  // InventoryId
     return nil
 }
 
-func (x *PartName) writeField2(p thrift.Protocol) error {  // Name
+func (x *PartName) writeField2(p thrift.Format) error {  // Name
     if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -322,7 +322,7 @@ func (x *PartName) writeField2(p thrift.Protocol) error {  // Name
     return nil
 }
 
-func (x *PartName) readField1(p thrift.Protocol) error {  // InventoryId
+func (x *PartName) readField1(p thrift.Format) error {  // InventoryId
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -332,7 +332,7 @@ if err != nil {
     return nil
 }
 
-func (x *PartName) readField2(p thrift.Protocol) error {  // Name
+func (x *PartName) readField2(p thrift.Format) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -386,7 +386,7 @@ func (x *PartNameBuilder) Emit() *PartName {
     return &objCopy
 }
 
-func (x *PartName) Write(p thrift.Protocol) error {
+func (x *PartName) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("PartName"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -409,7 +409,7 @@ func (x *PartName) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *PartName) Read(p thrift.Protocol) error {
+func (x *PartName) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

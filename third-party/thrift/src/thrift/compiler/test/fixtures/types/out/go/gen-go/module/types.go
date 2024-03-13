@@ -24,14 +24,14 @@ func NewTBinary() TBinary {
     return []byte("")
 }
 
-func WriteTBinary(item TBinary, p thrift.Protocol) error {
+func WriteTBinary(item TBinary, p thrift.Format) error {
     if err := p.WriteBinary(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadTBinary(p thrift.Protocol) (TBinary, error) {
+func ReadTBinary(p thrift.Format) (TBinary, error) {
     var decodeResult TBinary
     decodeErr := func() error {
         result, err := p.ReadBinary()
@@ -50,14 +50,14 @@ func NewIntTypedef() IntTypedef {
     return 0
 }
 
-func WriteIntTypedef(item IntTypedef, p thrift.Protocol) error {
+func WriteIntTypedef(item IntTypedef, p thrift.Format) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadIntTypedef(p thrift.Protocol) (IntTypedef, error) {
+func ReadIntTypedef(p thrift.Format) (IntTypedef, error) {
     var decodeResult IntTypedef
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -76,7 +76,7 @@ func NewUintTypedef() UintTypedef {
     return NewIntTypedef()
 }
 
-func WriteUintTypedef(item UintTypedef, p thrift.Protocol) error {
+func WriteUintTypedef(item UintTypedef, p thrift.Format) error {
     err := WriteIntTypedef(item, p)
 if err != nil {
     return err
@@ -84,7 +84,7 @@ if err != nil {
     return nil
 }
 
-func ReadUintTypedef(p thrift.Protocol) (UintTypedef, error) {
+func ReadUintTypedef(p thrift.Format) (UintTypedef, error) {
     var decodeResult UintTypedef
     decodeErr := func() error {
         result, err := ReadIntTypedef(p)
@@ -103,7 +103,7 @@ func NewSomeListOfTypeMap_2468() SomeListOfTypeMap_2468 {
     return included.NewSomeListOfTypeMap()
 }
 
-func WriteSomeListOfTypeMap_2468(item SomeListOfTypeMap_2468, p thrift.Protocol) error {
+func WriteSomeListOfTypeMap_2468(item SomeListOfTypeMap_2468, p thrift.Format) error {
     err := included.WriteSomeListOfTypeMap(item, p)
 if err != nil {
     return err
@@ -111,7 +111,7 @@ if err != nil {
     return nil
 }
 
-func ReadSomeListOfTypeMap_2468(p thrift.Protocol) (SomeListOfTypeMap_2468, error) {
+func ReadSomeListOfTypeMap_2468(p thrift.Format) (SomeListOfTypeMap_2468, error) {
     var decodeResult SomeListOfTypeMap_2468
     decodeErr := func() error {
         result, err := included.ReadSomeListOfTypeMap(p)
@@ -130,7 +130,7 @@ func NewTBinary_8623() TBinary_8623 {
     return NewTBinary()
 }
 
-func WriteTBinary_8623(item TBinary_8623, p thrift.Protocol) error {
+func WriteTBinary_8623(item TBinary_8623, p thrift.Format) error {
     err := WriteTBinary(item, p)
 if err != nil {
     return err
@@ -138,7 +138,7 @@ if err != nil {
     return nil
 }
 
-func ReadTBinary_8623(p thrift.Protocol) (TBinary_8623, error) {
+func ReadTBinary_8623(p thrift.Format) (TBinary_8623, error) {
     var decodeResult TBinary_8623
     decodeErr := func() error {
         result, err := ReadTBinary(p)
@@ -157,14 +157,14 @@ func NewI32_9314() I32_9314 {
     return 0
 }
 
-func WriteI32_9314(item I32_9314, p thrift.Protocol) error {
+func WriteI32_9314(item I32_9314, p thrift.Format) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadI32_9314(p thrift.Protocol) (I32_9314, error) {
+func ReadI32_9314(p thrift.Format) (I32_9314, error) {
     var decodeResult I32_9314
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -183,7 +183,7 @@ func NewListI32_9187() ListI32_9187 {
     return make([]int32, 0)
 }
 
-func WriteListI32_9187(item ListI32_9187, p thrift.Protocol) error {
+func WriteListI32_9187(item ListI32_9187, p thrift.Format) error {
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -201,7 +201,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func ReadListI32_9187(p thrift.Protocol) (ListI32_9187, error) {
+func ReadListI32_9187(p thrift.Format) (ListI32_9187, error) {
     var decodeResult ListI32_9187
     decodeErr := func() error {
         _ /* elemType */, size, err := p.ReadListBegin()
@@ -238,7 +238,7 @@ func NewMapI32I32_9565() MapI32I32_9565 {
     return make(map[int32]int32)
 }
 
-func WriteMapI32I32_9565(item MapI32I32_9565, p thrift.Protocol) error {
+func WriteMapI32I32_9565(item MapI32I32_9565, p thrift.Format) error {
     if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -263,7 +263,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func ReadMapI32I32_9565(p thrift.Protocol) (MapI32I32_9565, error) {
+func ReadMapI32I32_9565(p thrift.Format) (MapI32I32_9565, error) {
     var decodeResult MapI32I32_9565
     decodeErr := func() error {
         _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
@@ -310,7 +310,7 @@ func NewMapI32String_1261() MapI32String_1261 {
     return make(map[int32]string)
 }
 
-func WriteMapI32String_1261(item MapI32String_1261, p thrift.Protocol) error {
+func WriteMapI32String_1261(item MapI32String_1261, p thrift.Format) error {
     if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -335,7 +335,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func ReadMapI32String_1261(p thrift.Protocol) (MapI32String_1261, error) {
+func ReadMapI32String_1261(p thrift.Format) (MapI32String_1261, error) {
     var decodeResult MapI32String_1261
     decodeErr := func() error {
         _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
@@ -382,7 +382,7 @@ func NewSetI32_7070() SetI32_7070 {
     return make([]int32, 0)
 }
 
-func WriteSetI32_7070(item SetI32_7070, p thrift.Protocol) error {
+func WriteSetI32_7070(item SetI32_7070, p thrift.Format) error {
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -400,7 +400,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func ReadSetI32_7070(p thrift.Protocol) (SetI32_7070, error) {
+func ReadSetI32_7070(p thrift.Format) (SetI32_7070, error) {
     var decodeResult SetI32_7070
     decodeErr := func() error {
         _ /* elemType */, size, err := p.ReadSetBegin()
@@ -437,7 +437,7 @@ func NewSetI32_7194() SetI32_7194 {
     return make([]int32, 0)
 }
 
-func WriteSetI32_7194(item SetI32_7194, p thrift.Protocol) error {
+func WriteSetI32_7194(item SetI32_7194, p thrift.Format) error {
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -455,7 +455,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func ReadSetI32_7194(p thrift.Protocol) (SetI32_7194, error) {
+func ReadSetI32_7194(p thrift.Format) (SetI32_7194, error) {
     var decodeResult SetI32_7194
     decodeErr := func() error {
         _ /* elemType */, size, err := p.ReadSetBegin()
@@ -492,14 +492,14 @@ func NewString_5252() String_5252 {
     return ""
 }
 
-func WriteString_5252(item String_5252, p thrift.Protocol) error {
+func WriteString_5252(item String_5252, p thrift.Format) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadString_5252(p thrift.Protocol) (String_5252, error) {
+func ReadString_5252(p thrift.Format) (String_5252, error) {
     var decodeResult String_5252
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -723,7 +723,7 @@ func (x *EmptyStructBuilder) Emit() *EmptyStruct {
     return &objCopy
 }
 
-func (x *EmptyStruct) Write(p thrift.Protocol) error {
+func (x *EmptyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("empty_struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -738,7 +738,7 @@ func (x *EmptyStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *EmptyStruct) Read(p thrift.Protocol) error {
+func (x *EmptyStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -814,7 +814,7 @@ func (x *DecoratedStruct) SetField(value string) *DecoratedStruct {
     return x
 }
 
-func (x *DecoratedStruct) writeField1(p thrift.Protocol) error {  // Field
+func (x *DecoratedStruct) writeField1(p thrift.Format) error {  // Field
     if err := p.WriteFieldBegin("field", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -830,7 +830,7 @@ func (x *DecoratedStruct) writeField1(p thrift.Protocol) error {  // Field
     return nil
 }
 
-func (x *DecoratedStruct) readField1(p thrift.Protocol) error {  // Field
+func (x *DecoratedStruct) readField1(p thrift.Format) error {  // Field
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -873,7 +873,7 @@ func (x *DecoratedStructBuilder) Emit() *DecoratedStruct {
     return &objCopy
 }
 
-func (x *DecoratedStruct) Write(p thrift.Protocol) error {
+func (x *DecoratedStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("decorated_struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -892,7 +892,7 @@ func (x *DecoratedStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *DecoratedStruct) Read(p thrift.Protocol) error {
+func (x *DecoratedStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1177,7 +1177,7 @@ func (x *ContainerStruct) IsSetFieldA() bool {
     return x != nil && x.FieldA != nil
 }
 
-func (x *ContainerStruct) writeField2(p thrift.Protocol) error {  // FieldB
+func (x *ContainerStruct) writeField2(p thrift.Format) error {  // FieldB
     if err := p.WriteFieldBegin("fieldB", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1204,7 +1204,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField3(p thrift.Protocol) error {  // FieldC
+func (x *ContainerStruct) writeField3(p thrift.Format) error {  // FieldC
     if err := p.WriteFieldBegin("fieldC", thrift.LIST, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1231,7 +1231,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField4(p thrift.Protocol) error {  // FieldD
+func (x *ContainerStruct) writeField4(p thrift.Format) error {  // FieldD
     if err := p.WriteFieldBegin("fieldD", thrift.LIST, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1258,7 +1258,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField5(p thrift.Protocol) error {  // FieldE
+func (x *ContainerStruct) writeField5(p thrift.Format) error {  // FieldE
     if err := p.WriteFieldBegin("fieldE", thrift.LIST, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1285,7 +1285,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField6(p thrift.Protocol) error {  // FieldF
+func (x *ContainerStruct) writeField6(p thrift.Format) error {  // FieldF
     if err := p.WriteFieldBegin("fieldF", thrift.SET, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1302,7 +1302,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField7(p thrift.Protocol) error {  // FieldG
+func (x *ContainerStruct) writeField7(p thrift.Format) error {  // FieldG
     if err := p.WriteFieldBegin("fieldG", thrift.MAP, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1319,7 +1319,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField8(p thrift.Protocol) error {  // FieldH
+func (x *ContainerStruct) writeField8(p thrift.Format) error {  // FieldH
     if err := p.WriteFieldBegin("fieldH", thrift.MAP, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1336,7 +1336,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) writeField12(p thrift.Protocol) error {  // FieldA
+func (x *ContainerStruct) writeField12(p thrift.Format) error {  // FieldA
     if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1363,7 +1363,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ContainerStruct) readField2(p thrift.Protocol) error {  // FieldB
+func (x *ContainerStruct) readField2(p thrift.Format) error {  // FieldB
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1391,7 +1391,7 @@ result := listResult
     return nil
 }
 
-func (x *ContainerStruct) readField3(p thrift.Protocol) error {  // FieldC
+func (x *ContainerStruct) readField3(p thrift.Format) error {  // FieldC
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1419,7 +1419,7 @@ result := listResult
     return nil
 }
 
-func (x *ContainerStruct) readField4(p thrift.Protocol) error {  // FieldD
+func (x *ContainerStruct) readField4(p thrift.Format) error {  // FieldD
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1447,7 +1447,7 @@ result := listResult
     return nil
 }
 
-func (x *ContainerStruct) readField5(p thrift.Protocol) error {  // FieldE
+func (x *ContainerStruct) readField5(p thrift.Format) error {  // FieldE
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1475,7 +1475,7 @@ result := listResult
     return nil
 }
 
-func (x *ContainerStruct) readField6(p thrift.Protocol) error {  // FieldF
+func (x *ContainerStruct) readField6(p thrift.Format) error {  // FieldF
     result, err := ReadSetI32_7194(p)
 if err != nil {
     return err
@@ -1485,7 +1485,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) readField7(p thrift.Protocol) error {  // FieldG
+func (x *ContainerStruct) readField7(p thrift.Format) error {  // FieldG
     result, err := ReadMapI32String_1261(p)
 if err != nil {
     return err
@@ -1495,7 +1495,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) readField8(p thrift.Protocol) error {  // FieldH
+func (x *ContainerStruct) readField8(p thrift.Format) error {  // FieldH
     result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
@@ -1505,7 +1505,7 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) readField12(p thrift.Protocol) error {  // FieldA
+func (x *ContainerStruct) readField12(p thrift.Format) error {  // FieldA
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1643,7 +1643,7 @@ func (x *ContainerStructBuilder) Emit() *ContainerStruct {
     return &objCopy
 }
 
-func (x *ContainerStruct) Write(p thrift.Protocol) error {
+func (x *ContainerStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ContainerStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1690,7 +1690,7 @@ func (x *ContainerStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ContainerStruct) Read(p thrift.Protocol) error {
+func (x *ContainerStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1814,7 +1814,7 @@ func (x *CppTypeStruct) IsSetFieldA() bool {
     return x != nil && x.FieldA != nil
 }
 
-func (x *CppTypeStruct) writeField1(p thrift.Protocol) error {  // FieldA
+func (x *CppTypeStruct) writeField1(p thrift.Format) error {  // FieldA
     if err := p.WriteFieldBegin("fieldA", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1841,7 +1841,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *CppTypeStruct) readField1(p thrift.Protocol) error {  // FieldA
+func (x *CppTypeStruct) readField1(p thrift.Format) error {  // FieldA
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1902,7 +1902,7 @@ func (x *CppTypeStructBuilder) Emit() *CppTypeStruct {
     return &objCopy
 }
 
-func (x *CppTypeStruct) Write(p thrift.Protocol) error {
+func (x *CppTypeStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CppTypeStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1921,7 +1921,7 @@ func (x *CppTypeStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CppTypeStruct) Read(p thrift.Protocol) error {
+func (x *CppTypeStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2002,7 +2002,7 @@ func (x *VirtualStruct) SetMyIntField(value int64) *VirtualStruct {
     return x
 }
 
-func (x *VirtualStruct) writeField1(p thrift.Protocol) error {  // MyIntField
+func (x *VirtualStruct) writeField1(p thrift.Format) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2018,7 +2018,7 @@ func (x *VirtualStruct) writeField1(p thrift.Protocol) error {  // MyIntField
     return nil
 }
 
-func (x *VirtualStruct) readField1(p thrift.Protocol) error {  // MyIntField
+func (x *VirtualStruct) readField1(p thrift.Format) error {  // MyIntField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -2061,7 +2061,7 @@ func (x *VirtualStructBuilder) Emit() *VirtualStruct {
     return &objCopy
 }
 
-func (x *VirtualStruct) Write(p thrift.Protocol) error {
+func (x *VirtualStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("VirtualStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2080,7 +2080,7 @@ func (x *VirtualStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *VirtualStruct) Read(p thrift.Protocol) error {
+func (x *VirtualStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2185,7 +2185,7 @@ func (x *MyStructWithForwardRefEnum) SetB(value MyForwardRefEnum) *MyStructWithF
     return x
 }
 
-func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Protocol) error {  // A
+func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Format) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2201,7 +2201,7 @@ func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Protocol) error {  // B
+func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Format) error {  // B
     if err := p.WriteFieldBegin("b", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2217,7 +2217,7 @@ func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *MyStructWithForwardRefEnum) readField1(p thrift.Protocol) error {  // A
+func (x *MyStructWithForwardRefEnum) readField1(p thrift.Format) error {  // A
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -2228,7 +2228,7 @@ result := MyForwardRefEnum(enumResult)
     return nil
 }
 
-func (x *MyStructWithForwardRefEnum) readField2(p thrift.Protocol) error {  // B
+func (x *MyStructWithForwardRefEnum) readField2(p thrift.Format) error {  // B
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -2283,7 +2283,7 @@ func (x *MyStructWithForwardRefEnumBuilder) Emit() *MyStructWithForwardRefEnum {
     return &objCopy
 }
 
-func (x *MyStructWithForwardRefEnum) Write(p thrift.Protocol) error {
+func (x *MyStructWithForwardRefEnum) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructWithForwardRefEnum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2306,7 +2306,7 @@ func (x *MyStructWithForwardRefEnum) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyStructWithForwardRefEnum) Read(p thrift.Protocol) error {
+func (x *MyStructWithForwardRefEnum) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2412,7 +2412,7 @@ func (x *TrivialNumeric) SetB(value bool) *TrivialNumeric {
     return x
 }
 
-func (x *TrivialNumeric) writeField1(p thrift.Protocol) error {  // A
+func (x *TrivialNumeric) writeField1(p thrift.Format) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2428,7 +2428,7 @@ func (x *TrivialNumeric) writeField1(p thrift.Protocol) error {  // A
     return nil
 }
 
-func (x *TrivialNumeric) writeField2(p thrift.Protocol) error {  // B
+func (x *TrivialNumeric) writeField2(p thrift.Format) error {  // B
     if err := p.WriteFieldBegin("b", thrift.BOOL, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2444,7 +2444,7 @@ func (x *TrivialNumeric) writeField2(p thrift.Protocol) error {  // B
     return nil
 }
 
-func (x *TrivialNumeric) readField1(p thrift.Protocol) error {  // A
+func (x *TrivialNumeric) readField1(p thrift.Format) error {  // A
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -2454,7 +2454,7 @@ if err != nil {
     return nil
 }
 
-func (x *TrivialNumeric) readField2(p thrift.Protocol) error {  // B
+func (x *TrivialNumeric) readField2(p thrift.Format) error {  // B
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -2508,7 +2508,7 @@ func (x *TrivialNumericBuilder) Emit() *TrivialNumeric {
     return &objCopy
 }
 
-func (x *TrivialNumeric) Write(p thrift.Protocol) error {
+func (x *TrivialNumeric) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TrivialNumeric"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2531,7 +2531,7 @@ func (x *TrivialNumeric) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TrivialNumeric) Read(p thrift.Protocol) error {
+func (x *TrivialNumeric) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2649,7 +2649,7 @@ func (x *TrivialNestedWithDefault) IsSetN() bool {
     return x != nil && x.N != nil
 }
 
-func (x *TrivialNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
+func (x *TrivialNestedWithDefault) writeField1(p thrift.Format) error {  // Z
     if err := p.WriteFieldBegin("z", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2665,7 +2665,7 @@ func (x *TrivialNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
     return nil
 }
 
-func (x *TrivialNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
+func (x *TrivialNestedWithDefault) writeField2(p thrift.Format) error {  // N
     if !x.IsSetN() {
         return nil
     }
@@ -2685,7 +2685,7 @@ func (x *TrivialNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
     return nil
 }
 
-func (x *TrivialNestedWithDefault) readField1(p thrift.Protocol) error {  // Z
+func (x *TrivialNestedWithDefault) readField1(p thrift.Format) error {  // Z
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -2695,7 +2695,7 @@ if err != nil {
     return nil
 }
 
-func (x *TrivialNestedWithDefault) readField2(p thrift.Protocol) error {  // N
+func (x *TrivialNestedWithDefault) readField2(p thrift.Format) error {  // N
     result := *NewTrivialNumeric()
 err := result.Read(p)
 if err != nil {
@@ -2758,7 +2758,7 @@ func (x *TrivialNestedWithDefaultBuilder) Emit() *TrivialNestedWithDefault {
     return &objCopy
 }
 
-func (x *TrivialNestedWithDefault) Write(p thrift.Protocol) error {
+func (x *TrivialNestedWithDefault) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TrivialNestedWithDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2781,7 +2781,7 @@ func (x *TrivialNestedWithDefault) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TrivialNestedWithDefault) Read(p thrift.Protocol) error {
+func (x *TrivialNestedWithDefault) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2895,7 +2895,7 @@ func (x *ComplexString) IsSetB() bool {
     return x != nil && x.B != nil
 }
 
-func (x *ComplexString) writeField1(p thrift.Protocol) error {  // A
+func (x *ComplexString) writeField1(p thrift.Format) error {  // A
     if err := p.WriteFieldBegin("a", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2911,7 +2911,7 @@ func (x *ComplexString) writeField1(p thrift.Protocol) error {  // A
     return nil
 }
 
-func (x *ComplexString) writeField2(p thrift.Protocol) error {  // B
+func (x *ComplexString) writeField2(p thrift.Format) error {  // B
     if err := p.WriteFieldBegin("b", thrift.MAP, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2945,7 +2945,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *ComplexString) readField1(p thrift.Protocol) error {  // A
+func (x *ComplexString) readField1(p thrift.Format) error {  // A
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -2955,7 +2955,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexString) readField2(p thrift.Protocol) error {  // B
+func (x *ComplexString) readField2(p thrift.Format) error {  // B
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -3037,7 +3037,7 @@ func (x *ComplexStringBuilder) Emit() *ComplexString {
     return &objCopy
 }
 
-func (x *ComplexString) Write(p thrift.Protocol) error {
+func (x *ComplexString) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ComplexString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3060,7 +3060,7 @@ func (x *ComplexString) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ComplexString) Read(p thrift.Protocol) error {
+func (x *ComplexString) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3182,7 +3182,7 @@ func (x *ComplexNestedWithDefault) IsSetN() bool {
     return x != nil && x.N != nil
 }
 
-func (x *ComplexNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
+func (x *ComplexNestedWithDefault) writeField1(p thrift.Format) error {  // Z
     if err := p.WriteFieldBegin("z", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3198,7 +3198,7 @@ func (x *ComplexNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
     return nil
 }
 
-func (x *ComplexNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
+func (x *ComplexNestedWithDefault) writeField2(p thrift.Format) error {  // N
     if !x.IsSetN() {
         return nil
     }
@@ -3218,7 +3218,7 @@ func (x *ComplexNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
     return nil
 }
 
-func (x *ComplexNestedWithDefault) readField1(p thrift.Protocol) error {  // Z
+func (x *ComplexNestedWithDefault) readField1(p thrift.Format) error {  // Z
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -3228,7 +3228,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexNestedWithDefault) readField2(p thrift.Protocol) error {  // N
+func (x *ComplexNestedWithDefault) readField2(p thrift.Format) error {  // N
     result := *NewComplexString()
 err := result.Read(p)
 if err != nil {
@@ -3291,7 +3291,7 @@ func (x *ComplexNestedWithDefaultBuilder) Emit() *ComplexNestedWithDefault {
     return &objCopy
 }
 
-func (x *ComplexNestedWithDefault) Write(p thrift.Protocol) error {
+func (x *ComplexNestedWithDefault) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ComplexNestedWithDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3314,7 +3314,7 @@ func (x *ComplexNestedWithDefault) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ComplexNestedWithDefault) Read(p thrift.Protocol) error {
+func (x *ComplexNestedWithDefault) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3480,7 +3480,7 @@ func (x *MinPadding) SetTiny(value int8) *MinPadding {
     return x
 }
 
-func (x *MinPadding) writeField1(p thrift.Protocol) error {  // Small
+func (x *MinPadding) writeField1(p thrift.Format) error {  // Small
     if err := p.WriteFieldBegin("small", thrift.BYTE, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3496,7 +3496,7 @@ func (x *MinPadding) writeField1(p thrift.Protocol) error {  // Small
     return nil
 }
 
-func (x *MinPadding) writeField2(p thrift.Protocol) error {  // Big
+func (x *MinPadding) writeField2(p thrift.Format) error {  // Big
     if err := p.WriteFieldBegin("big", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3512,7 +3512,7 @@ func (x *MinPadding) writeField2(p thrift.Protocol) error {  // Big
     return nil
 }
 
-func (x *MinPadding) writeField3(p thrift.Protocol) error {  // Medium
+func (x *MinPadding) writeField3(p thrift.Format) error {  // Medium
     if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3528,7 +3528,7 @@ func (x *MinPadding) writeField3(p thrift.Protocol) error {  // Medium
     return nil
 }
 
-func (x *MinPadding) writeField4(p thrift.Protocol) error {  // Biggish
+func (x *MinPadding) writeField4(p thrift.Format) error {  // Biggish
     if err := p.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3544,7 +3544,7 @@ func (x *MinPadding) writeField4(p thrift.Protocol) error {  // Biggish
     return nil
 }
 
-func (x *MinPadding) writeField5(p thrift.Protocol) error {  // Tiny
+func (x *MinPadding) writeField5(p thrift.Format) error {  // Tiny
     if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3560,7 +3560,7 @@ func (x *MinPadding) writeField5(p thrift.Protocol) error {  // Tiny
     return nil
 }
 
-func (x *MinPadding) readField1(p thrift.Protocol) error {  // Small
+func (x *MinPadding) readField1(p thrift.Format) error {  // Small
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -3571,7 +3571,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPadding) readField2(p thrift.Protocol) error {  // Big
+func (x *MinPadding) readField2(p thrift.Format) error {  // Big
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -3581,7 +3581,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPadding) readField3(p thrift.Protocol) error {  // Medium
+func (x *MinPadding) readField3(p thrift.Format) error {  // Medium
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -3591,7 +3591,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPadding) readField4(p thrift.Protocol) error {  // Biggish
+func (x *MinPadding) readField4(p thrift.Format) error {  // Biggish
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -3601,7 +3601,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPadding) readField5(p thrift.Protocol) error {  // Tiny
+func (x *MinPadding) readField5(p thrift.Format) error {  // Tiny
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -3689,7 +3689,7 @@ func (x *MinPaddingBuilder) Emit() *MinPadding {
     return &objCopy
 }
 
-func (x *MinPadding) Write(p thrift.Protocol) error {
+func (x *MinPadding) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MinPadding"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3724,7 +3724,7 @@ func (x *MinPadding) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MinPadding) Read(p thrift.Protocol) error {
+func (x *MinPadding) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3905,7 +3905,7 @@ func (x *MinPaddingWithCustomType) SetTiny(value int8) *MinPaddingWithCustomType
     return x
 }
 
-func (x *MinPaddingWithCustomType) writeField1(p thrift.Protocol) error {  // Small
+func (x *MinPaddingWithCustomType) writeField1(p thrift.Format) error {  // Small
     if err := p.WriteFieldBegin("small", thrift.BYTE, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3921,7 +3921,7 @@ func (x *MinPaddingWithCustomType) writeField1(p thrift.Protocol) error {  // Sm
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField2(p thrift.Protocol) error {  // Big
+func (x *MinPaddingWithCustomType) writeField2(p thrift.Format) error {  // Big
     if err := p.WriteFieldBegin("big", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3937,7 +3937,7 @@ func (x *MinPaddingWithCustomType) writeField2(p thrift.Protocol) error {  // Bi
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField3(p thrift.Protocol) error {  // Medium
+func (x *MinPaddingWithCustomType) writeField3(p thrift.Format) error {  // Medium
     if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3953,7 +3953,7 @@ func (x *MinPaddingWithCustomType) writeField3(p thrift.Protocol) error {  // Me
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField4(p thrift.Protocol) error {  // Biggish
+func (x *MinPaddingWithCustomType) writeField4(p thrift.Format) error {  // Biggish
     if err := p.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3969,7 +3969,7 @@ func (x *MinPaddingWithCustomType) writeField4(p thrift.Protocol) error {  // Bi
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField5(p thrift.Protocol) error {  // Tiny
+func (x *MinPaddingWithCustomType) writeField5(p thrift.Format) error {  // Tiny
     if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3985,7 +3985,7 @@ func (x *MinPaddingWithCustomType) writeField5(p thrift.Protocol) error {  // Ti
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField1(p thrift.Protocol) error {  // Small
+func (x *MinPaddingWithCustomType) readField1(p thrift.Format) error {  // Small
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -3996,7 +3996,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField2(p thrift.Protocol) error {  // Big
+func (x *MinPaddingWithCustomType) readField2(p thrift.Format) error {  // Big
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4006,7 +4006,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField3(p thrift.Protocol) error {  // Medium
+func (x *MinPaddingWithCustomType) readField3(p thrift.Format) error {  // Medium
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -4016,7 +4016,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField4(p thrift.Protocol) error {  // Biggish
+func (x *MinPaddingWithCustomType) readField4(p thrift.Format) error {  // Biggish
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -4026,7 +4026,7 @@ if err != nil {
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField5(p thrift.Protocol) error {  // Tiny
+func (x *MinPaddingWithCustomType) readField5(p thrift.Format) error {  // Tiny
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -4114,7 +4114,7 @@ func (x *MinPaddingWithCustomTypeBuilder) Emit() *MinPaddingWithCustomType {
     return &objCopy
 }
 
-func (x *MinPaddingWithCustomType) Write(p thrift.Protocol) error {
+func (x *MinPaddingWithCustomType) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MinPaddingWithCustomType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4149,7 +4149,7 @@ func (x *MinPaddingWithCustomType) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MinPaddingWithCustomType) Read(p thrift.Protocol) error {
+func (x *MinPaddingWithCustomType) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4318,7 +4318,7 @@ func (x *MyStruct) IsSetData() bool {
     return x != nil && x.Data != nil
 }
 
-func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
+func (x *MyStruct) writeField1(p thrift.Format) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4334,7 +4334,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
     return nil
 }
 
-func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyStringField
+func (x *MyStruct) writeField2(p thrift.Format) error {  // MyStringField
     if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4350,7 +4350,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyStringField
     return nil
 }
 
-func (x *MyStruct) writeField3(p thrift.Protocol) error {  // MajorVer
+func (x *MyStruct) writeField3(p thrift.Format) error {  // MajorVer
     if err := p.WriteFieldBegin("majorVer", thrift.I64, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4366,7 +4366,7 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // MajorVer
     return nil
 }
 
-func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Data
+func (x *MyStruct) writeField4(p thrift.Format) error {  // Data
     if !x.IsSetData() {
         return nil
     }
@@ -4386,7 +4386,7 @@ func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Data
     return nil
 }
 
-func (x *MyStruct) readField1(p thrift.Protocol) error {  // MyIntField
+func (x *MyStruct) readField1(p thrift.Format) error {  // MyIntField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4396,7 +4396,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField2(p thrift.Protocol) error {  // MyStringField
+func (x *MyStruct) readField2(p thrift.Format) error {  // MyStringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -4406,7 +4406,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField3(p thrift.Protocol) error {  // MajorVer
+func (x *MyStruct) readField3(p thrift.Format) error {  // MajorVer
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4416,7 +4416,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField4(p thrift.Protocol) error {  // Data
+func (x *MyStruct) readField4(p thrift.Format) error {  // Data
     result := *NewMyDataItem()
 err := result.Read(p)
 if err != nil {
@@ -4501,7 +4501,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     return &objCopy
 }
 
-func (x *MyStruct) Write(p thrift.Protocol) error {
+func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4532,7 +4532,7 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyStruct) Read(p thrift.Protocol) error {
+func (x *MyStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4630,7 +4630,7 @@ func (x *MyDataItemBuilder) Emit() *MyDataItem {
     return &objCopy
 }
 
-func (x *MyDataItem) Write(p thrift.Protocol) error {
+func (x *MyDataItem) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4645,7 +4645,7 @@ func (x *MyDataItem) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyDataItem) Read(p thrift.Protocol) error {
+func (x *MyDataItem) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4721,7 +4721,7 @@ func (x *Renaming) SetFoo(value int64) *Renaming {
     return x
 }
 
-func (x *Renaming) writeField1(p thrift.Protocol) error {  // Foo
+func (x *Renaming) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4737,7 +4737,7 @@ func (x *Renaming) writeField1(p thrift.Protocol) error {  // Foo
     return nil
 }
 
-func (x *Renaming) readField1(p thrift.Protocol) error {  // Foo
+func (x *Renaming) readField1(p thrift.Format) error {  // Foo
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4780,7 +4780,7 @@ func (x *RenamingBuilder) Emit() *Renaming {
     return &objCopy
 }
 
-func (x *Renaming) Write(p thrift.Protocol) error {
+func (x *Renaming) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Renaming"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4799,7 +4799,7 @@ func (x *Renaming) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Renaming) Read(p thrift.Protocol) error {
+func (x *Renaming) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4916,7 +4916,7 @@ func (x *AnnotatedTypes) IsSetListField() bool {
     return x != nil && x.ListField != nil
 }
 
-func (x *AnnotatedTypes) writeField1(p thrift.Protocol) error {  // BinaryField
+func (x *AnnotatedTypes) writeField1(p thrift.Format) error {  // BinaryField
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4933,7 +4933,7 @@ if err != nil {
     return nil
 }
 
-func (x *AnnotatedTypes) writeField2(p thrift.Protocol) error {  // ListField
+func (x *AnnotatedTypes) writeField2(p thrift.Format) error {  // ListField
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4950,7 +4950,7 @@ if err != nil {
     return nil
 }
 
-func (x *AnnotatedTypes) readField1(p thrift.Protocol) error {  // BinaryField
+func (x *AnnotatedTypes) readField1(p thrift.Format) error {  // BinaryField
     result, err := ReadTBinary_8623(p)
 if err != nil {
     return err
@@ -4960,7 +4960,7 @@ if err != nil {
     return nil
 }
 
-func (x *AnnotatedTypes) readField2(p thrift.Protocol) error {  // ListField
+func (x *AnnotatedTypes) readField2(p thrift.Format) error {  // ListField
     result, err := ReadSomeListOfTypeMap_2468(p)
 if err != nil {
     return err
@@ -5014,7 +5014,7 @@ func (x *AnnotatedTypesBuilder) Emit() *AnnotatedTypes {
     return &objCopy
 }
 
-func (x *AnnotatedTypes) Write(p thrift.Protocol) error {
+func (x *AnnotatedTypes) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AnnotatedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5037,7 +5037,7 @@ func (x *AnnotatedTypes) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AnnotatedTypes) Read(p thrift.Protocol) error {
+func (x *AnnotatedTypes) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5157,7 +5157,7 @@ func (x *ForwardUsageRoot) IsSetForwardUsageByRef() bool {
     return x != nil && x.ForwardUsageByRef != nil
 }
 
-func (x *ForwardUsageRoot) writeField1(p thrift.Protocol) error {  // ForwardUsageStruct
+func (x *ForwardUsageRoot) writeField1(p thrift.Format) error {  // ForwardUsageStruct
     if !x.IsSetForwardUsageStruct() {
         return nil
     }
@@ -5177,7 +5177,7 @@ func (x *ForwardUsageRoot) writeField1(p thrift.Protocol) error {  // ForwardUsa
     return nil
 }
 
-func (x *ForwardUsageRoot) writeField2(p thrift.Protocol) error {  // ForwardUsageByRef
+func (x *ForwardUsageRoot) writeField2(p thrift.Format) error {  // ForwardUsageByRef
     if !x.IsSetForwardUsageByRef() {
         return nil
     }
@@ -5197,7 +5197,7 @@ func (x *ForwardUsageRoot) writeField2(p thrift.Protocol) error {  // ForwardUsa
     return nil
 }
 
-func (x *ForwardUsageRoot) readField1(p thrift.Protocol) error {  // ForwardUsageStruct
+func (x *ForwardUsageRoot) readField1(p thrift.Format) error {  // ForwardUsageStruct
     result := *NewForwardUsageStruct()
 err := result.Read(p)
 if err != nil {
@@ -5208,7 +5208,7 @@ if err != nil {
     return nil
 }
 
-func (x *ForwardUsageRoot) readField2(p thrift.Protocol) error {  // ForwardUsageByRef
+func (x *ForwardUsageRoot) readField2(p thrift.Format) error {  // ForwardUsageByRef
     result := *NewForwardUsageByRef()
 err := result.Read(p)
 if err != nil {
@@ -5279,7 +5279,7 @@ func (x *ForwardUsageRootBuilder) Emit() *ForwardUsageRoot {
     return &objCopy
 }
 
-func (x *ForwardUsageRoot) Write(p thrift.Protocol) error {
+func (x *ForwardUsageRoot) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ForwardUsageRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5302,7 +5302,7 @@ func (x *ForwardUsageRoot) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ForwardUsageRoot) Read(p thrift.Protocol) error {
+func (x *ForwardUsageRoot) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5395,7 +5395,7 @@ func (x *ForwardUsageStruct) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *ForwardUsageStruct) writeField1(p thrift.Protocol) error {  // Foo
+func (x *ForwardUsageStruct) writeField1(p thrift.Format) error {  // Foo
     if !x.IsSetFoo() {
         return nil
     }
@@ -5415,7 +5415,7 @@ func (x *ForwardUsageStruct) writeField1(p thrift.Protocol) error {  // Foo
     return nil
 }
 
-func (x *ForwardUsageStruct) readField1(p thrift.Protocol) error {  // Foo
+func (x *ForwardUsageStruct) readField1(p thrift.Format) error {  // Foo
     result := *NewForwardUsageRoot()
 err := result.Read(p)
 if err != nil {
@@ -5467,7 +5467,7 @@ func (x *ForwardUsageStructBuilder) Emit() *ForwardUsageStruct {
     return &objCopy
 }
 
-func (x *ForwardUsageStruct) Write(p thrift.Protocol) error {
+func (x *ForwardUsageStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ForwardUsageStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5486,7 +5486,7 @@ func (x *ForwardUsageStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ForwardUsageStruct) Read(p thrift.Protocol) error {
+func (x *ForwardUsageStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5574,7 +5574,7 @@ func (x *ForwardUsageByRef) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *ForwardUsageByRef) writeField1(p thrift.Protocol) error {  // Foo
+func (x *ForwardUsageByRef) writeField1(p thrift.Format) error {  // Foo
     if !x.IsSetFoo() {
         return nil
     }
@@ -5594,7 +5594,7 @@ func (x *ForwardUsageByRef) writeField1(p thrift.Protocol) error {  // Foo
     return nil
 }
 
-func (x *ForwardUsageByRef) readField1(p thrift.Protocol) error {  // Foo
+func (x *ForwardUsageByRef) readField1(p thrift.Format) error {  // Foo
     result := *NewForwardUsageRoot()
 err := result.Read(p)
 if err != nil {
@@ -5646,7 +5646,7 @@ func (x *ForwardUsageByRefBuilder) Emit() *ForwardUsageByRef {
     return &objCopy
 }
 
-func (x *ForwardUsageByRef) Write(p thrift.Protocol) error {
+func (x *ForwardUsageByRef) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("ForwardUsageByRef"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5665,7 +5665,7 @@ func (x *ForwardUsageByRef) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ForwardUsageByRef) Read(p thrift.Protocol) error {
+func (x *ForwardUsageByRef) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5753,7 +5753,7 @@ func (x *IncompleteMap) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *IncompleteMap) writeField1(p thrift.Protocol) error {  // Field
+func (x *IncompleteMap) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -5791,7 +5791,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *IncompleteMap) readField1(p thrift.Protocol) error {  // Field
+func (x *IncompleteMap) readField1(p thrift.Format) error {  // Field
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -5863,7 +5863,7 @@ func (x *IncompleteMapBuilder) Emit() *IncompleteMap {
     return &objCopy
 }
 
-func (x *IncompleteMap) Write(p thrift.Protocol) error {
+func (x *IncompleteMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("IncompleteMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5882,7 +5882,7 @@ func (x *IncompleteMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *IncompleteMap) Read(p thrift.Protocol) error {
+func (x *IncompleteMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5965,7 +5965,7 @@ func (x *IncompleteMapDepBuilder) Emit() *IncompleteMapDep {
     return &objCopy
 }
 
-func (x *IncompleteMapDep) Write(p thrift.Protocol) error {
+func (x *IncompleteMapDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("IncompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5980,7 +5980,7 @@ func (x *IncompleteMapDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *IncompleteMapDep) Read(p thrift.Protocol) error {
+func (x *IncompleteMapDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6063,7 +6063,7 @@ func (x *CompleteMap) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *CompleteMap) writeField1(p thrift.Protocol) error {  // Field
+func (x *CompleteMap) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -6101,7 +6101,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *CompleteMap) readField1(p thrift.Protocol) error {  // Field
+func (x *CompleteMap) readField1(p thrift.Format) error {  // Field
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -6173,7 +6173,7 @@ func (x *CompleteMapBuilder) Emit() *CompleteMap {
     return &objCopy
 }
 
-func (x *CompleteMap) Write(p thrift.Protocol) error {
+func (x *CompleteMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CompleteMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6192,7 +6192,7 @@ func (x *CompleteMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CompleteMap) Read(p thrift.Protocol) error {
+func (x *CompleteMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6275,7 +6275,7 @@ func (x *CompleteMapDepBuilder) Emit() *CompleteMapDep {
     return &objCopy
 }
 
-func (x *CompleteMapDep) Write(p thrift.Protocol) error {
+func (x *CompleteMapDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6290,7 +6290,7 @@ func (x *CompleteMapDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CompleteMapDep) Read(p thrift.Protocol) error {
+func (x *CompleteMapDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6373,7 +6373,7 @@ func (x *IncompleteList) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *IncompleteList) writeField1(p thrift.Protocol) error {  // Field
+func (x *IncompleteList) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -6404,7 +6404,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *IncompleteList) readField1(p thrift.Protocol) error {  // Field
+func (x *IncompleteList) readField1(p thrift.Format) error {  // Field
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -6466,7 +6466,7 @@ func (x *IncompleteListBuilder) Emit() *IncompleteList {
     return &objCopy
 }
 
-func (x *IncompleteList) Write(p thrift.Protocol) error {
+func (x *IncompleteList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("IncompleteList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6485,7 +6485,7 @@ func (x *IncompleteList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *IncompleteList) Read(p thrift.Protocol) error {
+func (x *IncompleteList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6568,7 +6568,7 @@ func (x *IncompleteListDepBuilder) Emit() *IncompleteListDep {
     return &objCopy
 }
 
-func (x *IncompleteListDep) Write(p thrift.Protocol) error {
+func (x *IncompleteListDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("IncompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6583,7 +6583,7 @@ func (x *IncompleteListDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *IncompleteListDep) Read(p thrift.Protocol) error {
+func (x *IncompleteListDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6666,7 +6666,7 @@ func (x *CompleteList) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *CompleteList) writeField1(p thrift.Protocol) error {  // Field
+func (x *CompleteList) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -6697,7 +6697,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *CompleteList) readField1(p thrift.Protocol) error {  // Field
+func (x *CompleteList) readField1(p thrift.Format) error {  // Field
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -6759,7 +6759,7 @@ func (x *CompleteListBuilder) Emit() *CompleteList {
     return &objCopy
 }
 
-func (x *CompleteList) Write(p thrift.Protocol) error {
+func (x *CompleteList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CompleteList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6778,7 +6778,7 @@ func (x *CompleteList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CompleteList) Read(p thrift.Protocol) error {
+func (x *CompleteList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6861,7 +6861,7 @@ func (x *CompleteListDepBuilder) Emit() *CompleteListDep {
     return &objCopy
 }
 
-func (x *CompleteListDep) Write(p thrift.Protocol) error {
+func (x *CompleteListDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6876,7 +6876,7 @@ func (x *CompleteListDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CompleteListDep) Read(p thrift.Protocol) error {
+func (x *CompleteListDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6959,7 +6959,7 @@ func (x *AdaptedList) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *AdaptedList) writeField1(p thrift.Protocol) error {  // Field
+func (x *AdaptedList) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -6990,7 +6990,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *AdaptedList) readField1(p thrift.Protocol) error {  // Field
+func (x *AdaptedList) readField1(p thrift.Format) error {  // Field
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -7052,7 +7052,7 @@ func (x *AdaptedListBuilder) Emit() *AdaptedList {
     return &objCopy
 }
 
-func (x *AdaptedList) Write(p thrift.Protocol) error {
+func (x *AdaptedList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AdaptedList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7071,7 +7071,7 @@ func (x *AdaptedList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AdaptedList) Read(p thrift.Protocol) error {
+func (x *AdaptedList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7160,7 +7160,7 @@ func (x *AdaptedListDep) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *AdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
+func (x *AdaptedListDep) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -7180,7 +7180,7 @@ func (x *AdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
     return nil
 }
 
-func (x *AdaptedListDep) readField1(p thrift.Protocol) error {  // Field
+func (x *AdaptedListDep) readField1(p thrift.Format) error {  // Field
     result := *NewAdaptedList()
 err := result.Read(p)
 if err != nil {
@@ -7232,7 +7232,7 @@ func (x *AdaptedListDepBuilder) Emit() *AdaptedListDep {
     return &objCopy
 }
 
-func (x *AdaptedListDep) Write(p thrift.Protocol) error {
+func (x *AdaptedListDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AdaptedListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7251,7 +7251,7 @@ func (x *AdaptedListDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AdaptedListDep) Read(p thrift.Protocol) error {
+func (x *AdaptedListDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7339,7 +7339,7 @@ func (x *DependentAdaptedList) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *DependentAdaptedList) writeField1(p thrift.Protocol) error {  // Field
+func (x *DependentAdaptedList) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -7370,7 +7370,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *DependentAdaptedList) readField1(p thrift.Protocol) error {  // Field
+func (x *DependentAdaptedList) readField1(p thrift.Format) error {  // Field
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -7432,7 +7432,7 @@ func (x *DependentAdaptedListBuilder) Emit() *DependentAdaptedList {
     return &objCopy
 }
 
-func (x *DependentAdaptedList) Write(p thrift.Protocol) error {
+func (x *DependentAdaptedList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("DependentAdaptedList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7451,7 +7451,7 @@ func (x *DependentAdaptedList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *DependentAdaptedList) Read(p thrift.Protocol) error {
+func (x *DependentAdaptedList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7539,7 +7539,7 @@ func (x *DependentAdaptedListDep) IsSetField() bool {
     return x != nil && x.Field != nil
 }
 
-func (x *DependentAdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
+func (x *DependentAdaptedListDep) writeField1(p thrift.Format) error {  // Field
     if !x.IsSetField() {
         return nil
     }
@@ -7559,7 +7559,7 @@ func (x *DependentAdaptedListDep) writeField1(p thrift.Protocol) error {  // Fie
     return nil
 }
 
-func (x *DependentAdaptedListDep) readField1(p thrift.Protocol) error {  // Field
+func (x *DependentAdaptedListDep) readField1(p thrift.Format) error {  // Field
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -7606,7 +7606,7 @@ func (x *DependentAdaptedListDepBuilder) Emit() *DependentAdaptedListDep {
     return &objCopy
 }
 
-func (x *DependentAdaptedListDep) Write(p thrift.Protocol) error {
+func (x *DependentAdaptedListDep) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("DependentAdaptedListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7625,7 +7625,7 @@ func (x *DependentAdaptedListDep) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *DependentAdaptedListDep) Read(p thrift.Protocol) error {
+func (x *DependentAdaptedListDep) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7850,7 +7850,7 @@ func (x *AllocatorAware) IsSetAaMap() bool {
     return x != nil && x.AaMap != nil
 }
 
-func (x *AllocatorAware) writeField1(p thrift.Protocol) error {  // AaList
+func (x *AllocatorAware) writeField1(p thrift.Format) error {  // AaList
     if err := p.WriteFieldBegin("aa_list", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7867,7 +7867,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) writeField2(p thrift.Protocol) error {  // AaSet
+func (x *AllocatorAware) writeField2(p thrift.Format) error {  // AaSet
     if err := p.WriteFieldBegin("aa_set", thrift.SET, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7884,7 +7884,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) writeField3(p thrift.Protocol) error {  // AaMap
+func (x *AllocatorAware) writeField3(p thrift.Format) error {  // AaMap
     if err := p.WriteFieldBegin("aa_map", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7901,7 +7901,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) writeField4(p thrift.Protocol) error {  // AaString
+func (x *AllocatorAware) writeField4(p thrift.Format) error {  // AaString
     if err := p.WriteFieldBegin("aa_string", thrift.STRING, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7918,7 +7918,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) writeField5(p thrift.Protocol) error {  // NotAContainer
+func (x *AllocatorAware) writeField5(p thrift.Format) error {  // NotAContainer
     if err := p.WriteFieldBegin("not_a_container", thrift.I32, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7934,7 +7934,7 @@ func (x *AllocatorAware) writeField5(p thrift.Protocol) error {  // NotAContaine
     return nil
 }
 
-func (x *AllocatorAware) writeField6(p thrift.Protocol) error {  // AaUnique
+func (x *AllocatorAware) writeField6(p thrift.Format) error {  // AaUnique
     if err := p.WriteFieldBegin("aa_unique", thrift.I32, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7951,7 +7951,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) writeField7(p thrift.Protocol) error {  // AaShared
+func (x *AllocatorAware) writeField7(p thrift.Format) error {  // AaShared
     if err := p.WriteFieldBegin("aa_shared", thrift.I32, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7968,7 +7968,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField1(p thrift.Protocol) error {  // AaList
+func (x *AllocatorAware) readField1(p thrift.Format) error {  // AaList
     result, err := ReadListI32_9187(p)
 if err != nil {
     return err
@@ -7978,7 +7978,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField2(p thrift.Protocol) error {  // AaSet
+func (x *AllocatorAware) readField2(p thrift.Format) error {  // AaSet
     result, err := ReadSetI32_7070(p)
 if err != nil {
     return err
@@ -7988,7 +7988,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField3(p thrift.Protocol) error {  // AaMap
+func (x *AllocatorAware) readField3(p thrift.Format) error {  // AaMap
     result, err := ReadMapI32I32_9565(p)
 if err != nil {
     return err
@@ -7998,7 +7998,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField4(p thrift.Protocol) error {  // AaString
+func (x *AllocatorAware) readField4(p thrift.Format) error {  // AaString
     result, err := ReadString_5252(p)
 if err != nil {
     return err
@@ -8008,7 +8008,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField5(p thrift.Protocol) error {  // NotAContainer
+func (x *AllocatorAware) readField5(p thrift.Format) error {  // NotAContainer
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -8018,7 +8018,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField6(p thrift.Protocol) error {  // AaUnique
+func (x *AllocatorAware) readField6(p thrift.Format) error {  // AaUnique
     result, err := ReadI32_9314(p)
 if err != nil {
     return err
@@ -8028,7 +8028,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware) readField7(p thrift.Protocol) error {  // AaShared
+func (x *AllocatorAware) readField7(p thrift.Format) error {  // AaShared
     result, err := ReadI32_9314(p)
 if err != nil {
     return err
@@ -8137,7 +8137,7 @@ func (x *AllocatorAwareBuilder) Emit() *AllocatorAware {
     return &objCopy
 }
 
-func (x *AllocatorAware) Write(p thrift.Protocol) error {
+func (x *AllocatorAware) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AllocatorAware"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -8180,7 +8180,7 @@ func (x *AllocatorAware) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AllocatorAware) Read(p thrift.Protocol) error {
+func (x *AllocatorAware) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -8318,7 +8318,7 @@ func (x *AllocatorAware2) IsSetBoxField() bool {
     return x != nil && x.BoxField != nil
 }
 
-func (x *AllocatorAware2) writeField1(p thrift.Protocol) error {  // NotAContainer
+func (x *AllocatorAware2) writeField1(p thrift.Format) error {  // NotAContainer
     if err := p.WriteFieldBegin("not_a_container", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -8334,7 +8334,7 @@ func (x *AllocatorAware2) writeField1(p thrift.Protocol) error {  // NotAContain
     return nil
 }
 
-func (x *AllocatorAware2) writeField2(p thrift.Protocol) error {  // BoxField
+func (x *AllocatorAware2) writeField2(p thrift.Format) error {  // BoxField
     if !x.IsSetBoxField() {
         return nil
     }
@@ -8354,7 +8354,7 @@ func (x *AllocatorAware2) writeField2(p thrift.Protocol) error {  // BoxField
     return nil
 }
 
-func (x *AllocatorAware2) readField1(p thrift.Protocol) error {  // NotAContainer
+func (x *AllocatorAware2) readField1(p thrift.Format) error {  // NotAContainer
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -8364,7 +8364,7 @@ if err != nil {
     return nil
 }
 
-func (x *AllocatorAware2) readField2(p thrift.Protocol) error {  // BoxField
+func (x *AllocatorAware2) readField2(p thrift.Format) error {  // BoxField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -8422,7 +8422,7 @@ func (x *AllocatorAware2Builder) Emit() *AllocatorAware2 {
     return &objCopy
 }
 
-func (x *AllocatorAware2) Write(p thrift.Protocol) error {
+func (x *AllocatorAware2) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AllocatorAware2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -8445,7 +8445,7 @@ func (x *AllocatorAware2) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AllocatorAware2) Read(p thrift.Protocol) error {
+func (x *AllocatorAware2) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -8571,7 +8571,7 @@ func (x *TypedefStruct) SetUintTypedefField(value UintTypedef) *TypedefStruct {
     return x
 }
 
-func (x *TypedefStruct) writeField1(p thrift.Protocol) error {  // I32Field
+func (x *TypedefStruct) writeField1(p thrift.Format) error {  // I32Field
     if err := p.WriteFieldBegin("i32_field", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -8587,7 +8587,7 @@ func (x *TypedefStruct) writeField1(p thrift.Protocol) error {  // I32Field
     return nil
 }
 
-func (x *TypedefStruct) writeField2(p thrift.Protocol) error {  // IntTypedefField
+func (x *TypedefStruct) writeField2(p thrift.Format) error {  // IntTypedefField
     if err := p.WriteFieldBegin("IntTypedef_field", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -8604,7 +8604,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypedefStruct) writeField3(p thrift.Protocol) error {  // UintTypedefField
+func (x *TypedefStruct) writeField3(p thrift.Format) error {  // UintTypedefField
     if err := p.WriteFieldBegin("UintTypedef_field", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -8621,7 +8621,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypedefStruct) readField1(p thrift.Protocol) error {  // I32Field
+func (x *TypedefStruct) readField1(p thrift.Format) error {  // I32Field
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -8631,7 +8631,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypedefStruct) readField2(p thrift.Protocol) error {  // IntTypedefField
+func (x *TypedefStruct) readField2(p thrift.Format) error {  // IntTypedefField
     result, err := ReadIntTypedef(p)
 if err != nil {
     return err
@@ -8641,7 +8641,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypedefStruct) readField3(p thrift.Protocol) error {  // UintTypedefField
+func (x *TypedefStruct) readField3(p thrift.Format) error {  // UintTypedefField
     result, err := ReadUintTypedef(p)
 if err != nil {
     return err
@@ -8706,7 +8706,7 @@ func (x *TypedefStructBuilder) Emit() *TypedefStruct {
     return &objCopy
 }
 
-func (x *TypedefStruct) Write(p thrift.Protocol) error {
+func (x *TypedefStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TypedefStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -8733,7 +8733,7 @@ func (x *TypedefStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TypedefStruct) Read(p thrift.Protocol) error {
+func (x *TypedefStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -8824,7 +8824,7 @@ func (x *StructWithDoubleUnderscores) Set_Field(value int32) *StructWithDoubleUn
     return x
 }
 
-func (x *StructWithDoubleUnderscores) writeField1(p thrift.Protocol) error {  // _Field
+func (x *StructWithDoubleUnderscores) writeField1(p thrift.Format) error {  // _Field
     if err := p.WriteFieldBegin("__field", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -8840,7 +8840,7 @@ func (x *StructWithDoubleUnderscores) writeField1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *StructWithDoubleUnderscores) readField1(p thrift.Protocol) error {  // _Field
+func (x *StructWithDoubleUnderscores) readField1(p thrift.Format) error {  // _Field
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -8883,7 +8883,7 @@ func (x *StructWithDoubleUnderscoresBuilder) Emit() *StructWithDoubleUnderscores
     return &objCopy
 }
 
-func (x *StructWithDoubleUnderscores) Write(p thrift.Protocol) error {
+func (x *StructWithDoubleUnderscores) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("StructWithDoubleUnderscores"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -8902,7 +8902,7 @@ func (x *StructWithDoubleUnderscores) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *StructWithDoubleUnderscores) Read(p thrift.Protocol) error {
+func (x *StructWithDoubleUnderscores) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

@@ -22,14 +22,14 @@ func NewLanyard() Lanyard {
     return ""
 }
 
-func WriteLanyard(item Lanyard, p thrift.Protocol) error {
+func WriteLanyard(item Lanyard, p thrift.Format) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadLanyard(p thrift.Protocol) (Lanyard, error) {
+func ReadLanyard(p thrift.Format) (Lanyard, error) {
     var decodeResult Lanyard
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -48,14 +48,14 @@ func NewNumber() Number {
     return 0
 }
 
-func WriteNumber(item Number, p thrift.Protocol) error {
+func WriteNumber(item Number, p thrift.Format) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadNumber(p thrift.Protocol) (Number, error) {
+func ReadNumber(p thrift.Format) (Number, error) {
     var decodeResult Number
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -147,7 +147,7 @@ func (x *A) SetUselessField(value int32) *A {
     return x
 }
 
-func (x *A) writeField1(p thrift.Protocol) error {  // UselessField
+func (x *A) writeField1(p thrift.Format) error {  // UselessField
     if err := p.WriteFieldBegin("useless_field", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -163,7 +163,7 @@ func (x *A) writeField1(p thrift.Protocol) error {  // UselessField
     return nil
 }
 
-func (x *A) readField1(p thrift.Protocol) error {  // UselessField
+func (x *A) readField1(p thrift.Format) error {  // UselessField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -206,7 +206,7 @@ func (x *ABuilder) Emit() *A {
     return &objCopy
 }
 
-func (x *A) Write(p thrift.Protocol) error {
+func (x *A) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("A"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -225,7 +225,7 @@ func (x *A) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *A) Read(p thrift.Protocol) error {
+func (x *A) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -340,7 +340,7 @@ func (x *U) IsSetS() bool {
     return x != nil && x.S != nil
 }
 
-func (x *U) writeField1(p thrift.Protocol) error {  // I
+func (x *U) writeField1(p thrift.Format) error {  // I
     if !x.IsSetI() {
         return nil
     }
@@ -360,7 +360,7 @@ func (x *U) writeField1(p thrift.Protocol) error {  // I
     return nil
 }
 
-func (x *U) writeField2(p thrift.Protocol) error {  // S
+func (x *U) writeField2(p thrift.Format) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -380,7 +380,7 @@ func (x *U) writeField2(p thrift.Protocol) error {  // S
     return nil
 }
 
-func (x *U) readField1(p thrift.Protocol) error {  // I
+func (x *U) readField1(p thrift.Format) error {  // I
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -390,7 +390,7 @@ if err != nil {
     return nil
 }
 
-func (x *U) readField2(p thrift.Protocol) error {  // S
+func (x *U) readField2(p thrift.Format) error {  // S
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -467,7 +467,7 @@ func (x *UBuilder) Emit() *U {
     return &objCopy
 }
 
-func (x *U) Write(p thrift.Protocol) error {
+func (x *U) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -493,7 +493,7 @@ func (x *U) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *U) Read(p thrift.Protocol) error {
+func (x *U) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -579,7 +579,7 @@ func (x *Bang) SetMessage(value string) *Bang {
     return x
 }
 
-func (x *Bang) writeField1(p thrift.Protocol) error {  // Message
+func (x *Bang) writeField1(p thrift.Format) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -595,7 +595,7 @@ func (x *Bang) writeField1(p thrift.Protocol) error {  // Message
     return nil
 }
 
-func (x *Bang) readField1(p thrift.Protocol) error {  // Message
+func (x *Bang) readField1(p thrift.Format) error {  // Message
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -638,7 +638,7 @@ func (x *BangBuilder) Emit() *Bang {
     return &objCopy
 }
 
-func (x *Bang) Write(p thrift.Protocol) error {
+func (x *Bang) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Bang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -657,7 +657,7 @@ func (x *Bang) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Bang) Read(p thrift.Protocol) error {
+func (x *Bang) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

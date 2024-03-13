@@ -47,7 +47,7 @@ func (x *EmptyBuilder) Emit() *Empty {
     return &objCopy
 }
 
-func (x *Empty) Write(p thrift.Protocol) error {
+func (x *Empty) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -62,7 +62,7 @@ func (x *Empty) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Empty) Read(p thrift.Protocol) error {
+func (x *Empty) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -149,7 +149,7 @@ func (x *NadaBuilder) Emit() *Nada {
     return &objCopy
 }
 
-func (x *Nada) Write(p thrift.Protocol) error {
+func (x *Nada) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -167,7 +167,7 @@ func (x *Nada) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Nada) Read(p thrift.Protocol) error {
+func (x *Nada) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

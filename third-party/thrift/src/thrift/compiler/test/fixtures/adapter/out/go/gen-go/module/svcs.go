@@ -190,7 +190,7 @@ func (x *reqServiceFunc) IsSetArg3() bool {
     return x != nil && x.Arg3 != nil
 }
 
-func (x *reqServiceFunc) writeField1(p thrift.Protocol) error {  // Arg1
+func (x *reqServiceFunc) writeField1(p thrift.Format) error {  // Arg1
     if err := p.WriteFieldBegin("arg1", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -207,7 +207,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqServiceFunc) writeField2(p thrift.Protocol) error {  // Arg2
+func (x *reqServiceFunc) writeField2(p thrift.Format) error {  // Arg2
     if err := p.WriteFieldBegin("arg2", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -223,7 +223,7 @@ func (x *reqServiceFunc) writeField2(p thrift.Protocol) error {  // Arg2
     return nil
 }
 
-func (x *reqServiceFunc) writeField3(p thrift.Protocol) error {  // Arg3
+func (x *reqServiceFunc) writeField3(p thrift.Format) error {  // Arg3
     if !x.IsSetArg3() {
         return nil
     }
@@ -243,7 +243,7 @@ func (x *reqServiceFunc) writeField3(p thrift.Protocol) error {  // Arg3
     return nil
 }
 
-func (x *reqServiceFunc) readField1(p thrift.Protocol) error {  // Arg1
+func (x *reqServiceFunc) readField1(p thrift.Format) error {  // Arg1
     result, err := ReadStringWithAdapter_7208(p)
 if err != nil {
     return err
@@ -253,7 +253,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqServiceFunc) readField2(p thrift.Protocol) error {  // Arg2
+func (x *reqServiceFunc) readField2(p thrift.Format) error {  // Arg2
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -263,7 +263,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqServiceFunc) readField3(p thrift.Protocol) error {  // Arg3
+func (x *reqServiceFunc) readField3(p thrift.Format) error {  // Arg3
     result := *NewFoo()
 err := result.Read(p)
 if err != nil {
@@ -337,7 +337,7 @@ func (x *reqServiceFuncBuilder) Emit() *reqServiceFunc {
     return &objCopy
 }
 
-func (x *reqServiceFunc) Write(p thrift.Protocol) error {
+func (x *reqServiceFunc) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -364,7 +364,7 @@ func (x *reqServiceFunc) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqServiceFunc) Read(p thrift.Protocol) error {
+func (x *reqServiceFunc) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -465,7 +465,7 @@ func (x *respServiceFunc) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Success
+func (x *respServiceFunc) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -486,7 +486,7 @@ if err != nil {
     return nil
 }
 
-func (x *respServiceFunc) readField0(p thrift.Protocol) error {  // Success
+func (x *respServiceFunc) readField0(p thrift.Format) error {  // Success
     result, err := ReadMyI32_4873(p)
 if err != nil {
     return err
@@ -537,7 +537,7 @@ func (x *respServiceFunc) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respServiceFunc) Write(p thrift.Protocol) error {
+func (x *respServiceFunc) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -556,7 +556,7 @@ func (x *respServiceFunc) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respServiceFunc) Read(p thrift.Protocol) error {
+func (x *respServiceFunc) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -663,7 +663,7 @@ type procFuncServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncServiceFunc{}
 
-func (p *procFuncServiceFunc) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncServiceFunc) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqServiceFunc()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -672,7 +672,7 @@ func (p *procFuncServiceFunc) Read(iprot thrift.Protocol) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -851,7 +851,7 @@ func (x *reqAdapterServiceCountBuilder) Emit() *reqAdapterServiceCount {
     return &objCopy
 }
 
-func (x *reqAdapterServiceCount) Write(p thrift.Protocol) error {
+func (x *reqAdapterServiceCount) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -866,7 +866,7 @@ func (x *reqAdapterServiceCount) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqAdapterServiceCount) Read(p thrift.Protocol) error {
+func (x *reqAdapterServiceCount) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -952,7 +952,7 @@ func (x *respAdapterServiceCount) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Success
+func (x *respAdapterServiceCount) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -972,7 +972,7 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Suc
     return nil
 }
 
-func (x *respAdapterServiceCount) readField0(p thrift.Protocol) error {  // Success
+func (x *respAdapterServiceCount) readField0(p thrift.Format) error {  // Success
     result := *NewCountingStruct()
 err := result.Read(p)
 if err != nil {
@@ -1028,7 +1028,7 @@ func (x *respAdapterServiceCount) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
+func (x *respAdapterServiceCount) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1047,7 +1047,7 @@ func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respAdapterServiceCount) Read(p thrift.Protocol) error {
+func (x *respAdapterServiceCount) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1138,7 +1138,7 @@ func (x *reqAdapterServiceAdaptedTypes) IsSetArg() bool {
     return x != nil && x.Arg != nil
 }
 
-func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  // Arg
+func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Format) error {  // Arg
     if !x.IsSetArg() {
         return nil
     }
@@ -1158,7 +1158,7 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Protocol) error {  // Arg
+func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Format) error {  // Arg
     result := *NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
@@ -1210,7 +1210,7 @@ func (x *reqAdapterServiceAdaptedTypesBuilder) Emit() *reqAdapterServiceAdaptedT
     return &objCopy
 }
 
-func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
+func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1229,7 +1229,7 @@ func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
+func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1320,7 +1320,7 @@ func (x *respAdapterServiceAdaptedTypes) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error {  // Success
+func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1340,7 +1340,7 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error { 
     return nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Protocol) error {  // Success
+func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Format) error {  // Success
     result := *NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
@@ -1396,7 +1396,7 @@ func (x *respAdapterServiceAdaptedTypes) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
+func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1415,7 +1415,7 @@ func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
+func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1524,7 +1524,7 @@ type procFuncAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncAdapterServiceCount{}
 
-func (p *procFuncAdapterServiceCount) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncAdapterServiceCount) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqAdapterServiceCount()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1533,7 +1533,7 @@ func (p *procFuncAdapterServiceCount) Read(iprot thrift.Protocol) (thrift.Struct
     return args, nil
 }
 
-func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -1575,7 +1575,7 @@ type procFuncAdapterServiceAdaptedTypes struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncAdapterServiceAdaptedTypes{}
 
-func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqAdapterServiceAdaptedTypes()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -1584,7 +1584,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Protocol) (thrift
     return args, nil
 }
 
-func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

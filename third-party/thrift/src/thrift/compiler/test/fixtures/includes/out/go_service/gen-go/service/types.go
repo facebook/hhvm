@@ -26,14 +26,14 @@ func NewIncludesIncluded() *IncludesIncluded {
     return includes.NewIncluded()
 }
 
-func WriteIncludesIncluded(item *IncludesIncluded, p thrift.Protocol) error {
+func WriteIncludesIncluded(item *IncludesIncluded, p thrift.Format) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadIncludesIncluded(p thrift.Protocol) (IncludesIncluded, error) {
+func ReadIncludesIncluded(p thrift.Format) (IncludesIncluded, error) {
     var decodeResult IncludesIncluded
     decodeErr := func() error {
         result := *includes.NewIncluded()
@@ -53,7 +53,7 @@ func NewIncludesTransitiveFoo() *IncludesTransitiveFoo {
     return includes.NewTransitiveFoo()
 }
 
-func WriteIncludesTransitiveFoo(item *IncludesTransitiveFoo, p thrift.Protocol) error {
+func WriteIncludesTransitiveFoo(item *IncludesTransitiveFoo, p thrift.Format) error {
     err := includes.WriteTransitiveFoo(item, p)
 if err != nil {
     return err
@@ -61,7 +61,7 @@ if err != nil {
     return nil
 }
 
-func ReadIncludesTransitiveFoo(p thrift.Protocol) (IncludesTransitiveFoo, error) {
+func ReadIncludesTransitiveFoo(p thrift.Format) (IncludesTransitiveFoo, error) {
     var decodeResult IncludesTransitiveFoo
     decodeErr := func() error {
         result, err := includes.ReadTransitiveFoo(p)

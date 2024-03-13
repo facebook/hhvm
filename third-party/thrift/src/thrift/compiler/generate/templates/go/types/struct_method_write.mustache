@@ -19,7 +19,7 @@
   This template creates a Write method for Thrift structs.
 
 }}
-func (x *{{struct:go_name}}) Write(p thrift.Protocol) error {
+func (x *{{struct:go_name}}) Write(p thrift.Format) error {
     {{#struct:union?}}
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)

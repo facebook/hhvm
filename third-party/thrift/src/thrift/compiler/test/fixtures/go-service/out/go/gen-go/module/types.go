@@ -45,7 +45,7 @@ func (x *GetEntityRequest) SetId(value string) *GetEntityRequest {
     return x
 }
 
-func (x *GetEntityRequest) writeField1(p thrift.Protocol) error {  // Id
+func (x *GetEntityRequest) writeField1(p thrift.Format) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -61,7 +61,7 @@ func (x *GetEntityRequest) writeField1(p thrift.Protocol) error {  // Id
     return nil
 }
 
-func (x *GetEntityRequest) readField1(p thrift.Protocol) error {  // Id
+func (x *GetEntityRequest) readField1(p thrift.Format) error {  // Id
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -104,7 +104,7 @@ func (x *GetEntityRequestBuilder) Emit() *GetEntityRequest {
     return &objCopy
 }
 
-func (x *GetEntityRequest) Write(p thrift.Protocol) error {
+func (x *GetEntityRequest) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -123,7 +123,7 @@ func (x *GetEntityRequest) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *GetEntityRequest) Read(p thrift.Protocol) error {
+func (x *GetEntityRequest) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -204,7 +204,7 @@ func (x *GetEntityResponse) SetEntity(value string) *GetEntityResponse {
     return x
 }
 
-func (x *GetEntityResponse) writeField1(p thrift.Protocol) error {  // Entity
+func (x *GetEntityResponse) writeField1(p thrift.Format) error {  // Entity
     if err := p.WriteFieldBegin("entity", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -220,7 +220,7 @@ func (x *GetEntityResponse) writeField1(p thrift.Protocol) error {  // Entity
     return nil
 }
 
-func (x *GetEntityResponse) readField1(p thrift.Protocol) error {  // Entity
+func (x *GetEntityResponse) readField1(p thrift.Format) error {  // Entity
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -263,7 +263,7 @@ func (x *GetEntityResponseBuilder) Emit() *GetEntityResponse {
     return &objCopy
 }
 
-func (x *GetEntityResponse) Write(p thrift.Protocol) error {
+func (x *GetEntityResponse) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("GetEntityResponse"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -282,7 +282,7 @@ func (x *GetEntityResponse) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *GetEntityResponse) Read(p thrift.Protocol) error {
+func (x *GetEntityResponse) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -419,7 +419,7 @@ func (x *NonComparableStruct) IsSetBaz() bool {
     return x != nil && x.Baz != nil
 }
 
-func (x *NonComparableStruct) writeField1(p thrift.Protocol) error {  // Foo
+func (x *NonComparableStruct) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -435,7 +435,7 @@ func (x *NonComparableStruct) writeField1(p thrift.Protocol) error {  // Foo
     return nil
 }
 
-func (x *NonComparableStruct) writeField2(p thrift.Protocol) error {  // Bar
+func (x *NonComparableStruct) writeField2(p thrift.Format) error {  // Bar
     if err := p.WriteFieldBegin("bar", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -462,7 +462,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *NonComparableStruct) writeField3(p thrift.Protocol) error {  // Baz
+func (x *NonComparableStruct) writeField3(p thrift.Format) error {  // Baz
     if err := p.WriteFieldBegin("baz", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -500,7 +500,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *NonComparableStruct) readField1(p thrift.Protocol) error {  // Foo
+func (x *NonComparableStruct) readField1(p thrift.Format) error {  // Foo
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -510,7 +510,7 @@ if err != nil {
     return nil
 }
 
-func (x *NonComparableStruct) readField2(p thrift.Protocol) error {  // Bar
+func (x *NonComparableStruct) readField2(p thrift.Format) error {  // Bar
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -538,7 +538,7 @@ result := listResult
     return nil
 }
 
-func (x *NonComparableStruct) readField3(p thrift.Protocol) error {  // Baz
+func (x *NonComparableStruct) readField3(p thrift.Format) error {  // Baz
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -632,7 +632,7 @@ func (x *NonComparableStructBuilder) Emit() *NonComparableStruct {
     return &objCopy
 }
 
-func (x *NonComparableStruct) Write(p thrift.Protocol) error {
+func (x *NonComparableStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("NonComparableStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -659,7 +659,7 @@ func (x *NonComparableStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *NonComparableStruct) Read(p thrift.Protocol) error {
+func (x *NonComparableStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

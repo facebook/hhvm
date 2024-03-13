@@ -626,7 +626,7 @@ func (x *reqGetEntityGetEntity) IsSetR() bool {
     return x != nil && x.R != nil
 }
 
-func (x *reqGetEntityGetEntity) writeField1(p thrift.Protocol) error {  // R
+func (x *reqGetEntityGetEntity) writeField1(p thrift.Format) error {  // R
     if !x.IsSetR() {
         return nil
     }
@@ -646,7 +646,7 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Protocol) error {  // R
     return nil
 }
 
-func (x *reqGetEntityGetEntity) readField1(p thrift.Protocol) error {  // R
+func (x *reqGetEntityGetEntity) readField1(p thrift.Format) error {  // R
     result := *NewGetEntityRequest()
 err := result.Read(p)
 if err != nil {
@@ -698,7 +698,7 @@ func (x *reqGetEntityGetEntityBuilder) Emit() *reqGetEntityGetEntity {
     return &objCopy
 }
 
-func (x *reqGetEntityGetEntity) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetEntity) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetEntity"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -717,7 +717,7 @@ func (x *reqGetEntityGetEntity) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetEntity) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetEntity) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -808,7 +808,7 @@ func (x *respGetEntityGetEntity) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetEntity) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -828,7 +828,7 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Succ
     return nil
 }
 
-func (x *respGetEntityGetEntity) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetEntity) readField0(p thrift.Format) error {  // Success
     result := *NewGetEntityResponse()
 err := result.Read(p)
 if err != nil {
@@ -884,7 +884,7 @@ func (x *respGetEntityGetEntity) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetEntity) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetEntity) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetEntity"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -903,7 +903,7 @@ func (x *respGetEntityGetEntity) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetEntity) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetEntity) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -988,7 +988,7 @@ func (x *reqGetEntityGetBoolBuilder) Emit() *reqGetEntityGetBool {
     return &objCopy
 }
 
-func (x *reqGetEntityGetBool) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetBool) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1003,7 +1003,7 @@ func (x *reqGetEntityGetBool) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetBool) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetBool) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1089,7 +1089,7 @@ func (x *respGetEntityGetBool) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetBool) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1109,7 +1109,7 @@ func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Succes
     return nil
 }
 
-func (x *respGetEntityGetBool) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetBool) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -1160,7 +1160,7 @@ func (x *respGetEntityGetBool) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetBool) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetBool) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1179,7 +1179,7 @@ func (x *respGetEntityGetBool) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetBool) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetBool) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1264,7 +1264,7 @@ func (x *reqGetEntityGetByteBuilder) Emit() *reqGetEntityGetByte {
     return &objCopy
 }
 
-func (x *reqGetEntityGetByte) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetByte) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1279,7 +1279,7 @@ func (x *reqGetEntityGetByte) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetByte) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetByte) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1365,7 +1365,7 @@ func (x *respGetEntityGetByte) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetByte) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1385,7 +1385,7 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Succes
     return nil
 }
 
-func (x *respGetEntityGetByte) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetByte) readField0(p thrift.Format) error {  // Success
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -1437,7 +1437,7 @@ func (x *respGetEntityGetByte) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetByte) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetByte) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1456,7 +1456,7 @@ func (x *respGetEntityGetByte) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetByte) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetByte) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1541,7 +1541,7 @@ func (x *reqGetEntityGetI16Builder) Emit() *reqGetEntityGetI16 {
     return &objCopy
 }
 
-func (x *reqGetEntityGetI16) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetI16) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1556,7 +1556,7 @@ func (x *reqGetEntityGetI16) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetI16) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetI16) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1642,7 +1642,7 @@ func (x *respGetEntityGetI16) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI16) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1662,7 +1662,7 @@ func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Success
     return nil
 }
 
-func (x *respGetEntityGetI16) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI16) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -1713,7 +1713,7 @@ func (x *respGetEntityGetI16) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetI16) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetI16) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1732,7 +1732,7 @@ func (x *respGetEntityGetI16) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetI16) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetI16) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1817,7 +1817,7 @@ func (x *reqGetEntityGetI32Builder) Emit() *reqGetEntityGetI32 {
     return &objCopy
 }
 
-func (x *reqGetEntityGetI32) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetI32) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1832,7 +1832,7 @@ func (x *reqGetEntityGetI32) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetI32) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetI32) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1918,7 +1918,7 @@ func (x *respGetEntityGetI32) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI32) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -1938,7 +1938,7 @@ func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Success
     return nil
 }
 
-func (x *respGetEntityGetI32) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI32) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -1989,7 +1989,7 @@ func (x *respGetEntityGetI32) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetI32) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetI32) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2008,7 +2008,7 @@ func (x *respGetEntityGetI32) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetI32) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetI32) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2093,7 +2093,7 @@ func (x *reqGetEntityGetI64Builder) Emit() *reqGetEntityGetI64 {
     return &objCopy
 }
 
-func (x *reqGetEntityGetI64) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetI64) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2108,7 +2108,7 @@ func (x *reqGetEntityGetI64) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetI64) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetI64) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2194,7 +2194,7 @@ func (x *respGetEntityGetI64) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI64) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -2214,7 +2214,7 @@ func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Success
     return nil
 }
 
-func (x *respGetEntityGetI64) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetI64) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -2265,7 +2265,7 @@ func (x *respGetEntityGetI64) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetI64) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetI64) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2284,7 +2284,7 @@ func (x *respGetEntityGetI64) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetI64) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetI64) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2369,7 +2369,7 @@ func (x *reqGetEntityGetDoubleBuilder) Emit() *reqGetEntityGetDouble {
     return &objCopy
 }
 
-func (x *reqGetEntityGetDouble) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetDouble) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2384,7 +2384,7 @@ func (x *reqGetEntityGetDouble) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetDouble) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetDouble) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2470,7 +2470,7 @@ func (x *respGetEntityGetDouble) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetDouble) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -2490,7 +2490,7 @@ func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Succ
     return nil
 }
 
-func (x *respGetEntityGetDouble) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetDouble) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -2541,7 +2541,7 @@ func (x *respGetEntityGetDouble) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetDouble) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetDouble) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2560,7 +2560,7 @@ func (x *respGetEntityGetDouble) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetDouble) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetDouble) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2645,7 +2645,7 @@ func (x *reqGetEntityGetStringBuilder) Emit() *reqGetEntityGetString {
     return &objCopy
 }
 
-func (x *reqGetEntityGetString) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetString) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2660,7 +2660,7 @@ func (x *reqGetEntityGetString) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetString) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetString) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2746,7 +2746,7 @@ func (x *respGetEntityGetString) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetString) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -2766,7 +2766,7 @@ func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Succ
     return nil
 }
 
-func (x *respGetEntityGetString) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetString) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -2817,7 +2817,7 @@ func (x *respGetEntityGetString) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetString) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetString) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2836,7 +2836,7 @@ func (x *respGetEntityGetString) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetString) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetString) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2921,7 +2921,7 @@ func (x *reqGetEntityGetBinaryBuilder) Emit() *reqGetEntityGetBinary {
     return &objCopy
 }
 
-func (x *reqGetEntityGetBinary) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetBinary) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2936,7 +2936,7 @@ func (x *reqGetEntityGetBinary) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetBinary) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetBinary) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3022,7 +3022,7 @@ func (x *respGetEntityGetBinary) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetBinary) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -3042,7 +3042,7 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Succ
     return nil
 }
 
-func (x *respGetEntityGetBinary) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetBinary) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -3089,7 +3089,7 @@ func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetBinary) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetBinary) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3108,7 +3108,7 @@ func (x *respGetEntityGetBinary) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetBinary) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetBinary) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3193,7 +3193,7 @@ func (x *reqGetEntityGetMapBuilder) Emit() *reqGetEntityGetMap {
     return &objCopy
 }
 
-func (x *reqGetEntityGetMap) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3208,7 +3208,7 @@ func (x *reqGetEntityGetMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetMap) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3294,7 +3294,7 @@ func (x *respGetEntityGetMap) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetMap) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -3332,7 +3332,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetMap) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetMap) readField0(p thrift.Format) error {  // Success
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -3407,7 +3407,7 @@ func (x *respGetEntityGetMap) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetMap) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3426,7 +3426,7 @@ func (x *respGetEntityGetMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetMap) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3511,7 +3511,7 @@ func (x *reqGetEntityGetSetBuilder) Emit() *reqGetEntityGetSet {
     return &objCopy
 }
 
-func (x *reqGetEntityGetSet) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3526,7 +3526,7 @@ func (x *reqGetEntityGetSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetSet) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3612,7 +3612,7 @@ func (x *respGetEntityGetSet) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetSet) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -3643,7 +3643,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetSet) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetSet) readField0(p thrift.Format) error {  // Success
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -3708,7 +3708,7 @@ func (x *respGetEntityGetSet) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetSet) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3727,7 +3727,7 @@ func (x *respGetEntityGetSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetSet) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3812,7 +3812,7 @@ func (x *reqGetEntityGetListBuilder) Emit() *reqGetEntityGetList {
     return &objCopy
 }
 
-func (x *reqGetEntityGetList) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -3827,7 +3827,7 @@ func (x *reqGetEntityGetList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetList) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3913,7 +3913,7 @@ func (x *respGetEntityGetList) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetList) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -3944,7 +3944,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetList) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetList) readField0(p thrift.Format) error {  // Success
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -4009,7 +4009,7 @@ func (x *respGetEntityGetList) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetList) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4028,7 +4028,7 @@ func (x *respGetEntityGetList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetList) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4151,7 +4151,7 @@ func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLega
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Protocol) error {  // NumNeg2
+func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Format) error {  // NumNeg2
     if err := p.WriteFieldBegin("numNeg2", thrift.I64, -2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4167,7 +4167,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Protocol) error {  // NumNeg1
+func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Format) error {  // NumNeg1
     if err := p.WriteFieldBegin("numNeg1", thrift.I64, -1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4183,7 +4183,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Protocol) error {  // NumPos
+func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Format) error {  // NumPos
     if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4199,7 +4199,7 @@ func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) readField_2(p thrift.Protocol) error {  // NumNeg2
+func (x *reqGetEntityGetLegacyStuff) readField_2(p thrift.Format) error {  // NumNeg2
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4209,7 +4209,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Protocol) error {  // NumNeg1
+func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Format) error {  // NumNeg1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4219,7 +4219,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Protocol) error {  // NumPos
+func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Format) error {  // NumPos
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4284,7 +4284,7 @@ func (x *reqGetEntityGetLegacyStuffBuilder) Emit() *reqGetEntityGetLegacyStuff {
     return &objCopy
 }
 
-func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetLegacyStuff"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4311,7 +4311,7 @@ func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4412,7 +4412,7 @@ func (x *respGetEntityGetLegacyStuff) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -4432,7 +4432,7 @@ func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -4483,7 +4483,7 @@ func (x *respGetEntityGetLegacyStuff) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetLegacyStuff) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetLegacyStuff"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4502,7 +4502,7 @@ func (x *respGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetLegacyStuff) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4585,7 +4585,7 @@ func (x *reqGetEntityGetCtxCollision) SetCtx(value int64) *reqGetEntityGetCtxCol
     return x
 }
 
-func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Protocol) error {  // Ctx
+func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Format) error {  // Ctx
     if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4601,7 +4601,7 @@ func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Protocol) error {  // Ctx
+func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Format) error {  // Ctx
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4644,7 +4644,7 @@ func (x *reqGetEntityGetCtxCollisionBuilder) Emit() *reqGetEntityGetCtxCollision
     return &objCopy
 }
 
-func (x *reqGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetCtxCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetCtxCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4663,7 +4663,7 @@ func (x *reqGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetCtxCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4754,7 +4754,7 @@ func (x *respGetEntityGetCtxCollision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -4774,7 +4774,7 @@ func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetCtxCollision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -4825,7 +4825,7 @@ func (x *respGetEntityGetCtxCollision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetCtxCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetCtxCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -4844,7 +4844,7 @@ func (x *respGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetCtxCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -4947,7 +4947,7 @@ func (x *reqGetEntityGetCtx1Collision) SetCtx1(value int64) *reqGetEntityGetCtx1
     return x
 }
 
-func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Protocol) error {  // Ctx
+func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Format) error {  // Ctx
     if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4963,7 +4963,7 @@ func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Protocol) error {  // Ctx1
+func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Format) error {  // Ctx1
     if err := p.WriteFieldBegin("ctx1", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4979,7 +4979,7 @@ func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Protocol) error {  // Ctx
+func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Format) error {  // Ctx
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4989,7 +4989,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Protocol) error {  // Ctx1
+func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Format) error {  // Ctx1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -5043,7 +5043,7 @@ func (x *reqGetEntityGetCtx1CollisionBuilder) Emit() *reqGetEntityGetCtx1Collisi
     return &objCopy
 }
 
-func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetCtx1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5066,7 +5066,7 @@ func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetCtx1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5162,7 +5162,7 @@ func (x *respGetEntityGetCtx1Collision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -5182,7 +5182,7 @@ func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -5233,7 +5233,7 @@ func (x *respGetEntityGetCtx1Collision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetCtx1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetCtx1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5252,7 +5252,7 @@ func (x *respGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetCtx1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5335,7 +5335,7 @@ func (x *reqGetEntityGetContextCollision) SetContext(value int64) *reqGetEntityG
     return x
 }
 
-func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Protocol) error {  // Context
+func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Format) error {  // Context
     if err := p.WriteFieldBegin("context", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5351,7 +5351,7 @@ func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetContextCollision) readField1(p thrift.Protocol) error {  // Context
+func (x *reqGetEntityGetContextCollision) readField1(p thrift.Format) error {  // Context
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -5394,7 +5394,7 @@ func (x *reqGetEntityGetContextCollisionBuilder) Emit() *reqGetEntityGetContextC
     return &objCopy
 }
 
-func (x *reqGetEntityGetContextCollision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetContextCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetContextCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5413,7 +5413,7 @@ func (x *reqGetEntityGetContextCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetContextCollision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetContextCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5504,7 +5504,7 @@ func (x *respGetEntityGetContextCollision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetContextCollision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetContextCollision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -5524,7 +5524,7 @@ func (x *respGetEntityGetContextCollision) writeField0(p thrift.Protocol) error 
     return nil
 }
 
-func (x *respGetEntityGetContextCollision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetContextCollision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -5575,7 +5575,7 @@ func (x *respGetEntityGetContextCollision) Exception() thrift.WritableException 
     return nil
 }
 
-func (x *respGetEntityGetContextCollision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetContextCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetContextCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5594,7 +5594,7 @@ func (x *respGetEntityGetContextCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetContextCollision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetContextCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5677,7 +5677,7 @@ func (x *reqGetEntityGetOutCollision) SetOut(value int64) *reqGetEntityGetOutCol
     return x
 }
 
-func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Protocol) error {  // Out
+func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Format) error {  // Out
     if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5693,7 +5693,7 @@ func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetOutCollision) readField1(p thrift.Protocol) error {  // Out
+func (x *reqGetEntityGetOutCollision) readField1(p thrift.Format) error {  // Out
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -5736,7 +5736,7 @@ func (x *reqGetEntityGetOutCollisionBuilder) Emit() *reqGetEntityGetOutCollision
     return &objCopy
 }
 
-func (x *reqGetEntityGetOutCollision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetOutCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetOutCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5755,7 +5755,7 @@ func (x *reqGetEntityGetOutCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetOutCollision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetOutCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5846,7 +5846,7 @@ func (x *respGetEntityGetOutCollision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetOutCollision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetOutCollision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -5866,7 +5866,7 @@ func (x *respGetEntityGetOutCollision) writeField0(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *respGetEntityGetOutCollision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetOutCollision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -5917,7 +5917,7 @@ func (x *respGetEntityGetOutCollision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetOutCollision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetOutCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetOutCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5936,7 +5936,7 @@ func (x *respGetEntityGetOutCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetOutCollision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetOutCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6039,7 +6039,7 @@ func (x *reqGetEntityGetOut1Collision) SetOut1(value int64) *reqGetEntityGetOut1
     return x
 }
 
-func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Protocol) error {  // Out
+func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Format) error {  // Out
     if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6055,7 +6055,7 @@ func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Protocol) error {  // Out1
+func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Format) error {  // Out1
     if err := p.WriteFieldBegin("out1", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6071,7 +6071,7 @@ func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Protocol) error {  // Out
+func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Format) error {  // Out
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6081,7 +6081,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Protocol) error {  // Out1
+func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Format) error {  // Out1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6135,7 +6135,7 @@ func (x *reqGetEntityGetOut1CollisionBuilder) Emit() *reqGetEntityGetOut1Collisi
     return &objCopy
 }
 
-func (x *reqGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetOut1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetOut1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6158,7 +6158,7 @@ func (x *reqGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetOut1Collision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetOut1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6254,7 +6254,7 @@ func (x *respGetEntityGetOut1Collision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -6274,7 +6274,7 @@ func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *respGetEntityGetOut1Collision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetOut1Collision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -6325,7 +6325,7 @@ func (x *respGetEntityGetOut1Collision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetOut1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetOut1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6344,7 +6344,7 @@ func (x *respGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetOut1Collision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetOut1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6427,7 +6427,7 @@ func (x *reqGetEntityGetInCollision) SetIn(value int64) *reqGetEntityGetInCollis
     return x
 }
 
-func (x *reqGetEntityGetInCollision) writeField1(p thrift.Protocol) error {  // In
+func (x *reqGetEntityGetInCollision) writeField1(p thrift.Format) error {  // In
     if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6443,7 +6443,7 @@ func (x *reqGetEntityGetInCollision) writeField1(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *reqGetEntityGetInCollision) readField1(p thrift.Protocol) error {  // In
+func (x *reqGetEntityGetInCollision) readField1(p thrift.Format) error {  // In
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6486,7 +6486,7 @@ func (x *reqGetEntityGetInCollisionBuilder) Emit() *reqGetEntityGetInCollision {
     return &objCopy
 }
 
-func (x *reqGetEntityGetInCollision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetInCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetInCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6505,7 +6505,7 @@ func (x *reqGetEntityGetInCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetInCollision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetInCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6596,7 +6596,7 @@ func (x *respGetEntityGetInCollision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetInCollision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetInCollision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -6616,7 +6616,7 @@ func (x *respGetEntityGetInCollision) writeField0(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *respGetEntityGetInCollision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetInCollision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -6667,7 +6667,7 @@ func (x *respGetEntityGetInCollision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetInCollision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetInCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetInCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6686,7 +6686,7 @@ func (x *respGetEntityGetInCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetInCollision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetInCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6789,7 +6789,7 @@ func (x *reqGetEntityGetIn1Collision) SetIn1(value int64) *reqGetEntityGetIn1Col
     return x
 }
 
-func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Protocol) error {  // In
+func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Format) error {  // In
     if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6805,7 +6805,7 @@ func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Protocol) error {  // In1
+func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Format) error {  // In1
     if err := p.WriteFieldBegin("in1", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6821,7 +6821,7 @@ func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Protocol) error {  // In
+func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Format) error {  // In
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6831,7 +6831,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Protocol) error {  // In1
+func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Format) error {  // In1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6885,7 +6885,7 @@ func (x *reqGetEntityGetIn1CollisionBuilder) Emit() *reqGetEntityGetIn1Collision
     return &objCopy
 }
 
-func (x *reqGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetIn1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetIn1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6908,7 +6908,7 @@ func (x *reqGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetIn1Collision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetIn1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7004,7 +7004,7 @@ func (x *respGetEntityGetIn1Collision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -7024,7 +7024,7 @@ func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *respGetEntityGetIn1Collision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetIn1Collision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -7075,7 +7075,7 @@ func (x *respGetEntityGetIn1Collision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetIn1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetIn1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7094,7 +7094,7 @@ func (x *respGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetIn1Collision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetIn1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7177,7 +7177,7 @@ func (x *reqGetEntityGetErrCollision) SetErr(value int64) *reqGetEntityGetErrCol
     return x
 }
 
-func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Protocol) error {  // Err
+func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Format) error {  // Err
     if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7193,7 +7193,7 @@ func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetErrCollision) readField1(p thrift.Protocol) error {  // Err
+func (x *reqGetEntityGetErrCollision) readField1(p thrift.Format) error {  // Err
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -7236,7 +7236,7 @@ func (x *reqGetEntityGetErrCollisionBuilder) Emit() *reqGetEntityGetErrCollision
     return &objCopy
 }
 
-func (x *reqGetEntityGetErrCollision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetErrCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetErrCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7255,7 +7255,7 @@ func (x *reqGetEntityGetErrCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetErrCollision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetErrCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7346,7 +7346,7 @@ func (x *respGetEntityGetErrCollision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetErrCollision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetErrCollision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -7366,7 +7366,7 @@ func (x *respGetEntityGetErrCollision) writeField0(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *respGetEntityGetErrCollision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetErrCollision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -7417,7 +7417,7 @@ func (x *respGetEntityGetErrCollision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetErrCollision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetErrCollision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetErrCollision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7436,7 +7436,7 @@ func (x *respGetEntityGetErrCollision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetErrCollision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetErrCollision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7539,7 +7539,7 @@ func (x *reqGetEntityGetErr1Collision) SetErr1(value int64) *reqGetEntityGetErr1
     return x
 }
 
-func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Protocol) error {  // Err
+func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Format) error {  // Err
     if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7555,7 +7555,7 @@ func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Protocol) error {  // Err1
+func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Format) error {  // Err1
     if err := p.WriteFieldBegin("err1", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7571,7 +7571,7 @@ func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Protocol) error {  // Err
+func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Format) error {  // Err
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -7581,7 +7581,7 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Protocol) error {  // Err1
+func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Format) error {  // Err1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -7635,7 +7635,7 @@ func (x *reqGetEntityGetErr1CollisionBuilder) Emit() *reqGetEntityGetErr1Collisi
     return &objCopy
 }
 
-func (x *reqGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
+func (x *reqGetEntityGetErr1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqGetEntityGetErr1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7658,7 +7658,7 @@ func (x *reqGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqGetEntityGetErr1Collision) Read(p thrift.Protocol) error {
+func (x *reqGetEntityGetErr1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7754,7 +7754,7 @@ func (x *respGetEntityGetErr1Collision) IsSetSuccess() bool {
     return x != nil && x.Success != nil
 }
 
-func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Format) error {  // Success
     if !x.IsSetSuccess() {
         return nil
     }
@@ -7774,7 +7774,7 @@ func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *respGetEntityGetErr1Collision) readField0(p thrift.Protocol) error {  // Success
+func (x *respGetEntityGetErr1Collision) readField0(p thrift.Format) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -7825,7 +7825,7 @@ func (x *respGetEntityGetErr1Collision) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
+func (x *respGetEntityGetErr1Collision) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respGetEntityGetErr1Collision"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7844,7 +7844,7 @@ func (x *respGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respGetEntityGetErr1Collision) Read(p thrift.Protocol) error {
+func (x *respGetEntityGetErr1Collision) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7993,7 +7993,7 @@ type procFuncGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetEntity{}
 
-func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetEntity()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8002,7 +8002,7 @@ func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Protocol) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8045,7 +8045,7 @@ type procFuncGetEntityGetBool struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBool{}
 
-func (p *procFuncGetEntityGetBool) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetBool) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBool()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8054,7 +8054,7 @@ func (p *procFuncGetEntityGetBool) Read(iprot thrift.Protocol) (thrift.Struct, t
     return args, nil
 }
 
-func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8096,7 +8096,7 @@ type procFuncGetEntityGetByte struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetByte{}
 
-func (p *procFuncGetEntityGetByte) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetByte) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetByte()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8105,7 +8105,7 @@ func (p *procFuncGetEntityGetByte) Read(iprot thrift.Protocol) (thrift.Struct, t
     return args, nil
 }
 
-func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8147,7 +8147,7 @@ type procFuncGetEntityGetI16 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI16{}
 
-func (p *procFuncGetEntityGetI16) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetI16) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI16()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8156,7 +8156,7 @@ func (p *procFuncGetEntityGetI16) Read(iprot thrift.Protocol) (thrift.Struct, th
     return args, nil
 }
 
-func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8198,7 +8198,7 @@ type procFuncGetEntityGetI32 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI32{}
 
-func (p *procFuncGetEntityGetI32) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetI32) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI32()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8207,7 +8207,7 @@ func (p *procFuncGetEntityGetI32) Read(iprot thrift.Protocol) (thrift.Struct, th
     return args, nil
 }
 
-func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8249,7 +8249,7 @@ type procFuncGetEntityGetI64 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI64{}
 
-func (p *procFuncGetEntityGetI64) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetI64) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI64()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8258,7 +8258,7 @@ func (p *procFuncGetEntityGetI64) Read(iprot thrift.Protocol) (thrift.Struct, th
     return args, nil
 }
 
-func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8300,7 +8300,7 @@ type procFuncGetEntityGetDouble struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetDouble{}
 
-func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetDouble()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8309,7 +8309,7 @@ func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Protocol) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8351,7 +8351,7 @@ type procFuncGetEntityGetString struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetString{}
 
-func (p *procFuncGetEntityGetString) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetString) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetString()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8360,7 +8360,7 @@ func (p *procFuncGetEntityGetString) Read(iprot thrift.Protocol) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8402,7 +8402,7 @@ type procFuncGetEntityGetBinary struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBinary{}
 
-func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBinary()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8411,7 +8411,7 @@ func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Protocol) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8453,7 +8453,7 @@ type procFuncGetEntityGetMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetMap{}
 
-func (p *procFuncGetEntityGetMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8462,7 +8462,7 @@ func (p *procFuncGetEntityGetMap) Read(iprot thrift.Protocol) (thrift.Struct, th
     return args, nil
 }
 
-func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8504,7 +8504,7 @@ type procFuncGetEntityGetSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetSet{}
 
-func (p *procFuncGetEntityGetSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetSet()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8513,7 +8513,7 @@ func (p *procFuncGetEntityGetSet) Read(iprot thrift.Protocol) (thrift.Struct, th
     return args, nil
 }
 
-func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8555,7 +8555,7 @@ type procFuncGetEntityGetList struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetList{}
 
-func (p *procFuncGetEntityGetList) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetList) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetList()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8564,7 +8564,7 @@ func (p *procFuncGetEntityGetList) Read(iprot thrift.Protocol) (thrift.Struct, t
     return args, nil
 }
 
-func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8606,7 +8606,7 @@ type procFuncGetEntityGetLegacyStuff struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetLegacyStuff{}
 
-func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetLegacyStuff()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8615,7 +8615,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8658,7 +8658,7 @@ type procFuncGetEntityGetCtxCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtxCollision{}
 
-func (p *procFuncGetEntityGetCtxCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetCtxCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetCtxCollision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8667,7 +8667,7 @@ func (p *procFuncGetEntityGetCtxCollision) Read(iprot thrift.Protocol) (thrift.S
     return args, nil
 }
 
-func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8710,7 +8710,7 @@ type procFuncGetEntityGetCtx1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtx1Collision{}
 
-func (p *procFuncGetEntityGetCtx1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetCtx1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetCtx1Collision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8719,7 +8719,7 @@ func (p *procFuncGetEntityGetCtx1Collision) Read(iprot thrift.Protocol) (thrift.
     return args, nil
 }
 
-func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8762,7 +8762,7 @@ type procFuncGetEntityGetContextCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetContextCollision{}
 
-func (p *procFuncGetEntityGetContextCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetContextCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetContextCollision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8771,7 +8771,7 @@ func (p *procFuncGetEntityGetContextCollision) Read(iprot thrift.Protocol) (thri
     return args, nil
 }
 
-func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8814,7 +8814,7 @@ type procFuncGetEntityGetOutCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOutCollision{}
 
-func (p *procFuncGetEntityGetOutCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetOutCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetOutCollision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8823,7 +8823,7 @@ func (p *procFuncGetEntityGetOutCollision) Read(iprot thrift.Protocol) (thrift.S
     return args, nil
 }
 
-func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8866,7 +8866,7 @@ type procFuncGetEntityGetOut1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOut1Collision{}
 
-func (p *procFuncGetEntityGetOut1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetOut1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetOut1Collision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8875,7 +8875,7 @@ func (p *procFuncGetEntityGetOut1Collision) Read(iprot thrift.Protocol) (thrift.
     return args, nil
 }
 
-func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8918,7 +8918,7 @@ type procFuncGetEntityGetInCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetInCollision{}
 
-func (p *procFuncGetEntityGetInCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetInCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetInCollision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8927,7 +8927,7 @@ func (p *procFuncGetEntityGetInCollision) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -8970,7 +8970,7 @@ type procFuncGetEntityGetIn1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetIn1Collision{}
 
-func (p *procFuncGetEntityGetIn1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetIn1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetIn1Collision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -8979,7 +8979,7 @@ func (p *procFuncGetEntityGetIn1Collision) Read(iprot thrift.Protocol) (thrift.S
     return args, nil
 }
 
-func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -9022,7 +9022,7 @@ type procFuncGetEntityGetErrCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErrCollision{}
 
-func (p *procFuncGetEntityGetErrCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetErrCollision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetErrCollision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -9031,7 +9031,7 @@ func (p *procFuncGetEntityGetErrCollision) Read(iprot thrift.Protocol) (thrift.S
     return args, nil
 }
 
-func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -9074,7 +9074,7 @@ type procFuncGetEntityGetErr1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErr1Collision{}
 
-func (p *procFuncGetEntityGetErr1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncGetEntityGetErr1Collision) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetErr1Collision()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -9083,7 +9083,7 @@ func (p *procFuncGetEntityGetErr1Collision) Read(iprot thrift.Protocol) (thrift.
     return args, nil
 }
 
-func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -45,7 +45,7 @@ func (x *Foo) SetMyInt(value int64) *Foo {
     return x
 }
 
-func (x *Foo) writeField1(p thrift.Protocol) error {  // MyInt
+func (x *Foo) writeField1(p thrift.Format) error {  // MyInt
     if err := p.WriteFieldBegin("MyInt", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -61,7 +61,7 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // MyInt
     return nil
 }
 
-func (x *Foo) readField1(p thrift.Protocol) error {  // MyInt
+func (x *Foo) readField1(p thrift.Format) error {  // MyInt
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -104,7 +104,7 @@ func (x *FooBuilder) Emit() *Foo {
     return &objCopy
 }
 
-func (x *Foo) Write(p thrift.Protocol) error {
+func (x *Foo) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -123,7 +123,7 @@ func (x *Foo) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Foo) Read(p thrift.Protocol) error {
+func (x *Foo) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

@@ -19,7 +19,7 @@
   This template creates a Read method for Thrift structs.
 
 }}
-func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
+func (x *{{struct:go_name}}) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

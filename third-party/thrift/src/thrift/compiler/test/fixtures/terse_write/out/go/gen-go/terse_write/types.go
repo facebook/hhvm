@@ -22,14 +22,14 @@ func NewMyInteger() MyInteger {
     return 0
 }
 
-func WriteMyInteger(item MyInteger, p thrift.Protocol) error {
+func WriteMyInteger(item MyInteger, p thrift.Format) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadMyInteger(p thrift.Protocol) (MyInteger, error) {
+func ReadMyInteger(p thrift.Format) (MyInteger, error) {
     var decodeResult MyInteger
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -128,7 +128,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     return &objCopy
 }
 
-func (x *MyStruct) Write(p thrift.Protocol) error {
+func (x *MyStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -143,7 +143,7 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyStruct) Read(p thrift.Protocol) error {
+func (x *MyStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -577,7 +577,7 @@ func (x *MyUnion) IsSetStructField() bool {
     return x != nil && x.StructField != nil
 }
 
-func (x *MyUnion) writeField1(p thrift.Protocol) error {  // BoolField
+func (x *MyUnion) writeField1(p thrift.Format) error {  // BoolField
     if !x.IsSetBoolField() {
         return nil
     }
@@ -597,7 +597,7 @@ func (x *MyUnion) writeField1(p thrift.Protocol) error {  // BoolField
     return nil
 }
 
-func (x *MyUnion) writeField2(p thrift.Protocol) error {  // ByteField
+func (x *MyUnion) writeField2(p thrift.Format) error {  // ByteField
     if !x.IsSetByteField() {
         return nil
     }
@@ -617,7 +617,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // ByteField
     return nil
 }
 
-func (x *MyUnion) writeField3(p thrift.Protocol) error {  // ShortField
+func (x *MyUnion) writeField3(p thrift.Format) error {  // ShortField
     if !x.IsSetShortField() {
         return nil
     }
@@ -637,7 +637,7 @@ func (x *MyUnion) writeField3(p thrift.Protocol) error {  // ShortField
     return nil
 }
 
-func (x *MyUnion) writeField4(p thrift.Protocol) error {  // IntField
+func (x *MyUnion) writeField4(p thrift.Format) error {  // IntField
     if !x.IsSetIntField() {
         return nil
     }
@@ -657,7 +657,7 @@ func (x *MyUnion) writeField4(p thrift.Protocol) error {  // IntField
     return nil
 }
 
-func (x *MyUnion) writeField5(p thrift.Protocol) error {  // LongField
+func (x *MyUnion) writeField5(p thrift.Format) error {  // LongField
     if !x.IsSetLongField() {
         return nil
     }
@@ -677,7 +677,7 @@ func (x *MyUnion) writeField5(p thrift.Protocol) error {  // LongField
     return nil
 }
 
-func (x *MyUnion) writeField6(p thrift.Protocol) error {  // FloatField
+func (x *MyUnion) writeField6(p thrift.Format) error {  // FloatField
     if !x.IsSetFloatField() {
         return nil
     }
@@ -697,7 +697,7 @@ func (x *MyUnion) writeField6(p thrift.Protocol) error {  // FloatField
     return nil
 }
 
-func (x *MyUnion) writeField7(p thrift.Protocol) error {  // DoubleField
+func (x *MyUnion) writeField7(p thrift.Format) error {  // DoubleField
     if !x.IsSetDoubleField() {
         return nil
     }
@@ -717,7 +717,7 @@ func (x *MyUnion) writeField7(p thrift.Protocol) error {  // DoubleField
     return nil
 }
 
-func (x *MyUnion) writeField8(p thrift.Protocol) error {  // StringField
+func (x *MyUnion) writeField8(p thrift.Format) error {  // StringField
     if !x.IsSetStringField() {
         return nil
     }
@@ -737,7 +737,7 @@ func (x *MyUnion) writeField8(p thrift.Protocol) error {  // StringField
     return nil
 }
 
-func (x *MyUnion) writeField9(p thrift.Protocol) error {  // BinaryField
+func (x *MyUnion) writeField9(p thrift.Format) error {  // BinaryField
     if !x.IsSetBinaryField() {
         return nil
     }
@@ -757,7 +757,7 @@ func (x *MyUnion) writeField9(p thrift.Protocol) error {  // BinaryField
     return nil
 }
 
-func (x *MyUnion) writeField10(p thrift.Protocol) error {  // EnumField
+func (x *MyUnion) writeField10(p thrift.Format) error {  // EnumField
     if !x.IsSetEnumField() {
         return nil
     }
@@ -777,7 +777,7 @@ func (x *MyUnion) writeField10(p thrift.Protocol) error {  // EnumField
     return nil
 }
 
-func (x *MyUnion) writeField11(p thrift.Protocol) error {  // ListField
+func (x *MyUnion) writeField11(p thrift.Format) error {  // ListField
     if !x.IsSetListField() {
         return nil
     }
@@ -808,7 +808,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *MyUnion) writeField12(p thrift.Protocol) error {  // SetField
+func (x *MyUnion) writeField12(p thrift.Format) error {  // SetField
     if !x.IsSetSetField() {
         return nil
     }
@@ -839,7 +839,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *MyUnion) writeField13(p thrift.Protocol) error {  // MapField
+func (x *MyUnion) writeField13(p thrift.Format) error {  // MapField
     if !x.IsSetMapField() {
         return nil
     }
@@ -877,7 +877,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *MyUnion) writeField14(p thrift.Protocol) error {  // StructField
+func (x *MyUnion) writeField14(p thrift.Format) error {  // StructField
     if !x.IsSetStructField() {
         return nil
     }
@@ -897,7 +897,7 @@ func (x *MyUnion) writeField14(p thrift.Protocol) error {  // StructField
     return nil
 }
 
-func (x *MyUnion) readField1(p thrift.Protocol) error {  // BoolField
+func (x *MyUnion) readField1(p thrift.Format) error {  // BoolField
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -907,7 +907,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField2(p thrift.Protocol) error {  // ByteField
+func (x *MyUnion) readField2(p thrift.Format) error {  // ByteField
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -918,7 +918,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField3(p thrift.Protocol) error {  // ShortField
+func (x *MyUnion) readField3(p thrift.Format) error {  // ShortField
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -928,7 +928,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField4(p thrift.Protocol) error {  // IntField
+func (x *MyUnion) readField4(p thrift.Format) error {  // IntField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -938,7 +938,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField5(p thrift.Protocol) error {  // LongField
+func (x *MyUnion) readField5(p thrift.Format) error {  // LongField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -948,7 +948,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField6(p thrift.Protocol) error {  // FloatField
+func (x *MyUnion) readField6(p thrift.Format) error {  // FloatField
     result, err := p.ReadFloat()
 if err != nil {
     return err
@@ -958,7 +958,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField7(p thrift.Protocol) error {  // DoubleField
+func (x *MyUnion) readField7(p thrift.Format) error {  // DoubleField
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -968,7 +968,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField8(p thrift.Protocol) error {  // StringField
+func (x *MyUnion) readField8(p thrift.Format) error {  // StringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -978,7 +978,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField9(p thrift.Protocol) error {  // BinaryField
+func (x *MyUnion) readField9(p thrift.Format) error {  // BinaryField
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -988,7 +988,7 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) readField10(p thrift.Protocol) error {  // EnumField
+func (x *MyUnion) readField10(p thrift.Format) error {  // EnumField
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -999,7 +999,7 @@ result := MyEnum(enumResult)
     return nil
 }
 
-func (x *MyUnion) readField11(p thrift.Protocol) error {  // ListField
+func (x *MyUnion) readField11(p thrift.Format) error {  // ListField
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1027,7 +1027,7 @@ result := listResult
     return nil
 }
 
-func (x *MyUnion) readField12(p thrift.Protocol) error {  // SetField
+func (x *MyUnion) readField12(p thrift.Format) error {  // SetField
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -1055,7 +1055,7 @@ result := setResult
     return nil
 }
 
-func (x *MyUnion) readField13(p thrift.Protocol) error {  // MapField
+func (x *MyUnion) readField13(p thrift.Format) error {  // MapField
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1093,7 +1093,7 @@ result := mapResult
     return nil
 }
 
-func (x *MyUnion) readField14(p thrift.Protocol) error {  // StructField
+func (x *MyUnion) readField14(p thrift.Format) error {  // StructField
     result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -1375,7 +1375,7 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     return &objCopy
 }
 
-func (x *MyUnion) Write(p thrift.Protocol) error {
+func (x *MyUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -1449,7 +1449,7 @@ func (x *MyUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyUnion) Read(p thrift.Protocol) error {
+func (x *MyUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1595,7 +1595,7 @@ func (x *MyStructWithCustomDefault) SetField1(value int64) *MyStructWithCustomDe
     return x
 }
 
-func (x *MyStructWithCustomDefault) writeField1(p thrift.Protocol) error {  // Field1
+func (x *MyStructWithCustomDefault) writeField1(p thrift.Format) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1611,7 +1611,7 @@ func (x *MyStructWithCustomDefault) writeField1(p thrift.Protocol) error {  // F
     return nil
 }
 
-func (x *MyStructWithCustomDefault) readField1(p thrift.Protocol) error {  // Field1
+func (x *MyStructWithCustomDefault) readField1(p thrift.Format) error {  // Field1
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -1654,7 +1654,7 @@ func (x *MyStructWithCustomDefaultBuilder) Emit() *MyStructWithCustomDefault {
     return &objCopy
 }
 
-func (x *MyStructWithCustomDefault) Write(p thrift.Protocol) error {
+func (x *MyStructWithCustomDefault) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MyStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1673,7 +1673,7 @@ func (x *MyStructWithCustomDefault) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MyStructWithCustomDefault) Read(p thrift.Protocol) error {
+func (x *MyStructWithCustomDefault) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2082,7 +2082,7 @@ func (x *StructLevelTerseStruct) IsSetUnionField() bool {
     return x != nil && x.UnionField != nil
 }
 
-func (x *StructLevelTerseStruct) writeField1(p thrift.Protocol) error {  // BoolField
+func (x *StructLevelTerseStruct) writeField1(p thrift.Format) error {  // BoolField
     if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2098,7 +2098,7 @@ func (x *StructLevelTerseStruct) writeField1(p thrift.Protocol) error {  // Bool
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField2(p thrift.Protocol) error {  // ByteField
+func (x *StructLevelTerseStruct) writeField2(p thrift.Format) error {  // ByteField
     if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2114,7 +2114,7 @@ func (x *StructLevelTerseStruct) writeField2(p thrift.Protocol) error {  // Byte
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField3(p thrift.Protocol) error {  // ShortField
+func (x *StructLevelTerseStruct) writeField3(p thrift.Format) error {  // ShortField
     if err := p.WriteFieldBegin("short_field", thrift.I16, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2130,7 +2130,7 @@ func (x *StructLevelTerseStruct) writeField3(p thrift.Protocol) error {  // Shor
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField4(p thrift.Protocol) error {  // IntField
+func (x *StructLevelTerseStruct) writeField4(p thrift.Format) error {  // IntField
     if err := p.WriteFieldBegin("int_field", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2146,7 +2146,7 @@ func (x *StructLevelTerseStruct) writeField4(p thrift.Protocol) error {  // IntF
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField5(p thrift.Protocol) error {  // LongField
+func (x *StructLevelTerseStruct) writeField5(p thrift.Format) error {  // LongField
     if err := p.WriteFieldBegin("long_field", thrift.I64, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2162,7 +2162,7 @@ func (x *StructLevelTerseStruct) writeField5(p thrift.Protocol) error {  // Long
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField6(p thrift.Protocol) error {  // FloatField
+func (x *StructLevelTerseStruct) writeField6(p thrift.Format) error {  // FloatField
     if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2178,7 +2178,7 @@ func (x *StructLevelTerseStruct) writeField6(p thrift.Protocol) error {  // Floa
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField7(p thrift.Protocol) error {  // DoubleField
+func (x *StructLevelTerseStruct) writeField7(p thrift.Format) error {  // DoubleField
     if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2194,7 +2194,7 @@ func (x *StructLevelTerseStruct) writeField7(p thrift.Protocol) error {  // Doub
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField8(p thrift.Protocol) error {  // StringField
+func (x *StructLevelTerseStruct) writeField8(p thrift.Format) error {  // StringField
     if err := p.WriteFieldBegin("string_field", thrift.STRING, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2210,7 +2210,7 @@ func (x *StructLevelTerseStruct) writeField8(p thrift.Protocol) error {  // Stri
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField9(p thrift.Protocol) error {  // BinaryField
+func (x *StructLevelTerseStruct) writeField9(p thrift.Format) error {  // BinaryField
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2226,7 +2226,7 @@ func (x *StructLevelTerseStruct) writeField9(p thrift.Protocol) error {  // Bina
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField10(p thrift.Protocol) error {  // EnumField
+func (x *StructLevelTerseStruct) writeField10(p thrift.Format) error {  // EnumField
     if err := p.WriteFieldBegin("enum_field", thrift.I32, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2242,7 +2242,7 @@ func (x *StructLevelTerseStruct) writeField10(p thrift.Protocol) error {  // Enu
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField11(p thrift.Protocol) error {  // ListField
+func (x *StructLevelTerseStruct) writeField11(p thrift.Format) error {  // ListField
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2269,7 +2269,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField12(p thrift.Protocol) error {  // SetField
+func (x *StructLevelTerseStruct) writeField12(p thrift.Format) error {  // SetField
     if err := p.WriteFieldBegin("set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2296,7 +2296,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField13(p thrift.Protocol) error {  // MapField
+func (x *StructLevelTerseStruct) writeField13(p thrift.Format) error {  // MapField
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2330,7 +2330,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField14(p thrift.Protocol) error {  // StructField
+func (x *StructLevelTerseStruct) writeField14(p thrift.Format) error {  // StructField
     if !x.IsSetStructField() {
         return nil
     }
@@ -2350,7 +2350,7 @@ func (x *StructLevelTerseStruct) writeField14(p thrift.Protocol) error {  // Str
     return nil
 }
 
-func (x *StructLevelTerseStruct) writeField15(p thrift.Protocol) error {  // UnionField
+func (x *StructLevelTerseStruct) writeField15(p thrift.Format) error {  // UnionField
     if !x.IsSetUnionField() {
         return nil
     }
@@ -2370,7 +2370,7 @@ func (x *StructLevelTerseStruct) writeField15(p thrift.Protocol) error {  // Uni
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField1(p thrift.Protocol) error {  // BoolField
+func (x *StructLevelTerseStruct) readField1(p thrift.Format) error {  // BoolField
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -2380,7 +2380,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField2(p thrift.Protocol) error {  // ByteField
+func (x *StructLevelTerseStruct) readField2(p thrift.Format) error {  // ByteField
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -2391,7 +2391,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField3(p thrift.Protocol) error {  // ShortField
+func (x *StructLevelTerseStruct) readField3(p thrift.Format) error {  // ShortField
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -2401,7 +2401,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField4(p thrift.Protocol) error {  // IntField
+func (x *StructLevelTerseStruct) readField4(p thrift.Format) error {  // IntField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -2411,7 +2411,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField5(p thrift.Protocol) error {  // LongField
+func (x *StructLevelTerseStruct) readField5(p thrift.Format) error {  // LongField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -2421,7 +2421,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField6(p thrift.Protocol) error {  // FloatField
+func (x *StructLevelTerseStruct) readField6(p thrift.Format) error {  // FloatField
     result, err := p.ReadFloat()
 if err != nil {
     return err
@@ -2431,7 +2431,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField7(p thrift.Protocol) error {  // DoubleField
+func (x *StructLevelTerseStruct) readField7(p thrift.Format) error {  // DoubleField
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -2441,7 +2441,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField8(p thrift.Protocol) error {  // StringField
+func (x *StructLevelTerseStruct) readField8(p thrift.Format) error {  // StringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -2451,7 +2451,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField9(p thrift.Protocol) error {  // BinaryField
+func (x *StructLevelTerseStruct) readField9(p thrift.Format) error {  // BinaryField
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -2461,7 +2461,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField10(p thrift.Protocol) error {  // EnumField
+func (x *StructLevelTerseStruct) readField10(p thrift.Format) error {  // EnumField
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -2472,7 +2472,7 @@ result := MyEnum(enumResult)
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField11(p thrift.Protocol) error {  // ListField
+func (x *StructLevelTerseStruct) readField11(p thrift.Format) error {  // ListField
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -2500,7 +2500,7 @@ result := listResult
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField12(p thrift.Protocol) error {  // SetField
+func (x *StructLevelTerseStruct) readField12(p thrift.Format) error {  // SetField
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -2528,7 +2528,7 @@ result := setResult
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField13(p thrift.Protocol) error {  // MapField
+func (x *StructLevelTerseStruct) readField13(p thrift.Format) error {  // MapField
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -2566,7 +2566,7 @@ result := mapResult
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField14(p thrift.Protocol) error {  // StructField
+func (x *StructLevelTerseStruct) readField14(p thrift.Format) error {  // StructField
     result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -2577,7 +2577,7 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) readField15(p thrift.Protocol) error {  // UnionField
+func (x *StructLevelTerseStruct) readField15(p thrift.Format) error {  // UnionField
     result := *NewMyUnion()
 err := result.Read(p)
 if err != nil {
@@ -2791,7 +2791,7 @@ func (x *StructLevelTerseStructBuilder) Emit() *StructLevelTerseStruct {
     return &objCopy
 }
 
-func (x *StructLevelTerseStruct) Write(p thrift.Protocol) error {
+func (x *StructLevelTerseStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("StructLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2866,7 +2866,7 @@ func (x *StructLevelTerseStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *StructLevelTerseStruct) Read(p thrift.Protocol) error {
+func (x *StructLevelTerseStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -3693,7 +3693,7 @@ func (x *FieldLevelTerseStruct) IsSetUnionField() bool {
     return x != nil && x.UnionField != nil
 }
 
-func (x *FieldLevelTerseStruct) writeField1(p thrift.Protocol) error {  // TerseBoolField
+func (x *FieldLevelTerseStruct) writeField1(p thrift.Format) error {  // TerseBoolField
     if err := p.WriteFieldBegin("terse_bool_field", thrift.BOOL, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3709,7 +3709,7 @@ func (x *FieldLevelTerseStruct) writeField1(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField2(p thrift.Protocol) error {  // TerseByteField
+func (x *FieldLevelTerseStruct) writeField2(p thrift.Format) error {  // TerseByteField
     if err := p.WriteFieldBegin("terse_byte_field", thrift.BYTE, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3725,7 +3725,7 @@ func (x *FieldLevelTerseStruct) writeField2(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField3(p thrift.Protocol) error {  // TerseShortField
+func (x *FieldLevelTerseStruct) writeField3(p thrift.Format) error {  // TerseShortField
     if err := p.WriteFieldBegin("terse_short_field", thrift.I16, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3741,7 +3741,7 @@ func (x *FieldLevelTerseStruct) writeField3(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField4(p thrift.Protocol) error {  // TerseIntField
+func (x *FieldLevelTerseStruct) writeField4(p thrift.Format) error {  // TerseIntField
     if err := p.WriteFieldBegin("terse_int_field", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3757,7 +3757,7 @@ func (x *FieldLevelTerseStruct) writeField4(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField5(p thrift.Protocol) error {  // TerseLongField
+func (x *FieldLevelTerseStruct) writeField5(p thrift.Format) error {  // TerseLongField
     if err := p.WriteFieldBegin("terse_long_field", thrift.I64, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3773,7 +3773,7 @@ func (x *FieldLevelTerseStruct) writeField5(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField6(p thrift.Protocol) error {  // TerseFloatField
+func (x *FieldLevelTerseStruct) writeField6(p thrift.Format) error {  // TerseFloatField
     if err := p.WriteFieldBegin("terse_float_field", thrift.FLOAT, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3789,7 +3789,7 @@ func (x *FieldLevelTerseStruct) writeField6(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField7(p thrift.Protocol) error {  // TerseDoubleField
+func (x *FieldLevelTerseStruct) writeField7(p thrift.Format) error {  // TerseDoubleField
     if err := p.WriteFieldBegin("terse_double_field", thrift.DOUBLE, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3805,7 +3805,7 @@ func (x *FieldLevelTerseStruct) writeField7(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField8(p thrift.Protocol) error {  // TerseStringField
+func (x *FieldLevelTerseStruct) writeField8(p thrift.Format) error {  // TerseStringField
     if err := p.WriteFieldBegin("terse_string_field", thrift.STRING, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3821,7 +3821,7 @@ func (x *FieldLevelTerseStruct) writeField8(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField9(p thrift.Protocol) error {  // TerseBinaryField
+func (x *FieldLevelTerseStruct) writeField9(p thrift.Format) error {  // TerseBinaryField
     if err := p.WriteFieldBegin("terse_binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3837,7 +3837,7 @@ func (x *FieldLevelTerseStruct) writeField9(p thrift.Protocol) error {  // Terse
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField10(p thrift.Protocol) error {  // TerseEnumField
+func (x *FieldLevelTerseStruct) writeField10(p thrift.Format) error {  // TerseEnumField
     if err := p.WriteFieldBegin("terse_enum_field", thrift.I32, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3853,7 +3853,7 @@ func (x *FieldLevelTerseStruct) writeField10(p thrift.Protocol) error {  // Ters
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField11(p thrift.Protocol) error {  // TerseListField
+func (x *FieldLevelTerseStruct) writeField11(p thrift.Format) error {  // TerseListField
     if err := p.WriteFieldBegin("terse_list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3880,7 +3880,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField12(p thrift.Protocol) error {  // TerseSetField
+func (x *FieldLevelTerseStruct) writeField12(p thrift.Format) error {  // TerseSetField
     if err := p.WriteFieldBegin("terse_set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3907,7 +3907,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField13(p thrift.Protocol) error {  // TerseMapField
+func (x *FieldLevelTerseStruct) writeField13(p thrift.Format) error {  // TerseMapField
     if err := p.WriteFieldBegin("terse_map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3941,7 +3941,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField14(p thrift.Protocol) error {  // TerseStructField
+func (x *FieldLevelTerseStruct) writeField14(p thrift.Format) error {  // TerseStructField
     if !x.IsSetTerseStructField() {
         return nil
     }
@@ -3961,7 +3961,7 @@ func (x *FieldLevelTerseStruct) writeField14(p thrift.Protocol) error {  // Ters
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField15(p thrift.Protocol) error {  // BoolField
+func (x *FieldLevelTerseStruct) writeField15(p thrift.Format) error {  // BoolField
     if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 15); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3977,7 +3977,7 @@ func (x *FieldLevelTerseStruct) writeField15(p thrift.Protocol) error {  // Bool
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField16(p thrift.Protocol) error {  // ByteField
+func (x *FieldLevelTerseStruct) writeField16(p thrift.Format) error {  // ByteField
     if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 16); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3993,7 +3993,7 @@ func (x *FieldLevelTerseStruct) writeField16(p thrift.Protocol) error {  // Byte
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField17(p thrift.Protocol) error {  // ShortField
+func (x *FieldLevelTerseStruct) writeField17(p thrift.Format) error {  // ShortField
     if err := p.WriteFieldBegin("short_field", thrift.I16, 17); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4009,7 +4009,7 @@ func (x *FieldLevelTerseStruct) writeField17(p thrift.Protocol) error {  // Shor
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField18(p thrift.Protocol) error {  // IntField
+func (x *FieldLevelTerseStruct) writeField18(p thrift.Format) error {  // IntField
     if err := p.WriteFieldBegin("int_field", thrift.I32, 18); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4025,7 +4025,7 @@ func (x *FieldLevelTerseStruct) writeField18(p thrift.Protocol) error {  // IntF
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField19(p thrift.Protocol) error {  // LongField
+func (x *FieldLevelTerseStruct) writeField19(p thrift.Format) error {  // LongField
     if err := p.WriteFieldBegin("long_field", thrift.I64, 19); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4041,7 +4041,7 @@ func (x *FieldLevelTerseStruct) writeField19(p thrift.Protocol) error {  // Long
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField20(p thrift.Protocol) error {  // FloatField
+func (x *FieldLevelTerseStruct) writeField20(p thrift.Format) error {  // FloatField
     if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 20); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4057,7 +4057,7 @@ func (x *FieldLevelTerseStruct) writeField20(p thrift.Protocol) error {  // Floa
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField21(p thrift.Protocol) error {  // DoubleField
+func (x *FieldLevelTerseStruct) writeField21(p thrift.Format) error {  // DoubleField
     if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 21); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4073,7 +4073,7 @@ func (x *FieldLevelTerseStruct) writeField21(p thrift.Protocol) error {  // Doub
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField22(p thrift.Protocol) error {  // StringField
+func (x *FieldLevelTerseStruct) writeField22(p thrift.Format) error {  // StringField
     if err := p.WriteFieldBegin("string_field", thrift.STRING, 22); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4089,7 +4089,7 @@ func (x *FieldLevelTerseStruct) writeField22(p thrift.Protocol) error {  // Stri
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField23(p thrift.Protocol) error {  // BinaryField
+func (x *FieldLevelTerseStruct) writeField23(p thrift.Format) error {  // BinaryField
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 23); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4105,7 +4105,7 @@ func (x *FieldLevelTerseStruct) writeField23(p thrift.Protocol) error {  // Bina
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField24(p thrift.Protocol) error {  // EnumField
+func (x *FieldLevelTerseStruct) writeField24(p thrift.Format) error {  // EnumField
     if err := p.WriteFieldBegin("enum_field", thrift.I32, 24); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4121,7 +4121,7 @@ func (x *FieldLevelTerseStruct) writeField24(p thrift.Protocol) error {  // Enum
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField25(p thrift.Protocol) error {  // ListField
+func (x *FieldLevelTerseStruct) writeField25(p thrift.Format) error {  // ListField
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 25); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4148,7 +4148,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField26(p thrift.Protocol) error {  // SetField
+func (x *FieldLevelTerseStruct) writeField26(p thrift.Format) error {  // SetField
     if err := p.WriteFieldBegin("set_field", thrift.SET, 26); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4175,7 +4175,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField27(p thrift.Protocol) error {  // MapField
+func (x *FieldLevelTerseStruct) writeField27(p thrift.Format) error {  // MapField
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 27); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4209,7 +4209,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField28(p thrift.Protocol) error {  // StructField
+func (x *FieldLevelTerseStruct) writeField28(p thrift.Format) error {  // StructField
     if !x.IsSetStructField() {
         return nil
     }
@@ -4229,7 +4229,7 @@ func (x *FieldLevelTerseStruct) writeField28(p thrift.Protocol) error {  // Stru
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField29(p thrift.Protocol) error {  // TerseUnionField
+func (x *FieldLevelTerseStruct) writeField29(p thrift.Format) error {  // TerseUnionField
     if !x.IsSetTerseUnionField() {
         return nil
     }
@@ -4249,7 +4249,7 @@ func (x *FieldLevelTerseStruct) writeField29(p thrift.Protocol) error {  // Ters
     return nil
 }
 
-func (x *FieldLevelTerseStruct) writeField30(p thrift.Protocol) error {  // UnionField
+func (x *FieldLevelTerseStruct) writeField30(p thrift.Format) error {  // UnionField
     if !x.IsSetUnionField() {
         return nil
     }
@@ -4269,7 +4269,7 @@ func (x *FieldLevelTerseStruct) writeField30(p thrift.Protocol) error {  // Unio
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField1(p thrift.Protocol) error {  // TerseBoolField
+func (x *FieldLevelTerseStruct) readField1(p thrift.Format) error {  // TerseBoolField
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -4279,7 +4279,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField2(p thrift.Protocol) error {  // TerseByteField
+func (x *FieldLevelTerseStruct) readField2(p thrift.Format) error {  // TerseByteField
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -4290,7 +4290,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField3(p thrift.Protocol) error {  // TerseShortField
+func (x *FieldLevelTerseStruct) readField3(p thrift.Format) error {  // TerseShortField
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -4300,7 +4300,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField4(p thrift.Protocol) error {  // TerseIntField
+func (x *FieldLevelTerseStruct) readField4(p thrift.Format) error {  // TerseIntField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -4310,7 +4310,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField5(p thrift.Protocol) error {  // TerseLongField
+func (x *FieldLevelTerseStruct) readField5(p thrift.Format) error {  // TerseLongField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4320,7 +4320,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField6(p thrift.Protocol) error {  // TerseFloatField
+func (x *FieldLevelTerseStruct) readField6(p thrift.Format) error {  // TerseFloatField
     result, err := p.ReadFloat()
 if err != nil {
     return err
@@ -4330,7 +4330,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField7(p thrift.Protocol) error {  // TerseDoubleField
+func (x *FieldLevelTerseStruct) readField7(p thrift.Format) error {  // TerseDoubleField
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -4340,7 +4340,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField8(p thrift.Protocol) error {  // TerseStringField
+func (x *FieldLevelTerseStruct) readField8(p thrift.Format) error {  // TerseStringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -4350,7 +4350,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField9(p thrift.Protocol) error {  // TerseBinaryField
+func (x *FieldLevelTerseStruct) readField9(p thrift.Format) error {  // TerseBinaryField
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -4360,7 +4360,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField10(p thrift.Protocol) error {  // TerseEnumField
+func (x *FieldLevelTerseStruct) readField10(p thrift.Format) error {  // TerseEnumField
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -4371,7 +4371,7 @@ result := MyEnum(enumResult)
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField11(p thrift.Protocol) error {  // TerseListField
+func (x *FieldLevelTerseStruct) readField11(p thrift.Format) error {  // TerseListField
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -4399,7 +4399,7 @@ result := listResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField12(p thrift.Protocol) error {  // TerseSetField
+func (x *FieldLevelTerseStruct) readField12(p thrift.Format) error {  // TerseSetField
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -4427,7 +4427,7 @@ result := setResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField13(p thrift.Protocol) error {  // TerseMapField
+func (x *FieldLevelTerseStruct) readField13(p thrift.Format) error {  // TerseMapField
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -4465,7 +4465,7 @@ result := mapResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField14(p thrift.Protocol) error {  // TerseStructField
+func (x *FieldLevelTerseStruct) readField14(p thrift.Format) error {  // TerseStructField
     result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -4476,7 +4476,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField15(p thrift.Protocol) error {  // BoolField
+func (x *FieldLevelTerseStruct) readField15(p thrift.Format) error {  // BoolField
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -4486,7 +4486,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField16(p thrift.Protocol) error {  // ByteField
+func (x *FieldLevelTerseStruct) readField16(p thrift.Format) error {  // ByteField
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -4497,7 +4497,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField17(p thrift.Protocol) error {  // ShortField
+func (x *FieldLevelTerseStruct) readField17(p thrift.Format) error {  // ShortField
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -4507,7 +4507,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField18(p thrift.Protocol) error {  // IntField
+func (x *FieldLevelTerseStruct) readField18(p thrift.Format) error {  // IntField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -4517,7 +4517,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField19(p thrift.Protocol) error {  // LongField
+func (x *FieldLevelTerseStruct) readField19(p thrift.Format) error {  // LongField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -4527,7 +4527,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField20(p thrift.Protocol) error {  // FloatField
+func (x *FieldLevelTerseStruct) readField20(p thrift.Format) error {  // FloatField
     result, err := p.ReadFloat()
 if err != nil {
     return err
@@ -4537,7 +4537,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField21(p thrift.Protocol) error {  // DoubleField
+func (x *FieldLevelTerseStruct) readField21(p thrift.Format) error {  // DoubleField
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -4547,7 +4547,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField22(p thrift.Protocol) error {  // StringField
+func (x *FieldLevelTerseStruct) readField22(p thrift.Format) error {  // StringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -4557,7 +4557,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField23(p thrift.Protocol) error {  // BinaryField
+func (x *FieldLevelTerseStruct) readField23(p thrift.Format) error {  // BinaryField
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -4567,7 +4567,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField24(p thrift.Protocol) error {  // EnumField
+func (x *FieldLevelTerseStruct) readField24(p thrift.Format) error {  // EnumField
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -4578,7 +4578,7 @@ result := MyEnum(enumResult)
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField25(p thrift.Protocol) error {  // ListField
+func (x *FieldLevelTerseStruct) readField25(p thrift.Format) error {  // ListField
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -4606,7 +4606,7 @@ result := listResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField26(p thrift.Protocol) error {  // SetField
+func (x *FieldLevelTerseStruct) readField26(p thrift.Format) error {  // SetField
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -4634,7 +4634,7 @@ result := setResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField27(p thrift.Protocol) error {  // MapField
+func (x *FieldLevelTerseStruct) readField27(p thrift.Format) error {  // MapField
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -4672,7 +4672,7 @@ result := mapResult
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField28(p thrift.Protocol) error {  // StructField
+func (x *FieldLevelTerseStruct) readField28(p thrift.Format) error {  // StructField
     result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
@@ -4683,7 +4683,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField29(p thrift.Protocol) error {  // TerseUnionField
+func (x *FieldLevelTerseStruct) readField29(p thrift.Format) error {  // TerseUnionField
     result := *NewMyUnion()
 err := result.Read(p)
 if err != nil {
@@ -4694,7 +4694,7 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField30(p thrift.Protocol) error {  // UnionField
+func (x *FieldLevelTerseStruct) readField30(p thrift.Format) error {  // UnionField
     result := *NewMyUnion()
 err := result.Read(p)
 if err != nil {
@@ -5089,7 +5089,7 @@ func (x *FieldLevelTerseStructBuilder) Emit() *FieldLevelTerseStruct {
     return &objCopy
 }
 
-func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
+func (x *FieldLevelTerseStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("FieldLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -5224,7 +5224,7 @@ func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
+func (x *FieldLevelTerseStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -5770,7 +5770,7 @@ func (x *TerseStructWithCustomDefault) IsSetStructField() bool {
     return x != nil && x.StructField != nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField1(p thrift.Protocol) error {  // BoolField
+func (x *TerseStructWithCustomDefault) writeField1(p thrift.Format) error {  // BoolField
     if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5786,7 +5786,7 @@ func (x *TerseStructWithCustomDefault) writeField1(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField2(p thrift.Protocol) error {  // ByteField
+func (x *TerseStructWithCustomDefault) writeField2(p thrift.Format) error {  // ByteField
     if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5802,7 +5802,7 @@ func (x *TerseStructWithCustomDefault) writeField2(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField3(p thrift.Protocol) error {  // ShortField
+func (x *TerseStructWithCustomDefault) writeField3(p thrift.Format) error {  // ShortField
     if err := p.WriteFieldBegin("short_field", thrift.I16, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5818,7 +5818,7 @@ func (x *TerseStructWithCustomDefault) writeField3(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField4(p thrift.Protocol) error {  // IntField
+func (x *TerseStructWithCustomDefault) writeField4(p thrift.Format) error {  // IntField
     if err := p.WriteFieldBegin("int_field", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5834,7 +5834,7 @@ func (x *TerseStructWithCustomDefault) writeField4(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField5(p thrift.Protocol) error {  // LongField
+func (x *TerseStructWithCustomDefault) writeField5(p thrift.Format) error {  // LongField
     if err := p.WriteFieldBegin("long_field", thrift.I64, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5850,7 +5850,7 @@ func (x *TerseStructWithCustomDefault) writeField5(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField6(p thrift.Protocol) error {  // FloatField
+func (x *TerseStructWithCustomDefault) writeField6(p thrift.Format) error {  // FloatField
     if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5866,7 +5866,7 @@ func (x *TerseStructWithCustomDefault) writeField6(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField7(p thrift.Protocol) error {  // DoubleField
+func (x *TerseStructWithCustomDefault) writeField7(p thrift.Format) error {  // DoubleField
     if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5882,7 +5882,7 @@ func (x *TerseStructWithCustomDefault) writeField7(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField8(p thrift.Protocol) error {  // StringField
+func (x *TerseStructWithCustomDefault) writeField8(p thrift.Format) error {  // StringField
     if err := p.WriteFieldBegin("string_field", thrift.STRING, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5898,7 +5898,7 @@ func (x *TerseStructWithCustomDefault) writeField8(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField9(p thrift.Protocol) error {  // BinaryField
+func (x *TerseStructWithCustomDefault) writeField9(p thrift.Format) error {  // BinaryField
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5914,7 +5914,7 @@ func (x *TerseStructWithCustomDefault) writeField9(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField10(p thrift.Protocol) error {  // EnumField
+func (x *TerseStructWithCustomDefault) writeField10(p thrift.Format) error {  // EnumField
     if err := p.WriteFieldBegin("enum_field", thrift.I32, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5930,7 +5930,7 @@ func (x *TerseStructWithCustomDefault) writeField10(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField11(p thrift.Protocol) error {  // ListField
+func (x *TerseStructWithCustomDefault) writeField11(p thrift.Format) error {  // ListField
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5957,7 +5957,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField12(p thrift.Protocol) error {  // SetField
+func (x *TerseStructWithCustomDefault) writeField12(p thrift.Format) error {  // SetField
     if err := p.WriteFieldBegin("set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5984,7 +5984,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField13(p thrift.Protocol) error {  // MapField
+func (x *TerseStructWithCustomDefault) writeField13(p thrift.Format) error {  // MapField
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6018,7 +6018,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) writeField14(p thrift.Protocol) error {  // StructField
+func (x *TerseStructWithCustomDefault) writeField14(p thrift.Format) error {  // StructField
     if !x.IsSetStructField() {
         return nil
     }
@@ -6038,7 +6038,7 @@ func (x *TerseStructWithCustomDefault) writeField14(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField1(p thrift.Protocol) error {  // BoolField
+func (x *TerseStructWithCustomDefault) readField1(p thrift.Format) error {  // BoolField
     result, err := p.ReadBool()
 if err != nil {
     return err
@@ -6048,7 +6048,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField2(p thrift.Protocol) error {  // ByteField
+func (x *TerseStructWithCustomDefault) readField2(p thrift.Format) error {  // ByteField
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
@@ -6059,7 +6059,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField3(p thrift.Protocol) error {  // ShortField
+func (x *TerseStructWithCustomDefault) readField3(p thrift.Format) error {  // ShortField
     result, err := p.ReadI16()
 if err != nil {
     return err
@@ -6069,7 +6069,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField4(p thrift.Protocol) error {  // IntField
+func (x *TerseStructWithCustomDefault) readField4(p thrift.Format) error {  // IntField
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -6079,7 +6079,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField5(p thrift.Protocol) error {  // LongField
+func (x *TerseStructWithCustomDefault) readField5(p thrift.Format) error {  // LongField
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -6089,7 +6089,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField6(p thrift.Protocol) error {  // FloatField
+func (x *TerseStructWithCustomDefault) readField6(p thrift.Format) error {  // FloatField
     result, err := p.ReadFloat()
 if err != nil {
     return err
@@ -6099,7 +6099,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField7(p thrift.Protocol) error {  // DoubleField
+func (x *TerseStructWithCustomDefault) readField7(p thrift.Format) error {  // DoubleField
     result, err := p.ReadDouble()
 if err != nil {
     return err
@@ -6109,7 +6109,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField8(p thrift.Protocol) error {  // StringField
+func (x *TerseStructWithCustomDefault) readField8(p thrift.Format) error {  // StringField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -6119,7 +6119,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField9(p thrift.Protocol) error {  // BinaryField
+func (x *TerseStructWithCustomDefault) readField9(p thrift.Format) error {  // BinaryField
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -6129,7 +6129,7 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField10(p thrift.Protocol) error {  // EnumField
+func (x *TerseStructWithCustomDefault) readField10(p thrift.Format) error {  // EnumField
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -6140,7 +6140,7 @@ result := MyEnum(enumResult)
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField11(p thrift.Protocol) error {  // ListField
+func (x *TerseStructWithCustomDefault) readField11(p thrift.Format) error {  // ListField
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -6168,7 +6168,7 @@ result := listResult
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField12(p thrift.Protocol) error {  // SetField
+func (x *TerseStructWithCustomDefault) readField12(p thrift.Format) error {  // SetField
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -6196,7 +6196,7 @@ result := setResult
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField13(p thrift.Protocol) error {  // MapField
+func (x *TerseStructWithCustomDefault) readField13(p thrift.Format) error {  // MapField
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -6234,7 +6234,7 @@ result := mapResult
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) readField14(p thrift.Protocol) error {  // StructField
+func (x *TerseStructWithCustomDefault) readField14(p thrift.Format) error {  // StructField
     result := *NewMyStructWithCustomDefault()
 err := result.Read(p)
 if err != nil {
@@ -6429,7 +6429,7 @@ func (x *TerseStructWithCustomDefaultBuilder) Emit() *TerseStructWithCustomDefau
     return &objCopy
 }
 
-func (x *TerseStructWithCustomDefault) Write(p thrift.Protocol) error {
+func (x *TerseStructWithCustomDefault) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TerseStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6500,7 +6500,7 @@ func (x *TerseStructWithCustomDefault) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) Read(p thrift.Protocol) error {
+func (x *TerseStructWithCustomDefault) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6686,7 +6686,7 @@ func (x *AdaptedFields) SetField3(value MyInteger) *AdaptedFields {
     return x
 }
 
-func (x *AdaptedFields) writeField1(p thrift.Protocol) error {  // Field1
+func (x *AdaptedFields) writeField1(p thrift.Format) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6703,7 +6703,7 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) writeField2(p thrift.Protocol) error {  // Field2
+func (x *AdaptedFields) writeField2(p thrift.Format) error {  // Field2
     if err := p.WriteFieldBegin("field2", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6719,7 +6719,7 @@ func (x *AdaptedFields) writeField2(p thrift.Protocol) error {  // Field2
     return nil
 }
 
-func (x *AdaptedFields) writeField3(p thrift.Protocol) error {  // Field3
+func (x *AdaptedFields) writeField3(p thrift.Format) error {  // Field3
     if err := p.WriteFieldBegin("field3", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6736,7 +6736,7 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) readField1(p thrift.Protocol) error {  // Field1
+func (x *AdaptedFields) readField1(p thrift.Format) error {  // Field1
     result, err := ReadMyInteger(p)
 if err != nil {
     return err
@@ -6746,7 +6746,7 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) readField2(p thrift.Protocol) error {  // Field2
+func (x *AdaptedFields) readField2(p thrift.Format) error {  // Field2
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -6756,7 +6756,7 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) readField3(p thrift.Protocol) error {  // Field3
+func (x *AdaptedFields) readField3(p thrift.Format) error {  // Field3
     result, err := ReadMyInteger(p)
 if err != nil {
     return err
@@ -6821,7 +6821,7 @@ func (x *AdaptedFieldsBuilder) Emit() *AdaptedFields {
     return &objCopy
 }
 
-func (x *AdaptedFields) Write(p thrift.Protocol) error {
+func (x *AdaptedFields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("AdaptedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6848,7 +6848,7 @@ func (x *AdaptedFields) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *AdaptedFields) Read(p thrift.Protocol) error {
+func (x *AdaptedFields) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -6939,7 +6939,7 @@ func (x *WrappedFields) SetField1(value int32) *WrappedFields {
     return x
 }
 
-func (x *WrappedFields) writeField1(p thrift.Protocol) error {  // Field1
+func (x *WrappedFields) writeField1(p thrift.Format) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6955,7 +6955,7 @@ func (x *WrappedFields) writeField1(p thrift.Protocol) error {  // Field1
     return nil
 }
 
-func (x *WrappedFields) readField1(p thrift.Protocol) error {  // Field1
+func (x *WrappedFields) readField1(p thrift.Format) error {  // Field1
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -6998,7 +6998,7 @@ func (x *WrappedFieldsBuilder) Emit() *WrappedFields {
     return &objCopy
 }
 
-func (x *WrappedFields) Write(p thrift.Protocol) error {
+func (x *WrappedFields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("WrappedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7017,7 +7017,7 @@ func (x *WrappedFields) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *WrappedFields) Read(p thrift.Protocol) error {
+func (x *WrappedFields) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -7098,7 +7098,7 @@ func (x *TerseException) SetMsg(value string) *TerseException {
     return x
 }
 
-func (x *TerseException) writeField1(p thrift.Protocol) error {  // Msg
+func (x *TerseException) writeField1(p thrift.Format) error {  // Msg
     if err := p.WriteFieldBegin("msg", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7114,7 +7114,7 @@ func (x *TerseException) writeField1(p thrift.Protocol) error {  // Msg
     return nil
 }
 
-func (x *TerseException) readField1(p thrift.Protocol) error {  // Msg
+func (x *TerseException) readField1(p thrift.Format) error {  // Msg
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -7157,7 +7157,7 @@ func (x *TerseExceptionBuilder) Emit() *TerseException {
     return &objCopy
 }
 
-func (x *TerseException) Write(p thrift.Protocol) error {
+func (x *TerseException) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("TerseException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -7176,7 +7176,7 @@ func (x *TerseException) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TerseException) Read(p thrift.Protocol) error {
+func (x *TerseException) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

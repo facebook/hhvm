@@ -22,14 +22,14 @@ func NewByteString() ByteString {
     return []byte("")
 }
 
-func WriteByteString(item ByteString, p thrift.Protocol) error {
+func WriteByteString(item ByteString, p thrift.Format) error {
     if err := p.WriteBinary(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadByteString(p thrift.Protocol) (ByteString, error) {
+func ReadByteString(p thrift.Format) (ByteString, error) {
     var decodeResult ByteString
     decodeErr := func() error {
         result, err := p.ReadBinary()
@@ -48,14 +48,14 @@ func NewByteBuffer() ByteBuffer {
     return []byte("")
 }
 
-func WriteByteBuffer(item ByteBuffer, p thrift.Protocol) error {
+func WriteByteBuffer(item ByteBuffer, p thrift.Format) error {
     if err := p.WriteBinary(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadByteBuffer(p thrift.Protocol) (ByteBuffer, error) {
+func ReadByteBuffer(p thrift.Format) (ByteBuffer, error) {
     var decodeResult ByteBuffer
     decodeErr := func() error {
         result, err := p.ReadBinary()
@@ -278,7 +278,7 @@ func (x *TypeUri) IsSetScopedName() bool {
     return x != nil && x.ScopedName != nil
 }
 
-func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
+func (x *TypeUri) writeField1(p thrift.Format) error {  // Uri
     if !x.IsSetUri() {
         return nil
     }
@@ -298,7 +298,7 @@ func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
     return nil
 }
 
-func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_256
+func (x *TypeUri) writeField2(p thrift.Format) error {  // TypeHashPrefixSha2_256
     if !x.IsSetTypeHashPrefixSha2_256() {
         return nil
     }
@@ -319,7 +319,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeUri) writeField3(p thrift.Protocol) error {  // ScopedName
+func (x *TypeUri) writeField3(p thrift.Format) error {  // ScopedName
     if !x.IsSetScopedName() {
         return nil
     }
@@ -339,7 +339,7 @@ func (x *TypeUri) writeField3(p thrift.Protocol) error {  // ScopedName
     return nil
 }
 
-func (x *TypeUri) readField1(p thrift.Protocol) error {  // Uri
+func (x *TypeUri) readField1(p thrift.Format) error {  // Uri
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -349,7 +349,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeUri) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_256
+func (x *TypeUri) readField2(p thrift.Format) error {  // TypeHashPrefixSha2_256
     result, err := ReadByteString(p)
 if err != nil {
     return err
@@ -359,7 +359,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeUri) readField3(p thrift.Protocol) error {  // ScopedName
+func (x *TypeUri) readField3(p thrift.Format) error {  // ScopedName
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -450,7 +450,7 @@ func (x *TypeUriBuilder) Emit() *TypeUri {
     return &objCopy
 }
 
-func (x *TypeUri) Write(p thrift.Protocol) error {
+func (x *TypeUri) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -480,7 +480,7 @@ func (x *TypeUri) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TypeUri) Read(p thrift.Protocol) error {
+func (x *TypeUri) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1010,7 +1010,7 @@ func (x *TypeName) IsSetTypedefType() bool {
     return x != nil && x.TypedefType != nil
 }
 
-func (x *TypeName) writeField1(p thrift.Protocol) error {  // BoolType
+func (x *TypeName) writeField1(p thrift.Format) error {  // BoolType
     if !x.IsSetBoolType() {
         return nil
     }
@@ -1030,7 +1030,7 @@ func (x *TypeName) writeField1(p thrift.Protocol) error {  // BoolType
     return nil
 }
 
-func (x *TypeName) writeField2(p thrift.Protocol) error {  // ByteType
+func (x *TypeName) writeField2(p thrift.Format) error {  // ByteType
     if !x.IsSetByteType() {
         return nil
     }
@@ -1050,7 +1050,7 @@ func (x *TypeName) writeField2(p thrift.Protocol) error {  // ByteType
     return nil
 }
 
-func (x *TypeName) writeField3(p thrift.Protocol) error {  // I16Type
+func (x *TypeName) writeField3(p thrift.Format) error {  // I16Type
     if !x.IsSetI16Type() {
         return nil
     }
@@ -1070,7 +1070,7 @@ func (x *TypeName) writeField3(p thrift.Protocol) error {  // I16Type
     return nil
 }
 
-func (x *TypeName) writeField4(p thrift.Protocol) error {  // I32Type
+func (x *TypeName) writeField4(p thrift.Format) error {  // I32Type
     if !x.IsSetI32Type() {
         return nil
     }
@@ -1090,7 +1090,7 @@ func (x *TypeName) writeField4(p thrift.Protocol) error {  // I32Type
     return nil
 }
 
-func (x *TypeName) writeField5(p thrift.Protocol) error {  // I64Type
+func (x *TypeName) writeField5(p thrift.Format) error {  // I64Type
     if !x.IsSetI64Type() {
         return nil
     }
@@ -1110,7 +1110,7 @@ func (x *TypeName) writeField5(p thrift.Protocol) error {  // I64Type
     return nil
 }
 
-func (x *TypeName) writeField6(p thrift.Protocol) error {  // FloatType
+func (x *TypeName) writeField6(p thrift.Format) error {  // FloatType
     if !x.IsSetFloatType() {
         return nil
     }
@@ -1130,7 +1130,7 @@ func (x *TypeName) writeField6(p thrift.Protocol) error {  // FloatType
     return nil
 }
 
-func (x *TypeName) writeField7(p thrift.Protocol) error {  // DoubleType
+func (x *TypeName) writeField7(p thrift.Format) error {  // DoubleType
     if !x.IsSetDoubleType() {
         return nil
     }
@@ -1150,7 +1150,7 @@ func (x *TypeName) writeField7(p thrift.Protocol) error {  // DoubleType
     return nil
 }
 
-func (x *TypeName) writeField8(p thrift.Protocol) error {  // StringType
+func (x *TypeName) writeField8(p thrift.Format) error {  // StringType
     if !x.IsSetStringType() {
         return nil
     }
@@ -1170,7 +1170,7 @@ func (x *TypeName) writeField8(p thrift.Protocol) error {  // StringType
     return nil
 }
 
-func (x *TypeName) writeField9(p thrift.Protocol) error {  // BinaryType
+func (x *TypeName) writeField9(p thrift.Format) error {  // BinaryType
     if !x.IsSetBinaryType() {
         return nil
     }
@@ -1190,7 +1190,7 @@ func (x *TypeName) writeField9(p thrift.Protocol) error {  // BinaryType
     return nil
 }
 
-func (x *TypeName) writeField10(p thrift.Protocol) error {  // EnumType
+func (x *TypeName) writeField10(p thrift.Format) error {  // EnumType
     if !x.IsSetEnumType() {
         return nil
     }
@@ -1210,7 +1210,7 @@ func (x *TypeName) writeField10(p thrift.Protocol) error {  // EnumType
     return nil
 }
 
-func (x *TypeName) writeField11(p thrift.Protocol) error {  // StructType
+func (x *TypeName) writeField11(p thrift.Format) error {  // StructType
     if !x.IsSetStructType() {
         return nil
     }
@@ -1230,7 +1230,7 @@ func (x *TypeName) writeField11(p thrift.Protocol) error {  // StructType
     return nil
 }
 
-func (x *TypeName) writeField12(p thrift.Protocol) error {  // UnionType
+func (x *TypeName) writeField12(p thrift.Format) error {  // UnionType
     if !x.IsSetUnionType() {
         return nil
     }
@@ -1250,7 +1250,7 @@ func (x *TypeName) writeField12(p thrift.Protocol) error {  // UnionType
     return nil
 }
 
-func (x *TypeName) writeField13(p thrift.Protocol) error {  // ExceptionType
+func (x *TypeName) writeField13(p thrift.Format) error {  // ExceptionType
     if !x.IsSetExceptionType() {
         return nil
     }
@@ -1270,7 +1270,7 @@ func (x *TypeName) writeField13(p thrift.Protocol) error {  // ExceptionType
     return nil
 }
 
-func (x *TypeName) writeField14(p thrift.Protocol) error {  // ListType
+func (x *TypeName) writeField14(p thrift.Format) error {  // ListType
     if !x.IsSetListType() {
         return nil
     }
@@ -1290,7 +1290,7 @@ func (x *TypeName) writeField14(p thrift.Protocol) error {  // ListType
     return nil
 }
 
-func (x *TypeName) writeField15(p thrift.Protocol) error {  // SetType
+func (x *TypeName) writeField15(p thrift.Format) error {  // SetType
     if !x.IsSetSetType() {
         return nil
     }
@@ -1310,7 +1310,7 @@ func (x *TypeName) writeField15(p thrift.Protocol) error {  // SetType
     return nil
 }
 
-func (x *TypeName) writeField16(p thrift.Protocol) error {  // MapType
+func (x *TypeName) writeField16(p thrift.Format) error {  // MapType
     if !x.IsSetMapType() {
         return nil
     }
@@ -1330,7 +1330,7 @@ func (x *TypeName) writeField16(p thrift.Protocol) error {  // MapType
     return nil
 }
 
-func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
+func (x *TypeName) writeField17(p thrift.Format) error {  // TypedefType
     if !x.IsSetTypedefType() {
         return nil
     }
@@ -1350,7 +1350,7 @@ func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
     return nil
 }
 
-func (x *TypeName) readField1(p thrift.Protocol) error {  // BoolType
+func (x *TypeName) readField1(p thrift.Format) error {  // BoolType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1361,7 +1361,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField2(p thrift.Protocol) error {  // ByteType
+func (x *TypeName) readField2(p thrift.Format) error {  // ByteType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1372,7 +1372,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField3(p thrift.Protocol) error {  // I16Type
+func (x *TypeName) readField3(p thrift.Format) error {  // I16Type
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1383,7 +1383,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField4(p thrift.Protocol) error {  // I32Type
+func (x *TypeName) readField4(p thrift.Format) error {  // I32Type
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1394,7 +1394,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField5(p thrift.Protocol) error {  // I64Type
+func (x *TypeName) readField5(p thrift.Format) error {  // I64Type
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1405,7 +1405,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField6(p thrift.Protocol) error {  // FloatType
+func (x *TypeName) readField6(p thrift.Format) error {  // FloatType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1416,7 +1416,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField7(p thrift.Protocol) error {  // DoubleType
+func (x *TypeName) readField7(p thrift.Format) error {  // DoubleType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1427,7 +1427,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField8(p thrift.Protocol) error {  // StringType
+func (x *TypeName) readField8(p thrift.Format) error {  // StringType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1438,7 +1438,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField9(p thrift.Protocol) error {  // BinaryType
+func (x *TypeName) readField9(p thrift.Format) error {  // BinaryType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1449,7 +1449,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField10(p thrift.Protocol) error {  // EnumType
+func (x *TypeName) readField10(p thrift.Format) error {  // EnumType
     result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
@@ -1460,7 +1460,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeName) readField11(p thrift.Protocol) error {  // StructType
+func (x *TypeName) readField11(p thrift.Format) error {  // StructType
     result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
@@ -1471,7 +1471,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeName) readField12(p thrift.Protocol) error {  // UnionType
+func (x *TypeName) readField12(p thrift.Format) error {  // UnionType
     result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
@@ -1482,7 +1482,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeName) readField13(p thrift.Protocol) error {  // ExceptionType
+func (x *TypeName) readField13(p thrift.Format) error {  // ExceptionType
     result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
@@ -1493,7 +1493,7 @@ if err != nil {
     return nil
 }
 
-func (x *TypeName) readField14(p thrift.Protocol) error {  // ListType
+func (x *TypeName) readField14(p thrift.Format) error {  // ListType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1504,7 +1504,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField15(p thrift.Protocol) error {  // SetType
+func (x *TypeName) readField15(p thrift.Format) error {  // SetType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1515,7 +1515,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField16(p thrift.Protocol) error {  // MapType
+func (x *TypeName) readField16(p thrift.Format) error {  // MapType
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
@@ -1526,7 +1526,7 @@ result := Void(enumResult)
     return nil
 }
 
-func (x *TypeName) readField17(p thrift.Protocol) error {  // TypedefType
+func (x *TypeName) readField17(p thrift.Format) error {  // TypedefType
     result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
@@ -1894,7 +1894,7 @@ func (x *TypeNameBuilder) Emit() *TypeName {
     return &objCopy
 }
 
-func (x *TypeName) Write(p thrift.Protocol) error {
+func (x *TypeName) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -1980,7 +1980,7 @@ func (x *TypeName) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TypeName) Read(p thrift.Protocol) error {
+func (x *TypeName) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

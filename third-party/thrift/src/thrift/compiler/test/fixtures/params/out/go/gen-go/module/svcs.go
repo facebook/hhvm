@@ -240,7 +240,7 @@ func (x *reqNestedContainersMapList) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *reqNestedContainersMapList) writeField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersMapList) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -285,7 +285,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *reqNestedContainersMapList) readField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersMapList) readField1(p thrift.Format) error {  // Foo
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -374,7 +374,7 @@ func (x *reqNestedContainersMapListBuilder) Emit() *reqNestedContainersMapList {
     return &objCopy
 }
 
-func (x *reqNestedContainersMapList) Write(p thrift.Protocol) error {
+func (x *reqNestedContainersMapList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -393,7 +393,7 @@ func (x *reqNestedContainersMapList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqNestedContainersMapList) Read(p thrift.Protocol) error {
+func (x *reqNestedContainersMapList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -483,7 +483,7 @@ func (x *respNestedContainersMapList) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respNestedContainersMapList) Write(p thrift.Protocol) error {
+func (x *respNestedContainersMapList) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respNestedContainersMapList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -498,7 +498,7 @@ func (x *respNestedContainersMapList) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respNestedContainersMapList) Read(p thrift.Protocol) error {
+func (x *respNestedContainersMapList) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -584,7 +584,7 @@ func (x *reqNestedContainersMapSet) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *reqNestedContainersMapSet) writeField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersMapSet) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -629,7 +629,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *reqNestedContainersMapSet) readField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersMapSet) readField1(p thrift.Format) error {  // Foo
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -718,7 +718,7 @@ func (x *reqNestedContainersMapSetBuilder) Emit() *reqNestedContainersMapSet {
     return &objCopy
 }
 
-func (x *reqNestedContainersMapSet) Write(p thrift.Protocol) error {
+func (x *reqNestedContainersMapSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -737,7 +737,7 @@ func (x *reqNestedContainersMapSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqNestedContainersMapSet) Read(p thrift.Protocol) error {
+func (x *reqNestedContainersMapSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -827,7 +827,7 @@ func (x *respNestedContainersMapSet) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respNestedContainersMapSet) Write(p thrift.Protocol) error {
+func (x *respNestedContainersMapSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respNestedContainersMapSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -842,7 +842,7 @@ func (x *respNestedContainersMapSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respNestedContainersMapSet) Read(p thrift.Protocol) error {
+func (x *respNestedContainersMapSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -928,7 +928,7 @@ func (x *reqNestedContainersListMap) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *reqNestedContainersListMap) writeField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersListMap) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -973,7 +973,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *reqNestedContainersListMap) readField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersListMap) readField1(p thrift.Format) error {  // Foo
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1062,7 +1062,7 @@ func (x *reqNestedContainersListMapBuilder) Emit() *reqNestedContainersListMap {
     return &objCopy
 }
 
-func (x *reqNestedContainersListMap) Write(p thrift.Protocol) error {
+func (x *reqNestedContainersListMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1081,7 +1081,7 @@ func (x *reqNestedContainersListMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqNestedContainersListMap) Read(p thrift.Protocol) error {
+func (x *reqNestedContainersListMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1171,7 +1171,7 @@ func (x *respNestedContainersListMap) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respNestedContainersListMap) Write(p thrift.Protocol) error {
+func (x *respNestedContainersListMap) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respNestedContainersListMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1186,7 +1186,7 @@ func (x *respNestedContainersListMap) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respNestedContainersListMap) Read(p thrift.Protocol) error {
+func (x *respNestedContainersListMap) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1272,7 +1272,7 @@ func (x *reqNestedContainersListSet) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *reqNestedContainersListSet) writeField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersListSet) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1310,7 +1310,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *reqNestedContainersListSet) readField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersListSet) readField1(p thrift.Format) error {  // Foo
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1389,7 +1389,7 @@ func (x *reqNestedContainersListSetBuilder) Emit() *reqNestedContainersListSet {
     return &objCopy
 }
 
-func (x *reqNestedContainersListSet) Write(p thrift.Protocol) error {
+func (x *reqNestedContainersListSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1408,7 +1408,7 @@ func (x *reqNestedContainersListSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqNestedContainersListSet) Read(p thrift.Protocol) error {
+func (x *reqNestedContainersListSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1498,7 +1498,7 @@ func (x *respNestedContainersListSet) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respNestedContainersListSet) Write(p thrift.Protocol) error {
+func (x *respNestedContainersListSet) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respNestedContainersListSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1513,7 +1513,7 @@ func (x *respNestedContainersListSet) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respNestedContainersListSet) Read(p thrift.Protocol) error {
+func (x *respNestedContainersListSet) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1599,7 +1599,7 @@ func (x *reqNestedContainersTurtles) IsSetFoo() bool {
     return x != nil && x.Foo != nil
 }
 
-func (x *reqNestedContainersTurtles) writeField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersTurtles) writeField1(p thrift.Format) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1684,7 +1684,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *reqNestedContainersTurtles) readField1(p thrift.Protocol) error {  // Foo
+func (x *reqNestedContainersTurtles) readField1(p thrift.Format) error {  // Foo
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1837,7 +1837,7 @@ func (x *reqNestedContainersTurtlesBuilder) Emit() *reqNestedContainersTurtles {
     return &objCopy
 }
 
-func (x *reqNestedContainersTurtles) Write(p thrift.Protocol) error {
+func (x *reqNestedContainersTurtles) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1856,7 +1856,7 @@ func (x *reqNestedContainersTurtles) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqNestedContainersTurtles) Read(p thrift.Protocol) error {
+func (x *reqNestedContainersTurtles) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1946,7 +1946,7 @@ func (x *respNestedContainersTurtles) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respNestedContainersTurtles) Write(p thrift.Protocol) error {
+func (x *respNestedContainersTurtles) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respNestedContainersTurtles"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1961,7 +1961,7 @@ func (x *respNestedContainersTurtles) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respNestedContainersTurtles) Read(p thrift.Protocol) error {
+func (x *respNestedContainersTurtles) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2071,7 +2071,7 @@ type procFuncNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapList{}
 
-func (p *procFuncNestedContainersMapList) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersMapList) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapList()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -2080,7 +2080,7 @@ func (p *procFuncNestedContainersMapList) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -2122,7 +2122,7 @@ type procFuncNestedContainersMapSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapSet{}
 
-func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapSet()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -2131,7 +2131,7 @@ func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Protocol) (thrift.Str
     return args, nil
 }
 
-func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -2173,7 +2173,7 @@ type procFuncNestedContainersListMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListMap{}
 
-func (p *procFuncNestedContainersListMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersListMap) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -2182,7 +2182,7 @@ func (p *procFuncNestedContainersListMap) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -2224,7 +2224,7 @@ type procFuncNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListSet{}
 
-func (p *procFuncNestedContainersListSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersListSet) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListSet()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -2233,7 +2233,7 @@ func (p *procFuncNestedContainersListSet) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -2275,7 +2275,7 @@ type procFuncNestedContainersTurtles struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersTurtles{}
 
-func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersTurtles()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -2284,7 +2284,7 @@ func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Protocol) (thrift.St
     return args, nil
 }
 
-func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

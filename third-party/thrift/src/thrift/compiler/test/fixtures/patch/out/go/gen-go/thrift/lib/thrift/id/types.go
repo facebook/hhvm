@@ -22,14 +22,14 @@ func NewFieldId() FieldId {
     return 0
 }
 
-func WriteFieldId(item FieldId, p thrift.Protocol) error {
+func WriteFieldId(item FieldId, p thrift.Format) error {
     if err := p.WriteI16(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadFieldId(p thrift.Protocol) (FieldId, error) {
+func ReadFieldId(p thrift.Format) (FieldId, error) {
     var decodeResult FieldId
     decodeErr := func() error {
         result, err := p.ReadI16()
@@ -48,14 +48,14 @@ func NewExternId() ExternId {
     return 0
 }
 
-func WriteExternId(item ExternId, p thrift.Protocol) error {
+func WriteExternId(item ExternId, p thrift.Format) error {
     if err := p.WriteI64(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadExternId(p thrift.Protocol) (ExternId, error) {
+func ReadExternId(p thrift.Format) (ExternId, error) {
     var decodeResult ExternId
     decodeErr := func() error {
         result, err := p.ReadI64()
@@ -74,7 +74,7 @@ func NewValueId() ValueId {
     return NewExternId()
 }
 
-func WriteValueId(item ValueId, p thrift.Protocol) error {
+func WriteValueId(item ValueId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -82,7 +82,7 @@ if err != nil {
     return nil
 }
 
-func ReadValueId(p thrift.Protocol) (ValueId, error) {
+func ReadValueId(p thrift.Format) (ValueId, error) {
     var decodeResult ValueId
     decodeErr := func() error {
         result, err := ReadExternId(p)
@@ -101,7 +101,7 @@ func NewProtocolId() ProtocolId {
     return NewExternId()
 }
 
-func WriteProtocolId(item ProtocolId, p thrift.Protocol) error {
+func WriteProtocolId(item ProtocolId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -109,7 +109,7 @@ if err != nil {
     return nil
 }
 
-func ReadProtocolId(p thrift.Protocol) (ProtocolId, error) {
+func ReadProtocolId(p thrift.Format) (ProtocolId, error) {
     var decodeResult ProtocolId
     decodeErr := func() error {
         result, err := ReadExternId(p)
@@ -128,7 +128,7 @@ func NewTypeId() TypeId {
     return NewExternId()
 }
 
-func WriteTypeId(item TypeId, p thrift.Protocol) error {
+func WriteTypeId(item TypeId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -136,7 +136,7 @@ if err != nil {
     return nil
 }
 
-func ReadTypeId(p thrift.Protocol) (TypeId, error) {
+func ReadTypeId(p thrift.Format) (TypeId, error) {
     var decodeResult TypeId
     decodeErr := func() error {
         result, err := ReadExternId(p)
@@ -155,7 +155,7 @@ func NewDefinitionId() DefinitionId {
     return NewExternId()
 }
 
-func WriteDefinitionId(item DefinitionId, p thrift.Protocol) error {
+func WriteDefinitionId(item DefinitionId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -163,7 +163,7 @@ if err != nil {
     return nil
 }
 
-func ReadDefinitionId(p thrift.Protocol) (DefinitionId, error) {
+func ReadDefinitionId(p thrift.Format) (DefinitionId, error) {
     var decodeResult DefinitionId
     decodeErr := func() error {
         result, err := ReadExternId(p)
@@ -182,7 +182,7 @@ func NewProgramId() ProgramId {
     return NewExternId()
 }
 
-func WriteProgramId(item ProgramId, p thrift.Protocol) error {
+func WriteProgramId(item ProgramId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -190,7 +190,7 @@ if err != nil {
     return nil
 }
 
-func ReadProgramId(p thrift.Protocol) (ProgramId, error) {
+func ReadProgramId(p thrift.Format) (ProgramId, error) {
     var decodeResult ProgramId
     decodeErr := func() error {
         result, err := ReadExternId(p)
@@ -209,7 +209,7 @@ func NewSourceId() SourceId {
     return NewExternId()
 }
 
-func WriteSourceId(item SourceId, p thrift.Protocol) error {
+func WriteSourceId(item SourceId, p thrift.Format) error {
     err := WriteExternId(item, p)
 if err != nil {
     return err
@@ -217,7 +217,7 @@ if err != nil {
     return nil
 }
 
-func ReadSourceId(p thrift.Protocol) (SourceId, error) {
+func ReadSourceId(p thrift.Format) (SourceId, error) {
     var decodeResult SourceId
     decodeErr := func() error {
         result, err := ReadExternId(p)

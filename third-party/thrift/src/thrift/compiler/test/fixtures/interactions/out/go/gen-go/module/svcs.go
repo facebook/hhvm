@@ -141,7 +141,7 @@ func (x *reqMyServiceFooBuilder) Emit() *reqMyServiceFoo {
     return &objCopy
 }
 
-func (x *reqMyServiceFoo) Write(p thrift.Protocol) error {
+func (x *reqMyServiceFoo) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("reqMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -156,7 +156,7 @@ func (x *reqMyServiceFoo) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqMyServiceFoo) Read(p thrift.Protocol) error {
+func (x *reqMyServiceFoo) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -241,7 +241,7 @@ func (x *respMyServiceFoo) Exception() thrift.WritableException {
     return nil
 }
 
-func (x *respMyServiceFoo) Write(p thrift.Protocol) error {
+func (x *respMyServiceFoo) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("respMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -256,7 +256,7 @@ func (x *respMyServiceFoo) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respMyServiceFoo) Read(p thrift.Protocol) error {
+func (x *respMyServiceFoo) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -358,7 +358,7 @@ type procFuncMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunctionContext = &procFuncMyServiceFoo{}
 
-func (p *procFuncMyServiceFoo) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyServiceFoo) Read(iprot thrift.Format) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceFoo()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -367,7 +367,7 @@ func (p *procFuncMyServiceFoo) Read(iprot thrift.Protocol) (thrift.Struct, thrif
     return args, nil
 }
 
-func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Format) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

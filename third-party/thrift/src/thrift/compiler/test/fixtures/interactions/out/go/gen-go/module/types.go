@@ -45,7 +45,7 @@ func (x *CustomException) SetMessage(value string) *CustomException {
     return x
 }
 
-func (x *CustomException) writeField1(p thrift.Protocol) error {  // Message
+func (x *CustomException) writeField1(p thrift.Format) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -61,7 +61,7 @@ func (x *CustomException) writeField1(p thrift.Protocol) error {  // Message
     return nil
 }
 
-func (x *CustomException) readField1(p thrift.Protocol) error {  // Message
+func (x *CustomException) readField1(p thrift.Format) error {  // Message
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -104,7 +104,7 @@ func (x *CustomExceptionBuilder) Emit() *CustomException {
     return &objCopy
 }
 
-func (x *CustomException) Write(p thrift.Protocol) error {
+func (x *CustomException) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -123,7 +123,7 @@ func (x *CustomException) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *CustomException) Read(p thrift.Protocol) error {
+func (x *CustomException) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

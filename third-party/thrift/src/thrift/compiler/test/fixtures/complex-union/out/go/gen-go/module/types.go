@@ -22,7 +22,7 @@ func NewContainerTypedef() ContainerTypedef {
     return make(map[int16]string)
 }
 
-func WriteContainerTypedef(item ContainerTypedef, p thrift.Protocol) error {
+func WriteContainerTypedef(item ContainerTypedef, p thrift.Format) error {
     if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -47,7 +47,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func ReadContainerTypedef(p thrift.Protocol) (ContainerTypedef, error) {
+func ReadContainerTypedef(p thrift.Format) (ContainerTypedef, error) {
     var decodeResult ContainerTypedef
     decodeErr := func() error {
         _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
@@ -259,7 +259,7 @@ func (x *ComplexUnion) IsSetStringRef() bool {
     return x != nil && x.StringRef != nil
 }
 
-func (x *ComplexUnion) writeField1(p thrift.Protocol) error {  // IntValue
+func (x *ComplexUnion) writeField1(p thrift.Format) error {  // IntValue
     if !x.IsSetIntValue() {
         return nil
     }
@@ -279,7 +279,7 @@ func (x *ComplexUnion) writeField1(p thrift.Protocol) error {  // IntValue
     return nil
 }
 
-func (x *ComplexUnion) writeField2(p thrift.Protocol) error {  // IntListValue
+func (x *ComplexUnion) writeField2(p thrift.Format) error {  // IntListValue
     if !x.IsSetIntListValue() {
         return nil
     }
@@ -310,7 +310,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ComplexUnion) writeField3(p thrift.Protocol) error {  // StringListValue
+func (x *ComplexUnion) writeField3(p thrift.Format) error {  // StringListValue
     if !x.IsSetStringListValue() {
         return nil
     }
@@ -341,7 +341,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ComplexUnion) writeField5(p thrift.Protocol) error {  // StringValue
+func (x *ComplexUnion) writeField5(p thrift.Format) error {  // StringValue
     if !x.IsSetStringValue() {
         return nil
     }
@@ -361,7 +361,7 @@ func (x *ComplexUnion) writeField5(p thrift.Protocol) error {  // StringValue
     return nil
 }
 
-func (x *ComplexUnion) writeField9(p thrift.Protocol) error {  // TypedefValue
+func (x *ComplexUnion) writeField9(p thrift.Format) error {  // TypedefValue
     if !x.IsSetTypedefValue() {
         return nil
     }
@@ -382,7 +382,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexUnion) writeField14(p thrift.Protocol) error {  // StringRef
+func (x *ComplexUnion) writeField14(p thrift.Format) error {  // StringRef
     if !x.IsSetStringRef() {
         return nil
     }
@@ -402,7 +402,7 @@ func (x *ComplexUnion) writeField14(p thrift.Protocol) error {  // StringRef
     return nil
 }
 
-func (x *ComplexUnion) readField1(p thrift.Protocol) error {  // IntValue
+func (x *ComplexUnion) readField1(p thrift.Format) error {  // IntValue
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -412,7 +412,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexUnion) readField2(p thrift.Protocol) error {  // IntListValue
+func (x *ComplexUnion) readField2(p thrift.Format) error {  // IntListValue
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -440,7 +440,7 @@ result := listResult
     return nil
 }
 
-func (x *ComplexUnion) readField3(p thrift.Protocol) error {  // StringListValue
+func (x *ComplexUnion) readField3(p thrift.Format) error {  // StringListValue
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -468,7 +468,7 @@ result := listResult
     return nil
 }
 
-func (x *ComplexUnion) readField5(p thrift.Protocol) error {  // StringValue
+func (x *ComplexUnion) readField5(p thrift.Format) error {  // StringValue
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -478,7 +478,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexUnion) readField9(p thrift.Protocol) error {  // TypedefValue
+func (x *ComplexUnion) readField9(p thrift.Format) error {  // TypedefValue
     result, err := ReadContainerTypedef(p)
 if err != nil {
     return err
@@ -488,7 +488,7 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexUnion) readField14(p thrift.Protocol) error {  // StringRef
+func (x *ComplexUnion) readField14(p thrift.Format) error {  // StringRef
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -625,7 +625,7 @@ func (x *ComplexUnionBuilder) Emit() *ComplexUnion {
     return &objCopy
 }
 
-func (x *ComplexUnion) Write(p thrift.Protocol) error {
+func (x *ComplexUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -667,7 +667,7 @@ func (x *ComplexUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ComplexUnion) Read(p thrift.Protocol) error {
+func (x *ComplexUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -807,7 +807,7 @@ func (x *ListUnion) IsSetStringListValue() bool {
     return x != nil && x.StringListValue != nil
 }
 
-func (x *ListUnion) writeField2(p thrift.Protocol) error {  // IntListValue
+func (x *ListUnion) writeField2(p thrift.Format) error {  // IntListValue
     if !x.IsSetIntListValue() {
         return nil
     }
@@ -838,7 +838,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ListUnion) writeField3(p thrift.Protocol) error {  // StringListValue
+func (x *ListUnion) writeField3(p thrift.Format) error {  // StringListValue
     if !x.IsSetStringListValue() {
         return nil
     }
@@ -869,7 +869,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *ListUnion) readField2(p thrift.Protocol) error {  // IntListValue
+func (x *ListUnion) readField2(p thrift.Format) error {  // IntListValue
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -897,7 +897,7 @@ result := listResult
     return nil
 }
 
-func (x *ListUnion) readField3(p thrift.Protocol) error {  // StringListValue
+func (x *ListUnion) readField3(p thrift.Format) error {  // StringListValue
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -984,7 +984,7 @@ func (x *ListUnionBuilder) Emit() *ListUnion {
     return &objCopy
 }
 
-func (x *ListUnion) Write(p thrift.Protocol) error {
+func (x *ListUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -1010,7 +1010,7 @@ func (x *ListUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ListUnion) Read(p thrift.Protocol) error {
+func (x *ListUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1130,7 +1130,7 @@ func (x *DataUnion) IsSetStringData() bool {
     return x != nil && x.StringData != nil
 }
 
-func (x *DataUnion) writeField1(p thrift.Protocol) error {  // BinaryData
+func (x *DataUnion) writeField1(p thrift.Format) error {  // BinaryData
     if !x.IsSetBinaryData() {
         return nil
     }
@@ -1150,7 +1150,7 @@ func (x *DataUnion) writeField1(p thrift.Protocol) error {  // BinaryData
     return nil
 }
 
-func (x *DataUnion) writeField2(p thrift.Protocol) error {  // StringData
+func (x *DataUnion) writeField2(p thrift.Format) error {  // StringData
     if !x.IsSetStringData() {
         return nil
     }
@@ -1170,7 +1170,7 @@ func (x *DataUnion) writeField2(p thrift.Protocol) error {  // StringData
     return nil
 }
 
-func (x *DataUnion) readField1(p thrift.Protocol) error {  // BinaryData
+func (x *DataUnion) readField1(p thrift.Format) error {  // BinaryData
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -1180,7 +1180,7 @@ if err != nil {
     return nil
 }
 
-func (x *DataUnion) readField2(p thrift.Protocol) error {  // StringData
+func (x *DataUnion) readField2(p thrift.Format) error {  // StringData
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1253,7 +1253,7 @@ func (x *DataUnionBuilder) Emit() *DataUnion {
     return &objCopy
 }
 
-func (x *DataUnion) Write(p thrift.Protocol) error {
+func (x *DataUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -1279,7 +1279,7 @@ func (x *DataUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *DataUnion) Read(p thrift.Protocol) error {
+func (x *DataUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1413,7 +1413,7 @@ func (x *Val) IsSetTypedefValue() bool {
     return x != nil && x.TypedefValue != nil
 }
 
-func (x *Val) writeField1(p thrift.Protocol) error {  // StrVal
+func (x *Val) writeField1(p thrift.Format) error {  // StrVal
     if err := p.WriteFieldBegin("strVal", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1429,7 +1429,7 @@ func (x *Val) writeField1(p thrift.Protocol) error {  // StrVal
     return nil
 }
 
-func (x *Val) writeField2(p thrift.Protocol) error {  // IntVal
+func (x *Val) writeField2(p thrift.Format) error {  // IntVal
     if err := p.WriteFieldBegin("intVal", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1445,7 +1445,7 @@ func (x *Val) writeField2(p thrift.Protocol) error {  // IntVal
     return nil
 }
 
-func (x *Val) writeField9(p thrift.Protocol) error {  // TypedefValue
+func (x *Val) writeField9(p thrift.Format) error {  // TypedefValue
     if err := p.WriteFieldBegin("typedefValue", thrift.MAP, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1462,7 +1462,7 @@ if err != nil {
     return nil
 }
 
-func (x *Val) readField1(p thrift.Protocol) error {  // StrVal
+func (x *Val) readField1(p thrift.Format) error {  // StrVal
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1472,7 +1472,7 @@ if err != nil {
     return nil
 }
 
-func (x *Val) readField2(p thrift.Protocol) error {  // IntVal
+func (x *Val) readField2(p thrift.Format) error {  // IntVal
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -1482,7 +1482,7 @@ if err != nil {
     return nil
 }
 
-func (x *Val) readField9(p thrift.Protocol) error {  // TypedefValue
+func (x *Val) readField9(p thrift.Format) error {  // TypedefValue
     result, err := ReadContainerTypedef(p)
 if err != nil {
     return err
@@ -1547,7 +1547,7 @@ func (x *ValBuilder) Emit() *Val {
     return &objCopy
 }
 
-func (x *Val) Write(p thrift.Protocol) error {
+func (x *Val) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Val"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1574,7 +1574,7 @@ func (x *Val) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Val) Read(p thrift.Protocol) error {
+func (x *Val) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1699,7 +1699,7 @@ func (x *ValUnion) IsSetV2() bool {
     return x != nil && x.V2 != nil
 }
 
-func (x *ValUnion) writeField1(p thrift.Protocol) error {  // V1
+func (x *ValUnion) writeField1(p thrift.Format) error {  // V1
     if !x.IsSetV1() {
         return nil
     }
@@ -1719,7 +1719,7 @@ func (x *ValUnion) writeField1(p thrift.Protocol) error {  // V1
     return nil
 }
 
-func (x *ValUnion) writeField2(p thrift.Protocol) error {  // V2
+func (x *ValUnion) writeField2(p thrift.Format) error {  // V2
     if !x.IsSetV2() {
         return nil
     }
@@ -1739,7 +1739,7 @@ func (x *ValUnion) writeField2(p thrift.Protocol) error {  // V2
     return nil
 }
 
-func (x *ValUnion) readField1(p thrift.Protocol) error {  // V1
+func (x *ValUnion) readField1(p thrift.Format) error {  // V1
     result := *NewVal()
 err := result.Read(p)
 if err != nil {
@@ -1750,7 +1750,7 @@ if err != nil {
     return nil
 }
 
-func (x *ValUnion) readField2(p thrift.Protocol) error {  // V2
+func (x *ValUnion) readField2(p thrift.Format) error {  // V2
     result := *NewVal()
 err := result.Read(p)
 if err != nil {
@@ -1836,7 +1836,7 @@ func (x *ValUnionBuilder) Emit() *ValUnion {
     return &objCopy
 }
 
-func (x *ValUnion) Write(p thrift.Protocol) error {
+func (x *ValUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -1862,7 +1862,7 @@ func (x *ValUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *ValUnion) Read(p thrift.Protocol) error {
+func (x *ValUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1982,7 +1982,7 @@ func (x *VirtualComplexUnion) IsSetThingTwo() bool {
     return x != nil && x.ThingTwo != nil
 }
 
-func (x *VirtualComplexUnion) writeField1(p thrift.Protocol) error {  // ThingOne
+func (x *VirtualComplexUnion) writeField1(p thrift.Format) error {  // ThingOne
     if !x.IsSetThingOne() {
         return nil
     }
@@ -2002,7 +2002,7 @@ func (x *VirtualComplexUnion) writeField1(p thrift.Protocol) error {  // ThingOn
     return nil
 }
 
-func (x *VirtualComplexUnion) writeField2(p thrift.Protocol) error {  // ThingTwo
+func (x *VirtualComplexUnion) writeField2(p thrift.Format) error {  // ThingTwo
     if !x.IsSetThingTwo() {
         return nil
     }
@@ -2022,7 +2022,7 @@ func (x *VirtualComplexUnion) writeField2(p thrift.Protocol) error {  // ThingTw
     return nil
 }
 
-func (x *VirtualComplexUnion) readField1(p thrift.Protocol) error {  // ThingOne
+func (x *VirtualComplexUnion) readField1(p thrift.Format) error {  // ThingOne
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -2032,7 +2032,7 @@ if err != nil {
     return nil
 }
 
-func (x *VirtualComplexUnion) readField2(p thrift.Protocol) error {  // ThingTwo
+func (x *VirtualComplexUnion) readField2(p thrift.Format) error {  // ThingTwo
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -2109,7 +2109,7 @@ func (x *VirtualComplexUnionBuilder) Emit() *VirtualComplexUnion {
     return &objCopy
 }
 
-func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
+func (x *VirtualComplexUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -2135,7 +2135,7 @@ func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *VirtualComplexUnion) Read(p thrift.Protocol) error {
+func (x *VirtualComplexUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2221,7 +2221,7 @@ func (x *NonCopyableStruct) SetNum(value int64) *NonCopyableStruct {
     return x
 }
 
-func (x *NonCopyableStruct) writeField1(p thrift.Protocol) error {  // Num
+func (x *NonCopyableStruct) writeField1(p thrift.Format) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2237,7 +2237,7 @@ func (x *NonCopyableStruct) writeField1(p thrift.Protocol) error {  // Num
     return nil
 }
 
-func (x *NonCopyableStruct) readField1(p thrift.Protocol) error {  // Num
+func (x *NonCopyableStruct) readField1(p thrift.Format) error {  // Num
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -2280,7 +2280,7 @@ func (x *NonCopyableStructBuilder) Emit() *NonCopyableStruct {
     return &objCopy
 }
 
-func (x *NonCopyableStruct) Write(p thrift.Protocol) error {
+func (x *NonCopyableStruct) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("NonCopyableStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2299,7 +2299,7 @@ func (x *NonCopyableStruct) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *NonCopyableStruct) Read(p thrift.Protocol) error {
+func (x *NonCopyableStruct) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -2387,7 +2387,7 @@ func (x *NonCopyableUnion) IsSetS() bool {
     return x != nil && x.S != nil
 }
 
-func (x *NonCopyableUnion) writeField1(p thrift.Protocol) error {  // S
+func (x *NonCopyableUnion) writeField1(p thrift.Format) error {  // S
     if !x.IsSetS() {
         return nil
     }
@@ -2407,7 +2407,7 @@ func (x *NonCopyableUnion) writeField1(p thrift.Protocol) error {  // S
     return nil
 }
 
-func (x *NonCopyableUnion) readField1(p thrift.Protocol) error {  // S
+func (x *NonCopyableUnion) readField1(p thrift.Format) error {  // S
     result := *NewNonCopyableStruct()
 err := result.Read(p)
 if err != nil {
@@ -2471,7 +2471,7 @@ func (x *NonCopyableUnionBuilder) Emit() *NonCopyableUnion {
     return &objCopy
 }
 
-func (x *NonCopyableUnion) Write(p thrift.Protocol) error {
+func (x *NonCopyableUnion) Write(p thrift.Format) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
@@ -2493,7 +2493,7 @@ func (x *NonCopyableUnion) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *NonCopyableUnion) Read(p thrift.Protocol) error {
+func (x *NonCopyableUnion) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

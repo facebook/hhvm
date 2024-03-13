@@ -99,7 +99,7 @@ func (x *Fields) IsSetInjectedUnstructuredAnnotationField() bool {
     return x != nil && x.InjectedUnstructuredAnnotationField != nil
 }
 
-func (x *Fields) writeField100(p thrift.Protocol) error {  // InjectedField
+func (x *Fields) writeField100(p thrift.Format) error {  // InjectedField
     if err := p.WriteFieldBegin("injected_field", thrift.STRING, 100); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -115,7 +115,7 @@ func (x *Fields) writeField100(p thrift.Protocol) error {  // InjectedField
     return nil
 }
 
-func (x *Fields) writeField101(p thrift.Protocol) error {  // InjectedStructuredAnnotationField
+func (x *Fields) writeField101(p thrift.Format) error {  // InjectedStructuredAnnotationField
     if !x.IsSetInjectedStructuredAnnotationField() {
         return nil
     }
@@ -135,7 +135,7 @@ func (x *Fields) writeField101(p thrift.Protocol) error {  // InjectedStructured
     return nil
 }
 
-func (x *Fields) writeField102(p thrift.Protocol) error {  // InjectedUnstructuredAnnotationField
+func (x *Fields) writeField102(p thrift.Format) error {  // InjectedUnstructuredAnnotationField
     if !x.IsSetInjectedUnstructuredAnnotationField() {
         return nil
     }
@@ -155,7 +155,7 @@ func (x *Fields) writeField102(p thrift.Protocol) error {  // InjectedUnstructur
     return nil
 }
 
-func (x *Fields) readField100(p thrift.Protocol) error {  // InjectedField
+func (x *Fields) readField100(p thrift.Format) error {  // InjectedField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -165,7 +165,7 @@ if err != nil {
     return nil
 }
 
-func (x *Fields) readField101(p thrift.Protocol) error {  // InjectedStructuredAnnotationField
+func (x *Fields) readField101(p thrift.Format) error {  // InjectedStructuredAnnotationField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -175,7 +175,7 @@ if err != nil {
     return nil
 }
 
-func (x *Fields) readField102(p thrift.Protocol) error {  // InjectedUnstructuredAnnotationField
+func (x *Fields) readField102(p thrift.Format) error {  // InjectedUnstructuredAnnotationField
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -248,7 +248,7 @@ func (x *FieldsBuilder) Emit() *Fields {
     return &objCopy
 }
 
-func (x *Fields) Write(p thrift.Protocol) error {
+func (x *Fields) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Fields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -275,7 +275,7 @@ func (x *Fields) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Fields) Read(p thrift.Protocol) error {
+func (x *Fields) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

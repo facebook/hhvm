@@ -81,7 +81,7 @@ func upgradeToRocket(_ context.Context, protocol Protocol) error {
 
 type reqServiceUpgradeToRocket struct{}
 
-func (x *reqServiceUpgradeToRocket) Write(p Protocol) error {
+func (x *reqServiceUpgradeToRocket) Write(p Format) error {
 	if err := p.WriteStructBegin("reqServiceUpgradeToRocket"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -96,7 +96,7 @@ func (x *reqServiceUpgradeToRocket) Write(p Protocol) error {
 	return nil
 }
 
-func (x *reqServiceUpgradeToRocket) Read(p Protocol) error {
+func (x *reqServiceUpgradeToRocket) Read(p Format) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}
@@ -132,7 +132,7 @@ func (x *reqServiceUpgradeToRocket) Read(p Protocol) error {
 
 type respServiceUpgradeToRocket struct{}
 
-func (x *respServiceUpgradeToRocket) Write(p Protocol) error {
+func (x *respServiceUpgradeToRocket) Write(p Format) error {
 	if err := p.WriteStructBegin("respServiceUpgradeToRocket"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
 	}
@@ -147,7 +147,7 @@ func (x *respServiceUpgradeToRocket) Write(p Protocol) error {
 	return nil
 }
 
-func (x *respServiceUpgradeToRocket) Read(p Protocol) error {
+func (x *respServiceUpgradeToRocket) Read(p Format) error {
 	if _, err := p.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", x), err)
 	}

@@ -45,7 +45,7 @@ func (x *Name) SetName(value string) *Name {
     return x
 }
 
-func (x *Name) writeField1(p thrift.Protocol) error {  // Name
+func (x *Name) writeField1(p thrift.Format) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -61,7 +61,7 @@ func (x *Name) writeField1(p thrift.Protocol) error {  // Name
     return nil
 }
 
-func (x *Name) readField1(p thrift.Protocol) error {  // Name
+func (x *Name) readField1(p thrift.Format) error {  // Name
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -104,7 +104,7 @@ func (x *NameBuilder) Emit() *Name {
     return &objCopy
 }
 
-func (x *Name) Write(p thrift.Protocol) error {
+func (x *Name) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Name"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -123,7 +123,7 @@ func (x *Name) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Name) Read(p thrift.Protocol) error {
+func (x *Name) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -204,7 +204,7 @@ func (x *Tag) SetTag(value string) *Tag {
     return x
 }
 
-func (x *Tag) writeField1(p thrift.Protocol) error {  // Tag
+func (x *Tag) writeField1(p thrift.Format) error {  // Tag
     if err := p.WriteFieldBegin("tag", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -220,7 +220,7 @@ func (x *Tag) writeField1(p thrift.Protocol) error {  // Tag
     return nil
 }
 
-func (x *Tag) readField1(p thrift.Protocol) error {  // Tag
+func (x *Tag) readField1(p thrift.Format) error {  // Tag
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -263,7 +263,7 @@ func (x *TagBuilder) Emit() *Tag {
     return &objCopy
 }
 
-func (x *Tag) Write(p thrift.Protocol) error {
+func (x *Tag) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Tag"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -282,7 +282,7 @@ func (x *Tag) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Tag) Read(p thrift.Protocol) error {
+func (x *Tag) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

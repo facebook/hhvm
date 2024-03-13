@@ -85,7 +85,7 @@ func (x *Foo) SetField1(value int32) *Foo {
     return x
 }
 
-func (x *Foo) writeField1(p thrift.Protocol) error {  // Field2
+func (x *Foo) writeField1(p thrift.Format) error {  // Field2
     if err := p.WriteFieldBegin("field2", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -101,7 +101,7 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // Field2
     return nil
 }
 
-func (x *Foo) writeField2(p thrift.Protocol) error {  // Field3
+func (x *Foo) writeField2(p thrift.Format) error {  // Field3
     if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -117,7 +117,7 @@ func (x *Foo) writeField2(p thrift.Protocol) error {  // Field3
     return nil
 }
 
-func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
+func (x *Foo) writeField3(p thrift.Format) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -133,7 +133,7 @@ func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
     return nil
 }
 
-func (x *Foo) readField1(p thrift.Protocol) error {  // Field2
+func (x *Foo) readField1(p thrift.Format) error {  // Field2
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -143,7 +143,7 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) readField2(p thrift.Protocol) error {  // Field3
+func (x *Foo) readField2(p thrift.Format) error {  // Field3
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -153,7 +153,7 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) readField3(p thrift.Protocol) error {  // Field1
+func (x *Foo) readField3(p thrift.Format) error {  // Field1
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -218,7 +218,7 @@ func (x *FooBuilder) Emit() *Foo {
     return &objCopy
 }
 
-func (x *Foo) Write(p thrift.Protocol) error {
+func (x *Foo) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -245,7 +245,7 @@ func (x *Foo) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Foo) Read(p thrift.Protocol) error {
+func (x *Foo) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -376,7 +376,7 @@ func (x *Foo2) SetField1(value int32) *Foo2 {
     return x
 }
 
-func (x *Foo2) writeField1(p thrift.Protocol) error {  // Field2
+func (x *Foo2) writeField1(p thrift.Format) error {  // Field2
     if err := p.WriteFieldBegin("field2", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -392,7 +392,7 @@ func (x *Foo2) writeField1(p thrift.Protocol) error {  // Field2
     return nil
 }
 
-func (x *Foo2) writeField2(p thrift.Protocol) error {  // Field3
+func (x *Foo2) writeField2(p thrift.Format) error {  // Field3
     if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -408,7 +408,7 @@ func (x *Foo2) writeField2(p thrift.Protocol) error {  // Field3
     return nil
 }
 
-func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
+func (x *Foo2) writeField3(p thrift.Format) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -424,7 +424,7 @@ func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
     return nil
 }
 
-func (x *Foo2) readField1(p thrift.Protocol) error {  // Field2
+func (x *Foo2) readField1(p thrift.Format) error {  // Field2
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -434,7 +434,7 @@ if err != nil {
     return nil
 }
 
-func (x *Foo2) readField2(p thrift.Protocol) error {  // Field3
+func (x *Foo2) readField2(p thrift.Format) error {  // Field3
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -444,7 +444,7 @@ if err != nil {
     return nil
 }
 
-func (x *Foo2) readField3(p thrift.Protocol) error {  // Field1
+func (x *Foo2) readField3(p thrift.Format) error {  // Field1
     result, err := p.ReadI32()
 if err != nil {
     return err
@@ -509,7 +509,7 @@ func (x *Foo2Builder) Emit() *Foo2 {
     return &objCopy
 }
 
-func (x *Foo2) Write(p thrift.Protocol) error {
+func (x *Foo2) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Foo2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -536,7 +536,7 @@ func (x *Foo2) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Foo2) Read(p thrift.Protocol) error {
+func (x *Foo2) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

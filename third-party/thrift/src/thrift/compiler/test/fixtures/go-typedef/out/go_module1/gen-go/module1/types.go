@@ -24,14 +24,14 @@ func NewPlate() Plate {
     return ""
 }
 
-func WritePlate(item Plate, p thrift.Protocol) error {
+func WritePlate(item Plate, p thrift.Format) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadPlate(p thrift.Protocol) (Plate, error) {
+func ReadPlate(p thrift.Format) (Plate, error) {
     var decodeResult Plate
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -50,14 +50,14 @@ func NewState() State {
     return ""
 }
 
-func WriteState(item State, p thrift.Protocol) error {
+func WriteState(item State, p thrift.Format) error {
     if err := p.WriteString(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadState(p thrift.Protocol) (State, error) {
+func ReadState(p thrift.Format) (State, error) {
     var decodeResult State
     decodeErr := func() error {
         result, err := p.ReadString()
@@ -76,14 +76,14 @@ func NewYear() Year {
     return 0
 }
 
-func WriteYear(item Year, p thrift.Protocol) error {
+func WriteYear(item Year, p thrift.Format) error {
     if err := p.WriteI32(item); err != nil {
     return err
 }
     return nil
 }
 
-func ReadYear(p thrift.Protocol) (Year, error) {
+func ReadYear(p thrift.Format) (Year, error) {
     var decodeResult Year
     decodeErr := func() error {
         result, err := p.ReadI32()
@@ -102,7 +102,7 @@ func NewDrivers() Drivers {
     return make([]string, 0)
 }
 
-func WriteDrivers(item Drivers, p thrift.Protocol) error {
+func WriteDrivers(item Drivers, p thrift.Format) error {
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -120,7 +120,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func ReadDrivers(p thrift.Protocol) (Drivers, error) {
+func ReadDrivers(p thrift.Format) (Drivers, error) {
     var decodeResult Drivers
     decodeErr := func() error {
         _ /* elemType */, size, err := p.ReadListBegin()
@@ -157,14 +157,14 @@ func NewAccessory() *Accessory {
     return module0.NewAccessory()
 }
 
-func WriteAccessory(item *Accessory, p thrift.Protocol) error {
+func WriteAccessory(item *Accessory, p thrift.Format) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadAccessory(p thrift.Protocol) (Accessory, error) {
+func ReadAccessory(p thrift.Format) (Accessory, error) {
     var decodeResult Accessory
     decodeErr := func() error {
         result := *module0.NewAccessory()
@@ -184,14 +184,14 @@ func NewCarPartName() *CarPartName {
     return module0.NewPartName()
 }
 
-func WriteCarPartName(item *CarPartName, p thrift.Protocol) error {
+func WriteCarPartName(item *CarPartName, p thrift.Format) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadCarPartName(p thrift.Protocol) (CarPartName, error) {
+func ReadCarPartName(p thrift.Format) (CarPartName, error) {
     var decodeResult CarPartName
     decodeErr := func() error {
         result := *module0.NewPartName()
@@ -211,14 +211,14 @@ func NewCar() *Car {
     return NewAutomobile()
 }
 
-func WriteCar(item *Car, p thrift.Protocol) error {
+func WriteCar(item *Car, p thrift.Format) error {
     if err := item.Write(p); err != nil {
     return err
 }
     return nil
 }
 
-func ReadCar(p thrift.Protocol) (Car, error) {
+func ReadCar(p thrift.Format) (Car, error) {
     var decodeResult Car
     decodeErr := func() error {
         result := *NewAutomobile()
@@ -420,7 +420,7 @@ func (x *Automobile) IsSetPartNames() bool {
     return x != nil && x.PartNames != nil
 }
 
-func (x *Automobile) writeField1(p thrift.Protocol) error {  // Plate
+func (x *Automobile) writeField1(p thrift.Format) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -437,7 +437,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField2(p thrift.Protocol) error {  // PreviousPlate
+func (x *Automobile) writeField2(p thrift.Format) error {  // PreviousPlate
     if !x.IsSetPreviousPlate() {
         return nil
     }
@@ -458,7 +458,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField3(p thrift.Protocol) error {  // FirstPlate
+func (x *Automobile) writeField3(p thrift.Format) error {  // FirstPlate
     if !x.IsSetFirstPlate() {
         return nil
     }
@@ -479,7 +479,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField4(p thrift.Protocol) error {  // Year
+func (x *Automobile) writeField4(p thrift.Format) error {  // Year
     if err := p.WriteFieldBegin("year", thrift.I32, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -496,7 +496,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField5(p thrift.Protocol) error {  // Drivers
+func (x *Automobile) writeField5(p thrift.Format) error {  // Drivers
     if err := p.WriteFieldBegin("drivers", thrift.LIST, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -513,7 +513,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) writeField6(p thrift.Protocol) error {  // Accessories
+func (x *Automobile) writeField6(p thrift.Format) error {  // Accessories
     if err := p.WriteFieldBegin("Accessories", thrift.LIST, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -541,7 +541,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Automobile) writeField7(p thrift.Protocol) error {  // PartNames
+func (x *Automobile) writeField7(p thrift.Format) error {  // PartNames
     if err := p.WriteFieldBegin("PartNames", thrift.MAP, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -576,7 +576,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *Automobile) readField1(p thrift.Protocol) error {  // Plate
+func (x *Automobile) readField1(p thrift.Format) error {  // Plate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -586,7 +586,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField2(p thrift.Protocol) error {  // PreviousPlate
+func (x *Automobile) readField2(p thrift.Format) error {  // PreviousPlate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -596,7 +596,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField3(p thrift.Protocol) error {  // FirstPlate
+func (x *Automobile) readField3(p thrift.Format) error {  // FirstPlate
     result, err := ReadPlate(p)
 if err != nil {
     return err
@@ -606,7 +606,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField4(p thrift.Protocol) error {  // Year
+func (x *Automobile) readField4(p thrift.Format) error {  // Year
     result, err := ReadYear(p)
 if err != nil {
     return err
@@ -616,7 +616,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField5(p thrift.Protocol) error {  // Drivers
+func (x *Automobile) readField5(p thrift.Format) error {  // Drivers
     result, err := ReadDrivers(p)
 if err != nil {
     return err
@@ -626,7 +626,7 @@ if err != nil {
     return nil
 }
 
-func (x *Automobile) readField6(p thrift.Protocol) error {  // Accessories
+func (x *Automobile) readField6(p thrift.Format) error {  // Accessories
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -654,7 +654,7 @@ result := listResult
     return nil
 }
 
-func (x *Automobile) readField7(p thrift.Protocol) error {  // PartNames
+func (x *Automobile) readField7(p thrift.Format) error {  // PartNames
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -799,7 +799,7 @@ func (x *AutomobileBuilder) Emit() *Automobile {
     return &objCopy
 }
 
-func (x *Automobile) Write(p thrift.Protocol) error {
+func (x *Automobile) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Automobile"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -842,7 +842,7 @@ func (x *Automobile) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Automobile) Read(p thrift.Protocol) error {
+func (x *Automobile) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -973,7 +973,7 @@ func (x *MapKey) SetStrval(value string) *MapKey {
     return x
 }
 
-func (x *MapKey) writeField1(p thrift.Protocol) error {  // Num
+func (x *MapKey) writeField1(p thrift.Format) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -989,7 +989,7 @@ func (x *MapKey) writeField1(p thrift.Protocol) error {  // Num
     return nil
 }
 
-func (x *MapKey) writeField2(p thrift.Protocol) error {  // Strval
+func (x *MapKey) writeField2(p thrift.Format) error {  // Strval
     if err := p.WriteFieldBegin("strval", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1005,7 +1005,7 @@ func (x *MapKey) writeField2(p thrift.Protocol) error {  // Strval
     return nil
 }
 
-func (x *MapKey) readField1(p thrift.Protocol) error {  // Num
+func (x *MapKey) readField1(p thrift.Format) error {  // Num
     result, err := p.ReadI64()
 if err != nil {
     return err
@@ -1015,7 +1015,7 @@ if err != nil {
     return nil
 }
 
-func (x *MapKey) readField2(p thrift.Protocol) error {  // Strval
+func (x *MapKey) readField2(p thrift.Format) error {  // Strval
     result, err := p.ReadString()
 if err != nil {
     return err
@@ -1069,7 +1069,7 @@ func (x *MapKeyBuilder) Emit() *MapKey {
     return &objCopy
 }
 
-func (x *MapKey) Write(p thrift.Protocol) error {
+func (x *MapKey) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MapKey"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1092,7 +1092,7 @@ func (x *MapKey) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MapKey) Read(p thrift.Protocol) error {
+func (x *MapKey) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1186,7 +1186,7 @@ func (x *MapContainer) IsSetMapval() bool {
     return x != nil && x.Mapval != nil
 }
 
-func (x *MapContainer) writeField1(p thrift.Protocol) error {  // Mapval
+func (x *MapContainer) writeField1(p thrift.Format) error {  // Mapval
     if err := p.WriteFieldBegin("mapval", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1220,7 +1220,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *MapContainer) readField1(p thrift.Protocol) error {  // Mapval
+func (x *MapContainer) readField1(p thrift.Format) error {  // Mapval
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1292,7 +1292,7 @@ func (x *MapContainerBuilder) Emit() *MapContainer {
     return &objCopy
 }
 
-func (x *MapContainer) Write(p thrift.Protocol) error {
+func (x *MapContainer) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1311,7 +1311,7 @@ func (x *MapContainer) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MapContainer) Read(p thrift.Protocol) error {
+func (x *MapContainer) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1428,7 +1428,7 @@ func (x *Pair) IsSetCar() bool {
     return x != nil && x.Car != nil
 }
 
-func (x *Pair) writeField1(p thrift.Protocol) error {  // Automobile
+func (x *Pair) writeField1(p thrift.Format) error {  // Automobile
     if !x.IsSetAutomobile() {
         return nil
     }
@@ -1448,7 +1448,7 @@ func (x *Pair) writeField1(p thrift.Protocol) error {  // Automobile
     return nil
 }
 
-func (x *Pair) writeField2(p thrift.Protocol) error {  // Car
+func (x *Pair) writeField2(p thrift.Format) error {  // Car
     if !x.IsSetCar() {
         return nil
     }
@@ -1469,7 +1469,7 @@ if err != nil {
     return nil
 }
 
-func (x *Pair) readField1(p thrift.Protocol) error {  // Automobile
+func (x *Pair) readField1(p thrift.Format) error {  // Automobile
     result := *NewAutomobile()
 err := result.Read(p)
 if err != nil {
@@ -1480,7 +1480,7 @@ if err != nil {
     return nil
 }
 
-func (x *Pair) readField2(p thrift.Protocol) error {  // Car
+func (x *Pair) readField2(p thrift.Format) error {  // Car
     result, err := ReadCar(p)
 if err != nil {
     return err
@@ -1550,7 +1550,7 @@ func (x *PairBuilder) Emit() *Pair {
     return &objCopy
 }
 
-func (x *Pair) Write(p thrift.Protocol) error {
+func (x *Pair) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Pair"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1573,7 +1573,7 @@ func (x *Pair) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Pair) Read(p thrift.Protocol) error {
+func (x *Pair) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1695,7 +1695,7 @@ func (x *Collection) IsSetCars() bool {
     return x != nil && x.Cars != nil
 }
 
-func (x *Collection) writeField1(p thrift.Protocol) error {  // Automobiles
+func (x *Collection) writeField1(p thrift.Format) error {  // Automobiles
     if err := p.WriteFieldBegin("automobiles", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1722,7 +1722,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Collection) writeField2(p thrift.Protocol) error {  // Cars
+func (x *Collection) writeField2(p thrift.Format) error {  // Cars
     if err := p.WriteFieldBegin("cars", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1750,7 +1750,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *Collection) readField1(p thrift.Protocol) error {  // Automobiles
+func (x *Collection) readField1(p thrift.Format) error {  // Automobiles
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1779,7 +1779,7 @@ result := listResult
     return nil
 }
 
-func (x *Collection) readField2(p thrift.Protocol) error {  // Cars
+func (x *Collection) readField2(p thrift.Format) error {  // Cars
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1851,7 +1851,7 @@ func (x *CollectionBuilder) Emit() *Collection {
     return &objCopy
 }
 
-func (x *Collection) Write(p thrift.Protocol) error {
+func (x *Collection) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Collection"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1874,7 +1874,7 @@ func (x *Collection) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Collection) Read(p thrift.Protocol) error {
+func (x *Collection) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

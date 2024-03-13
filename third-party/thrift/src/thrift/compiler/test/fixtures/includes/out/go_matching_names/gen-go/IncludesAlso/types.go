@@ -47,7 +47,7 @@ func (x *AlsoBuilder) Emit() *Also {
     return &objCopy
 }
 
-func (x *Also) Write(p thrift.Protocol) error {
+func (x *Also) Write(p thrift.Format) error {
     if err := p.WriteStructBegin("Also"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -62,7 +62,7 @@ func (x *Also) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Also) Read(p thrift.Protocol) error {
+func (x *Also) Read(p thrift.Format) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

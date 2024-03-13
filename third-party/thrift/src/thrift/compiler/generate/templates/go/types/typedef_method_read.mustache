@@ -26,7 +26,7 @@
   Read function (with no receiver) which takes the alias (typedef) as an argument.
 
 }}
-func {{typedef:go_qualified_read_func}}(p thrift.Protocol) ({{typedef:go_name}}, error) {
+func {{typedef:go_qualified_read_func}}(p thrift.Format) ({{typedef:go_name}}, error) {
     var decodeResult {{typedef:go_name}}
     decodeErr := func() error {
         {{#typedef:type}}

@@ -196,7 +196,7 @@ class MessageWrapper {
   }
 
   template <typename SubMessage, typename SubMessageHeader>
-  std::uint32_t wrapSubMessage(
+  auto wrapSubMessage(
       MessageWrapper<SubMessage, SubMessageHeader>& message,
       std::string_view (*bufferFunc)(Message&),
       void (MessageWrapper<SubMessage, SubMessageHeader>::*wrapFunc)(

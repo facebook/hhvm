@@ -751,6 +751,24 @@ class MultipleCustomerResponse {
       return bytesToCopy;
     }
 
+    char* putCustomerResponse(const std::uint16_t length) {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+      onCustomerResponseAccessed();
+#endif
+      std::uint64_t lengthOfLengthField = 2;
+      std::uint64_t lengthPosition = sbePosition();
+      std::uint16_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_16(length);
+      sbePosition(lengthPosition + lengthOfLengthField);
+      std::memcpy(
+          m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint16_t));
+      if (length != std::uint16_t(0)) {
+        std::uint64_t pos = sbePosition();
+        sbePosition(pos + length);
+        return m_buffer + pos;
+      }
+      return nullptr;
+    }
+
     CustomerResponses& putCustomerResponse(
         const char* src, const std::uint16_t length) {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)

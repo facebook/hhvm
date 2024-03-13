@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('module_level_traits')>>
+<<file:__EnableUnstableFeatures('module_level_traits_extensions')>>
 
 module MLT_A;
 

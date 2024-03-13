@@ -1,4 +1,4 @@
-File "module_level_traits_internal_member_2.bad.php--b.php", line 7, characters 16-22:
+File "module_level_traits_internal_member_2.bad.php--b.php", line 9, characters 16-22:
 You cannot make this trait member `internal` (NastCheck[3099])
-  File "module_level_traits_internal_member_2.bad.php--b.php", line 6, characters 7-7:
+  File "module_level_traits_internal_member_2.bad.php--b.php", line 8, characters 7-7:
   Only `internal` traits can have `internal` members

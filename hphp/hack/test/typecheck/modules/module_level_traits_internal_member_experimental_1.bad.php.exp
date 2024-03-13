@@ -1,0 +1,4 @@
+File "module_level_traits_internal_member_experimental_1.bad.php", line 7, characters 3-54:
+Cannot use unstable feature: `module_level_traits_extensions` (Parsing[1002])
+File "module_level_traits_internal_member_experimental_1.bad.php", line 3, characters 8-8:
+Unbound name: `A` (a module) (Naming[2049])

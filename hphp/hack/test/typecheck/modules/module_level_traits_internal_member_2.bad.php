@@ -8,6 +8,8 @@ new module A {}
 
 module A;
 
+<<file:__EnableUnstableFeatures('module_level_traits_extensions')>>
+
 <<__ModuleLevelTrait>>
 trait T {
   internal int $x = 42;

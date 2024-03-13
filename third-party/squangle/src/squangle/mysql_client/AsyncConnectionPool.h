@@ -76,23 +76,6 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
       const std::string& special_tag,
       const ConnectionOptions& conn_opts = ConnectionOptions());
 
-  folly::Future<ConnectResult> connectFuture(
-      const std::string& host,
-      int port,
-      const std::string& database_name,
-      const std::string& user,
-      const std::string& password,
-      const ConnectionOptions& conn_opts = ConnectionOptions());
-
-  folly::Future<ConnectResult> connectFuture(
-      const std::string& host,
-      int port,
-      const std::string& database_name,
-      const std::string& user,
-      const std::string& password,
-      const std::string& special_tag,
-      const ConnectionOptions& conn_opts = ConnectionOptions());
-
   std::unique_ptr<Connection> connect(
       const std::string& host,
       int port,

@@ -41,21 +41,6 @@ FOLLY_NODISCARD folly::SemiFuture<DbQueryResult> toSemiFuture(
 FOLLY_NODISCARD folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
     MultiQueryOperation_ptr mquery_op);
 
-// Future for ConnectOperation
-folly::Future<ConnectResult> toFuture(ConnectOperation_ptr conn_op);
-
-// Future for QueryOperation
-folly::Future<DbQueryResult> toFuture(QueryOperation_ptr query_op);
-
-// Future for MultiQueryOperation
-folly::Future<DbMultiQueryResult> toFuture(MultiQueryOperation_ptr mquery_op);
-
-// Trivial conversions are defined so that all Future uses are handled
-// by this interface
-folly::Future<ConnectResult> toFuture(folly::SemiFuture<ConnectResult>&& fut);
-folly::Future<DbQueryResult> toFuture(folly::SemiFuture<DbQueryResult>&& fut);
-folly::Future<DbMultiQueryResult> toFuture(
-    folly::SemiFuture<DbMultiQueryResult>&& fut);
 } // namespace mysql_client
 } // namespace common
 } // namespace facebook

@@ -163,31 +163,6 @@ folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
       std::vector<QueryResult>>(std::move(mquery_op));
 }
 
-folly::Future<ConnectResult> toFuture(ConnectOperation_ptr conn_op) {
-  return toFuture(toSemiFuture(std::move(conn_op)));
-}
-
-folly::Future<DbQueryResult> toFuture(QueryOperation_ptr query_op) {
-  return toFuture(toSemiFuture(std::move(query_op)));
-}
-
-folly::Future<DbMultiQueryResult> toFuture(MultiQueryOperation_ptr mquery_op) {
-  return toFuture(toSemiFuture(std::move(mquery_op)));
-}
-
-folly::Future<ConnectResult> toFuture(folly::SemiFuture<ConnectResult>&& fut) {
-  return std::move(fut).toUnsafeFuture();
-}
-
-folly::Future<DbQueryResult> toFuture(folly::SemiFuture<DbQueryResult>&& fut) {
-  return std::move(fut).toUnsafeFuture();
-}
-
-folly::Future<DbMultiQueryResult> toFuture(
-    folly::SemiFuture<DbMultiQueryResult>&& fut) {
-  return std::move(fut).toUnsafeFuture();
-}
-
 } // namespace mysql_client
 } // namespace common
 } // namespace facebook

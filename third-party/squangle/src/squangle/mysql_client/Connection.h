@@ -121,11 +121,6 @@ class Connection {
         std::move(conn), std::move(query), nullptr, std::move(options));
   }
 
-  template <typename... Args>
-  [[deprecated(
-      "Replaced by the SemiFuture APIs")]] static folly::Future<DbQueryResult>
-  queryFuture(std::unique_ptr<Connection> conn, Args&&... args);
-
   FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
@@ -157,16 +152,6 @@ class Connection {
     return multiQuerySemiFuture(
         std::move(conn), std::move(queries), nullptr, std::move(options));
   }
-
-  [[deprecated("Replaced by the SemiFuture APIs")]] static folly::Future<
-      DbMultiQueryResult>
-  multiQueryFuture(std::unique_ptr<Connection> conn, Query&& query);
-
-  [[deprecated("Replaced by the SemiFuture APIs")]] static folly::Future<
-      DbMultiQueryResult>
-  multiQueryFuture(
-      std::unique_ptr<Connection> conn,
-      std::vector<Query>&& queries);
 
   // An alternate interface that allows for easier re-use of an
   // existing query_op, moving the Connection from the old op and into
@@ -655,17 +640,6 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
     Args&&... args) {
   Query query{std::forward<Args>(args)...};
   return beginQuery(std::move(conn), std::move(query));
-}
-
-template <>
-[[deprecated("Replaced by the SemiFuture APIs")]] folly::Future<DbQueryResult>
-Connection::queryFuture(std::unique_ptr<Connection> conn, Query&& args);
-
-template <typename... Args>
-[[deprecated("Replaced by the SemiFuture APIs")]] folly::Future<DbQueryResult>
-Connection::queryFuture(std::unique_ptr<Connection> conn, Args&&... args) {
-  Query query{std::forward<Args>(args)...};
-  return queryFuture(std::move(conn), std::move(query));
 }
 
 } // namespace facebook::common::mysql_client

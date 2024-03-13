@@ -132,17 +132,6 @@ class AsyncMysqlClient : public MysqlClientBase {
       const std::string& password,
       const ConnectionOptions& conn_opts = ConnectionOptions());
 
-  [[deprecated(
-      "Replaced by the SemiFuture APIs, use SemiFutures and pass an executor")]] FOLLY_NODISCARD
-      folly::Future<ConnectResult>
-      connectFuture(
-          const std::string& host,
-          int port,
-          const std::string& database_name,
-          const std::string& user,
-          const std::string& password,
-          const ConnectionOptions& conn_opts = ConnectionOptions());
-
   // Synchronous call to acquire a connection, the caller thread will be blocked
   // until the operation has finished.
   // In case the we fail to acquire the connection, MysqlException will be

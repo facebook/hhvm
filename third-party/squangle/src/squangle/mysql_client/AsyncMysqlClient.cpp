@@ -187,17 +187,6 @@ folly::SemiFuture<ConnectResult> AsyncMysqlClient::connectSemiFuture(
   return toSemiFuture(std::move(op));
 }
 
-folly::Future<ConnectResult> AsyncMysqlClient::connectFuture(
-    const std::string& host,
-    int port,
-    const std::string& database_name,
-    const std::string& user,
-    const std::string& password,
-    const ConnectionOptions& conn_opts) {
-  return toFuture(
-      connectSemiFuture(host, port, database_name, user, password, conn_opts));
-}
-
 std::unique_ptr<Connection> AsyncMysqlClient::connect(
     const std::string& host,
     int port,

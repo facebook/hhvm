@@ -226,13 +226,6 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
   return toSemiFuture(std::move(op));
 }
 
-template <>
-folly::Future<DbQueryResult> Connection::queryFuture(
-    std::unique_ptr<Connection> conn,
-    Query&& query) {
-  return toFuture(querySemiFuture(std::move(conn), std::move(query)));
-}
-
 folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     std::unique_ptr<Connection> conn,
     Query&& args,
@@ -259,18 +252,6 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     op->setCallback(std::move(cb));
   }
   return toSemiFuture(std::move(op));
-}
-
-folly::Future<DbMultiQueryResult> Connection::multiQueryFuture(
-    std::unique_ptr<Connection> conn,
-    Query&& args) {
-  return toFuture(multiQuerySemiFuture(std::move(conn), std::move(args)));
-}
-
-folly::Future<DbMultiQueryResult> Connection::multiQueryFuture(
-    std::unique_ptr<Connection> conn,
-    std::vector<Query>&& args) {
-  return toFuture(multiQuerySemiFuture(std::move(conn), std::move(args)));
 }
 
 template <>

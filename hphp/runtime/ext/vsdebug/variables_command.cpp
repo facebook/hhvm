@@ -752,9 +752,9 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      auto const type = getDataTypeString(variable.getType());
+      auto const type_2 = getDataTypeString(variable.getType());
       auto const size = variable.toArray().size();
-      return VariableValue{format("{}[{}]", type.data(), size).str()};
+      return VariableValue{format("{}[{}]", type_2.data(), size).str()};
     }
 
     case KindOfObject:

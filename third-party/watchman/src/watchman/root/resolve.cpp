@@ -61,7 +61,7 @@ bool root_check_restrict(const char* watch_path) {
 }
 
 static void check_allowed_fs(const char* filename, const w_string& fs_type) {
-  const char* advice = NULL;
+  const char* advice = nullptr;
 
   // Report this to the log always, as it is helpful in understanding
   // problem reports

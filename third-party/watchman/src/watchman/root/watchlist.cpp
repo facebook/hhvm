@@ -307,7 +307,7 @@ void w_root_free_watched_roots() {
     if (current == 0) {
       break;
     }
-    if (time(NULL) > started + 3) {
+    if (time(nullptr) > started + 3) {
       logf(ERR, "{} roots were still live at exit\n", current);
       break;
     }

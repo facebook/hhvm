@@ -20,12 +20,12 @@ const char* win32_strerror(DWORD err) {
   static char msgbuf[1024];
   FormatMessageA(
       FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL,
+      nullptr,
       err,
       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
       msgbuf,
       sizeof(msgbuf) - 1,
-      NULL);
+      nullptr);
   return msgbuf;
 }
 

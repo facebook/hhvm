@@ -64,7 +64,7 @@ const char* find_sep_and_specials(
     ++pattern;
   }
   // No separator found
-  return NULL;
+  return nullptr;
 }
 
 // Simple brute force lookup of pattern within a node.

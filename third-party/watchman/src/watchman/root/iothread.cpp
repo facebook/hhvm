@@ -1000,7 +1000,7 @@ void InMemoryView::statPath(
     watcher_->startWatchFile(file);
 
     if (st.isDir()) {
-      if (dir_ent == NULL) {
+      if (dir_ent == nullptr) {
         recursive = true;
       } else {
         // Ensure that we believe that this node exists

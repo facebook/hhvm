@@ -165,13 +165,13 @@ void bench_list(const char* label, const char* prefix) {
   init_state(&state);
   auto strings = build_list_with_prefix(prefix, kWordLimit);
 
-  gettimeofday(&start, NULL);
+  gettimeofday(&start, nullptr);
   for (n = 0; n < 100; n++) {
     for (i = 0; i < kWordLimit; i++) {
       state.isIgnored(strings[i].data(), strings[i].size());
     }
   }
-  gettimeofday(&end, NULL);
+  gettimeofday(&end, nullptr);
 
   XLOG(ERR) << label << ": took " << w_timeval_diff(start, end);
 }

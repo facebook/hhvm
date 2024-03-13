@@ -124,7 +124,7 @@ char* Log::timeString(char* buf, size_t bufsize, timeval tv) {
 
 char* Log::currentTimeString(char* buf, size_t bufsize) {
   struct timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
   return timeString(buf, bufsize, tv);
 }
 

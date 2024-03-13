@@ -167,13 +167,13 @@ void setup_signal_handlers() {
   sa.sa_sigaction = crash_handler;
   sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
 
-  sigaction(SIGSEGV, &sa, NULL);
+  sigaction(SIGSEGV, &sa, nullptr);
 #ifdef SIGBUS
-  sigaction(SIGBUS, &sa, NULL);
+  sigaction(SIGBUS, &sa, nullptr);
 #endif
-  sigaction(SIGFPE, &sa, NULL);
-  sigaction(SIGILL, &sa, NULL);
-  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGFPE, &sa, nullptr);
+  sigaction(SIGILL, &sa, nullptr);
+  sigaction(SIGTERM, &sa, nullptr);
 #else
   // Don't show error dialogs for background service failures
   SetErrorMode(SEM_FAILCRITICALERRORS);

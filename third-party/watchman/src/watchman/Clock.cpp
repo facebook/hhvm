@@ -21,7 +21,7 @@ void ClockSpec::init() {
   struct timeval tv;
 
   proc_pid = (int)::getpid();
-  if (gettimeofday(&tv, NULL) == -1) {
+  if (gettimeofday(&tv, nullptr) == -1) {
     logf(FATAL, "gettimeofday failed: {}\n", folly::errnoStr(errno));
   }
   proc_start_time = (uint64_t)tv.tv_sec;

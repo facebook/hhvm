@@ -15,7 +15,7 @@ duct = "0.13.6"
 jwalk = "0.6"
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
-structopt = "0.3.23"
+structopt = "0.3.26"
 sysinfo = "0.26.8"
 tabular = "0.2.0"
 tokio = { version = "1.29.1", features = ["full", "test-util", "tracing"] }

@@ -60,6 +60,20 @@ type {{service:go_name}}Client struct {
 var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
 var _ {{service:go_name}}ContextClientInterface = &{{service:go_name}}Client{}
 
+func New{{service:go_name}}Client(prot thrift.Protocol) *{{service:go_name}}Client {
+    return &{{service:go_name}}Client{
+        {{#service:extends?}}
+        {{#service:extends}}
+        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ClientFromProtocol(prot),
+        {{/service:extends}}
+        {{/service:extends?}}
+        chClient: New{{service:go_name}}ChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: New{{service:go_name}}ClientFromProtocol is deprecated rather call equivalent, but shorter function New{{service:go_name}}Client.
 func New{{service:go_name}}ClientFromProtocol(prot thrift.Protocol) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{
         {{#service:extends?}}

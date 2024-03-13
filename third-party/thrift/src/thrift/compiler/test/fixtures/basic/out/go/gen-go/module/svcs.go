@@ -67,6 +67,15 @@ type FooServiceClient struct {
 var _ FooServiceClientInterface = &FooServiceClient{}
 var _ FooServiceContextClientInterface = &FooServiceClient{}
 
+func NewFooServiceClient(prot thrift.Protocol) *FooServiceClient {
+    return &FooServiceClient{
+        chClient: NewFooServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewFooServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewFooServiceClient.
 func NewFooServiceClientFromProtocol(prot thrift.Protocol) *FooServiceClient {
     return &FooServiceClient{
         chClient: NewFooServiceChannelClient(
@@ -438,6 +447,15 @@ type FB303ServiceClient struct {
 var _ FB303ServiceClientInterface = &FB303ServiceClient{}
 var _ FB303ServiceContextClientInterface = &FB303ServiceClient{}
 
+func NewFB303ServiceClient(prot thrift.Protocol) *FB303ServiceClient {
+    return &FB303ServiceClient{
+        chClient: NewFB303ServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewFB303ServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewFB303ServiceClient.
 func NewFB303ServiceClientFromProtocol(prot thrift.Protocol) *FB303ServiceClient {
     return &FB303ServiceClient{
         chClient: NewFB303ServiceChannelClient(
@@ -991,6 +1009,15 @@ type MyServiceClient struct {
 var _ MyServiceClientInterface = &MyServiceClient{}
 var _ MyServiceContextClientInterface = &MyServiceClient{}
 
+func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
+    return &MyServiceClient{
+        chClient: NewMyServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewMyServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyServiceClient.
 func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(
@@ -4648,6 +4675,15 @@ type DbMixedStackArgumentsClient struct {
 var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}
 var _ DbMixedStackArgumentsContextClientInterface = &DbMixedStackArgumentsClient{}
 
+func NewDbMixedStackArgumentsClient(prot thrift.Protocol) *DbMixedStackArgumentsClient {
+    return &DbMixedStackArgumentsClient{
+        chClient: NewDbMixedStackArgumentsChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewDbMixedStackArgumentsClientFromProtocol is deprecated rather call equivalent, but shorter function NewDbMixedStackArgumentsClient.
 func NewDbMixedStackArgumentsClientFromProtocol(prot thrift.Protocol) *DbMixedStackArgumentsClient {
     return &DbMixedStackArgumentsClient{
         chClient: NewDbMixedStackArgumentsChannelClient(

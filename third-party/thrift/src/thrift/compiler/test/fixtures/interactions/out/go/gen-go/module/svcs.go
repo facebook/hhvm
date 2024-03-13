@@ -67,6 +67,15 @@ type MyServiceClient struct {
 var _ MyServiceClientInterface = &MyServiceClient{}
 var _ MyServiceContextClientInterface = &MyServiceClient{}
 
+func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
+    return &MyServiceClient{
+        chClient: NewMyServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewMyServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyServiceClient.
 func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(

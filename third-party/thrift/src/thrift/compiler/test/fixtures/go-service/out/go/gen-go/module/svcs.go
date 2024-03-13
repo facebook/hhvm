@@ -130,6 +130,15 @@ type GetEntityClient struct {
 var _ GetEntityClientInterface = &GetEntityClient{}
 var _ GetEntityContextClientInterface = &GetEntityClient{}
 
+func NewGetEntityClient(prot thrift.Protocol) *GetEntityClient {
+    return &GetEntityClient{
+        chClient: NewGetEntityChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewGetEntityClientFromProtocol is deprecated rather call equivalent, but shorter function NewGetEntityClient.
 func NewGetEntityClientFromProtocol(prot thrift.Protocol) *GetEntityClient {
     return &GetEntityClient{
         chClient: NewGetEntityChannelClient(

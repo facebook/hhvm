@@ -79,6 +79,15 @@ type NestedContainersClient struct {
 var _ NestedContainersClientInterface = &NestedContainersClient{}
 var _ NestedContainersContextClientInterface = &NestedContainersClient{}
 
+func NewNestedContainersClient(prot thrift.Protocol) *NestedContainersClient {
+    return &NestedContainersClient{
+        chClient: NewNestedContainersChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewNestedContainersClientFromProtocol is deprecated rather call equivalent, but shorter function NewNestedContainersClient.
 func NewNestedContainersClientFromProtocol(prot thrift.Protocol) *NestedContainersClient {
     return &NestedContainersClient{
         chClient: NewNestedContainersChannelClient(

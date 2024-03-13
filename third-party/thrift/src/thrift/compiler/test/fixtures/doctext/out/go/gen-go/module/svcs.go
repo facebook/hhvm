@@ -70,6 +70,15 @@ type CClient struct {
 var _ CClientInterface = &CClient{}
 var _ CContextClientInterface = &CClient{}
 
+func NewCClient(prot thrift.Protocol) *CClient {
+    return &CClient{
+        chClient: NewCChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewCClientFromProtocol is deprecated rather call equivalent, but shorter function NewCClient.
 func NewCClientFromProtocol(prot thrift.Protocol) *CClient {
     return &CClient{
         chClient: NewCChannelClient(

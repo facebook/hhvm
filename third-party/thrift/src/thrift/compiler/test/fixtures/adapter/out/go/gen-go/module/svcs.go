@@ -67,6 +67,15 @@ type ServiceClient struct {
 var _ ServiceClientInterface = &ServiceClient{}
 var _ ServiceContextClientInterface = &ServiceClient{}
 
+func NewServiceClient(prot thrift.Protocol) *ServiceClient {
+    return &ServiceClient{
+        chClient: NewServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewServiceClient.
 func NewServiceClientFromProtocol(prot thrift.Protocol) *ServiceClient {
     return &ServiceClient{
         chClient: NewServiceChannelClient(
@@ -748,6 +757,15 @@ type AdapterServiceClient struct {
 var _ AdapterServiceClientInterface = &AdapterServiceClient{}
 var _ AdapterServiceContextClientInterface = &AdapterServiceClient{}
 
+func NewAdapterServiceClient(prot thrift.Protocol) *AdapterServiceClient {
+    return &AdapterServiceClient{
+        chClient: NewAdapterServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewAdapterServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewAdapterServiceClient.
 func NewAdapterServiceClientFromProtocol(prot thrift.Protocol) *AdapterServiceClient {
     return &AdapterServiceClient{
         chClient: NewAdapterServiceChannelClient(

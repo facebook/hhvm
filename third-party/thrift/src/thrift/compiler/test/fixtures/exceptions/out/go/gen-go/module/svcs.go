@@ -76,6 +76,15 @@ type RaiserClient struct {
 var _ RaiserClientInterface = &RaiserClient{}
 var _ RaiserContextClientInterface = &RaiserClient{}
 
+func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
+    return &RaiserClient{
+        chClient: NewRaiserChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+// Deprecated: NewRaiserClientFromProtocol is deprecated rather call equivalent, but shorter function NewRaiserClient.
 func NewRaiserClientFromProtocol(prot thrift.Protocol) *RaiserClient {
     return &RaiserClient{
         chClient: NewRaiserChannelClient(

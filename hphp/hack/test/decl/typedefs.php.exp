@@ -4,17 +4,6 @@
        td_tparams = []; td_as_constraint = None; td_super_constraint = None;
        td_type = (Rhint ([7:19-25]), (Tprim Tstring)); td_is_ctx = false;
        td_attributes = []; td_internal = false; td_docs_url = None }));
-  ("\\MyArray",
-   (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [10:6-13];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([10:16-32]),
-         (Tvec_or_dict (Rvec_or_dict_key ([10:16-32]), (Tprim Tarraykey)),
-            (Rhint ([10:16-32]), Tany)));
-        td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None }));
   ("\\MyArray1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [11:6-14];

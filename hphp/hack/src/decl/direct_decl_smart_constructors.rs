@@ -1508,24 +1508,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
             ))),
-            Node::Token(t) if t.kind() == TokenKind::Varray => {
-                let pos = self.token_pos(t);
-                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = Ty_::Tapply(self.alloc((
-                    (self.token_pos(t), naming_special_names::collections::VEC),
-                    self.alloc([tany]),
-                )));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
-            }
-            Node::Token(t) if t.kind() == TokenKind::Darray => {
-                let pos = self.token_pos(t);
-                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = Ty_::Tapply(self.alloc((
-                    (self.token_pos(t), naming_special_names::collections::DICT),
-                    self.alloc([tany, tany]),
-                )));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
-            }
             Node::Token(t) if t.kind() == TokenKind::This => {
                 Some(self.alloc(Ty(self.alloc(Reason::hint(self.token_pos(t))), Ty_::Tthis)))
             }
@@ -1560,11 +1542,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             }
                         }
                         "dynamic" => Ty_::Tdynamic,
-                        "varray_or_darray" | "vec_or_dict" => {
-                            let key_type = self.vec_or_dict_key(pos);
-                            let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                            Ty_::TvecOrDict(self.alloc((key_type, value_type)))
-                        }
                         "_" => Ty_::Twildcard,
                         _ => {
                             let name = self.elaborate_raw_id(name);

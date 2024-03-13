@@ -1,14 +1,4 @@
-File "array_typehints.php", line 26, characters 17-32:
+File "array_typehints.php", line 23, characters 17-32:
 Unbound name: `varray_or_darray` (Naming[2049])
-File "array_typehints.php", line 38, characters 17-32:
-Unbound name: `varray_or_darray` (Naming[2049])
-File "array_typehints.php", line 38, characters 17-51:
+File "array_typehints.php", line 23, characters 17-51:
 Too many type arguments for this type (Naming[2065])
-File "array_typehints.php", line 8, characters 16-21:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
-File "array_typehints.php", line 17, characters 16-21:
-Wrong number of type arguments (expected 2, got 0) (Typing[4101])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Definition is here

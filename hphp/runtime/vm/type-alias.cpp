@@ -153,11 +153,11 @@ bool TypeAlias::compat(const PreTypeAlias& alias) const {
       tc0.clsNamedType()->getCachedClass() : nullptr;
     auto tc1 = *it1++;
     auto ptype = tc1.type();
-    auto value = tc1.typeName();
+    auto value_2 = tc1.typeName();
     auto const preType =
       ptype == AnnotType::Unresolved ? AnnotType::SubObject : ptype;
     if (ptype == AnnotType::Mixed && type == AnnotType::Mixed) continue;
-    if (preType == type && Class::lookup(value) == klass) continue;
+    if (preType == type && Class::lookup(value_2) == klass) continue;
     return false;
   }
   return true;

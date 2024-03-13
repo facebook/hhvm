@@ -251,7 +251,6 @@ name = "assemble_ir"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr",
  "hash",
  "ir_core",
  "itertools 0.11.0",
@@ -377,7 +376,6 @@ name = "bc_to_ir"
 version = "0.0.0"
 dependencies = [
  "b2i_macros",
- "bstr",
  "ffi",
  "hash",
  "hhbc",
@@ -2646,7 +2644,6 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "bstr",
  "ffi",
  "hash",
  "hhbc",

@@ -32,7 +32,11 @@ pub struct Unit {
     pub module_use: Maybe<ModuleName>,
     pub symbol_refs: SymbolRefs,
     pub constants: Vector<Constant>,
+
+    /// If the Unit failed to parse or compile this defines the error that
+    /// should be reported and the rest of the Unit will be empty.
     pub fatal: Maybe<Fatal>,
+
     pub missing_symbols: Vector<StringId>,
     pub error_symbols: Vector<StringId>,
     // TODO(T120858428): Remove this field once non-utf8 is banned from the
@@ -43,7 +47,7 @@ pub struct Unit {
 
 /// Fields used when a unit had compile-time errors that should be reported
 /// when the unit is loaded.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Fatal {
     pub op: FatalOp,

@@ -3,27 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::BString;
-
 use crate::Attribute;
 use crate::Class;
-use crate::FatalOp;
+use crate::Fatal;
 use crate::Function;
 use crate::HackConstant;
 use crate::Module;
 use crate::ModuleName;
-use crate::SrcLoc;
 use crate::SymbolRefs;
 use crate::Typedef;
-
-/// Fields used when a unit had compile-time errors that should be reported
-/// when the unit is loaded.
-#[derive(Debug)]
-pub struct Fatal {
-    pub op: FatalOp,
-    pub loc: SrcLoc,
-    pub message: BString,
-}
 
 /// Unit represents a single parsed file.
 #[derive(Debug, Default)]

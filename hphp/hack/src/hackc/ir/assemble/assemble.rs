@@ -144,8 +144,7 @@ impl UnitParser {
         let op = parse_fatal_op(tokenizer)?;
 
         let message = tokenizer.expect_any_string()?;
-        let message = message.unescaped_string()?;
-        let message = bstr::BString::from(message);
+        let message = message.unescaped_string()?.into();
 
         self.unit.fatal = Some(Fatal { op, message, loc });
         Ok(())

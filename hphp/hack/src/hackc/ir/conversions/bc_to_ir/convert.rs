@@ -5,9 +5,7 @@
 
 use std::sync::Arc;
 
-use ffi::Maybe;
 use hash::HashMap;
-use hhbc::Fatal;
 use hhbc::Unit;
 
 /// Convert a hhbc::Unit to an ir::Unit.
@@ -81,14 +79,7 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
         }
     }
 
-    if let Maybe::Just(Fatal { op, loc, message }) = &unit.fatal {
-        let message = bstr::BString::from(message.as_ref());
-        ir_unit.fatal = Some(ir::Fatal {
-            op: *op,
-            loc: *loc,
-            message,
-        });
-    }
+    ir_unit.fatal = unit.fatal.clone().into();
 
     ir_unit
 }

@@ -11,7 +11,6 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 ffi = { version = "0.0.0", path = "../../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../hhbc/cargo/hhbc" }

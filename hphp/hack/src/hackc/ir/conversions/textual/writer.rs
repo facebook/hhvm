@@ -81,6 +81,7 @@ pub fn textual_writer(
 }
 
 fn check_fatal(path: &Path, fatal: Option<&ir::Fatal>) -> Result<()> {
+    use bstr::ByteSlice;
     if let Some(fatal) = fatal {
         let err = match fatal.op {
             ir::FatalOp::Parse => "Parse",
@@ -93,7 +94,7 @@ fn check_fatal(path: &Path, fatal: Option<&ir::Fatal>) -> Result<()> {
             "{err} error in {}[{}]: {}",
             path.display(),
             fatal.loc.line_begin,
-            fatal.message
+            fatal.message.as_bstr()
         );
     }
 

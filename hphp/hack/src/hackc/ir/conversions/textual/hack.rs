@@ -315,6 +315,11 @@ pub(crate) enum Builtin {
     /// This is equivalent to `a[b][c]`.
     #[decl(fn hack_array_get(...) -> *HackMixed)]
     HackArrayGet,
+    /// n-ary array "get"
+    ///
+    /// Similar to `hack_array_get`, but does not throw on missing keys.
+    #[decl(fn hack_array_get_quiet(...) -> *HackMixed)]
+    HackArrayGetQuiet,
     /// Hack constants.
     #[decl(skip)]
     HackConst(HackConst),

@@ -214,7 +214,7 @@ enum Pending {
 
 impl Pending {
     /// Read the current pending operation and return the value it represents.
-    fn read(&self, state: &mut FuncState<'_, '_, '_>) -> Result<Sid> {
+    fn read(&self, state: &mut FuncState<'_, '_, '_>, op: PropOp) -> Result<Sid> {
         match self {
             Pending::None => unreachable!(),
             Pending::Base(base) => base.load(state),
@@ -226,7 +226,11 @@ impl Pending {
                 let params = std::iter::once(base_value.into())
                     .chain(dim.iter().cloned())
                     .collect_vec();
-                state.call_builtin(hack::Builtin::HackArrayGet, params)
+                let target = match op {
+                    PropOp::NullSafe => hack::Builtin::HackArrayGetQuiet,
+                    PropOp::NullThrows => hack::Builtin::HackArrayGet,
+                };
+                state.call_builtin(target, params)
             }
         }
     }
@@ -421,7 +425,7 @@ where
 
         let value: Option<Sid> = match *final_op {
             FinalOp::IncDecM { inc_dec_op, .. } => {
-                let pre = self.pending.read(self.state)?;
+                let pre = self.pending.read(self.state, PropOp::NullThrows)?;
                 let op = match inc_dec_op {
                     ir::IncDecOp::PreInc | ir::IncDecOp::PostInc => hack::Hhbc::Add,
                     ir::IncDecOp::PreDec | ir::IncDecOp::PostDec => hack::Hhbc::Sub,
@@ -439,9 +443,10 @@ where
                 }
             }
             FinalOp::QueryM { query_m_op, .. } => match query_m_op {
-                QueryMOp::CGet | QueryMOp::CGetQuiet => Some(self.pending.read(self.state)?),
+                QueryMOp::CGet => Some(self.pending.read(self.state, PropOp::NullThrows)?),
+                QueryMOp::CGetQuiet => Some(self.pending.read(self.state, PropOp::NullSafe)?),
                 QueryMOp::Isset => {
-                    let value = self.pending.read(self.state)?;
+                    let value = self.pending.read(self.state, PropOp::NullSafe)?;
                     let result = self
                         .state
                         .call_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), [value])?;
@@ -530,7 +535,7 @@ where
                 bail!("Cannot use [] with vecs for reading in an lvalue context")
             }
             Pending::ArrayGet { .. } => {
-                let base = pending.read(self.state)?;
+                let base = pending.read(self.state, op)?;
                 (base, key, op)
             }
         };

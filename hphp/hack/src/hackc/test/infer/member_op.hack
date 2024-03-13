@@ -89,7 +89,7 @@ function mop_basel_querym_ei(vec<int> $a): int {
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(5)
 // CHECK:   n4: *HackMixed = load &$a
-// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n5 = $builtins.hack_array_get_quiet(n4, n3)
 // CHECK:   n6 = $builtins.hhbc_is_type_null(n5)
 // CHECK:   n7 = $builtins.hhbc_is_type_bool(n6)
 // CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
@@ -264,4 +264,48 @@ function mop_basel_unset_ei(dict<int, int> $a): void {
 function mop_basel_unset_pt(C $a): void {
   /* HH_FIXME[4135] Allow unset */
   unset($a->foo);
+}
+
+// TEST-CHECK-BAL: define $root.mop_basec_querym_cget(
+// CHECK: define $root.mop_basec_querym_cget($this: *void, $d: *HackDict) : *HackInt {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$d
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = $builtins.hack_string("k")
+// CHECK:   n4: *HackMixed = load &$d
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
+// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
+// CHECK:   ret n5
+// CHECK: }
+function mop_basec_querym_cget(dict<string, int> $d): int {
+  return $d['k'];
+}
+
+// TEST-CHECK-BAL: define $root.mop_basec_querym_cgetquiet(
+// CHECK: define $root.mop_basec_querym_cgetquiet($this: *void, $d: *HackDict) : *HackInt {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$d
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = $builtins.hack_string("k")
+// CHECK:   n4: *HackMixed = load &$d
+// CHECK:   n5 = $builtins.hack_array_get_quiet(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_null(n5)
+// CHECK:   n7 = $builtins.hhbc_not(n6)
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n7)
+// CHECK:   jmp b3(n5)
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n7)
+// CHECK:   jmp b3($builtins.hack_int(42))
+// CHECK: #b3(n8: *HackMixed):
+// CHECK:   n9 = $builtins.hhbc_is_type_int(n8)
+// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
+// CHECK:   ret n8
+// CHECK: }
+function mop_basec_querym_cgetquiet(dict<string, int> $d): int {
+  return $d['k'] ?? 42;
 }

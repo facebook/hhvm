@@ -21,7 +21,6 @@ use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
-use options::Options;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::visit_mut;
 use oxidized::aast_visitor::AstParams;
@@ -33,8 +32,6 @@ use oxidized::ast::CallExpr;
 use oxidized::ast::CaptureLid;
 use oxidized::ast::ClassGetExpr;
 use oxidized::ast::ClassHint;
-use oxidized::ast::ClassId;
-use oxidized::ast::ClassId_;
 use oxidized::ast::ClassName;
 use oxidized::ast::ClassVar;
 use oxidized::ast::Class_;
@@ -436,13 +433,11 @@ struct CaptureState {
 
 /// ReadOnlyState is split from State because it can be a simple ref in
 /// ClosureVisitor.
-struct ReadOnlyState<'a> {
+struct ReadOnlyState {
     // Empty namespace as constructed by parser
     empty_namespace: Arc<namespace_env::Env>,
     /// For debugger eval
     for_debugger_eval: bool,
-    /// Global compiler/hack options
-    options: &'a Options,
 }
 
 /// Mutable state used during visiting in ClosureVisitor. It's mutable and owned
@@ -556,7 +551,7 @@ fn make_closure(
     p: Pos,
     scope: &Scope<'_>,
     state: &State,
-    ro_state: &ReadOnlyState<'_>,
+    ro_state: &'_ ReadOnlyState,
     lambda_vars: Vec<String>,
     fun_tparams: Vec<Tparam>,
     class_tparams: Vec<Tparam>,
@@ -845,7 +840,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
 
 struct ClosureVisitor<'a, 'b> {
     state: Option<State>,
-    ro_state: &'a ReadOnlyState<'a>,
+    ro_state: &'a ReadOnlyState,
     // We need 'b to be a real lifetime so that our `type Params` can refer to
     // it - but we don't actually have any fields that use it - so we need a
     // Phantom.
@@ -1042,12 +1037,6 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                 Expr_::Call(x) if is_dyn_meth_caller(&x) => {
                     self.visit_dyn_meth_caller(scope, x, &*pos)?
                 }
-                Expr_::Call(x)
-                    if is_meth_caller(&x)
-                        && self.ro_state.options.hhbc.emit_meth_caller_func_pointers =>
-                {
-                    self.visit_meth_caller_funcptr(scope, x, &*pos)?
-                }
                 Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(scope, x)?,
                 Expr_::Call(x)
                     if (x.func)
@@ -1121,10 +1110,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
         Ok((res?, scope.closure_cnt_per_fun))
     }
 
-    fn state(&self) -> &State {
-        self.state.as_ref().unwrap()
-    }
-
     fn state_mut(&mut self) -> &mut State {
         self.state.as_mut().unwrap()
     }
@@ -1147,75 +1132,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
             res.recurse(scope, self)?;
             Ok(res)
-        } else {
-            let mut res = Expr_::Call(x);
-            res.recurse(scope, self)?;
-            Ok(res)
-        }
-    }
-
-    #[inline(never)]
-    fn visit_meth_caller_funcptr(
-        &mut self,
-        scope: &mut Scope<'b>,
-        mut x: Box<CallExpr>,
-        pos: &Pos,
-    ) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.args {
-            error::ensure_normal_paramkind(pk_cls)?;
-            error::ensure_normal_paramkind(pk_f)?;
-            match (&cls, func.as_string()) {
-                (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
-                    let mut cls_const = cls.as_class_const_mut();
-                    let (cid, _) = match cls_const {
-                        None => unreachable!(),
-                        Some((ref mut cid, (_, cs))) => (cid, cs),
-                    };
-                    self.visit_class_id(scope, cid)?;
-                    match &cid.2 {
-                        cid if cid
-                            .as_ciexpr()
-                            .and_then(Expr::as_id)
-                            .map_or(false, |id| !is_selflike_keyword(id)) =>
-                        {
-                            let id = cid.as_ciexpr().unwrap().as_id().unwrap();
-                            let mangled_class_name =
-                                hhbc::ClassName::from_ast_name_and_mangle(id.as_ref());
-                            Ok(self.convert_meth_caller_to_func_ptr(
-                                scope,
-                                pos,
-                                pc,
-                                mangled_class_name.as_str(),
-                                pf,
-                                // FIXME: This is not safe--string literals are binary
-                                // strings. There's no guarantee that they're valid UTF-8.
-                                unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                            ))
-                        }
-                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
-                    }
-                }
-                (Expr_::String(cls_name), Some(fname)) => Ok(self.convert_meth_caller_to_func_ptr(
-                    scope,
-                    pos,
-                    pc,
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { std::str::from_utf8_unchecked(cls_name.as_slice()) },
-                    pf,
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
-                )),
-                (_, Some(_)) => Err(Error::fatal_parse(
-                    pc,
-                    "Class must be a Class or string type",
-                )),
-                (_, _) => Err(Error::fatal_parse(
-                    pf,
-                    "Method name must be a literal string",
-                )),
-            }
         } else {
             let mut res = Expr_::Call(x);
             res.recurse(scope, self)?;
@@ -1266,13 +1182,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             res.recurse(scope, self)?;
             Ok(res)
         }
-    }
-
-    fn visit_class_id(&mut self, scope: &mut Scope<'b>, cid: &mut ClassId) -> Result<()> {
-        if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
-            self.visit_expr(scope, e)?;
-        }
-        Ok(())
     }
 
     // Closure-convert a lambda expression, with use_vars_opt = Some vars
@@ -1467,93 +1376,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
         Ok(Expr_::mk_efun(efun))
     }
 
-    fn convert_meth_caller_to_func_ptr(
-        &mut self,
-        scope: &Scope<'_>,
-        pos: &Pos,
-        pc: &Pos,
-        cls: &str,
-        pf: &Pos,
-        fname: &str,
-    ) -> Expr_ {
-        let pos = || pos.clone();
-        let cname = match scope.as_class_summary() {
-            Some(cd) => &cd.name.1,
-            None => "",
-        };
-        let mangle_name = string_utils::mangle_meth_caller(cls, fname);
-        let fun_handle = hack_expr!(
-            pos = pos(),
-            r#"\__SystemLib\meth_caller(#{str(clone(mangle_name))})"#
-        );
-        if self
-            .state()
-            .named_hoisted_functions
-            .contains_key(&mangle_name)
-        {
-            return fun_handle.2;
-        }
-        // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
-        let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
-        let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
-        let msg = format!("object must be an instance of ({})", cls);
-        let assert_invariant = hack_expr!(
-            pos = pos(),
-            r#"\HH\invariant(\is_a(#{clone(obj_lvar)}, #{str(clone(cls), pc)}), #{str(msg)})"#
-        );
-        // AST for: return $o-><func>(...$args);
-        let args_var = local_id::make_unscoped("$args");
-        let variadic_param = make_fn_param(pos(), &args_var, true, false);
-        let meth_caller_handle = hack_expr!(
-            pos = pos(),
-            r#"#obj_lvar->#{id(clone(fname), pf)}(...#{lvar(args_var)})"#
-        );
-
-        let f = Fun_ {
-            span: pos(),
-            annotation: (),
-            readonly_this: None, // TODO(readonly): readonly_this in closure_convert
-            readonly_ret: None,
-            ret: TypeHint((), None),
-            params: vec![
-                make_fn_param(pos(), &obj_var.1, false, false),
-                variadic_param,
-            ],
-            ctxs: None,
-            unsafe_ctxs: None,
-            body: FuncBody {
-                fb_ast: Block(vec![
-                    Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
-                    Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
-                ]),
-            },
-            fun_kind: FunKind::FSync,
-            user_attributes: UserAttributes(vec![UserAttribute {
-                name: Id(pos(), "__MethCaller".into()),
-                params: vec![Expr((), pos(), Expr_::String(cname.into()))],
-            }]),
-            external: false,
-            doc_comment: None,
-        };
-        let fd = FunDef {
-            file_attributes: vec![],
-            namespace: Arc::clone(&self.ro_state.empty_namespace),
-            mode: scope.scope_fmode(),
-            name: Id(pos(), mangle_name.clone()),
-            fun: f,
-            // TODO(T116039119): Populate value with presence of internal attribute
-            internal: false,
-            // TODO: meth_caller should have the visibility of the module it is defined in
-            module: None,
-            tparams: vec![],
-            where_constraints: vec![],
-        };
-        self.state_mut()
-            .named_hoisted_functions
-            .insert(mangle_name, fd);
-        fun_handle.2
-    }
-
     fn compute_variables_from_fun(
         params: &[FunParam],
         body: &[Stmt],
@@ -1685,7 +1507,6 @@ pub fn convert_toplevel_prog<'d>(
     let ro_state = ReadOnlyState {
         empty_namespace: Arc::clone(&namespace_env),
         for_debugger_eval: e.for_debugger_eval,
-        options: e.options(),
     };
     let state = State::initial_state(namespace_env);
 

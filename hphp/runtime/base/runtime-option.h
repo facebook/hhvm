@@ -839,7 +839,6 @@ struct RuntimeOption {
   F(bool, ClassAsStringGetType, true)                                   \
   /* Raise sampled notice when strings are used as classes. */          \
   F(uint32_t, RaiseStrToClsConversionNoticeSampleRate, 0)               \
-  F(bool, EmitMethCallerFuncPointers, false)                            \
   /* trigger E_USER_WARNING error when getClassName()/getMethodName()
    * is used on __SystemLib\MethCallerHelper */                         \
   F(bool, NoticeOnMethCallerHelperUse, false)                           \

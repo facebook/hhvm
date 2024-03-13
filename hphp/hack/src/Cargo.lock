@@ -751,7 +751,6 @@ dependencies = [
  "hhbc_string_utils",
  "itertools 0.11.0",
  "naming_special_names_rust",
- "options",
  "oxidized",
  "stack_limit",
  "unique_id_builder",

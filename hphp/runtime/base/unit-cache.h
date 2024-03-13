@@ -110,7 +110,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalEmitClsMethPointers)                    \
   R(EvalIsVecNotices)                           \
   R(EvalAllowHhas)                              \
-  R(EvalEmitMethCallerFuncPointers)             \
   R(EvalAssemblerMaxScalarSize)                 \
   R(EvalFoldLazyClassKeys)                      \
   R(EvalEmitNativeEnumClassLabels)              \

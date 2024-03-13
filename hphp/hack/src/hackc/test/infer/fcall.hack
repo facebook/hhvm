@@ -198,8 +198,7 @@ function fcall_splat(): void {
 // CHECK: define $root.fcall_meth_caller($this: *void, $b: *C) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
-// CHECK:   n0 = __sil_allocate(<MethCaller$C$b$curry>)
-// CHECK:   store n0.MethCaller$C$b$curry.arg0 <- null: *void
+// CHECK:   n0 = $root.HH::meth_caller(null, __sil_get_lazy_class(<C>), $builtins.hack_string("b"))
 // CHECK:   store &$x <- n0: *HackMixed
 // CHECK:   jmp b1
 // CHECK: #b1:
@@ -221,9 +220,6 @@ function fcall_meth_caller(C $b): void {
   $x = meth_caller(C::class, 'b');
   $x($b, 1, 2, 3);
 }
-
-// TEST-CHECK-1: define $root.MethCaller$C$b
-// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic .typevar="array" *HackMixed) : *HackMixed {
 
 // TEST-CHECK-BAL: define $root.fcall_cls_method
 // CHECK: define $root.fcall_cls_method($this: *void, $a: *Classname) : *void {
@@ -249,22 +245,6 @@ function fcall_cls_method(classname<D> $a): void {
 function fcall_readonly(): void {
   readonly_param(readonly g());
 }
-
-// TEST-CHECK-BAL: type MethCaller$C$b$curry
-// CHECK: type MethCaller$C$b$curry = .kind="class" .final {
-// CHECK:   arg0: .private *void
-// CHECK: }
-
-// TEST-CHECK-BAL: define .final .curry MethCaller$C$b$curry.__invoke
-// CHECK: define .final .curry MethCaller$C$b$curry.__invoke(this: *MethCaller$C$b$curry, args: .variadic *HackVec) : *HackMixed {
-// CHECK: #b0:
-// CHECK:   n0: *MethCaller$C$b$curry = load &this
-// CHECK:   n1: *void = load n0.MethCaller$C$b$curry.arg0
-// CHECK:   n2: *HackVec = load &args
-// CHECK:   n3 = $builtins.__sil_splat(n2)
-// CHECK:   n4 = $root.MethCaller$C$b(null, n1, n3)
-// CHECK:   ret n4
-// CHECK: }
 
 // TEST-CHECK-BAL: type f$curry
 // CHECK: type f$curry = .kind="class" .final {

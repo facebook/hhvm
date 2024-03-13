@@ -1122,17 +1122,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
     );
     mc.ifThen(
       [&] (Block* taken) { return check(mcCls, taken); },
-      [&] (SSATmp*) {
-        if (RO::EvalEmitMethCallerFuncPointers &&
-            RO::EvalNoticeOnMethCallerHelperUse) {
-          updateMarker(env);
-          env.irb->exceptionStackBoundary();
-          auto const msg = cns(env, isCls ?
-            s_MCHELPER_ON_GET_CLS.get() : s_MCHELPER_ON_GET_METH.get());
-          gen(env, RaiseNotice, SampleRateData {}, msg);
-        }
-        return loadProp(mcCls, isCls, value);
-      }
+      [&] (SSATmp*) { return loadProp(mcCls, isCls, value); }
     );
     return mc.elseDo(
       [&] { // src is not a meth_caller

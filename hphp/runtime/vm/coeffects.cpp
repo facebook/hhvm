@@ -251,9 +251,7 @@ RuntimeCoeffects getFunParamHelper(const TypedValue* tv, uint32_t paramIdx) {
   };
   if (tvIsNull(tv))     return RuntimeCoeffects::none();
   if (tvIsFunc(tv)) {
-    auto const func = RO::EvalEmitMethCallerFuncPointers &&
-                      tv->m_data.pfunc->isMethCaller()
-      ? getFuncFromMethCallerFunc(tv->m_data.pfunc) : tv->m_data.pfunc;
+    auto const func = tv->m_data.pfunc;
     return handleFunc(func);
   }
   if (tvIsRFunc(tv))    return handleFunc(tv->m_data.prfunc->m_func);

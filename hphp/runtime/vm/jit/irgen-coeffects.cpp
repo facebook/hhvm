@@ -298,57 +298,34 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
         );
         break;
       case CoeffectFunParamProfile::OptType::MethCaller:
-        if (RO::EvalEmitMethCallerFuncPointers) {
-          mc.ifThen(
-            [&] (Block* taken) {
-              auto const func = gen(env, CheckType, TFunc, taken, tv);
-              auto const success =
-                gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, func);
-              gen(env, JmpZero, taken, success);
-              return func;
-            },
-            [&] (SSATmp* func) {
-              return handleFunc(fnFromName(
-                gen(env, LdMethCallerName, MethCallerData{true}, func),
-                gen(env, LdMethCallerName, MethCallerData{false}, func)
-              ));
-            }
-          );
-        } else {
-          mc.ifThen(
-            [&] (Block* taken) {
-              auto const obj = gen(env, CheckType, TObj, taken, tv);
-              auto const cls = gen(env, LdObjClass, obj);
-              auto const success =
-                gen(env, EqCls, cls, cns(env, SystemLib::getMethCallerHelperClass()));
-              gen(env, JmpZero, taken, success);
-              return cls;
-            },
-            [&] (SSATmp* cls) {
-              auto const obj = gen(env, AssertType, TObj, tv);
-              auto const getClsOrMethod = [&](bool is_cls) {
-                auto const cls = SystemLib::getMethCallerHelperClass();
-                auto const slot = is_cls ? Slot{0} : Slot{1};
-                auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
-                auto const ret = gen(env, LdMem, TStr, prop);
-                gen(env, IncRef, ret);
-                return ret;
-              };
-              return handleFunc(fnFromName(getClsOrMethod(true),
-                                           getClsOrMethod(false)));
-            }
-          );
-        }
+        mc.ifThen(
+          [&] (Block* taken) {
+            auto const obj = gen(env, CheckType, TObj, taken, tv);
+            auto const cls = gen(env, LdObjClass, obj);
+            auto const success =
+              gen(env, EqCls, cls, cns(env, SystemLib::getMethCallerHelperClass()));
+            gen(env, JmpZero, taken, success);
+            return cls;
+          },
+          [&] (SSATmp* cls) {
+            auto const obj = gen(env, AssertType, TObj, tv);
+            auto const getClsOrMethod = [&](bool is_cls) {
+              auto const cls = SystemLib::getMethCallerHelperClass();
+              auto const slot = is_cls ? Slot{0} : Slot{1};
+              auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
+              auto const ret = gen(env, LdMem, TStr, prop);
+              gen(env, IncRef, ret);
+              return ret;
+            };
+            return handleFunc(fnFromName(getClsOrMethod(true),
+                                         getClsOrMethod(false)));
+          }
+        );
         break;
       case CoeffectFunParamProfile::OptType::Func:
         mc.ifThen(
           [&] (Block* taken) {
             auto const func = gen(env, CheckType, TFunc, taken, tv);
-            if (RO::EvalEmitMethCallerFuncPointers) {
-              auto const success =
-                gen(env, FuncHasAttr, AttrData { AttrIsMethCaller }, func);
-              gen(env, JmpNZero, taken, success);
-            }
             return func;
           },
           handleFunc

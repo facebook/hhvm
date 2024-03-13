@@ -56,17 +56,12 @@ void CoeffectFunParamProfile::update(const TypedValue* tv) {
     auto const cls = tv->m_data.pobj->getVMClass();
     if (cls->isClosureClass()) {
       m_closure++;
-    } else if (!RO::EvalEmitMethCallerFuncPointers &&
-               cls == SystemLib::getMethCallerHelperClass()) {
+    } else if (cls == SystemLib::getMethCallerHelperClass()) {
       m_methcaller++;
     }
   } else if (tvIsFunc(tv)) {
-    if (RO::EvalEmitMethCallerFuncPointers &&
-        tv->m_data.pfunc->isMethCaller()) {
-      m_methcaller++;
-    } else {
-      m_func++;
-    }
+    m_func++;
+
   } else if (tvIsClsMeth(tv)) {
     m_clsmeth++;
   }

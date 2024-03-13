@@ -442,10 +442,6 @@ StringData* getMethCallerClsOrMethNameFromMethCallerHelperClass(const char* fn,
   auto const c UNUSED = obj->getVMClass();
   assertx(c == SystemLib::getMethCallerHelperClass());
   assertx(meth_caller_has_expected_prop(c));
-  if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
-      RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
-    raise_notice("MethCallerHelper is used on %s()", fn);
-  }
   auto const tv = obj->propRvalAtOffset(
     isGetClass ? s_cls_idx : s_meth_idx).tv();
   assertx(isStringType(type(tv)));
@@ -465,13 +461,7 @@ StringData* getMethCallerClsOrMethNameFromDynMethCallerHelperClass(const ObjectD
 
 template<bool isGetClass>
 String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
-  if (tvIsFunc(v)) {
-    if (val(v).pfunc->isMethCaller()) {
-      auto const name =
-        getMethCallerClsOrMethNameFromMethCallerFunc<isGetClass>(val(v).pfunc);
-      return String::attach(const_cast<StringData*>(name));
-    }
-  } else if (tvIsObject(v)) {
+  if (tvIsObject(v)) {
     auto const obj = val(v).pobj;
     auto const cls = obj->getVMClass();
     if (cls == SystemLib::getDynMethCallerHelperClass()) {

@@ -42,11 +42,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         "Eval.EmitClsMethPointers",
     )?;
 
-    // Only the hdf versions used. Can kill variant in options_cli.rs
-    flags.emit_meth_caller_func_pointers = config
-        .get_bool("Eval.EmitMethCallerFuncPointers")?
-        .unwrap_or(true);
-
     flags.optimize_reified_param_checks = config
         .get_bool("Hack.Lang.OptimizeReifiedParamChecks")?
         .unwrap_or(false);

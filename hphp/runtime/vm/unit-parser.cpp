@@ -129,7 +129,6 @@ CompilerResult hackc_compile(
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
       .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
       .emit_cls_meth_pointers = RO::EvalEmitClsMethPointers,
-      .emit_meth_caller_func_pointers = RO::EvalEmitMethCallerFuncPointers,
       .fold_lazy_class_keys = RO::EvalFoldLazyClassKeys,
       .enable_native_enum_class_labels = RO::EvalEmitNativeEnumClassLabels,
     },

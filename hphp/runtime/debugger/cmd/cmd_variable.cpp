@@ -140,10 +140,10 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
     cmd.m_formatMaxLen = -1;
     rcmd = client.xend<CmdVariable>(&cmd);
 
-    auto value = get_var(*rcmd);
+    auto value_2 = get_var(*rcmd);
     auto rest = folly::StringPiece {
-      value.data() + charCount,
-      static_cast<size_t>(value.size() - charCount)
+      value_2.data() + charCount,
+      static_cast<size_t>(value_2.size() - charCount)
     };
     client.output(rest);
     client.tutorial("You can use 'set cc n' to increase the character"

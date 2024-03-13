@@ -128,7 +128,7 @@ W_CMD_REG(
     "watch-del-all",
     cmd_watch_del_all,
     CMD_DAEMON | CMD_POISON_IMMUNE,
-    NULL);
+    nullptr);
 
 /* watch-list
  * Returns a list of watched roots */
@@ -138,7 +138,11 @@ static UntypedResponse cmd_watch_list(Client*, const json_ref&) {
   resp.set("roots", std::move(root_paths));
   return resp;
 }
-W_CMD_REG("watch-list", cmd_watch_list, CMD_DAEMON | CMD_ALLOW_ANY_USER, NULL);
+W_CMD_REG(
+    "watch-list",
+    cmd_watch_list,
+    CMD_DAEMON | CMD_ALLOW_ANY_USER,
+    nullptr);
 
 // For each directory component in candidate_dir to the root of the filesystem,
 // look for root_file.  If root_file is present, update relpath to reflect the

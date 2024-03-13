@@ -194,7 +194,7 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
 
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
+    sigprocmask(SIG_BLOCK, &sigset, nullptr);
   }
 #endif
 
@@ -350,7 +350,7 @@ static SpawnResult run_service_as_daemon() {
 #ifdef _WIN32
 static SpawnResult spawn_win32(const std::vector<std::string>& daemon_argv) {
   char module_name[WATCHMAN_NAME_MAX];
-  GetModuleFileName(NULL, module_name, sizeof(module_name));
+  GetModuleFileName(nullptr, module_name, sizeof(module_name));
 
   ChildProcess::Options opts;
   opts.setFlags(POSIX_SPAWN_SETPGROUP);

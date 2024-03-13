@@ -117,7 +117,7 @@ static UntypedResponse cmd_debug_drop_privs(Client* client, const json_ref&) {
   resp.set("owner", json_boolean(client->client_is_owner));
   return resp;
 }
-W_CMD_REG("debug-drop-privs", cmd_debug_drop_privs, CMD_DAEMON, NULL);
+W_CMD_REG("debug-drop-privs", cmd_debug_drop_privs, CMD_DAEMON, nullptr);
 
 struct DebugSetParallelCrawlCommand
     : TypedCommand<DebugSetParallelCrawlCommand> {
@@ -391,7 +391,7 @@ static UntypedResponse cmd_debug_watcher_info(
   response.set("watcher-debug-info", root->view()->getWatcherDebugInfo());
   return response;
 }
-W_CMD_REG("debug-watcher-info", cmd_debug_watcher_info, CMD_DAEMON, NULL);
+W_CMD_REG("debug-watcher-info", cmd_debug_watcher_info, CMD_DAEMON, nullptr);
 
 static UntypedResponse cmd_debug_watcher_info_clear(
     Client* clientbase,
@@ -407,7 +407,7 @@ W_CMD_REG(
     "debug-watcher-info-clear",
     cmd_debug_watcher_info_clear,
     CMD_DAEMON,
-    NULL);
+    nullptr);
 
 void addCacheStats(UntypedResponse& resp, const CacheStats& stats) {
   resp.set(

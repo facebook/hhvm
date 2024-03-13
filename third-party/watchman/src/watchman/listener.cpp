@@ -167,7 +167,7 @@ static void named_pipe_accept_loop_internal(
     std::shared_ptr<watchman_event> listener_event) {
   HANDLE handles[2];
   auto olap = OVERLAPPED();
-  HANDLE connected_event = CreateEvent(NULL, FALSE, TRUE, NULL);
+  HANDLE connected_event = CreateEvent(nullptr, FALSE, TRUE, nullptr);
   auto path = get_named_pipe_sock_path();
 
   if (!connected_event) {
@@ -390,7 +390,7 @@ bool w_start_listener() {
       size_t len;
 
       len = sizeof(maxperproc);
-      sysctl(mib, 2, &maxperproc, &len, NULL, 0);
+      sysctl(mib, 2, &maxperproc, &len, nullptr, 0);
       logf(
           ERR,
           "file limit is {} kern.maxfilesperproc={}\n",
@@ -442,13 +442,13 @@ bool w_start_listener() {
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = [](int) {};
   sa.sa_flags = 0;
-  sigaction(SIGUSR1, &sa, NULL);
-  sigaction(SIGCHLD, &sa, NULL);
+  sigaction(SIGUSR1, &sa, nullptr);
+  sigaction(SIGCHLD, &sa, nullptr);
 
   // Block SIGCHLD everywhere
   sigemptyset(&sigset);
   sigaddset(&sigset, SIGCHLD);
-  sigprocmask(SIG_BLOCK, &sigset, NULL);
+  sigprocmask(SIG_BLOCK, &sigset, nullptr);
 #endif
   // TODO: We are trying out folly signal handling on Linux. Eventually we
   // should remove this if and use folly signal handling on all platforms.
@@ -555,7 +555,7 @@ static UntypedResponse cmd_get_pid(Client*, const json_ref&) {
   resp.set("pid", json_integer(::getpid()));
   return resp;
 }
-W_CMD_REG("get-pid", cmd_get_pid, CMD_DAEMON, NULL);
+W_CMD_REG("get-pid", cmd_get_pid, CMD_DAEMON, nullptr);
 
 /* vim:ts=2:sw=2:et:
  */

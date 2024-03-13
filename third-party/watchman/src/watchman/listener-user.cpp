@@ -30,7 +30,7 @@ W_CMD_REG(
     "shutdown-server",
     cmd_shutdown,
     CMD_DAEMON | CMD_POISON_IMMUNE,
-    NULL);
+    nullptr);
 
 void add_root_warnings_to_response(
     UntypedResponse& response,

@@ -71,7 +71,7 @@ int posix_spawnattr_getflags(posix_spawnattr_t* attrp, short* flags) {
 }
 
 int posix_spawnattr_setcwd_np(posix_spawnattr_t* attrp, const char* path) {
-  char* path_dup = NULL;
+  char* path_dup = nullptr;
 
   if (path) {
     path_dup = strdup(path);
@@ -178,18 +178,18 @@ int posix_spawn_file_actions_destroy(posix_spawn_file_actions_t* actions) {
 static char* build_command_line(char* const argv[]) {
   int argc = 0, i = 0;
   size_t size = 0;
-  char *cmdbuf = NULL, *cur = NULL;
+  char *cmdbuf = nullptr, *cur = nullptr;
 
   // Note: includes trailing NUL which we count as the closing quote
   size = sizeof(CMD_EXE_PREFIX);
 
-  for (argc = 0; argv[argc] != NULL; argc++) {
+  for (argc = 0; argv[argc] != nullptr; argc++) {
     size += 4 * (strlen(argv[argc]) + 1);
   }
 
   cmdbuf = (char*)malloc(size);
   if (!cmdbuf) {
-    return NULL;
+    return nullptr;
   }
 
   // Here be dragons.  More gory details in http://stackoverflow.com/q/4094699

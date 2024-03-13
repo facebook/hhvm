@@ -124,7 +124,7 @@ W_CMD_REG(
     "list-capabilities",
     cmd_list_capabilities,
     CMD_DAEMON | CMD_CLIENT | CMD_ALLOW_ANY_USER,
-    NULL);
+    nullptr);
 
 /* get-sockname */
 static UntypedResponse cmd_get_sockname(Client*, const json_ref&) {
@@ -154,7 +154,7 @@ W_CMD_REG(
     "get-sockname",
     cmd_get_sockname,
     CMD_DAEMON | CMD_CLIENT | CMD_ALLOW_ANY_USER,
-    NULL);
+    nullptr);
 
 static UntypedResponse cmd_get_config(Client* client, const json_ref& args) {
   if (json_array_size(args) != 2) {

@@ -40,7 +40,7 @@ static constexpr size_t kMaxSymbolLen = 4096;
 
 static void sym_init() {
   proc = GetCurrentProcess();
-  SymInitialize(proc, NULL, TRUE);
+  SymInitialize(proc, nullptr, TRUE);
   SymSetOptions(
       SYMOPT_LOAD_LINES | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_NO_PROMPTS |
       SYMOPT_UNDNAME);
@@ -50,7 +50,7 @@ size_t backtrace(void** frames, size_t n_frames) {
   std::call_once(sym_init_once, sym_init);
   // Skip the first three frames; they're always going to show
   // w_log, log_stack_trace and backtrace
-  return CaptureStackBackTrace(3, (DWORD)n_frames, frames, NULL);
+  return CaptureStackBackTrace(3, (DWORD)n_frames, frames, nullptr);
 }
 
 char** backtrace_symbols(void** array, size_t n_frames) {

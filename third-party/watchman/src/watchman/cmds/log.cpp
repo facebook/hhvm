@@ -51,7 +51,7 @@ static UntypedResponse cmd_loglevel(Client* client, const json_ref& args) {
   resp.set("log_level", json_ref(args.at(1)));
   return resp;
 }
-W_CMD_REG("log-level", cmd_loglevel, CMD_DAEMON, NULL);
+W_CMD_REG("log-level", cmd_loglevel, CMD_DAEMON, nullptr);
 
 // log "debug" "text to log"
 static UntypedResponse cmd_log(Client*, const json_ref& args) {
@@ -74,7 +74,7 @@ static UntypedResponse cmd_log(Client*, const json_ref& args) {
   resp.set("logged", json_true());
   return resp;
 }
-W_CMD_REG("log", cmd_log, CMD_DAEMON | CMD_ALLOW_ANY_USER, NULL);
+W_CMD_REG("log", cmd_log, CMD_DAEMON | CMD_ALLOW_ANY_USER, nullptr);
 
 // change the server log level for the logs
 static UntypedResponse cmd_global_log_level(Client*, const json_ref& args) {
@@ -111,7 +111,7 @@ static UntypedResponse cmd_get_log(Client*, const json_ref& args) {
   resp.set("log", w_string_to_json(w_string::build(logging::log_name)));
   return resp;
 }
-W_CMD_REG("get-log", cmd_get_log, CMD_DAEMON | CMD_ALLOW_ANY_USER, NULL);
+W_CMD_REG("get-log", cmd_get_log, CMD_DAEMON | CMD_ALLOW_ANY_USER, nullptr);
 
 /* vim:ts=2:sw=2:et:
  */

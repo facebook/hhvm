@@ -461,7 +461,13 @@ StringData* getMethCallerClsOrMethNameFromDynMethCallerHelperClass(const ObjectD
 
 template<bool isGetClass>
 String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
-  if (tvIsObject(v)) {
+  if (tvIsFunc(v)) {
+    if (val(v).pfunc->isMethCaller()) {
+      auto const name =
+        getMethCallerClsOrMethNameFromMethCallerFunc<isGetClass>(val(v).pfunc);
+      return String::attach(const_cast<StringData*>(name));
+    }
+  } else if (tvIsObject(v)) {
     auto const obj = val(v).pobj;
     auto const cls = obj->getVMClass();
     if (cls == SystemLib::getDynMethCallerHelperClass()) {

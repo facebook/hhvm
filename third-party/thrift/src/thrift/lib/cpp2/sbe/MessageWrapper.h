@@ -180,7 +180,7 @@ class MessageWrapper {
   void completeEncoding() { message_.checkEncodingIsComplete(); }
   void completeEncoding(folly::IOBuf& buf) {
     completeEncoding();
-    size_t length = message_.bufferLength() - message_.sbePosition();
+    size_t length = message_.sbePosition();
     buf.append(length);
   }
 

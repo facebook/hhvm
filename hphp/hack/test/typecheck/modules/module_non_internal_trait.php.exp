@@ -13,7 +13,7 @@ Cannot access `internal` members inside a non-internal trait (Typing[4444])
 File "module_non_internal_trait.php--also-A.php", line 12, characters 3-34:
 You cannot make this trait member `internal` (NastCheck[3099])
   File "module_non_internal_trait.php--also-A.php", line 10, characters 7-11:
-  Only `internal` traits can have `internal` members
+  Only `internal` or `<<__ModuleLevelTrait>>` traits can have `internal` methods
 File "module_non_internal_trait.php--also-A.php", line 11, characters 7-10:
 Cannot access `internal` members inside a non-internal trait (Typing[4444])
   File "module_non_internal_trait.php--also-A.php", line 10, characters 7-11:

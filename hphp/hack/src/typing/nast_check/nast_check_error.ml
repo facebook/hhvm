@@ -129,6 +129,7 @@ type t =
   | Internal_member_inside_public_trait of {
       member_pos: Pos.t;
       trait_pos: Pos.t;
+      is_method: bool;
     }
   | Attribute_conflicting_memoize of {
       pos: Pos.t;
@@ -653,13 +654,18 @@ let soft_internal_without_internal pos =
     )
     []
 
-let internal_member_inside_public_trait member_pos trait_pos =
+let internal_member_inside_public_trait member_pos trait_pos is_method =
   User_error.make
     Error_code.(to_enum InternalMemberInsidePublicTrait)
     (member_pos, "You cannot make this trait member `internal`")
     [
-      ( Pos_or_decl.of_raw_pos trait_pos,
-        "Only `internal` traits can have `internal` members" );
+      (if is_method then
+        ( Pos_or_decl.of_raw_pos trait_pos,
+          "Only `internal` or `<<__ModuleLevelTrait>>` traits can have `internal` methods"
+        )
+      else
+        ( Pos_or_decl.of_raw_pos trait_pos,
+          "Only `internal` traits can have `internal` members" ));
     ]
 
 let attribute_conflicting_memoize pos second_pos =
@@ -876,8 +882,8 @@ let to_user_error = function
   | Internal_method_with_invalid_visibility { pos; vis } ->
     internal_method_with_invalid_visibility pos vis
   | Private_and_final pos -> private_and_final pos
-  | Internal_member_inside_public_trait { member_pos; trait_pos } ->
-    internal_member_inside_public_trait member_pos trait_pos
+  | Internal_member_inside_public_trait { member_pos; trait_pos; is_method } ->
+    internal_member_inside_public_trait member_pos trait_pos is_method
   | Attribute_conflicting_memoize { pos; second_pos } ->
     attribute_conflicting_memoize pos second_pos
   | Soft_internal_without_internal pos -> soft_internal_without_internal pos

@@ -5,7 +5,7 @@ You cannot make this trait member `internal` (NastCheck[3099])
 File "module_traits.php--A.php", line 12, characters 3-34:
 You cannot make this trait member `internal` (NastCheck[3099])
   File "module_traits.php--A.php", line 8, characters 7-8:
-  Only `internal` traits can have `internal` members
+  Only `internal` or `<<__ModuleLevelTrait>>` traits can have `internal` methods
 File "module_traits.php--A.php", line 25, characters 21-21:
 Cannot access `internal` members inside a non-internal trait (Typing[4444])
   File "module_traits.php--A.php", line 24, characters 7-8:

@@ -26,7 +26,7 @@ type PersistentHeaders interface {
 }
 
 // Compile time interface enforcer
-var _ PersistentHeaders = (*HeaderProtocol)(nil)
+var _ PersistentHeaders = (*headerProtocol)(nil)
 var _ PersistentHeaders = (*rocketProtocol)(nil)
 var _ PersistentHeaders = (*upgradeToRocketProtocol)(nil)
 
@@ -37,6 +37,6 @@ type ResponseHeaderGetter interface {
 }
 
 // Compile time interface enforcer
-var _ ResponseHeaderGetter = (*HeaderProtocol)(nil)
+var _ ResponseHeaderGetter = (*headerProtocol)(nil)
 var _ ResponseHeaderGetter = (*rocketProtocol)(nil)
 var _ ResponseHeaderGetter = (*upgradeToRocketProtocol)(nil)

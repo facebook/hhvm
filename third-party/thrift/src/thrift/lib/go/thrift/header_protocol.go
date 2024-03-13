@@ -20,7 +20,7 @@ import (
 	"fmt"
 )
 
-type HeaderProtocol struct {
+type headerProtocol struct {
 	Protocol
 	origTransport Transport
 	trans         *HeaderTransport
@@ -38,8 +38,8 @@ func (p *HeaderProtocolFactory) GetProtocol(trans Transport) Protocol {
 	return NewHeaderProtocol(trans)
 }
 
-func NewHeaderProtocol(trans Transport) *HeaderProtocol {
-	p := &HeaderProtocol{
+func NewHeaderProtocol(trans Transport) *headerProtocol {
+	p := &headerProtocol{
 		origTransport: trans,
 		protoID:       ProtocolIDCompact,
 	}
@@ -56,7 +56,7 @@ func NewHeaderProtocol(trans Transport) *HeaderProtocol {
 	return p
 }
 
-func (p *HeaderProtocol) ResetProtocol() error {
+func (p *headerProtocol) ResetProtocol() error {
 	if p.Protocol != nil && p.protoID == p.trans.ProtocolID() {
 		return nil
 	}
@@ -78,7 +78,7 @@ func (p *HeaderProtocol) ResetProtocol() error {
 // Writing methods.
 //
 
-func (p *HeaderProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
+func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
 	p.ResetProtocol()
 
 	// The conditions here only match on the Go client side.
@@ -93,7 +93,7 @@ func (p *HeaderProtocol) WriteMessageBegin(name string, typeId MessageType, seqi
 // Reading methods.
 //
 
-func (p *HeaderProtocol) ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error) {
+func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error) {
 	if typeId == INVALID_MESSAGE_TYPE {
 		if err = p.trans.ResetProtocol(); err != nil {
 			return name, EXCEPTION, seqid, err
@@ -112,111 +112,111 @@ func (p *HeaderProtocol) ReadMessageBegin() (name string, typeId MessageType, se
 	return p.Protocol.ReadMessageBegin()
 }
 
-func (p *HeaderProtocol) Flush() (err error) {
+func (p *headerProtocol) Flush() (err error) {
 	return NewProtocolException(p.trans.Flush())
 }
 
-func (p *HeaderProtocol) Skip(fieldType Type) (err error) {
+func (p *headerProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
-func (p *HeaderProtocol) Close() error {
+func (p *headerProtocol) Close() error {
 	return p.origTransport.Close()
 }
 
 // Deprecated: SetSeqID() is a deprecated method.
-func (p *HeaderProtocol) SetSeqID(seq uint32) {
+func (p *headerProtocol) SetSeqID(seq uint32) {
 	p.trans.SetSeqID(seq)
 }
 
 // Deprecated: GetSeqID() is a deprecated method.
-func (p *HeaderProtocol) GetSeqID() uint32 {
+func (p *headerProtocol) GetSeqID() uint32 {
 	return p.trans.SeqID()
 }
 
 // Control underlying header transport
 
-func (p *HeaderProtocol) SetIdentity(identity string) {
+func (p *headerProtocol) SetIdentity(identity string) {
 	p.trans.SetIdentity(identity)
 }
 
-func (p *HeaderProtocol) Identity() string {
+func (p *headerProtocol) Identity() string {
 	return p.trans.Identity()
 }
 
-func (p *HeaderProtocol) peerIdentity() string {
+func (p *headerProtocol) peerIdentity() string {
 	return p.trans.peerIdentity()
 }
 
-func (p *HeaderProtocol) SetPersistentHeader(key, value string) {
+func (p *headerProtocol) SetPersistentHeader(key, value string) {
 	p.trans.SetPersistentHeader(key, value)
 }
 
-func (p *HeaderProtocol) GetPersistentHeader(key string) (string, bool) {
+func (p *headerProtocol) GetPersistentHeader(key string) (string, bool) {
 	return p.trans.GetPersistentHeader(key)
 }
 
-func (p *HeaderProtocol) GetPersistentHeaders() map[string]string {
+func (p *headerProtocol) GetPersistentHeaders() map[string]string {
 	return p.trans.GetPersistentHeaders()
 }
 
-func (p *HeaderProtocol) ClearPersistentHeaders() {
+func (p *headerProtocol) ClearPersistentHeaders() {
 	p.trans.ClearPersistentHeaders()
 }
 
 // GetRequestHeader returns a request header if the key exists, otherwise false
-func (p *HeaderProtocol) GetRequestHeader(key string) (string, bool) {
+func (p *headerProtocol) GetRequestHeader(key string) (string, bool) {
 	return p.trans.GetRequestHeader(key)
 }
 
 // Deprecated SetHeader is deprecated, rather use SetRequestHeader
-func (p *HeaderProtocol) SetHeader(key, value string) {
+func (p *headerProtocol) SetHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 
 // Deprecated Header is deprecated, rather use GetRequestHeader
-func (p *HeaderProtocol) Header(key string) (string, bool) {
+func (p *headerProtocol) Header(key string) (string, bool) {
 	return p.trans.GetRequestHeader(key)
 }
 
 // Deprecated Headers is deprecated, rather use GetRequestHeaders
-func (p *HeaderProtocol) Headers() map[string]string {
+func (p *headerProtocol) Headers() map[string]string {
 	return p.trans.GetRequestHeaders()
 }
 
 // Deprecated: SetRequestHeader is deprecated and will eventually be private.
-func (p *HeaderProtocol) SetRequestHeader(key, value string) {
+func (p *headerProtocol) SetRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 
 // Deprecated: GetRequestHeader is deprecated and will eventually be private.
-func (p *HeaderProtocol) GetRequestHeaders() map[string]string {
+func (p *headerProtocol) GetRequestHeaders() map[string]string {
 	return p.trans.GetRequestHeaders()
 }
 
-func (p *HeaderProtocol) GetResponseHeader(key string) (string, bool) {
+func (p *headerProtocol) GetResponseHeader(key string) (string, bool) {
 	return p.trans.GetResponseHeader(key)
 }
 
-func (p *HeaderProtocol) GetResponseHeaders() map[string]string {
+func (p *headerProtocol) GetResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }
 
-func (p *HeaderProtocol) ProtocolID() ProtocolID {
+func (p *headerProtocol) ProtocolID() ProtocolID {
 	return p.protoID
 }
 
 // Deprecated: GetFlags() is a deprecated method.
-func (t *HeaderProtocol) GetFlags() HeaderFlags {
+func (t *headerProtocol) GetFlags() HeaderFlags {
 	return t.trans.GetFlags()
 }
 
 // Deprecated: SetFlags() is a deprecated method.
-func (p *HeaderProtocol) SetFlags(flags HeaderFlags) {
+func (p *headerProtocol) SetFlags(flags HeaderFlags) {
 	p.trans.SetFlags(flags)
 }
 
-func (p *HeaderProtocol) AddTransform(trans TransformID) error {
+func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
 
@@ -226,7 +226,13 @@ type HeaderProtocolFlags interface {
 	SetFlags(flags HeaderFlags)
 }
 
+// Compile time interface enforcer
+var _ HeaderProtocolFlags = (*headerProtocol)(nil)
+
 // Deprecated: HeaderProtocolProtocolID is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolProtocolID interface {
 	ProtocolID() ProtocolID
 }
+
+// Compile time interface enforcer
+var _ HeaderProtocolProtocolID = (*headerProtocol)(nil)

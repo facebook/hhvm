@@ -91,13 +91,13 @@ func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	return v, ok
 }
 
-// The context can be augmented with the underlying HeaderProtocol. Thrift
+// The context can be augmented with the underlying headerProtocol. Thrift
 // handlers can then query the context for the message headers. We store the
 // protocol object on the context instead of the headers directly to avoid
 // copying headers at each request and only lazy-copy them when the handler
 // asks for them.
-func headerProtocolFromContext(ctx context.Context) *HeaderProtocol {
-	v, ok := ctx.Value(protocolKey).(*HeaderProtocol)
+func headerProtocolFromContext(ctx context.Context) *headerProtocol {
+	v, ok := ctx.Value(protocolKey).(*headerProtocol)
 	if !ok {
 		return nil
 	}

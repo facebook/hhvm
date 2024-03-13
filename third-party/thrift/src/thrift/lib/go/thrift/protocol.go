@@ -29,6 +29,6 @@ type Protocol = Format
 // }
 
 // Compile time check for interface conformance
-var _ Protocol = (*HeaderProtocol)(nil)
+var _ Protocol = (*headerProtocol)(nil)
 var _ Protocol = (*rocketProtocol)(nil)
 var _ Protocol = (*upgradeToRocketProtocol)(nil)

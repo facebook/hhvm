@@ -35,7 +35,7 @@ func NewUpgradeToRocketProtocolFactory() ProtocolFactory {
 }
 
 func (p *upgradeToRocketProtocolFactory) GetProtocol(trans Transport) Protocol {
-	headerProtocol := p.headerProtocolFactory.GetProtocol(trans).(*HeaderProtocol)
+	headerProtocol := p.headerProtocolFactory.GetProtocol(trans).(*headerProtocol)
 	rocketProtocol := p.rocketProtocolFactory.GetProtocol(trans).(*rocketProtocol)
 	return NewUpgradeToRocketProtocol(rocketProtocol, headerProtocol)
 }

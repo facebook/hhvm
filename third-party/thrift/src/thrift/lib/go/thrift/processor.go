@@ -175,7 +175,7 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 		// protect message writing
 		if err != nil {
 			switch oprotHeader := oprot.(type) {
-			case *HeaderProtocol:
+			case *headerProtocol:
 				// set header for ServiceRouter
 				oprotHeader.SetRequestHeader("uex", errorType(err))
 				oprotHeader.SetRequestHeader("uexw", err.Error())
@@ -188,7 +188,7 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 		// If we got a structured exception back, write metadata about it into headers
 		if rr, ok := result.(WritableResult); ok && rr.Exception() != nil {
 			switch oprotHeader := oprot.(type) {
-			case *HeaderProtocol:
+			case *headerProtocol:
 				terr := rr.Exception()
 				oprotHeader.SetRequestHeader("uex", errorType(terr))
 				oprotHeader.SetRequestHeader("uexw", terr.Error())

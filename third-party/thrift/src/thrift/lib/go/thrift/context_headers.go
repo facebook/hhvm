@@ -50,7 +50,7 @@ type RequestHeaders interface {
 }
 
 // Compile time interface enforcer
-var _ RequestHeaders = (*HeaderProtocol)(nil)
+var _ RequestHeaders = (*headerProtocol)(nil)
 var _ RequestHeaders = (*rocketProtocol)(nil)
 var _ RequestHeaders = (*upgradeToRocketProtocol)(nil)
 

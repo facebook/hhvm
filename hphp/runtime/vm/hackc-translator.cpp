@@ -284,7 +284,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
                     RO::EvalRaiseClassConversionNoticeSampleRate)) {
                 raise_class_to_string_conversion_notice("dict key");
               }
-              auto const s = toStaticString(elt.key.LazyClass._0);
+              auto const s = toStaticString(elt.key.LazyClass._0._0);
               d.set(s, toTypedValue(elt.value));
               break;
             }
@@ -307,7 +307,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfKeyset>(tv);
       }
       case kind::LazyClass: {
-        auto const lc = LazyClassData::create(toStaticString(tv.LazyClass._0));
+        auto const lc = LazyClassData::create(toStaticString(tv.LazyClass._0._0));
         return make_tv<KindOfLazyClass>(lc);
       }
     }

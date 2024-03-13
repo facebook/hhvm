@@ -116,7 +116,7 @@ fn class_const_to_typed_value(
     if id.1 == members::M_CLASS {
         let cexpr = ClassExpr::class_id_to_class_expr(emitter, scope, false, true, cid);
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
-            let classid = hhbc::ClassName::mangle(cname);
+            let classid = hhbc::ClassName::from_ast_name_and_mangle(cname);
             return Ok(TypedValue::LazyClass(classid));
         }
     }

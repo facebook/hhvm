@@ -138,7 +138,7 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue) -> hhbc::TypedValue {
         ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
         ir::TypedValue::String(v) => hhbc::TypedValue::String(*v),
-        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
+        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(*v),
         ir::TypedValue::Null => hhbc::TypedValue::Null,
         ir::TypedValue::Vec(ref vs) => {
             hhbc::TypedValue::Vec(Vec::from_iter(vs.iter().map(convert_typed_value)).into())
@@ -160,7 +160,7 @@ pub(crate) fn convert_typed_value(tv: &ir::TypedValue) -> hhbc::TypedValue {
 pub(crate) fn convert_array_key(tv: &ir::ArrayKey) -> hhbc::TypedValue {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
-        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(v.as_string_id()),
+        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(v),
         ir::ArrayKey::String(v) => hhbc::TypedValue::String(v),
     }
 }

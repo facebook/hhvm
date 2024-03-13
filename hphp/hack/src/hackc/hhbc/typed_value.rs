@@ -5,8 +5,9 @@
 
 use ffi::Vector;
 use intern::string::BytesId;
-use intern::string::StringId;
 use serde::Serialize;
+
+use crate::ClassName;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that
 /// hash/equality have bitwise interning behavior: -0.0 != 0.0, NaN == NaN.
@@ -64,7 +65,7 @@ pub enum TypedValue {
     /// Hack strings are plain bytes with no utf-8 guarantee
     String(BytesId),
     /// Hack source code including identifiers must be valid utf-8
-    LazyClass(StringId),
+    LazyClass(ClassName),
     Null,
     // Hack arrays: vectors, keysets, and dictionaries
     Vec(Vector<TypedValue>),
@@ -90,7 +91,7 @@ impl TypedValue {
     }
 
     pub fn intern_lazy_class(x: impl AsRef<str>) -> Self {
-        Self::LazyClass(intern::string::intern(x.as_ref()))
+        Self::LazyClass(ClassName::intern(x.as_ref()))
     }
 
     pub fn vec(x: Vec<TypedValue>) -> Self {

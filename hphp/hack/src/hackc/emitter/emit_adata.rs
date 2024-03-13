@@ -7,7 +7,6 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use hhbc::AdataId;
-use hhbc::ClassName;
 use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
@@ -20,7 +19,7 @@ pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<Ins
         TypedValue::Bool(false) => Ok(instr::false_()),
         TypedValue::Int(i) => Ok(instr::int(i)),
         TypedValue::String(s) => Ok(instr::string_lit(s)),
-        TypedValue::LazyClass(s) => Ok(instr::lazy_class(ClassName::from_ast_name_and_mangle(s))),
+        TypedValue::LazyClass(s) => Ok(instr::lazy_class(s)),
         TypedValue::Float(f) => Ok(instr::double(f)),
         TypedValue::Keyset(_) => {
             let arrayid = intern_array(e, tv);

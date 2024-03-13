@@ -16,7 +16,7 @@
 
 package thrift
 
-// ProtocolFactory interface for constructing protocol instances.
-type ProtocolFactory interface {
-	GetProtocol(trans Transport) Protocol
+// FormatFactory interface for constructing serialization format instances.
+type FormatFactory interface {
+	GetFormat(trans Transport) Format
 }

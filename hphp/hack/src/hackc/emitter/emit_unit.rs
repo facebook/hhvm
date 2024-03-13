@@ -170,7 +170,7 @@ fn emit_unit_<'a, 'd>(
     };
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
-    let adata = emitter.adata_state.take_adata();
+    let adata = std::mem::take(&mut emitter.adata_state).finish();
     let module_use = emit_module_use_from_program(prog);
     let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;

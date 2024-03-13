@@ -15,7 +15,6 @@ ast_scope = { version = "0.0.0", path = "../ast_scope" }
 bitflags = { version = "2.4", features = ["serde"] }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
 global_state = { version = "0.0.0", path = "../global_state" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "2.1.0", features = ["arbitrary", "rayon", "serde"] }

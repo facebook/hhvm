@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc::AdataState;
 use hhbc::Method;
 use log::trace;
 
-use crate::adata::AdataCache;
 use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
@@ -30,7 +30,7 @@ use crate::pusher;
 /// BlockArgs (phi-nodes) are handled like a split instruction - by pushing args
 /// onto the stack before the jump and popping them off the stack in receiving
 /// block.
-pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataCache) -> hhbc::Body {
+pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::Body {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
@@ -131,7 +131,7 @@ pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Functio
     unit.functions.push(hhas_func);
 }
 
-pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataCache) -> Method {
+pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataState) -> Method {
     trace!("convert_method {}", method.name);
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;

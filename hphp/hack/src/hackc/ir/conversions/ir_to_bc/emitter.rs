@@ -5,9 +5,9 @@
 
 use std::collections::VecDeque;
 use std::fmt::Display;
-use std::sync::Arc;
 
 use hash::HashMap;
+use hhbc::AdataState;
 use hhbc::BytesId;
 use hhbc::Dummy;
 use hhbc::Instruct;
@@ -29,14 +29,13 @@ use ir::StringId;
 use itertools::Itertools;
 use log::trace;
 
-use crate::adata::AdataCache;
 use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
 
 pub(crate) fn emit_func(
     func: &ir::Func,
     labeler: &mut Labeler,
-    adata_cache: &mut AdataCache,
+    adata_cache: &mut AdataState,
 ) -> (InstrSeq, Vec<StringId>) {
     let adata_id_map = func
         .constants
@@ -46,7 +45,7 @@ pub(crate) fn emit_func(
             let cid = ir::ConstantId::from_usize(idx);
             match constant {
                 ir::Constant::Array(tv) => {
-                    let id = adata_cache.intern(Arc::clone(tv));
+                    let id = adata_cache.intern((**tv).clone());
                     let kind = match **tv {
                         ir::TypedValue::Dict(_) => AdataKind::Dict,
                         ir::TypedValue::Keyset(_) => AdataKind::Keyset,

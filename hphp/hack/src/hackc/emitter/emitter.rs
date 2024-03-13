@@ -14,6 +14,7 @@ use ast_scope::Scope;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
 use global_state::GlobalState;
+use hhbc::AdataState;
 use hhbc::ClassName;
 use hhbc::ConstName;
 use hhbc::FunctionName;
@@ -30,7 +31,6 @@ use oxidized::pos::Pos;
 use relative_path::RelativePath;
 use statement_state::StatementState;
 
-use crate::adata_state::AdataState;
 use crate::ClassExpr;
 use crate::IterGen;
 use crate::LabelGen;

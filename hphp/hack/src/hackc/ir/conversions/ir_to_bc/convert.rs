@@ -6,15 +6,13 @@
 use ffi::Maybe;
 use hhbc::Fatal;
 
-use crate::adata::AdataCache;
-
 /// Convert an ir::Unit to a hhbc::Unit
 ///
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
 pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
-    let mut unit = UnitBuilder::new();
+    let mut unit = UnitBuilder::default();
 
     for cls in ir_unit.classes.into_iter() {
         crate::class::convert_class(&mut unit, cls);
@@ -72,21 +70,14 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
     unit
 }
 
+#[derive(Default)]
 pub(crate) struct UnitBuilder {
-    pub adata_cache: AdataCache,
+    pub adata_cache: hhbc::AdataState,
     pub functions: Vec<hhbc::Function>,
     pub classes: Vec<hhbc::Class>,
 }
 
 impl UnitBuilder {
-    fn new() -> Self {
-        Self {
-            adata_cache: AdataCache::new(),
-            classes: Default::default(),
-            functions: Default::default(),
-        }
-    }
-
     fn finish(self) -> hhbc::Unit {
         hhbc::Unit {
             adata: self.adata_cache.finish().into(),

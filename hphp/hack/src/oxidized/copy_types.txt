@@ -104,6 +104,7 @@ typing_defs_core::Enforcement
 typing_defs_core::FunTparamsKind
 typing_defs_core::ParamMode
 typing_defs_core::ShapeKind
+typing_defs_core::TypePredicate
 typing_defs_core::ValKind
 typing_reason::ArgPosition
 typing_reason::BlameSource

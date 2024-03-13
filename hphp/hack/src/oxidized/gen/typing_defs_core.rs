@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<193b3983ebd7a99287486a6eb0e92810>>
+// @generated SignedSource<<c0773581ac5fad7fbd6a5fd1affd1ee9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -514,6 +514,31 @@ pub struct FunType {
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(u8)]
+pub enum TypePredicate {
+    IsBool,
+}
+impl TrivialDrop for TypePredicate {}
+arena_deserializer::impl_deserialize_in_arena!(TypePredicate);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -534,6 +559,8 @@ pub enum NegType {
     NegPrim(ast_defs::Tprim),
     #[rust_to_ocaml(name = "Neg_class")]
     NegClass(PosId),
+    #[rust_to_ocaml(name = "Neg_predicate")]
+    NegPredicate(TypePredicate),
 }
 
 #[derive(
@@ -1080,6 +1107,12 @@ pub enum ConstraintType_ {
     Tdestructure(Destructure),
     TCunion(Ty, ConstraintType),
     TCintersection(Ty, ConstraintType),
+    #[rust_to_ocaml(name = "Ttype_switch")]
+    TtypeSwitch {
+        predicate: TypePredicate,
+        ty_true: Ty,
+        ty_false: Ty,
+    },
 }
 
 #[derive(

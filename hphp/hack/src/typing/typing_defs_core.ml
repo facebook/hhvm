@@ -242,9 +242,13 @@ type 'ty fun_type = {
 }
 [@@deriving eq, hash, show { with_path = false }]
 
+type type_predicate = IsBool
+[@@deriving eq, ord, hash, show { with_path = false }]
+
 type neg_type =
   | Neg_prim of Ast_defs.tprim
   | Neg_class of pos_id
+  | Neg_predicate of type_predicate
 [@@deriving hash, show { with_path = false }]
 
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
@@ -755,8 +759,11 @@ let neg_type_compare (neg1 : neg_type) neg2 =
   | (Neg_class c1, Neg_class c2) ->
     (* We ignore positions here *)
     String.compare (snd c1) (snd c2)
+  | (Neg_predicate p1, Neg_predicate p2) -> compare_type_predicate p1 p2
   | (Neg_prim _, Neg_class _) -> -1
   | (Neg_class _, Neg_prim _) -> 1
+  | (Neg_predicate _, (Neg_prim _ | Neg_class _)) -> -1
+  | ((Neg_prim _ | Neg_class _), Neg_predicate _) -> 1
 
 (* Constructor and deconstructor functions for types and constraint types.
  * Abstracting these lets us change the implementation, e.g. hash cons
@@ -1274,6 +1281,11 @@ type constraint_type_ =
       (** The type of container destructuring via list() or splat `...` *)
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
+  | Ttype_switch of {
+      predicate: type_predicate;
+      ty_true: locl_ty;
+      ty_false: locl_ty;
+    }
 
 and constraint_type = Reason.t * constraint_type_ [@@deriving show]
 
@@ -1414,6 +1426,7 @@ let constraint_ty_con_ordinal cty =
   | Tcan_index _ -> 4
   | Tcan_traverse _ -> 5
   | Thas_type_member _ -> 6
+  | Ttype_switch _ -> 7
 
 let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   let (_, ty1) = deref_constraint_type ty1 in
@@ -1443,9 +1456,24 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
       comp1
     else
       constraint_ty_compare ~normalize_lists cty1 cty2
+  | ( Ttype_switch
+        { predicate = predicate1; ty_true = ty_true1; ty_false = ty_false1 },
+      Ttype_switch
+        { predicate = predicate2; ty_true = ty_true2; ty_false = ty_false2 } )
+    ->
+    let comp =
+      match compare_type_predicate predicate1 predicate2 with
+      | 0 ->
+        (match ty_compare ~normalize_lists ty_true1 ty_true2 with
+        | 0 -> ty_compare ~normalize_lists ty_false1 ty_false2
+        | comp -> comp)
+      | comp -> comp
+    in
+    comp
   | ( _,
       ( Thas_member _ | Tcan_index _ | Tcan_traverse _ | Tdestructure _
-      | TCunion _ | TCintersection _ | Thas_type_member _ ) ) ->
+      | TCunion _ | TCintersection _ | Thas_type_member _ | Ttype_switch _ ) )
+    ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =

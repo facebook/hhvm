@@ -405,6 +405,12 @@ let rec refresh_ctype renv v cty_orig =
     let (renv, d_variadic, ch3) = refresh_type_opt renv inv d_variadic in
     let des = { d_required; d_optional; d_variadic; d_kind } in
     (renv, mk_constraint_type (r, Tdestructure des), ch1 || ch2 || ch3)
+  | (r, Ttype_switch { predicate; ty_true; ty_false }) ->
+    let (renv, ty_true, ch1) = refresh_type renv v ty_true in
+    let (renv, ty_false, ch2) = refresh_type renv v ty_false in
+    ( renv,
+      mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }),
+      ch1 || ch2 )
   | (r, TCunion (lty, cty)) ->
     let (renv, lty, ch1) = refresh_type renv v lty in
     let (renv, cty, ch2) = refresh_ctype renv v cty in

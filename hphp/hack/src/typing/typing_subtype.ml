@@ -507,6 +507,7 @@ end = struct
             (bound_desc ~prefix:" as " ~is_trivial:TUtils.is_mixed up)
       | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
       | (_, Tcan_index _) -> "an array that can be indexed"
+      | (_, Ttype_switch _)
       | (_, Tdestructure _) ->
         Markdown_lite.md_codify
           (Typing_print.with_blank_tyvars (fun () ->
@@ -1360,6 +1361,15 @@ end = struct
           ~fail
           ty_sub
           (r_super, tprim_super)
+          env)
+    | (reason_super, Tneg (Neg_predicate predicate)) ->
+      Type_switch.(
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+          ~rhs:{ reason_super; predicate; ty_super_opt = None; super_like }
           env)
     | (r_super, Tneg (Neg_class cls_id_super)) ->
       (match ity_sub with
@@ -6029,6 +6039,21 @@ end = struct
             ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
             ~rhs:{ reason_super = r; has_type_member }
             env)
+      | (reason_super, Ttype_switch { predicate; ty_true; ty_false }) ->
+        Type_switch.(
+          simplify
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~rhs:
+              {
+                reason_super;
+                predicate;
+                ty_super_opt = Some (ty_true, ty_false);
+                super_like;
+              }
+            env)
     end
 end
 
@@ -7232,6 +7257,70 @@ end = struct
                     super_supportdyn = false;
                     ty_super = member_ty;
                   }))
+end
+
+and Type_switch : sig
+  type rhs = {
+    super_like: bool;
+    reason_super: Reason.t;
+    predicate: Typing_defs.type_predicate;
+    ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
+  }
+
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    this_ty:Typing_defs.locl_ty option ->
+    fail:Typing_error.t option ->
+    lhs:Typing_defs.internal_type lhs ->
+    rhs:rhs ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  type rhs = {
+    super_like: bool;
+    reason_super: Reason.t;
+    predicate: Typing_defs.type_predicate;
+    ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
+  }
+
+  let simplify
+      ~subtype_env
+      ~this_ty
+      ~fail
+      ~lhs:{ ty_sub; sub_supportdyn }
+      ~rhs:{ super_like; reason_super; predicate; ty_super_opt }
+      env =
+    let ty_super =
+      match ty_super_opt with
+      | None ->
+        let lty = MakeType.neg reason_super (Neg_predicate predicate) in
+        LoclType lty
+      | Some (ty_true, ty_false) ->
+        let cty =
+          mk_constraint_type
+            (reason_super, Ttype_switch { predicate; ty_true; ty_false })
+        in
+        ConstraintType cty
+    in
+    Logging.log_subtype_i
+      ~level:2
+      ~this_ty
+      ~function_name:"simplify_subtype_type_switch"
+      env
+      ty_sub
+      ty_super;
+    let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+    let default_subtype_help env =
+      Subtype.(
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ ty_sub = ety_sub; sub_supportdyn }
+          ~rhs:{ super_supportdyn = false; super_like; ty_super }
+          env)
+    in
+    default_subtype_help env
 end
 
 and Common : sig

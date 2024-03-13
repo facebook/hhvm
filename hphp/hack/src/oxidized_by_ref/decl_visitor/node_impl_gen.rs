@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<672c19b4dd798b4d5b4babc8049f0182>>
+// @generated SignedSource<<44df18c0d20a095e7c0808b96b40efaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -577,6 +577,7 @@ impl<'a> Node<'a> for NegType<'a> {
         match self {
             NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
             NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
+            NegType::NegPredicate(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1282,6 +1283,16 @@ impl<'a> Node<'a> for ClassConstKind {
         match self {
             ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
             ClassConstKind::CCConcrete => {}
+        }
+    }
+}
+impl<'a> Node<'a> for TypePredicate {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_type_predicate(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypePredicate::IsBool => {}
         }
     }
 }

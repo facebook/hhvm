@@ -62,6 +62,7 @@ let make_type_const_equal
       | (_, Thas_member _)
       | (_, Tcan_index _)
       | (_, Tcan_traverse _)
+      | (_, Ttype_switch _)
       | (_, Tdestructure _) ->
         (env, None)
       | (_, TCunion (lty, cty)) ->

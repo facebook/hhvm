@@ -341,6 +341,7 @@ let simplify_constraint_type env ty =
   | (_, Thas_type_member _)
   | (_, Tcan_index _)
   | (_, Tcan_traverse _)
+  | (_, Ttype_switch _)
   | (_, Tdestructure _) ->
     (env, ConstraintType ty)
 

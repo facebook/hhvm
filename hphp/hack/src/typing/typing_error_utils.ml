@@ -5652,6 +5652,10 @@ end = struct
         Markdown_lite.md_codify
           (Typing_print.with_blank_tyvars (fun () ->
                Typing_print.full_strip_ns_i env (ConstraintType ty)))
+      | (_, Ttype_switch _) ->
+        Markdown_lite.md_codify
+          (Typing_print.with_blank_tyvars (fun () ->
+               Typing_print.full_strip_ns_i env (ConstraintType ty)))
       | (_, TCunion (lty, cty)) ->
         Printf.sprintf
           "%s or %s"

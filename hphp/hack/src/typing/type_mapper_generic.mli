@@ -190,6 +190,14 @@ class type ['env] constraint_type_mapper_type =
       Typing_defs.locl_ty ->
       Typing_defs.constraint_type ->
       'env * Typing_defs.constraint_type
+
+    method on_Ttype_switch :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.type_predicate ->
+      Typing_defs.locl_ty ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs.constraint_type
   end
 
 class type ['env] locl_constraint_type_mapper_type =

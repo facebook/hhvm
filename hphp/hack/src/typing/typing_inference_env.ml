@@ -671,6 +671,8 @@ module Size = struct
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       1 + ty_size env lty + constraint_type_size env cty
+    | (_, Ttype_switch { predicate = _; ty_true; ty_false }) ->
+      1 + ty_size env ty_true + ty_size env ty_false
 
   let internal_type_size env ty =
     match ty with

@@ -346,6 +346,14 @@ class type ['env] constraint_type_mapper_type =
 
     method on_TCintersection :
       'env -> Reason.t -> locl_ty -> constraint_type -> 'env * constraint_type
+
+    method on_Ttype_switch :
+      'env ->
+      Reason.t ->
+      type_predicate ->
+      locl_ty ->
+      locl_ty ->
+      'env * constraint_type
   end
 
 class type ['env] locl_constraint_type_mapper_type =
@@ -372,6 +380,8 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
       | TCunion (lty, cty) -> this#on_TCunion env r lty cty
       | TCintersection (lty, cty) -> this#on_TCintersection env r lty cty
+      | Ttype_switch { predicate; ty_true; ty_false } ->
+        this#on_Ttype_switch env r predicate ty_true ty_false
 
     method on_Thas_member env r hm =
       let { hm_name; hm_type; hm_class_id; hm_explicit_targs } = hm in
@@ -418,6 +428,12 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let (env, lty) = this#on_type env lty in
       let (env, cty) = this#on_constraint_type env cty in
       (env, mk_constraint_type (r, TCintersection (lty, cty)))
+
+    method on_Ttype_switch env r predicate lty_true lty_false =
+      let (env, ty_true) = this#on_type env lty_true in
+      let (env, ty_false) = this#on_type env lty_false in
+      ( env,
+        mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }) )
   end
 
 class type ['env] internal_type_mapper_type =

@@ -566,6 +566,13 @@ let rec intersect_i env r ty1 lty2 =
             (env, LoclType ty)
           | ConstraintType cty ->
             (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty)))))
+        | (reason, Ttype_switch { predicate; ty_true; ty_false }) ->
+          let (env, ty_true) = intersect env ~r ty_true lty2 in
+          let (env, ty_false) = intersect env ~r ty_false lty2 in
+          ( env,
+            ConstraintType
+              (mk_constraint_type
+                 (reason, Ttype_switch { predicate; ty_true; ty_false })) )
         | (_, Thas_member _)
         | (_, Thas_type_member _)
         | (_, Tcan_index _)

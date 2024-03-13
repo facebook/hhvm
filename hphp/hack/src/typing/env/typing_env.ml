@@ -1665,6 +1665,12 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, positive2, negative2) = get_tyvars_i env (ConstraintType cty) in
       ( env,
         Tvid.Set.union positive1 positive2,
+        Tvid.Set.union negative1 negative2 )
+    | (_, Ttype_switch { predicate = _; ty_true; ty_false }) ->
+      let (env, positive1, negative1) = get_tyvars env ty_true in
+      let (env, positive2, negative2) = get_tyvars env ty_false in
+      ( env,
+        Tvid.Set.union positive1 positive2,
         Tvid.Set.union negative1 negative2 ))
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =

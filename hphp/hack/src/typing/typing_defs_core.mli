@@ -176,6 +176,15 @@ type enforcement =
   | Enforced  (** The consumer enforces the type at runtime *)
 [@@deriving eq, show, ord]
 
+(** Represents the predicate of a type switch, i.e. in the expression
+      ```
+      if ($x is Bool) { ... } else { ... }
+      ```
+
+    The predicate would be `is Bool`
+  *)
+type type_predicate = IsBool [@@deriving eq, ord, hash, show]
+
 (** Negation types represent the type of values that fail an `is` test
     for either a primitive type, or a class-ish type C<_> *)
 type neg_type =
@@ -185,6 +194,8 @@ type neg_type =
        of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is
        all values that are not in C<t1, ..., tn> for any application of C to type
        arguments. *)
+  | Neg_predicate of type_predicate
+      (** The set of all values that do not pass the given predicate *)
 [@@deriving hash, show]
 
 (** Because Tfun is currently used as both a decl and locl ty, without this,
@@ -618,6 +629,21 @@ type constraint_type_ =
           Implements valid destructuring operations via subtyping. *)
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
+  | Ttype_switch of {
+      predicate: type_predicate;
+      ty_true: locl_ty;
+      ty_false: locl_ty;
+    }
+      (** The type of a value we want to decompose based on a runtime type test.
+          In the expression:
+          ```
+          if ($x is P) { ... } else { ... }
+          ```
+
+          The term `$x` must satisfy the constraint type_switch(P, T_true, T_false), where
+          T_true is the type of `$x` if the predicate is true and T_false is the
+          type of `$x` if the predicate is false
+          *)
 [@@deriving show]
 
 type internal_type =

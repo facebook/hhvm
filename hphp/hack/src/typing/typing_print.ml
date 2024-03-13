@@ -935,6 +935,8 @@ module Full = struct
     | Tprim x -> (fuel, tprim x)
     | Tneg (Neg_prim x) -> (fuel, Concat [text "not "; tprim x])
     | Tneg (Neg_class c) -> (fuel, Concat [text "not "; to_doc (snd c)])
+    | Tneg (Neg_predicate predicate) ->
+      type_predicate ~fuel ~negate:true predicate
     | Tvar n ->
       let (_, ety) =
         Typing_inference_env.expand_type
@@ -1171,6 +1173,25 @@ module Full = struct
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
 
+  and type_predicate ~fuel ~negate predicate =
+    let predicate_doc =
+      match predicate with
+      | IsBool -> text "bool"
+    in
+    let doc =
+      Concat
+        [
+          (text
+          @@
+          if negate then
+            "not "
+          else
+            "is ");
+          predicate_doc;
+        ]
+    in
+    (fuel, doc)
+
   and fun_locl_implicit_params ~fuel =
     fun_implicit_params
       locl_ty
@@ -1203,6 +1224,25 @@ module Full = struct
     | Tdestructure d -> tdestructure ~fuel k d
     | Tcan_index ci -> tcan_index ~fuel k ci
     | Tcan_traverse ct -> tcan_traverse ~fuel k ct
+    | Ttype_switch { predicate; ty_true; ty_false } ->
+      let (fuel, predicate_doc) =
+        type_predicate ~fuel ~negate:false predicate
+      in
+      let (fuel, ty_true_doc) = k ~fuel ty_true in
+      let (fuel, ty_false_doc) = k ~fuel ty_false in
+      let ttype_switch_doc =
+        Concat
+          [
+            text "(";
+            predicate_doc;
+            text "?";
+            ty_true_doc;
+            text ":";
+            ty_false_doc;
+            text ")";
+          ]
+      in
+      (fuel, ttype_switch_doc)
     | TCunion (lty, cty) ->
       let (fuel, lty_doc) = k ~fuel lty in
       let (fuel, cty_doc) = k' ~fuel cty in
@@ -1510,6 +1550,12 @@ module ErrorString = struct
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tneg (Neg_prim p) -> (fuel, "anything but a " ^ tprim p)
     | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
+    | Tneg (Neg_predicate predicate) ->
+      let str =
+        match predicate with
+        | IsBool -> "a bool"
+      in
+      (fuel, "is not " ^ str)
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
@@ -1691,6 +1737,12 @@ module Json = struct
     | (p, Tneg (Neg_prim tp)) ->
       obj @@ kind p "negation" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
+    | (p, Tneg (Neg_predicate predicate)) ->
+      let predicate_json =
+        match predicate with
+        | IsBool -> name "isbool"
+      in
+      obj @@ kind p "negation" @ predicate_json
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
     | (p, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fl })

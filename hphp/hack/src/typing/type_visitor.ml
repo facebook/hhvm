@@ -300,6 +300,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       match neg_ty with
       | Neg_prim p -> this#on_tprim acc r p
       | Neg_class c -> this#on_tclass acc r c nonexact []
+      | Neg_predicate _p -> acc
 
     method on_tunapplied_alias acc _ _ = acc
 
@@ -367,6 +368,9 @@ class type ['a] internal_type_visitor_type =
 
     method on_tcintersection :
       'a -> Reason.t -> locl_ty -> constraint_type -> 'a
+
+    method on_ttype_switch :
+      'a -> Reason.t -> type_predicate -> locl_ty -> locl_ty -> 'a
   end
 
 class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
@@ -386,6 +390,8 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       | Tdestructure des -> this#on_tdestructure acc r des
       | TCunion (lty, cty) -> this#on_tcunion acc r lty cty
       | TCintersection (lty, cty) -> this#on_tcintersection acc r lty cty
+      | Ttype_switch { predicate; ty_true; ty_false } ->
+        this#on_ttype_switch acc r predicate ty_true ty_false
 
     method on_locl_type acc ty = this#on_type acc ty
 
@@ -441,6 +447,11 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
     method on_tcintersection acc _r lty cty =
       let acc = this#on_locl_type acc lty in
       let acc = this#on_constraint_type acc cty in
+      acc
+
+    method on_ttype_switch acc _r _predicate ty_true ty_false =
+      let acc = this#on_locl_type acc ty_true in
+      let acc = this#on_locl_type acc ty_false in
       acc
 
     inherit ['a] locl_type_visitor

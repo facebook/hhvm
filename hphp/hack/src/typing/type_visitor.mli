@@ -226,6 +226,14 @@ class type ['a] internal_type_visitor_type =
       Typing_defs.locl_ty ->
       Typing_defs.constraint_type ->
       'a
+
+    method on_ttype_switch :
+      'a ->
+      Typing_reason.t ->
+      Typing_defs.type_predicate ->
+      Typing_defs.locl_ty ->
+      Typing_defs.locl_ty ->
+      'a
   end
 
 class ['a] internal_type_visitor : ['a] internal_type_visitor_type

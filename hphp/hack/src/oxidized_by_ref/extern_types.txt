@@ -102,6 +102,7 @@ oxidized::typing_defs_core::Enforcement
 oxidized::typing_defs_core::FunTparamsKind
 oxidized::typing_defs_core::ParamMode
 oxidized::typing_defs_core::ShapeKind
+oxidized::typing_defs_core::TypePredicate
 oxidized::typing_defs_core::ValKind
 oxidized::typing_reason::ArgPosition
 oxidized::typing_reason::BlameSource

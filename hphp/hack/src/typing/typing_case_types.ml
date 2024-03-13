@@ -481,6 +481,13 @@ module DataType = struct
         to_datatypes ~trail env cls
   end
 
+  let fromPredicate ~trail (_env : env) (predicate : type_predicate) : 'phase t
+      =
+    let open Tag in
+    let reason = DataTypeReason.(make NoSubreason trail) in
+    match predicate with
+    | IsBool -> Set.singleton ~reason BoolData
+
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
     let open Tag in
     let (env, ty) = Env.expand_type env ty in
@@ -607,6 +614,7 @@ module DataType = struct
         match n with
         | Neg_prim prim -> prim_to_datatypes ~trail prim
         | Neg_class (_, cls) -> Class.to_datatypes ~trail env cls
+        | Neg_predicate predicate -> fromPredicate ~trail env predicate
       in
       Set.diff (mixed ~reason) right
 

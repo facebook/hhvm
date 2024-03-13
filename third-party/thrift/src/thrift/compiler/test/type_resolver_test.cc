@@ -472,12 +472,12 @@ TEST_F(TypeResolverTest, Typedef_cpptemplate) {
       get_standard_type(imap), "::std::map<::std::int32_t, ::std::string>");
   EXPECT_FALSE(can_resolve_to_scalar(imap));
 
-  // The 'cpp.template' annotations is applied to the typedef; however, the type
-  // resolver only looks for it on container types.
-  // TODO(afuller): Consider making the template annotation propagate through
-  // the typedef.
-  EXPECT_EQ(get_native_type(iumap), "::path::to::iumap");
-  EXPECT_EQ(get_standard_type(iumap), "::path::to::iumap");
+  EXPECT_EQ(
+      get_native_type(iumap),
+      "std::unorderd_map<::std::int32_t, ::std::string>");
+  EXPECT_EQ(
+      get_standard_type(iumap),
+      "std::unorderd_map<::std::int32_t, ::std::string>");
   EXPECT_FALSE(can_resolve_to_scalar(iumap));
 
   EXPECT_EQ(get_native_type(tiumap), "::path::to::tiumap");

@@ -238,7 +238,7 @@ bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
 
   // fail fast if the post is too large, but only bother resolving host
   // if content_length is larger than the minimum setting.
-  m_maxPost = RuntimeOption::LowestMaxPostSize;
+  m_maxPost = Cfg::Server::LowestMaxPostSize;
   if (content_length > m_maxPost) {
     auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
     if (auto vhost = VirtualHost::Resolve(host)) {

@@ -124,7 +124,7 @@ ExecutionContext::ExecutionContext()
   // allocations (because it will cause us to hold a slab, even while idle).
   static auto s_cwd = makeStaticString(Process::CurrentWorkingDirectory);
   m_cwd = s_cwd;
-  RID().setMemoryLimit(std::to_string(RuntimeOption::RequestMemoryMaxBytes));
+  RID().setMemoryLimit(std::to_string(Cfg::Server::RequestMemoryMaxBytes));
   RID().setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
 
   VariableSerializer::serializationSizeLimit->value =

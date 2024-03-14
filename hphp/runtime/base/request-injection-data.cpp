@@ -195,7 +195,7 @@ void RequestInjectionData::threadInit() {
   }
 
   // Resource Limits
-  std::string mem_def = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
+  std::string mem_def = std::to_string(Cfg::Server::RequestMemoryMaxBytes);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request, "memory_limit",
                    mem_def.c_str(),
                    IniSetting::SetAndGet<std::string>(

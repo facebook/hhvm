@@ -659,9 +659,6 @@ std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
-int64_t RuntimeOption::RequestMemoryMaxBytes =
-  std::numeric_limits<int64_t>::max();
-int64_t RuntimeOption::LowestMaxPostSize = LLONG_MAX;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
@@ -1806,9 +1803,6 @@ void RuntimeOption::Load(
       throw std::runtime_error("Unable to resolve the server's IPv4 or IPv6 address");
     }
 
-    Config::Bind(RequestMemoryMaxBytes, ini, config,
-                 "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
-
     // These are here because the value is part of util so they can't use the normal
     // configs.specification
     {
@@ -1863,7 +1857,7 @@ void RuntimeOption::Load(
     // naturally (as specified top to bottom in the file and left to right on
     // the command line.
     Config::Iterate(vh_callback, ini, config, "VirtualHost");
-    LowestMaxPostSize = VirtualHost::GetLowestMaxPostSize();
+    Cfg::Server::LowestMaxPostSize = VirtualHost::GetLowestMaxPostSize();
   }
   {
     // IpBlocks

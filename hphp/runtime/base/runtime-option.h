@@ -325,8 +325,6 @@ struct RuntimeOption {
 
   static const std::string& GetServerPrimaryIPv4();
   static const std::string& GetServerPrimaryIPv6();
-  static int64_t RequestMemoryMaxBytes;
-  static int64_t LowestMaxPostSize;
   static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
   static std::shared_ptr<IpBlockMap> IpBlocks;
   static std::vector<std::shared_ptr<SatelliteServerInfo>>

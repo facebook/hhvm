@@ -2312,7 +2312,7 @@ static void update_constants_and_options() {
   }
   if (IniSetting::GetSystem("memory_limit", sys)) {
     RID().setMemoryLimit(sys.toString().toCppString());
-    RuntimeOption::RequestMemoryMaxBytes = RID().getMemoryLimitNumeric();
+    Cfg::Server::RequestMemoryMaxBytes = RID().getMemoryLimitNumeric();
   }
 }
 

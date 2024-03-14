@@ -185,6 +185,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         } = tc;
         let arguments: Vec<TypedValue> = initializer
             .as_ref()
+            .into_option()
             .and_then(compute_tc_attribute)
             .map(|s| TypedValue::String(ir::intern(s).as_bytes()))
             .into_iter()
@@ -210,7 +211,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             flags: Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,
-            initial_value: initializer,
+            initial_value: initializer.into(),
             type_info,
             doc_comment: Default::default(),
         };

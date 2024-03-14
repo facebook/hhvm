@@ -9,7 +9,7 @@ use serde::Serialize;
 use crate::typed_value::TypedValue;
 use crate::StringId;
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct TypeConstant {
     pub name: StringId,

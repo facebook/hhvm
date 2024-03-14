@@ -35,13 +35,13 @@ pub mod func_builder_ex;
 pub mod instr;
 pub mod module;
 pub mod newtype;
-pub mod type_const;
 pub mod type_struct;
 pub mod types;
 pub mod unit;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+pub use ffi::Maybe;
 pub use hhbc::dict_get;
 pub use hhbc::intern;
 pub use hhbc::intern_bytes;
@@ -95,6 +95,7 @@ pub use hhbc::StringId;
 pub use hhbc::SwitchKind;
 pub use hhbc::SymbolRefs;
 pub use hhbc::TraitReqKind;
+pub use hhbc::TypeConstant;
 pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;
 pub use hhbc::TypedValue;
@@ -141,7 +142,6 @@ pub use self::newtype::ValueId;
 pub use self::newtype::ValueIdMap;
 pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
-pub use self::type_const::TypeConstant;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;
 pub use self::types::TypeInfo;

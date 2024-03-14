@@ -2062,7 +2062,7 @@ fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant) -> Result {
         write!(w, "abstract ")?;
     }
     write!(w, "{}", FmtIdentifier(tc.name.as_str().as_bytes()))?;
-    if let Some(init) = &tc.initializer {
+    if let ir_core::Maybe::Just(init) = &tc.initializer {
         write!(w, " = {}", FmtTypedValue(init))?;
     }
     writeln!(w)

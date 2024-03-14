@@ -1390,8 +1390,8 @@ fn cmp_type_constant(a: &TypeConstant, b: &TypeConstant) -> Result {
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_option(
-        a_initializer.as_ref(),
-        b_initializer.as_ref(),
+        a_initializer.as_ref().into(),
+        b_initializer.as_ref().into(),
         cmp_typed_value,
     )
     .qualified("initializer")?;

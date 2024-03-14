@@ -22,14 +22,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         .map(types::convert_type)
         .into_option();
 
-    let type_constants = cls
-        .type_constants
-        .iter()
-        .map(convert_type_constant)
-        .collect();
-
-    let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
-
     let upper_bounds = cls
         .upper_bounds
         .iter()
@@ -52,7 +44,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         attributes: cls.attributes.clone().into(),
         base: cls.base.into(),
         constants,
-        ctx_constants,
+        ctx_constants: cls.ctx_constants.clone().into(),
         doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
         enum_includes: cls.enum_includes.clone().into(),
         enum_type,
@@ -63,7 +55,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         properties,
         requirements: cls.requirements.clone().into(),
         src_loc: ir::SrcLoc::from_span(&cls.span),
-        type_constants,
+        type_constants: cls.type_constants.clone().into(),
         upper_bounds,
         uses: cls.uses.clone().into(),
     });
@@ -78,23 +70,5 @@ fn convert_property(prop: &hhbc::Property) -> ir::Property {
         initial_value: prop.initial_value.clone().into(),
         type_info: types::convert_type(&prop.type_info),
         doc_comment: prop.doc_comment.clone().map(|c| c.into()),
-    }
-}
-
-fn convert_ctx_constant(ctx: &hhbc::CtxConstant) -> ir::CtxConstant {
-    ir::CtxConstant {
-        name: ctx.name,
-        recognized: ctx.recognized.clone(),
-        unrecognized: ctx.unrecognized.clone(),
-        is_abstract: ctx.is_abstract,
-    }
-}
-
-fn convert_type_constant(tc: &hhbc::TypeConstant) -> ir::TypeConstant {
-    let initializer = tc.initializer.clone();
-    ir::TypeConstant {
-        name: tc.name,
-        initializer: initializer.into(),
-        is_abstract: tc.is_abstract,
     }
 }

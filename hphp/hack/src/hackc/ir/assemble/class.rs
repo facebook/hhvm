@@ -208,11 +208,12 @@ impl ClassParser {
     }
 
     fn parse_type_constant(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
+        use ir_core::Maybe;
         parse!(tokenizer, <is_abstract:"abstract"?> <name:parse_user_id>);
         let initializer = if tokenizer.next_is_identifier("=")? {
-            Some(parse_typed_value(tokenizer)?)
+            Maybe::Just(parse_typed_value(tokenizer)?)
         } else {
-            None
+            Maybe::Nothing
         };
 
         let tc = TypeConstant {

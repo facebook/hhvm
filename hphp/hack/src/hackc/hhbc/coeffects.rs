@@ -16,7 +16,7 @@ use serde::Serialize;
 
 use crate::StringId;
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct CtxConstant {
     pub name: StringId,

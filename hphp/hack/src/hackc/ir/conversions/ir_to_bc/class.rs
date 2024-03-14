@@ -29,14 +29,10 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         uses,
     } = class;
 
-    let ctx_constants = Vec::from_iter(ctx_constants.iter().map(|ctx| convert_ctx_constant(ctx)));
-
     let enum_type: Maybe<_> = enum_type
         .as_ref()
         .map(|et| types::convert(et).unwrap())
         .into();
-
-    let type_constants = Vec::from_iter(type_constants.into_iter().map(convert_type_constant));
 
     let upper_bounds = Vec::from_iter(upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
         name: *name,
@@ -67,7 +63,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         methods: methods.into(),
         name,
         properties: Vec::from_iter(properties.into_iter().map(convert_property)).into(),
-        requirements: requirements.clone().into(),
+        requirements: requirements.into(),
         span: src_loc.to_span(),
         type_constants: type_constants.into(),
         upper_bounds: upper_bounds.into(),
@@ -85,22 +81,5 @@ fn convert_property(src: ir::Property) -> hhbc::Property {
         initial_value: src.initial_value.into(),
         type_info: types::convert(&src.type_info).unwrap(),
         doc_comment: src.doc_comment.map(|c| c.into()),
-    }
-}
-
-fn convert_ctx_constant(ctx: &ir::CtxConstant) -> hhbc::CtxConstant {
-    hhbc::CtxConstant {
-        name: ctx.name,
-        recognized: ctx.recognized.clone().into(),
-        unrecognized: ctx.unrecognized.clone().into(),
-        is_abstract: ctx.is_abstract,
-    }
-}
-
-fn convert_type_constant(tc: ir::TypeConstant) -> hhbc::TypeConstant {
-    hhbc::TypeConstant {
-        name: tc.name,
-        initializer: tc.initializer.into(),
-        is_abstract: tc.is_abstract,
     }
 }

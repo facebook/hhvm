@@ -281,6 +281,8 @@ void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
   if (FOLLY_LIKELY(len >= maxSize)) {
     size_t bytesRead;
     if (sizeof(T) <= 4) {
+      // NOTE: BMI2-based decoding for 32-bit integers appears not to
+      // be worthwhile; see preview diff D54881228.
       bytesRead = readVarintMediumSlowUnrolled(value, p);
     } else {
       uint64_t result;

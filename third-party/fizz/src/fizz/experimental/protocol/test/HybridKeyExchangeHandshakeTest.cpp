@@ -39,6 +39,7 @@ INSTANTIATE_TEST_SUITE_P(
         NamedGroup::x25519_kyber512,
         NamedGroup::secp256r1_kyber512,
         NamedGroup::x25519_kyber768_draft00,
+        NamedGroup::x25519_kyber768_experimental,
         NamedGroup::secp256r1_kyber768_draft00,
         NamedGroup::secp384r1_kyber768,
         NamedGroup::x25519 // Non-hybrid named group using hybrid factory

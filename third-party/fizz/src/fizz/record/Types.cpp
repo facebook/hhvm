@@ -259,6 +259,8 @@ std::string toString(NamedGroup group) {
       return "kyber512";
     case NamedGroup::x25519_kyber768_draft00:
       return "x25519_kyber768_draft00";
+    case NamedGroup::x25519_kyber768_experimental:
+      return "x25519_kyber768_experimental";
     case NamedGroup::secp256r1_kyber768_draft00:
       return "secp256r1_kyber768_draft00";
     case NamedGroup::secp384r1_kyber768:

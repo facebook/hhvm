@@ -34,7 +34,7 @@ file `[thrift_file_name]_patch.thrift`. It takes the following arguments
 | ------------------- | ------------------------------------------------------- | ---------------------------------- |
 | thrift_library_name | The name of thrift_library that contains the srcs.      | "my_rule"                          |
 | thrift_library_srcs | The thrift source files that we want to generate Patch. | ["foo.thrift", "bar.thrift"]       |
-| thrift_library_deps | The build rules that patch depends on.                  | ["//path/to/foo", "//path/to/bar"] |
+| thrift_patch_deps   | The build rules that patch depends on.                  | ["//path/to/foo", "//path/to/bar"] |
 | languages           | Same as the `languages` argument in thrift_library.     | ["cpp2", "python"]                 |
 
 Any extra arguments will be forwarded to the internal Patch's thrift_library.
@@ -58,7 +58,7 @@ Add the following build rule to build patch target
 thrift_patch_library(
   thrift_library_name = "foo",
   thrift_library_srcs = ["foo.thrift"],
-  thrift_library_deps = ["//path/to/bar"],
+  thrift_patch_deps = ["//path/to/bar"],
   languages = ['cpp2'],
   thrift_cpp2_options = ['any'],
 )

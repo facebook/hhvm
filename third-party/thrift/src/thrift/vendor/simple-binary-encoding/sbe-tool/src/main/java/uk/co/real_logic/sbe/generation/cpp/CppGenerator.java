@@ -1613,7 +1613,7 @@ public class CppGenerator implements CodeGenerator
     {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("/* Generated SBE (Simple Binary Encoding) message codec */\n");
+        sb.append("/* Generated @" + "generated SBE (Simple Binary Encoding) message codec */\n");
 
         sb.append(String.format(
             "#ifndef _%1$s_%2$s_CXX_H_\n" +
@@ -1719,7 +1719,7 @@ public class CppGenerator implements CodeGenerator
     {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("/* Generated SBE (Simple Binary Encoding) message codec */\n");
+        sb.append("/* Generated @" + "generated SBE (Simple Binary Encoding) message codec */\n");
 
         sb.append(String.format(
             "#ifndef _%1$s_%2$s_CXX_H_\n" +

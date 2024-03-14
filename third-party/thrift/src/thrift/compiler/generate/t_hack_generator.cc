@@ -2142,7 +2142,7 @@ std::string t_hack_generator::render_const_value_helper(
   } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
     const t_type* etype = tset->get_elem_type();
     indent_up();
-    const auto& vals = value->get_list();
+    const auto& vals = value->get_list_or_empty_map();
     if (arrays_ || structured_annotations) {
       out << "keyset[\n";
       for (const auto* val : vals) {

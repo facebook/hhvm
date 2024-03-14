@@ -19,7 +19,6 @@ use log::trace;
 use newtype::IdVec;
 
 use crate::context::Context;
-use crate::convert;
 use crate::convert::UnitState;
 use crate::types;
 
@@ -116,16 +115,10 @@ fn convert_body<'a>(
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
     locs.push(src_loc);
 
-    let attributes = attributes
-        .as_ref()
-        .iter()
-        .map(convert::convert_attribute)
-        .collect();
-
     let coeffects = convert_coeffects(coeffects);
 
     let func = ir::Func {
-        attributes,
+        attributes: attributes.to_vec(),
         attrs,
         blocks: Default::default(),
         coeffects,
@@ -214,13 +207,7 @@ fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
 
     let name = param.name;
     ctx.named_local_lookup.push(LocalId::Named(name));
-
-    let user_attributes = param
-        .user_attributes
-        .iter()
-        .map(convert::convert_attribute)
-        .collect();
-
+    let user_attributes = param.user_attributes.clone().into();
     ir::Param {
         default_value,
         name,

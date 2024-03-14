@@ -11,7 +11,6 @@ use ir::BaseType;
 use itertools::Itertools;
 use maplit::hashmap;
 
-use crate::convert;
 use crate::types;
 
 pub(crate) fn convert_type(ty: &hhbc::TypeInfo) -> ir::TypeInfo {
@@ -104,10 +103,6 @@ pub(crate) fn convert_typedef(td: &hhbc::Typedef) -> ir::Typedef {
     } = td;
 
     let loc = ir::SrcLoc::from_span(span);
-    let attributes = attributes
-        .iter()
-        .map(convert::convert_attribute)
-        .collect_vec();
     let type_info_union = type_info_union
         .iter()
         .map(types::convert_type)
@@ -115,7 +110,7 @@ pub(crate) fn convert_typedef(td: &hhbc::Typedef) -> ir::Typedef {
 
     ir::Typedef {
         name: *name,
-        attributes,
+        attributes: attributes.clone().into(),
         type_info_union,
         type_structure: type_structure.clone(),
         loc,

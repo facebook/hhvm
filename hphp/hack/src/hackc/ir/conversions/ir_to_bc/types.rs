@@ -107,7 +107,6 @@ pub(crate) fn convert_typedef(td: ir::Typedef) -> hhbc::Typedef {
         line_begin: loc.line_begin,
         line_end: loc.line_end,
     };
-    let attributes = crate::convert::convert_attributes(attributes);
     let type_info_union = convert_types(type_info_union.as_ref());
 
     hhbc::Typedef {

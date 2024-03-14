@@ -7,7 +7,6 @@ use hhbc::AdataState;
 use hhbc::Method;
 use log::trace;
 
-use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
 use crate::pusher;
@@ -56,7 +55,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let params = Vec::from_iter(func.params.into_iter().map(|param| {
         let name = param.name;
-        let user_attributes = convert::convert_attributes(param.user_attributes);
+        let user_attributes = param.user_attributes.into();
         let default_value = param
             .default_value
             .map(|dv| {
@@ -72,7 +71,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
             is_variadic: param.is_variadic,
             is_inout: param.is_inout,
             is_readonly: param.is_readonly,
-            user_attributes: user_attributes.into(),
+            user_attributes,
             type_info: crate::types::convert(&param.ty),
             default_value,
         }
@@ -115,12 +114,12 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Function) {
     trace!("convert_function {}", function.name);
     let span = function.func.loc(function.func.loc_id).to_span();
-    let attributes = convert::convert_attributes(std::mem::take(&mut function.func.attributes));
+    let attributes = std::mem::take(&mut function.func.attributes).into();
     let attrs = function.func.attrs;
     let coeffects = convert_coeffects(&function.func.coeffects);
     let body = convert_func(function.func, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
-        attributes: attributes.into(),
+        attributes,
         body,
         coeffects,
         flags: function.flags,
@@ -136,10 +135,10 @@ pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataState) -> 
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
-    let attributes = convert::convert_attributes(std::mem::take(&mut method.func.attributes));
+    let attributes = std::mem::take(&mut method.func.attributes).into();
     let body = convert_func(method.func, adata);
     hhbc::Method {
-        attributes: attributes.into(),
+        attributes,
         name: method.name,
         body,
         span,

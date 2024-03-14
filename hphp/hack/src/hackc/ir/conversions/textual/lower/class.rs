@@ -158,7 +158,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         // Mark the property as originally being a constant.
         let attributes = vec![Attribute {
             name: ClassName::intern(INFER_CONSTANT),
-            arguments: Vec::new(),
+            arguments: vec![].into(),
         }];
         let type_info = if let Some(value) = value.as_ref() {
             TypeInfo::from_typed_value(value)
@@ -192,7 +192,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         // Mark the property as originally being a type constant.
         let attributes = vec![Attribute {
             name: ClassName::intern(INFER_TYPE_CONSTANT),
-            arguments,
+            arguments: arguments.into(),
         }];
         let mut modifiers = TypeConstraintFlags::TypeConstant;
         if is_abstract {

@@ -6,7 +6,6 @@
 use hhbc::Class;
 use itertools::Itertools;
 
-use crate::convert;
 use crate::types;
 
 pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
@@ -42,13 +41,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         })
         .collect_vec();
 
-    let attributes = cls
-        .attributes
-        .as_ref()
-        .iter()
-        .map(convert::convert_attribute)
-        .collect_vec();
-
     let properties = cls
         .properties
         .as_ref()
@@ -57,7 +49,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         .collect_vec();
 
     unit.classes.push(ir::Class {
-        attributes,
+        attributes: cls.attributes.clone().into(),
         base: cls.base.into(),
         constants,
         ctx_constants,
@@ -78,15 +70,10 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
 }
 
 fn convert_property(prop: &hhbc::Property) -> ir::Property {
-    let attributes = prop
-        .attributes
-        .iter()
-        .map(convert::convert_attribute)
-        .collect_vec();
     ir::Property {
         name: prop.name,
         flags: prop.flags,
-        attributes,
+        attributes: prop.attributes.clone().into(),
         visibility: prop.visibility,
         initial_value: prop.initial_value.clone().into(),
         type_info: types::convert_type(&prop.type_info),

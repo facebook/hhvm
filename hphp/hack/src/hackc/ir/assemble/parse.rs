@@ -143,9 +143,9 @@ pub(crate) fn parse_attribute(tokenizer: &mut Tokenizer<'_>) -> Result<Attribute
     let name = parse_class_name(tokenizer)?;
     let arguments = if tokenizer.next_is_identifier("(")? {
         parse!(tokenizer, <args:parse_typed_value,*> ")");
-        args
+        args.into()
     } else {
-        Vec::new()
+        vec![].into()
     };
     Ok(Attribute { name, arguments })
 }

@@ -5,7 +5,6 @@
 
 use ffi::Maybe;
 
-use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::types;
 
@@ -51,7 +50,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
     );
 
     let class = hhbc::Class {
-        attributes: convert::convert_attributes(attributes).into(),
+        attributes: attributes.into(),
         base: base.into(),
         constants: Vec::from_iter(
             constants
@@ -81,7 +80,7 @@ fn convert_property(src: ir::Property) -> hhbc::Property {
     hhbc::Property {
         name: src.name,
         flags: src.flags,
-        attributes: convert::convert_attributes(src.attributes).into(),
+        attributes: src.attributes.into(),
         visibility: src.visibility,
         initial_value: src.initial_value.into(),
         type_info: types::convert(&src.type_info).unwrap(),

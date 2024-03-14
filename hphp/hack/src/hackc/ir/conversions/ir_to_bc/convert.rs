@@ -24,7 +24,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
 
     let mut unit = unit.finish();
 
-    unit.file_attributes = convert_attributes(ir_unit.file_attributes).into();
+    unit.file_attributes = ir_unit.file_attributes.into();
     unit.typedefs = ir_unit
         .typedefs
         .into_iter()
@@ -41,7 +41,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         .modules
         .into_iter()
         .map(|module| hhbc::Module {
-            attributes: convert_attributes(module.attributes).into(),
+            attributes: module.attributes.into(),
             name: module.name,
             span: module.src_loc.to_span(),
             doc_comment: module.doc_comment.map(|c| c.into()).into(),
@@ -105,14 +105,4 @@ fn convert_symbol_refs(symbol_refs: &ir::SymbolRefs) -> hhbc::SymbolRefs {
         functions: symbol_refs.functions.clone(),
         includes: symbol_refs.includes.clone(),
     }
-}
-
-pub(crate) fn convert_attributes(attrs: Vec<ir::Attribute>) -> Vec<hhbc::Attribute> {
-    attrs
-        .into_iter()
-        .map(|attr| {
-            let arguments = attr.arguments.clone();
-            hhbc::Attribute::new(attr.name.as_string_id(), arguments)
-        })
-        .collect()
 }

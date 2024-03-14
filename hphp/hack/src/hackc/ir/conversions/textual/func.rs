@@ -254,7 +254,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
         let mut func = orig_func.clone();
         func.attributes.push(ir::Attribute {
             name: wrapper_attribute(),
-            arguments: Vec::new(),
+            arguments: vec![].into(),
         });
 
         let target_bid = func.params[param_count]

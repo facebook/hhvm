@@ -31,13 +31,13 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
         .map(crate::constant::convert_constant)
         .collect();
 
-    let file_attributes: Vec<_> = unit.file_attributes.iter().map(convert_attribute).collect();
+    let file_attributes = unit.file_attributes.clone().into();
 
     let modules: Vec<ir::Module> = unit
         .modules
         .iter()
         .map(|module| ir::Module {
-            attributes: module.attributes.iter().map(convert_attribute).collect(),
+            attributes: module.attributes.clone().into(),
             name: module.name,
             src_loc: ir::SrcLoc::from_span(&module.span),
             doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
@@ -87,12 +87,4 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
 pub(crate) struct UnitState {
     /// Conversion from hhbc::AdataId to hhbc::TypedValue
     pub(crate) adata_lookup: HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
-}
-
-pub(crate) fn convert_attribute(attr: &hhbc::Attribute) -> ir::Attribute {
-    let arguments = attr.arguments.clone().into();
-    ir::Attribute {
-        name: attr.name,
-        arguments,
-    }
 }

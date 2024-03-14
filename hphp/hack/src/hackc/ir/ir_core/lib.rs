@@ -28,7 +28,6 @@
 
 pub mod block;
 pub mod class;
-pub mod common;
 pub mod constant;
 pub mod func;
 pub mod func_builder;
@@ -48,6 +47,7 @@ pub use hhbc::intern;
 pub use hhbc::intern_bytes;
 pub use hhbc::string_id;
 pub use hhbc::AsTypeStructExceptionKind;
+pub use hhbc::Attribute;
 pub use hhbc::BareThisOp;
 pub use hhbc::BytesId;
 pub use hhbc::CcParam;
@@ -107,7 +107,6 @@ pub use naming_special_names_rust::coeffects::Ctx;
 pub use self::block::Block;
 pub use self::class::Class;
 pub use self::class::Property;
-pub use self::common::Attribute;
 pub use self::constant::Constant;
 pub use self::constant::HackConstant;
 pub use self::func::ExFrameId;

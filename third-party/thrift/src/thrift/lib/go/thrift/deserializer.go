@@ -22,25 +22,23 @@ type Deserializer struct {
 }
 
 func NewDeserializer() *Deserializer {
-	var transport Transport
-	transport = NewMemoryBufferLen(1024)
-
+	transport := NewMemoryBufferLen(1024)
 	protocol := NewBinaryProtocolFactoryDefault().GetProtocol(transport)
-
-	return &Deserializer{
-		transport,
-		protocol}
+	return &Deserializer{transport, protocol}
 }
 
 // NewCompactDeserializer creates a new deserializer using the compact protocol
 func NewCompactDeserializer() *Deserializer {
-	var transport Transport
-	transport = NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactProtocolFactory().GetProtocol(transport)
+	return &Deserializer{transport, protocol}
+}
 
-	return &Deserializer{
-		transport,
-		protocol}
+// NewJSONDeserializer creates a new deserializer using the JSON protocol
+func NewJSONDeserializer() *Deserializer {
+	transport := NewMemoryBufferLen(1024)
+	protocol := NewJSONProtocolFactory().GetProtocol(transport)
+	return &Deserializer{transport, protocol}
 }
 
 func (t *Deserializer) ReadString(msg Struct, s string) (err error) {

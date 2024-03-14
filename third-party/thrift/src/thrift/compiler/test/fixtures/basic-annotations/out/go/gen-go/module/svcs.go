@@ -93,15 +93,6 @@ func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     }
 }
 
-// Deprecated: NewMyServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyServiceClient.
-func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
-    return &MyServiceClient{
-        chClient: NewMyServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
 }
@@ -2819,15 +2810,6 @@ func NewMyServicePrioParentClient(prot thrift.Protocol) *MyServicePrioParentClie
     }
 }
 
-// Deprecated: NewMyServicePrioParentClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyServicePrioParentClient.
-func NewMyServicePrioParentClientFromProtocol(prot thrift.Protocol) *MyServicePrioParentClient {
-    return &MyServicePrioParentClient{
-        chClient: NewMyServicePrioParentChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *MyServicePrioParentClient) Close() error {
     return c.chClient.Close()
 }
@@ -3470,17 +3452,7 @@ var _ MyServicePrioChildContextClientInterface = &MyServicePrioChildClient{}
 
 func NewMyServicePrioChildClient(prot thrift.Protocol) *MyServicePrioChildClient {
     return &MyServicePrioChildClient{
-        MyServicePrioParentClient: NewMyServicePrioParentClientFromProtocol(prot),
-        chClient: NewMyServicePrioChildChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
-// Deprecated: NewMyServicePrioChildClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyServicePrioChildClient.
-func NewMyServicePrioChildClientFromProtocol(prot thrift.Protocol) *MyServicePrioChildClient {
-    return &MyServicePrioChildClient{
-        MyServicePrioParentClient: NewMyServicePrioParentClientFromProtocol(prot),
+        MyServicePrioParentClient: NewMyServicePrioParentClient(prot),
         chClient: NewMyServicePrioChildChannelClient(
             thrift.NewSerialChannel(prot),
         ),
@@ -3825,15 +3797,6 @@ var _ BadServiceClientInterface = &BadServiceClient{}
 var _ BadServiceContextClientInterface = &BadServiceClient{}
 
 func NewBadServiceClient(prot thrift.Protocol) *BadServiceClient {
-    return &BadServiceClient{
-        chClient: NewBadServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
-// Deprecated: NewBadServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewBadServiceClient.
-func NewBadServiceClientFromProtocol(prot thrift.Protocol) *BadServiceClient {
     return &BadServiceClient{
         chClient: NewBadServiceChannelClient(
             thrift.NewSerialChannel(prot),
@@ -4293,15 +4256,6 @@ var _ FooBarBazServiceClientInterface = &FooBarBazServiceClient{}
 var _ FooBarBazServiceContextClientInterface = &FooBarBazServiceClient{}
 
 func NewFooBarBazServiceClient(prot thrift.Protocol) *FooBarBazServiceClient {
-    return &FooBarBazServiceClient{
-        chClient: NewFooBarBazServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
-// Deprecated: NewFooBarBazServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewFooBarBazServiceClient.
-func NewFooBarBazServiceClientFromProtocol(prot thrift.Protocol) *FooBarBazServiceClient {
     return &FooBarBazServiceClient{
         chClient: NewFooBarBazServiceChannelClient(
             thrift.NewSerialChannel(prot),

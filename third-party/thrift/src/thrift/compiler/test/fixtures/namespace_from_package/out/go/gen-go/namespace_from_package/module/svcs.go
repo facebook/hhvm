@@ -75,15 +75,6 @@ func NewTestServiceClient(prot thrift.Protocol) *TestServiceClient {
     }
 }
 
-// Deprecated: NewTestServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewTestServiceClient.
-func NewTestServiceClientFromProtocol(prot thrift.Protocol) *TestServiceClient {
-    return &TestServiceClient{
-        chClient: NewTestServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *TestServiceClient) Close() error {
     return c.chClient.Close()
 }

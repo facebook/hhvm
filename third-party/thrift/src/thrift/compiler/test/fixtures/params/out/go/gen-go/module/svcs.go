@@ -87,15 +87,6 @@ func NewNestedContainersClient(prot thrift.Protocol) *NestedContainersClient {
     }
 }
 
-// Deprecated: NewNestedContainersClientFromProtocol is deprecated rather call equivalent, but shorter function NewNestedContainersClient.
-func NewNestedContainersClientFromProtocol(prot thrift.Protocol) *NestedContainersClient {
-    return &NestedContainersClient{
-        chClient: NewNestedContainersChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *NestedContainersClient) Close() error {
     return c.chClient.Close()
 }

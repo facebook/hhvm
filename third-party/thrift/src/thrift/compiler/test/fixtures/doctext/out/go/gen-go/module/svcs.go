@@ -78,15 +78,6 @@ func NewCClient(prot thrift.Protocol) *CClient {
     }
 }
 
-// Deprecated: NewCClientFromProtocol is deprecated rather call equivalent, but shorter function NewCClient.
-func NewCClientFromProtocol(prot thrift.Protocol) *CClient {
-    return &CClient{
-        chClient: NewCChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *CClient) Close() error {
     return c.chClient.Close()
 }

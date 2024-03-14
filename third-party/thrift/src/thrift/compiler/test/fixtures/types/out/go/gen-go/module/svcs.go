@@ -80,15 +80,6 @@ func NewSomeServiceClient(prot thrift.Protocol) *SomeServiceClient {
     }
 }
 
-// Deprecated: NewSomeServiceClientFromProtocol is deprecated rather call equivalent, but shorter function NewSomeServiceClient.
-func NewSomeServiceClientFromProtocol(prot thrift.Protocol) *SomeServiceClient {
-    return &SomeServiceClient{
-        chClient: NewSomeServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *SomeServiceClient) Close() error {
     return c.chClient.Close()
 }

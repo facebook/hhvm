@@ -83,15 +83,6 @@ func NewFinderClient(prot thrift.Protocol) *FinderClient {
     }
 }
 
-// Deprecated: NewFinderClientFromProtocol is deprecated rather call equivalent, but shorter function NewFinderClient.
-func NewFinderClientFromProtocol(prot thrift.Protocol) *FinderClient {
-    return &FinderClient{
-        chClient: NewFinderChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *FinderClient) Close() error {
     return c.chClient.Close()
 }

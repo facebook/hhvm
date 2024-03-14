@@ -84,15 +84,6 @@ func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
     }
 }
 
-// Deprecated: NewRaiserClientFromProtocol is deprecated rather call equivalent, but shorter function NewRaiserClient.
-func NewRaiserClientFromProtocol(prot thrift.Protocol) *RaiserClient {
-    return &RaiserClient{
-        chClient: NewRaiserChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *RaiserClient) Close() error {
     return c.chClient.Close()
 }

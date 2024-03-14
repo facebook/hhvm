@@ -75,15 +75,6 @@ func NewMyRootClient(prot thrift.Protocol) *MyRootClient {
     }
 }
 
-// Deprecated: NewMyRootClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyRootClient.
-func NewMyRootClientFromProtocol(prot thrift.Protocol) *MyRootClient {
-    return &MyRootClient{
-        chClient: NewMyRootChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
 func (c *MyRootClient) Close() error {
     return c.chClient.Close()
 }
@@ -460,17 +451,7 @@ var _ MyNodeContextClientInterface = &MyNodeClient{}
 
 func NewMyNodeClient(prot thrift.Protocol) *MyNodeClient {
     return &MyNodeClient{
-        MyRootClient: NewMyRootClientFromProtocol(prot),
-        chClient: NewMyNodeChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
-// Deprecated: NewMyNodeClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyNodeClient.
-func NewMyNodeClientFromProtocol(prot thrift.Protocol) *MyNodeClient {
-    return &MyNodeClient{
-        MyRootClient: NewMyRootClientFromProtocol(prot),
+        MyRootClient: NewMyRootClient(prot),
         chClient: NewMyNodeChannelClient(
             thrift.NewSerialChannel(prot),
         ),
@@ -827,17 +808,7 @@ var _ MyLeafContextClientInterface = &MyLeafClient{}
 
 func NewMyLeafClient(prot thrift.Protocol) *MyLeafClient {
     return &MyLeafClient{
-        MyNodeClient: NewMyNodeClientFromProtocol(prot),
-        chClient: NewMyLeafChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
-    }
-}
-
-// Deprecated: NewMyLeafClientFromProtocol is deprecated rather call equivalent, but shorter function NewMyLeafClient.
-func NewMyLeafClientFromProtocol(prot thrift.Protocol) *MyLeafClient {
-    return &MyLeafClient{
-        MyNodeClient: NewMyNodeClientFromProtocol(prot),
+        MyNodeClient: NewMyNodeClient(prot),
         chClient: NewMyLeafChannelClient(
             thrift.NewSerialChannel(prot),
         ),

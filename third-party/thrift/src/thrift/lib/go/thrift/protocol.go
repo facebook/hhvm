@@ -32,3 +32,5 @@ type Protocol = Format
 var _ Protocol = (*headerProtocol)(nil)
 var _ Protocol = (*rocketProtocol)(nil)
 var _ Protocol = (*upgradeToRocketProtocol)(nil)
+var _ Protocol = (*httpProtocol)(nil)
+var _ Protocol = (*framedProtocol)(nil)

@@ -27,8 +27,8 @@ type ClientConn struct {
 	seqID int32
 }
 
-// NewClientConnFromProtocol creates a new ClientConn object using a protocol
-func NewClientConnFromProtocol(proto Protocol) ClientConn {
+// NewClientConn creates a new ClientConn object using a protocol
+func NewClientConn(proto Protocol) ClientConn {
 	return ClientConn{
 		proto: proto,
 	}

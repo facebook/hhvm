@@ -9,7 +9,8 @@ pub mod services;
 
 pub mod errors;
 
-pub use crate as types;
+#[allow(unused_imports)]
+pub(crate) use crate as types;
 
 pub type TBinary = ::std::vec::Vec<::std::primitive::u8>;
 

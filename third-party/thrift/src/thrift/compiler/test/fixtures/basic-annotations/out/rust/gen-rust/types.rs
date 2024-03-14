@@ -12,7 +12,8 @@ pub mod services;
 
 pub mod errors;
 
-pub use crate as types;
+#[allow(unused_imports)]
+pub(crate) use crate as types;
 
 pub type AwesomeStruct = crate::types::MyStruct;
 

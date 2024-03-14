@@ -11,7 +11,8 @@ pub mod services;
 
 pub mod errors;
 
-pub use crate as types;
+#[allow(unused_imports)]
+pub(crate) use crate as types;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, ::serde_derive::Serialize, ::serde_derive::Deserialize)]
 pub struct MyStruct {

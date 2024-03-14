@@ -7,7 +7,8 @@
 
 pub mod errors;
 
-pub use crate as types;
+#[allow(unused_imports)]
+pub(crate) use crate as types;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);

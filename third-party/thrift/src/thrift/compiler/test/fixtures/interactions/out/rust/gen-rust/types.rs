@@ -9,7 +9,8 @@ pub mod services;
 
 pub mod errors;
 
-pub use crate as types;
+#[allow(unused_imports)]
+pub(crate) use crate as types;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CustomException {

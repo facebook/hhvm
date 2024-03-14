@@ -17,17 +17,7 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-/* Not specialized for all routers. Does nothing */
-template <class RouterInfo>
-class RequestAclChecker : public std::false_type {
- public:
-  template <class... Args>
-  explicit RequestAclChecker(Args&&...) {}
-};
-
-/* Memcache specialization. Initializes ACL checker */
-template <>
-class RequestAclChecker<MemcacheRouterInfo> : public std::true_type {
+class RequestAclChecker {
  public:
   explicit RequestAclChecker(
       ExternalStatsHandler& statsHandler,

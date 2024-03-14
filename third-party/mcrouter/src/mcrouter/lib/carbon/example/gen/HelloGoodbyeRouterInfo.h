@@ -75,6 +75,7 @@ struct HelloGoodbyeRouterInfo {
 
   static constexpr const char* name = "HelloGoodbye";
   static constexpr const bool bucketization = false;
+  static constexpr const bool useRequestAclChecker = false;
 
   template <class Route>
   using RouteHandle = HelloGoodbyeRouteHandle<Route>;

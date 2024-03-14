@@ -9,6 +9,7 @@
 
 #include <folly/io/async/EventBase.h>
 #include <cassert>
+#include <memory>
 
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/RequestAclChecker.h"
@@ -53,13 +54,18 @@ class ServerOnRequest {
       bool retainSourceIp,
       bool enablePassThroughMode,
       bool remoteThread,
-      Args&&... args)
+      ExternalStatsHandler& statsHandler,
+      bool requestAclCheckerEnable)
       : client_(client),
         eventBase_(eventBase),
         retainSourceIp_(retainSourceIp),
         enablePassThroughMode_(enablePassThroughMode),
-        remoteThread_(remoteThread),
-        aclChecker_(std::forward<Args>(args)...) {}
+        remoteThread_(remoteThread) {
+    if constexpr (RouterInfo::useRequestAclChecker) {
+      aclChecker_ = std::make_unique<RequestAclChecker>(
+          statsHandler, requestAclCheckerEnable);
+    }
+  }
 
   template <class Reply, class Callback>
   void sendReply(Callback&& ctx, Reply&& reply) {
@@ -136,15 +142,11 @@ class ServerOnRequest {
       ReplyFunction<Callback, Request> replyFn,
       const CaretMessageInfo* headerInfo = nullptr,
       const folly::IOBuf* reqBuffer = nullptr) {
-    /*
-     * If we don't have an AclChecker specialized
-     * for this router, don't bother running Acl checks
-     */
     if constexpr (
-        decltype(aclChecker_)::value &&
+        RouterInfo::useRequestAclChecker &&
         !folly::IsOneOf<Request, McDeleteRequest>::value) {
-      if (aclChecker_.shouldReply(ctx, req)) {
-        aclChecker_.template reply<Request>(std::forward<Callback>(ctx));
+      if (aclChecker_->shouldReply(ctx, req)) {
+        aclChecker_->template reply<Request>(std::forward<Callback>(ctx));
         return;
       }
     }
@@ -195,7 +197,7 @@ class ServerOnRequest {
   const bool retainSourceIp_{false};
   const bool enablePassThroughMode_{false};
   const bool remoteThread_{false};
-  const RequestAclChecker<RouterInfo> aclChecker_;
+  std::unique_ptr<RequestAclChecker> aclChecker_;
 };
 
 } // namespace mcrouter

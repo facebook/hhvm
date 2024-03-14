@@ -11,14 +11,14 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-RequestAclChecker<MemcacheRouterInfo>::RequestAclChecker(
+RequestAclChecker::RequestAclChecker(
     ExternalStatsHandler& statsHandler,
     bool requestAclCheckerEnable)
     : requestAclCheckerEnable_(requestAclCheckerEnable),
       requestAclCheckCb_(initRequestAclCheckCbIfEnabled(statsHandler)) {}
 
 /* Determines if the command is of the form "refresh prefix-acl" */
-bool RequestAclChecker<MemcacheRouterInfo>::isRefreshCommand(
+bool RequestAclChecker::isRefreshCommand(
     const folly::StringPiece cmd) noexcept {
   std::vector<folly::StringPiece> parts;
   folly::split(' ', cmd, parts, true);
@@ -27,7 +27,7 @@ bool RequestAclChecker<MemcacheRouterInfo>::isRefreshCommand(
 }
 
 MemcacheRequestAclCheckerCallback
-RequestAclChecker<MemcacheRouterInfo>::initRequestAclCheckCbIfEnabled(
+RequestAclChecker::initRequestAclCheckCbIfEnabled(
     ExternalStatsHandler& statsHandler) const noexcept {
   if (requestAclCheckerEnable_) {
     return getMemcacheServerRequestAclCheckCallback(statsHandler);
@@ -35,7 +35,7 @@ RequestAclChecker<MemcacheRouterInfo>::initRequestAclCheckCbIfEnabled(
   return {};
 }
 
-bool RequestAclChecker<MemcacheRouterInfo>::isLocalRequest(
+bool RequestAclChecker::isLocalRequest(
     const folly::Optional<struct sockaddr_storage>& address) noexcept {
   const auto addr = address.hasValue()
       ? reinterpret_cast<const struct sockaddr*>(address.get_pointer())

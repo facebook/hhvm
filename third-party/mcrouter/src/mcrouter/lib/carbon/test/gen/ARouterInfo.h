@@ -78,6 +78,7 @@ struct ARouterInfo {
 
   static constexpr const char* name = "A";
   static constexpr const bool bucketization = false;
+  static constexpr const bool useRequestAclChecker = false;
 
   template <class Route>
   using RouteHandle = ARouteHandle<Route>;

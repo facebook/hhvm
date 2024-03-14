@@ -220,6 +220,15 @@ func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
 
+// Deprecated: HeaderProtocolIdentity is a deprecated type, temporarily introduced to ease transition to new API.
+type HeaderProtocolIdentity interface {
+	SetIdentity(identity string)
+	Identity() string
+}
+
+// Compile time interface enforcer
+var _ HeaderProtocolIdentity = (*headerProtocol)(nil)
+
 // Deprecated: HeaderProtocolSetSeqID is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolSetSeqID interface {
 	SetSeqID(uint32)

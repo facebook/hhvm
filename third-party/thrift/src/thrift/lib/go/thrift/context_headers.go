@@ -53,6 +53,8 @@ type RequestHeaders interface {
 var _ RequestHeaders = (*headerProtocol)(nil)
 var _ RequestHeaders = (*rocketProtocol)(nil)
 var _ RequestHeaders = (*upgradeToRocketProtocol)(nil)
+var _ RequestHeaders = (*httpProtocol)(nil)
+var _ RequestHeaders = (*framedProtocol)(nil)
 
 // setRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.

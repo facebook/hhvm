@@ -16,19 +16,69 @@
 
 package thrift
 
+import (
+	"strings"
+)
+
 type httpProtocol struct {
 	Format
-	transport *HTTPClient
+	transport         *HTTPClient
+	persistentHeaders map[string]string
 }
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
 func NewHTTPProtocol(transport *HTTPClient, format Format) Protocol {
 	return &httpProtocol{
-		Format:    format,
-		transport: transport,
+		Format:            format,
+		transport:         transport,
+		persistentHeaders: make(map[string]string),
 	}
 }
 
 func (p *httpProtocol) Close() error {
 	return p.transport.Close()
+}
+
+func (p *httpProtocol) SetPersistentHeader(key, value string) {
+	p.persistentHeaders[key] = value
+}
+
+func (p *httpProtocol) GetPersistentHeader(key string) (string, bool) {
+	v, ok := p.persistentHeaders[key]
+	return v, ok
+}
+
+func (p *httpProtocol) GetPersistentHeaders() map[string]string {
+	return p.persistentHeaders
+}
+
+func (p *httpProtocol) ClearPersistentHeaders() {
+	p.persistentHeaders = make(map[string]string)
+}
+
+func (p *httpProtocol) GetResponseHeader(key string) (string, bool) {
+	return "", false
+}
+
+func (p *httpProtocol) GetResponseHeaders() map[string]string {
+	return nil
+}
+
+func (p *httpProtocol) SetRequestHeader(key, value string) {
+	p.transport.SetHeader(key, value)
+}
+
+func (p *httpProtocol) GetRequestHeaders() map[string]string {
+	headers := make(map[string]string)
+	for k, v := range p.transport.header {
+		headers[k] = strings.Join(v, ",")
+	}
+	return headers
+}
+
+func (p *httpProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+	for k, v := range p.persistentHeaders {
+		p.transport.SetHeader(k, v)
+	}
+	return p.Format.WriteMessageBegin(name, typeID, seqid)
 }

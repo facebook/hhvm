@@ -29,6 +29,32 @@ func NewFramedProtocol(transport *FramedTransport, format Format) Protocol {
 	}
 }
 
+func (p *framedProtocol) SetPersistentHeader(key, value string) {}
+
+func (p *framedProtocol) GetPersistentHeader(key string) (string, bool) {
+	return "", false
+}
+
+func (p *framedProtocol) GetPersistentHeaders() map[string]string {
+	return nil
+}
+
+func (p *framedProtocol) ClearPersistentHeaders() {}
+
+func (p *framedProtocol) GetResponseHeader(key string) (string, bool) {
+	return "", false
+}
+
+func (p *framedProtocol) GetResponseHeaders() map[string]string {
+	return nil
+}
+
+func (p *framedProtocol) SetRequestHeader(key, value string) {}
+
+func (p *framedProtocol) GetRequestHeaders() map[string]string {
+	return nil
+}
+
 func (p *framedProtocol) Close() error {
 	return p.transport.Close()
 }

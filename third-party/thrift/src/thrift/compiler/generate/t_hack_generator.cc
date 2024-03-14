@@ -2086,26 +2086,30 @@ std::string t_hack_generator::render_const_value_helper(
       out << (immutable_collections ? "Imm" : "") << "Map {\n";
     }
     indent_up();
-    for (const auto& entry : value->get_map()) {
-      out << indent();
-      out << render_const_value_helper(
-          ktype,
-          entry.first,
-          temp_var_initializations_out,
-          namer,
-          immutable_collections,
-          false, // ignore_wrapper
-          structured_annotations);
-      out << " => ";
-      out << render_const_value_helper(
-          vtype,
-          entry.second,
-          temp_var_initializations_out,
-          namer,
-          immutable_collections,
-          false, // ignore_wrapper
-          structured_annotations);
-      out << ",\n";
+    // Workaround to cover the cases where map is initialized with an empty
+    // list, e.g. map<string, i32> m = []
+    if (!value->is_empty()) {
+      for (const auto& entry : value->get_map()) {
+        out << indent();
+        out << render_const_value_helper(
+            ktype,
+            entry.first,
+            temp_var_initializations_out,
+            namer,
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
+        out << " => ";
+        out << render_const_value_helper(
+            vtype,
+            entry.second,
+            temp_var_initializations_out,
+            namer,
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
+        out << ",\n";
+      }
     }
     indent_down();
     if (arrays_ || no_use_hack_collections_ || structured_annotations) {
@@ -2121,7 +2125,9 @@ std::string t_hack_generator::render_const_value_helper(
       out << (immutable_collections ? "Imm" : "") << "Vector {\n";
     }
     indent_up();
-    for (const auto* val : value->get_list()) {
+    // Workaround to cover the cases where list is initialized with an empty
+    // map, e.g. list<i32> l = {}
+    for (const auto* val : value->get_list_or_empty_map()) {
       out << indent();
       out << render_const_value_helper(
           etype,

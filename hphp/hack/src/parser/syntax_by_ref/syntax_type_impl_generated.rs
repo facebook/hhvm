@@ -544,26 +544,17 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, call_convention: Self, readonly: Self, type_: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
+    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(ctx.get_arena().alloc(ParameterDeclarationChildren {
             attribute,
             visibility,
             call_convention,
             readonly,
             type_,
+            ellipsis,
             name,
             default_value,
             parameter_end,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_variadic_parameter(ctx: &C, call_convention: Self, type_: Self, ellipsis: Self) -> Self {
-        let syntax = SyntaxVariant::VariadicParameter(ctx.get_arena().alloc(VariadicParameterChildren {
-            call_convention,
-            type_,
-            ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -1725,12 +1716,13 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, readonly: Self, type_: Self) -> Self {
+    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(ctx.get_arena().alloc(ClosureParameterTypeSpecifierChildren {
             optional,
             call_convention,
             readonly,
             type_,
+            ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

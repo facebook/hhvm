@@ -3727,26 +3727,19 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         inout: Self::Output,
         readonly: Self::Output,
         hint: Self::Output,
+        ellipsis: Self::Output,
         name: Self::Output,
         initializer: Self::Output,
         parameter_end: Self::Output,
     ) -> Self::Output {
-        let (variadic, pos, name) = match name {
-            Node::ListItem(&(ellipsis, id)) => {
-                let Id(pos, name) = match id.as_variable() {
-                    Some(id) => id,
-                    None => return Node::Ignored(SK::ParameterDeclaration),
-                };
-                let variadic = ellipsis.is_token(TokenKind::DotDotDot);
-                (variadic, pos, Some(name))
+        let variadic = ellipsis.is_present();
+        let (pos, name) = match name.as_variable() {
+            Some(id) => {
+                let Id(pos, name) = id;
+                (pos, Some(name))
             }
-            name => {
-                let Id(pos, name) = match name.as_variable() {
-                    Some(id) => id,
-                    None => return Node::Ignored(SK::ParameterDeclaration),
-                };
-                (false, pos, Some(name))
-            }
+            None if variadic => (self.get_pos(ellipsis), None),
+            None => return Node::Ignored(SK::ParameterDeclaration),
         };
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
@@ -3780,31 +3773,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             initializer,
             parameter_end,
         }))
-    }
-
-    fn make_variadic_parameter(
-        &mut self,
-        _: Self::Output,
-        hint: Self::Output,
-        ellipsis: Self::Output,
-    ) -> Self::Output {
-        Node::FunParam(
-            self.alloc(FunParamDecl {
-                attributes: Node::Ignored(SK::Missing),
-                visibility: Node::Ignored(SK::Missing),
-                kind: ParamMode::FPnormal,
-                optional: false,
-                readonly: false,
-                hint,
-                pos: self
-                    .get_pos_opt(hint)
-                    .unwrap_or_else(|| self.get_pos(ellipsis)),
-                name: None,
-                variadic: true,
-                initializer: Node::Ignored(SK::Missing),
-                parameter_end: Node::Ignored(SK::Missing),
-            }),
-        )
     }
 
     fn make_function_declaration(
@@ -5777,6 +5745,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         inout: Self::Output,
         readonly: Self::Output,
         hint: Self::Output,
+        ellipsis: Self::Output,
     ) -> Self::Output {
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
@@ -5792,7 +5761,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             readonly: readonly.is_token(TokenKind::Readonly),
             pos: self.get_pos(hint),
             name: Some(""),
-            variadic: false,
+            variadic: ellipsis.is_token(TokenKind::DotDotDot),
             initializer: Node::Ignored(SK::Missing),
             parameter_end: Node::Ignored(SK::Missing),
         }))

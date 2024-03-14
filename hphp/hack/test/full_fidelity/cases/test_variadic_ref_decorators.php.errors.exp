@@ -1,5 +1,12 @@
 (5,18)-(5,19) Encountered unexpected token `&`.
-(7,23)-(7,33) Parameter redundantly marked as variadic `...`.
+(7,27)-(7,27) A right parenthesis `)` is expected here.
+(7,31)-(7,31) An expression is expected here.
+(7,33)-(7,33) A semicolon `;` is expected here.
+(7,35)-(7,35) An expression is expected here.
+(7,37)-(7,37) An expression is expected here.
+(7,37)-(7,44) Cannot use collection initialization for non-collection class.
+(7,44)-(8,1) A semicolon `;` is expected here.
+(9,1)-(9,20) Declarations are not supported outside global scope
 (9,21)-(9,21) A variable name is expected here.
 (9,23)-(9,23) An expression is expected here.
 (9,27)-(9,27) A semicolon `;` is expected here.
@@ -7,9 +14,14 @@
 (9,31)-(9,31) An expression is expected here.
 (9,31)-(9,38) Cannot use collection initialization for non-collection class.
 (9,38)-(10,1) A semicolon `;` is expected here.
-(11,1)-(11,37) Declarations are not supported outside global scope
-(11,25)-(11,26) Encountered unexpected token `&`.
-(11,40)-(12,1) Inline function definitions are not supported in Hack
+(11,1)-(11,24) Declarations are not supported outside global scope
+(11,25)-(11,25) A right parenthesis `)` is expected here.
+(11,27)-(11,27) An expression is expected here.
+(11,29)-(11,29) A semicolon `;` is expected here.
+(11,31)-(11,31) An expression is expected here.
+(11,33)-(11,33) An expression is expected here.
+(11,33)-(11,40) Cannot use collection initialization for non-collection class.
+(11,40)-(12,1) A semicolon `;` is expected here.
 (13,1)-(13,22) Declarations are not supported outside global scope
 (13,23)-(13,23) A variable name is expected here.
 (13,25)-(13,25) An expression is expected here.

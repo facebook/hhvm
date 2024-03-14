@@ -904,7 +904,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 .parameter_list
                 .syntax_node_to_list_skip_separator()
                 .partition(|n| match &n.children {
-                    VariadicParameter(_) => false,
+                    ClosureParameterTypeSpecifier(c) => c.ellipsis.is_missing(),
                     _ => true,
                 });
             let (type_hints, info) = param_list
@@ -916,8 +916,8 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             let variadic_hints = variadic_hints
                 .iter()
                 .map(|v| match &v.children {
-                    VariadicParameter(c) => {
-                        if c.type_.is_missing() {
+                    ClosureParameterTypeSpecifier(c) => {
+                        if !c.ellipsis.is_missing() && c.type_.is_missing() {
                             raise_parsing_error(v, env, "Cannot use ... without a typehint");
                         }
                         Ok(Some(p_hint(&c.type_, env)?))
@@ -3810,31 +3810,14 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             call_convention,
             readonly,
             type_,
+            ellipsis,
             name,
             default_value,
             parameter_end: _parameter_end,
         }) => {
-            let (is_variadic, name) = match &name.children {
-                DecoratedExpression(DecoratedExpressionChildren {
-                    decorator,
-                    expression,
-                }) => {
-                    let decorator = text_str(decorator, env);
-                    match &expression.children {
-                        DecoratedExpression(c) => {
-                            let nested_expression = &c.expression;
-                            let nested_decorator = text_str(&c.decorator, env);
-                            (
-                                decorator == "..." || nested_decorator == "...",
-                                nested_expression,
-                            )
-                        }
-                        _ => (decorator == "...", expression),
-                    }
-                }
-                _ => (false, name),
-            };
+            let is_variadic = !ellipsis.is_missing();
             let user_attributes = p_user_attributes(attribute, env);
+            let name = if name.is_missing() { ellipsis } else { name };
             let pos = p_pos(name, env);
             let name = text(name, env);
             let hint = map_optional(type_, env, p_hint)?;
@@ -3863,11 +3846,6 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                  */
                 visibility: p_visibility(visibility, env),
             })
-        }
-        VariadicParameter(_) => {
-            let mut param = param_template(node, env);
-            param.is_variadic = true;
-            Ok(param)
         }
         Token(_) if text_str(node, env) == "..." => {
             let mut param = param_template(node, env);

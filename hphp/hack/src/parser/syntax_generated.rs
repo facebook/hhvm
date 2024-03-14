@@ -538,26 +538,17 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
+    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_ellipsis: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
             parameter_visibility,
             parameter_call_convention,
             parameter_readonly,
             parameter_type,
+            parameter_ellipsis,
             parameter_name,
             parameter_default_value,
             parameter_parameter_end,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_variadic_parameter(_: &C, variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self {
-        let syntax = SyntaxVariant::VariadicParameter(Box::new(VariadicParameterChildren {
-            variadic_parameter_call_convention,
-            variadic_parameter_type,
-            variadic_parameter_ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -1719,12 +1710,13 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(_: &C, closure_parameter_optional: Self, closure_parameter_call_convention: Self, closure_parameter_readonly: Self, closure_parameter_type: Self) -> Self {
+    fn make_closure_parameter_type_specifier(_: &C, closure_parameter_optional: Self, closure_parameter_call_convention: Self, closure_parameter_readonly: Self, closure_parameter_type: Self, closure_parameter_ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
             closure_parameter_optional,
             closure_parameter_call_convention,
             closure_parameter_readonly,
             closure_parameter_type,
+            closure_parameter_ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -2434,22 +2426,16 @@ where
                 acc
             },
             SyntaxVariant::ParameterDeclaration(x) => {
-                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
+                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_ellipsis, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
                 let acc = f(parameter_attribute, acc);
                 let acc = f(parameter_visibility, acc);
                 let acc = f(parameter_call_convention, acc);
                 let acc = f(parameter_readonly, acc);
                 let acc = f(parameter_type, acc);
+                let acc = f(parameter_ellipsis, acc);
                 let acc = f(parameter_name, acc);
                 let acc = f(parameter_default_value, acc);
                 let acc = f(parameter_parameter_end, acc);
-                acc
-            },
-            SyntaxVariant::VariadicParameter(x) => {
-                let VariadicParameterChildren { variadic_parameter_call_convention, variadic_parameter_type, variadic_parameter_ellipsis } = *x;
-                let acc = f(variadic_parameter_call_convention, acc);
-                let acc = f(variadic_parameter_type, acc);
-                let acc = f(variadic_parameter_ellipsis, acc);
                 acc
             },
             SyntaxVariant::OldAttributeSpecification(x) => {
@@ -3288,11 +3274,12 @@ where
                 acc
             },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => {
-                let ClosureParameterTypeSpecifierChildren { closure_parameter_optional, closure_parameter_call_convention, closure_parameter_readonly, closure_parameter_type } = *x;
+                let ClosureParameterTypeSpecifierChildren { closure_parameter_optional, closure_parameter_call_convention, closure_parameter_readonly, closure_parameter_type, closure_parameter_ellipsis } = *x;
                 let acc = f(closure_parameter_optional, acc);
                 let acc = f(closure_parameter_call_convention, acc);
                 let acc = f(closure_parameter_readonly, acc);
                 let acc = f(closure_parameter_type, acc);
+                let acc = f(closure_parameter_ellipsis, acc);
                 acc
             },
             SyntaxVariant::TypeRefinement(x) => {
@@ -3567,7 +3554,6 @@ where
             SyntaxVariant::ContextConstDeclaration {..} => SyntaxKind::ContextConstDeclaration,
             SyntaxVariant::DecoratedExpression {..} => SyntaxKind::DecoratedExpression,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
-            SyntaxVariant::VariadicParameter {..} => SyntaxKind::VariadicParameter,
             SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
             SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,
             SyntaxVariant::Attribute {..} => SyntaxKind::Attribute,
@@ -4045,21 +4031,16 @@ where
                  decorated_expression_decorator: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ParameterDeclaration, 8) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+             (SyntaxKind::ParameterDeclaration, 9) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
                  parameter_parameter_end: ts.pop().unwrap(),
                  parameter_default_value: ts.pop().unwrap(),
                  parameter_name: ts.pop().unwrap(),
+                 parameter_ellipsis: ts.pop().unwrap(),
                  parameter_type: ts.pop().unwrap(),
                  parameter_readonly: ts.pop().unwrap(),
                  parameter_call_convention: ts.pop().unwrap(),
                  parameter_visibility: ts.pop().unwrap(),
                  parameter_attribute: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::VariadicParameter, 3) => SyntaxVariant::VariadicParameter(Box::new(VariadicParameterChildren {
-                 variadic_parameter_ellipsis: ts.pop().unwrap(),
-                 variadic_parameter_type: ts.pop().unwrap(),
-                 variadic_parameter_call_convention: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::OldAttributeSpecification, 3) => SyntaxVariant::OldAttributeSpecification(Box::new(OldAttributeSpecificationChildren {
@@ -4790,7 +4771,8 @@ where
                  closure_outer_left_paren: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClosureParameterTypeSpecifier, 4) => SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
+             (SyntaxKind::ClosureParameterTypeSpecifier, 5) => SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
+                 closure_parameter_ellipsis: ts.pop().unwrap(),
                  closure_parameter_type: ts.pop().unwrap(),
                  closure_parameter_readonly: ts.pop().unwrap(),
                  closure_parameter_call_convention: ts.pop().unwrap(),
@@ -5039,8 +5021,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts(&x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 8) },
-            SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts(&x.variadic_parameter_call_convention, 3) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 9) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
             SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts(&x.attribute_at, 2) },
@@ -5148,7 +5129,7 @@ where
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 11) },
-            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 4) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 5) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.ctx_in_refinement_keyword, 6) },
@@ -5231,8 +5212,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 8) },
-            SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variadic_parameter_call_convention, 3) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 9) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
             SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_at, 2) },
@@ -5340,7 +5320,7 @@ where
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 11) },
-            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 4) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 5) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_in_refinement_keyword, 6) },
@@ -5805,17 +5785,10 @@ pub struct ParameterDeclarationChildren<T, V> {
     pub parameter_call_convention: Syntax<T, V>,
     pub parameter_readonly: Syntax<T, V>,
     pub parameter_type: Syntax<T, V>,
+    pub parameter_ellipsis: Syntax<T, V>,
     pub parameter_name: Syntax<T, V>,
     pub parameter_default_value: Syntax<T, V>,
     pub parameter_parameter_end: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct VariadicParameterChildren<T, V> {
-    pub variadic_parameter_call_convention: Syntax<T, V>,
-    pub variadic_parameter_type: Syntax<T, V>,
-    pub variadic_parameter_ellipsis: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6767,6 +6740,7 @@ pub struct ClosureParameterTypeSpecifierChildren<T, V> {
     pub closure_parameter_call_convention: Syntax<T, V>,
     pub closure_parameter_readonly: Syntax<T, V>,
     pub closure_parameter_type: Syntax<T, V>,
+    pub closure_parameter_ellipsis: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -7067,7 +7041,6 @@ pub enum SyntaxVariant<T, V> {
     ContextConstDeclaration(Box<ContextConstDeclarationChildren<T, V>>),
     DecoratedExpression(Box<DecoratedExpressionChildren<T, V>>),
     ParameterDeclaration(Box<ParameterDeclarationChildren<T, V>>),
-    VariadicParameter(Box<VariadicParameterChildren<T, V>>),
     OldAttributeSpecification(Box<OldAttributeSpecificationChildren<T, V>>),
     AttributeSpecification(Box<AttributeSpecificationChildren<T, V>>),
     Attribute(Box<AttributeChildren<T, V>>),
@@ -7696,24 +7669,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(8).and_then(|index| { match index {
+                get_index(9).and_then(|index| { match index {
                         0 => Some(&x.parameter_attribute),
                     1 => Some(&x.parameter_visibility),
                     2 => Some(&x.parameter_call_convention),
                     3 => Some(&x.parameter_readonly),
                     4 => Some(&x.parameter_type),
-                    5 => Some(&x.parameter_name),
-                    6 => Some(&x.parameter_default_value),
-                    7 => Some(&x.parameter_parameter_end),
-                        _ => None,
-                    }
-                })
-            },
-            VariadicParameter(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.variadic_parameter_call_convention),
-                    1 => Some(&x.variadic_parameter_type),
-                    2 => Some(&x.variadic_parameter_ellipsis),
+                    5 => Some(&x.parameter_ellipsis),
+                    6 => Some(&x.parameter_name),
+                    7 => Some(&x.parameter_default_value),
+                    8 => Some(&x.parameter_parameter_end),
                         _ => None,
                     }
                 })
@@ -8768,11 +8733,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureParameterTypeSpecifier(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.closure_parameter_optional),
                     1 => Some(&x.closure_parameter_call_convention),
                     2 => Some(&x.closure_parameter_readonly),
                     3 => Some(&x.closure_parameter_type),
+                    4 => Some(&x.closure_parameter_ellipsis),
                         _ => None,
                     }
                 })

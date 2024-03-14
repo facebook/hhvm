@@ -72,7 +72,6 @@ pub enum SyntaxVariant<'a, T, V> {
     ContextConstDeclaration(&'a ContextConstDeclarationChildren<'a, T, V>),
     DecoratedExpression(&'a DecoratedExpressionChildren<'a, T, V>),
     ParameterDeclaration(&'a ParameterDeclarationChildren<'a, T, V>),
-    VariadicParameter(&'a VariadicParameterChildren<'a, T, V>),
     OldAttributeSpecification(&'a OldAttributeSpecificationChildren<'a, T, V>),
     AttributeSpecification(&'a AttributeSpecificationChildren<'a, T, V>),
     Attribute(&'a AttributeChildren<'a, T, V>),
@@ -597,16 +596,10 @@ pub struct ParameterDeclarationChildren<'a, T, V> {
     pub call_convention: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub default_value: Syntax<'a, T, V>,
     pub parameter_end: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct VariadicParameterChildren<'a, T, V> {
-    pub call_convention: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
-    pub ellipsis: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -1450,6 +1443,7 @@ pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
     pub call_convention: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

@@ -1636,30 +1636,9 @@ where
         // pass gives an error if a variadic parameter is in an incorrect position
         // or followed by a trailing comma, or if the parameter has a
         // default value.
-        self.parse_parenthesized_comma_list_opt_allow_trailing(|x: &mut Self| x.parse_parameter())
-    }
-
-    fn parse_parameter(&mut self) -> S::Output {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
-            TokenKind::DotDotDot => {
-                let next_kind = parser1.peek_token_kind();
-                if next_kind == TokenKind::Variable {
-                    self.parse_parameter_declaration()
-                } else {
-                    let pos = self.pos();
-                    let missing1 = parser1.sc_mut().make_missing(pos);
-                    let pos = self.pos();
-                    let missing2 = parser1.sc_mut().make_missing(pos);
-                    self.continue_from(parser1);
-                    let token = self.sc_mut().make_token(token);
-                    self.sc_mut()
-                        .make_variadic_parameter(missing1, missing2, token)
-                }
-            }
-            _ => self.parse_parameter_declaration(),
-        }
+        self.parse_parenthesized_comma_list_opt_allow_trailing(|x: &mut Self| {
+            x.parse_parameter_declaration()
+        })
     }
 
     fn parse_parameter_declaration(&mut self) -> S::Output {
@@ -1701,7 +1680,12 @@ where
                 self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ false)
             }
         };
-        let name = self.parse_decorated_variable_opt();
+        let ellipsis = self.parse_ellipsis_opt();
+        let name = if ellipsis.is_missing() {
+            self.require_variable()
+        } else {
+            self.parse_variable_opt()
+        };
         let default = self.parse_simple_initializer_opt();
         let parameter_end = self.pos();
         let parameter_end_token = self.sc_mut().make_missing(parameter_end);
@@ -1711,35 +1695,11 @@ where
             callconv,
             readonly,
             type_specifier,
+            ellipsis,
             name,
             default,
             parameter_end_token,
         )
-    }
-
-    fn parse_decorated_variable_opt(&mut self) -> S::Output {
-        match self.peek_token_kind() {
-            TokenKind::DotDotDot => self.parse_decorated_variable(),
-            _ => self.require_variable(),
-        }
-    }
-
-    // TODO: This is wrong. The variable here is not anexpression* that has
-    // an optional decoration on it.  It's a declaration. We shouldn't be using the
-    // same data structure for a decorated expression as a declaration; one
-    // is ause* and the other is a *definition*.
-    fn parse_decorated_variable(&mut self) -> S::Output {
-        // ERROR RECOVERY
-        // Detection of (variadic, byRef) inout params happens in post-parsing.
-        // Although a parameter can have at most one variadic/reference decorator,
-        // we deliberately allow multiple decorators in the initial parse and produce
-        // an error in a later pass.
-        let decorator = self.fetch_token();
-        let variable = match self.peek_token_kind() {
-            TokenKind::DotDotDot => self.parse_decorated_variable(),
-            _ => self.require_variable(),
-        };
-        self.sc_mut().make_decorated_expression(decorator, variable)
     }
 
     fn parse_visibility_modifier_opt(&mut self) -> S::Output {
@@ -1788,6 +1748,34 @@ where
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Readonly => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_ellipsis_opt(&mut self) -> S::Output {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
+            TokenKind::DotDotDot => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_variable_opt(&mut self) -> S::Output {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
+            TokenKind::Variable => {
                 let token = self.next_token();
                 self.sc_mut().make_token(token)
             }

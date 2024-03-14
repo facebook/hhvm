@@ -3123,35 +3123,32 @@
                       }
                     }
                   },
+                  "parameter_ellipsis":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"...",
+                      "text":"...",
+                      "offset":637,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":38
+                    }
+                  },
                   "parameter_name":{
-                    "kind":"decorated_expression",
-                    "decorated_expression_decorator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"...",
-                        "text":"...",
-                        "offset":637,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":38
-                      }
-                    },
-                    "decorated_expression_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$f",
-                        "offset":640,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"end_of_line","text":"\n","offset":642,"width":1}],
-                        "line_number":38
-                      }
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$f",
+                      "offset":640,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":642,"width":1}],
+                      "line_number":38
                     }
                   }
                 }

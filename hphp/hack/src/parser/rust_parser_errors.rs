@@ -555,16 +555,10 @@ fn is_double_variadic(node: S<'_>) -> bool {
         && test_decorated_expression_child(node, is_variadic_expression)
 }
 
-fn is_variadic_parameter_variable(node: S<'_>) -> bool {
-    // TODO: This shouldn't be a decorated *expression* because we are not
-    // expecting an expression at all. We're expecting a declaration.
-    is_variadic_expression(node)
-}
-
 fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
     match &node.children {
-        VariadicParameter(_) => true,
-        ParameterDeclaration(x) => is_variadic_parameter_variable(&x.name),
+        ParameterDeclaration(x) => x.ellipsis.is_ellipsis(),
+        ClosureParameterTypeSpecifier(x) => x.ellipsis.is_ellipsis(),
         _ => false,
     }
 }
@@ -807,7 +801,6 @@ fn parameter_callconv<'a>(param: S<'a>) -> Option<S<'a>> {
     (match &param.children {
         ParameterDeclaration(x) => Some(&x.call_convention),
         ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
-        VariadicParameter(x) => Some(&x.call_convention),
         _ => None,
     })
     .filter(|node| !node.is_missing())
@@ -848,7 +841,6 @@ fn extract_callconv_node<'a>(node: S<'a>) -> Option<S<'a>> {
     match &node.children {
         ParameterDeclaration(x) => Some(&x.call_convention),
         ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
-        VariadicParameter(x) => Some(&x.call_convention),
         _ => None,
     }
 }
@@ -882,8 +874,6 @@ fn variadic_param_with_callconv<'a>(params: S<'a>) -> Option<S<'a>> {
 fn variadic_param_with_readonly<'a>(params: S<'a>) -> Option<S<'a>> {
     variadic_param(params).filter(|x| match &x.children {
         ParameterDeclaration(x) => x.readonly.is_readonly(),
-        // A VariadicParameter cannot parse readonly, only decorated ... expressions can
-        // so it would parse error anyways
         _ => false,
     })
 }

@@ -384,6 +384,7 @@
                               }
                             }
                           },
+                          "parameter_ellipsis":{"kind":"missing"},
                           "parameter_name":{
                             "kind":"token",
                             "token":{
@@ -725,6 +726,7 @@
                               }
                             }
                           },
+                          "parameter_ellipsis":{"kind":"missing"},
                           "parameter_name":{
                             "kind":"token",
                             "token":{

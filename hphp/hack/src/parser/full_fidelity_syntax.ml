@@ -103,7 +103,6 @@ module WithToken (Token : TokenType) = struct
       | ContextConstDeclaration _ -> SyntaxKind.ContextConstDeclaration
       | DecoratedExpression _ -> SyntaxKind.DecoratedExpression
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
-      | VariadicParameter _ -> SyntaxKind.VariadicParameter
       | OldAttributeSpecification _ -> SyntaxKind.OldAttributeSpecification
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
@@ -363,8 +362,6 @@ module WithToken (Token : TokenType) = struct
     let is_decorated_expression = has_kind SyntaxKind.DecoratedExpression
 
     let is_parameter_declaration = has_kind SyntaxKind.ParameterDeclaration
-
-    let is_variadic_parameter = has_kind SyntaxKind.VariadicParameter
 
     let is_old_attribute_specification =
       has_kind SyntaxKind.OldAttributeSpecification
@@ -1270,6 +1267,7 @@ module WithToken (Token : TokenType) = struct
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
             parameter_parameter_end;
@@ -1279,19 +1277,10 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc parameter_call_convention in
         let acc = f acc parameter_readonly in
         let acc = f acc parameter_type in
+        let acc = f acc parameter_ellipsis in
         let acc = f acc parameter_name in
         let acc = f acc parameter_default_value in
         let acc = f acc parameter_parameter_end in
-        acc
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        let acc = f acc variadic_parameter_call_convention in
-        let acc = f acc variadic_parameter_type in
-        let acc = f acc variadic_parameter_ellipsis in
         acc
       | OldAttributeSpecification
           {
@@ -2356,11 +2345,13 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+            closure_parameter_ellipsis;
           } ->
         let acc = f acc closure_parameter_optional in
         let acc = f acc closure_parameter_call_convention in
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
+        let acc = f acc closure_parameter_ellipsis in
         acc
       | TypeRefinement
           {
@@ -3122,6 +3113,7 @@ module WithToken (Token : TokenType) = struct
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
             parameter_parameter_end;
@@ -3132,20 +3124,10 @@ module WithToken (Token : TokenType) = struct
           parameter_call_convention;
           parameter_readonly;
           parameter_type;
+          parameter_ellipsis;
           parameter_name;
           parameter_default_value;
           parameter_parameter_end;
-        ]
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        [
-          variadic_parameter_call_convention;
-          variadic_parameter_type;
-          variadic_parameter_ellipsis;
         ]
       | OldAttributeSpecification
           {
@@ -4144,12 +4126,14 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+            closure_parameter_ellipsis;
           } ->
         [
           closure_parameter_optional;
           closure_parameter_call_convention;
           closure_parameter_readonly;
           closure_parameter_type;
+          closure_parameter_ellipsis;
         ]
       | TypeRefinement
           {
@@ -4902,6 +4886,7 @@ module WithToken (Token : TokenType) = struct
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
             parameter_parameter_end;
@@ -4912,20 +4897,10 @@ module WithToken (Token : TokenType) = struct
           "parameter_call_convention";
           "parameter_readonly";
           "parameter_type";
+          "parameter_ellipsis";
           "parameter_name";
           "parameter_default_value";
           "parameter_parameter_end";
-        ]
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        [
-          "variadic_parameter_call_convention";
-          "variadic_parameter_type";
-          "variadic_parameter_ellipsis";
         ]
       | OldAttributeSpecification
           {
@@ -5941,12 +5916,14 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+            closure_parameter_ellipsis;
           } ->
         [
           "closure_parameter_optional";
           "closure_parameter_call_convention";
           "closure_parameter_readonly";
           "closure_parameter_type";
+          "closure_parameter_ellipsis";
         ]
       | TypeRefinement
           {
@@ -6825,6 +6802,7 @@ module WithToken (Token : TokenType) = struct
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
             parameter_parameter_end;
@@ -6836,21 +6814,10 @@ module WithToken (Token : TokenType) = struct
             parameter_call_convention;
             parameter_readonly;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
             parameter_parameter_end;
-          }
-      | ( SyntaxKind.VariadicParameter,
-          [
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          ] ) ->
-        VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
           }
       | ( SyntaxKind.OldAttributeSpecification,
           [
@@ -7951,6 +7918,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+            closure_parameter_ellipsis;
           ] ) ->
         ClosureParameterTypeSpecifier
           {
@@ -7958,6 +7926,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
+            closure_parameter_ellipsis;
           }
       | ( SyntaxKind.TypeRefinement,
           [
@@ -8968,6 +8937,7 @@ module WithToken (Token : TokenType) = struct
           parameter_call_convention
           parameter_readonly
           parameter_type
+          parameter_ellipsis
           parameter_name
           parameter_default_value
           parameter_parameter_end =
@@ -8979,24 +8949,10 @@ module WithToken (Token : TokenType) = struct
               parameter_call_convention;
               parameter_readonly;
               parameter_type;
+              parameter_ellipsis;
               parameter_name;
               parameter_default_value;
               parameter_parameter_end;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_variadic_parameter
-          variadic_parameter_call_convention
-          variadic_parameter_type
-          variadic_parameter_ellipsis =
-        let syntax =
-          VariadicParameter
-            {
-              variadic_parameter_call_convention;
-              variadic_parameter_type;
-              variadic_parameter_ellipsis;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -10469,7 +10425,8 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_optional
           closure_parameter_call_convention
           closure_parameter_readonly
-          closure_parameter_type =
+          closure_parameter_type
+          closure_parameter_ellipsis =
         let syntax =
           ClosureParameterTypeSpecifier
             {
@@ -10477,6 +10434,7 @@ module WithToken (Token : TokenType) = struct
               closure_parameter_call_convention;
               closure_parameter_readonly;
               closure_parameter_type;
+              closure_parameter_ellipsis;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

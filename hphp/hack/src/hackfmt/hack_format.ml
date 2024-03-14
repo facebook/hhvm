@@ -942,6 +942,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_call_convention = callconv;
           parameter_readonly = readonly;
           parameter_type = param_type;
+          parameter_ellipsis = ellipsis;
           parameter_name = name;
           parameter_default_value = default;
           parameter_parameter_end = _prend;
@@ -961,24 +962,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
            Syntax.is_missing visibility
            && Syntax.is_missing callconv
            && Syntax.is_missing param_type
-          then
-            t env name
-          else
-            Concat [Space; SplitWith Cost.Moderate; Nest [t env name]]);
+          then begin
+            Concat [t env ellipsis; t env name]
+          end else begin
+            Concat
+              [
+                Space; SplitWith Cost.Moderate; Nest [t env ellipsis; t env name];
+              ]
+          end);
           t env default;
-        ]
-    | Syntax.VariadicParameter
-        {
-          variadic_parameter_call_convention = callconv;
-          variadic_parameter_type = type_var;
-          variadic_parameter_ellipsis = ellipsis;
-        } ->
-      Concat
-        [
-          t env callconv;
-          when_present callconv space;
-          t env type_var;
-          t env ellipsis;
         ]
     | Syntax.FileAttributeSpecification
         {
@@ -2335,6 +2327,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_parameter_call_convention = callconv;
           closure_parameter_readonly = readonly;
           closure_parameter_type = cp_type;
+          closure_parameter_ellipsis = ellipsis;
         } ->
       Concat
         [
@@ -2345,6 +2338,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env readonly;
           when_present readonly space;
           t env cp_type;
+          t env ellipsis;
         ]
     | Syntax.ClassArgsTypeSpecifier
         {
@@ -3162,25 +3156,19 @@ and transform_fn_decl_args env params rightp =
       in
       begin
         match Syntax.syntax last_param with
-        | Syntax.VariadicParameter _
         | Syntax.(
             ParameterDeclaration
               {
-                parameter_name =
-                  {
-                    syntax =
-                      DecoratedExpression
-                        {
-                          decorated_expression_decorator =
-                            {
-                              syntax =
-                                Token { Token.kind = TokenKind.DotDotDot; _ };
-                              _;
-                            };
-                          _;
-                        };
-                    _;
-                  };
+                parameter_ellipsis =
+                  { syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _ };
+                _;
+              }) ->
+          false
+        | Syntax.(
+            ClosureParameterTypeSpecifier
+              {
+                closure_parameter_ellipsis =
+                  { syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _ };
                 _;
               }) ->
           false

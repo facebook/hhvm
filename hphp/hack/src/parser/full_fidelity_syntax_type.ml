@@ -445,14 +445,10 @@ struct
         parameter_call_convention: t;
         parameter_readonly: t;
         parameter_type: t;
+        parameter_ellipsis: t;
         parameter_name: t;
         parameter_default_value: t;
         parameter_parameter_end: t;
-      }
-    | VariadicParameter of {
-        variadic_parameter_call_convention: t;
-        variadic_parameter_type: t;
-        variadic_parameter_ellipsis: t;
       }
     | OldAttributeSpecification of {
         old_attribute_specification_left_double_angle: t;
@@ -1074,6 +1070,7 @@ struct
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
         closure_parameter_type: t;
+        closure_parameter_ellipsis: t;
       }
     | TypeRefinement of {
         type_refinement_type: t;

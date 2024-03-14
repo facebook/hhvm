@@ -246,12 +246,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_decorated_expression(self, decorator, expression)
     }
 
-    fn make_parameter_declaration(&mut self, attribute: Self::Output, visibility: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output, name: Self::Output, default_value: Self::Output, parameter_end: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_parameter_declaration(self, attribute, visibility, call_convention, readonly, type_, name, default_value, parameter_end)
-    }
-
-    fn make_variadic_parameter(&mut self, call_convention: Self::Output, type_: Self::Output, ellipsis: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_variadic_parameter(self, call_convention, type_, ellipsis)
+    fn make_parameter_declaration(&mut self, attribute: Self::Output, visibility: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output, ellipsis: Self::Output, name: Self::Output, default_value: Self::Output, parameter_end: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_parameter_declaration(self, attribute, visibility, call_convention, readonly, type_, ellipsis, name, default_value, parameter_end)
     }
 
     fn make_old_attribute_specification(&mut self, left_double_angle: Self::Output, attributes: Self::Output, right_double_angle: Self::Output) -> Self::Output {
@@ -682,8 +678,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_closure_type_specifier(self, outer_left_paren, readonly_keyword, function_keyword, inner_left_paren, parameter_list, inner_right_paren, contexts, colon, readonly_return, return_type, outer_right_paren)
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, optional: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, optional, call_convention, readonly, type_)
+    fn make_closure_parameter_type_specifier(&mut self, optional: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output, ellipsis: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, optional, call_convention, readonly, type_, ellipsis)
     }
 
     fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {

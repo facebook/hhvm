@@ -2230,8 +2230,8 @@
                       {
                         "kind":"list_item",
                         "list_item":{
-                          "kind":"variadic_parameter",
-                          "variadic_parameter_ellipsis":{
+                          "kind":"parameter_declaration",
+                          "parameter_ellipsis":{
                             "kind":"token",
                             "token":{
                               "kind":"...",
@@ -2402,8 +2402,8 @@
                       {
                         "kind":"list_item",
                         "list_item":{
-                          "kind":"variadic_parameter",
-                          "variadic_parameter_ellipsis":{
+                          "kind":"parameter_declaration",
+                          "parameter_ellipsis":{
                             "kind":"token",
                             "token":{
                               "kind":"...",
@@ -2593,8 +2593,8 @@
                       {
                         "kind":"list_item",
                         "list_item":{
-                          "kind":"variadic_parameter",
-                          "variadic_parameter_ellipsis":{
+                          "kind":"parameter_declaration",
+                          "parameter_ellipsis":{
                             "kind":"token",
                             "token":{
                               "kind":"...",

@@ -547,6 +547,19 @@ where
         }
     }
 
+    fn parse_ellipsis_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::DotDotDot => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
     fn parse_optional_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Optional => {
@@ -594,34 +607,22 @@ where
     //   ...
 
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::Output {
-        match self.peek_token_kind() {
+        let optional = self.parse_optional_opt();
+        let callconv = self.parse_call_convention_opt();
+        let readonly = self.parse_readonly_opt();
+        let token = self.peek_token();
+        let ts = match token.kind() {
             TokenKind::DotDotDot => {
                 let pos = self.pos();
-                let missing1 = self.sc_mut().make_missing(pos);
-                let pos = self.pos();
-                let missing2 = self.sc_mut().make_missing(pos);
-                let token = self.next_token();
-                let token = self.sc_mut().make_token(token);
-                self.sc_mut()
-                    .make_variadic_parameter(missing1, missing2, token)
+                self.sc_mut().make_missing(pos)
             }
             _ => {
-                let optional = self.parse_optional_opt();
-                let callconv = self.parse_call_convention_opt();
-                let readonly = self.parse_readonly_opt();
-                let ts = self.parse_type_specifier(false, true);
-                match self.peek_token_kind() {
-                    TokenKind::DotDotDot => {
-                        let token = self.next_token();
-                        let token = self.sc_mut().make_token(token);
-                        self.sc_mut().make_variadic_parameter(callconv, ts, token)
-                    }
-                    _ => self
-                        .sc_mut()
-                        .make_closure_parameter_type_specifier(optional, callconv, readonly, ts),
-                }
+                self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ true)
             }
-        }
+        };
+        let ellipsis = self.parse_ellipsis_opt();
+        self.sc_mut()
+            .make_closure_parameter_type_specifier(optional, callconv, readonly, ts, ellipsis)
     }
 
     fn parse_optionally_reified_type(&mut self) -> S::Output {

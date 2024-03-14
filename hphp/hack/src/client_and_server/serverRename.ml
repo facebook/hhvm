@@ -139,33 +139,12 @@ let get_pos_before_docblock_from_cst_node filename node =
     let start_offset = leading_start_offset node in
     SourceText.relative_pos filename source_text start_offset start_offset)
 
-(* This function will capture a variadic parameter and give it a name if it is
- * anonymous.  Example:
- *
- * public static function newName(int $x, ...): string {
- *
- * would become:
- *
- * public static function newName(int $x, mixed ...$args): string {
- *
- *)
-let fixup_anonymous_variadic
-    (func_decl : Full_fidelity_positioned_syntax.t)
-    (has_anonymous_variadic : bool) : string =
-  Full_fidelity_positioned_syntax.(
-    if has_anonymous_variadic then
-      let r = Str.regexp "\\.\\.\\." in
-      Str.global_replace r "mixed ...$args" (text func_decl)
-    else
-      text func_decl)
-
 (* Contains just enough information to properly wrap a function *)
 type wrapper_call_signature_info = {
   params_text_list: string list;
   returns_void: bool;
   is_async: bool;
   is_static: bool;
-  has_anonymous_variadic: bool;
 }
 
 (* Identify key information about a function so we can produce a deprecated wrapper *)
@@ -194,36 +173,21 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                 (* NOTE:
                     `ParameterDeclaration` includes regular params like "$x" and
                      _named_ variadic parameters like "...$nums". For the latter case,
-                     calling `text parameter_name` will return the entire "...$nums"
-                     string, including the ellipsis.
-
-                   `VariadicParameter` addresses the unnamed variadic parameter
-                     "...". In this case, we provide as a parameter a function call
-                     that outputs only the variadic params (and dropping the
-                     non-variadic ones).
+                     we prepend the name with the ellipsis, in order to construct
+                     the wrapped call.
                 *)
-                | ParameterDeclaration { parameter_name = name; _ } -> text name
-                | VariadicParameter _ -> "...$args"
+                | ParameterDeclaration
+                    { parameter_name = name; parameter_ellipsis = ellipsis; _ }
+                  -> begin
+                  match syntax ellipsis with
+                  | Missing -> text name
+                  | _ -> "..." ^ text name
+                end
                 | _ -> failwith "Expected some parameter type")
           in
           params_text_list
         | Missing -> []
         | _ -> []
-      in
-      let has_anonymous_variadic =
-        match syntax params with
-        | SyntaxList params ->
-          List.exists params ~f:(fun param ->
-              let param =
-                match syntax param with
-                | ListItem { list_item; _ } -> list_item
-                | _ -> failwith "Expected ListItem"
-              in
-              match syntax param with
-              | VariadicParameter _ -> true
-              | _ -> false)
-        | Missing -> false
-        | _ -> false
       in
       let returns_void =
         match syntax ret_type with
@@ -287,20 +251,13 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
           (is_async, is_static)
         | _ -> (false, false)
       in
-      {
-        params_text_list;
-        returns_void;
-        is_async;
-        is_static;
-        has_anonymous_variadic;
-      }
+      { params_text_list; returns_void; is_async; is_static }
     | _ ->
       {
         params_text_list = [];
         returns_void = false;
         is_async = false;
         is_static = false;
-        has_anonymous_variadic = false;
       })
 
 let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
@@ -361,11 +318,7 @@ let get_deprecated_wrapper_patch
           | MethodishDeclaration
               { methodish_function_decl_header = func_decl; _ } ->
             let call_signature = get_call_signature_for_wrap func_decl in
-            let func_decl_text =
-              fixup_anonymous_variadic
-                func_decl
-                call_signature.has_anonymous_variadic
-            in
+            let func_decl_text = text func_decl in
             let func_ref =
               if call_signature.is_static then
                 DeprecatedStaticMethodRef
@@ -388,11 +341,7 @@ let get_deprecated_wrapper_patch
           | FunctionDeclaration { function_declaration_header = func_decl; _ }
             ->
             let call_signature = get_call_signature_for_wrap func_decl in
-            let func_decl_text =
-              fixup_anonymous_variadic
-                func_decl
-                call_signature.has_anonymous_variadic
-            in
+            let func_decl_text = text func_decl in
             let func_ref = DeprecatedFunctionRef in
             Some
               ( func_decl_text,

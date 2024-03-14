@@ -598,8 +598,8 @@
                         {
                           "kind":"list_item",
                           "list_item":{
-                            "kind":"variadic_parameter",
-                            "variadic_parameter_ellipsis":{
+                            "kind":"closure_parameter_type_specifier",
+                            "closure_parameter_ellipsis":{
                               "kind":"token",
                               "token":{
                                 "kind":"...",

@@ -511,24 +511,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(8).and_then(|index| { match index {
+                get_index(9).and_then(|index| { match index {
                         0 => Some(&x.attribute),
                     1 => Some(&x.visibility),
                     2 => Some(&x.call_convention),
                     3 => Some(&x.readonly),
                     4 => Some(&x.type_),
-                    5 => Some(&x.name),
-                    6 => Some(&x.default_value),
-                    7 => Some(&x.parameter_end),
-                        _ => None,
-                    }
-                })
-            },
-            VariadicParameter(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.call_convention),
-                    1 => Some(&x.type_),
-                    2 => Some(&x.ellipsis),
+                    5 => Some(&x.ellipsis),
+                    6 => Some(&x.name),
+                    7 => Some(&x.default_value),
+                    8 => Some(&x.parameter_end),
                         _ => None,
                     }
                 })
@@ -1583,11 +1575,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureParameterTypeSpecifier(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.optional),
                     1 => Some(&x.call_convention),
                     2 => Some(&x.readonly),
                     3 => Some(&x.type_),
+                    4 => Some(&x.ellipsis),
                         _ => None,
                     }
                 })

@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2024-01-31-0000",
+  "version" : "2024-03-13-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -918,18 +918,10 @@
         { "field_name" : "call_convention" },
         { "field_name" : "readonly" },
         { "field_name" : "type" },
+        { "field_name" : "ellipsis" },
         { "field_name" : "name" },
         { "field_name" : "default_value" },
         { "field_name" : "parameter_end" }
-      ] },
-    { "kind_name" : "VariadicParameter",
-      "type_name" : "variadic_parameter",
-      "description" : "variadic_parameter",
-      "prefix" : "variadic_parameter",
-      "fields" : [
-        { "field_name" : "call_convention" },
-        { "field_name" : "type" },
-        { "field_name" : "ellipsis" }
       ] },
     { "kind_name" : "OldAttributeSpecification",
       "type_name" : "old_attribute_specification",
@@ -1988,7 +1980,8 @@
         { "field_name" : "optional" },
         { "field_name" : "call_convention" },
         { "field_name" : "readonly" },
-        { "field_name" : "type" }
+        { "field_name" : "type" },
+        { "field_name" : "ellipsis" }
       ] },
     { "kind_name" : "TypeRefinement",
       "type_name" : "type_refinement",

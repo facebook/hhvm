@@ -209,11 +209,8 @@ where S: SmartConstructors<State = St>,
     fn make_decorated_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         compose(SyntaxKind::DecoratedExpression, self.s.make_decorated_expression(arg0.1, arg1.1))
     }
-    fn make_parameter_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::ParameterDeclaration, self.s.make_parameter_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1))
-    }
-    fn make_variadic_parameter(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::VariadicParameter, self.s.make_variadic_parameter(arg0.1, arg1.1, arg2.1))
+    fn make_parameter_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ParameterDeclaration, self.s.make_parameter_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1))
     }
     fn make_old_attribute_specification(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::OldAttributeSpecification, self.s.make_old_attribute_specification(arg0.1, arg1.1, arg2.1))
@@ -536,8 +533,8 @@ where S: SmartConstructors<State = St>,
     fn make_closure_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output, arg10 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ClosureTypeSpecifier, self.s.make_closure_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1))
     }
-    fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::ClosureParameterTypeSpecifier, self.s.make_closure_parameter_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1))
+    fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ClosureParameterTypeSpecifier, self.s.make_closure_parameter_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
     fn make_type_refinement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::TypeRefinement, self.s.make_type_refinement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))

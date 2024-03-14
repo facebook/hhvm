@@ -1,0 +1,2 @@
+File "duplicate_promoted_variadic.php", line 5, characters 31-50:
+Cannot redeclare `C::$args` (Parsing[1002])

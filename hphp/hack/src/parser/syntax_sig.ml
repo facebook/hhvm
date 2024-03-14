@@ -314,14 +314,10 @@ module type Syntax_S = sig
         parameter_call_convention: t;
         parameter_readonly: t;
         parameter_type: t;
+        parameter_ellipsis: t;
         parameter_name: t;
         parameter_default_value: t;
         parameter_parameter_end: t;
-      }
-    | VariadicParameter of {
-        variadic_parameter_call_convention: t;
-        variadic_parameter_type: t;
-        variadic_parameter_ellipsis: t;
       }
     | OldAttributeSpecification of {
         old_attribute_specification_left_double_angle: t;
@@ -943,6 +939,7 @@ module type Syntax_S = sig
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
         closure_parameter_type: t;
+        closure_parameter_ellipsis: t;
       }
     | TypeRefinement of {
         type_refinement_type: t;
@@ -1255,9 +1252,8 @@ module type Syntax_S = sig
 
   val make_decorated_expression : t -> t -> t
 
-  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
-
-  val make_variadic_parameter : t -> t -> t -> t
+  val make_parameter_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_old_attribute_specification : t -> t -> t -> t
 
@@ -1476,7 +1472,7 @@ module type Syntax_S = sig
   val make_closure_type_specifier :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t
+  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t
 
   val make_type_refinement : t -> t -> t -> t -> t -> t
 
@@ -1635,8 +1631,6 @@ module type Syntax_S = sig
   val is_decorated_expression : t -> bool
 
   val is_parameter_declaration : t -> bool
-
-  val is_variadic_parameter : t -> bool
 
   val is_old_attribute_specification : t -> bool
 

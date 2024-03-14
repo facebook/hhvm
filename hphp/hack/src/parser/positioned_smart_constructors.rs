@@ -261,12 +261,8 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_decorated_expression(self, arg0, arg1)
     }
 
-    fn make_parameter_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output, arg6: Self::Output, arg7: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_parameter_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-    }
-
-    fn make_variadic_parameter(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_variadic_parameter(self, arg0, arg1, arg2)
+    fn make_parameter_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output, arg6: Self::Output, arg7: Self::Output, arg8: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_parameter_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
     }
 
     fn make_old_attribute_specification(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output {
@@ -697,8 +693,8 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_closure_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_closure_parameter_type_specifier(self, arg0, arg1, arg2, arg3)
+    fn make_closure_parameter_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_closure_parameter_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_type_refinement(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {

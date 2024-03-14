@@ -705,23 +705,10 @@ let schema : schema_node list =
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
+          ("ellipsis", ZeroOrOne Token);
           ("name", Aggregate Expression);
           ("default_value", ZeroOrOne (Just "SimpleInitializer"));
           ("parameter_end", ZeroOrOne Token);
-        ];
-    };
-    {
-      kind_name = "VariadicParameter";
-      type_name = "variadic_parameter";
-      func_name = "variadic_parameter";
-      description = "variadic_parameter";
-      prefix = "variadic_parameter";
-      aggregates = [Specifier; Parameter];
-      fields =
-        [
-          ("call_convention", ZeroOrOne Token);
-          ("type", ZeroOrOne (Just "SimpleTypeSpecifier"));
-          ("ellipsis", Token);
         ];
     };
     {
@@ -2200,6 +2187,7 @@ let schema : schema_node list =
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           ("type", Aggregate Specifier);
+          ("ellipsis", ZeroOrOne Token);
         ];
     };
     {

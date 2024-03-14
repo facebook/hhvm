@@ -98,7 +98,7 @@ cdef __ListSpec get_reflection__folly_small_vector__List__i32()
 
 cdef __SetSpec get_reflection__folly_sorted_vector_set__Set__i32()
 
-cdef __MapSpec get_reflection__Map__i32_string()
+cdef __MapSpec get_reflection__folly_sorted_vector_map__Map__i32_string()
 
 cdef __ListSpec get_reflection__std_list_int32_t__List__i32()
 

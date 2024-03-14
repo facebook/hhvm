@@ -544,7 +544,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef inline fieldG_impl(self):
 
         if self.__fbthrift_cached_fieldG is None:
-            self.__fbthrift_cached_fieldG = Map__i32_string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).fieldG_ref().ref(), self._cpp_obj))
+            self.__fbthrift_cached_fieldG = folly_sorted_vector_map__Map__i32_string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).fieldG_ref().ref(), self._cpp_obj))
         return self.__fbthrift_cached_fieldG
 
     @property
@@ -5075,31 +5075,31 @@ cdef class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
 Set.register(folly_sorted_vector_set__Set__i32)
 
 @__cython.auto_pickle(False)
-cdef class Map__i32_string(thrift.py3.types.Map):
+cdef class folly_sorted_vector_map__Map__i32_string(thrift.py3.types.Map):
     def __init__(self, items=None):
-        if isinstance(items, Map__i32_string):
-            self._cpp_obj = (<Map__i32_string> items)._cpp_obj
+        if isinstance(items, folly_sorted_vector_map__Map__i32_string):
+            self._cpp_obj = (<folly_sorted_vector_map__Map__i32_string> items)._cpp_obj
         else:
-            self._cpp_obj = Map__i32_string._make_instance(items)
+            self._cpp_obj = folly_sorted_vector_map__Map__i32_string._make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cint32_t,string]] c_items):
-        __fbthrift_inst = <Map__i32_string>Map__i32_string.__new__(Map__i32_string)
+    cdef _fbthrift_create(shared_ptr[folly_sorted_vector_map[cint32_t,string]] c_items):
+        __fbthrift_inst = <folly_sorted_vector_map__Map__i32_string>folly_sorted_vector_map__Map__i32_string.__new__(folly_sorted_vector_map__Map__i32_string)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
 
-    def __copy__(Map__i32_string self):
-        cdef shared_ptr[cmap[cint32_t,string]] cpp_obj = make_shared[cmap[cint32_t,string]](
+    def __copy__(folly_sorted_vector_map__Map__i32_string self):
+        cdef shared_ptr[folly_sorted_vector_map[cint32_t,string]] cpp_obj = make_shared[folly_sorted_vector_map[cint32_t,string]](
             deref(self._cpp_obj)
         )
-        return Map__i32_string._fbthrift_create(cmove(cpp_obj))
+        return folly_sorted_vector_map__Map__i32_string._fbthrift_create(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
 
     @staticmethod
-    cdef shared_ptr[cmap[cint32_t,string]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cint32_t,string]] c_inst = make_shared[cmap[cint32_t,string]]()
+    cdef shared_ptr[folly_sorted_vector_map[cint32_t,string]] _make_instance(object items) except *:
+        cdef shared_ptr[folly_sorted_vector_map[cint32_t,string]] c_inst = make_shared[folly_sorted_vector_map[cint32_t,string]]()
         if items is not None:
             for key, item in items.items():
                 if not isinstance(key, int):
@@ -5132,7 +5132,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     def __iter__(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint32_t,string]] itr = __map_iter[cmap[cint32_t,string]](self._cpp_obj)
+        cdef __map_iter[folly_sorted_vector_map[cint32_t,string]] itr = __map_iter[folly_sorted_vector_map[cint32_t,string]](self._cpp_obj)
         cdef cint32_t citem = 0
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextKey(self._cpp_obj, citem)
@@ -5148,7 +5148,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     def values(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint32_t,string]] itr = __map_iter[cmap[cint32_t,string]](self._cpp_obj)
+        cdef __map_iter[folly_sorted_vector_map[cint32_t,string]] itr = __map_iter[folly_sorted_vector_map[cint32_t,string]](self._cpp_obj)
         cdef string citem
         for i in range(deref(self._cpp_obj).size()):
             itr.genNextValue(self._cpp_obj, citem)
@@ -5157,7 +5157,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     def items(self):
         if not self:
             return
-        cdef __map_iter[cmap[cint32_t,string]] itr = __map_iter[cmap[cint32_t,string]](self._cpp_obj)
+        cdef __map_iter[folly_sorted_vector_map[cint32_t,string]] itr = __map_iter[folly_sorted_vector_map[cint32_t,string]](self._cpp_obj)
         cdef cint32_t ckey = 0
         cdef string citem
         for i in range(deref(self._cpp_obj).size()):
@@ -5166,9 +5166,9 @@ cdef class Map__i32_string(thrift.py3.types.Map):
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__i32_string()
+        return _types_reflection.get_reflection__folly_sorted_vector_map__Map__i32_string()
 
-Mapping.register(Map__i32_string)
+Mapping.register(folly_sorted_vector_map__Map__i32_string)
 
 @__cython.auto_pickle(False)
 cdef class std_list_int32_t__List__i32(thrift.py3.types.List):
@@ -6113,7 +6113,7 @@ TBinary_8623 = bytes
 i32_9314 = int
 list_i32_9187 = List__i32
 map_i32_i32_9565 = Map__i32_i32
-map_i32_string_1261 = Map__i32_string
+map_i32_string_1261 = folly_sorted_vector_map__Map__i32_string
 set_i32_7070 = Set__i32
 set_i32_7194 = folly_sorted_vector_set__Set__i32
 string_5252 = str

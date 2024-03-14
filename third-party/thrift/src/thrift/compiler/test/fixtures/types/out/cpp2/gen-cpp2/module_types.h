@@ -575,7 +575,7 @@ typedef ::apache::thrift::fixtures::types::TBinary TBinary_8623;
 typedef ::std::int32_t i32_9314;
 typedef ::std::vector<::std::int32_t> list_i32_9187;
 typedef ::std::map<::std::int32_t, ::std::int32_t> map_i32_i32_9565;
-typedef ::std::map<::std::int32_t, ::std::string> map_i32_string_1261;
+typedef folly::sorted_vector_map<::std::int32_t, ::std::string> map_i32_string_1261;
 typedef ::std::set<::std::int32_t> set_i32_7070;
 typedef folly::sorted_vector_set<::std::int32_t> set_i32_7194;
 typedef ::std::string string_5252;
@@ -897,7 +897,7 @@ class ContainerStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, folly::sorted_vector_map<::std::int32_t, ::std::string> fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg);
+  ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, ::apache::thrift::fixtures::types::map_i32_string_1261 fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg);
 
   ContainerStruct(ContainerStruct&&) noexcept;
 
@@ -922,7 +922,7 @@ class ContainerStruct final  {
  private:
   ::apache::thrift::fixtures::types::set_i32_7194 __fbthrift_field_fieldF;
  private:
-  folly::sorted_vector_map<::std::int32_t, ::std::string> __fbthrift_field_fieldG;
+  ::apache::thrift::fixtures::types::map_i32_string_1261 __fbthrift_field_fieldG;
  private:
   ::apache::thrift::fixtures::types::SomeMap __fbthrift_field_fieldH;
  private:
@@ -1173,42 +1173,42 @@ class ContainerStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_fieldF), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldG_ref() const& {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldG_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldG_ref() & {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldG_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldG() const& {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldG() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldG() & {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldG() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
@@ -1306,12 +1306,12 @@ class ContainerStruct final  {
     fieldF_ref() = std::forward<T_ContainerStruct_fieldF_struct_setter>(fieldF_);
     return __fbthrift_field_fieldF;
   }
-  const folly::sorted_vector_map<::std::int32_t, ::std::string>& get_fieldG() const&;
-  folly::sorted_vector_map<::std::int32_t, ::std::string> get_fieldG() &&;
+  const ::apache::thrift::fixtures::types::map_i32_string_1261& get_fieldG() const&;
+  ::apache::thrift::fixtures::types::map_i32_string_1261 get_fieldG() &&;
 
-  template <typename T_ContainerStruct_fieldG_struct_setter = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename T_ContainerStruct_fieldG_struct_setter = ::apache::thrift::fixtures::types::map_i32_string_1261>
   [[deprecated("Use `FOO.fieldG_ref() = BAR;` instead of `FOO.set_fieldG(BAR);`")]]
-  folly::sorted_vector_map<::std::int32_t, ::std::string>& set_fieldG(T_ContainerStruct_fieldG_struct_setter&& fieldG_) {
+  ::apache::thrift::fixtures::types::map_i32_string_1261& set_fieldG(T_ContainerStruct_fieldG_struct_setter&& fieldG_) {
     fieldG_ref() = std::forward<T_ContainerStruct_fieldG_struct_setter>(fieldG_);
     return __fbthrift_field_fieldG;
   }

@@ -1183,6 +1183,10 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   generate_file("thrift_types.py", IsTypesFile, generate_root_path_);
   generate_file("thrift_types.pyi", IsTypesFile, generate_root_path_);
+  if (has_option("experimental_generate_mutable_types")) {
+    generate_file("thrift_mutable_types.py", IsTypesFile, generate_root_path_);
+    generate_file("thrift_mutable_types.pyi", IsTypesFile, generate_root_path_);
+  }
 }
 
 void t_mstch_python_generator::generate_metadata() {

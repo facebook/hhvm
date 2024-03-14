@@ -150,12 +150,12 @@ public:
   static int getNumGP();
   static int getNumSIMD();
   static int numGP() {
-    static int kNumGP = getNumGP();
-    return kNumGP;
+    static int kNumGP_2 = getNumGP();
+    return kNumGP_2;
   }
   static int numSIMD() {
-    static int kNumSIMD = getNumSIMD();
-    return kNumSIMD;
+    static int kNumSIMD_2 = getNumSIMD();
+    return kNumSIMD_2;
   }
 
   /*

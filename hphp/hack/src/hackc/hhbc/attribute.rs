@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Vector;
-use intern::string::StringId;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use serde::Serialize;
 
-use crate::typed_value::TypedValue;
+use crate::ClassName;
+use crate::TypedValue;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:
@@ -26,14 +26,14 @@ use crate::typed_value::TypedValue;
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
 pub struct Attribute {
-    pub name: StringId,
+    pub name: ClassName,
     pub arguments: Vector<TypedValue>,
 }
 
 impl Attribute {
     pub fn new(name: impl AsRef<str>, arguments: Vec<TypedValue>) -> Self {
         Self {
-            name: intern::string::intern(name.as_ref()),
+            name: ClassName::intern(name.as_ref()),
             arguments: arguments.into(),
         }
     }
@@ -190,7 +190,7 @@ mod tests {
     #[test]
     fn example_is_memoized_vs_eq_memoize() {
         let attr = Attribute {
-            name: intern::string::intern(ua::MEMOIZE_LSB),
+            name: ClassName::intern(ua::MEMOIZE_LSB),
             arguments: vec![].into(),
         };
         assert!(attr.is(ua::is_memoized));
@@ -200,8 +200,8 @@ mod tests {
 
     #[test]
     fn example_has_dynamically_callable() {
-        let mk_attr = |name: &'static str| Attribute {
-            name: intern::string::intern(name),
+        let mk_attr = |name: &str| Attribute {
+            name: ClassName::intern(name),
             arguments: vec![].into(),
         };
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];

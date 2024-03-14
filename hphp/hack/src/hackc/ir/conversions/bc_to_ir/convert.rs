@@ -92,7 +92,7 @@ pub(crate) struct UnitState {
 pub(crate) fn convert_attribute(attr: &hhbc::Attribute) -> ir::Attribute {
     let arguments = attr.arguments.clone().into();
     ir::Attribute {
-        name: ir::ClassName::new(attr.name),
+        name: attr.name,
         arguments,
     }
 }

@@ -326,7 +326,7 @@ void translateUserAttributes(const Vector<hhbc::Attribute>& attributes,
   Trace::Indent indent;
   auto attrs = range(attributes);
   for (auto const& attr : attrs) {
-    auto const name = toStaticString(attr.name);
+    auto const name = toStaticString(attr.name._0);
     VecInit v(attr.arguments.len);
     auto args = range(attr.arguments);
     for (auto const& arg : args) {

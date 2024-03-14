@@ -55,9 +55,6 @@ class HTTPAcceptor : public wangle::Acceptor {
     return std::make_unique<WheelTimerInstance>(
         accConfig_.transactionIdleTimeout, eventBase);
   }
-
- private:
-  AsyncTimeoutSet::UniquePtr tcpEventsTimeouts_;
 };
 
 } // namespace proxygen

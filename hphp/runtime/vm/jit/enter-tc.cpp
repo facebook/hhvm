@@ -23,9 +23,9 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/vm/runtime.h"
 
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"

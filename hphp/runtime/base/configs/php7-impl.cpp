@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/php7.h"
+#include "hphp/runtime/base/configs/php7-loader.h"
 
 namespace HPHP::Cfg {
 
-bool PHP7::allDefault() {
+bool PHP7Loader::allDefault() {
 #ifdef HHVM_FACEBOOK
   return false;
 #else

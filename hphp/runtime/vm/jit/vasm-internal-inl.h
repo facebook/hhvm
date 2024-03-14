@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -23,6 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 
 #include <folly/Random.h>

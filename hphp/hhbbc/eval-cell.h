@@ -21,13 +21,14 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/configs/jit.h" // @manual=//hphp/runtime/base/configs:jit-header
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
+
+#include "hphp/util/configs/jit.h" // @manual=//hphp/util/configs:jit
 
 namespace HPHP::HHBBC {
 

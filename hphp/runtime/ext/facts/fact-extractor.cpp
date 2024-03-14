@@ -23,13 +23,13 @@
 #include <folly/json/dynamic.h>
 #include <folly/logging/xlog.h>
 
-#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/unit-parser.h"
+#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"

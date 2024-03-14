@@ -21,9 +21,9 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 

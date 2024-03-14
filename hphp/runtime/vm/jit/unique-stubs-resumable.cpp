@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -48,6 +47,8 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
+
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit {
 

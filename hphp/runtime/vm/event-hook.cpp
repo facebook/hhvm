@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/implicit-context.h"
@@ -46,6 +45,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"
 
 namespace HPHP {

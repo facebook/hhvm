@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -41,6 +39,8 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 

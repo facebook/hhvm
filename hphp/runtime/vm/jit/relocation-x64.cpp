@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/base/configs/jit.h"
-
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -25,6 +23,8 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit::x64 {
 

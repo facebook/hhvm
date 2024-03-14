@@ -18,8 +18,6 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/unit-cache-generated.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -45,6 +43,8 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"

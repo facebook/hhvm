@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -65,6 +64,7 @@
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"

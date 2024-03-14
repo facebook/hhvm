@@ -33,8 +33,6 @@
 #include <folly/String.h>
 #include <folly/portability/Unistd.h>
 
-#include "hphp/runtime/base/configs/jit.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -53,8 +51,10 @@
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 
-#include "hphp/util/rds-local.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

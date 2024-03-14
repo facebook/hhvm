@@ -15,8 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
-
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unwind.h"
 
@@ -29,6 +27,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP::jit::irgen {

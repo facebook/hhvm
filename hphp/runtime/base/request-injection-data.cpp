@@ -27,10 +27,8 @@
 #include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 
-#include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -41,6 +39,8 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

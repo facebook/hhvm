@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_auth.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/process-exec.h"
 #include <string>
 

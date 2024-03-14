@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -41,6 +40,7 @@
 #include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {

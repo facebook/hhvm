@@ -18,8 +18,8 @@
 
 #include <string>
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
+#include "hphp/util/configs/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {

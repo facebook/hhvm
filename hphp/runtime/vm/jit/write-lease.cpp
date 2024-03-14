@@ -15,12 +15,12 @@
 */
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/process.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"

@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/configs/jit.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"

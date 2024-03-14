@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -29,6 +28,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/match.h"
 #include "hphp/util/immed.h"
 #include "hphp/util/trace.h"

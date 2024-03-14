@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -54,6 +52,8 @@
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/trace.h"
 

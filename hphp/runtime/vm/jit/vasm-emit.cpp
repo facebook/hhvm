@@ -30,11 +30,11 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {

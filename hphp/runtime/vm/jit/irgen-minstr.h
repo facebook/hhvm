@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/static-string-table.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -32,6 +31,8 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
+
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
 

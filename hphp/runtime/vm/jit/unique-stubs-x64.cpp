@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -37,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 

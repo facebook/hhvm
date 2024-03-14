@@ -19,11 +19,10 @@
 #include <array>
 #include <folly/MapUtil.h>
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
-
-#include "hphp/runtime/base/configs/hhir.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"

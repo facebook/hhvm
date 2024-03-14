@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/server.h"
+#include "hphp/runtime/base/configs/server-loader.h"
 
+#include "hphp/util/configs/server.h"
 #include "hphp/util/process.h"
 #include "hphp/util/process-cpu.h"
 
@@ -26,29 +27,29 @@
 
 namespace HPHP::Cfg {
 
-int Server::ThreadCountDefault() {
+int ServerLoader::ThreadCountDefault() {
   return Process::GetCPUCount() * 2;
 }
 
-int Server::WarmupThrottleThreadCountDefault() {
+int ServerLoader::WarmupThrottleThreadCountDefault() {
   return Process::GetCPUCount();
 }
 
-void Server::CacheFreeFactorPostProcess(int& value) {
+void ServerLoader::CacheFreeFactorPostProcess(int& value) {
   if (value > 100) value = 100;
   if (value < 0) value = 0;
 }
 
-void Server::MaxPostSizePostProcess(int64_t& value) {
+void ServerLoader::MaxPostSizePostProcess(int64_t& value) {
   value <<= 20;
 }
 
-void Server::ExpiresDefaultPostProcess(int& value) {
+void ServerLoader::ExpiresDefaultPostProcess(int& value) {
   if (value < 0) value = 2592000;
 }
 
-void Server::SSLClientCAFilePostProcess(std::string& value) {
-  if (!SSLClientAuthLevel) {
+void ServerLoader::SSLClientCAFilePostProcess(std::string& value) {
+  if (!Cfg::Server::SSLClientAuthLevel) {
       value = "";
     } else if (value.empty()) {
       throw std::runtime_error(
@@ -56,26 +57,26 @@ void Server::SSLClientCAFilePostProcess(std::string& value) {
     }
 }
 
-void Server::SSLClientAuthLevelPostProcess(int& value) {
+void ServerLoader::SSLClientAuthLevelPostProcess(int& value) {
   if (value < 0) value = 0;
   if (value > 2) value = 2;
 }
 
-void Server::ClientAuthLogSampleBasePostProcess(uint32_t& value) {
+void ServerLoader::ClientAuthLogSampleBasePostProcess(uint32_t& value) {
   if (value < 1) {
     value = 1;
   }
 }
 
-void Server::ClientAuthSuccessLogSampleRatioPostProcess(uint32_t& value) {
-  if (value > ClientAuthLogSampleBase) {
-    value = ClientAuthLogSampleBase;
+void ServerLoader::ClientAuthSuccessLogSampleRatioPostProcess(uint32_t& value) {
+  if (value > Cfg::Server::ClientAuthLogSampleBase) {
+    value = Cfg::Server::ClientAuthLogSampleBase;
   }
 }
 
-void Server::ClientAuthFailureLogSampleRatioPostProcess(uint32_t& value) {
-  if (value > ClientAuthLogSampleBase) {
-    value = ClientAuthLogSampleBase;
+void ServerLoader::ClientAuthFailureLogSampleRatioPostProcess(uint32_t& value) {
+  if (value > Cfg::Server::ClientAuthLogSampleBase) {
+    value = Cfg::Server::ClientAuthLogSampleBase;
   }
 }
 
@@ -94,19 +95,19 @@ static void normalizePath(std::string& path) {
 
 }
 
-void Server::ErrorDocument404PostProcess(std::string& value) {
+void ServerLoader::ErrorDocument404PostProcess(std::string& value) {
   normalizePath(value);
 }
 
-void Server::ErrorDocument500PostProcess(std::string& value) {
+void ServerLoader::ErrorDocument500PostProcess(std::string& value) {
   normalizePath(value);
 }
 
-std::string Server::SourceRootDefault() {
+std::string ServerLoader::SourceRootDefault() {
   return Process::GetCurrentDirectory() + '/';
 }
 
-void Server::MaxArrayChainPostProcess(int& value) {
+void ServerLoader::MaxArrayChainPostProcess(int& value) {
   // VanillaDict needs a higher threshold to avoid false-positives.
   // (and we always use VanillaDict)
   if (value < (INT_MAX / 2)) {
@@ -116,22 +117,22 @@ void Server::MaxArrayChainPostProcess(int& value) {
   }
 }
 
-int Server::ThreadJobLIFOSwitchThresholdDefault() {
-  if (ThreadJobLIFO) return 0;
+int ServerLoader::ThreadJobLIFOSwitchThresholdDefault() {
+  if (Cfg::Server::ThreadJobLIFO) return 0;
   return INT_MAX;
 }
 
-void Server::UploadMaxFileSizePostProcess(int64_t& value) {
+void ServerLoader::UploadMaxFileSizePostProcess(int64_t& value) {
   value <<= 20;
 }
 
-void Server::UploadRfc1867FreqPostProcess(int& value) {
+void ServerLoader::UploadRfc1867FreqPostProcess(int& value) {
   if (value < 0) value = 256 * 1024;
 }
 
-void Server::ImageMemoryMaxBytesPostProcess(int64_t& value) {
+void ServerLoader::ImageMemoryMaxBytesPostProcess(int64_t& value) {
   if (value == 0) {
-    value = UploadMaxFileSize * 2;
+    value = Cfg::Server::UploadMaxFileSize * 2;
   }
 }
 

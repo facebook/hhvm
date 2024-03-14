@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/xbox.h"
+#include "hphp/runtime/base/configs/xbox-loader.h"
 
 #include <climits>
 
 namespace HPHP::Cfg {
 
-void Xbox::ServerInfoMaxQueueLengthPostProcess(int& value) {
+void XboxLoader::ServerInfoMaxQueueLengthPostProcess(int& value) {
   if (value < 0) value = INT_MAX;
 }
 

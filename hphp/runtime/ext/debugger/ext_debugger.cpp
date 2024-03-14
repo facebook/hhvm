@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
@@ -25,6 +24,8 @@
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unwind.h"
+
+#include "hphp/util/configs/debugger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

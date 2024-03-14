@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP {
 namespace VSDEBUG {

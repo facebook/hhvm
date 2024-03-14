@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -62,6 +61,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"

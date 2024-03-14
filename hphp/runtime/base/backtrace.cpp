@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -34,6 +33,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/concurrent-scalable-cache.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"
 
 #include <folly/small_vector.h>

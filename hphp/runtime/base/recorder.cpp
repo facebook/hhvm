@@ -32,7 +32,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
@@ -62,6 +61,7 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"

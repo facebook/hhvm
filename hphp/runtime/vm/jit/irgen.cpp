@@ -15,9 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/hhir.h"
-
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
@@ -27,6 +24,9 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
 

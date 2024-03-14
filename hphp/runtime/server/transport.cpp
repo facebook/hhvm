@@ -21,7 +21,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/stream-transport.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"

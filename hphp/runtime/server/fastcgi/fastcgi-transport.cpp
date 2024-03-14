@@ -15,11 +15,12 @@
 */
 
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/transport.h"
+
+#include "hphp/util/configs/server.h"
 
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>

@@ -20,7 +20,6 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/intercept.h"
@@ -51,6 +50,7 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/struct-log.h"

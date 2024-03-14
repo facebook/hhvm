@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-string.h"
@@ -31,6 +30,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/configs/hacklang.h"
 #include "hphp/util/exception.h"
 
 namespace HPHP {

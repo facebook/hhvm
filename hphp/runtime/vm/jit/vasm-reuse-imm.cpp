@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -26,6 +25,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
 
 #include <cstdlib>
 

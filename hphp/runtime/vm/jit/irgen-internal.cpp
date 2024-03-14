@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP::jit::irgen {

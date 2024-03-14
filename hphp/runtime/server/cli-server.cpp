@@ -130,8 +130,6 @@ way to determine how much progress the server made.
 #include "hphp/runtime/server/cli-server-ext.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/server.h"
-#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
@@ -156,6 +154,8 @@ way to determine how much progress the server made.
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/util/afdt-util.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/configs/xbox.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"

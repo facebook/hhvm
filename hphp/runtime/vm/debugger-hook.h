@@ -18,7 +18,6 @@
 
 #include <functional>
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -28,6 +27,8 @@
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
+
+#include "hphp/util/configs/jit.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify

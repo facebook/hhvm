@@ -23,13 +23,13 @@
 #include <folly/Hash.h>
 
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/either.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/perf-warning.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"

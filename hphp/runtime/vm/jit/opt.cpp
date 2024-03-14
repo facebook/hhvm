@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/dce.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 #include <boost/dynamic_bitset.hpp>

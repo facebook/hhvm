@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -30,6 +29,7 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 

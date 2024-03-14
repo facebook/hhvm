@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -38,6 +37,7 @@
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {

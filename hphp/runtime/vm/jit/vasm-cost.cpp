@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit {
 namespace {

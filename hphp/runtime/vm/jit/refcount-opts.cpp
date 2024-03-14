@@ -510,15 +510,14 @@ them when we shouldn't.
 
 #include "hphp/util/bitset-array.h"
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/jit.h"
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"

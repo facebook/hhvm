@@ -26,7 +26,6 @@
 #include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/repo-global-data-generated.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -45,6 +44,7 @@
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"

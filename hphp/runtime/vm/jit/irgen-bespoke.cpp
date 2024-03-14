@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
 

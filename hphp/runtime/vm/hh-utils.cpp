@@ -20,12 +20,12 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/hacklang.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {

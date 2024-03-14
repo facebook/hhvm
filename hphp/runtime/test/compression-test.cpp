@@ -25,10 +25,10 @@
 
 #include "hphp/runtime/test/test-context.h"
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/server/compression.h"
 
 #include "hphp/util/brotli.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/zstd.h"
 

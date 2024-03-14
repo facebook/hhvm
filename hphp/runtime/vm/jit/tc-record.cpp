@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"

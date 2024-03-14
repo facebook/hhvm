@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -49,6 +48,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"

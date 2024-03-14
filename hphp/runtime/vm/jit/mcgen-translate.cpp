@@ -42,7 +42,6 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -50,6 +49,7 @@
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"

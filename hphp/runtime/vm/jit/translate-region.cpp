@@ -17,13 +17,13 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"

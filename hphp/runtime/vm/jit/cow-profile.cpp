@@ -17,7 +17,8 @@
 #include "hphp/runtime/vm/jit/cow-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/configs/hhir.h"
+
+#include "hphp/util/configs/hhir.h"
 
 #include <algorithm>
 #include <cstring>

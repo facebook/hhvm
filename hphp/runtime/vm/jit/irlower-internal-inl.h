@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/object-data.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit::irlower {
 

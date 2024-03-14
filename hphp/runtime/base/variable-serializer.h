@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -28,6 +27,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {

@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/base/crash-reporter.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -36,6 +34,8 @@
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"

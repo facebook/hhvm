@@ -21,9 +21,9 @@
 
 #include <folly/MapUtil.h>
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"

@@ -30,6 +30,9 @@
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
 
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/text-util.h"
@@ -43,9 +46,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/errorhandling.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"

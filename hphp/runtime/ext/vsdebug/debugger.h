@@ -21,7 +21,6 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
@@ -34,6 +33,7 @@
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {

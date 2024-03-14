@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -26,6 +25,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 
 TRACE_SET_MOD(fixup);

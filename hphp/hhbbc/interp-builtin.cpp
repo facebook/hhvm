@@ -15,12 +15,12 @@
 */
 #include "hphp/hhbbc/interp.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 

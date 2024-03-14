@@ -6,7 +6,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
@@ -15,6 +14,8 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/util/configs/php7.h"
 
 #include <curl/curl.h>
 #include <curl/easy.h>

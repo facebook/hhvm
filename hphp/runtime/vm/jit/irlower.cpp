@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/tracing.h"
 
@@ -37,6 +36,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>

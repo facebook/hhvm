@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -71,6 +70,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 

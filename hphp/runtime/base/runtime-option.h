@@ -28,17 +28,17 @@
 #include <folly/json/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/configs/autoload.h"
-#include "hphp/runtime/base/configs/hacklang.h"
-#include "hphp/runtime/base/configs/jit.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/repo-options-flags-generated.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/hacklang.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/php7.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"

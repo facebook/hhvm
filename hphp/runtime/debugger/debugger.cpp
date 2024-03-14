@@ -20,13 +20,13 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/util/text-color.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/text-color.h"
 
 #include <memory>
 #include <set>

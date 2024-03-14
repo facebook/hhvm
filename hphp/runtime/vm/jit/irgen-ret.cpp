@@ -15,17 +15,15 @@
 */
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 
-
-#include "hphp/runtime/base/configs/hhir.h"
-
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
-
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
 

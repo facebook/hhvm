@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 
-#include "hphp/runtime/base/configs/pcre.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -29,6 +28,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/configs/pcre.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {

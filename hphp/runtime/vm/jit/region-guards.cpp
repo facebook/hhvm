@@ -21,9 +21,8 @@
 #include <folly/Hash.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
-
-#include "hphp/runtime/base/configs/jit.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"

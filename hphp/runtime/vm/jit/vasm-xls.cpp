@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -33,6 +32,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 

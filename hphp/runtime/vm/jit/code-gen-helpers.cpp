@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -40,6 +39,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/immed.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"

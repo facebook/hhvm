@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/class.h"
@@ -26,6 +25,8 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
+
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
 

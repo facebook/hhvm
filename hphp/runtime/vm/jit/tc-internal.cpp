@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -46,6 +45,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"

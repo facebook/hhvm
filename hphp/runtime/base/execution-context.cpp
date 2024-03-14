@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
@@ -82,6 +81,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 #include "hphp/zend/zend-math.h"
 

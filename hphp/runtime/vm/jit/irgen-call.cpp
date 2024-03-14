@@ -15,9 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
@@ -43,6 +40,10 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
+
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit::irgen {
 

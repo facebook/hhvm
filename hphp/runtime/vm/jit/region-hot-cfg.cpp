@@ -17,9 +17,9 @@
 #include <memory>
 #include <algorithm>
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"

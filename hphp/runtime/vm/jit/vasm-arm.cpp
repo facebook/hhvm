@@ -67,7 +67,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -84,6 +83,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include "hphp/util/configs/jit.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 

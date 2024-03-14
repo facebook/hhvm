@@ -14,17 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/hhir-loader.h"
 
 #include "hphp/util/compilation-flags.h"
 
 namespace HPHP::Cfg {
 
-bool HHIR::InliningIgnoreHintsDefault() {
+bool HHIRLoader::InliningIgnoreHintsDefault() {
   return !debug;
 }
 
-bool HHIR::AlwaysInterpIgnoreHintDefault() {
+bool HHIRLoader::AlwaysInterpIgnoreHintDefault() {
   return !debug;
 }
 

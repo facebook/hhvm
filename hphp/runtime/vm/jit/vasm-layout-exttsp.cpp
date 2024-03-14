@@ -16,8 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-layout.h"
 
-#include "hphp/runtime/base/configs/jit.h"
-
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <algorithm>

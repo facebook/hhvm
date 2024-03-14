@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -33,6 +32,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 
 #include <vector>

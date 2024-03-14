@@ -45,6 +45,9 @@ namespace HPHP {
  */
 struct HdfRaw; // reference counting HDF* raw pointer, implmented in .cpp file
 struct Hdf {
+
+  friend struct IniSettingMap;
+
   /**
    * Constructors.
    */

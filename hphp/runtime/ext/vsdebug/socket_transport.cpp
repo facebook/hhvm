@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/ext/vsdebug/socket_transport.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/user-info.h"
 
 #include <pwd.h>

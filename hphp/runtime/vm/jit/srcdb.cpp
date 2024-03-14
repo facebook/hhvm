@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 
-#include "hphp/runtime/base/configs/jit.h"
-
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -27,6 +25,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <cstdarg>

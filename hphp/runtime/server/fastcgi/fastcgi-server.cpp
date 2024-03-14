@@ -17,7 +17,7 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 
 #include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/base/configs/server.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP {
 

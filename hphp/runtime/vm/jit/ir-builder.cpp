@@ -22,9 +22,9 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"

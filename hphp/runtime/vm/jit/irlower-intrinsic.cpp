@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/stats.h"
@@ -51,6 +50,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {

@@ -23,7 +23,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/configs/server.h" // @manual=//hphp/runtime/base/configs:server-header
+#include "hphp/util/configs/server.h" // @manual=//hphp/util/configs:server
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"

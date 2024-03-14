@@ -24,10 +24,10 @@
 #include <vector>
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/unit-cache-generated.h"
 #include "hphp/runtime/base/unit-cache.h"
 
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/coro.h"
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/hash-map.h"

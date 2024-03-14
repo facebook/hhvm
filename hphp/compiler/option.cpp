@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/configs/configs-load.h"
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/variable-unserializer.h"

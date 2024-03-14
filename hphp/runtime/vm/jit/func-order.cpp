@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -28,6 +27,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/hfsort.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"

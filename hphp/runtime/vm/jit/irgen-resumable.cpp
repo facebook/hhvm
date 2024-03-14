@@ -19,8 +19,6 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -38,6 +36,8 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irgen {

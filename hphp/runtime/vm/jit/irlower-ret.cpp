@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -48,6 +47,7 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {

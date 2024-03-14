@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/configs/hhir.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
@@ -55,6 +53,8 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/check-size.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>

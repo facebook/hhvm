@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/strings.h"
@@ -38,6 +37,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/php7.h"
 
 #include <folly/tracing/StaticTracepoint.h>
 

@@ -20,12 +20,13 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+
+#include "hphp/util/configs/errorhandling.h"
 
 #include <folly/portability/Unistd.h>
 

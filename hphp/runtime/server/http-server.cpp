@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/configs/debugger.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -42,6 +40,8 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

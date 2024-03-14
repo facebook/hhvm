@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
-#include "hphp/runtime/base/configs/jit.h"
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP {
 namespace VSDEBUG {

@@ -23,9 +23,6 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/configs/hacklang.h"
-#include "hphp/runtime/base/configs/jit.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
@@ -45,6 +42,9 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
+#include "hphp/util/configs/hacklang.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 

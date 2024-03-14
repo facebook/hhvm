@@ -19,8 +19,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/autoload.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -36,6 +34,8 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP {
 

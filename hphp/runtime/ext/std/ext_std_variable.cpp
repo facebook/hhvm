@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -31,6 +30,7 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/server/http-protocol.h"
 
+#include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/logger.h"
 

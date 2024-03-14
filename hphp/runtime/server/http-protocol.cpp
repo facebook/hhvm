@@ -21,6 +21,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
@@ -28,7 +29,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"

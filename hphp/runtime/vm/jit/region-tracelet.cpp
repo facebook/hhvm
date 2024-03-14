@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -28,6 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <folly/MapUtil.h>

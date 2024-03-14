@@ -30,6 +30,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
@@ -37,7 +38,6 @@
 #include "hphp/util/smalllocks.h"
 #include "hphp/util/type-scan.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/vm/debug/debug.h"

@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -54,8 +53,9 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 

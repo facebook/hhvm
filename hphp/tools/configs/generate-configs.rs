@@ -62,11 +62,13 @@ Possible features are:
 
 */
 
+use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
+use clap::ValueEnum;
 use nom::branch::alt;
 use nom::bytes::complete::escaped;
 use nom::bytes::complete::tag;
@@ -239,6 +241,27 @@ impl ConfigType {
         }
     }
 
+    fn includes(&self) -> Vec<&str> {
+        match *self {
+            ConfigType::Bool | ConfigType::Double | ConfigType::Int => vec![],
+            ConfigType::Int8t
+            | ConfigType::Int16t
+            | ConfigType::Int32t
+            | ConfigType::Int64t
+            | ConfigType::UInt8t
+            | ConfigType::UInt16t
+            | ConfigType::UInt32t
+            | ConfigType::UInt64t => vec!["cstdint"],
+            ConfigType::StdString => vec!["string"],
+            ConfigType::StdVectorStdString => vec!["vector", "string"],
+            ConfigType::StdSetStdString => vec!["set", "string"],
+            ConfigType::StdMapStdStringStdString => vec!["map", "string"],
+            ConfigType::BoostFlatSetStdString => {
+                vec!["boost/container/flat_set.hpp", "string"]
+            }
+        }
+    }
+
     fn default(&self) -> &str {
         match *self {
             ConfigType::Bool => "false",
@@ -285,9 +308,17 @@ impl ConfigSection {
     }
 }
 
+#[derive(Debug, Clone, ValueEnum)]
+enum OutputType {
+    Defs,
+    Loader,
+}
+
 #[derive(Debug, Parser)]
 #[clap(name = "HHVM Generate Configs")]
 struct Arguments {
+    #[clap(value_enum)]
+    output_type: OutputType,
     output_dir: PathBuf,
     input: PathBuf,
 }
@@ -626,9 +657,119 @@ fn parse_option_doc<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     ))(input)
 }
 
-fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
+fn generate_defs(sections: Vec<ConfigSection>, output_dir: PathBuf) {
+    let section_names = sections.iter().map(|s| s.name.clone()).collect::<Vec<_>>();
+
+    for section in sections.iter() {
+        let section_shortname = section.shortname();
+        let lower_section_shortname = section_shortname.to_lowercase();
+
+        // [section].h file
+        let mut public_defs = vec![];
+        let mut private_defs = vec![];
+        let mut includes = vec![];
+        for config in section.configs.iter() {
+            let shortname = config.shortname(&section.name);
+            if config.features.repo_options_flag.is_none() {
+                for include in config.type_.includes() {
+                    includes.push(include);
+                }
+                if config.features.is_private {
+                    private_defs.push(format!("  static {} {};", config.type_.str(), shortname));
+                } else {
+                    public_defs.push(format!("  static {} {};", config.type_.str(), shortname));
+                }
+            }
+        }
+
+        let mut unique_includes = includes
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+        unique_includes.sort();
+        let unique_include_paths = unique_includes
+            .into_iter()
+            .map(|p| format!("#include <{}>", p))
+            .collect::<Vec<_>>();
+
+        let h_content = format!(
+            r#"#pragma once
+
+{}
+
+namespace HPHP::Cfg {{
+
+struct {} {{
+
+  friend struct {}Loader;
+
+{}
+
+private:
+{}
+
+}};
+
+}} // namespace HPHP::Cfg
+"#,
+            unique_include_paths.join("\n"),
+            section_shortname,
+            section_shortname,
+            public_defs.join("\n"),
+            private_defs.join("\n"),
+        );
+        let mut h_output_file = output_dir.clone();
+        h_output_file.push(format!("{}.h", lower_section_shortname));
+        fs::write(h_output_file, h_content).unwrap();
+
+        // [section].cpp file
+        let mut defs = vec![];
+        for config in section.configs.iter() {
+            let shortname = config.shortname(&section.name);
+            if config.features.repo_options_flag.is_none() {
+                defs.push(format!(
+                    "{} {}::{} = {};",
+                    config.type_.str(),
+                    section_shortname,
+                    shortname,
+                    if config.features.has_no_bind {
+                        config
+                            .default_value
+                            .as_ref()
+                            .unwrap()
+                            .string(&section_names)
+                    } else if let Some(d) = &config.features.static_default {
+                        d.to_string()
+                    } else {
+                        config.type_.default().to_string()
+                    },
+                ));
+            }
+        }
+
+        let cpp_content = format!(
+            r#"#include "{}.h"
+
+namespace HPHP::Cfg {{
+
+{}
+
+}} // namespace HPHP::Cfg
+"#,
+            lower_section_shortname,
+            defs.join("\n"),
+        );
+        let mut cpp_output_file = output_dir.clone();
+        cpp_output_file.push(format!("{}.cpp", lower_section_shortname));
+        fs::write(cpp_output_file, cpp_content).unwrap();
+    }
+}
+
+fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
     let mut repo_global_data = vec![];
     let mut unit_cache_flags = vec![];
+    let mut repo_options_includes = vec![];
     let mut repo_options_flags = vec![];
     let mut repo_options_sections = vec![];
 
@@ -644,23 +785,18 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             .any(|c| c.features.repo_options_flag.is_some());
 
         if has_repo_option_flags {
-            repo_options_sections.push(format!("  S({})\\", section_shortname));
+            repo_options_includes.push(format!(
+                r#"#include "hphp/runtime/base/configs/{}-loader.h""#,
+                lower_section_shortname
+            ));
+            repo_options_sections.push(format!("  S({}Loader)\\", section_shortname));
         }
 
-        // [section].h file
-        let mut public_defs = vec![];
+        // [section]-loader.h
         let mut public_methods = vec![];
-        let mut private_defs = vec![];
         let mut private_methods = vec![];
         for config in section.configs.iter() {
             let shortname = config.shortname(&section.name);
-            if config.features.repo_options_flag.is_none() {
-                if config.features.is_private {
-                    private_defs.push(format!("  static {} {};", config.type_.str(), shortname,));
-                } else {
-                    public_defs.push(format!("  static {} {};", config.type_.str(), shortname,));
-                }
-            }
             if config.default_value.is_none() {
                 public_methods.push(format!(
                     "  static {} {}Default();",
@@ -703,11 +839,7 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
         let h_content = format!(
             r#"#pragma once
 
-#include <cstdint>
-#include <set>
 #include <string>
-#include <vector>
-#include <boost/container/flat_set.hpp>
 
 namespace HPHP {{
 
@@ -717,34 +849,30 @@ struct RepoOptionsFlags;
 
 namespace Cfg {{
 
-struct {} {{
-
-{}
+struct {}Loader {{
 
 {}
 
 private:
 {}
 
-{}
 }};
 
 }} // namespace Cfg
 
 }} // namespace HPHP
+
 "#,
             section_shortname,
-            public_defs.join("\n"),
             public_methods.join("\n"),
-            private_defs.join("\n"),
             private_methods.join("\n"),
         );
+
         let mut h_output_file = output_dir.clone();
-        h_output_file.push(format!("{}.h", lower_section_shortname));
+        h_output_file.push(format!("{}-loader.h", lower_section_shortname));
         fs::write(h_output_file, h_content).unwrap();
 
-        // [section].cpp file
-        let mut defs = vec![];
+        // [section]-loader.cpp file
         let mut bind_calls = vec![];
         let mut debug_calls = vec![];
         let mut compiler_option_calls = vec![];
@@ -786,38 +914,29 @@ private:
                     section_shortname, shortname,
                 ));
             } else {
-                defs.push(format!(
-                    "{} {}::{} = {};",
-                    config.type_.str(),
-                    section_shortname,
-                    shortname,
-                    if config.features.has_no_bind {
-                        &default_value
-                    } else if let Some(d) = &config.features.static_default {
-                        d
-                    } else {
-                        config.type_.default()
-                    },
-                ));
                 if !config.features.has_no_bind {
                     bind_calls.push(format!(
-                        r#"  Config::Bind({}, ini, config, "{}", {});"#,
+                        r#"  Config::Bind(Cfg::{}::{}, ini, config, "{}", {});"#,
+                        section_shortname,
                         shortname,
                         config.hdf_path(section),
                         default_value
                     ));
                     if config.features.has_post_process {
-                        bind_calls.push(format!(r#"  {}PostProcess({});"#, shortname, shortname));
+                        bind_calls.push(format!(
+                            r#"  {}PostProcess(Cfg::{}::{});"#,
+                            shortname, section_shortname, shortname
+                        ));
                     }
                 }
                 debug_calls.push(format!(
-                    r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = {{}}\n", {});"#,
-                    section_shortname, shortname, shortname,
+                    r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = {{}}\n", Cfg::{}::{});"#,
+                    section_shortname, shortname, section_shortname, shortname,
                 ));
                 if let Some(compiler_option_name) = &config.features.compiler_option {
                     compiler_option_calls.push(format!(
-                        r#"  Config::Bind({}, ini, config, "{}", {});"#,
-                        shortname, compiler_option_name, default_value,
+                        r#"  Config::Bind(Cfg::{}::{}, ini, config, "{}", {});"#,
+                        section_shortname, shortname, compiler_option_name, default_value,
                     ));
                 }
             }
@@ -826,15 +945,15 @@ private:
         let mut repo_options_methods = String::new();
         if has_repo_option_flags {
             repo_options_methods = format!(
-                r#"void {}::GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSetting::Map& ini, const Hdf& config) {{
+                r#"void {}Loader::GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSetting::Map& ini, const Hdf& config) {{
 {}
 }}
 
-void {}::GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, const RepoOptionsFlags& default_flags) {{
+void {}Loader::GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, const RepoOptionsFlags& default_flags) {{
 {}
 }}
 
-void {}::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
+void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 {}
 }}
 
@@ -851,7 +970,7 @@ void {}::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
         let mut compiler_options_method = String::new();
         if has_compiler_option {
             compiler_options_method = format!(
-                r#"void {}::LoadForCompiler(const IniSettingMap& ini, const Hdf& config) {{
+                r#"void {}Loader::LoadForCompiler(const IniSettingMap& ini, const Hdf& config) {{
 {}
 }}
 
@@ -862,9 +981,11 @@ void {}::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
         }
 
         let cpp_content = format!(
-            r#"#include "hphp/runtime/base/configs/{}.h"
+            r#"#include "hphp/runtime/base/configs/{}-loader.h"
+
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/{}.h"
 #include "hphp/util/hdf-extract.h"
 
 #include <fmt/core.h>
@@ -872,13 +993,11 @@ void {}::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 
 namespace HPHP::Cfg {{
 
-{}
-
-void {}::Load(const IniSetting::Map& ini, const Hdf& config) {{
+void {}Loader::Load(const IniSetting::Map& ini, const Hdf& config) {{
 {}
 }}
 
-std::string {}::Debug() {{
+std::string {}Loader::Debug() {{
   std::string out;
 {}
   return out;
@@ -887,7 +1006,7 @@ std::string {}::Debug() {{
 {}{}}} // namespace HPHP::Cfg
 "#,
             lower_section_shortname,
-            defs.join("\n"),
+            lower_section_shortname,
             section_shortname,
             bind_calls.join("\n"),
             section_shortname,
@@ -897,7 +1016,7 @@ std::string {}::Debug() {{
         );
 
         let mut cpp_output_file = output_dir.clone();
-        cpp_output_file.push(format!("{}.cpp", lower_section_shortname));
+        cpp_output_file.push(format!("{}-loader.cpp", lower_section_shortname));
         fs::write(cpp_output_file, cpp_content).unwrap();
 
         // macro files
@@ -964,7 +1083,8 @@ std::string {}::Debug() {{
     let repo_options_flags_content = format!(
         r#"#pragma once
 
-#include "hphp/runtime/base/configs/configs-load.h"
+#include "hphp/runtime/base/configs/configs.h"
+{}
 
 #define CONFIGS_FOR_REPOOPTIONSFLAGS() \
 {}
@@ -973,6 +1093,7 @@ std::string {}::Debug() {{
 {}
 
 "#,
+        repo_options_includes.join("\n"),
         repo_options_flags.join("\n"),
         repo_options_sections.join("\n"),
     );
@@ -991,17 +1112,20 @@ std::string {}::Debug() {{
         let section_shortname = section.shortname();
         let lower_section_shortname = section_shortname.to_lowercase();
         config_load_includes.push(format!(
-            r#"#include "hphp/runtime/base/configs/{}.h""#,
+            r#"#include "hphp/runtime/base/configs/{}-loader.h""#,
             lower_section_shortname
         ));
-        config_load_calls.push(format!("  Cfg::{}::Load(ini, config);", section_shortname));
+        config_load_calls.push(format!(
+            "  Cfg::{}Loader::Load(ini, config);",
+            section_shortname
+        ));
         if section
             .configs
             .iter()
             .any(|c| c.features.compiler_option.is_some())
         {
             config_load_compiler_calls.push(format!(
-                "  Cfg::{}::LoadForCompiler(ini, config);",
+                "  Cfg::{}Loader::LoadForCompiler(ini, config);",
                 section_shortname
             ));
         }
@@ -1012,22 +1136,22 @@ std::string {}::Debug() {{
             .any(|c| c.features.repo_options_flag.is_some())
         {
             repo_options_flags_calls.push(format!(
-                "  Cfg::{}::GetRepoOptionsFlags(flags, ini, config);",
+                "  Cfg::{}Loader::GetRepoOptionsFlags(flags, ini, config);",
                 section_shortname,
             ));
             repo_options_flags_from_config_calls.push(format!(
-                "  Cfg::{}::GetRepoOptionsFlagsFromConfig(flags, config, default_flags);",
+                "  Cfg::{}Loader::GetRepoOptionsFlagsFromConfig(flags, config, default_flags);",
                 section_shortname,
             ));
             repo_options_flags_for_systemlib_calls.push(format!(
-                "  Cfg::{}::GetRepoOptionsFlagsForSystemlib(flags);",
+                "  Cfg::{}Loader::GetRepoOptionsFlagsForSystemlib(flags);",
                 section_shortname,
             ));
         }
     }
 
     let configs_load_content = format!(
-        r#"#include "hphp/runtime/base/configs/configs-load.h"
+        r#"#include "hphp/runtime/base/configs/configs.h"
 
 {}
 
@@ -1071,7 +1195,7 @@ void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
         repo_options_flags_for_systemlib_calls.join("\n"),
     );
     let mut configs_load_file = output_dir.clone();
-    configs_load_file.push("configs-load-generated.cpp");
+    configs_load_file.push("configs-generated.cpp");
     fs::write(configs_load_file, configs_load_content).unwrap();
 }
 
@@ -1085,7 +1209,10 @@ fn main() -> ExitCode {
     let res = parse_option_doc::<VerboseError<&str>>(&contents);
     match res {
         Ok((_, sections)) => {
-            generate_files(sections, args.output_dir);
+            match args.output_type {
+                OutputType::Defs => generate_defs(sections, args.output_dir),
+                OutputType::Loader => generate_loader(sections, args.output_dir),
+            }
             ExitCode::from(0)
         }
         Err(Err::Error(e)) | Err(Err::Failure(e)) => {

@@ -14,19 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/jit.h"
+#include "hphp/runtime/base/configs/jit-loader.h"
 
 #include <limits>
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/cpuid.h"
 #include "hphp/util/process-cpu.h"
 
 namespace HPHP::Cfg {
 
-bool Jit::TimerDefault() {
+bool JitLoader::TimerDefault() {
 #ifdef ENABLE_JIT_TIMER_DEFAULT
   return true;
 #else
@@ -34,51 +35,51 @@ bool Jit::TimerDefault() {
 #endif
 }
 
-int Jit::WorkerThreadsDefault() {
+int JitLoader::WorkerThreadsDefault() {
   return std::max(1, Process::GetCPUCount() / 2);
 }
 
-int Jit::WorkerArenasDefault() {
+int JitLoader::WorkerArenasDefault() {
   return std::max(1, Process::GetCPUCount() / 4);
 }
 
-uint32_t Jit::ProfileRequestsDefault() {
+uint32_t JitLoader::ProfileRequestsDefault() {
   return debug ? std::numeric_limits<uint32_t>::max() : 2500;
 }
 
-uint32_t Jit::ProfileBCSizeDefault() {
+uint32_t JitLoader::ProfileBCSizeDefault() {
   return debug ? std::numeric_limits<uint32_t>::max()
     : Jit::Concurrently ? 3750000
     : 4300000;
 }
 
-uint32_t Jit::ResetProfCountersRequestDefault() {
+uint32_t JitLoader::ResetProfCountersRequestDefault() {
   return Jit::PGORacyProfiling
     ? std::numeric_limits<uint32_t>::max()
     : Jit::Concurrently ? 250 : 1000;
 }
 
-uint32_t Jit::RetranslateAllRequestDefault() {
+uint32_t JitLoader::RetranslateAllRequestDefault() {
   return Cfg::Server::Mode ? 1000000 : 0;
 }
 
-uint32_t Jit::RetranslateAllSecondsDefault() {
+uint32_t JitLoader::RetranslateAllSecondsDefault() {
   return Cfg::Server::Mode ? 180 : 0;
 }
 
-bool Jit::PGOLayoutSplitHotColdDefault() {
+bool JitLoader::PGOLayoutSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 
-uint32_t Jit::PGOVasmBlockCountersMinEntryValueDefault() {
+uint32_t JitLoader::PGOVasmBlockCountersMinEntryValueDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
-bool Jit::LayoutPrologueSplitHotColdDefault() {
+bool JitLoader::LayoutPrologueSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 
-bool Jit::PGODefault() {
+bool JitLoader::PGODefault() {
 #ifdef HHVM_NO_DEFAULT_PGO
   return false;
 #else
@@ -86,35 +87,35 @@ bool Jit::PGODefault() {
 #endif
 }
 
-uint64_t Jit::PGOThresholdDefault() {
+uint64_t JitLoader::PGOThresholdDefault() {
   return debug ? 2 : 2000;
 }
 
-double Jit::PGODecRefNZReleasePercentCOWDefault() {
+double JitLoader::PGODecRefNZReleasePercentCOWDefault() {
   return Cfg::Server::Mode ? 0.5 : 0;
 }
 
-double Jit::PGODecRefNZReleasePercentDefault() {
+double JitLoader::PGODecRefNZReleasePercentDefault() {
   return Cfg::Server::Mode ? 5 : 0;
 }
 
-double Jit::PGODecRefNopDecPercentCOWDefault() {
+double JitLoader::PGODecRefNopDecPercentCOWDefault() {
   return Cfg::Server::Mode ? 0.5 : 0;
 }
 
-double Jit::PGODecRefNopDecPercentDefault() {
+double JitLoader::PGODecRefNopDecPercentDefault() {
   return Cfg::Server::Mode ? 5 : 0;
 }
 
-uint8_t Jit::LiveThresholdDefault() {
+uint8_t JitLoader::LiveThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
-uint8_t Jit::ProfileThresholdDefault() {
+uint8_t JitLoader::ProfileThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
-bool Jit::AlignMacroFusionPairsDefault() {
+bool JitLoader::AlignMacroFusionPairsDefault() {
   switch (getProcessorFamily()) {
     case ProcessorFamily::Intel_SandyBridge:
     case ProcessorFamily::Intel_IvyBridge:
@@ -129,11 +130,11 @@ bool Jit::AlignMacroFusionPairsDefault() {
   return false;
 }
 
-uint32_t Jit::SerializeOptProfSecondsDefault() {
+uint32_t JitLoader::SerializeOptProfSecondsDefault() {
   return Cfg::Server::Mode ? 300 : 0;
 }
 
-bool Jit::ArmLseDefault() {
+bool JitLoader::ArmLseDefault() {
 #if defined (__aarch64__) && defined (HWCAP_ATOMICS)
   return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
 #else

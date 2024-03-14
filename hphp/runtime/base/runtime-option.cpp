@@ -22,10 +22,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/configs/autoload.h"
-#include "hphp/runtime/base/configs/configs-load.h"
-#include "hphp/runtime/base/configs/errorhandling.h"
-#include "hphp/runtime/base/configs/jit.h"
+#include "hphp/runtime/base/configs/server-loader.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
@@ -1822,7 +1819,7 @@ void RuntimeOption::Load(
     {
       Cfg::Server::SourceRoot = FileUtil::normalizeDir(Cfg::Server::SourceRoot);
       if (Cfg::Server::SourceRoot.empty()) {
-        Cfg::Server::SourceRoot = Cfg::Server::SourceRootDefault();
+        Cfg::Server::SourceRoot = Cfg::ServerLoader::SourceRootDefault();
       }
 
       for (unsigned int i = 0; i < Cfg::Server::IncludeSearchPaths.size(); i++) {

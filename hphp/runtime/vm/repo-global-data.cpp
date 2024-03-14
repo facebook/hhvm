@@ -17,8 +17,8 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Format.h>

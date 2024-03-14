@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -49,6 +48,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/blob-encoder.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/sha1.h"

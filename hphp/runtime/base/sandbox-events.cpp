@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/sandbox-events.h"
-#include "hphp/runtime/base/configs/autoload.h"
+#include "hphp/util/configs/autoload.h"
 
 namespace HPHP {
 

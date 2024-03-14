@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/trace.h"

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
@@ -47,6 +46,7 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/string-vsnprintf.h"

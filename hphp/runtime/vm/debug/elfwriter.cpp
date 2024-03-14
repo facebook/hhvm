@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"

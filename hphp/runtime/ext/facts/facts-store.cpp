@@ -32,7 +32,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-array.h"
@@ -53,6 +52,7 @@
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"

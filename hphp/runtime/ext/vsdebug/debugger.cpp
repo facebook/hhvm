@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/intercept.h"
@@ -27,6 +26,7 @@
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 

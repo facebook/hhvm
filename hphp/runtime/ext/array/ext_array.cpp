@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
@@ -44,6 +43,7 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 

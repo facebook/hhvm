@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
-
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -42,6 +40,7 @@
 #include "hphp/vixl/a64/decoder-a64.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 

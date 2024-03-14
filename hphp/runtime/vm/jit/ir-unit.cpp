@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
-#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP::jit {

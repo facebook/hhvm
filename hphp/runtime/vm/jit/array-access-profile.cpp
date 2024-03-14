@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-dict.h"
@@ -25,6 +24,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/safe-cast.h"
 
 #include <algorithm>

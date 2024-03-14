@@ -15,11 +15,11 @@
 */
 #include "hphp/runtime/vm/jit/memory-effects.h"
 
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/assertions.h"
 
-#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/implicit-context.h"
 
 #include "hphp/runtime/vm/bytecode.h"

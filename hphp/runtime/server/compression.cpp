@@ -20,12 +20,12 @@
 
 #include <folly/Random.h>
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
 #include "hphp/util/brotli.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/zstd.h"

@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
 #include "hphp/runtime/server/transport.h"
+#include "hphp/util/configs/xbox.h"
 #include "hphp/util/synchronizable.h"
 
 namespace HPHP {

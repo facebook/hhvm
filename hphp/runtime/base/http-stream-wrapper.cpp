@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/http-stream-wrapper.h"
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-util.h"
@@ -25,6 +24,7 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/server.h"
 #include <memory>
 
 namespace HPHP {

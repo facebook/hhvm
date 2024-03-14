@@ -229,13 +229,14 @@ type HeaderProtocolIdentity interface {
 // Compile time interface enforcer
 var _ HeaderProtocolIdentity = (*headerProtocol)(nil)
 
-// Deprecated: HeaderProtocolSetSeqID is a deprecated type, temporarily introduced to ease transition to new API.
-type HeaderProtocolSetSeqID interface {
+// Deprecated: HeaderProtocolSeqID is a deprecated type, temporarily introduced to ease transition to new API.
+type HeaderProtocolSeqID interface {
+	GetSeqID() uint32
 	SetSeqID(uint32)
 }
 
 // Compile time interface enforcer
-var _ HeaderProtocolSetSeqID = (*headerProtocol)(nil)
+var _ HeaderProtocolSeqID = (*headerProtocol)(nil)
 
 // Deprecated: HeaderProtocolFlags is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolFlags interface {

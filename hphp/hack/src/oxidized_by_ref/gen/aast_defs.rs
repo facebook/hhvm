@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c67d3b4c9b71ad90ef4f6d1bc8436ffd>>
+// @generated SignedSource<<521e044f7d0751e05f47d652d19f8f25>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2535,7 +2535,6 @@ pub struct ClassVar<'a, Ex, En> {
     pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
-    pub is_promoted_variadic: bool,
     pub is_static: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]

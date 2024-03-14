@@ -86,8 +86,7 @@ Errors:
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = ((), (Some ([18:10-12], (Hoption ([18:11-12], (Habstr ("T", []))))))); 
           cv_id = ([18:13-15], "x"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [18:13-15] }
+          cv_doc_comment = None; cv_is_static = false; cv_span = [18:13-15] }
          ];
        c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

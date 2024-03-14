@@ -8,28 +8,24 @@
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)])))));
          cv_id = ([7:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-         cv_span = [7:38-49] };
+         cv_doc_comment = None; cv_is_static = false; cv_span = [7:38-49] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = ((~vec<dynamic>), (Some ([8:14-29], (Happly (([8:14-20], "\\HH\\vec"), [([8:21-28], Hdynamic)]))))); 
           cv_id = ([8:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [8:30-39] };
+          cv_doc_comment = None; cv_is_static = false; cv_span = [8:30-39] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
           cv_id = ([9:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [9:21-26] };
+          cv_doc_comment = None; cv_is_static = false; cv_span = [9:21-26] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([10:14-17], (Hprim Tint)))); 
           cv_id = ([10:18-23], "line"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [10:18-23] };
+          cv_doc_comment = None; cv_is_static = false; cv_span = [10:18-23] };
         { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = (Some Required); xai_enum_values = [] }); 
           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
           cv_type = ((~int), (Some ([5:15-18], (Hprim Tint)))); cv_id = ([5:19-23], ":prop"); 
           cv_expr = None; cv_user_attributes = []; cv_doc_comment = None; 
-          cv_is_promoted_variadic = false; cv_is_static = false; cv_span = [5:19-23] }
+          cv_is_static = false; cv_span = [5:19-23] }
         ];
       c_methods =
       [{ m_span = [6:5-11:9]; m_annotation = (); m_final = false; m_abstract = false; 
@@ -145,28 +141,24 @@
           cv_readonly = false; cv_visibility = Public;
           cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)]))))); 
           cv_id = ([7:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [7:38-49] };
+          cv_doc_comment = None; cv_is_static = false; cv_span = [7:38-49] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Public; cv_type = ((~vec<dynamic>), (Some ([8:14-29], (Happly (([8:14-20], "\\HH\\vec"), [([8:21-28], Hdynamic)]))))); 
            cv_id = ([8:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-           cv_span = [8:30-39] };
+           cv_doc_comment = None; cv_is_static = false; cv_span = [8:30-39] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
            cv_id = ([9:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-           cv_span = [9:21-26] };
+           cv_doc_comment = None; cv_is_static = false; cv_span = [9:21-26] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([10:14-17], (Hprim Tint)))); 
            cv_id = ([10:18-23], "line"); cv_expr = None; cv_user_attributes = []; 
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-           cv_span = [10:18-23] };
+           cv_doc_comment = None; cv_is_static = false; cv_span = [10:18-23] };
          { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = (Some Required); xai_enum_values = [] }); 
            cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
            cv_type = ((~int), (Some ([5:15-18], (Hprim Tint)))); cv_id = ([5:19-23], ":prop"); 
            cv_expr = None; cv_user_attributes = []; cv_doc_comment = None; 
-           cv_is_promoted_variadic = false; cv_is_static = false; cv_span = [5:19-23] }
+           cv_is_static = false; cv_span = [5:19-23] }
          ];
        c_methods =
        [{ m_span = [6:5-11:9]; m_annotation = (); m_final = false; m_abstract = false; 

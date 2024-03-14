@@ -192,8 +192,8 @@ Errors:
                        ]
                      )))));
           cv_id = ([10:35-37], "_"); cv_expr = (Some (((readonly function(): int)), [10:40-53], (FunctionPointer ((FP_class_const (((Foo), [10:40-44], CIself), ([10:46-51], "class"))), []))));
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [10:35-53] }
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [10:35-53] }
          ];
        c_methods =
        [{ m_span = [11:3-13:4]; m_annotation = (); m_final = false; m_abstract = false; 

@@ -82,8 +82,8 @@
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = ((), (Some ([15:17-20], (Hprim Tint)))); 
           cv_id = ([15:21-27], "myInt"); cv_expr = (Some ((), [15:30-31], (Int "0"))); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [15:21-31] }
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [15:21-31] }
          ];
        c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

@@ -4699,7 +4699,6 @@ fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::Xh
                     expr: init_expr,
                     user_attributes: Default::default(),
                     doc_comment: None,
-                    is_promoted_variadic: false,
                     is_static: false,
                     span: pos,
                 },
@@ -4934,7 +4933,6 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                     expr: name_expr.2,
                     user_attributes: user_attributes.clone(),
                     doc_comment: if i == 0 { doc_comment.clone() } else { None },
-                    is_promoted_variadic: false,
                     is_static: kinds.has(modifier::STATIC),
                     span: name_expr.0,
                 });
@@ -4996,7 +4994,6 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                         expr: None,
                         user_attributes: param.user_attributes.clone(),
                         doc_comment: None,
-                        is_promoted_variadic: param.is_variadic,
                         is_static: false,
                         span,
                     },

@@ -8,8 +8,7 @@
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = ((), (Some ([4:20-25], (Hoption ([4:21-25], Hthis))))); 
          cv_id = ([4:26-28], "x"); cv_expr = None; cv_user_attributes = [{ ua_name = ([4:5-10], "__LSB"); ua_params = [] }]; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true; 
-         cv_span = [4:26-28] }
+         cv_doc_comment = None; cv_is_static = true; cv_span = [4:26-28] }
         ];
       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =

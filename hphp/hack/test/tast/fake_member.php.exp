@@ -8,8 +8,8 @@
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Private; cv_type = ((?int), (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))))); 
          cv_id = ([4:16-20], "foo"); cv_expr = (Some ((null), [4:23-27], Null)); 
-         cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-         cv_is_static = false; cv_span = [4:16-27] }
+         cv_user_attributes = []; cv_doc_comment = None; cv_is_static = false; 
+         cv_span = [4:16-27] }
         ];
       c_methods =
       [{ m_span = [6:3-10:4]; m_annotation = (); m_final = false; m_abstract = false; 

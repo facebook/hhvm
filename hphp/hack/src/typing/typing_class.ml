@@ -1355,7 +1355,6 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       Aast.cv_id = cv.cv_id;
       Aast.cv_expr = typed_cv_expr;
       Aast.cv_user_attributes = user_attributes;
-      Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
       Aast.cv_doc_comment = cv.cv_doc_comment;
       (* Can make None to save space *)
       Aast.cv_is_static = is_static;

@@ -253,12 +253,6 @@ fn from_class_elt_classvars<'a, 'd>(
         .vars
         .iter()
         .map(|cv| {
-            let hint = if cv.is_promoted_variadic {
-                None
-            } else {
-                cv.type_.1.as_ref()
-            };
-
             emit_property::from_ast(
                 emitter,
                 ast_class,
@@ -269,7 +263,7 @@ fn from_class_elt_classvars<'a, 'd>(
                     user_attributes: &cv.user_attributes,
                     id: &cv.id,
                     initial_value: &cv.expr,
-                    typehint: hint,
+                    typehint: cv.type_.1.as_ref(),
                     // Doc comments are weird. T40098274
                     doc_comment: cv.doc_comment.clone(),
                     visibility: cv.visibility, // This used to be cv_kinds

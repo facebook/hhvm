@@ -45,13 +45,13 @@ Errors:
                     [(((string), [9:5-8], (String "a")), ((classname<A>), [9:12-20], (Class_const (((A), [9:12-13], (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
                       (((string), [10:5-8], (String "b")), ((classname<B>), [10:12-20], (Class_const (((B), [10:12-13], (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))]
                     ))));
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [8:18-11:4] };
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [8:18-11:4] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private; cv_type = ((dynamic), None); 
            cv_id = ([12:18-20], "s"); cv_expr = (Some ((Set<string>), [12:23-34], (ValCollection (([12:23-26], Set), None, [((string), [12:28-33], (String "foo"))])))); 
-           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-           cv_is_static = true; cv_span = [12:18-34] }
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+           cv_span = [12:18-34] }
          ];
        c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

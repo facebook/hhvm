@@ -23,8 +23,7 @@
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((), (Some ([5:11-13], (Hoption ([5:12-13], (Habstr ("T", []))))))); 
           cv_id = ([5:14-16], "x"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [5:14-16] }
+          cv_doc_comment = None; cv_is_static = false; cv_span = [5:14-16] }
          ];
        c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

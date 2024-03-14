@@ -11,8 +11,7 @@
          ((~dict<string, mixed>),
           (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
          cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-         cv_span = [5:59-64] }
+         cv_doc_comment = None; cv_is_static = false; cv_span = [5:59-64] }
         ];
       c_methods =
       [{ m_span = [5:3-68]; m_annotation = (); m_final = false; m_abstract = false; 
@@ -197,8 +196,7 @@
           ((~dict<string, mixed>),
            (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
           cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
-          cv_span = [5:59-64] }
+          cv_doc_comment = None; cv_is_static = false; cv_span = [5:59-64] }
          ];
        c_methods =
        [{ m_span = [5:3-68]; m_annotation = (); m_final = false; m_abstract = false; 

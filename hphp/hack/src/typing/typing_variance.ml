@@ -986,7 +986,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
       |> List.filter_map ~f:(fun param ->
              let {
                Aast.param_type_hint;
-               param_is_variadic;
+               param_is_variadic = _;
                param_pos;
                param_name;
                param_annotation = ();
@@ -1011,7 +1011,6 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                  cv_expr = param_expr;
                  cv_user_attributes = param_user_attributes;
                  cv_doc_comment = None;
-                 cv_is_promoted_variadic = param_is_variadic;
                  cv_is_static = false;
                  cv_span = param_pos;
                })))

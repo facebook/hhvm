@@ -8,8 +8,8 @@
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = ((arraykey), (Some ([4:10-18], (Hprim Tarraykey)))); 
          cv_id = ([4:19-24], "prop"); cv_expr = (Some ((int), [4:27-28], (Int "0"))); 
-         cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-         cv_is_static = false; cv_span = [4:19-28] }
+         cv_user_attributes = []; cv_doc_comment = None; cv_is_static = false; 
+         cv_span = [4:19-28] }
         ];
       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9e19f005f8d1226f1180e8d97b661ab>>
+// @generated SignedSource<<d2f9510af91380f6c1785e27a7592d1c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1723,8 +1723,7 @@ impl Transform for ClassVar {
                 expr: ref mut __binding_7,
                 user_attributes: ref mut __binding_8,
                 doc_comment: ref mut __binding_9,
-                is_promoted_variadic: ref mut __binding_10,
-                is_static: ref mut __binding_11,
+                is_static: ref mut __binding_10,
                 ..
             } => {
                 {
@@ -1762,10 +1761,7 @@ impl Transform for ClassVar {
                 {
                     __binding_9.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_10.transform(env, &mut pass.clone())
-                }
-                { __binding_11.transform(env, &mut pass.clone()) }
+                { __binding_10.transform(env, &mut pass.clone()) }
             }
         }
     }

@@ -8,23 +8,23 @@
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Private; cv_type = ((int), (Some ([4:18-21], (Hprim Tint)))); 
          cv_id = ([4:22-27], "prop"); cv_expr = (Some ((int), [4:30-31], (Int "0"))); 
-         cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-         cv_is_static = true; cv_span = [4:22-31] };
+         cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+         cv_span = [4:22-31] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((?int), (Some ([5:18-22], (Hoption ([5:19-22], (Hprim Tint)))))); 
           cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some ((null), [5:40-44], Null)); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [5:23-44] };
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [5:23-44] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
           cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [6:32-57] };
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [6:32-57] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((~Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
           cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (([7:45-51], Vector), None, [])))); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [7:33-54] }
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [7:33-54] }
         ];
       c_methods =
       [{ m_span = [9:3-12:4]; m_annotation = (); m_final = false; m_abstract = false; 
@@ -217,23 +217,23 @@
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((int), (Some ([4:18-21], (Hprim Tint)))); 
           cv_id = ([4:22-27], "prop"); cv_expr = (Some ((int), [4:30-31], (Int "0"))); 
-          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-          cv_is_static = true; cv_span = [4:22-31] };
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+          cv_span = [4:22-31] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private; cv_type = ((?int), (Some ([5:18-22], (Hoption ([5:19-22], (Hprim Tint)))))); 
            cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some ((null), [5:40-44], Null)); 
-           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-           cv_is_static = true; cv_span = [5:23-44] };
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+           cv_span = [5:23-44] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private; cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
            cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
-           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-           cv_is_static = true; cv_span = [6:32-57] };
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+           cv_span = [6:32-57] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private; cv_type = ((~Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
            cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (([7:45-51], Vector), None, [])))); 
-           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-           cv_is_static = true; cv_span = [7:33-54] }
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
+           cv_span = [7:33-54] }
          ];
        c_methods =
        [{ m_span = [14:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 

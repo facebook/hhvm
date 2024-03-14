@@ -593,7 +593,6 @@ fn make_closure(
         expr: None,
         user_attributes: Default::default(),
         doc_comment: None,
-        is_promoted_variadic: false,
         is_static: false,
         span: p.clone(),
     };
@@ -822,7 +821,6 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
             ClassVar {
                 final_: false,
                 xhp_attr: None,
-                is_promoted_variadic: false,
                 doc_comment: None,
                 abstract_: false,
                 readonly: false,

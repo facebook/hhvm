@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74535810a87b24ecf49b1fb1f3749182>>
+// @generated SignedSource<<c8cc9232084c7f055893dd5d063750d7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -469,7 +469,6 @@ impl<P: Params> Node<P> for ClassVar<P::Ex, P::En> {
         self.expr.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
-        self.is_promoted_variadic.accept(c, v)?;
         self.is_static.accept(c, v)?;
         self.span.accept(c, v)
     }

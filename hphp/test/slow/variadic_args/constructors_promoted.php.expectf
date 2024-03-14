@@ -1,0 +1,15 @@
+int(1)
+vec(3) {
+  int(2)
+  int(3)
+  int(4)
+}
+int(23)
+vec(2) {
+  int(23)
+  int(45)
+}
+
+Warning: Property 'C::arg1' declared as type int, string assigned in %s/test/slow/variadic_args/constructors_promoted.php on line 6
+
+Warning: Property 'C::arg2' declared as type HH\vec, string assigned in %s/test/slow/variadic_args/constructors_promoted.php on line 9

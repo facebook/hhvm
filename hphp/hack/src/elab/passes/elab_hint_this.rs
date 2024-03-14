@@ -352,7 +352,6 @@ mod tests {
             expr: Default::default(),
             user_attributes,
             doc_comment: Default::default(),
-            is_promoted_variadic: Default::default(),
             is_static: true,
             span: Default::default(),
         }

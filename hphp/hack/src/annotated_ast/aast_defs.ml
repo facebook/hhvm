@@ -1051,7 +1051,6 @@ and ('ex, 'en) class_var = {
   cv_expr: ('ex, 'en) expr option;
   cv_user_attributes: ('ex, 'en) user_attributes;
   cv_doc_comment: doc_comment option;
-  cv_is_promoted_variadic: bool;
   cv_is_static: bool;
   cv_span: pos; [@transform.opaque]
 }

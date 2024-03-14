@@ -18,11 +18,17 @@ package thrift
 
 type framedProtocol struct {
 	Format
+	transport *FramedTransport
 }
 
 // NewFramedProtocol creates a Protocol from a format that serializes directly to an FramedTransport.
-func NewFramedProtocol(format Format) Protocol {
+func NewFramedProtocol(transport *FramedTransport, format Format) Protocol {
 	return &framedProtocol{
-		Format: format,
+		Format:    format,
+		transport: transport,
 	}
+}
+
+func (p *framedProtocol) Close() error {
+	return p.transport.Close()
 }

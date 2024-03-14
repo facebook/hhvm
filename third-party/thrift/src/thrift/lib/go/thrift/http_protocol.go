@@ -18,11 +18,17 @@ package thrift
 
 type httpProtocol struct {
 	Format
+	transport *HTTPClient
 }
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPProtocol(format Format) Protocol {
+func NewHTTPProtocol(transport *HTTPClient, format Format) Protocol {
 	return &httpProtocol{
-		Format: format,
+		Format:    format,
+		transport: transport,
 	}
+}
+
+func (p *httpProtocol) Close() error {
+	return p.transport.Close()
 }

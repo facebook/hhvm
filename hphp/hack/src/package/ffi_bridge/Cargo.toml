@@ -14,8 +14,8 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.118"
+cxx = "1.0.119"
 package = { version = "0.0.0", path = "../cargo" }
 
 [build-dependencies]
-cxx-build = "1.0.118"
+cxx-build = "1.0.119"

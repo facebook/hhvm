@@ -16,7 +16,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/AnyDebugWriter.h>
-#include <thrift/test/AnyTesting.h>
+#include <thrift/lib/cpp2/type/AnyTesting.h>
 
 namespace apache::thrift {
 

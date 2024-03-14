@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <variant>
 
 #include <folly/Synchronized.h>
 #include <folly/experimental/FunctionScheduler.h>
@@ -58,6 +59,8 @@ class CPUConcurrencyController {
   };
 
   struct Config {
+    struct UseStaticLimit {};
+
     // Operating mode
     Mode mode = Mode::DISABLED;
     // CPU concurrency enforcement method
@@ -95,7 +98,7 @@ class CPUConcurrencyController {
     // How many samples to collect for the initial estimate
     uint32_t collectionSampleSize = 500;
     // Don't go above this concurrency limit, ever.
-    uint32_t concurrencyUpperBound = 1 << 16;
+    std::variant<int32_t, UseStaticLimit> concurrencyUpperBound = 1 << 16;
     // Don't go below this concurrency limit, ever.
     uint32_t concurrencyLowerBound = 1;
 
@@ -109,11 +112,14 @@ class CPUConcurrencyController {
 
     std::string_view concurrencyUnit() const;
 
-    // Returns a string description of the Config
-    std::string describe() const;
-
     // Returns a string representation of the CPU load source
     std::string_view cpuLoadSourceName() const;
+
+    // Returns a string representation of the concurrencyUpperBound value
+    std::string concurrencyUpperBoundName() const;
+
+    // Returns a string description of the Config
+    std::string describe() const;
   };
 
   CPUConcurrencyController(
@@ -147,6 +153,10 @@ class CPUConcurrencyController {
 
   int64_t getLoad() const { return getLoadInternal(config()); }
 
+  uint32_t getConcurrencyUpperBound() const {
+    return getConcurrencyUpperBoundInternal(config());
+  }
+
   bool enabled() const { return (*config_.rlock())->enabled(); }
 
   std::shared_ptr<const Config> config() const { return config_.copy(); }
@@ -167,6 +177,8 @@ class CPUConcurrencyController {
   bool isRefractoryPeriodInternal(
       const std::shared_ptr<const Config>& config) const;
   int64_t getLoadInternal(const std::shared_ptr<const Config>& config) const;
+  uint32_t getConcurrencyUpperBoundInternal(
+      const std::shared_ptr<const Config>& config) const;
 
   folly::Synchronized<std::shared_ptr<const Config>> config_;
   std::atomic<bool> enabled_;

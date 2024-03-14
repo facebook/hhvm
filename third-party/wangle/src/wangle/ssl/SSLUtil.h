@@ -20,12 +20,12 @@
 #include <mutex>
 
 #include <folly/String.h>
-#include <folly/io/async/SSLContext.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
+#include <folly/ssl/PasswordCollector.h>
 
 namespace folly {
 class AsyncSSLSocket;
-}
+} // namespace folly
 
 namespace wangle {
 
@@ -222,7 +222,7 @@ class SSLUtil {
    */
   static folly::Optional<std::string> decryptOpenSSLEncFilePassFile(
       const std::string& filename,
-      const folly::PasswordCollector& pwdCollector,
+      const folly::ssl::PasswordCollector& pwdCollector,
       const EVP_CIPHER* cipher,
       const EVP_MD* digest);
 };

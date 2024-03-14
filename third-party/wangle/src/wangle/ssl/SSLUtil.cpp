@@ -20,9 +20,8 @@
 #include <folly/Format.h>
 #include <folly/Memory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
-#include <folly/ssl/OpenSSLPtrTypes.h>
-
 #include <folly/portability/OpenSSL.h>
+#include <folly/ssl/OpenSSLPtrTypes.h>
 
 namespace wangle {
 
@@ -207,7 +206,7 @@ folly::Optional<std::string> SSLUtil::decryptOpenSSLEncFilePassString(
 
 folly::Optional<std::string> SSLUtil::decryptOpenSSLEncFilePassFile(
     const std::string& filename,
-    const folly::PasswordCollector& pwdCollector,
+    const folly::ssl::PasswordCollector& pwdCollector,
     const EVP_CIPHER* cipher,
     const EVP_MD* digest) {
   // Get password as a string and call decryptFilePasswordString()

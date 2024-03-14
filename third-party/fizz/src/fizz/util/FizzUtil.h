@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <folly/io/async/PasswordInFile.h>
+#include <folly/io/async/SSLContext.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>

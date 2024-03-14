@@ -51,8 +51,6 @@ struct ZstdCompressor {
 
   static ContextPool::Ref make_zstd_cctx(bool last);
 
- public:
-  static bool s_useLocalArena;
  protected:
   const int compression_level_;
   bool should_checksum_;

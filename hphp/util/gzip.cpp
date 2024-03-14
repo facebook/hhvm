@@ -18,6 +18,7 @@
 #include "hphp/util/gzip.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 
@@ -26,8 +27,6 @@
 #define GZIP_FOOTER_LENGTH 8
 
 namespace HPHP {
-
-bool GzipCompressor::s_useLocalArena = false;
 
 namespace {
 
@@ -192,7 +191,7 @@ GzipCompressor::GzipCompressor(int level, int encoding_mode, bool header)
     throw Exception("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
   }
 
-  if (s_useLocalArena) {
+  if (Cfg::Server::GzipUseLocalArena) {
     m_stream.zalloc = local_zalloc;
     m_stream.zfree = local_zfree;
   } else {
@@ -245,7 +244,7 @@ GzipCompressor::compress(const char *data, int &len, bool trailer) {
   char *s2;
   auto const allocSize = m_stream.avail_out + GZIP_HEADER_LENGTH +
     ((trailer && m_encoding == CODING_GZIP) ? GZIP_FOOTER_LENGTH : 0);
-  if (s_useLocalArena) {
+  if (Cfg::Server::GzipUseLocalArena) {
     s2 = (char *)local_malloc(allocSize);
   } else {
     s2 = (char *)malloc(allocSize);
@@ -293,10 +292,10 @@ GzipCompressor::compress(const char *data, int &len, bool trailer) {
     } else {
       s2[len] = '\0';
     }
-    return StringHolder(s2, len, s_useLocalArena ? FreeType::LocalFree
-                                                 : FreeType::Free);
+    return StringHolder(s2, len, Cfg::Server::GzipUseLocalArena ? FreeType::LocalFree
+                                                                : FreeType::Free);
   }
-  if (s_useLocalArena) {
+  if (Cfg::Server::GzipUseLocalArena) {
     local_free(s2);
   } else {
     free(s2);

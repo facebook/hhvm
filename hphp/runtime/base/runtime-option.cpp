@@ -58,11 +58,9 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/current-executable.h" // @donotremove
-#include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/hdf-extract.h"
-#include "hphp/util/light-process.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
@@ -71,7 +69,6 @@
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
-#include "hphp/util/zstd.h"
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
@@ -1798,20 +1795,6 @@ void RuntimeOption::Load(
     // Server
     if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
       throw std::runtime_error("Unable to resolve the server's IPv4 or IPv6 address");
-    }
-
-    // These are here because the value is part of util so they can't use the normal
-    // configs.specification
-    {
-      extern bool g_brotliUseLocalArena;
-      Config::Bind(g_brotliUseLocalArena, ini, config,
-                  "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
-      Config::Bind(ZstdCompressor::s_useLocalArena, ini, config,
-                  "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
-      Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
-                  "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
-      Config::Bind(LightProcess::g_strictUser, ini, config,
-                   "Server.LightProcessStrictUser", false);
     }
 
     // These things should be in Cfg PostProcess methods. But because they use

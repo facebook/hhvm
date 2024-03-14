@@ -17,6 +17,7 @@
 #include "hphp/util/brotli.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 
@@ -25,11 +26,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool g_brotliUseLocalArena = false;
-
 namespace {
 void *brotlialloc(void * /*opaque*/, size_t size) {
-  if (g_brotliUseLocalArena) {
+  if (Cfg::Server::BrotliUseLocalArena) {
     return local_malloc(size);
   } else {
     return malloc(size);
@@ -37,7 +36,7 @@ void *brotlialloc(void * /*opaque*/, size_t size) {
 }
 
 void brotlifree(void * /*opaque*/, void *address) {
-  if (g_brotliUseLocalArena) {
+  if (Cfg::Server::BrotliUseLocalArena) {
     local_free(address);
   } else {
     free(address);
@@ -96,7 +95,7 @@ StringHolder BrotliCompressor::compress(const void* data,
 
   StringHolder available;
   void* availablePtr;
-  if (g_brotliUseLocalArena) {
+  if (Cfg::Server::BrotliUseLocalArena) {
     availablePtr = local_malloc(availableBytes);
     available = StringHolder(static_cast<char*>(availablePtr),
                              availableBytes,

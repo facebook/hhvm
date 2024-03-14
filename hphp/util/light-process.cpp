@@ -41,6 +41,7 @@
 
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/hugetlb.h"
@@ -54,8 +55,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper functions
-
-bool LightProcess::g_strictUser = false;
 
 namespace {
 
@@ -457,7 +456,7 @@ void do_change_user(int afdt_fd) {
     err = errno;
     log = new StructuredLogEntry();
     log->setStr("function", "getpwnam_r");
-    if (LightProcess::g_strictUser) {
+    if (Cfg::Server::LightProcessStrictUser) {
       throw std::runtime_error{"getpwnam_r(): " + folly::errnoStr(err)};
     }
     return;
@@ -465,7 +464,7 @@ void do_change_user(int afdt_fd) {
   if (!pw) {
     log = new StructuredLogEntry();
     log->setStr("function", "getpwnam_r");
-    if (LightProcess::g_strictUser) {
+    if (Cfg::Server::LightProcessStrictUser) {
       throw std::runtime_error{"getpwnam_r(): not found"};
     }
     return;
@@ -481,7 +480,7 @@ void do_change_user(int afdt_fd) {
         err = errno;
         log = new StructuredLogEntry();
         log->setStr("function", "setgid");
-        if (LightProcess::g_strictUser) {
+        if (Cfg::Server::LightProcessStrictUser) {
           throw std::runtime_error{"setgid():" + folly::errnoStr(err)};
         }
       }
@@ -493,7 +492,7 @@ void do_change_user(int afdt_fd) {
         err = errno;
         log = new StructuredLogEntry();
         log->setStr("function", "setuid");
-        if (LightProcess::g_strictUser) {
+        if (Cfg::Server::LightProcessStrictUser) {
           throw std::runtime_error{"setuid():" + folly::errnoStr(err)};
         }
       }

@@ -654,6 +654,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   is the following prefix followed by the pid of the hphp process.
 
 - int Server.LightProcessCount = 0, UNKNOWN
+- bool Server.LightProcessStrictUser = false, UNKNOWN
 - bool Server.ForceServerNameToHeader = false, UNKNOWN
 - bool Server.PathDebug = false, UNKNOWN
 - std::string Server.User = "", UNKNOWN
@@ -683,6 +684,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 - int Server.BrotliCompressionMode = 0, UNKNOWN
 - int Server.BrotliCompressionQuality = 6, UNKNOWN
+- bool Server.BrotliUseLocalArena = false, UNKNOWN
 - int Server.ZstdCompressionEnabled = -1, UNKNOWN
 - int Server.ZstdCompressionLevel = 3, UNKNOWN
 - int Server.ZstdWindowLog = 0, UNKNOWN, nobind
@@ -696,8 +698,10 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   for now I'm keeping the behavior
 
 - int Server.ZstdChecksumRate = 0, UNKNOWN
+- bool Server.ZstdUseLocalArena = false, UNKNOWN
 - int Server.GzipCompressionLevel = 3, UNKNOWN
 - int Server.GzipMaxCompressionLevel = 9, UNKNOWN
+- bool Server.GzipUseLocalArena = false, UNKNOWN
 
 # Xbox
 

@@ -22,6 +22,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/compression-ctx-pool.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,8 +40,6 @@ size_t throwIfZstdError(size_t code, const std::string& msg) {
 ZstdCompressor::ContextPool ZstdCompressor::streaming_cctx_pool{};
 
 ZstdCompressor::ContextPool ZstdCompressor::single_shot_cctx_pool{};
-
-bool ZstdCompressor::s_useLocalArena = false;
 
 void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
   size_t error = ZSTD_freeCCtx(ctx);
@@ -72,7 +71,7 @@ StringHolder ZstdCompressor::compress(const void* data,
   auto const outSize = ZSTD_compressBound(len) + extraOutSize;
   char* out;
   StringHolder holder;
-  if (s_useLocalArena) {
+  if (Cfg::Server::ZstdUseLocalArena) {
     out = (char*)local_malloc(outSize);
     holder = StringHolder(out, outSize, FreeType::LocalFree);
   } else {

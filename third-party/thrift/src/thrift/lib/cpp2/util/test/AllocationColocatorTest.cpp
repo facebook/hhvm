@@ -289,3 +289,27 @@ TEST(AllocationColocatorTest, NonTrivialDestructorArrayWithException) {
   EXPECT_EQ(constructorCount, 3);
   EXPECT_EQ(destructorCount, 2);
 }
+
+TEST(AllocationColocatorTest, ArrayZeroSize) {
+  struct Foo {
+    AllocationColocator<>::ArrayPtr<std::string> array1;
+    AllocationColocator<>::ArrayPtr<std::string> array2;
+  };
+
+  AllocationColocator<Foo> alloc;
+  auto foo =
+      alloc.allocate([&,
+                      array1 = alloc.array<std::string>(0),
+                      array2 = alloc.array<std::string>(0)](auto make) mutable {
+        Foo foo;
+        auto generator = []() -> std::string {
+          throw std::runtime_error("Should never be called!");
+        };
+        foo.array1 = make(std::move(array1), generator);
+        foo.array2 = make(std::move(array2), generator);
+        return foo;
+      });
+
+  EXPECT_NE(foo->array1.get(), nullptr);
+  EXPECT_EQ(foo->array1.get(), foo->array2.get());
+}

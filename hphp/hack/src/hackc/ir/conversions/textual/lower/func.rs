@@ -5,9 +5,9 @@
 
 use ir::instr::Hhbc;
 use ir::ClassGetCMode;
-use ir::Constant;
 use ir::Func;
 use ir::FuncBuilder;
+use ir::Immediate;
 use ir::Instr;
 use ir::LocId;
 use ir::LocalId;
@@ -153,7 +153,7 @@ fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 initial_value: Some(initial_value),
                 ..
             } if !flags.is_static() => {
-                let vid = builder.emit_constant(initial_value.clone().into());
+                let vid = builder.emit_imm(initial_value.clone().into());
                 MemberOpBuilder::base_h(loc).emit_set_m_pt(builder, *name, vid);
             }
             _ => {}
@@ -180,7 +180,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
 
     // Now emit the static properties.
-    let cls_name = builder.emit_constant(Constant::String(class.name.as_bytes_id()));
+    let cls_name = builder.emit_imm(Immediate::String(class.name.as_bytes_id()));
     let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
         cls_name,
         ClassGetCMode::Normal,
@@ -202,7 +202,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 // the value.
                 let clsref = SpecialClsRef::SelfCls;
                 let method = MethodName::_86cinit();
-                let name = builder.emit_constant(Constant::String(name.as_bytes_id()));
+                let name = builder.emit_imm(Immediate::String(name.as_bytes_id()));
                 Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
             }
             ir::Property {
@@ -218,13 +218,13 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 ..
             } => {
                 // Either a normal property or non-complex constant.
-                Some(builder.emit_constant(initial_value.clone().into()))
+                Some(builder.emit_imm(initial_value.clone().into()))
             }
             _ => None,
         };
 
         if let Some(vid) = vid {
-            let prop_name = builder.emit_constant(Constant::String(prop.name.as_bytes_id()));
+            let prop_name = builder.emit_imm(Immediate::String(prop.name.as_bytes_id()));
             builder.emit(Instr::Hhbc(Hhbc::SetS(
                 [prop_name, cls, vid],
                 ReadonlyOp::Any,

@@ -121,8 +121,8 @@ impl<'b> Context<'b> {
         self.builder.emit(i)
     }
 
-    pub(crate) fn emit_constant(&mut self, constant: ir::Constant) -> ir::ValueId {
-        self.builder.emit_constant(constant)
+    pub(crate) fn emit_imm(&mut self, imm: ir::Immediate) -> ir::ValueId {
+        self.builder.emit_imm(imm)
     }
 
     /// Emit an Instr and push its return onto the stack.
@@ -132,9 +132,9 @@ impl<'b> Context<'b> {
         vid
     }
 
-    /// Emit a Constant and push its return onto the stack.
-    pub(crate) fn emit_push_constant(&mut self, lc: ir::Constant) -> ir::ValueId {
-        let vid = self.emit_constant(lc);
+    /// Emit an Immediate and push its return onto the stack.
+    pub(crate) fn emit_push_imm(&mut self, imm: ir::Immediate) -> ir::ValueId {
+        let vid = self.emit_imm(imm);
         self.push(vid);
         vid
     }

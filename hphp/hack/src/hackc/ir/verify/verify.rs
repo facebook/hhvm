@@ -285,10 +285,10 @@ impl<'b> VerifyFunc<'b> {
         dominated_iids: &InstrIdSet,
     ) {
         match op_vid.full() {
-            FullInstrId::Constant(cid) => {
+            FullInstrId::Imm(cid) => {
                 check!(
                     self,
-                    self.func.constants.get(cid).is_some(),
+                    self.func.imms.get(cid).is_some(),
                     "iid {} refers to missing constant {}",
                     src_iid,
                     cid
@@ -521,8 +521,8 @@ impl<'b> VerifyFunc<'b> {
             Instr::Special(Special::IrToBc(IrToBc::PushConstant(vid))) => {
                 check!(
                     self,
-                    vid.is_constant(),
-                    "vid {} PushConstant must refer to a ConstantId",
+                    vid.is_imm(),
+                    "vid {} PushConstant must refer to a ImmId",
                     iid
                 );
             }

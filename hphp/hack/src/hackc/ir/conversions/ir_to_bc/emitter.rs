@@ -18,7 +18,7 @@ use ir::instr;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::IrToBc;
-use ir::newtype::ConstantIdMap;
+use ir::newtype::ImmIdMap;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
 use ir::BlockId;
@@ -38,13 +38,13 @@ pub(crate) fn emit_func(
     adata_cache: &mut AdataState,
 ) -> (InstrSeq, Vec<StringId>) {
     let adata_id_map = func
-        .constants
+        .imms
         .iter()
         .enumerate()
         .filter_map(|(idx, constant)| {
-            let cid = ir::ConstantId::from_usize(idx);
+            let cid = ir::ImmId::from_usize(idx);
             match constant {
-                ir::Constant::Array(tv) => {
+                ir::Immediate::Array(tv) => {
                     let id = adata_cache.intern((**tv).clone());
                     let kind = match **tv {
                         ir::TypedValue::Dict(_) => AdataKind::Dict,
@@ -80,9 +80,8 @@ pub(crate) fn emit_func(
     (InstrSeq::List(ctx.instrs), decl_vars)
 }
 
-/// Use to look up a ConstantId and get the AdataId and AdataKind for that
-/// ConstantId.
-type AdataIdMap = ConstantIdMap<(hhbc::AdataId, AdataKind)>;
+/// Use to look up a ImmId and get the AdataId and AdataKind
+type AdataIdMap = ImmIdMap<(hhbc::AdataId, AdataKind)>;
 
 /// Used for adata_id_map - the kind of the underlying array. Storing this in
 /// AdataIdMap means we don't have to pass around a &Unit just to look up what
@@ -620,8 +619,8 @@ impl<'b> InstrEmitter<'b> {
         }
     }
 
-    fn emit_constant(&mut self, cid: ir::ConstantId) {
-        use ir::Constant;
+    fn emit_constant(&mut self, cid: ir::ImmId) {
+        use ir::Immediate;
 
         let i = if let Some((id, kind)) = self.adata_id_map.get(&cid) {
             match kind {
@@ -630,24 +629,24 @@ impl<'b> InstrEmitter<'b> {
                 AdataKind::Vec => Opcode::Vec(*id),
             }
         } else {
-            let lc = self.func.constant(cid);
+            let lc = self.func.imm(cid);
             match lc {
-                Constant::Array(_) => unreachable!(),
-                Constant::Bool(false) => Opcode::False,
-                Constant::Bool(true) => Opcode::True,
-                Constant::Dir => Opcode::Dir,
-                Constant::EnumClassLabel(v) => Opcode::EnumClassLabel(*v),
-                Constant::Float(v) => Opcode::Double(*v),
-                Constant::File => Opcode::File,
-                Constant::FuncCred => Opcode::FuncCred,
-                Constant::Int(v) => Opcode::Int(*v),
-                Constant::LazyClass(cid) => Opcode::LazyClass(*cid),
-                Constant::Method => Opcode::Method,
-                Constant::Named(name) => Opcode::CnsE(*name),
-                Constant::NewCol(k) => Opcode::NewCol(*k),
-                Constant::Null => Opcode::Null,
-                Constant::String(v) => Opcode::String(*v),
-                Constant::Uninit => Opcode::NullUninit,
+                Immediate::Array(_) => unreachable!(),
+                Immediate::Bool(false) => Opcode::False,
+                Immediate::Bool(true) => Opcode::True,
+                Immediate::Dir => Opcode::Dir,
+                Immediate::EnumClassLabel(v) => Opcode::EnumClassLabel(*v),
+                Immediate::Float(v) => Opcode::Double(*v),
+                Immediate::File => Opcode::File,
+                Immediate::FuncCred => Opcode::FuncCred,
+                Immediate::Int(v) => Opcode::Int(*v),
+                Immediate::LazyClass(cid) => Opcode::LazyClass(*cid),
+                Immediate::Method => Opcode::Method,
+                Immediate::Named(name) => Opcode::CnsE(*name),
+                Immediate::NewCol(k) => Opcode::NewCol(*k),
+                Immediate::Null => Opcode::Null,
+                Immediate::String(v) => Opcode::String(*v),
+                Immediate::Uninit => Opcode::NullUninit,
             }
         };
         self.push_opcode(i);
@@ -872,7 +871,7 @@ impl<'b> InstrEmitter<'b> {
                 self.push_opcode(Opcode::PushL(local));
             }
             IrToBc::PushConstant(vid) => match vid.full() {
-                FullInstrId::Constant(cid) => self.emit_constant(cid),
+                FullInstrId::Imm(cid) => self.emit_constant(cid),
                 FullInstrId::Instr(_) | FullInstrId::None => panic!("Malformed PushConstant!"),
             },
             IrToBc::PushUninit => self.push_opcode(Opcode::NullUninit),

@@ -9,9 +9,9 @@ use crate::instr::Hhbc;
 use crate::instr::Predicate;
 use crate::type_struct::TypeStruct;
 use crate::BaseType;
-use crate::Constant;
 use crate::EnforceableType;
 use crate::FuncBuilder;
+use crate::Immediate;
 use crate::Instr;
 use crate::IsTypeOp;
 use crate::LocId;
@@ -133,7 +133,7 @@ impl FuncBuilderEx for FuncBuilder {
     }
 
     fn emit_string(&mut self, s: &str) -> ValueId {
-        self.emit_constant(Constant::String(crate::intern_bytes(s.as_bytes())))
+        self.emit_imm(Immediate::String(crate::intern_bytes(s.as_bytes())))
     }
 
     #[allow(clippy::todo)]
@@ -152,7 +152,7 @@ impl FuncBuilderEx for FuncBuilder {
             return Instr::copy(self.emit_if_then_else(
                 is1,
                 loc,
-                |builder| Instr::copy(builder.emit_constant(Constant::Bool(true))),
+                |builder| Instr::copy(builder.emit_imm(Immediate::Bool(true))),
                 |builder| builder.is(vid, &ety, loc),
             ));
         }
@@ -183,7 +183,7 @@ impl FuncBuilderEx for FuncBuilder {
                 Instr::copy(builder.emit_if_then_else(
                     is1,
                     loc,
-                    |builder| Instr::copy(builder.emit_constant(Constant::Bool(true))),
+                    |builder| Instr::copy(builder.emit_imm(Immediate::Bool(true))),
                     |_| is_type_op(op2, vid, loc),
                 ))
             }
@@ -199,9 +199,9 @@ impl FuncBuilderEx for FuncBuilder {
                 BaseType::Int => is_type_op(IsTypeOp::Int, vid, loc),
                 BaseType::Keyset => is_type_op(IsTypeOp::Keyset, vid, loc),
                 BaseType::Mixed | BaseType::None => {
-                    Instr::copy(self.emit_constant(Constant::Bool(true)))
+                    Instr::copy(self.emit_imm(Immediate::Bool(true)))
                 }
-                BaseType::Nothing => Instr::copy(self.emit_constant(Constant::Bool(false))),
+                BaseType::Nothing => Instr::copy(self.emit_imm(Immediate::Bool(false))),
                 BaseType::Null => is_type_op(IsTypeOp::Null, vid, loc),
                 BaseType::Num => is_type_op2(IsTypeOp::Int, IsTypeOp::Dbl, self, vid, loc),
                 BaseType::Resource => is_type_op(IsTypeOp::Res, vid, loc),
@@ -216,8 +216,8 @@ impl FuncBuilderEx for FuncBuilder {
 
                 BaseType::Class(cid) => {
                     let constant =
-                        Constant::Array(Arc::new(TypeStruct::Unresolved(cid).into_typed_value()));
-                    let adata = self.emit_constant(constant);
+                        Immediate::Array(Arc::new(TypeStruct::Unresolved(cid).into_typed_value()));
+                    let adata = self.emit_imm(constant);
                     Instr::Hhbc(Hhbc::IsTypeStructC(
                         [vid, adata],
                         TypeStructResolveOp::Resolve,

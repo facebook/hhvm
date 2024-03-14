@@ -4,13 +4,13 @@
 
 use hash::HashMap;
 use hash::HashSet;
-use ir_core::constant::Constant;
 use ir_core::instr;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::FuncBuilder;
 use ir_core::FunctionName;
 use ir_core::HasEdges;
+use ir_core::Immediate;
 use ir_core::Instr;
 use ir_core::LocId;
 use ir_core::ValueId;
@@ -104,7 +104,7 @@ impl Block {
             }
         }
 
-        let null_iid = fb.emit_constant(Constant::Null);
+        let null_iid = fb.emit_imm(Immediate::Null);
 
         let terminator = match &self.terminator {
             Terminator::Ret => Instr::ret(null_iid, loc),

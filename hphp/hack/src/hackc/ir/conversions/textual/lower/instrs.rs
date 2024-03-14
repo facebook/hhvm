@@ -22,12 +22,12 @@ use ir::instr::Textual;
 use ir::type_struct::TypeStruct;
 use ir::BareThisOp;
 use ir::Call;
-use ir::Constant;
 use ir::FCallArgsFlags;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
 use ir::GlobalId;
+use ir::Immediate;
 use ir::InitPropOp;
 use ir::Instr;
 use ir::InstrId;
@@ -86,25 +86,24 @@ impl LowerInstrs<'_> {
         // A lot of times the name for the global comes from a static
         // string name - see if we can dig it up and turn this into a
         // Textual::LoadGlobal.
-        vid.constant()
-            .and_then(|cid| match builder.func.constant(cid) {
-                Constant::String(s) => {
-                    match ir::StringId::from_bytes(*s) {
-                        Ok(s) => {
-                            let id = ir::GlobalId::new(s);
-                            Some(Instr::Special(Special::Textual(Textual::LoadGlobal {
-                                id,
-                                is_const: false,
-                            })))
-                        }
-                        Err(_) => {
-                            // Non-utf8 string value cannot be a symbol name
-                            None
-                        }
+        vid.imm().and_then(|cid| match builder.func.imm(cid) {
+            Immediate::String(s) => {
+                match ir::StringId::from_bytes(*s) {
+                    Ok(s) => {
+                        let id = ir::GlobalId::new(s);
+                        Some(Instr::Special(Special::Textual(Textual::LoadGlobal {
+                            id,
+                            is_const: false,
+                        })))
+                    }
+                    Err(_) => {
+                        // Non-utf8 string value cannot be a symbol name
+                        None
                     }
                 }
-                _ => None,
-            })
+            }
+            _ => None,
+        })
     }
 
     fn handle_hhbc_with_builtin(&self, hhbc: &Hhbc) -> Option<hack::Hhbc> {
@@ -250,7 +249,7 @@ impl LowerInstrs<'_> {
 
     fn check_prop(&self, builder: &mut FuncBuilder, _: PropName, _: LocId) -> Instr {
         // CheckProp checks to see if the prop has already been initialized - we'll just always say "no".
-        Instr::copy(builder.emit_constant(Constant::Bool(false)))
+        Instr::copy(builder.emit_imm(Immediate::Bool(false)))
     }
 
     fn init_prop(
@@ -287,7 +286,7 @@ impl LowerInstrs<'_> {
         let key_var = if let Some(key_lid) = args.key_lid() {
             builder.emit(Textual::deref(key_lid))
         } else {
-            builder.emit_constant(Constant::Null)
+            builder.emit_imm(Immediate::Null)
         };
 
         let pred = builder.emit_hhbc_builtin(
@@ -319,7 +318,7 @@ impl LowerInstrs<'_> {
         let key_var = if let Some(key_lid) = args.key_lid() {
             builder.emit(Textual::deref(key_lid))
         } else {
-            builder.emit_constant(Constant::Null)
+            builder.emit_imm(Immediate::Null)
         };
 
         let iter_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
@@ -482,7 +481,7 @@ impl LowerInstrs<'_> {
             return Instr::copy(obj);
         }
         let pred = match return_type.ty {
-            ir::BaseType::Noreturn => builder.emit_constant(Constant::Bool(false)),
+            ir::BaseType::Noreturn => builder.emit_imm(Immediate::Bool(false)),
             _ => builder.emit_is(obj, &return_type, loc),
         };
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
@@ -540,8 +539,8 @@ impl LowerInstrs<'_> {
                 {
                     if target == hack::Hhbc::ClassGetC.as_str() {
                         if let Some(classname) = lookup_constant_string(&builder.func, *cid) {
-                            let cid = builder.emit_constant(Constant::String(classname));
-                            let pid = builder.emit_constant(Constant::String(propname));
+                            let cid = builder.emit_imm(Immediate::String(classname));
+                            let pid = builder.emit_imm(Immediate::String(propname));
                             return Some(builder.hack_builtin(
                                 hack::Builtin::SetStaticProp,
                                 &[cid, pid, vid],
@@ -629,13 +628,13 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::ClsCns(cls, const_id, loc)) => {
                 let builtin = hack::Hhbc::ClsCns;
-                let const_id = builder.emit_constant(Constant::String(const_id.as_bytes_id()));
+                let const_id = builder.emit_imm(Immediate::String(const_id.as_bytes_id()));
                 builder.hhbc_builtin(builtin, &[cls, const_id], loc)
             }
             Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, loc)) => {
                 // ClsCnsD(id, cid) -> CGetS(id, cid)
-                let cid = builder.emit_constant(Constant::String(cid.as_bytes_id()));
-                let const_id = builder.emit_constant(Constant::String(const_id.as_bytes_id()));
+                let cid = builder.emit_imm(Immediate::String(cid.as_bytes_id()));
+                let const_id = builder.emit_imm(Immediate::String(const_id.as_bytes_id()));
                 Instr::Hhbc(Hhbc::CGetS([const_id, cid], ReadonlyOp::Readonly, loc))
             }
             Instr::Hhbc(Hhbc::ColFromArray(vid, col_type, loc)) => {
@@ -671,8 +670,8 @@ impl TransformInstr for LowerInstrs<'_> {
                 match rewrite_constant_type_check(builder, obj, ts, loc) {
                     Some(null_check) => null_check,
                     None => {
-                        let op = builder.emit_constant(Constant::Int(op));
-                        let kind = builder.emit_constant(Constant::Int(kind));
+                        let op = builder.emit_imm(Immediate::Int(op));
+                        let kind = builder.emit_imm(Immediate::Int(kind));
                         builder.hhbc_builtin(builtin, &[obj, ts, op, kind], loc)
                     }
                 }
@@ -704,9 +703,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 let args = names
                     .iter()
                     .zip(values.iter().copied())
-                    .flat_map(|(name, value)| {
-                        [builder.emit_constant(Constant::String(*name)), value]
-                    })
+                    .flat_map(|(name, value)| [builder.emit_imm(Immediate::String(*name)), value])
                     .collect_vec();
                 builder.hack_builtin(Builtin::NewDict, &args, loc)
             }
@@ -796,7 +793,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 // Reified generics generate a lot of IR that is opaque to the analysis and actually
                 // negatively affects the precision. Lowering these checks to a constant value
                 // 'false' allows us to skip the whole branches related to reified generics.
-                let value = builder.emit_constant(Constant::Bool(false));
+                let value = builder.emit_imm(Immediate::Bool(false));
                 Instr::copy(value)
             }
             Instr::Terminator(Terminator::JmpOp {
@@ -807,7 +804,7 @@ impl TransformInstr for LowerInstrs<'_> {
             }) => {
                 match lookup_constant(&builder.func, cond) {
                     // TODO(arr): do we need to check any other known falsy/truthy values here?
-                    Some(Constant::Bool(cond)) => {
+                    Some(Immediate::Bool(cond)) => {
                         let reachable_branch = if *cond && pred == Predicate::NonZero
                             || !*cond && pred == Predicate::Zero
                         {
@@ -851,7 +848,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 let iter = cases.iter().take(cases.len() - 1).zip(targets.iter());
 
                 for (case, target) in iter {
-                    let string = builder.emit_constant(Constant::String(*case));
+                    let string = builder.emit_imm(Immediate::String(*case));
                     let pred = builder.emit_hhbc_builtin(hack::Hhbc::CmpSame, &[string, cond], loc);
                     let false_bid = builder.alloc_bid_based_on_cur();
                     builder.emit(Instr::jmp_op(
@@ -922,7 +919,7 @@ fn rewrite_nullsafe_call(
     // Null case - main value should be null. Inouts should be passed through.
     builder.start_block(null_bid);
     let mut args = Vec::with_capacity(num_rets as usize);
-    args.push(builder.emit_constant(Constant::Null));
+    args.push(builder.emit_imm(Immediate::Null));
     if let Some(inouts) = call.inouts.as_ref() {
         for inout_idx in inouts.iter() {
             let op = call.operands[*inout_idx as usize];
@@ -978,7 +975,7 @@ fn rewrite_constant_type_check(
 ) -> Option<Instr> {
     let typestruct = lookup_constant(&builder.func, typestruct)?;
     let typestruct = match typestruct {
-        Constant::Array(tv) => TypeStruct::try_from_typed_value(tv)?,
+        Immediate::Array(tv) => TypeStruct::try_from_typed_value(tv)?,
         _ => return None,
     };
     match typestruct {

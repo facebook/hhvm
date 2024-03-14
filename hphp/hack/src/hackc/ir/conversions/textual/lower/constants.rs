@@ -6,14 +6,14 @@
 use ir::instr;
 use ir::instr::HasOperands;
 use ir::instr::Terminator;
-use ir::newtype::ConstantIdSet;
+use ir::newtype::ImmIdSet;
 use ir::BlockId;
 use ir::BlockIdSet;
-use ir::Constant;
-use ir::ConstantId;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::HasEdges;
+use ir::ImmId;
+use ir::Immediate;
 use ir::Instr;
 use ir::ValueId;
 use ir::ValueIdMap;
@@ -23,13 +23,13 @@ use log::trace;
 /// handling blocks) and remap their uses to the emitted values.
 pub(crate) fn write_constants(builder: &mut FuncBuilder) {
     // Rewrite some types of constants.
-    for c in builder.func.constants.iter_mut() {
+    for c in builder.func.imms.iter_mut() {
         match c {
-            Constant::File => {
+            Immediate::File => {
                 // Rewrite __FILE__ as a simple string since the real filename
                 // shouldn't matter for analysis.
                 let id = ir::intern("__FILE__");
-                *c = Constant::String(id.as_bytes());
+                *c = Immediate::String(id.as_bytes());
             }
             _ => {}
         }
@@ -76,15 +76,15 @@ fn follow_block_successors(func: &Func, bid: BlockId) -> Vec<BlockId> {
 }
 
 /// Compute the set of constants that are visible starting from `bid`.
-fn compute_live_constants(func: &Func, bids: &Vec<BlockId>) -> ConstantIdSet {
-    let mut visible = ConstantIdSet::default();
+fn compute_live_constants(func: &Func, bids: &Vec<BlockId>) -> ImmIdSet {
+    let mut visible = ImmIdSet::default();
     for &bid in bids {
         let block = func.block(bid);
         visible.extend(
             block
                 .iids()
                 .map(|iid| func.instr(iid))
-                .flat_map(|instr| instr.operands().iter().filter_map(|op| op.constant())),
+                .flat_map(|instr| instr.operands().iter().filter_map(|op| op.imm())),
         );
     }
 
@@ -114,7 +114,7 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
 
     for cid in constants.into_iter() {
         let (vid, needs_fixup) = write_constant(builder, cid);
-        let src = ValueId::from_constant(cid);
+        let src = ValueId::from_imm(cid);
         remap.insert(src, vid);
         if needs_fixup {
             fixups.push((vid, src));
@@ -137,32 +137,32 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
 /// Arrays can refer to some prior constants (like Strings) so they need to be
 /// sorted before being written. Right now arrays can't refer to other arrays so
 /// they don't need to be sorted relative to each other.
-fn sort_and_filter_constants(func: &Func, constants: ConstantIdSet) -> Vec<ConstantId> {
+fn sort_and_filter_constants(func: &Func, constants: ImmIdSet) -> Vec<ImmId> {
     let mut result = Vec::with_capacity(constants.len());
     let mut arrays = Vec::with_capacity(constants.len());
     for cid in constants {
-        let constant = func.constant(cid);
-        match constant {
-            Constant::Bool(..)
-            | Constant::Dir
-            | Constant::EnumClassLabel(..)
-            | Constant::Float(..)
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Int(..)
-            | Constant::LazyClass(_)
-            | Constant::Method
-            | Constant::NewCol(..)
-            | Constant::Null
-            | Constant::Uninit => {}
+        let imm = func.imm(cid);
+        match imm {
+            Immediate::Bool(..)
+            | Immediate::Dir
+            | Immediate::EnumClassLabel(..)
+            | Immediate::Float(..)
+            | Immediate::File
+            | Immediate::FuncCred
+            | Immediate::Int(..)
+            | Immediate::LazyClass(_)
+            | Immediate::Method
+            | Immediate::NewCol(..)
+            | Immediate::Null
+            | Immediate::Uninit => {}
 
-            Constant::Array(_) => {
+            Immediate::Array(_) => {
                 arrays.push(cid);
             }
-            Constant::Named(..) => {
+            Immediate::Named(..) => {
                 result.push(cid);
             }
-            Constant::String(s) => {
+            Immediate::String(s) => {
                 // If the string is short then just keep it inline. This makes
                 // it easier to visually read the output but may be more work
                 // for infer (because it's a call)...
@@ -177,28 +177,28 @@ fn sort_and_filter_constants(func: &Func, constants: ConstantIdSet) -> Vec<Const
     result
 }
 
-fn write_constant(builder: &mut FuncBuilder, cid: ConstantId) -> (ValueId, bool) {
-    let constant = builder.func.constant(cid);
-    trace!("    Const {cid}: {constant:?}");
-    match constant {
-        Constant::Bool(..)
-        | Constant::Dir
-        | Constant::Float(..)
-        | Constant::File
-        | Constant::FuncCred
-        | Constant::Int(..)
-        | Constant::LazyClass(_)
-        | Constant::Method
-        | Constant::NewCol(..)
-        | Constant::Null
-        | Constant::Uninit => unreachable!(),
+fn write_constant(builder: &mut FuncBuilder, cid: ImmId) -> (ValueId, bool) {
+    let imm = builder.func.imm(cid);
+    trace!("    Immediate {cid}: {imm:?}");
+    match imm {
+        Immediate::Bool(..)
+        | Immediate::Dir
+        | Immediate::Float(..)
+        | Immediate::File
+        | Immediate::FuncCred
+        | Immediate::Int(..)
+        | Immediate::LazyClass(_)
+        | Immediate::Method
+        | Immediate::NewCol(..)
+        | Immediate::Null
+        | Immediate::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Constant::Array(_) | Constant::String(_) | Constant::EnumClassLabel(_) => {
+        Immediate::Array(_) | Immediate::String(_) | Immediate::EnumClassLabel(_) => {
             (builder.emit(Instr::tombstone()), true)
         }
 
-        Constant::Named(name) => {
+        Immediate::Named(name) => {
             let id = ir::GlobalId::new(name.as_string_id());
             let vid = builder.emit(Instr::Special(ir::instr::Special::Textual(
                 ir::instr::Textual::LoadGlobal { id, is_const: true },

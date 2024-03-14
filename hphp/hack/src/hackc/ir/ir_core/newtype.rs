@@ -14,8 +14,8 @@ newtype_int!(BlockId, u32, BlockIdMap, BlockIdSet);
 newtype_int!(InstrId, u32, InstrIdMap, InstrIdSet);
 pub type InstrIdIndexSet = indexmap::set::IndexSet<InstrId, newtype::BuildIdHasher<u32>>;
 
-// A ConstantId represents a Constant within a Func.
-newtype_int!(ConstantId, u32, ConstantIdMap, ConstantIdSet);
+// A ImmId represents an Immediate constant within a Func.
+newtype_int!(ImmId, u32, ImmIdMap, ImmIdSet);
 
 // A LocId represents a SrcLoc interned within a Func.
 newtype_int!(LocId, u32, LocIdMap, LocIdSet);
@@ -24,12 +24,12 @@ newtype_int!(LocId, u32, LocIdMap, LocIdSet);
 // They are disjoint from LocalIds.
 newtype_int!(VarId, u32, VarIdMap, VarIdSet);
 
-/// An ValueId can be either an InstrId or a ConstantId.
+/// An ValueId can be either an InstrId or a ImmId.
 ///
 /// Note that special care has been taken to make sure this encodes to the same
 /// size as a u32:
 ///   InstrId values are encoded as non-negative values.
-///   ConstantId values are encoded as binary negation (so negative values).
+///   ImmId values are encoded as binary negation (so negative values).
 ///   None is encoded as i32::MIN_INT.
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ValueId {
@@ -49,9 +49,9 @@ impl ValueId {
         Self { raw: idx as i32 }
     }
 
-    pub fn from_constant(idx: ConstantId) -> Self {
-        assert!(idx != ConstantId::NONE);
-        let ConstantId(idx) = idx;
+    pub fn from_imm(idx: ImmId) -> Self {
+        assert!(idx != ImmId::NONE);
+        let ImmId(idx) = idx;
         Self { raw: !(idx as i32) }
     }
 
@@ -73,15 +73,15 @@ impl ValueId {
         } else if self.raw == Self::NONE {
             FullInstrId::None
         } else {
-            FullInstrId::Constant(ConstantId((!self.raw) as u32))
+            FullInstrId::Imm(ImmId((!self.raw) as u32))
         }
     }
 
-    pub fn constant(self) -> Option<ConstantId> {
+    pub fn imm(self) -> Option<ImmId> {
         if self.raw >= 0 || self.raw == Self::NONE {
             None
         } else {
-            Some(ConstantId((!self.raw) as u32))
+            Some(ImmId((!self.raw) as u32))
         }
     }
 
@@ -93,7 +93,7 @@ impl ValueId {
         }
     }
 
-    pub fn is_constant(self) -> bool {
+    pub fn is_imm(self) -> bool {
         self.raw < 0 && self.raw != Self::NONE
     }
 
@@ -112,18 +112,18 @@ impl From<InstrId> for ValueId {
     }
 }
 
-impl From<ConstantId> for ValueId {
-    fn from(cid: ConstantId) -> ValueId {
-        Self::from_constant(cid)
+impl From<ImmId> for ValueId {
+    fn from(cid: ImmId) -> ValueId {
+        Self::from_imm(cid)
     }
 }
 
 // A 'FullInstrId' can be used with match but takes more memory than
-// ValueId. Note that the Constant and Instr variants will never contain
-// ConstantId::NONE or InstrId::NONE.
+// ValueId. Note that the Imm and Instr variants will never contain
+// ImmId::NONE or InstrId::NONE.
 pub enum FullInstrId {
     Instr(InstrId),
-    Constant(ConstantId),
+    Imm(ImmId),
     None,
 }
 

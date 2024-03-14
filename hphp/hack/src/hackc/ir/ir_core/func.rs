@@ -17,11 +17,11 @@ use crate::BytesId;
 use crate::ClassName;
 use crate::ClassNameMap;
 use crate::Coeffects;
-use crate::Constant;
-use crate::ConstantId;
 use crate::FunctionFlags;
 use crate::FunctionName;
 use crate::HasEdges;
+use crate::ImmId;
+use crate::Immediate;
 use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
@@ -157,7 +157,7 @@ impl TryCatchId {
 ///     Await object as a Block parameter.
 ///
 /// Funcs also contain some amount of storage for data associated with the code
-/// - such as constant values or locations - so they can referred to with
+/// - such as immediate constants or locations - so they can referred to with
 /// indices instead of having to deal with refereces and ownerhip (and to make
 /// them smaller).
 ///
@@ -174,7 +174,7 @@ pub struct Func {
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub constants: IdVec<ConstantId, Constant>,
+    pub imms: IdVec<ImmId, Immediate>,
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
     pub params: Vec<Param>,
@@ -190,9 +190,9 @@ impl Func {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
 
-    pub fn alloc_constant(&mut self, constant: Constant) -> ConstantId {
-        let cid = ConstantId::from_usize(self.constants.len());
-        self.constants.push(constant);
+    pub fn alloc_imm(&mut self, imm: Immediate) -> ImmId {
+        let cid = ImmId::from_usize(self.imms.len());
+        self.imms.push(imm);
         cid
     }
 
@@ -236,7 +236,7 @@ impl Func {
         self.blocks.get_mut(bid).unwrap()
     }
 
-    /// Yields normal instructions in bodies (not constants or params).
+    /// Yields normal instructions in bodies (not immediates or params).
     pub fn body_iids(&self) -> impl DoubleEndedIterator<Item = InstrId> + '_ {
         self.block_ids().flat_map(|bid| self.blocks[bid].iids())
     }
@@ -265,8 +265,8 @@ impl Func {
         }
     }
 
-    pub fn constant(&self, cid: ConstantId) -> &Constant {
-        self.get_constant(cid).unwrap()
+    pub fn imm(&self, cid: ImmId) -> &Immediate {
+        self.get_imm(cid).unwrap()
     }
 
     pub fn edges(&self, bid: BlockId) -> &[BlockId] {
@@ -287,8 +287,8 @@ impl Func {
         self.blocks.get(bid)
     }
 
-    pub fn get_constant(&self, cid: ConstantId) -> Option<&Constant> {
-        self.constants.get(cid)
+    pub fn get_imm(&self, cid: ImmId) -> Option<&Immediate> {
+        self.imms.get(cid)
     }
 
     pub fn get_edges(&self, bid: BlockId) -> Option<&[BlockId]> {

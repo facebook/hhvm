@@ -299,10 +299,10 @@ impl PushInserter {
                         .emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, LocId::NONE)));
                 }
             }
-            FullInstrId::Constant(cid) => {
+            FullInstrId::Imm(cid) => {
                 self.builder
                     .emit(Instr::Special(Special::IrToBc(IrToBc::PushConstant(
-                        ValueId::from_constant(cid),
+                        ValueId::from_imm(cid),
                     ))));
             }
         }

@@ -520,12 +520,12 @@ pub(crate) fn print_func_body(
         writeln!(w, "  .is_memoize_wrapper_lsb")?;
     }
 
-    for cid in func.constants.keys() {
+    for cid in func.imms.keys() {
         writeln!(
             w,
             "  .const {} = {}",
-            FmtRawVid(ValueId::from_constant(cid)),
-            FmtConstantId(func, cid),
+            FmtRawVid(ValueId::from_imm(cid)),
+            FmtImmId(func, cid),
         )?;
     }
 

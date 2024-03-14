@@ -16,9 +16,9 @@ use crate::instr::MemberOp;
 use crate::instr::Special;
 use crate::Block;
 use crate::BlockId;
-use crate::Constant;
-use crate::ConstantId;
 use crate::Func;
+use crate::ImmId;
+use crate::Immediate;
 use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
@@ -35,14 +35,14 @@ pub struct FuncBuilder {
     pub func: Func,
     cur_bid: BlockId,
     pub loc_lookup: HashMap<SrcLoc, LocId>,
-    pub constant_lookup: HashMap<Constant, ConstantId>,
+    pub imm_lookup: HashMap<Immediate, ImmId>,
     block_rewrite_stopped: bool,
     changed: bool,
 
     /// Used with rewrite_block(), maps old InstrId -> new InstrId, to handle
     /// replacing one instr with another.
     ///
-    /// For example, if we fold "add 2,2" => "4", and a Constant for 4 already exists, we will
+    /// For example, if we fold "add 2,2" => "4", and an Immediate for 4 already exists, we will
     /// redirect all references to the add's InstrId to use 4's ID instead. This is effectively
     /// on-the-fly copy propagation.
     ///
@@ -65,11 +65,11 @@ impl FuncBuilder {
 
     /// Create a FuncBuilder to edit a Func.
     pub fn with_func(func: Func) -> Self {
-        let constant_lookup: HashMap<Constant, ConstantId> = func
-            .constants
+        let imm_lookup: HashMap<Immediate, ImmId> = func
+            .imms
             .iter()
             .enumerate()
-            .map(|(idx, constant)| (constant.clone(), ConstantId::from_usize(idx)))
+            .map(|(idx, constant)| (constant.clone(), ImmId::from_usize(idx)))
             .collect();
 
         let loc_lookup: HashMap<SrcLoc, LocId> = func
@@ -82,7 +82,7 @@ impl FuncBuilder {
         FuncBuilder {
             block_rewrite_stopped: false,
             changed: false,
-            constant_lookup,
+            imm_lookup,
             cur_bid: BlockId::NONE,
             func,
             loc_lookup,
@@ -159,12 +159,12 @@ impl FuncBuilder {
         ValueId::from_instr(iid)
     }
 
-    pub fn emit_constant(&mut self, constant: Constant) -> ValueId {
+    pub fn emit_imm(&mut self, imm: Immediate) -> ValueId {
         let lit_id = self
-            .constant_lookup
-            .entry(constant)
-            .or_insert_with_key(|constant| self.func.alloc_constant(constant.clone()));
-        ValueId::from_constant(*lit_id)
+            .imm_lookup
+            .entry(imm)
+            .or_insert_with_key(|imm| self.func.alloc_imm(imm.clone()));
+        ValueId::from_imm(*lit_id)
     }
 
     pub fn finish(self) -> Func {

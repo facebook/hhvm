@@ -13,9 +13,9 @@ use crate::FloatBits;
 use crate::TypedValue;
 use crate::ValueId;
 
-/// A constant value.
+/// An immediate constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum Constant {
+pub enum Immediate {
     Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
@@ -33,7 +33,7 @@ pub enum Constant {
     Uninit,
 }
 
-impl HasOperands for Constant {
+impl HasOperands for Immediate {
     fn operands(&self) -> &[ValueId] {
         // By definition constants don't have operands.
         &[]
@@ -45,7 +45,7 @@ impl HasOperands for Constant {
     }
 }
 
-impl From<TypedValue> for Constant {
+impl From<TypedValue> for Immediate {
     fn from(tv: TypedValue) -> Self {
         match tv {
             TypedValue::Bool(b) => Self::Bool(b),

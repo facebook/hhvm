@@ -127,7 +127,7 @@ fn convert_body<'a>(
         instrs: Default::default(),
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        constants: Default::default(),
+        imms: Default::default(),
         locs,
         num_iters,
         params: Default::default(),

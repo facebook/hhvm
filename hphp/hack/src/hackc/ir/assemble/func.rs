@@ -33,13 +33,13 @@ use ir_core::CcThis;
 use ir_core::ClassNameMap;
 use ir_core::Coeffects;
 use ir_core::CollectionType;
-use ir_core::Constant;
 use ir_core::ExFrameId;
 use ir_core::FCallArgsFlags;
 use ir_core::Func;
 use ir_core::FuncBuilder;
 use ir_core::Function;
 use ir_core::FunctionFlags;
+use ir_core::Immediate;
 use ir_core::InstrId;
 use ir_core::InstrIdSet;
 use ir_core::IterId;
@@ -75,12 +75,12 @@ use crate::parse::parse_class_get_c_kind;
 use crate::parse::parse_class_name;
 use crate::parse::parse_comma_list;
 use crate::parse::parse_const_name;
-use crate::parse::parse_constant;
-use crate::parse::parse_constant_id;
 use crate::parse::parse_dynamic_call_op;
 use crate::parse::parse_fatal_op;
 use crate::parse::parse_func_name;
 use crate::parse::parse_i64;
+use crate::parse::parse_imm;
+use crate::parse::parse_imm_id;
 use crate::parse::parse_inc_dec_op_post;
 use crate::parse::parse_inc_dec_op_pre;
 use crate::parse::parse_init_prop_op;
@@ -386,14 +386,14 @@ impl FunctionParser<'_> {
     fn vid(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<ValueId> {
         match tokenizer.peek_token()? {
             Some(Token::Identifier(s, _)) if s.starts_with('#') => {
-                Ok(ValueId::from_constant(parse_constant_id(tokenizer)?))
+                Ok(ValueId::from_imm(parse_imm_id(tokenizer)?))
             }
             Some(Token::Identifier(s, _)) if s.starts_with('%') => {
                 Ok(ValueId::from_instr(parse_instr_id(tokenizer)?))
             }
             Some(_) => {
-                let c = parse_constant(tokenizer)?;
-                let id = self.builder.emit_constant(c);
+                let c = parse_imm(tokenizer)?;
+                let id = self.builder.emit_imm(c);
                 Ok(id)
             }
             None => Err(anyhow!("Expected token at end")),
@@ -1023,8 +1023,8 @@ impl FunctionParser<'_> {
             "->" => match kind {
                 OpKind::C => MemberKey::PC,
                 OpKind::I(i) => {
-                    // This needs to be pushed as a constant!
-                    operands.push(self.builder.emit_constant(Constant::Int(i)));
+                    // This needs to be pushed as an immediate!
+                    operands.push(self.builder.emit_imm(Immediate::Int(i)));
                     MemberKey::PC
                 }
                 OpKind::L => MemberKey::PL,
@@ -1187,16 +1187,16 @@ impl FunctionParser<'_> {
     }
 
     fn parse_const(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <idx:parse_constant_id> "=" <value:parse_constant()>);
+        parse!(tokenizer, <idx:parse_imm_id> "=" <value:parse_imm()>);
 
-        if self.builder.func.constants.len() <= idx.as_usize() {
+        if self.builder.func.imms.len() <= idx.as_usize() {
             self.builder
                 .func
-                .constants
-                .resize(idx.as_usize() + 1, Constant::Uninit);
+                .imms
+                .resize(idx.as_usize() + 1, Immediate::Uninit);
         }
-        self.builder.constant_lookup.insert(value.clone(), idx);
-        self.builder.func.constants[idx] = value;
+        self.builder.imm_lookup.insert(value.clone(), idx);
+        self.builder.func.imms[idx] = value;
         Ok(())
     }
 

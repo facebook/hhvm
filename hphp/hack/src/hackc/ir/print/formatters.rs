@@ -344,31 +344,31 @@ impl Display for FmtIdentifierId {
     }
 }
 
-pub(crate) struct FmtConstant<'a>(pub(crate) &'a Constant);
+pub(crate) struct FmtImmediate<'a>(pub(crate) &'a Immediate);
 
-impl Display for FmtConstant<'_> {
+impl Display for FmtImmediate<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtConstant(constant) = self;
-        match constant {
-            Constant::Array(tv) => write!(f, "array({})", FmtTypedValue(tv)),
-            Constant::Bool(b) => write!(f, "{b}"),
-            Constant::Dir => write!(f, "dir"),
-            Constant::EnumClassLabel(value) => {
+        let FmtImmediate(imm) = self;
+        match imm {
+            Immediate::Array(tv) => write!(f, "array({})", FmtTypedValue(tv)),
+            Immediate::Bool(b) => write!(f, "{b}"),
+            Immediate::Dir => write!(f, "dir"),
+            Immediate::EnumClassLabel(value) => {
                 write!(f, "enum_class_label({})", FmtQuotedStringId(*value))
             }
-            Constant::Float(value) => FmtFloat(value.to_f64()).fmt(f),
-            Constant::File => write!(f, "file"),
-            Constant::FuncCred => write!(f, "func_cred"),
-            Constant::Int(value) => write!(f, "{}", value),
-            Constant::LazyClass(cid) => {
+            Immediate::Float(value) => FmtFloat(value.to_f64()).fmt(f),
+            Immediate::File => write!(f, "file"),
+            Immediate::FuncCred => write!(f, "func_cred"),
+            Immediate::Int(value) => write!(f, "{}", value),
+            Immediate::LazyClass(cid) => {
                 write!(f, "lazy_class({})", FmtIdentifierId(cid.as_bytes_id()))
             }
-            Constant::Method => write!(f, "method"),
-            Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
-            Constant::NewCol(k) => write!(f, "new_col({:?})", k),
-            Constant::Null => write!(f, "null"),
-            Constant::String(value) => FmtQuotedStringId(*value).fmt(f),
-            Constant::Uninit => write!(f, "uninit"),
+            Immediate::Method => write!(f, "method"),
+            Immediate::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
+            Immediate::NewCol(k) => write!(f, "new_col({:?})", k),
+            Immediate::Null => write!(f, "null"),
+            Immediate::String(value) => FmtQuotedStringId(*value).fmt(f),
+            Immediate::Uninit => write!(f, "uninit"),
         }
     }
 }
@@ -379,11 +379,11 @@ impl Display for FmtVid<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtVid(body, vid, verbose) = *self;
         match vid.full() {
-            FullInstrId::Constant(cid) => {
+            FullInstrId::Imm(cid) => {
                 if verbose {
                     FmtRawVid(vid).fmt(f)
                 } else {
-                    FmtConstantId(body, cid).fmt(f)
+                    FmtImmId(body, cid).fmt(f)
                 }
             }
             FullInstrId::Instr(iid) => {
@@ -517,13 +517,13 @@ impl Display for FmtLids<'_> {
     }
 }
 
-pub(crate) struct FmtConstantId<'a>(pub(crate) &'a Func, pub(crate) ConstantId);
+pub(crate) struct FmtImmId<'a>(pub(crate) &'a Func, pub(crate) ImmId);
 
-impl Display for FmtConstantId<'_> {
+impl Display for FmtImmId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtConstantId(body, cid) = *self;
-        let constant = body.constant(cid);
-        FmtConstant(constant).fmt(f)
+        let FmtImmId(body, cid) = *self;
+        let imm = body.imm(cid);
+        FmtImmediate(imm).fmt(f)
     }
 }
 
@@ -634,8 +634,8 @@ impl Display for FmtRawVid {
                     write!(f, "%{}", iid.as_usize())
                 }
             }
-            FullInstrId::Constant(cid) => {
-                if cid == ConstantId::NONE {
+            FullInstrId::Imm(cid) => {
+                if cid == ImmId::NONE {
                     f.write_str("#none")
                 } else {
                     write!(f, "#{}", cid.as_usize())

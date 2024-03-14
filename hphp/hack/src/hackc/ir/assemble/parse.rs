@@ -18,14 +18,14 @@ use ir_core::ClassGetCMode;
 use ir_core::ClassName;
 use ir_core::CollectionType;
 use ir_core::ConstName;
-use ir_core::Constant;
-use ir_core::ConstantId;
 use ir_core::DictEntry;
 use ir_core::EnforceableType;
 use ir_core::FatalOp;
 use ir_core::FloatBits;
 use ir_core::FunctionName;
 use ir_core::HackConstant;
+use ir_core::ImmId;
+use ir_core::Immediate;
 use ir_core::IncDecOp;
 use ir_core::InitPropOp;
 use ir_core::InstrId;
@@ -240,12 +240,12 @@ pub(crate) fn parse_const_name(tokenizer: &mut Tokenizer<'_>) -> Result<ConstNam
     Ok(ConstName::from_utf8(&id)?)
 }
 
-pub(crate) fn parse_constant_id(tokenizer: &mut Tokenizer<'_>) -> Result<ConstantId> {
+pub(crate) fn parse_imm_id(tokenizer: &mut Tokenizer<'_>) -> Result<ImmId> {
     let t = tokenizer.expect_any_identifier()?;
     if !t.identifier().starts_with('#') {
         return Err(t.bail(format!("Expected '#' but got {t}")));
     }
-    Ok(ConstantId::from_usize(t.identifier()[1..].parse()?))
+    Ok(ImmId::from_usize(t.identifier()[1..].parse()?))
 }
 
 pub(crate) fn parse_comma_list<T, F: FnMut(&mut Tokenizer<'_>) -> Result<T>>(
@@ -321,31 +321,31 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
     })
 }
 
-pub(crate) fn parse_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> {
+pub(crate) fn parse_imm(tokenizer: &mut Tokenizer<'_>) -> Result<Immediate> {
     Ok(match tokenizer.expect_any_token()? {
         t @ Token::QuotedString(..) => {
             let id = ir_core::intern_bytes(t.unescaped_string()?);
-            Constant::String(id)
+            Immediate::String(id)
         }
         ref t @ Token::Identifier(ref s, _) => match s.as_str() {
             "array" => {
                 parse!(tokenizer, "(" <tv:parse_typed_value> ")");
-                Constant::Array(Arc::new(tv))
+                Immediate::Array(Arc::new(tv))
             }
             "constant" => {
                 parse!(tokenizer, "(" <value:parse_user_id> ")");
-                Constant::Named(ConstName::intern(std::str::from_utf8(&value.0)?))
+                Immediate::Named(ConstName::intern(std::str::from_utf8(&value.0)?))
             }
-            "dir" => Constant::Dir,
-            "false" => Constant::Bool(false),
-            "file" => Constant::File,
-            "func_cred" => Constant::FuncCred,
-            "inf" => Constant::Float(FloatBits(f64::INFINITY)),
+            "dir" => Immediate::Dir,
+            "false" => Immediate::Bool(false),
+            "file" => Immediate::File,
+            "func_cred" => Immediate::FuncCred,
+            "inf" => Immediate::Float(FloatBits(f64::INFINITY)),
             "lazy_class" => {
                 parse!(tokenizer, "(" <value:parse_class_name> ")");
-                Constant::LazyClass(value)
+                Immediate::LazyClass(value)
             }
-            "method" => Constant::Method,
+            "method" => Immediate::Method,
             "new_col" => {
                 parse!(tokenizer, "(" <kind:id> ")");
                 let kind = match kind.identifier() {
@@ -358,22 +358,22 @@ pub(crate) fn parse_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> 
                     "ImmSet" => CollectionType::ImmSet,
                     _ => return Err(kind.bail(format!("Unknown constant type '{kind}'"))),
                 };
-                Constant::NewCol(kind)
+                Immediate::NewCol(kind)
             }
-            "null" => Constant::Null,
-            "true" => Constant::Bool(true),
-            "uninit" => Constant::Uninit,
-            "nan" => Constant::Float(FloatBits(f64::NAN)),
+            "null" => Immediate::Null,
+            "true" => Immediate::Bool(true),
+            "uninit" => Immediate::Uninit,
+            "nan" => Immediate::Float(FloatBits(f64::NAN)),
             "-" => {
                 let next = tokenizer.expect_any_identifier()?;
                 match next.identifier() {
-                    "inf" => Constant::Float(FloatBits(f64::NEG_INFINITY)),
+                    "inf" => Immediate::Float(FloatBits(f64::NEG_INFINITY)),
                     _ => return Err(next.bail(format!("Invalid constant following '-': '{next}'"))),
                 }
             }
             s if is_num_lead(s.as_bytes()[0]) => match convert_num(t)? {
-                Num::Int(i) => Constant::Int(i),
-                Num::Float(f) => Constant::Float(FloatBits(f)),
+                Num::Int(i) => Immediate::Int(i),
+                Num::Float(f) => Immediate::Float(FloatBits(f)),
             },
             _ => {
                 return Err(t.bail(format!("Expected constant but got '{t}'")));

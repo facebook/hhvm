@@ -787,12 +787,12 @@ fn convert_control_flow(ctx: &mut Context<'_>, opcode: &Opcode) {
 #[allow(clippy::todo)]
 fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
     use instr::Hhbc;
-    use ir::Constant;
+    use ir::Immediate;
     let loc = ctx.loc;
 
     enum Action {
         Emit(Instr),
-        Constant(Constant),
+        Immediate(Immediate),
         None,
         Push(Instr),
         Terminal(Terminator),
@@ -932,17 +932,17 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Dict(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
             debug_assert!(matches!(*tv, ir::TypedValue::Dict(_)));
-            Action::Constant(Constant::Array(tv))
+            Action::Immediate(Immediate::Array(tv))
         }
         Opcode::Keyset(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
             debug_assert!(matches!(*tv, ir::TypedValue::Keyset(_)));
-            Action::Constant(Constant::Array(tv))
+            Action::Immediate(Immediate::Array(tv))
         }
         Opcode::Vec(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
             debug_assert!(matches!(*tv, ir::TypedValue::Vec(_)));
-            Action::Constant(Constant::Array(tv))
+            Action::Immediate(Immediate::Array(tv))
         }
 
         Opcode::AKExists => simple!(Hhbc::AKExists),
@@ -1002,15 +1002,15 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::CreateCont => simple!(Hhbc::CreateCont),
         Opcode::CreateSpecialImplicitContext => simple!(Hhbc::CreateSpecialImplicitContext),
         Opcode::DblAsBits => todo!(),
-        Opcode::Dir => simple!(Constant::Dir),
+        Opcode::Dir => simple!(Immediate::Dir),
         Opcode::Div => simple!(Hhbc::Div),
-        Opcode::Double => simple!(Constant::Float),
+        Opcode::Double => simple!(Immediate::Float),
         Opcode::EnumClassLabelName => simple!(Hhbc::EnumClassLabelName),
         Opcode::Eq => simple!(Hhbc::CmpOp, CmpOp::Eq),
         Opcode::Exit => simple!(Terminator::Exit),
-        Opcode::False => simple!(Constant::Bool, false),
-        Opcode::File => simple!(Constant::File),
-        Opcode::FuncCred => simple!(Constant::FuncCred),
+        Opcode::False => simple!(Immediate::Bool, false),
+        Opcode::File => simple!(Immediate::File),
+        Opcode::FuncCred => simple!(Immediate::FuncCred),
         Opcode::GetClsRGProp => simple!(Hhbc::GetClsRGProp),
         Opcode::GetMemoKeyL => simple!(Hhbc::GetMemoKeyL),
         Opcode::Gt => simple!(Hhbc::CmpOp, CmpOp::Gt),
@@ -1023,7 +1023,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::InitProp => simple!(Hhbc::InitProp),
         Opcode::InstanceOf => todo!(),
         Opcode::InstanceOfD => simple!(Hhbc::InstanceOfD),
-        Opcode::Int => simple!(Constant::Int),
+        Opcode::Int => simple!(Immediate::Int),
         Opcode::IsLateBoundCls => simple!(Hhbc::IsLateBoundCls),
         Opcode::IsTypeC => simple!(Hhbc::IsTypeC),
         Opcode::IsTypeL => simple!(Hhbc::IsTypeL),
@@ -1037,20 +1037,20 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::LIterInit => todo!(),
         Opcode::LIterNext => todo!(),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
-        Opcode::LazyClass => simple!(Constant::LazyClass),
+        Opcode::LazyClass => simple!(Immediate::LazyClass),
         Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),
         Opcode::LockObj => simple!(Hhbc::LockObj),
         Opcode::Lt => simple!(Hhbc::CmpOp, CmpOp::Lt),
         Opcode::Lte => simple!(Hhbc::CmpOp, CmpOp::Lte),
         Opcode::MemoSet => simple!(Hhbc::MemoSet),
         Opcode::MemoSetEager => simple!(Hhbc::MemoSetEager),
-        Opcode::Method => simple!(Constant::Method),
+        Opcode::Method => simple!(Immediate::Method),
         Opcode::Mod => simple!(Hhbc::Modulo),
         Opcode::Mul => simple!(Hhbc::Mul),
         Opcode::NSame => simple!(Hhbc::CmpOp, CmpOp::NSame),
         Opcode::NativeImpl => simple!(Terminator::NativeImpl),
         Opcode::Neq => simple!(Hhbc::CmpOp, CmpOp::Neq),
-        Opcode::NewCol => simple!(Constant::NewCol),
+        Opcode::NewCol => simple!(Immediate::NewCol),
         Opcode::NewDictArray => simple!(Hhbc::NewDictArray),
         Opcode::NewKeysetArray => simple!(Hhbc::NewKeysetArray),
         Opcode::NewObj => simple!(Hhbc::NewObj),
@@ -1060,8 +1060,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::NewVec => simple!(Hhbc::NewVec),
         Opcode::Nop => todo!(),
         Opcode::Not => simple!(Hhbc::Not),
-        Opcode::Null => simple!(Constant::Null),
-        Opcode::NullUninit => simple!(Constant::Uninit),
+        Opcode::Null => simple!(Immediate::Null),
+        Opcode::NullUninit => simple!(Immediate::Uninit),
         Opcode::OODeclExists => simple!(Hhbc::OODeclExists),
         Opcode::ParentCls => simple!(Hhbc::ParentCls),
         Opcode::PopL => simple!(Hhbc::SetL),
@@ -1103,7 +1103,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::This => simple!(Hhbc::This),
         Opcode::Throw => simple!(Terminator::Throw),
         Opcode::ThrowNonExhaustiveSwitch => simple!(Hhbc::ThrowNonExhaustiveSwitch),
-        Opcode::True => simple!(Constant::Bool, true),
+        Opcode::True => simple!(Immediate::Bool, true),
         Opcode::UGetCUNop => todo!(),
         Opcode::UnsetG => simple!(Hhbc::UnsetG),
         Opcode::UnsetL => simple!(Hhbc::UnsetL),
@@ -1132,7 +1132,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             ctx.push(s1);
             Action::None
         }
-        Opcode::CnsE(id) => Action::Constant(Constant::Named(id)),
+        Opcode::CnsE(id) => Action::Immediate(Immediate::Named(id)),
         Opcode::CreateCl(num_args, clsid) => {
             let operands = collect_args(ctx, num_args);
             Action::Push(Instr::Hhbc(Hhbc::CreateCl {
@@ -1157,12 +1157,12 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
         Opcode::String(value) => {
-            let s1 = Constant::String(value);
-            Action::Constant(s1)
+            let s1 = Immediate::String(value);
+            Action::Immediate(s1)
         }
         Opcode::EnumClassLabel(value) => {
-            let s1 = Constant::EnumClassLabel(value);
-            Action::Constant(s1)
+            let s1 = Immediate::EnumClassLabel(value);
+            Action::Immediate(s1)
         }
     };
 
@@ -1170,8 +1170,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Action::Emit(opcode) => {
             ctx.emit(opcode);
         }
-        Action::Constant(constant) => {
-            ctx.emit_push_constant(constant);
+        Action::Immediate(imm) => {
+            ctx.emit_push_imm(imm);
         }
         Action::None => {}
         Action::Push(opcode) => {

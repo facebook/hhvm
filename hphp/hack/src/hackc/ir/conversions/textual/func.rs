@@ -18,10 +18,10 @@ use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::BlockId;
 use ir::ClassName;
-use ir::Constant;
 use ir::Func;
 use ir::FunctionFlags;
 use ir::FunctionName;
+use ir::Immediate;
 use ir::IncDecOp;
 use ir::Instr;
 use ir::InstrId;
@@ -272,7 +272,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
-                let new_vec = func.alloc_constant(Constant::Array(Arc::new(ir::TypedValue::Vec(
+                let new_vec = func.alloc_imm(Immediate::Array(Arc::new(ir::TypedValue::Vec(
                     vec![].into(),
                 ))));
                 let lid = LocalId::Named(orig_func.params[variadic_idx].name);
@@ -823,28 +823,30 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
     use typed_value::typed_value_expr;
 
     match vid.full() {
-        ir::FullInstrId::Constant(cid) => {
-            let constant = state.func.constant(cid);
-            let expr = match constant {
-                Constant::Array(tv) => typed_value_expr(tv),
-                Constant::Bool(false) => Expr::Const(Const::False),
-                Constant::Bool(true) => Expr::Const(Const::True),
-                Constant::Dir => todo!(),
-                Constant::EnumClassLabel(..) => todo!(),
-                Constant::File => todo!(),
-                Constant::Float(f) => Expr::Const(Const::Float(*f)),
-                Constant::FuncCred => todo!(),
-                Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(*i))]),
-                Constant::LazyClass(_cid) => todo!(),
-                Constant::Method => todo!(),
-                Constant::Named(..) => todo!(),
-                Constant::NewCol(..) => todo!(),
-                Constant::Null => Expr::Const(Const::Null),
-                Constant::String(s) => {
+        ir::FullInstrId::Imm(cid) => {
+            let imm = state.func.imm(cid);
+            let expr = match imm {
+                Immediate::Array(tv) => typed_value_expr(tv),
+                Immediate::Bool(false) => Expr::Const(Const::False),
+                Immediate::Bool(true) => Expr::Const(Const::True),
+                Immediate::Dir => todo!(),
+                Immediate::EnumClassLabel(..) => todo!(),
+                Immediate::File => todo!(),
+                Immediate::Float(f) => Expr::Const(Const::Float(*f)),
+                Immediate::FuncCred => todo!(),
+                Immediate::Int(i) => {
+                    hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(*i))])
+                }
+                Immediate::LazyClass(_cid) => todo!(),
+                Immediate::Method => todo!(),
+                Immediate::Named(..) => todo!(),
+                Immediate::NewCol(..) => todo!(),
+                Immediate::Null => Expr::Const(Const::Null),
+                Immediate::String(s) => {
                     let s = util::escaped_string(s.as_bytes());
                     hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
                 }
-                Constant::Uninit => Expr::Const(Const::Null),
+                Immediate::Uninit => Expr::Const(Const::Null),
             };
 
             let expr = state.fb.write_expr_stmt(expr)?;
@@ -1324,59 +1326,59 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     /// Look up a ValueId in the FuncState and return an Expr representing
-    /// it. For InstrIds and complex Constants return an Expr containing the
-    /// (already emitted) Sid. For simple Constants use an Expr representing the
+    /// it. For InstrIds and complex Immediates return an Expr containing the
+    /// (already emitted) Sid. For simple Immediates use an Expr representing the
     /// value directly.
     pub(crate) fn lookup_vid(&mut self, vid: ValueId) -> textual::Expr {
         match vid.full() {
             ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
-            ir::FullInstrId::Constant(c) => {
+            ir::FullInstrId::Imm(c) => {
                 use hack::Builtin;
                 use ir::CollectionType;
-                let c = self.func.constant(c);
+                let c = self.func.imm(c);
                 match c {
-                    Constant::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
-                    Constant::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
-                    Constant::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
-                    Constant::LazyClass(cid) => {
+                    Immediate::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
+                    Immediate::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
+                    Immediate::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
+                    Immediate::LazyClass(cid) => {
                         let ty = TypeName::Class(*cid);
                         textual::Expr::Const(textual::Const::LazyClass(ty))
                     }
-                    Constant::Null => textual::Expr::null(),
-                    Constant::String(s) => {
+                    Immediate::Null => textual::Expr::null(),
+                    Immediate::String(s) => {
                         let s = util::escaped_string(s.as_bytes().as_bstr());
                         hack::expr_builtin(Builtin::String, [s])
                     }
-                    Constant::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
-                    Constant::Array(..) => textual_todo! { textual::Expr::null() },
-                    Constant::Dir => textual_todo! { textual::Expr::null() },
-                    Constant::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
-                    Constant::File => textual_todo! { textual::Expr::null() },
-                    Constant::FuncCred => textual_todo! { textual::Expr::null() },
-                    Constant::Method => textual_todo! { textual::Expr::null() },
-                    Constant::NewCol(CollectionType::ImmMap) => {
+                    Immediate::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
+                    Immediate::Array(..) => textual_todo! { textual::Expr::null() },
+                    Immediate::Dir => textual_todo! { textual::Expr::null() },
+                    Immediate::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
+                    Immediate::File => textual_todo! { textual::Expr::null() },
+                    Immediate::FuncCred => textual_todo! { textual::Expr::null() },
+                    Immediate::Method => textual_todo! { textual::Expr::null() },
+                    Immediate::NewCol(CollectionType::ImmMap) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmMap), ())
                     }
-                    Constant::NewCol(CollectionType::ImmSet) => {
+                    Immediate::NewCol(CollectionType::ImmSet) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmSet), ())
                     }
-                    Constant::NewCol(CollectionType::ImmVector) => {
+                    Immediate::NewCol(CollectionType::ImmVector) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmVector), ())
                     }
-                    Constant::NewCol(CollectionType::Map) => {
+                    Immediate::NewCol(CollectionType::Map) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColMap), ())
                     }
-                    Constant::NewCol(CollectionType::Pair) => {
+                    Immediate::NewCol(CollectionType::Pair) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColPair), ())
                     }
-                    Constant::NewCol(CollectionType::Set) => {
+                    Immediate::NewCol(CollectionType::Set) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColSet), ())
                     }
-                    Constant::NewCol(CollectionType::Vector) => {
+                    Immediate::NewCol(CollectionType::Vector) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColVector), ())
                     }
-                    Constant::Uninit => textual::Expr::null(),
-                    Constant::Named(..) | Constant::NewCol(_) => unreachable!(),
+                    Immediate::Uninit => textual::Expr::null(),
+                    Immediate::Named(..) | Immediate::NewCol(_) => unreachable!(),
                 }
             }
             ir::FullInstrId::None => unreachable!(),
@@ -1563,7 +1565,7 @@ pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Re
     }
 }
 
-pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Constant> {
+pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Immediate> {
     use ir::FullInstrId;
     loop {
         match vid.full() {
@@ -1583,8 +1585,8 @@ pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Cons
                     _ => return None,
                 }
             }
-            FullInstrId::Constant(cid) => {
-                return Some(func.constant(cid));
+            FullInstrId::Imm(cid) => {
+                return Some(func.imm(cid));
             }
             FullInstrId::None => {
                 return None;
@@ -1595,7 +1597,7 @@ pub(crate) fn lookup_constant(func: &Func, mut vid: ValueId) -> Option<&ir::Cons
 
 pub(crate) fn lookup_constant_string(func: &Func, vid: ValueId) -> Option<ir::BytesId> {
     match lookup_constant(func, vid) {
-        Some(Constant::String(id)) => Some(*id),
+        Some(Immediate::String(id)) => Some(*id),
         _ => None,
     }
 }

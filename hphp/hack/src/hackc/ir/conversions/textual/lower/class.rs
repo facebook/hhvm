@@ -6,10 +6,10 @@ use ir::Attribute;
 use ir::BaseType;
 use ir::Class;
 use ir::ClassName;
-use ir::Constant;
 use ir::EnforceableType;
 use ir::FuncBuilder;
 use ir::HackConstant;
+use ir::Immediate;
 use ir::Instr;
 use ir::LocalId;
 use ir::MemberOpBuilder;
@@ -246,7 +246,7 @@ fn create_default_closure_constructor(class: &mut Class) {
             MemberOpBuilder::base_h(loc).emit_set_m_pt(fb, prop.name, value);
         }
 
-        let null = fb.emit_constant(Constant::Null);
+        let null = fb.emit_imm(Immediate::Null);
         fb.emit(Instr::ret(null, loc));
     });
 
@@ -268,7 +268,7 @@ fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsSt
         let loc = fb.add_loc(class.src_loc.clone());
         fb.func.loc_id = loc;
         fb.func.attrs = is_static.as_attr();
-        let null = fb.emit_constant(Constant::Null);
+        let null = fb.emit_imm(Immediate::Null);
         fb.emit(Instr::ret(null, loc));
     });
 

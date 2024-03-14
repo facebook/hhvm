@@ -193,48 +193,50 @@ fn cmp_coeffects(a: &Coeffects, b: &Coeffects) -> Result {
     Ok(())
 }
 
-fn cmp_constant(a_const: &Constant, b_const: &Constant) -> Result {
+fn cmp_imm(a_const: &Immediate, b_const: &Immediate) -> Result {
     cmp_eq(
         std::mem::discriminant(a_const),
         std::mem::discriminant(b_const),
     )?;
 
     match (a_const, b_const) {
-        (Constant::Array(a), Constant::Array(b)) => cmp_typed_value(a, b).qualified("array")?,
-        (Constant::Bool(a), Constant::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
-        (Constant::EnumClassLabel(a), Constant::EnumClassLabel(b)) => {
+        (Immediate::Array(a), Immediate::Array(b)) => cmp_typed_value(a, b).qualified("array")?,
+        (Immediate::Bool(a), Immediate::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
+        (Immediate::EnumClassLabel(a), Immediate::EnumClassLabel(b)) => {
             cmp_eq(*a, *b).qualified("enum_class_label")?
         }
-        (Constant::Float(a), Constant::Float(b)) => cmp_eq(a, b).qualified("float")?,
-        (Constant::Int(a), Constant::Int(b)) => cmp_eq(a, b).qualified("int")?,
-        (Constant::LazyClass(a), Constant::LazyClass(b)) => cmp_eq(a, b).qualified("lazy_class")?,
-        (Constant::Named(a), Constant::Named(b)) => cmp_eq(a, b).qualified("named")?,
-        (Constant::NewCol(a), Constant::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
-        (Constant::String(a), Constant::String(b)) => cmp_eq(*a, *b).qualified("string")?,
-        (Constant::Dir, Constant::Dir)
-        | (Constant::File, Constant::File)
-        | (Constant::FuncCred, Constant::FuncCred)
-        | (Constant::Method, Constant::Method)
-        | (Constant::Null, Constant::Null)
-        | (Constant::Uninit, Constant::Uninit) => {}
+        (Immediate::Float(a), Immediate::Float(b)) => cmp_eq(a, b).qualified("float")?,
+        (Immediate::Int(a), Immediate::Int(b)) => cmp_eq(a, b).qualified("int")?,
+        (Immediate::LazyClass(a), Immediate::LazyClass(b)) => {
+            cmp_eq(a, b).qualified("lazy_class")?
+        }
+        (Immediate::Named(a), Immediate::Named(b)) => cmp_eq(a, b).qualified("named")?,
+        (Immediate::NewCol(a), Immediate::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
+        (Immediate::String(a), Immediate::String(b)) => cmp_eq(*a, *b).qualified("string")?,
+        (Immediate::Dir, Immediate::Dir)
+        | (Immediate::File, Immediate::File)
+        | (Immediate::FuncCred, Immediate::FuncCred)
+        | (Immediate::Method, Immediate::Method)
+        | (Immediate::Null, Immediate::Null)
+        | (Immediate::Uninit, Immediate::Uninit) => {}
 
         // these should never happen
         (
-            Constant::Array(_)
-            | Constant::Bool(_)
-            | Constant::EnumClassLabel(_)
-            | Constant::Float(_)
-            | Constant::Int(_)
-            | Constant::LazyClass(_)
-            | Constant::Named(_)
-            | Constant::NewCol(_)
-            | Constant::String(_)
-            | Constant::Dir
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Method
-            | Constant::Null
-            | Constant::Uninit,
+            Immediate::Array(_)
+            | Immediate::Bool(_)
+            | Immediate::EnumClassLabel(_)
+            | Immediate::Float(_)
+            | Immediate::Int(_)
+            | Immediate::LazyClass(_)
+            | Immediate::Named(_)
+            | Immediate::NewCol(_)
+            | Immediate::String(_)
+            | Immediate::Dir
+            | Immediate::File
+            | Immediate::FuncCred
+            | Immediate::Method
+            | Immediate::Null
+            | Immediate::Uninit,
             _,
         ) => unreachable!(),
     }
@@ -292,7 +294,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         attrs: a_attrs,
         blocks: a_blocks,
         coeffects: a_coeffects,
-        constants: _,
+        imms: _,
         doc_comment: a_doc_comment,
         ex_frames: a_ex_frames,
         instrs: a_instrs,
@@ -311,7 +313,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         attrs: b_attrs,
         blocks: b_blocks,
         coeffects: b_coeffects,
-        constants: _,
+        imms: _,
         doc_comment: b_doc_comment,
         ex_frames: b_ex_frames,
         instrs: b_instrs,
@@ -480,10 +482,8 @@ fn cmp_operand((a, a_func): (ValueId, &Func), (b, b_func): (ValueId, &Func)) -> 
         (I::Instr(a), I::Instr(b)) => cmp_eq(a, b).qualified("instr")?,
         (I::Instr(_), _) => bail!("Mismatch in ValueId (instr)"),
 
-        (I::Constant(a), I::Constant(b)) => {
-            cmp_constant(a_func.constant(a), b_func.constant(b)).qualified("constant")?
-        }
-        (I::Constant(_), _) => bail!("Mismatch in ValueId (const)"),
+        (I::Imm(a), I::Imm(b)) => cmp_imm(a_func.imm(a), b_func.imm(b)).qualified("constant")?,
+        (I::Imm(_), _) => bail!("Mismatch in ValueId (immediate)"),
     }
 
     Ok(())

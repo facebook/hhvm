@@ -65,7 +65,7 @@ class RocketThriftRequest : public ThriftRequestCore {
 class ThriftServerRequestResponse final : public RocketThriftRequest {
  public:
   ThriftServerRequestResponse(
-      RequestsRegistry::DebugStub& debugStubToInit,
+      RequestsRegistry::DebugStub* debugStubToInit,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -107,7 +107,7 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
 class ThriftServerRequestFnf final : public RocketThriftRequest {
  public:
   ThriftServerRequestFnf(
-      RequestsRegistry::DebugStub& debugStubToInit,
+      RequestsRegistry::DebugStub* debugStubToInit,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -147,7 +147,7 @@ class ThriftServerRequestFnf final : public RocketThriftRequest {
 class ThriftServerRequestStream final : public RocketThriftRequest {
  public:
   ThriftServerRequestStream(
-      RequestsRegistry::DebugStub& debugStubToInit,
+      RequestsRegistry::DebugStub* debugStubToInit,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
@@ -204,7 +204,7 @@ class ThriftServerRequestStream final : public RocketThriftRequest {
 class ThriftServerRequestSink final : public RocketThriftRequest {
  public:
   ThriftServerRequestSink(
-      RequestsRegistry::DebugStub& debugStubToInit,
+      RequestsRegistry::DebugStub* debugStubToInit,
       folly::EventBase& evb,
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,

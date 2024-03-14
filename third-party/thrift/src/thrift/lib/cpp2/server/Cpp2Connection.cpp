@@ -674,7 +674,7 @@ void Cpp2Connection::removeRequest(Cpp2Request* req) {
 }
 
 Cpp2Connection::Cpp2Request::Cpp2Request(
-    RequestsRegistry::DebugStub& debugStubToInit,
+    RequestsRegistry::DebugStub* debugStubToInit,
     std::unique_ptr<HeaderServerChannel::HeaderRequest> req,
     std::shared_ptr<folly::RequestContext> rctx,
     std::shared_ptr<Cpp2Connection> con,
@@ -693,7 +693,7 @@ Cpp2Connection::Cpp2Request::Cpp2Request(
               ->getAdaptiveConcurrencyController(),
           connection_->getWorker()->getServer()->getCPUConcurrencyController()),
       activeRequestsGuard_(connection_->getWorker()->getActiveRequestsGuard()) {
-  new (&debugStubToInit) RequestsRegistry::DebugStub(
+  new (debugStubToInit) RequestsRegistry::DebugStub(
       *connection_->getWorker()->getRequestsRegistry(),
       *this,
       reqContext_,

@@ -265,7 +265,7 @@ class RequestsRegistry {
     auto offset = sizeof(std::aligned_storage_t<sizeof(DebugStub), alignof(T)>);
     DebugStub* pStub = reinterpret_cast<DebugStub*>(malloc(offset + sizeof(T)));
     T* pT = reinterpret_cast<T*>(reinterpret_cast<char*>(pStub) + offset);
-    new (pT) T(*pStub, std::forward<Args>(args)...);
+    new (pT) T(pStub, std::forward<Args>(args)...);
     return std::unique_ptr<T, Deleter>(pT, pStub);
   }
 

@@ -428,7 +428,7 @@ RocketThriftRequest::RocketThriftRequest(
 }
 
 ThriftServerRequestResponse::ThriftServerRequestResponse(
-    RequestsRegistry::DebugStub& debugStubToInit,
+    RequestsRegistry::DebugStub* debugStubToInit,
     folly::EventBase& evb,
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -447,7 +447,7 @@ ThriftServerRequestResponse::ThriftServerRequestResponse(
           std::move(context)),
       version_(version),
       maxResponseWriteTime_(maxResponseWriteTime) {
-  new (&debugStubToInit) RequestsRegistry::DebugStub(
+  new (debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
       *getRequestContext(),
@@ -508,7 +508,7 @@ void ThriftServerRequestResponse::closeConnection(
 }
 
 ThriftServerRequestFnf::ThriftServerRequestFnf(
-    RequestsRegistry::DebugStub& debugStubToInit,
+    RequestsRegistry::DebugStub* debugStubToInit,
     folly::EventBase& evb,
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -525,7 +525,7 @@ ThriftServerRequestFnf::ThriftServerRequestFnf(
           evb,
           std::move(context)),
       onComplete_(std::move(onComplete)) {
-  new (&debugStubToInit) RequestsRegistry::DebugStub(
+  new (debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
       *getRequestContext(),
@@ -565,7 +565,7 @@ void ThriftServerRequestFnf::closeConnection(
 }
 
 ThriftServerRequestStream::ThriftServerRequestStream(
-    RequestsRegistry::DebugStub& debugStubToInit,
+    RequestsRegistry::DebugStub* debugStubToInit,
     folly::EventBase& evb,
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -586,7 +586,7 @@ ThriftServerRequestStream::ThriftServerRequestStream(
       version_(version),
       clientCallback_(clientCallback),
       cpp2Processor_(std::move(cpp2Processor)) {
-  new (&debugStubToInit) RequestsRegistry::DebugStub(
+  new (debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
       *getRequestContext(),
@@ -682,7 +682,7 @@ void ThriftServerRequestStream::closeConnection(
 }
 
 ThriftServerRequestSink::ThriftServerRequestSink(
-    RequestsRegistry::DebugStub& debugStubToInit,
+    RequestsRegistry::DebugStub* debugStubToInit,
     folly::EventBase& evb,
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -703,7 +703,7 @@ ThriftServerRequestSink::ThriftServerRequestSink(
       version_(version),
       clientCallback_(clientCallback),
       cpp2Processor_(std::move(cpp2Processor)) {
-  new (&debugStubToInit) RequestsRegistry::DebugStub(
+  new (debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
       *getRequestContext(),

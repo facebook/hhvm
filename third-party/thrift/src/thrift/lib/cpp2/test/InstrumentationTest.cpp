@@ -998,14 +998,14 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
 
    public:
     MockRequest(
-        RequestsRegistry::DebugStub& stub,
+        RequestsRegistry::DebugStub* stub,
         std::shared_ptr<RequestsRegistry> registry)
         : registry_(registry),
           stateMachine_(
               true,
               serverConfigs.getAdaptiveConcurrencyController(),
               serverConfigs.getCPUConcurrencyController()) {
-      new (&stub) RequestsRegistry::DebugStub(
+      new (stub) RequestsRegistry::DebugStub(
           *registry,
           *this,
           mockReqCtx_,

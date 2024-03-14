@@ -2415,6 +2415,7 @@ void Debugger::interruptAllThreads() {
   executeForEachAttachedRequest(
     [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       assertx(ti != nullptr);
+      ti->m_reqInjectionData.setWasInterruptedByDebugger();
       ti->m_reqInjectionData.setDebuggerIntr(true);
       ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     },

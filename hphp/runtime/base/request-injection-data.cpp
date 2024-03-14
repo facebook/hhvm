@@ -567,6 +567,7 @@ void RequestInjectionData::reset() {
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
+  m_wasInterruptedByDebugger = false;
   m_suppressClassConversionWarnings = false;
 
   clearPCFilters();
@@ -638,6 +639,14 @@ void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
   }
   tl_heap->setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
+}
+
+bool RequestInjectionData::wasInterruptedByDebugger() const {
+  return m_wasInterruptedByDebugger;
+}
+
+void RequestInjectionData::setWasInterruptedByDebugger() {
+  m_wasInterruptedByDebugger = true;
 }
 
 }

@@ -98,6 +98,12 @@ bool HHVM_FUNCTION(hphp_debugger_attached) {
   return (debugger != nullptr && debugger->clientConnected());
 }
 
+bool HHVM_FUNCTION(hphp_was_interrupted_by_debugger) {
+  if (RO::RepoAuthoritative || !Cfg::Debugger::EnableVSDebugger) return false;
+  return RID().wasInterruptedByDebugger();
+}
+
+
 bool HHVM_FUNCTION(hphp_debugger_set_option, const String& option, bool value) {
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   if (!debugger) {
@@ -152,6 +158,7 @@ struct DebuggerExtension final : Extension {
     HHVM_FE(hphp_debug_break);
     HHVM_FE(hphp_debugger_set_option);
     HHVM_FE(hphp_debugger_get_option);
+    HHVM_FE(hphp_was_interrupted_by_debugger);
   }
 } s_debugger_extension;
 

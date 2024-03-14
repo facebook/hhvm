@@ -24,6 +24,8 @@ function hphp_debug_break(bool $condition = true)[]: bool;
 <<__PHPStdLib>>
 function hphp_debugger_attached()[read_globals]: bool;
 <<__PHPStdLib>>
+function hphp_was_interrupted_by_debugger()[read_globals]: bool;
+<<__PHPStdLib>>
 function hphpd_get_client(
   HH\FIXME\MISSING_PARAM_TYPE $name = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;

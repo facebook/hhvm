@@ -1,14 +1,14 @@
 <?hh
-
 function foo($a, $b, $c) {
   echo $a + $b + $c;
   echo "\n";
 }
 <<__EntryPoint>> function main() {
 echo "Hello world.\n";
+echo hphp_was_interrupted_by_debugger()."\n"; // = false, before any breakpoints
 $x = 1;
 $x = 2;
-
+echo hphp_was_interrupted_by_debugger()."\n"; // = true, after breakpoints hit
 foo(
   $x + 1,
   $x + 2,

@@ -244,6 +244,12 @@ struct RequestInjectionData {
   void setDebuggerIntr(bool);
 
   /*
+   * Returns true whether the request was interrupted by the debugger.
+   */
+  bool wasInterruptedByDebugger() const;
+  void setWasInterruptedByDebugger();
+
+  /*
    * Whether the debugger is running any step command.
    */
   bool getDebuggerStepIntr() const;
@@ -376,7 +382,9 @@ private:
   bool m_jit{false};
   bool m_jittingDisabled{false};
   bool m_jitFolding{false};
+
   bool m_debuggerIntr{false};
+  bool m_wasInterruptedByDebugger{false};
 
   bool m_suppressClassConversionWarnings{false};
 

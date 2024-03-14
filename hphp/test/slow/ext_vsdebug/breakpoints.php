@@ -17,6 +17,7 @@ $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 skipMessages(count($breakpoints[0]{'breakpoints'}));
 
 checkForOutput($testProcess, "Hello world.\n", "stdout");
+checkForOutput($testProcess, "\n", "stdout");
 
 // Verify we hit breakpoint 1.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
@@ -25,6 +26,9 @@ resumeTarget();
 // Verify we hit breakpoint 2.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
 resumeTarget();
+
+checkForOutput($testProcess, "1\n", "stdout");
+
 
 // Verify we hit breakpoint 3.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[2]);

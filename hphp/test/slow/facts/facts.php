@@ -189,6 +189,15 @@ function print_attr_files(
   print "Files decorated with $attr: $files_json\n";
 }
 
+function print_attr_files_and_args(
+  classname<\HH\FileAttribute> $attr,
+): void {
+  $result = HH\Facts\files_and_attr_args_with_attribute($attr);
+  \sort(inout $result);
+  $result_json = \json_encode($result);
+  print "Files and attr args with $attr: $result_json\n";
+}
+
 function print_attr_value_files(
   classname<\HH\FileAttribute> $attr,
   string $value,
@@ -225,7 +234,7 @@ function print_num_symbols(
 
 <<__EntryPoint>>
 function facts(): void {
-  var_dump(HH\Facts\enabled());
+    var_dump(HH\Facts\enabled());
 
   var_dump(HH\Facts\TypeKind::K_CLASS);
   var_dump(HH\Facts\TypeKind::K_ENUM);
@@ -475,12 +484,20 @@ function facts(): void {
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);
 
+  // The reason these are in a weird order is because there was a bug
+  // which made print_files_and_args and print_attr_value_files not work
+  // unless they were called *after* print_attr_files.  So scramble the
+  // order aound to fix this.  The fix for that bug is in symbol-map.cpp
+  // in the same commit as this comment.
   print "\nGetting file attributes\n";
+  print_attr_value_files  (TwoArgFileAttr::class, 'Hello');
+  print_attr_files_and_args(OneArgFileAttr::class);
   print_attr_files(NoArgFileAttr::class);
+  print_attr_files(OneArgFileAttr::class);
   print_attr_files(TwoArgFileAttr::class);
-  print_attr_value_files(TwoArgFileAttr::class, 'Hello');
+  print_attr_files_and_args(NoArgFileAttr::class);
+  print_attr_files_and_args(TwoArgFileAttr::class);
   print_file_attrs('attribute-classes.inc');
-
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');

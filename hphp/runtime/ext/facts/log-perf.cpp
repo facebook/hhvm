@@ -227,6 +227,12 @@ Array FactsLogger::getFilesWithAttribute(const String& name) {
   });
 }
 
+Array FactsLogger::getFilesAndAttrValsWithAttribute(const String& name) {
+  return logPerf(__func__, name.slice(), [&]() {
+    return m_inner->getFilesAndAttrValsWithAttribute(name);
+  });
+}
+
 Array FactsLogger::getFilesWithAttributeAndAnyValue(
     const String& name,
     const folly::dynamic& val) {

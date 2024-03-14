@@ -28,6 +28,8 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - std::string Autoload.DB.Perms = "0644", UNKNOWN
 - std::string Autoload.DB.Group = "", UNKNOWN
 - std::string Autoload.Logging = "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm", UNKNOWN
+- uint32_t Autoload.DB.BlockingDbWaitTimeoutMs = 5000, UNKNOWN
+- bool Autoload.DB.EnableBlockingDbWait = true, UNKNOWN
 - bool Autoload.AllowLoggingPropagation = false, UNKNOWN
 - bool Autoload.RethrowExceptions = true, UNKNOWN
 - uint32_t Autoload.PerfSampleRate = 0, UNKNOWN

@@ -189,6 +189,11 @@ struct MethodDecl {
   }
 };
 
+struct FileAttrVal {
+  Path m_path;
+  HPHP::Optional<folly::dynamic> m_AttrVal;
+};
+
 } // namespace Facts
 } // namespace HPHP
 

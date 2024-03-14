@@ -448,6 +448,28 @@ Array makeVecOfDynamic(DynamicIterable&& vector) {
 }
 
 /**
+ * Converts a vector of FileAttrVals (each of which is one path and one
+ * attr val for a particular file attr) into a vector of two-item vectors
+ * each of which will be represented as a hack dynamic.
+ *
+ * If there is no attr arg for this attr, the second value will be null.
+ */
+Array makeVecOfDynamicDynamic(std::vector<FileAttrVal>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto&& [path, val] : vector) {
+    auto dynDynTuple = VecInit{2};
+    dynDynTuple.append(tvFromDynamic(*path.get()));
+    if (val) {
+      dynDynTuple.append(tvFromDynamic(std::move(*val)));
+    } else {
+      dynDynTuple.append(tvFromDynamic(folly::dynamic{}));
+    }
+    ret.append(dynDynTuple.toArray());
+  }
+  return ret.toArray();
+}
+
+/**
  * The actual AutoloadMap. Stores one SymbolMap for each kind of symbol.
  */
 struct FactsStoreImpl final
@@ -466,7 +488,10 @@ struct FactsStoreImpl final
         m_symbolMap{
             m_root,
             std::move(dbOpener),
-            std::move(indexedMethodAttributes)},
+            std::move(indexedMethodAttributes),
+            Cfg::Autoload::DBEnableBlockingDbWait,
+            std::chrono::milliseconds(Cfg::Autoload::DBBlockingDbWaitTimeoutMs),
+        },
         m_watcher{std::move(watcher)},
         m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
@@ -478,7 +503,10 @@ struct FactsStoreImpl final
         m_symbolMap{
             m_root,
             std::move(dbOpener),
-            std::move(indexedMethodAttributes)} {}
+            std::move(indexedMethodAttributes),
+            Cfg::Autoload::DBEnableBlockingDbWait,
+            std::chrono::milliseconds(
+                Cfg::Autoload::DBBlockingDbWaitTimeoutMs)} {}
 
   ~FactsStoreImpl() override {
     try {
@@ -724,6 +752,23 @@ struct FactsStoreImpl final
       const folly::dynamic& value) override {
     return makeVecOfString(
         m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
+  }
+  /**
+   * Given a the name of a file attribute, returns an array of two item
+   * arrays of hack dynamics. The first item in each array is  well typed
+   * string but made dynamic so the return vector has a single type.
+   * The second arg has strange behavior.
+   * It is a folly::dynamic in the symbol map, and a string in the db but we use
+   * parseJson on the way out.  So I originally expected values that were
+   * ints in the original file attribute to come back as ints. But they do
+   * come out as strings.  This behavior is the same with getFilesAttrArgs,
+   * so this is not a new bug with this method.  Because of this, we
+   * actually represent the output as a vec<(string, ?string)> in hack.
+   * The second item is nullable because not every attr has values.
+   */
+  Array getFilesAndAttrValsWithAttribute(const String& attr) override {
+    auto toConvert = m_symbolMap.getFilesAndAttrValsWithAttribute(*attr.get());
+    return makeVecOfDynamicDynamic(toConvert);
   }
 
   Array getTypeAttributes(const String& type) override {

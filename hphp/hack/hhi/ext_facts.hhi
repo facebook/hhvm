@@ -224,6 +224,18 @@ namespace HH\Facts {
   )[]: vec<string>;
 
   /**
+   * Get all files with the following attribute, including the argument list for
+   * that attribute if it exists.  Because each item in the returned list is a
+   * tuple including path and attr arg, if a file has more than one attr arg
+   * for the given attr, that file will appear in the return list more than
+   * once. If there is no argument for this attr, the second arg will be
+   * null.
+   */
+  function files_and_attr_args_with_attribute(
+    /* classname<\HH\FileAttribute> */ string $attribute,
+  )[]: vec<(string, ?string)>;
+
+  /**
    * Get all attributes on the given type.
    *
    * Return an empty vec if the given type doesn't exist or is defined in more

@@ -30,7 +30,6 @@
 #include <folly/Synchronized.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
-
 #include "hphp/runtime/ext/facts/attribute-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
@@ -95,7 +94,9 @@ struct SymbolMap {
   explicit SymbolMap(
       std::filesystem::path root,
       AutoloadDB::Opener dbOpener,
-      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes);
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
+      bool enableBlockingDbWait,
+      std::chrono::milliseconds blockingDbwWaitTimeout);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;
@@ -243,6 +244,12 @@ struct SymbolMap {
   std::vector<Path> getFilesWithAttributeAndAnyValue(
       const StringData& attr,
       const folly::dynamic& value);
+
+  std::vector<FileAttrVal> getFilesAndAttrValsWithAttribute(
+      Symbol<SymKind::Type> attr);
+
+  std::vector<FileAttrVal> getFilesAndAttrValsWithAttribute(
+      const StringData& attr);
 
   /**
    * Return the argument at the given position of a given type with a given
@@ -406,6 +413,7 @@ struct SymbolMap {
   typename PathToSymbolsMap<k>::PathSymbolMap::Values getPathSymbols(Path path);
 
   void waitForDBUpdate();
+  void waitForDBUpdate(std::chrono::milliseconds timeoutMs);
 
   /**
    * Return a map from path to hash for every path we know about.
@@ -538,6 +546,7 @@ struct SymbolMap {
   };
 
  private:
+  void waitForDBUpdateImpl(HPHP::Optional<std::chrono::milliseconds> timeoutMs);
   /**
    * Update the DB on the time interval beginning at `since` and
    * ending at `clock`.
@@ -615,6 +624,8 @@ struct SymbolMap {
   const std::string m_schemaHash;
   AutoloadDBVault m_dbVault;
   const hphp_vector_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
+  const bool m_enableBlockingDbWait;
+  const std::chrono::milliseconds m_blockingDbWaitTimeout;
 };
 
 } // namespace Facts

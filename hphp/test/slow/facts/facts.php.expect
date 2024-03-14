@@ -79,10 +79,14 @@ Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 
 Getting file attributes
-Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
-Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
 Files decorated with TwoArgFileAttr and value Hello: ["attribute-classes.inc"]
-Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
+Files and attr args with OneArgFileAttr: [["attribute-classes.inc","7"]]
+Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with OneArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Files and attr args with NoArgFileAttr: [["attribute-classes.inc",null]]
+Files and attr args with TwoArgFileAttr: [["attribute-classes.inc","Hello"],["attribute-classes.inc","There"]]
+Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"OneArgFileAttr":["7"],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules
@@ -177,10 +181,14 @@ Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 
 Getting file attributes
-Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
-Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
 Files decorated with TwoArgFileAttr and value Hello: ["attribute-classes.inc"]
-Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
+Files and attr args with OneArgFileAttr: [["attribute-classes.inc","7"]]
+Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with OneArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Files and attr args with NoArgFileAttr: [["attribute-classes.inc",null]]
+Files and attr args with TwoArgFileAttr: [["attribute-classes.inc","Hello"],["attribute-classes.inc","There"]]
+Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"OneArgFileAttr":["7"],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules

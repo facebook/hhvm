@@ -77,6 +77,11 @@ struct AutoloadDB {
     std::string m_hash;
   };
 
+  struct PathAndAttrVal {
+    std::filesystem::path m_path;
+    HPHP::Optional<folly::dynamic> m_AttrVal;
+  };
+
   /**
    * True iff you cannot write to this DB.
    */
@@ -210,6 +215,8 @@ struct AutoloadDB {
   virtual std::vector<std::filesystem::path> getFilesWithAttributeAndAnyValue(
       std::string_view attributeName,
       const folly::dynamic& attributeValue) = 0;
+  virtual std::vector<PathAndAttrVal> getFilesAndAttrValsWithAttribute(
+      const std::string_view attribute_name) = 0;
 
   // Functions
   virtual void insertFunction(

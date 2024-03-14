@@ -17,6 +17,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/hash/Hash.h>
+#include <folly/json/json.h>
 #include <folly/logging/xlog.h>
 
 #include "hphp/runtime/ext/facts/exception.h"
@@ -114,13 +115,17 @@ std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
 SymbolMap::SymbolMap(
     fs::path root,
     AutoloadDB::Opener dbOpener,
-    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs)
+    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs,
+    bool enableBlockingDbWait,
+    std::chrono::milliseconds blockingDbWaitTimeout)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1,
           std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
       m_root{std::move(root)},
       m_dbVault{std::move(dbOpener)},
-      m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
+      m_indexedMethodAttrs{std::move(indexedMethodAttrs)},
+      m_enableBlockingDbWait{enableBlockingDbWait},
+      m_blockingDbWaitTimeout{blockingDbWaitTimeout} {
   assertx(m_root.is_absolute());
 }
 
@@ -737,32 +742,73 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(const StringData& attr) {
   return getFilesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
+std::vector<FileAttrVal> SymbolMap::getFilesAndAttrValsWithAttribute(
+    const StringData& attr) {
+  return getFilesAndAttrValsWithAttribute(Symbol<SymKind::Type>{attr});
+}
+
+/**
+ * Given a file attribute, returns a vector of objects each containing a
+ * filepath and an argument for that file attribute. Since attrs may have
+ * more than one attribute, this vector may contain the same filepath more
+ * than one time.
+ */
+std::vector<FileAttrVal> SymbolMap::getFilesAndAttrValsWithAttribute(
+    Symbol<SymKind::Type> attr) {
+  using FileAttrValVec = std::vector<FileAttrVal>;
+  // This API uses a 'db only' strategy because it executes a join,
+  // which does not map well onto the symbol map data model.  That means:
+  // 1) never look in memory for the answer
+  // 2) always wait for db commit before returning from db
+  // 3) never try to update memory with the answer.
+  auto out = readOrUpdate<FileAttrValVec>(
+      [&](const UNUSED Data& data) -> Optional<FileAttrValVec> {
+        return std::nullopt;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> FileAttrValVec {
+        if (m_enableBlockingDbWait) {
+          waitForDBUpdate(std::chrono::milliseconds(m_blockingDbWaitTimeout));
+        }
+        auto fromDb = db->getFilesAndAttrValsWithAttribute(attr.slice());
+        FileAttrValVec innerRet;
+        innerRet.reserve(fromDb.size());
+        for (auto const& row : fromDb) {
+          innerRet.push_back(FileAttrVal{Path{row.m_path}, row.m_AttrVal});
+        }
+        return innerRet;
+      },
+      [&](Data& UNUSED data, FileAttrValVec resultsFromDb) -> FileAttrValVec {
+        return resultsFromDb;
+      });
+  return out;
+}
+
 std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(
     Symbol<SymKind::Type> attr,
     const folly::dynamic& value) {
   using PathVec = std::vector<Path>;
+  // This API uses a 'db only' strategy because it is unable to update
+  // the symbol map without overfetching.  That means:
+  // 1) never look in memory for the answer
+  // 2) always wait for db commit before returning from db
+  // 3) never try to update memory with the answer.
+  // We could do something where we try the symbol map in 1 anyway, hoping
+  // something else put the data there, but it's hacky and so we're not
+  // gonna do it.
   auto paths = readOrUpdate<PathVec>(
-      [&](const Data& data) -> Optional<PathVec> {
-        auto pathsWithAttr = data.m_fileAttrs.getKeysWithAttribute(attr);
-        if (!pathsWithAttr) {
-          return std::nullopt;
-        }
-        PathVec pathsRet;
-        for (auto&& path : *pathsWithAttr) {
-          auto args = data.m_fileAttrs.getAttributeArgs(path, attr);
-          if (!args) {
-            return std::nullopt;
-          }
-          for (auto&& arg : *args) {
-            if (arg == value) {
-              pathsRet.push_back(path);
-              break;
-            }
-          }
-        }
-        return pathsRet;
+      [&](const UNUSED Data& data) -> Optional<PathVec> {
+        return std::nullopt;
       },
       [&](std::shared_ptr<AutoloadDB> db) -> PathVec {
+        // This is necessary to prevent a race condition where the db isn't
+        // ready yet.  Most symbol map methods handle that in their
+        // 'writeFn', which is the next lambda, in a subtle way that involves
+        // flushing their own results to the memory cache.  As you can see,
+        // this method does not do that.  So it must wait for the db to prevent
+        // incorrect results.
+        if (m_enableBlockingDbWait) {
+          waitForDBUpdate(m_blockingDbWaitTimeout);
+        }
         auto dbPathDecls =
             db->getFilesWithAttributeAndAnyValue(attr.slice(), value);
         PathVec pathDecls;
@@ -1586,11 +1632,16 @@ void SymbolMap::Data::removePath(Path path) {
   m_fileExistsMap.insert_or_assign(path, false);
 }
 
-void SymbolMap::waitForDBUpdate() {
+void SymbolMap::waitForDBUpdateImpl(
+    HPHP::Optional<std::chrono::milliseconds> timeoutMs) {
   auto updateDBFuture = m_syncedData.withWLock(
       [](Data& data) { return data.m_updateDBFuture.getFuture(); });
   if (updateDBFuture.valid()) {
-    updateDBFuture.wait();
+    if (timeoutMs) {
+      updateDBFuture.wait(std::chrono::microseconds(1000 * timeoutMs.value()));
+    } else {
+      updateDBFuture.wait();
+    }
   }
   // Refresh the DB transaction
   try {
@@ -1598,6 +1649,14 @@ void SymbolMap::waitForDBUpdate() {
   } catch (const std::runtime_error& e) {
     XLOG(ERR) << e.what();
   }
+}
+
+void SymbolMap::waitForDBUpdate() {
+  waitForDBUpdateImpl(std::nullopt);
+}
+
+void SymbolMap::waitForDBUpdate(std::chrono::milliseconds timeoutMs) {
+  waitForDBUpdateImpl(timeoutMs);
 }
 
 std::shared_ptr<AutoloadDB> SymbolMap::getDB() const {

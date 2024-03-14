@@ -250,6 +250,15 @@ struct FactsStore : public AutoloadMap {
   virtual Array getFilesWithAttributeAndAnyValue(
       const String& attr, const folly::dynamic& value) = 0;
 
+
+  /**
+   * Return all files decorated with the given attribute including
+   * the attribute value for that attribute.  If there is more than
+   * one attr value for that attribute, the file will appear in the returned
+   * list more than once.
+   */
+  virtual Array getFilesAndAttrValsWithAttribute(const String& attr) = 0;
+
   /**
    * Return all attributes decorating the given type.
    */

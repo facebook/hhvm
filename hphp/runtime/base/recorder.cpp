@@ -368,6 +368,12 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(attr);
   }
 
+  Array getFilesAndAttrValsWithAttribute(const String& attr) override {
+    static constexpr auto m{&HPHP::FactsStore::getFilesAndAttrValsWithAttribute};
+    static const auto wrapper{wrap(m, "getFilesAndAttrValsWithAttribute")};
+    return wrapper(attr);
+  }
+
   Array getFilesWithAttributeAndAnyValue(const String& attr,
       const folly::dynamic& value) override {
     static constexpr auto m{

@@ -543,12 +543,18 @@ struct FileStmts {
             db.prepare("SELECT path FROM all_paths"
                        " JOIN file_attributes USING (pathid)"
                        " WHERE attribute_name = @attribute_name"
-                       " AND attribute_value = @attribute_value")} {}
+                       " AND attribute_value = @attribute_value")},
+        m_getFilesAndAttrValsWithAttribute{
+            db.prepare("SELECT path, attribute_value FROM all_paths"
+                       " JOIN file_attributes USING (pathid)"
+                       " WHERE attribute_name = @attribute_name")} {}
+
   SQLiteStmt m_insertFileAttribute;
   SQLiteStmt m_getFileAttributes;
   SQLiteStmt m_getFileAttributeArgs;
   SQLiteStmt m_getFilesWithAttribute;
   SQLiteStmt m_getFilesWithAttributeAndAnyValue;
+  SQLiteStmt m_getFilesAndAttrValsWithAttribute;
 };
 
 struct FunctionStmts {
@@ -1084,6 +1090,24 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(fs::path{std::string{query.getString(0)}});
+    }
+    return results;
+  }
+
+  std::vector<PathAndAttrVal> getFilesAndAttrValsWithAttribute(
+      const std::string_view attributeName) override {
+    auto query = m_txn.query(m_fileStmts.m_getFilesAndAttrValsWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<PathAndAttrVal> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      auto maybeVal = query.getNullableString(1);
+      auto path = fs::path{std::string{query.getString(0)}};
+      if (maybeVal) {
+        results.push_back(PathAndAttrVal{path, folly::parseJson(*maybeVal)});
+      } else {
+        results.push_back(PathAndAttrVal{path, std::nullopt});
+      }
     }
     return results;
   }

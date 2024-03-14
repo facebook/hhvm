@@ -744,6 +744,10 @@ Array HHVM_FUNCTION(
       attr, Facts::dynamicFromVariant(value));
 }
 
+Array HHVM_FUNCTION(facts_files_and_attr_args_with_attr, const String& attr) {
+  return Facts::getFactsOrThrow().getFilesAndAttrValsWithAttribute(attr);
+}
+
 Array HHVM_FUNCTION(facts_type_attributes, const String& type) {
   return Facts::getFactsOrThrow().getTypeAttributes(type);
 }
@@ -866,6 +870,9 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\files_with_attribute_and_any_value,
       HHVM_FN(facts_files_with_attribute_and_any_value));
+  HHVM_NAMED_FE(
+      HH\\Facts\\files_and_attr_args_with_attribute,
+      HHVM_FN(facts_files_and_attr_args_with_attr));
   HHVM_NAMED_FE(HH\\Facts\\type_attributes, HHVM_FN(facts_type_attributes));
   HHVM_NAMED_FE(
       HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));

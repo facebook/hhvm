@@ -458,6 +458,11 @@ struct MockAutoloadDB : public AutoloadDB {
       (const std::string_view attributeName,
        const folly::dynamic& attributeValue),
       (override));
+  MOCK_METHOD(
+      std::vector<PathAndAttrVal>,
+      getFilesAndAttrValsWithAttribute,
+      (const std::string_view attributeName),
+      (override));
 
   // Functions
   MOCK_METHOD(
@@ -634,7 +639,9 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
               return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
                   fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
             },
-            std::move(indexedMethodAttributes)),
+            std::move(indexedMethodAttributes),
+            true,
+            std::chrono::milliseconds(5000)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
   }
@@ -653,7 +660,9 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
         std::make_unique<SymbolMap>(
             std::move(root),
             [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
-            std::move(indexedMethodAttributes)),
+            std::move(indexedMethodAttributes),
+            true,
+            std::chrono::milliseconds(5000)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
   }

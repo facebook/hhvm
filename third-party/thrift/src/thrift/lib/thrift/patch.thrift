@@ -20,6 +20,10 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/id.thrift"
 
+// This is needed since generated Patch thrift file requires rust.Box
+// @lint-ignore THRIFTCHECKS
+include "thrift/annotation/rust.thrift"
+
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
 @thrift.TerseWrite

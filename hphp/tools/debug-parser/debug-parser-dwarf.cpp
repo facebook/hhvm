@@ -1131,10 +1131,10 @@ void TypeParserImpl::genNames(Env& env,
             // Check this type to see if it is a declaration and use the
             // real type instead
             const auto typeDieContext = dwarfContext.getDieContextAtGlobalOffset(offset);
-            for (const auto& attr : typeDieContext.die.attributes()) {
-              if (attr.Attr == llvm::dwarf::DW_AT_signature &&
-                  attr.Value.getForm() == llvm::dwarf::DW_FORM_ref_sig8) {
-                const auto sig8 = *attr.Value.getAsReference();
+            for (const auto& typeAttr : typeDieContext.die.attributes()) {
+              if (typeAttr.Attr == llvm::dwarf::DW_AT_signature &&
+                  typeAttr.Value.getForm() == llvm::dwarf::DW_FORM_ref_sig8) {
+                const auto sig8 = *typeAttr.Value.getAsReference();
                 offset = dwarfContext.getTypeUnitOffset(sig8);
                 break;
               }

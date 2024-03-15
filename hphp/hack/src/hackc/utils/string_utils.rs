@@ -197,7 +197,7 @@ pub fn is_static(s: impl AsRef<str>) -> bool {
 }
 
 pub fn is_class(s: impl AsRef<str>) -> bool {
-    s.as_ref().eq_ignore_ascii_case(members::M_CLASS)
+    s.as_ref() == members::M_CLASS
 }
 
 pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {
@@ -523,9 +523,11 @@ mod string_utils_tests {
     fn is_class_test() {
         let s1 = "class";
         let s2 = "not_a_class";
+        let s3 = "CLASS";
 
         assert!(super::is_class(s1));
         assert!(!super::is_class(s2));
+        assert!(!super::is_class(s3));
     }
 
     #[test]

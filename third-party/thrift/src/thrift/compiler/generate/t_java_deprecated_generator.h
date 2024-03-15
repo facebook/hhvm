@@ -235,7 +235,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   std::string java_suppress_warnings_union();
   std::string java_suppress_warnings_struct();
   std::string java_suppress_warnings_service();
-  virtual boost::optional<std::string> java_struct_parent_class(
+  virtual std::optional<std::string> java_struct_parent_class(
       const t_structured* tstruct, StructGenParams params);
 
   virtual std::string type_name(

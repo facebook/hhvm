@@ -18,10 +18,9 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_node.h>
@@ -103,7 +102,7 @@ class t_named : public t_node {
     std::string value;
     source_range range;
   };
-  boost::optional<node_doc> doc_;
+  std::optional<node_doc> doc_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

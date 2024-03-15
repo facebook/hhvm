@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include <boost/optional.hpp>
-#include <folly/portability/GTest.h>
 #include <thrift/compiler/parse/parse_ast.h>
+
+#include <optional>
+
+#include <folly/portability/GTest.h>
 
 using namespace apache::thrift::compiler;
 
@@ -27,7 +29,7 @@ TEST(ParserTest, type_resolution) {
       1: MissingType field;
     }
   )");
-  auto diag = boost::optional<diagnostic>();
+  auto diag = std::optional<diagnostic>();
   auto diags =
       diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
 

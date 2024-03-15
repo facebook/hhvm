@@ -17,10 +17,10 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
 #include <boost/filesystem.hpp>
-#include <boost/optional.hpp>
 #include <thrift/compiler/detail/mustache/mstch.h>
 
 #include <thrift/compiler/generate/mstch_objects.h>
@@ -203,7 +203,7 @@ class t_mstch_generator : public t_generator {
   }
 
   bool has_option(const std::string& option) const;
-  boost::optional<std::string> get_option(const std::string& option) const;
+  std::optional<std::string> get_option(const std::string& option) const;
   const std::map<std::string, std::string>& options() const { return options_; }
 
  private:

@@ -17,8 +17,8 @@
 #pragma once
 
 #include <map>
+#include <optional>
 #include <string>
-#include <boost/optional.hpp>
 
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
@@ -30,7 +30,7 @@ namespace rust {
 
 struct rust_crate {
   std::string name;
-  boost::optional<std::string> multifile_module;
+  std::optional<std::string> multifile_module;
   std::string label;
 
   std::string import_name() const;

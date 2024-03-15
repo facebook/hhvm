@@ -57,7 +57,7 @@ bool is_hex_digit(char c) {
       (c >= 'A' && c <= 'F');
 }
 
-boost::optional<unsigned> lex_hex_integer(
+std::optional<unsigned> lex_hex_integer(
     const char* begin, const char* end, int size) {
   if (end - begin < size) {
     return {};
@@ -324,7 +324,7 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
   }
 }
 
-boost::optional<std::string> lexer::lex_string_literal(token literal) {
+std::optional<std::string> lexer::lex_string_literal(token literal) {
   auto str = literal.string_value();
   auto size = str.size();
   assert(size >= 2);

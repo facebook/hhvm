@@ -295,7 +295,7 @@ bool has_newtype_annotation(const t_named* node) {
 }
 
 void parse_include_srcs(
-    mstch::array& elements, boost::optional<std::string> const& include_srcs) {
+    mstch::array& elements, std::optional<std::string> const& include_srcs) {
   if (!include_srcs) {
     return;
   }
@@ -2357,7 +2357,7 @@ void t_mstch_rust_generator::generate_program() {
     options_.gen_metadata = gen_metadata.value() == "true";
   }
 
-  boost::optional<std::string> crate_name_option = get_option("crate_name");
+  std::optional<std::string> crate_name_option = get_option("crate_name");
   std::string namespace_rust = program_->get_namespace("rust");
   if (!namespace_rust.empty()) {
     std::vector<std::string> pieces;
@@ -2384,7 +2384,7 @@ void t_mstch_rust_generator::generate_program() {
   } else if (crate_name_option) {
     namespace_rust = *crate_name_option;
   } else if (
-      boost::optional<std::string> default_crate_name_option =
+      std::optional<std::string> default_crate_name_option =
           get_option("default_crate_name")) {
     namespace_rust = *default_crate_name_option;
   } else {

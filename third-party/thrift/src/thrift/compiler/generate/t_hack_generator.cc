@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <queue>
 #include <set>
 #include <sstream>
@@ -31,7 +32,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/optional.hpp>
 
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -684,7 +684,7 @@ class t_hack_generator : public t_concat_generator {
         tenum->find_structured_annotation_or_null(kBitmaskEnumUri) != nullptr;
   }
 
-  boost::optional<std::string> find_hack_adapter(const t_type* type) {
+  std::optional<std::string> find_hack_adapter(const t_type* type) {
     if (!is_transitive_annotation(*type)) {
       if (const auto annotation =
               t_typedef::get_first_structured_annotation_or_null(
@@ -699,7 +699,7 @@ class t_hack_generator : public t_concat_generator {
     return {};
   }
 
-  boost::optional<std::string> find_hack_wrapper(const t_field& node) {
+  std::optional<std::string> find_hack_wrapper(const t_field& node) {
     if (!is_transitive_annotation(node)) {
       auto annotation =
           node.find_structured_annotation_or_null(kHackFieldWrapperUri);
@@ -718,9 +718,9 @@ class t_hack_generator : public t_concat_generator {
   }
 
   struct wrapper_info {
-    boost::optional<std::string> name;
-    boost::optional<std::string> underlying_name;
-    boost::optional<std::string> extra_namespace;
+    std::optional<std::string> name;
+    std::optional<std::string> underlying_name;
+    std::optional<std::string> extra_namespace;
   };
 
   wrapper_info find_hack_wrapper(
@@ -769,7 +769,7 @@ class t_hack_generator : public t_concat_generator {
     return info;
   }
 
-  boost::optional<std::string> find_hack_field_adapter(const t_field& node) {
+  std::optional<std::string> find_hack_field_adapter(const t_field& node) {
     if (const auto annotation =
             node.find_structured_annotation_or_null(kHackAdapterUri)) {
       for (const auto& item : annotation->value()->get_map()) {
@@ -949,8 +949,8 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::string hack_wrapped_type_name(
-      const boost::optional<std::string>& underlying_name,
-      const boost::optional<std::string>& underlying_ns,
+      const std::optional<std::string>& underlying_name,
+      const std::optional<std::string>& underlying_ns,
       bool decl = false) {
     if (decl) {
       return *underlying_name;
@@ -2904,7 +2904,7 @@ void t_hack_generator::generate_xception(const t_structured* txception) {
 void t_hack_generator::generate_php_type_spec(
     std::ofstream& out, const t_type* t, uint32_t depth) {
   // Check the adapter before resolving typedefs.
-  if (boost::optional<std::string> adapter = find_hack_adapter(t)) {
+  if (std::optional<std::string> adapter = find_hack_adapter(t)) {
     indent(out) << "'adapter' => " << *adapter << "::class,\n";
   }
 
@@ -3048,7 +3048,7 @@ void t_hack_generator::generate_php_struct_spec(
     if (find_hack_wrapper(field)) {
       indent(out) << "'is_wrapped' => true,\n";
     }
-    if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+    if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       indent(out) << "'adapter' => " << *adapter << "::class,\n";
     }
     if (field.qualifier() == t_field_qualifier::terse) {
@@ -3593,7 +3593,7 @@ bool t_hack_generator::
           dynamic_cast<const t_placeholder_typedef*>(ttype)) {
     ttype = ttypedef->get_type();
   }
-  if (boost::optional<std::string> adapter = find_hack_adapter(ttype)) {
+  if (std::optional<std::string> adapter = find_hack_adapter(ttype)) {
     out << val;
     return false;
   }
@@ -3932,7 +3932,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
         fieldRef = "$" + field.name();
       }
     }
-    if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+    if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       out << fieldRef << ",\n";
     } else if (!t->is_container() && !t->is_struct()) {
       out << fieldRef << ",\n";
@@ -4103,7 +4103,7 @@ void t_hack_generator::generate_php_union_methods(
     }
     const auto& fieldName = field.name();
     std::string typehint;
-    if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+    if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       typehint = *adapter + "::THackType";
     } else {
       typehint = type_to_typehint(field.get_type());
@@ -4175,7 +4175,7 @@ void t_hack_generator::generate_php_struct_fields(
     bool is_base_exception_field = type == ThriftStructType::EXCEPTION &&
         is_base_exception_property(&field);
 
-    boost::optional<std::string> field_wrapper = find_hack_wrapper(field);
+    std::optional<std::string> field_wrapper = find_hack_wrapper(field);
 
     if (is_base_exception_field && field_wrapper) {
       throw std::runtime_error(
@@ -4531,7 +4531,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
       }
       hack_typehint = type_to_typehint(field.get_type());
     }
-    if (boost::optional<std::string> field_wrapper = find_hack_wrapper(field)) {
+    if (std::optional<std::string> field_wrapper = find_hack_wrapper(field)) {
       out << indent() << "$this->" << field_name << " = " << *field_wrapper
           << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<" << (nullable ? "?" : "")
           << hack_typehint << ", " << struct_hack_name_with_ns << ">("
@@ -4576,7 +4576,7 @@ void t_hack_generator::generate_php_struct_constructor(
       continue;
     }
     std::string typehint;
-    if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+    if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       typehint = *adapter + "::THackType";
     } else {
       typehint = type_to_typehint(field.get_type());
@@ -5060,7 +5060,7 @@ void t_hack_generator::generate_adapter_type_checks(
   // Adapter name -> original type of the field that the adapter is for.
   std::set<std::pair<std::string, std::string>> adapter_types_;
   for (const auto* t : collect_types(tstruct)) {
-    if (boost::optional<std::string> adapter = find_hack_adapter(t)) {
+    if (std::optional<std::string> adapter = find_hack_adapter(t)) {
       adapter_types_.emplace(*adapter, type_to_typehint(t->get_true_type()));
     }
   }
@@ -5069,7 +5069,7 @@ void t_hack_generator::generate_adapter_type_checks(
     if (skip_codegen(&field)) {
       continue;
     }
-    if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+    if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       adapter_types_.emplace(*adapter, type_to_typehint(field.get_type()));
     }
   }
@@ -5392,7 +5392,7 @@ void t_hack_generator::
 
   bool is_async = false;
   std::string source_str;
-  if (boost::optional<std::string> adapter = find_hack_field_adapter(field)) {
+  if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
     is_async = false;
     source_str = field_ref;
   } else {
@@ -5429,7 +5429,7 @@ void t_hack_generator::
     }
   }
 
-  boost::optional<std::string> field_wrapper = find_hack_wrapper(field);
+  std::optional<std::string> field_wrapper = find_hack_wrapper(field);
   if (field_wrapper) {
     // await statements need to be in separate line,
     // so we need to assign the value to a temp variable
@@ -6726,14 +6726,14 @@ std::string t_hack_generator::field_to_typehint(
     bool is_field_nullable) {
   std::string typehint;
   // Check the adapter before resolving typedefs.
-  if (boost::optional<std::string> adapter = find_hack_field_adapter(tfield)) {
+  if (std::optional<std::string> adapter = find_hack_field_adapter(tfield)) {
     typehint = *adapter + "::THackType";
   }
 
   if (typehint.empty()) {
     typehint = type_to_typehint(tfield.get_type());
   }
-  if (boost::optional<std::string> field_wrapper = find_hack_wrapper(tfield)) {
+  if (std::optional<std::string> field_wrapper = find_hack_wrapper(tfield)) {
     typehint = *field_wrapper + "<" + (is_field_nullable ? "?" : "") +
         typehint + ", " + struct_class_name + ">";
   }

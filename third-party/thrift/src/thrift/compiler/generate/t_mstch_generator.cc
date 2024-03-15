@@ -463,10 +463,10 @@ bool t_mstch_generator::has_option(const std::string& option) const {
   return options_.find(option) != options_.end();
 }
 
-boost::optional<std::string> t_mstch_generator::get_option(
+std::optional<std::string> t_mstch_generator::get_option(
     const std::string& option) const {
   auto itr = options_.find(option);
-  return itr != options_.end() ? itr->second : boost::optional<std::string>();
+  return itr != options_.end() ? itr->second : std::optional<std::string>();
 }
 
 mstch::map t_mstch_generator::prepend_prefix(

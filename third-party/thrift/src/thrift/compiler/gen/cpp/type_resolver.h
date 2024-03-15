@@ -18,11 +18,11 @@
 
 #include <stdint.h>
 #include <initializer_list>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
-#include <boost/optional.hpp>
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_base_type.h>

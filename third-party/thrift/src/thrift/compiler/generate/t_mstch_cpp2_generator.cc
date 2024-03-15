@@ -297,8 +297,8 @@ class cpp_mstch_program : public mstch_program {
       const t_program* program,
       mstch_context& ctx,
       mstch_element_position pos,
-      boost::optional<int32_t> split_id = boost::none,
-      boost::optional<std::vector<t_structured*>> split_structs = boost::none)
+      std::optional<int32_t> split_id = std::nullopt,
+      std::optional<std::vector<t_structured*>> split_structs = std::nullopt)
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
         split_structs_(split_structs) {
@@ -648,9 +648,9 @@ class cpp_mstch_program : public mstch_program {
   }
 
  private:
-  const boost::optional<int32_t> split_id_;
-  const boost::optional<std::vector<t_structured*>> split_structs_;
-  boost::optional<std::vector<t_enum*>> split_enums_;
+  const std::optional<int32_t> split_id_;
+  const std::optional<std::vector<t_structured*>> split_structs_;
+  std::optional<std::vector<t_enum*>> split_enums_;
 };
 
 class cpp_mstch_service : public mstch_service {

@@ -95,7 +95,7 @@ rust_crate_map load_crate_map(const std::string& path) {
       }
     } else if (crate_name != "crate") {
       ret.cratemap[thrift_names[0]].name = crate_name;
-      ret.cratemap[thrift_names[0]].multifile_module = boost::none;
+      ret.cratemap[thrift_names[0]].multifile_module = std::nullopt;
       ret.cratemap[thrift_names[0]].label = label;
     }
   }

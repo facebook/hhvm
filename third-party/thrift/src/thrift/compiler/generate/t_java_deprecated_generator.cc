@@ -84,9 +84,11 @@ string t_java_deprecated_generator::java_package() {
 /**
  * @return String indicating the parent class for the generated struct
  */
-boost::optional<string> t_java_deprecated_generator::java_struct_parent_class(
+std::optional<string> t_java_deprecated_generator::java_struct_parent_class(
     const t_structured* /* unused */, StructGenParams params) {
-  return boost::make_optional(params.is_exception, std::string("Exception"));
+  return params.is_exception ? std::optional{std::string{"Exception"}}
+                             : std::nullopt;
+  // return boost::make_optional(params.is_exception, std::string("Exception"));
 }
 
 /**
@@ -1215,7 +1217,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
               << (params.in_class ? "static " : "") << "class "
               << tstruct->get_name() << " ";
 
-  boost::optional<string> parent = java_struct_parent_class(tstruct, params);
+  std::optional<string> parent = java_struct_parent_class(tstruct, params);
   if (parent) {
     out << "extends " << *parent << " ";
   }

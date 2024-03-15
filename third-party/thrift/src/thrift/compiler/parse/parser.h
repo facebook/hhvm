@@ -17,9 +17,8 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
-
-#include <boost/optional.hpp>
 
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_exception.h>
@@ -55,7 +54,7 @@ struct deprecated_annotations {
 
 struct attributes {
   source_location loc;
-  boost::optional<comment> doc;
+  std::optional<comment> doc;
   node_list<t_const> annotations;
   std::unique_ptr<struct deprecated_annotations> deprecated_annotations;
 };
@@ -93,7 +92,7 @@ class parser_actions {
   virtual void on_namespace(
       const identifier& language, std::string_view ns) = 0;
 
-  virtual boost::optional<comment> on_doctext() = 0;
+  virtual std::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
   virtual comment on_inline_doc(source_range range, std::string_view text) = 0;
 
@@ -181,12 +180,12 @@ class parser_actions {
   virtual std::unique_ptr<t_field> on_field(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      boost::optional<int64_t> id,
+      std::optional<int64_t> id,
       t_field_qualifier qual,
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      boost::optional<comment> doc) = 0;
+      std::optional<comment> doc) = 0;
 
   virtual t_type_ref on_type(
       source_range range,
@@ -208,8 +207,8 @@ class parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
-      boost::optional<int64_t> value,
-      boost::optional<comment> doc) = 0;
+      std::optional<int64_t> value,
+      std::optional<comment> doc) = 0;
 
   virtual void on_const(
       source_range range,

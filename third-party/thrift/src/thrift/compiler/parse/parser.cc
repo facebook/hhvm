@@ -279,10 +279,10 @@ class parser {
         : nullptr;
   }
 
-  boost::optional<comment> try_parse_inline_doc() {
+  std::optional<comment> try_parse_inline_doc() {
     return token_.kind == tok::inline_doc
         ? actions_.on_inline_doc(token_.range, consume_token().string_value())
-        : boost::optional<comment>();
+        : std::optional<comment>();
   }
 
   // structured_annotation: "@" (identifier | struct_initializer)
@@ -669,7 +669,7 @@ class parser {
     auto attrs = parse_attributes();
 
     // Parse the field id.
-    auto field_id = boost::optional<int64_t>();
+    auto field_id = std::optional<int64_t>();
     if (auto integer = try_parse_integer()) {
       field_id = *integer;
       expect_and_consume(':');
@@ -841,8 +841,8 @@ class parser {
     auto attrs = parse_attributes();
     auto name = parse_identifier();
     auto value = try_consume_token('=')
-        ? boost::optional<int64_t>(parse_integer())
-        : boost::none;
+        ? std::optional<int64_t>(parse_integer())
+        : std::nullopt;
     try_parse_deprecated_annotations(attrs);
     if (token_.kind == ',') {
       consume_token();
@@ -970,7 +970,7 @@ class parser {
   }
 
   // integer: ["+" | "-"] int_literal
-  boost::optional<int64_t> try_parse_integer(sign s = sign::plus) {
+  std::optional<int64_t> try_parse_integer(sign s = sign::plus) {
     auto range = track_range();
     switch (token_.kind) {
       case to_tok('-'):
@@ -1033,7 +1033,7 @@ class parser {
   //   | "permanent"
   //   | "server"
   //   | "client"
-  boost::optional<identifier> try_parse_identifier() {
+  std::optional<identifier> try_parse_identifier() {
     auto range = track_range();
     switch (token_.kind) {
       case tok::identifier:

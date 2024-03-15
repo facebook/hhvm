@@ -20,9 +20,9 @@
 #include <cmath>
 #include <cstddef>
 #include <limits>
+#include <optional>
 #include <set>
 
-#include <boost/optional.hpp>
 #include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_const_value.h>
@@ -213,7 +213,7 @@ class ast_builder : public parser_actions {
   std::unordered_map<std::string, t_named*> definitions_;
   const parsing_params& params_;
   include_handler on_include_;
-  boost::optional<comment> doctext_; // The last parsed doctext comment.
+  std::optional<comment> doctext_; // The last parsed doctext comment.
 
   // Checks that the constant name does not refer to an ambiguous enum.
   // An ambiguous enum is one that is redefined but not referred to by
@@ -238,12 +238,12 @@ class ast_builder : public parser_actions {
     if (doctext_) {
       diags_.warning_legacy_strict(doctext_->range.end, "uncaptured doctext");
     }
-    doctext_ = boost::none;
+    doctext_ = std::nullopt;
   }
 
   // Returns a previously pushed doctext.
-  boost::optional<comment> pop_doctext() {
-    return std::exchange(doctext_, boost::none);
+  std::optional<comment> pop_doctext() {
+    return std::exchange(doctext_, std::nullopt);
   }
 
   // Strips comment text and aligns leading whitespace on multiline doctext.
@@ -262,7 +262,7 @@ class ast_builder : public parser_actions {
   }
 
   // Updates doctext of the given node.
-  void set_doctext(t_named& node, boost::optional<comment> doc) const {
+  void set_doctext(t_named& node, std::optional<comment> doc) const {
     if (!doc) {
       return;
     }
@@ -547,7 +547,7 @@ class ast_builder : public parser_actions {
     program_.set_namespace(fmt::to_string(language.str), fmt::to_string(ns));
   }
 
-  boost::optional<comment> on_doctext() override { return pop_doctext(); }
+  std::optional<comment> on_doctext() override { return pop_doctext(); }
 
   void on_program_doctext() override {
     // When there is any doctext, assign it to the top-level program.
@@ -803,14 +803,14 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_field> on_field(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      boost::optional<int64_t> id,
+      std::optional<int64_t> id,
       t_field_qualifier qual,
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      boost::optional<comment> doc) override {
+      std::optional<comment> doc) override {
     auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
-                       : boost::optional<t_field_id>();
+                       : std::optional<t_field_id>();
     auto field = std::make_unique<t_field>(
         std::move(type), fmt::to_string(name.str), valid_id);
     field->set_qualifier(qual);
@@ -859,8 +859,8 @@ class ast_builder : public parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
-      boost::optional<int64_t> value,
-      boost::optional<comment> doc) override {
+      std::optional<int64_t> value,
+      std::optional<comment> doc) override {
     auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
     enum_value->set_src_range(range);
     set_attributes(*enum_value, std::move(attrs), range);

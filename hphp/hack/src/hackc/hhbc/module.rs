@@ -20,14 +20,14 @@ pub enum RuleKind {
     Exact,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize)]
 #[repr(C)]
 pub struct Rule {
     pub kind: RuleKind,
     pub name: Maybe<StringId>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Module {
     pub attributes: Vector<Attribute>,

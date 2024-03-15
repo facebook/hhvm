@@ -230,10 +230,12 @@ impl UnitParser {
         let src_loc = self.get_cur_src_loc();
 
         self.unit.modules.push(Module {
-            attributes,
+            attributes: attributes.into(),
             name,
-            src_loc,
-            doc_comment,
+            span: src_loc.to_span(),
+            doc_comment: doc_comment.map(|s| s.into()).into(),
+            imports: Default::default(),
+            exports: Default::default(),
         });
         Ok(())
     }

@@ -2106,17 +2106,20 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
             let Module {
                 attributes,
                 name,
-                src_loc,
+                span,
                 doc_comment,
+                imports: _,
+                exports: _,
             } = module;
-            print_top_level_loc(w, Some(src_loc))?;
+            let src_loc = SrcLoc::from_span(span);
+            print_top_level_loc(w, Some(&src_loc))?;
             write!(
                 w,
                 "module {name} [{attributes}] ",
                 name = FmtIdentifierId(name.as_bytes_id()),
                 attributes = FmtSep::comma(attributes.iter(), |w, a| FmtAttribute(a).fmt(w))
             )?;
-            if let Some(doc_comment) = doc_comment {
+            if let Some(doc_comment) = doc_comment.as_ref().into_option() {
                 write!(w, "{}", FmtEscapedString(doc_comment))?;
             } else {
                 write!(w, "N")?;

@@ -32,19 +32,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         .collect::<Vec<_>>()
         .into();
     unit.constants = ir_unit.constants.into();
-    unit.modules = ir_unit
-        .modules
-        .into_iter()
-        .map(|module| hhbc::Module {
-            attributes: module.attributes.into(),
-            name: module.name,
-            span: module.src_loc.to_span(),
-            doc_comment: module.doc_comment.map(|c| c.into()).into(),
-            exports: Maybe::Nothing, // TODO
-            imports: Maybe::Nothing, // TODO
-        })
-        .collect::<Vec<_>>()
-        .into();
+    unit.modules = ir_unit.modules.into();
     unit.module_use = ir_unit.module_use.into();
     unit.symbol_refs = convert_symbol_refs(&ir_unit.symbol_refs);
 

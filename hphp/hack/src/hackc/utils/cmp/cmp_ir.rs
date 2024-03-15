@@ -1223,19 +1223,25 @@ fn cmp_module(a: &Module, b: &Module) -> Result {
     let Module {
         attributes: a_attributes,
         name: a_name,
-        src_loc: a_src_loc,
+        span: a_span,
         doc_comment: a_doc_comment,
+        imports: a_imports,
+        exports: a_exports,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
-        src_loc: b_src_loc,
+        span: b_span,
         doc_comment: b_doc_comment,
+        imports: b_imports,
+        exports: b_exports,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
-    cmp_src_loc(a_src_loc, b_src_loc).qualified("src_loc")?;
+    cmp_span(a_span, b_span).qualified("span")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
+    cmp_eq(a_imports, b_imports).qualified("imports")?;
+    cmp_eq(a_exports, b_exports).qualified("exports")?;
     Ok(())
 }
 
@@ -1339,6 +1345,12 @@ fn cmp_requirement(a: &Requirement, b: &Requirement) -> Result {
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_kind, b_kind).qualified("kind")?;
+    Ok(())
+}
+
+fn cmp_span(a: &Span, b: &Span) -> Result {
+    cmp_eq(a.line_begin, b.line_begin).qualified("line_begin")?;
+    cmp_eq(a.line_end, b.line_end).qualified("line_end")?;
     Ok(())
 }
 
@@ -1626,12 +1638,6 @@ mod mapping {
     }
 
     impl MapName for &Method {
-        fn get_name(&self) -> String {
-            self.name.into_string()
-        }
-    }
-
-    impl MapName for &Module {
         fn get_name(&self) -> String {
             self.name.into_string()
         }

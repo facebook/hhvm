@@ -28,16 +28,7 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
 
     let file_attributes = unit.file_attributes.clone().into();
 
-    let modules: Vec<ir::Module> = unit
-        .modules
-        .iter()
-        .map(|module| ir::Module {
-            attributes: module.attributes.clone().into(),
-            name: module.name,
-            src_loc: ir::SrcLoc::from_span(&module.span),
-            doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
-        })
-        .collect();
+    let modules: Vec<ir::Module> = unit.modules.clone().into();
 
     let typedefs: Vec<_> = unit
         .typedefs

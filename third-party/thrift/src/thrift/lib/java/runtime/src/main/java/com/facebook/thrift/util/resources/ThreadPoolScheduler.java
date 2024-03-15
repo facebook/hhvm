@@ -83,7 +83,9 @@ final class ThreadPoolScheduler extends AtomicBoolean implements StatsScheduler 
     threadPoolExecutor.prestartAllCoreThreads();
 
     this.worker = new ThreadPoolSchedulerWorker();
-    this.scheduler = Schedulers.newElastic("thrift-offloop-scheduler", 60, true);
+    this.scheduler =
+        Schedulers.newBoundedElastic(
+            Integer.MAX_VALUE, Integer.MAX_VALUE, "thrift-offloop-scheduler", 60, true);
 
     scheduler.schedulePeriodically(this::captureThreadPoolExecutorMetrics, 1, 1, TimeUnit.SECONDS);
   }

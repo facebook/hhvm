@@ -294,7 +294,7 @@ pub fn emit_return_type_info(
     ret: Option<&aast::Hint>,
 ) -> Result<TypeInfo> {
     match ret {
-        None => Ok(TypeInfo::empty()),
+        None => Ok(TypeInfo::default()),
         Some(hint) => emit_type_hint::hint_to_type_info(
             &emit_type_hint::Kind::Return,
             skip_awaitable,

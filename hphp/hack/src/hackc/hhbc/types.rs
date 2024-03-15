@@ -18,27 +18,30 @@ pub struct TypeInfo {
     pub type_constraint: Constraint,
 }
 
+impl TypeInfo {
+    pub fn new(user_type: Maybe<StringId>, type_constraint: Constraint) -> Self {
+        Self {
+            user_type,
+            type_constraint,
+        }
+    }
+
+    pub fn has_type_constraint(&self) -> bool {
+        self.type_constraint.name.is_just()
+    }
+}
+
+impl Default for TypeInfo {
+    fn default() -> Self {
+        Self::new(Just(StringId::EMPTY), Constraint::default())
+    }
+}
+
 #[derive(Clone, Default, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Constraint {
     pub name: Maybe<StringId>,
     pub flags: TypeConstraintFlags,
-}
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
-#[repr(C)]
-pub struct UpperBound {
-    pub name: StringId,
-    pub bounds: Vector<TypeInfo>,
-}
-
-impl Default for UpperBound {
-    fn default() -> Self {
-        Self {
-            name: StringId::EMPTY,
-            bounds: Default::default(),
-        }
-    }
 }
 
 impl Constraint {
@@ -54,20 +57,19 @@ impl Constraint {
     }
 }
 
-impl TypeInfo {
-    pub fn new(user_type: Maybe<StringId>, type_constraint: Constraint) -> Self {
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct UpperBound {
+    pub name: StringId,
+    pub bounds: Vector<TypeInfo>,
+}
+
+impl Default for UpperBound {
+    fn default() -> Self {
         Self {
-            user_type,
-            type_constraint,
+            name: StringId::EMPTY,
+            bounds: Default::default(),
         }
-    }
-
-    pub fn empty() -> Self {
-        Self::new(Just(StringId::EMPTY), Constraint::default())
-    }
-
-    pub fn has_type_constraint(&self) -> bool {
-        self.type_constraint.name.is_just()
     }
 }
 

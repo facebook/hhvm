@@ -77,7 +77,7 @@ pub fn from_ast<'a>(
     };
 
     let type_info = match args.typehint.as_ref() {
-        None => TypeInfo::empty(),
+        None => TypeInfo::default(),
         Some(th) => emit_type_hint::hint_to_type_info(
             &emit_type_hint::Kind::Property,
             false,

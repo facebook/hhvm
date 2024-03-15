@@ -79,8 +79,10 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(meta.structs["testing.EmptyUnion"].is_union, True)
 
         mixedStruct = gen_metadata(mixed)
-        _, _, _, _, field, *rest = mixedStruct.fields
+        optional, non_optional, _, _, field, *rest = mixedStruct.fields
         self.assertEqual(field.name, "some_field")
+        self.assertTrue(optional.is_optional)
+        self.assertFalse(non_optional.is_optional)
         # TODO pyname
         # self.assertEqual(field.pyname, "some_field_")
 

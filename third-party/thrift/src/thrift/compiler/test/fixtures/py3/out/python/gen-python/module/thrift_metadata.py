@@ -43,7 +43,7 @@ def _fbthrift_gen_metadata_struct_OptionalRefStruct(metadata_struct: _fbthrift_m
     if qualified_name in metadata_struct.structs:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="optional_blob", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="optional_blob", is_optional=True, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

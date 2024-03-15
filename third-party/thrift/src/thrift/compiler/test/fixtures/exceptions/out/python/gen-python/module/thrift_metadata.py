@@ -41,7 +41,7 @@ def _fbthrift_gen_metadata_exception_Serious(metadata_struct: _fbthrift_metadata
     if qualified_name in metadata_struct.exceptions:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="sonnet", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="sonnet", is_optional=True, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)

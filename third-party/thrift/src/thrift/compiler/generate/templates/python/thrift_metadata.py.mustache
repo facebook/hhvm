@@ -38,7 +38,7 @@ def _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}
         return metadata_struct
     fields = [
         {{#struct:fields_ordered_by_id}}
-        _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional={{#field:optional?}}True{{/field:optional?}}{{^field:optional?}}False{{/field:optional?}}, structured_annotations=[
             {{#field:structured_annotations}}
             {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
             {{> metadata/const_struct }},

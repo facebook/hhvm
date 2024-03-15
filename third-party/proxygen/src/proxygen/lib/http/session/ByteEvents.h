@@ -10,7 +10,7 @@
 
 #include <folly/IntrusiveList.h>
 #include <folly/Portability.h>
-#include <proxygen/lib/utils/AsyncTimeoutSet.h>
+#include <functional>
 #include <proxygen/lib/utils/Time.h>
 
 namespace proxygen {

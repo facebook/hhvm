@@ -10,7 +10,9 @@
 
 #include <folly/Conv.h>
 
+#include <ostream>
 #include <proxygen/lib/utils/Time.h>
+#include <string>
 
 namespace proxygen {
 

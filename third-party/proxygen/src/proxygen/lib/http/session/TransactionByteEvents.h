@@ -42,7 +42,7 @@ class TransactionByteEvent : public ByteEvent {
  */
 class TimestampByteEvent
     : public TransactionByteEvent
-    , public AsyncTimeoutSet::Callback {
+    , public folly::HHWheelTimer::Callback {
  public:
   enum TimestampType {
     TX,

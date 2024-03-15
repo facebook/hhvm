@@ -6708,7 +6708,11 @@ end = struct
             (sub_supportdyn, r_dep, dep_ty, ty_inner_sub)
             rhs
             env
-        | (_, ListDestructure) ->
+        | ( ( _,
+              ( Tany _ | Tnonnull | Toption _ | Tprim _ | Tfun _ | Tshape _
+              | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _
+              | Tunapplied_alias _ ) ),
+            ListDestructure ) ->
           let ty_sub_descr =
             lazy
               (Typing_print.with_blank_tyvars (fun () ->

@@ -39,6 +39,7 @@ struct ContainerStruct {
   @cpp.Type{template = "folly::small_vector"}
   5: list<i32> fieldE;
   6: set_i32_7194 fieldF;
+  @cpp.Type{template = "folly::sorted_vector_map"}
   7: map_i32_string_1261 fieldG;
   8: included.SomeMap fieldH;
 }
@@ -245,7 +246,6 @@ typedef TBinary (noop_annotation = "1") TBinary_8623
 typedef i32 (cpp.use_allocator = "1") i32_9314
 typedef list<i32> (cpp.use_allocator = "1") list_i32_9187
 typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_9565
-@cpp.Type{template = "folly::sorted_vector_map"}
 typedef map<i32, string> (
   rust.type = "sorted_vector_map::SortedVectorMap",
 ) map_i32_string_1261

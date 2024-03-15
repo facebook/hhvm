@@ -20,13 +20,13 @@ type 'pos edits =
       which requires FFP to compute the { position. *)
 [@@deriving eq, ord, show]
 
-val make : title:string -> edits:Pos.t edits list -> Pos.t t
+val make : title:string -> edits:Pos.t edits -> Pos.t t
 
 (** Helper for the Quickfix.Eager constructor  *)
 val make_eager : title:string -> new_text:string -> Pos.t -> Pos.t t
 
 val get_title : Pos.t t -> string
 
-val get_edits : Pos.t t -> Pos.t edits list
+val get_edits : Pos.t t -> Pos.t edits
 
 val to_absolute : Pos.t t -> Pos.absolute t

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79cfb34adb153b677b066cfc0532ea8c>>
+// @generated SignedSource<<096a24516641f3f486c3a83d2957bd55>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -66,5 +66,5 @@ pub enum Edits<Pos> {
 #[repr(C)]
 pub struct Quickfix<Pos> {
     pub title: String,
-    pub edits: Vec<Edits<Pos>>,
+    pub edits: Edits<Pos>,
 }

@@ -351,7 +351,7 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
     [
       Quickfix.make
         ~title:("Change to " ^ suggest_name)
-        ~edits:[Quickfix.Eager [(suggest_name, pos)]];
+        ~edits:(Quickfix.Eager [(suggest_name, pos)]);
     ]
   in
   User_error.make

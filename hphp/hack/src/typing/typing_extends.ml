@@ -313,10 +313,8 @@ let stub_all_methods_quickfix
   Quickfix.make
     ~title
     ~edits:
-      [
-        Quickfix.Classish_end
-          { classish_end_new_text; classish_end_name = class_name };
-      ]
+      (Quickfix.Classish_end
+         { classish_end_new_text; classish_end_name = class_name })
 
 (* Emit an error for every missing method or property in this
    class. Offer a single quickfix for adding all the missing

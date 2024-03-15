@@ -4698,14 +4698,12 @@ end = struct
 
     let quickfixes =
       let edits =
-        [
-          Quickfix.Eager
-            [
-              (")", close_bracket_pos);
-              (", ", open_bracket_pos);
-              ("Shapes::idx(", Pos.shrink_to_start recv_pos);
-            ];
-        ]
+        Quickfix.Eager
+          [
+            (")", close_bracket_pos);
+            (", ", open_bracket_pos);
+            ("Shapes::idx(", Pos.shrink_to_start recv_pos);
+          ]
       in
       [Quickfix.make ~title:"Change to `Shapes::idx()`" ~edits]
     in

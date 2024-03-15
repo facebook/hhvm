@@ -1672,13 +1672,10 @@ end = struct
   }
 
   let of_quickfix (qf : Pos.t Quickfix.t) : t option =
-    Quickfix.get_edits qf
-    |> List.fold ~init:(Some []) ~f:(fun acc_opt edits_cons ->
-           match (acc_opt, edits_cons) with
-           | (Some acc, Quickfix.Eager eager_edits) -> Some (acc @ eager_edits)
-           | (_, _) -> None)
-    |> Option.map ~f:(fun eager_edits ->
-           { _title = Quickfix.get_title qf; edits = eager_edits })
+    match Quickfix.get_edits qf with
+    | Quickfix.Eager eager_edits ->
+      Some { _title = Quickfix.get_title qf; edits = eager_edits }
+    | _ -> None
 
   (* Sort [quickfixes] with their edit positions in descending
      order. This allows us to iteratively apply the quickfixes without

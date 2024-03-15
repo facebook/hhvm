@@ -20,14 +20,13 @@ type 'pos edits =
 
 type 'pos t = {
   title: string;
-  edits: 'pos edits list;
+  edits: 'pos edits;
 }
 [@@deriving eq, ord, show]
 
 let make ~title ~edits = { title; edits }
 
-let make_eager ~title ~new_text pos =
-  { title; edits = [Eager [(new_text, pos)]] }
+let make_eager ~title ~new_text pos = { title; edits = Eager [(new_text, pos)] }
 
 let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
  fun { title; edits } ~f ->
@@ -37,11 +36,11 @@ let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
       Eager edits
     | Classish_end fields -> Classish_end fields
   in
-  let edits = List.map ~f:transform_edits edits in
+  let edits = transform_edits edits in
   { title; edits }
 
 let to_absolute : Pos.t t -> Pos.absolute t = map_positions ~f:Pos.to_absolute
 
 let get_title (quickfix : 'a t) : string = quickfix.title
 
-let get_edits (quickfix : Pos.t t) : Pos.t edits list = quickfix.edits
+let get_edits (quickfix : Pos.t t) : Pos.t edits = quickfix.edits

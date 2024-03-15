@@ -7103,15 +7103,77 @@ end = struct
         on_error
     | _ -> on_error
 
+  let typing_obj_get
+      ~subtype_env
+      ~this_ty
+      ~class_id
+      ~member_id
+      ~explicit_targs
+      ~member_ty
+      ty_sub
+      env =
+    let (explicit_targs, is_method) =
+      match explicit_targs with
+      | None -> ([], false)
+      | Some targs -> (targs, true)
+    in
+    let (res, (obj_get_ty, _tal)) =
+      Typing_object_get.obj_get
+        ~obj_pos:(fst member_id)
+          (* `~obj_pos:name_pos` is a lie: `name_pos` is the rhs of `->` or `?->` *)
+        ~is_method
+        ~meth_caller:false
+        ~coerce_from_ty:None
+        ~nullsafe:None
+        ~explicit_targs
+        ~class_id
+        ~member_id
+        ~on_error:Typing_error.Callback.unify_error
+        env
+        ty_sub
+    in
+    let prop =
+      match res with
+      | (env, None) -> valid env
+      | (env, Some ty_err) ->
+        let on_error =
+          add_obj_get_quickfixes ty_err subtype_env.Subtype_env.on_error
+        in
+        (* TODO - this needs to somehow(?) account for the fact that the old
+           code considered FIXMEs in this position *)
+        let fail =
+          Option.map
+            on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error @@ Secondary.Of_error ty_err)
+        in
+        invalid env ~fail
+    in
+
+    prop
+    &&& Subtype.(
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn = None; ty_sub = obj_get_ty }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = member_ty;
+              })
+
   let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ sub_supportdyn; ty_sub }
-      ~rhs:{ reason_super = r; has_member = has_member_ty }
+      ~rhs:({ reason_super = r; has_member = has_member_ty } as rhs)
       env =
     let {
-      hm_name = (name_pos, name_) as name;
+      hm_name = (name_pos, name_) as member_id;
       hm_type = member_ty;
       hm_class_id = class_id;
       hm_explicit_targs = explicit_targs;
@@ -7119,6 +7181,8 @@ end = struct
       has_member_ty
     in
     let is_method = Option.is_some explicit_targs in
+    let cty_super = mk_constraint_type (r, Thas_member has_member_ty) in
+    let ity_super = ConstraintType cty_super in
 
     Logging.log_subtype_i
       ~level:2
@@ -7126,25 +7190,9 @@ end = struct
       ~function_name:"simplify_subtype_has_member"
       env
       ty_sub
-      (ConstraintType (mk_constraint_type (r, Thas_member has_member_ty)));
+      ity_super;
     let (env, ety_sub) = Env.expand_internal_type env ty_sub in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ety_sub }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super =
-                ConstraintType
-                  (mk_constraint_type (r, Thas_member has_member_ty));
-            }
-          env)
-    in
+
     match ety_sub with
     | ConstraintType cty ->
       (match deref_constraint_type cty with
@@ -7181,17 +7229,25 @@ end = struct
               env)
         else
           invalid ~fail env
-      | _ -> default_subtype_help env)
+      | _ -> invalid env ~fail)
     | LoclType ty_sub ->
       (match deref ty_sub with
-      | (_, (Tvar _ | Tunion _)) -> default_subtype_help env
-      | (_, Tintersection tyl)
-        when let (_, non_ty_opt, _) =
-               Subtype_negation.find_type_with_exact_negation env tyl
-             in
-             Option.is_some non_ty_opt ->
-        (* use default_subtype to perform: A & B <: C <=> A <: C | !B *)
-        default_subtype_help env
+      | (_, Tvar _) ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          ity_super
+      | (_, Tunion ty_subs) ->
+        Common.simplify_union_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
       | (r_inter, Tintersection []) ->
         (* Tintersection [] = mixed *)
         invalid
@@ -7216,6 +7272,36 @@ end = struct
                         (* Subtyping already gives these reasons *)
                         ty_reasons = lazy [];
                       }))
+      | (r_sub, Tintersection ty_subs) ->
+        (* A & B <: C iif A <: C | !B *)
+        (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+        | (env, Some non_ty, tyl) ->
+          let ty_sub = MakeType.intersection r_sub tyl in
+          TCunion.(
+            simplify
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
+              ~rhs:
+                {
+                  super_supportdyn = false;
+                  super_like = false;
+                  lty_super = non_ty;
+                  reason_super = r;
+                  cty_super;
+                }
+              env)
+        | _ ->
+          typing_obj_get
+            ~subtype_env
+            ~this_ty
+            ~class_id
+            ~member_id
+            ~explicit_targs
+            ~member_ty
+            ty_sub
+            env)
       | (r1, Tnewtype (n, _, newtype_ty)) ->
         let sub_supportdyn =
           match sub_supportdyn with
@@ -7233,63 +7319,19 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub = LoclType newtype_ty }
           ~rhs:{ reason_super = r; has_member = has_member_ty }
           env
-      (* TODO
-         | (_, Tdependent _) ->
-         | (_, Tgeneric _) ->
-      *)
-      | _ ->
-        let explicit_targs =
-          match explicit_targs with
-          | None -> []
-          | Some targs -> targs
-        in
-        let (res, (obj_get_ty, _tal)) =
-          Typing_object_get.obj_get
-            ~obj_pos:name_pos
-              (* `~obj_pos:name_pos` is a lie: `name_pos` is the rhs of `->` or `?->` *)
-            ~is_method
-            ~meth_caller:false
-            ~coerce_from_ty:None
-            ~nullsafe:None
-            ~explicit_targs
-            ~class_id
-            ~member_id:name
-            ~on_error:Typing_error.Callback.unify_error
-            env
-            ty_sub
-        in
-        let prop =
-          match res with
-          | (env, None) -> valid env
-          | (env, Some ty_err) ->
-            let on_error =
-              add_obj_get_quickfixes ty_err subtype_env.Subtype_env.on_error
-            in
-            (* TODO - this needs to somehow(?) account for the fact that the old
-               code considered FIXMEs in this position *)
-            let fail =
-              Option.map
-                on_error
-                ~f:
-                  Typing_error.(
-                    fun on_error ->
-                      apply_reasons ~on_error @@ Secondary.Of_error ty_err)
-            in
-            invalid env ~fail
-        in
-
-        prop
-        &&& Subtype.(
-              simplify_subtype
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn = None; ty_sub = obj_get_ty }
-                ~rhs:
-                  {
-                    super_like = false;
-                    super_supportdyn = false;
-                    ty_super = member_ty;
-                  }))
+      | ( _,
+          ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _
+          | Ttuple _ | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _
+          | Taccess _ | Tunapplied_alias _ | Tclass _ | Tneg _ ) ) ->
+        typing_obj_get
+          ~subtype_env
+          ~this_ty
+          ~class_id
+          ~member_id
+          ~explicit_targs
+          ~member_ty
+          ty_sub
+          env)
 end
 
 and Type_switch : sig

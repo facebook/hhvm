@@ -1,2 +1,4 @@
 hack: hack src/module.thrift
 hack_module2: hack:server src/module2.thrift
+hack_typedef: hack:typedef src/module.thrift
+hack_module2_typedef: hack:server,typedef src/module2.thrift

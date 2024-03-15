@@ -48,12 +48,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
     let class = hhbc::Class {
         attributes: attributes.into(),
         base: base.into(),
-        constants: Vec::from_iter(
-            constants
-                .into_iter()
-                .map(crate::constant::convert_hack_constant),
-        )
-        .into(),
+        constants: constants.into(),
         ctx_constants: ctx_constants.into(),
         doc_comment: doc_comment.map(|c| c.into()).into(),
         enum_includes: enum_includes.into(),

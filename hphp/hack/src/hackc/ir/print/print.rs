@@ -1276,7 +1276,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
     Ok(())
 }
 
-fn print_hack_constant(w: &mut dyn Write, c: &HackConstant) -> Result {
+fn print_hack_constant(w: &mut dyn Write, c: &Constant) -> Result {
     let attr = FmtAttr(c.attrs, AttrContext::Constant);
 
     write!(
@@ -1285,7 +1285,7 @@ fn print_hack_constant(w: &mut dyn Write, c: &HackConstant) -> Result {
         name = FmtIdentifierId(c.name.as_bytes_id())
     )?;
 
-    if let Some(value) = &c.value {
+    if let ir_core::Maybe::Just(value) = &c.value {
         write!(w, " = {}", FmtTypedValue(value))?;
     }
 

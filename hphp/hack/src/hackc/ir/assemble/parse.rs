@@ -18,12 +18,12 @@ use ir_core::ClassGetCMode;
 use ir_core::ClassName;
 use ir_core::CollectionType;
 use ir_core::ConstName;
+use ir_core::Constant;
 use ir_core::DictEntry;
 use ir_core::EnforceableType;
 use ir_core::FatalOp;
 use ir_core::FloatBits;
 use ir_core::FunctionName;
-use ir_core::HackConstant;
 use ir_core::ImmId;
 use ir_core::Immediate;
 use ir_core::IncDecOp;
@@ -415,16 +415,16 @@ pub(crate) fn parse_func_name(tokenizer: &mut Tokenizer<'_>) -> Result<FunctionN
     Ok(FunctionName::from_utf8(&ident)?)
 }
 
-pub(crate) fn parse_hack_constant(tokenizer: &mut Tokenizer<'_>) -> Result<HackConstant> {
+pub(crate) fn parse_hack_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Constant> {
     parse!(tokenizer, <attrs:parse_attr> <name:parse_const_name>);
 
     let value = if tokenizer.next_is_identifier("=")? {
-        Some(parse_typed_value(tokenizer)?)
+        ir_core::Maybe::Just(parse_typed_value(tokenizer)?)
     } else {
-        None
+        ir_core::Maybe::Nothing
     };
 
-    Ok(HackConstant { name, value, attrs })
+    Ok(Constant { name, value, attrs })
 }
 
 fn parse_i32(tokenizer: &mut Tokenizer<'_>) -> Result<i32> {

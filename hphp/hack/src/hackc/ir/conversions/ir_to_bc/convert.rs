@@ -31,12 +31,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
         .map(crate::types::convert_typedef)
         .collect::<Vec<_>>()
         .into();
-    unit.constants = ir_unit
-        .constants
-        .into_iter()
-        .map(crate::constant::convert_hack_constant)
-        .collect::<Vec<_>>()
-        .into();
+    unit.constants = ir_unit.constants.into();
     unit.modules = ir_unit
         .modules
         .into_iter()

@@ -6,9 +6,9 @@ use ir::Attribute;
 use ir::BaseType;
 use ir::Class;
 use ir::ClassName;
+use ir::Constant;
 use ir::EnforceableType;
 use ir::FuncBuilder;
-use ir::HackConstant;
 use ir::Immediate;
 use ir::Instr;
 use ir::LocalId;
@@ -154,13 +154,13 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     // TODO: Need to think about abstract constants. Maybe constants lookups
     // should really be function calls...
     for constant in class.constants.drain(..) {
-        let HackConstant { name, value, attrs } = constant;
+        let Constant { name, value, attrs } = constant;
         // Mark the property as originally being a constant.
         let attributes = vec![Attribute {
             name: ClassName::intern(INFER_CONSTANT),
             arguments: vec![].into(),
         }];
-        let type_info = if let Some(value) = value.as_ref() {
+        let type_info = if let Some(value) = value.as_ref().into_option() {
             TypeInfo::from_typed_value(value)
         } else {
             TypeInfo::empty()
@@ -170,7 +170,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             flags: attrs | Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,
-            initial_value: value,
+            initial_value: value.into(),
             type_info,
             doc_comment: Default::default(),
         };

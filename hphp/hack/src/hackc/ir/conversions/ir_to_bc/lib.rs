@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod class;
-mod constant;
 mod convert;
 mod emitter;
 mod ex_frame;

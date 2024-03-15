@@ -6,8 +6,8 @@
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
+use crate::Constant;
 use crate::CtxConstant;
-use crate::HackConstant;
 use crate::Method;
 use crate::PropName;
 use crate::Requirement;
@@ -28,7 +28,7 @@ pub struct Class {
     pub base: Option<ClassName>,
 
     /// Class constants.
-    pub constants: Vec<HackConstant>,
+    pub constants: Vec<Constant>,
 
     // TODO: (doc coeffect constants)
     pub ctx_constants: Vec<CtxConstant>,

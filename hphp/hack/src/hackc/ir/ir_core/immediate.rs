@@ -2,8 +2,6 @@
 
 use std::sync::Arc;
 
-use hhvm_types_ffi::Attr;
-
 use crate::instr::HasOperands;
 use crate::BytesId;
 use crate::ClassName;
@@ -60,11 +58,4 @@ impl From<TypedValue> for Immediate {
             }
         }
     }
-}
-
-#[derive(Debug)]
-pub struct HackConstant {
-    pub name: ConstName,
-    pub value: Option<TypedValue>,
-    pub attrs: Attr,
 }

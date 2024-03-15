@@ -127,7 +127,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_option(a_base.as_ref(), b_base.as_ref(), cmp_eq).qualified("base")?;
-    cmp_map_t(a_constants, b_constants, cmp_hack_constant).qualified("constants")?;
+    cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_ctx_constant).qualified("ctx_constants")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_option(a_enum_type.as_ref(), b_enum_type.as_ref(), cmp_type_info).qualified("enum_type")?;
@@ -376,19 +376,24 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
     Ok(())
 }
 
-fn cmp_hack_constant(a: &HackConstant, b: &HackConstant) -> Result {
-    let HackConstant {
+fn cmp_constant(a: &Constant, b: &Constant) -> Result {
+    let Constant {
         name: a_name,
         value: a_value,
         attrs: a_attrs,
     } = a;
-    let HackConstant {
+    let Constant {
         name: b_name,
         value: b_value,
         attrs: b_attrs,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_option(a_value.as_ref(), b_value.as_ref(), cmp_typed_value).qualified("value")?;
+    cmp_option(
+        a_value.as_ref().into(),
+        b_value.as_ref().into(),
+        cmp_typed_value,
+    )
+    .qualified("value")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())
 }
@@ -1575,7 +1580,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     } = b_unit;
 
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
-    cmp_map_t(a_constants, b_constants, cmp_hack_constant).qualified("constants")?;
+    cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_attributes(a_file_attributes, b_file_attributes).qualified("file_attributes")?;
     cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
     cmp_option(a_fatal.as_ref(), b_fatal.as_ref(), cmp_fatal).qualified("fatal")?;
@@ -1615,12 +1620,6 @@ mod mapping {
     }
 
     impl MapName for &Function {
-        fn get_name(&self) -> String {
-            self.name.as_str().to_owned()
-        }
-    }
-
-    impl MapName for &HackConstant {
         fn get_name(&self) -> String {
             self.name.as_str().to_owned()
         }

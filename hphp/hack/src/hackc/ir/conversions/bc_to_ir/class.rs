@@ -9,13 +9,6 @@ use itertools::Itertools;
 use crate::types;
 
 pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
-    let constants = cls
-        .constants
-        .as_ref()
-        .iter()
-        .map(crate::constant::convert_constant)
-        .collect_vec();
-
     let enum_type = cls
         .enum_type
         .as_ref()
@@ -43,7 +36,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
     unit.classes.push(ir::Class {
         attributes: cls.attributes.clone().into(),
         base: cls.base.into(),
-        constants,
+        constants: cls.constants.clone().into(),
         ctx_constants: cls.ctx_constants.clone().into(),
         doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
         enum_includes: cls.enum_includes.clone().into(),

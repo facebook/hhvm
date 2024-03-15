@@ -14,7 +14,7 @@ use serde::Serialize;
 use crate::typed_value::TypedValue;
 use crate::ConstName;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[repr(C)]
 pub struct Constant {
     pub name: ConstName,

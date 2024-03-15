@@ -24,12 +24,7 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
 
     let unit_state = UnitState { adata_lookup };
 
-    let constants = unit
-        .constants
-        .as_ref()
-        .iter()
-        .map(crate::constant::convert_constant)
-        .collect();
+    let constants = unit.constants.clone().into();
 
     let file_attributes = unit.file_attributes.clone().into();
 

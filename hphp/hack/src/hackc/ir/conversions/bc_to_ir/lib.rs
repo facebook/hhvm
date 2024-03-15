@@ -6,7 +6,6 @@
 #![feature(box_patterns)]
 
 mod class;
-mod constant;
 mod context;
 mod convert;
 mod func;

@@ -5,9 +5,9 @@
 
 use crate::Attribute;
 use crate::Class;
+use crate::Constant;
 use crate::Fatal;
 use crate::Function;
-use crate::HackConstant;
 use crate::Module;
 use crate::ModuleName;
 use crate::SymbolRefs;
@@ -29,7 +29,7 @@ pub struct Unit {
     /// ```
     /// const MAGIC_VALUE: int = 42;
     /// ```
-    pub constants: Vec<HackConstant>,
+    pub constants: Vec<Constant>,
 
     /// Per-file attributes.
     ///

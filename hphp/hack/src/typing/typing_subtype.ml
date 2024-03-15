@@ -6668,27 +6668,8 @@ end = struct
     can_index: can_index;
   }
 
-  let simplify
-      ~subtype_env
-      ~this_ty
-      ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-      ~rhs:{ reason_super = r; can_index = ci }
-      env =
-    (* TODO: implement *)
-    Subtype.(
-      default_subtype
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-        ~rhs:
-          {
-            super_like = false;
-            super_supportdyn = false;
-            ty_super = ConstraintType (mk_constraint_type (r, Tcan_index ci));
-          }
-        env)
+  let simplify ~subtype_env:_ ~this_ty:_ ~fail ~lhs:_ ~rhs:_ env =
+    invalid env ~fail
 end
 
 and Can_traverse : sig

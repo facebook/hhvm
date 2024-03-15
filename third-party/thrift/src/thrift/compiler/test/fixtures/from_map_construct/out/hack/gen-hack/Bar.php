@@ -157,7 +157,45 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
   }
 }
 
+trait BarGetThriftServiceMetadata {
+  private function process_getThriftServiceMetadataHelper(int $seqid, \TProtocol $input, \TProtocol $output): void {
+    $reply_type = \TMessageType::REPLY;
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else {
+      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+    try {
+      $result->success = BarStaticMetadata::getServiceMetadataResponse();
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    if ($output is \TBinaryProtocolAccelerated)
+    {
+      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
+    }
+    else if ($output is \TCompactProtocolAccelerated)
+    {
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
+    }
+    else
+    {
+      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+  }
+}
 abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
+  use BarGetThriftServiceMetadata;
   abstract const type TThriftIf as BarAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'Bar';
@@ -207,39 +245,7 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
     $this->eventHandler_->postWrite($handler_ctx, 'baz', $result);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $reply_type = \TMessageType::REPLY;
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else {
-      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
-    try {
-      $result->success = BarStaticMetadata::getServiceMetadataResponse();
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
   }
 }
 class BarAsyncProcessor extends BarAsyncProcessorBase {
@@ -247,6 +253,7 @@ class BarAsyncProcessor extends BarAsyncProcessorBase {
 }
 
 abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
+  use BarGetThriftServiceMetadata;
   abstract const type TThriftIf as BarIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'Bar';
@@ -296,39 +303,7 @@ abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->postWrite($handler_ctx, 'baz', $result);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $reply_type = \TMessageType::REPLY;
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else {
-      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
-    try {
-      $result->success = BarStaticMetadata::getServiceMetadataResponse();
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
   }
 }
 class BarSyncProcessor extends BarSyncProcessorBase {

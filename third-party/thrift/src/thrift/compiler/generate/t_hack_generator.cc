@@ -501,11 +501,12 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice, bool mangle, bool async);
   void generate_process_function(
       const t_service* tservice, const t_function* tfunction, bool async);
-  void generate_process_metadata_function(
-      const t_service* tservice, bool mangle, bool async);
+  void generate_process_metadata_function(bool async);
   void generate_processor_event_handler_functions(std::ofstream& out);
   void generate_client_event_handler_functions(std::ofstream& out);
   void generate_event_handler_functions(std::ofstream& out, std::string cl);
+  void generate_get_thrift_metadata_trait(
+      const t_service* tservice, bool mangle);
 
   /**
    * Read thrift object from JSON string, generated using the
@@ -5566,6 +5567,7 @@ void t_hack_generator::generate_service(
   generate_service_client(tservice, mangle);
   generate_service_interactions(tservice, mangle);
   if (phps_) {
+    generate_get_thrift_metadata_trait(tservice, mangle);
     generate_service_processor(tservice, mangle, /*async*/ true);
     generate_service_processor(tservice, mangle, /*async*/ false);
   }
@@ -5626,6 +5628,8 @@ void t_hack_generator::generate_service_processor(
 
   f_service_ << indent() << "abstract class " << long_name << suffix
              << "ProcessorBase extends " << extends_processor << " {\n"
+             << indent() << "  use " << php_servicename_mangle(mangle, tservice)
+             << "GetThriftServiceMetadata;\n"
              << indent() << "  abstract const type TThriftIf as " << long_name
              << (async ? "Async" : "") << "If;\n"
              << indent()
@@ -5643,7 +5647,7 @@ void t_hack_generator::generate_service_processor(
       generate_process_function(tservice, function, async);
     }
   }
-  generate_process_metadata_function(tservice, mangle, async);
+  generate_process_metadata_function(async);
 
   indent_down();
   f_service_ << "}\n";
@@ -5664,13 +5668,33 @@ void t_hack_generator::generate_service_processor(
   f_service_ << "\n";
 }
 
-void t_hack_generator::generate_process_metadata_function(
-    const t_service* tservice, bool mangle, bool async) {
+void t_hack_generator::generate_process_metadata_function(bool async) {
   // Open function
   indent(f_service_) << "protected" << (async ? " async" : "")
                      << " function process_getThriftServiceMetadata(int "
                         "$seqid, \\TProtocol $input, \\TProtocol $output): "
                      << (async ? "Awaitable<void>" : "void") << " {\n";
+  indent_up();
+
+  f_service_
+      << indent()
+      << "$this->process_getThriftServiceMetadataHelper($seqid, $input, $output);\n";
+
+  // Close function
+  indent_down();
+  f_service_ << indent() << "}\n";
+}
+
+void t_hack_generator::generate_get_thrift_metadata_trait(
+    const t_service* tservice, bool mangle) {
+  f_service_ << indent() << "trait " << php_servicename_mangle(mangle, tservice)
+             << "GetThriftServiceMetadata {\n";
+
+  indent_up();
+  // Open function
+  indent(f_service_)
+      << "private function process_getThriftServiceMetadataHelper(int $seqid, "
+         "\\TProtocol $input, \\TProtocol $output): void {\n";
   indent_up();
 
   std::string function_name = "getThriftServiceMetadata";
@@ -5742,6 +5766,9 @@ void t_hack_generator::generate_process_metadata_function(
   scope_down(f_service_);
 
   // Close function
+  indent_down();
+  f_service_ << indent() << "}\n";
+
   indent_down();
   f_service_ << indent() << "}\n";
 }

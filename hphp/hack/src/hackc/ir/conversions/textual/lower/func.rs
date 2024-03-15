@@ -150,7 +150,7 @@ fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
             ir::Property {
                 name,
                 flags,
-                initial_value: Some(initial_value),
+                initial_value: ir::Maybe::Just(initial_value),
                 ..
             } if !flags.is_static() => {
                 let vid = builder.emit_imm(initial_value.clone().into());
@@ -195,7 +195,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
         let vid = match prop {
             ir::Property {
                 name,
-                initial_value: Some(TypedValue::Uninit),
+                initial_value: ir::Maybe::Just(TypedValue::Uninit),
                 ..
             } if is_const => {
                 // This is a "complex" constant - we need to call 86cinit to get
@@ -206,7 +206,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
             }
             ir::Property {
-                initial_value: None,
+                initial_value: ir::Maybe::Nothing,
                 ..
             } if is_const => {
                 // This is an abstract constant - its value will be overwritten
@@ -214,7 +214,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
                 continue;
             }
             ir::Property {
-                initial_value: Some(initial_value),
+                initial_value: ir::Maybe::Just(initial_value),
                 ..
             } => {
                 // Either a normal property or non-complex constant.

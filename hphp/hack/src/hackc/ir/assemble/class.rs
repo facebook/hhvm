@@ -182,9 +182,9 @@ impl ClassParser {
         let prop = Property {
             name,
             flags,
-            attributes,
-            doc_comment: doc_comment.into(),
-            initial_value,
+            attributes: attributes.into(),
+            doc_comment: doc_comment.map(|s| s.into()).into(),
+            initial_value: initial_value.into(),
             type_info,
             visibility,
         };

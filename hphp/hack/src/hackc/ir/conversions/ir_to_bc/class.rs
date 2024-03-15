@@ -57,7 +57,7 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         implements: implements.into(),
         methods: methods.into(),
         name,
-        properties: Vec::from_iter(properties.into_iter().map(convert_property)).into(),
+        properties: properties.into(),
         requirements: requirements.into(),
         span: src_loc.to_span(),
         type_constants: type_constants.into(),
@@ -65,16 +65,4 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         uses: uses.into(),
     };
     unit.classes.push(class);
-}
-
-fn convert_property(src: ir::Property) -> hhbc::Property {
-    hhbc::Property {
-        name: src.name,
-        flags: src.flags,
-        attributes: src.attributes.into(),
-        visibility: src.visibility,
-        initial_value: src.initial_value.into(),
-        type_info: types::convert(&src.type_info).unwrap(),
-        doc_comment: src.doc_comment.map(|c| c.into()),
-    }
 }

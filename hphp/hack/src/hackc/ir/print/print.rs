@@ -16,7 +16,6 @@ use std::fmt::Error;
 use std::fmt::Result;
 use std::fmt::Write;
 
-use ir_core::class::Property;
 use ir_core::instr::BaseOp;
 use ir_core::instr::FinalOp;
 use ir_core::instr::HasLoc;
@@ -27,7 +26,6 @@ use ir_core::instr::MemberKey;
 use ir_core::instr::Special;
 use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
-use ir_core::SymbolRefs;
 use ir_core::*;
 
 use crate::formatters::*;
@@ -1844,10 +1842,10 @@ fn print_property(w: &mut dyn Write, property: &Property) -> Result {
         }),
         vis = FmtVisibility(property.visibility),
         ty = FmtTypeInfo(&property.type_info),
-        doc = FmtDocComment(property.doc_comment.as_ref().into()),
+        doc = FmtDocComment(property.doc_comment.as_ref().map(|s| s.as_ref()).into()),
     )?;
 
-    if let Some(iv) = property.initial_value.as_ref() {
+    if let Some(iv) = property.initial_value.as_ref().into_option() {
         write!(w, " = {}", FmtTypedValue(iv))?;
     }
 

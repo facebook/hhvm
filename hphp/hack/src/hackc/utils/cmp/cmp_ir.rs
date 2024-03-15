@@ -1319,8 +1319,8 @@ fn cmp_property(a: &Property, b: &Property) -> Result {
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_option(
-        a_initial_value.as_ref(),
-        b_initial_value.as_ref(),
+        a_initial_value.as_ref().into(),
+        b_initial_value.as_ref().into(),
         cmp_typed_value,
     )
     .qualified("initial_value")?;
@@ -1587,12 +1587,6 @@ mod mapping {
     }
 
     impl MapName for &Method {
-        fn get_name(&self) -> String {
-            self.name.into_string()
-        }
-    }
-
-    impl MapName for &Property {
         fn get_name(&self) -> String {
             self.name.into_string()
         }

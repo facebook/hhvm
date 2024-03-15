@@ -82,6 +82,7 @@ pub use hhbc::ModuleName;
 pub use hhbc::OODeclExistsOp;
 pub use hhbc::ObjMethodOp;
 pub use hhbc::PropName;
+pub use hhbc::Property;
 pub use hhbc::QueryMOp;
 pub use hhbc::ReadonlyOp;
 pub use hhbc::Requirement;
@@ -109,7 +110,6 @@ pub use naming_special_names_rust::coeffects::Ctx;
 
 pub use self::block::Block;
 pub use self::class::Class;
-pub use self::class::Property;
 pub use self::func::ExFrameId;
 pub use self::func::Filename;
 pub use self::func::Func;

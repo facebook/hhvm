@@ -10,13 +10,12 @@ use crate::Constant;
 use crate::CtxConstant;
 use crate::Method;
 use crate::PropName;
+use crate::Property;
 use crate::Requirement;
 use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeConstant;
 use crate::TypeInfo;
-use crate::TypedValue;
-use crate::Visibility;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
@@ -72,15 +71,4 @@ impl Class {
     pub fn is_trait(&self) -> bool {
         (self.flags & Attr::AttrTrait) == Attr::AttrTrait
     }
-}
-
-#[derive(Clone, Debug)]
-pub struct Property {
-    pub name: PropName,
-    pub flags: Attr,
-    pub attributes: Vec<Attribute>,
-    pub visibility: Visibility,
-    pub initial_value: Option<TypedValue>,
-    pub type_info: TypeInfo,
-    pub doc_comment: ffi::Maybe<Vec<u8>>,
 }

@@ -118,10 +118,10 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             Property {
                 name,
                 flags: Attr::AttrNone,
-                attributes: Vec::default(),
                 visibility: Visibility::Private,
-                initial_value: None,
                 type_info: TypeInfo::default(),
+                attributes: Default::default(),
+                initial_value: Default::default(),
                 doc_comment: Default::default(),
             },
         );
@@ -166,7 +166,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         let prop = Property {
             name: PropName::new(name.as_string_id()),
             flags: attrs | Attr::AttrStatic,
-            attributes,
+            attributes: attributes.into(),
             visibility: Visibility::Public,
             initial_value: value.into(),
             type_info,
@@ -208,7 +208,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         let prop = Property {
             name: PropName::new(name),
             flags: Attr::AttrStatic,
-            attributes,
+            attributes: attributes.into(),
             visibility: Visibility::Public,
             initial_value: initializer.into(),
             type_info,

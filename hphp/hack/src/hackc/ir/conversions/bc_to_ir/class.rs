@@ -16,13 +16,6 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         })
         .collect_vec();
 
-    let properties = cls
-        .properties
-        .as_ref()
-        .iter()
-        .map(convert_property)
-        .collect_vec();
-
     unit.classes.push(ir::Class {
         attributes: cls.attributes.clone().into(),
         base: cls.base.into(),
@@ -35,23 +28,11 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         implements: cls.implements.clone().into(),
         methods: Default::default(),
         name: cls.name,
-        properties,
+        properties: cls.properties.clone().into(),
         requirements: cls.requirements.clone().into(),
         src_loc: ir::SrcLoc::from_span(&cls.span),
         type_constants: cls.type_constants.clone().into(),
         upper_bounds,
         uses: cls.uses.clone().into(),
     });
-}
-
-fn convert_property(prop: &hhbc::Property) -> ir::Property {
-    ir::Property {
-        name: prop.name,
-        flags: prop.flags,
-        attributes: prop.attributes.clone().into(),
-        visibility: prop.visibility,
-        initial_value: prop.initial_value.clone().into(),
-        type_info: prop.type_info.clone(),
-        doc_comment: prop.doc_comment.clone().map(|c| c.into()),
-    }
 }

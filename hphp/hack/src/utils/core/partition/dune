@@ -1,0 +1,3 @@
+(library
+ (name partition)
+ (wrapped false))

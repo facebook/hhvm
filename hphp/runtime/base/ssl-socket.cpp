@@ -522,23 +522,11 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     return false;
 #endif
 
-  /* SSLv2 protocol might be disabled in the OpenSSL library */
-#ifndef OPENSSL_NO_SSL2
-  case CryptoMethod::ClientSSLv2:
-    m_data->m_client = true;
-    smethod = SSLv2_client_method();
-    break;
-  case CryptoMethod::ServerSSLv2:
-    m_data->m_client = false;
-    smethod = SSLv2_server_method();
-    break;
-#else
   case CryptoMethod::ClientSSLv2:
   case CryptoMethod::ServerSSLv2:
     raise_warning("OpenSSL library does not support SSL2 protocol");
     return false;
   break;
-#endif
 
   case CryptoMethod::ServerTLS:
     m_data->m_client = false;

@@ -9,10 +9,12 @@
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 
-type classish_body_offsets = {
-  classish_start_offset: int;
-  classish_end_offset: int;
+type 'pos classish_information = {
+  classish_start: 'pos;
+  classish_end: 'pos;
 }
+
+type classish_body_offsets = int classish_information
 
 let classish_body_braces_offsets s : classish_body_offsets option =
   let open Syntax in
@@ -24,15 +26,15 @@ let classish_body_braces_offsets s : classish_body_offsets option =
   match s.syntax with
   | ClassishBody cb ->
     let open Option.Let_syntax in
-    let* classish_start_offset =
+    let* classish_start =
       brace_to_offset cb.classish_body_left_brace @@ fun ~offset ~width ->
       offset + width
     in
-    let* classish_end_offset =
+    let* classish_end =
       brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width:_ ->
       offset
     in
-    Some { classish_start_offset; classish_end_offset }
+    Some { classish_start; classish_end }
   | _ -> None
 
 let namespace_name (s : Syntax.t) : string option =
@@ -99,16 +101,15 @@ let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
 let classish_information
     (s : Syntax.t)
     (source_text : Full_fidelity_source_text.t)
-    (filename : Relative_path.t) : Quickfix.classish_information SMap.t =
+    (filename : Relative_path.t) : Pos.t classish_information SMap.t =
   let offsets = classish_start_offsets s in
   let to_pos offset =
     Full_fidelity_source_text.relative_pos filename source_text offset offset
   in
   SMap.map
-    (fun { classish_start_offset; classish_end_offset } ->
-      Quickfix.
-        {
-          classish_start = to_pos classish_start_offset;
-          classish_end = to_pos classish_end_offset;
-        })
+    (fun { classish_start; classish_end } ->
+      {
+        classish_start = to_pos classish_start;
+        classish_end = to_pos classish_end;
+      })
     offsets

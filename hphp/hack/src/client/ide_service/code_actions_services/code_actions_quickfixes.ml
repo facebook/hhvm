@@ -8,14 +8,26 @@
 open Hh_prelude
 
 let text_edits
-    (classish_information : Quickfix.classish_information SMap.t)
+    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
     (quickfix : Pos.t Quickfix.t) : Code_action_types.edit list =
-  let edits = Quickfix.get_edits ~classish_information quickfix in
-  List.map edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
+  let edits = Quickfix.get_edits quickfix in
+  List.bind edits ~f:(function
+      | Quickfix.Eager eager_edits ->
+        List.map eager_edits ~f:(fun (text, pos) ->
+            Code_action_types.{ pos; text })
+      | Quickfix.Classish_end { classish_end_new_text; classish_end_name } ->
+        let pos =
+          match SMap.find_opt classish_end_name classish_information with
+          | Some Quickfix_ffp.{ classish_end; _ } -> classish_end
+          | None ->
+            (* TODO: return an empty list here and log invariant_violation_bug instead of using nonsense value *)
+            Pos.none
+        in
+        [Code_action_types.{ pos; text = classish_end_new_text }])
 
 let convert_quickfix
     path
-    (classish_information : Quickfix.classish_information SMap.t)
+    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
     (quickfix : Pos.t Quickfix.t) : Code_action_types.quickfix =
   let edits =
     lazy
@@ -32,7 +44,7 @@ let errors_to_quickfixes
     (entry : Provider_context.entry)
     (errors : Errors.t)
     (path : Relative_path.t)
-    (classish_information : Quickfix.classish_information SMap.t)
+    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
     (selection : Pos.t) : Code_action_types.quickfix list =
   let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =

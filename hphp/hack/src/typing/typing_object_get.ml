@@ -123,7 +123,7 @@ let smember_not_found
     let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
     let quickfixes =
       Option.value_map hint ~default:[] ~f:(fun (_, _, new_text) ->
-          [Quickfix.make ~title:("Change to ::" ^ new_text) ~new_text pos])
+          [Quickfix.make_eager ~title:("Change to ::" ^ new_text) ~new_text pos])
     in
     Typing_error.(
       apply ~on_error

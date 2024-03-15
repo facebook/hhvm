@@ -7,12 +7,18 @@
  *)
 open Hh_prelude
 
+type t = {
+  title: string;
+  text: string;
+  name: string;
+}
+
 let stub_method_action
     ~(is_static : bool)
-    (class_name : string)
+    (name : string)
     (parent_name : string)
-    ((meth_name, meth) : string * Typing_defs.class_elt) : Pos.t Quickfix.t =
-  let new_text =
+    ((meth_name, meth) : string * Typing_defs.class_elt) : t =
+  let text =
     Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth ^ "\n"
   in
   let title =
@@ -21,13 +27,12 @@ let stub_method_action
       (Utils.strip_ns parent_name)
       meth_name
   in
-  Quickfix.make_classish_start ~title ~new_text ~classish_name:class_name
+  { title; text; name }
 
 (* Return a list of quickfixes for [cls] which add a method that
    overrides one in [parent_name]. *)
 let override_method_quickfixes
-    (env : Tast_env.env) (cls : Tast.class_) (parent_name : string) :
-    Pos.t Quickfix.t list =
+    (env : Tast_env.env) (cls : Tast.class_) (parent_name : string) : t list =
   let (_, class_name) = cls.Aast.c_name in
   let existing_methods =
     SSet.of_list (List.map cls.Aast.c_methods ~f:(fun m -> snd m.Aast.m_name))
@@ -81,15 +86,23 @@ let override_method_refactorings_at ~start_line ~start_col =
   end
 
 let to_edits
-    (classish_information : Quickfix.classish_information SMap.t)
-    (quickfix : Pos.t Quickfix.t) : Code_action_types.edit list =
-  let edits = Quickfix.get_edits ~classish_information quickfix in
-  List.map edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
+    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
+    (quickfix : t) : Code_action_types.edit list =
+  let pos =
+    match SMap.find_opt quickfix.name classish_information with
+    | Some Quickfix_ffp.{ classish_start; _ } -> classish_start
+    | None ->
+      (* TODO: probably better to return an empty list of edits here
+         but I'm preserving the existing behavior of using Pos.none
+      *)
+      Pos.none
+  in
+  [Code_action_types.{ pos; text = quickfix.text }]
 
 let refactor_action
     path
-    (classish_information : Quickfix.classish_information SMap.t)
-    (quickfix : Pos.t Quickfix.t) : Code_action_types.refactor =
+    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
+    (quickfix : t) : Code_action_types.refactor =
   let edits =
     lazy
       (Relative_path.Map.singleton
@@ -97,8 +110,7 @@ let refactor_action
          (to_edits classish_information quickfix))
   in
 
-  Code_action_types.
-    { title = Quickfix.get_title quickfix; edits; kind = `Refactor }
+  Code_action_types.{ title = quickfix.title; edits; kind = `Refactor }
 
 let find ~entry pos ctx =
   let (start_line, start_col) = Pos.line_column pos in

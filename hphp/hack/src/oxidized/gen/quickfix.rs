@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<73425c2d1f576088ca2bef80da07970d>>
+// @generated SignedSource<<79cfb34adb153b677b066cfc0532ea8c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,56 +33,19 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "classish_")]
-#[repr(C)]
-pub struct ClassishInformation {
-    pub start: pos::Pos,
-    pub end: pos::Pos,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
-pub enum QfPos<Pos> {
-    Qpos(Pos),
-    #[rust_to_ocaml(name = "Qclassish_start")]
-    QclassishStart(String),
-    #[rust_to_ocaml(name = "Qclassish_end")]
-    QclassishEnd(String),
+pub enum Edits<Pos> {
+    Eager(Vec<(String, Pos)>),
+    /// A quickfix might want to add things to an empty class declaration,
+    /// which requires FFP to compute the { position.
+    #[rust_to_ocaml(prefix = "classish_end_")]
+    #[rust_to_ocaml(name = "Classish_end")]
+    ClassishEnd {
+        new_text: String,
+        name: String,
+    },
 }
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
-#[repr(C)]
-pub struct Edit<Pos>(pub String, pub QfPos<Pos>);
 
 #[derive(
     Clone,
@@ -103,5 +66,5 @@ pub struct Edit<Pos>(pub String, pub QfPos<Pos>);
 #[repr(C)]
 pub struct Quickfix<Pos> {
     pub title: String,
-    pub edits: Vec<Edit<Pos>>,
+    pub edits: Vec<Edits<Pos>>,
 }

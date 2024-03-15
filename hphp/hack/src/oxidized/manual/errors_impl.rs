@@ -8,8 +8,7 @@ use std::cmp::Ordering;
 use crate::errors::*;
 use crate::message::Message;
 use crate::pos::Pos;
-use crate::quickfix::Edit;
-use crate::quickfix::QfPos;
+use crate::quickfix::Edits;
 use crate::quickfix::Quickfix;
 use crate::user_error::UserError;
 use crate::user_error_flags::UserErrorFlags;
@@ -146,7 +145,7 @@ impl Naming {
             vec![],
             vec![Quickfix {
                 title: format!("Change to `{}`", correct_name),
-                edits: vec![Edit(correct_name.into(), QfPos::Qpos(p))],
+                edits: vec![Edits::Eager(vec![(correct_name.into(), p)])],
             }],
             Default::default(),
         )
@@ -170,15 +169,15 @@ impl Naming {
             vec![
                 Quickfix {
                     title: "Add `private` modifier".into(),
-                    edits: vec![Edit("private ".into(), QfPos::Qpos(fix_pos.clone()))],
+                    edits: vec![Edits::Eager(vec![("private ".into(), fix_pos.clone())])],
                 },
                 Quickfix {
                     title: "Add `protected` modifier".into(),
-                    edits: vec![Edit("protected ".into(), QfPos::Qpos(fix_pos.clone()))],
+                    edits: vec![Edits::Eager(vec![("protected ".into(), fix_pos.clone())])],
                 },
                 Quickfix {
                     title: "Add `public` modifier".into(),
-                    edits: vec![Edit("public ".into(), QfPos::Qpos(fix_pos))],
+                    edits: vec![Edits::Eager(vec![("public ".into(), (fix_pos.clone()))])],
                 },
             ],
             Default::default(),

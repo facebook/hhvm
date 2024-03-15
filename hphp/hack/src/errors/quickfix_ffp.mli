@@ -5,9 +5,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+type 'pos classish_information = {
+  classish_start: 'pos;
+  classish_end: 'pos;
+}
 
 val classish_information :
   Full_fidelity_positioned_syntax.t ->
   Full_fidelity_source_text.t ->
   Relative_path.t ->
-  Quickfix.classish_information SMap.t
+  Pos.t classish_information SMap.t

@@ -130,11 +130,15 @@ let process_syntax_errors
       List.map e.Full_fidelity_syntax_error.quickfixes ~f:(fun qf ->
           let { Full_fidelity_syntax_error.title; edits } = qf in
           let edits =
-            List.map edits ~f:(fun (start_offset, end_offset, new_text) ->
-                (new_text, pos_of_offsets start_offset end_offset))
+            [
+              Quickfix.Eager
+                (List.map edits ~f:(fun (start_offset, end_offset, new_text) ->
+                     (new_text, pos_of_offsets start_offset end_offset)));
+            ]
           in
-          Quickfix.make_with_edits ~title ~edits)
+          Quickfix.make ~title ~edits)
     in
+
     Errors.add_error
       Parsing_error.(
         to_user_error

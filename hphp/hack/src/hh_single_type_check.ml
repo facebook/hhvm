@@ -698,7 +698,7 @@ let parse_options () =
         " Show the hover information indicated by // ^ hover-at-caret" );
       ( "--fix",
         Arg.Unit (fun () -> set_mode Apply_quickfixes ()),
-        " Apply quickfixes for all the errors in the file, and print the resulting code."
+        " Apply quickfixes for all the errors in the file, and print the resulting code. Prefer --ide-code-actions, which tests more."
       );
       ( "--require-extends-implements-ancestors",
         Arg.Set require_extends_implements_ancestors,
@@ -1650,6 +1650,83 @@ let codemod
   invalidate_heaps_and_update_files files_info files_contents;
   decl_parse_typecheck_and_then files_contents ignore
 
+(** Enables testing of eager quickfixes (Quickfix.Eager).
+  Prefer using `--ide-code-actions` for more realistic tests that don't care about eagerness *)
+module Eager_quickfix_test_util : sig
+  (** corresponds to a Quickfix.Eager *)
+  type t
+
+  (** convert `Quickfix.Eager` to a `Some t`, otherwise `None *)
+  val of_quickfix : Pos.t Quickfix.t -> t option
+
+  (** For testing, with `--fix`, apply all eager quickfixes by replacing/inserting the new text in [src].
+      These tests aren't very realistic, better to use the tests driven by --ide-code-actions
+      this is useful for testing quickfixes. **)
+  val apply_all : src:string -> t list -> string
+end = struct
+  type edit = string * Pos.t
+
+  type t = {
+    _title: string;
+    edits: edit list;
+  }
+
+  let of_quickfix (qf : Pos.t Quickfix.t) : t option =
+    Quickfix.get_edits qf
+    |> List.fold ~init:(Some []) ~f:(fun acc_opt edits_cons ->
+           match (acc_opt, edits_cons) with
+           | (Some acc, Quickfix.Eager eager_edits) -> Some (acc @ eager_edits)
+           | (_, _) -> None)
+    |> Option.map ~f:(fun eager_edits ->
+           { _title = Quickfix.get_title qf; edits = eager_edits })
+
+  (* Sort [quickfixes] with their edit positions in descending
+     order. This allows us to iteratively apply the quickfixes without
+     messing up positions earlier in the file.*)
+  let sort_for_application (quickfixes : t list) : t list =
+    let first_qf_offset (quickfix : t) : int =
+      let pos =
+        match List.hd quickfix.edits with
+        | Some (_, pos) -> pos
+        | _ -> Pos.none
+      in
+      snd (Pos.info_raw pos)
+    in
+    let compare x y = Int.compare (first_qf_offset x) (first_qf_offset y) in
+    List.rev (List.sort ~compare quickfixes)
+
+  let sort_edits_for_application (edits : edit list) : edit list =
+    let offset (_, pos) = snd (Pos.info_raw pos) in
+    let compare x y = Int.compare (offset x) (offset y) in
+    List.rev (List.sort ~compare edits)
+
+  (* Apply [edit] to [src], replacing the text at the position specified. *)
+  let apply_edit (src : string) (edit : edit) : string =
+    let (new_text, pos) = edit in
+    if Pos.equal pos Pos.none then
+      failwith
+        (Printf.sprintf
+           "tried to apply quickfix edit with invalid pos 'Pos.none' and text '%s'"
+           new_text)
+    else
+      let (start_offset, end_offset) = Pos.info_raw pos in
+      let src_before = String.subo src ~len:start_offset in
+      let src_after = String.subo src ~pos:end_offset in
+      src_before ^ new_text ^ src_after
+
+  let apply_quickfix (src : string) (eager_quickfix : t) : string =
+    List.fold
+      (sort_edits_for_application eager_quickfix.edits)
+      ~init:src
+      ~f:apply_edit
+
+  let apply_all ~(src : string) (eager_quickfixes : t list) : string =
+    List.fold
+      (sort_for_application eager_quickfixes)
+      ~init:src
+      ~f:apply_quickfix
+end
+
 let handle_mode
     mode
     filenames
@@ -2175,7 +2252,7 @@ let handle_mode
       (String.concat ~sep:"\n-------------\n" formatted_results)
   | Apply_quickfixes ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let (ctx, _entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let (errors, _) =
       compute_tasts ~drop_fixmed:false ctx files_info files_contents
     in
@@ -2189,27 +2266,26 @@ let handle_mode
       |> List.filter_opt
     in
 
-    let cst = Ast_provider.compute_cst ~ctx ~entry in
-    let tree = Provider_context.PositionedSyntaxTree.root cst in
-
-    let classish_information =
-      match entry.Provider_context.source_text with
-      | Some source_text ->
-        Quickfix_ffp.classish_information
-          tree
-          source_text
-          entry.Provider_context.path
-      | None -> SMap.empty
-    in
-
     (* Print the title of each quickfix, so we can see text changes in tests. *)
     List.iter quickfixes ~f:(fun qf ->
         Printf.printf "%s\n" (Quickfix.get_title qf));
 
+    let (eagers, rejected_titles) =
+      List.partition_map quickfixes ~f:(fun qf ->
+          match Eager_quickfix_test_util.of_quickfix qf with
+          | Some eager_qf -> Either.First eager_qf
+          | None -> Either.Second (Quickfix.get_title qf))
+    in
+    begin
+      if not (List.is_empty rejected_titles) then
+        Printf.printf
+          "The following quickfixes could not be applied with --fix.\n%s\n%s"
+          (String.concat ~sep:"\n" rejected_titles)
+          " Use hh_single_type_check --ide-code-actions to handle non-eager quickfixes"
+    end;
+
     (* Print the source code after applying all these quickfixes. *)
-    Printf.printf
-      "\n%s"
-      (Quickfix.apply_all src classish_information quickfixes)
+    Printf.printf "\n%s" (Eager_quickfix_test_util.apply_all ~src eagers)
   | CountImpreciseTypes ->
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents

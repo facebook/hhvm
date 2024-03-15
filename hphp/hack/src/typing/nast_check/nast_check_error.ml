@@ -376,7 +376,7 @@ let await_in_sync_function pos func_pos =
       let fix_pos = Pos.set_col_end (start_col - 9) fix_pos in
       let fix_pos = Pos.set_col_start (start_col - 9) fix_pos in
       [
-        Quickfix.make
+        Quickfix.make_eager
           ~title:("Make function " ^ Markdown_lite.md_codify "async")
           ~new_text:"async "
           fix_pos;
@@ -551,7 +551,7 @@ let case_fallthrough switch_pos case_pos next_pos =
       in
 
       [
-        Quickfix.make
+        Quickfix.make_eager
           ~title:"Mark this `case` as explicitly falling through"
           ~new_text
           new_pos;

@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include <boost/lexical_cast.hpp>
+#include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_enum.h>
@@ -42,7 +42,7 @@ std::unique_ptr<t_function> create_fake_function(
   std::size_t index = 0;
   for (auto& arg : signature::args_types()) {
     args->append(std::make_unique<t_field>(
-        arg.release(), "arg_" + boost::lexical_cast<std::string>(index++)));
+        arg.release(), fmt::format("arg_{}", index++)));
   }
 
   return std::make_unique<t_function>(

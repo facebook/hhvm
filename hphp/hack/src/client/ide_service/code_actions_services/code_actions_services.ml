@@ -99,13 +99,13 @@ let find
     let path = entry.Provider_context.path in
     Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
   in
-  let quickfixes = Quickfixes.find ~entry pos ctx in
+  let quickfixes = Code_actions_quickfixes.find ~entry pos ctx in
   let lsp_quickfixes = List.map quickfixes ~f:to_action in
   let quickfix_titles =
     SSet.of_list @@ List.map quickfixes ~f:(fun q -> q.Code_action_types.title)
   in
   let lsp_refactors =
-    Refactors.find ~entry pos ctx
+    Code_actions_refactors.find ~entry pos ctx
     (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
     |> List.filter ~f:(fun Code_action_types.{ title; _ } ->
            not (SSet.mem title quickfix_titles))

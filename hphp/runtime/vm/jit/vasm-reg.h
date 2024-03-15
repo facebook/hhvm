@@ -322,10 +322,12 @@ public:
         return;
       }
 
-      auto const next = blocks[blockIdx].next(bit % kBitsPerBlock);
-      if (next < kBitsPerBlock) {
-        bit = blockIdx * kBitsPerBlock + next;
-        return;
+      {
+        auto const next = blocks[blockIdx].next(bit % kBitsPerBlock);
+        if (next < kBitsPerBlock) {
+          bit = blockIdx * kBitsPerBlock + next;
+          return;
+        }
       }
 
       ++blockIdx;

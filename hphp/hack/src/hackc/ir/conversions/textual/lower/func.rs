@@ -100,9 +100,9 @@ fn add_reified_parameter(func: &mut Func) {
         is_readonly: false,
         user_attributes: Default::default(),
         ty: ir::TypeInfo {
-            user_type: None,
+            user_type: None.into(),
             type_constraint: ir::Constraint {
-                name: Some(ir::intern(ir::types::BUILTIN_NAME_VEC)).into(),
+                name: Some(ir::intern(hhbc::BUILTIN_NAME_VEC)).into(),
                 flags: ir::TypeConstraintFlags::NoFlags,
             },
         },

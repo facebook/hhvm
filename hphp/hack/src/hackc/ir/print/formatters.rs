@@ -788,7 +788,7 @@ impl<'a> Display for FmtTypeInfo<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtTypeInfo(ti) = self;
         write!(f, "<")?;
-        if let Some(id) = ti.user_type {
+        if let Some(id) = ti.user_type.into_option() {
             FmtQuotedStringId(id.as_bytes()).fmt(f)?;
         } else {
             f.write_str("N")?;

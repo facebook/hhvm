@@ -4987,6 +4987,7 @@ dependencies = [
  "bstr",
  "escaper",
  "hash",
+ "hhbc",
  "hhbc_string_utils",
  "ir",
  "itertools 0.11.0",

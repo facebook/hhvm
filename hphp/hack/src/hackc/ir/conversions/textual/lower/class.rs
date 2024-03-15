@@ -175,7 +175,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         class.properties.push(prop);
     }
 
-    let dict_constraint_name = Some(ir::intern(ir::types::BUILTIN_NAME_DICT));
+    let dict_constraint_name = Some(ir::intern(hhbc::BUILTIN_NAME_DICT));
     for tc in class.type_constants.drain(..) {
         let TypeConstant {
             name,
@@ -199,7 +199,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             modifiers = modifiers | TypeConstraintFlags::Nullable;
         }
         let type_info = TypeInfo {
-            user_type: None,
+            user_type: None.into(),
             type_constraint: Constraint {
                 name: dict_constraint_name.into(),
                 flags: modifiers,

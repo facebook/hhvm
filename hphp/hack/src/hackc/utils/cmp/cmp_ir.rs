@@ -1426,7 +1426,7 @@ fn cmp_type_info(a: &TypeInfo, b: &TypeInfo) -> Result {
         type_constraint: b_type_constraint,
     } = b;
 
-    cmp_option(*a_user_type, *b_user_type, cmp_eq).qualified("user_type")?;
+    cmp_option(a_user_type.into(), b_user_type.into(), cmp_eq).qualified("user_type")?;
     cmp_eq(a_type_constraint, b_type_constraint).qualified("type_constraint")?;
     Ok(())
 }

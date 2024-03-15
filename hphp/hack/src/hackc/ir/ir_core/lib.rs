@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![feature(const_option)]
-
 //! # The HackC IR
 //!
 //! This is an IR representation of the Hack code.
@@ -98,6 +96,7 @@ pub use hhbc::SwitchKind;
 pub use hhbc::SymbolRefs;
 pub use hhbc::TraitReqKind;
 pub use hhbc::TypeConstant;
+pub use hhbc::TypeInfo;
 pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;
 pub use hhbc::TypedValue;
@@ -144,6 +143,5 @@ pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;
-pub use self::types::TypeInfo;
 pub use self::types::Typedef;
 pub use self::unit::Unit;

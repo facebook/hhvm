@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![feature(box_patterns)]
+#![feature(const_option)]
 
 mod adata;
 mod attribute;

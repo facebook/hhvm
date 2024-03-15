@@ -671,7 +671,7 @@ pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo>
     };
 
     Ok(TypeInfo {
-        user_type,
+        user_type: user_type.into(),
         type_constraint: Constraint {
             name: name.into(),
             flags,

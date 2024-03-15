@@ -16,6 +16,7 @@ ascii = "1.0"
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
+hhbc = { version = "0.0.0", path = "../../../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../../../utils/cargo/hhbc_string_utils" }
 ir = { version = "0.0.0", path = "../../../.." }
 itertools = "0.11.0"

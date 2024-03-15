@@ -6,22 +6,12 @@
 use hhbc::Class;
 use itertools::Itertools;
 
-use crate::types;
-
 pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
-    let enum_type = cls
-        .enum_type
-        .as_ref()
-        .map(types::convert_type)
-        .into_option();
-
     let upper_bounds = cls
         .upper_bounds
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
-            let tys = (bounds.as_ref().iter())
-                .map(types::convert_type)
-                .collect_vec();
+            let tys = bounds.clone().into();
             (*name, tys)
         })
         .collect_vec();
@@ -40,7 +30,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         ctx_constants: cls.ctx_constants.clone().into(),
         doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
         enum_includes: cls.enum_includes.clone().into(),
-        enum_type,
+        enum_type: cls.enum_type.clone().into(),
         flags: cls.flags,
         implements: cls.implements.clone().into(),
         methods: Default::default(),
@@ -61,7 +51,7 @@ fn convert_property(prop: &hhbc::Property) -> ir::Property {
         attributes: prop.attributes.clone().into(),
         visibility: prop.visibility,
         initial_value: prop.initial_value.clone().into(),
-        type_info: types::convert_type(&prop.type_info),
+        type_info: prop.type_info.clone(),
         doc_comment: prop.doc_comment.clone().map(|c| c.into()),
     }
 }

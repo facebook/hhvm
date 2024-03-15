@@ -18,15 +18,12 @@
 #include "thrift/compiler/ast/t_program.h"
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <queue>
 #include <stdexcept>
 
 #include <openssl/sha.h>
-
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <fmt/core.h>
 

@@ -28,7 +28,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_typedef.h>

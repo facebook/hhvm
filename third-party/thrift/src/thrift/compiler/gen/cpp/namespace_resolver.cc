@@ -17,7 +17,6 @@
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 namespace apache {
 namespace thrift {

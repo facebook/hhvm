@@ -63,7 +63,7 @@ TEST(MstchObjectTest, callAtForExistingMethodShouldReturnCorrectValue) {
       "method1", std::bind(&test_mstch_object::method1, &object));
 
   auto variantVal = object.at("method1");
-  EXPECT_TRUE(boost::get<bool>(variantVal));
+  EXPECT_TRUE(std::get<bool>(variantVal));
 }
 
 TEST(MstchObjectTest, registerNonExistingMethodShouldSetIt) {
@@ -74,7 +74,7 @@ TEST(MstchObjectTest, registerNonExistingMethodShouldSetIt) {
   EXPECT_TRUE(object.has("method2"));
   EXPECT_FALSE(object.has("method1"));
   auto variantVal = object.at("method2");
-  EXPECT_EQ(boost::get<std::string>(variantVal), "test");
+  EXPECT_EQ(std::get<std::string>(variantVal), "test");
 }
 
 TEST(MstchObjectTest, registerExistingMethodShouldThrowRuntimeException) {
@@ -91,5 +91,5 @@ TEST(MstchObjectTest, registerExistingMethodShouldThrowRuntimeException) {
 
   EXPECT_TRUE(object.has("method1"));
   auto variantVal = object.at("method1");
-  EXPECT_TRUE(boost::get<bool>(variantVal));
+  EXPECT_TRUE(std::get<bool>(variantVal));
 }

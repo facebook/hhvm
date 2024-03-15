@@ -29,7 +29,6 @@ SOFTWARE.
 #pragma once
 
 #include <sstream>
-#include <boost/variant/static_visitor.hpp>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/detail/mustache/render_context.h>
@@ -39,7 +38,7 @@ namespace apache {
 namespace thrift {
 namespace mstch {
 
-class render_node : public boost::static_visitor<std::string> {
+class render_node {
  public:
   render_node(render_context& ctx) : m_ctx(ctx) {}
 
@@ -64,7 +63,7 @@ class render_node : public boost::static_visitor<std::string> {
 
   std::string operator()(const lambda& value) const {
     template_type interpreted{
-        value([this](const node& n) { return visit(render_node(m_ctx), n); })};
+        value([this](const node& n) { return n.visit(render_node(m_ctx)); })};
     return render_context::push(m_ctx).render(interpreted);
   }
 

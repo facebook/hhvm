@@ -29,7 +29,6 @@ SOFTWARE.
 #pragma once
 
 #include <string>
-#include <utility>
 
 namespace apache {
 namespace thrift {
@@ -41,11 +40,6 @@ using criter = std::string::const_reverse_iterator;
 citer first_not_ws(citer begin, citer end);
 citer first_not_ws(criter begin, criter end);
 criter reverse(citer it);
-
-template <typename Visitor, typename Variant>
-decltype(auto) visit(Visitor&& visitor, Variant&& variant) {
-  return variant.apply_visitor(visitor);
-}
 
 } // namespace mstch
 } // namespace thrift

@@ -44,7 +44,7 @@ std::string outside_section::render(render_context& ctx, const token& token) {
       ctx.set_state<in_section>(in_section::type::inverted, token);
       break;
     case token::type::variable:
-      return visit(render_node(ctx), ctx.get_node(token.name()));
+      return ctx.get_node(token.name()).visit(render_node(ctx));
     case token::type::text:
       return token.raw();
     case token::type::partial:

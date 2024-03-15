@@ -28,15 +28,13 @@ SOFTWARE.
 */
 #pragma once
 
-#include <boost/variant/static_visitor.hpp>
-
 #include <thrift/compiler/detail/mustache/mstch.h>
 
 namespace apache {
 namespace thrift {
 namespace mstch {
 
-class has_token : public boost::static_visitor<bool> {
+class has_token {
  public:
   has_token(const std::string& token) : m_token(token) {}
 

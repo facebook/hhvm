@@ -473,7 +473,7 @@ class cpp_mstch_program : public mstch_program {
       }
     }
     if (!a.empty()) {
-      boost::get<mstch::map>(a.back())["last?"] = true;
+      std::get<mstch::map>(a.back())["last?"] = true;
     }
     return mstch::map{{"fatal_languages:items", a}};
   }
@@ -1080,7 +1080,7 @@ class cpp_mstch_type : public mstch_type {
         {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
   }
   mstch::node cpp_use_allocator() {
-    return t_typedef::get_first_annotation_or_null(
+    return !!t_typedef::get_first_annotation_or_null(
         type_, {"cpp.use_allocator"});
   }
   mstch::node is_non_empty_struct() {
@@ -1514,7 +1514,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node scoped_enum_as_union_type() {
-    return struct_->find_structured_annotation_or_null(
+    return !!struct_->find_structured_annotation_or_null(
         kCppScopedEnumAsUnionTypeUri);
   }
 
@@ -2288,7 +2288,7 @@ class cpp_mstch_const_value : public mstch_const_value {
 
  private:
   mstch::node default_construct() {
-    return boost::get<bool>(is_empty_container()) &&
+    return std::get<bool>(is_empty_container()) &&
         !gen::cpp::type_resolver::find_first_adapter(
                *const_value_->get_owner()->type());
   }
@@ -2592,8 +2592,8 @@ mstch::array t_mstch_cpp2_generator::get_namespace_array(
     a.push_back(m);
   }
   for (auto itr = a.begin(); itr != a.end(); ++itr) {
-    boost::get<mstch::map>(*itr).emplace("first?", itr == a.begin());
-    boost::get<mstch::map>(*itr).emplace("last?", std::next(itr) == a.end());
+    std::get<mstch::map>(*itr).emplace("first?", itr == a.begin());
+    std::get<mstch::map>(*itr).emplace("last?", std::next(itr) == a.end());
   }
   return a;
 }

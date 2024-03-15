@@ -28,8 +28,6 @@ SOFTWARE.
 */
 #pragma once
 
-#include <boost/variant/static_visitor.hpp>
-
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/detail/mustache/render_context.h>
 #include <thrift/compiler/detail/mustache/utils.h>
@@ -39,7 +37,7 @@ namespace apache {
 namespace thrift {
 namespace mstch {
 
-class render_section : public boost::static_visitor<std::string> {
+class render_section {
  public:
   enum class flag { none, keep_array };
   render_section(
@@ -59,7 +57,7 @@ class render_section : public boost::static_visitor<std::string> {
     for (auto& token : m_section)
       section_str += token.raw();
     template_type interpreted{
-        fun([this](const node& n) { return visit(render_node(m_ctx), n); },
+        fun([this](const node& n) { return n.visit(render_node(m_ctx)); },
             section_str),
         m_delims};
     return render_context::push(m_ctx).render(interpreted);
@@ -71,8 +69,8 @@ class render_section : public boost::static_visitor<std::string> {
       return render_context::push(m_ctx, array).render(m_section);
     else
       for (auto& item : array)
-        out += visit(
-            render_section(m_ctx, m_section, m_delims, flag::keep_array), item);
+        out += item.visit(
+            render_section(m_ctx, m_section, m_delims, flag::keep_array));
     return out;
   }
 

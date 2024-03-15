@@ -522,7 +522,7 @@ mstch::node structured_annotations_node(
 
   // Note, duplicate annotations are not allowed per the Thrift spec.
   for (const t_const& annotation : named.structured_annotations()) {
-    auto direct_annotation = std::make_shared<mstch_rust_value>(
+    auto direct_annotation = mstch::make_shared_node<mstch_rust_value>(
         annotation.value(), annotation.type(), depth, context, pos, options);
 
     mstch::node transitive;

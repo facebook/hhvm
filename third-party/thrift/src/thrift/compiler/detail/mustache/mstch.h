@@ -34,9 +34,8 @@ SOFTWARE.
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
-
-#include <boost/variant.hpp>
 
 namespace apache {
 namespace thrift {
@@ -130,7 +129,7 @@ class lambda_t {
 };
 
 template <typename Node>
-using node_base = boost::variant<
+using node_base = std::variant<
     std::nullptr_t,
     std::string,
     int,
@@ -144,10 +143,25 @@ using node_base = boost::variant<
 } // namespace internal
 
 struct node : internal::node_base<node> {
-  using internal::node_base<node>::node_base;
-  /* implicit */ node(std::string_view sv)
-      : internal::node_base<node>(std::string(sv)) {}
+  using base = internal::node_base<node>;
+
+  using base::base;
+  /* implicit */ node(std::string_view sv) : base(std::string(sv)) {}
+
+  template <typename... Visitor>
+  decltype(auto) visit(Visitor&&... visitor) {
+    return std::visit(visitor..., static_cast<base&>(*this));
+  }
+  template <typename... Visitor>
+  decltype(auto) visit(Visitor&&... visitor) const {
+    return std::visit(visitor..., static_cast<const base&>(*this));
+  }
 };
+
+template <typename Node, typename... A>
+node make_shared_node(A&&... a) {
+  return node(std::make_shared<Node>(static_cast<A&&>(a)...));
+}
 
 using object = internal::object_t<node>;
 using lambda = internal::lambda_t<node>;

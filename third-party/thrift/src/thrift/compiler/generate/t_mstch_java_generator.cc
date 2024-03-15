@@ -897,7 +897,7 @@ class mstch_java_field : public mstch_field {
       // default values are ignored for optional fields
       return false;
     }
-    return field_->get_value();
+    return !!field_->get_value();
   }
   mstch::node get_nested_depth() { return nestedDepth; }
   mstch::node preceding_nested_depth() { return (nestedDepth - 1); }
@@ -1045,7 +1045,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_field_name_unmangled() {
-    return field_->find_structured_annotation_or_null(
+    return !!field_->find_structured_annotation_or_null(
         kJavaFieldUseUnmangledNameUri);
   }
 };

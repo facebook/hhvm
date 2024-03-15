@@ -122,7 +122,7 @@ mstch::node adapter_node(
   };
   if (is_transitive) {
     node["adapter:transitive_annotation"] =
-        std::make_shared<python_mstch_const_value>(
+        mstch::make_shared_node<python_mstch_const_value>(
             transitive_adapter_annotation->value(),
             context,
             pos,
@@ -986,7 +986,7 @@ class python_mstch_const : public mstch_const {
   }
 
   mstch::node transitive_adapter_annotation() {
-    return std::make_shared<python_mstch_const_value>(
+    return mstch::make_shared_node<python_mstch_const_value>(
         transitive_adapter_annotation_->value(),
         context_,
         pos_,

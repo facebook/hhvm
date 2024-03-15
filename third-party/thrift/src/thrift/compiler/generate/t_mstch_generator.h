@@ -196,8 +196,8 @@ class t_mstch_generator : public t_generator {
 
   void add_first_last(mstch::array& elems) {
     for (auto itr = elems.begin(); itr != elems.end(); ++itr) {
-      boost::get<mstch::map>(*itr).emplace("first?", itr == elems.begin());
-      boost::get<mstch::map>(*itr).emplace(
+      std::get<mstch::map>(*itr).emplace("first?", itr == elems.begin());
+      std::get<mstch::map>(*itr).emplace(
           "last?", std::next(itr) == elems.end());
     }
   }

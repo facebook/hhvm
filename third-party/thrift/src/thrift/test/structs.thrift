@@ -66,7 +66,7 @@ struct HasSmallSortedVector {
   @cpp.Type{template = "SmallSortedVectorSet"}
   1: set<i32> set_field;
   @cpp.Type{template = "SmallSortedVectorMap"}
-  2: i32_map map_field;
+  2: map<i32, i32> map_field;
 }
 
 struct NoexceptMoveStruct {
@@ -106,5 +106,3 @@ struct NotEligibleForConstexpr {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: optional i32 swap;
 }
-
-typedef map<i32, i32> i32_map

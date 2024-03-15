@@ -202,13 +202,13 @@ int32_t iteratorType(const IterTypeData& data) {
   auto const nextHelperIndex = [&]{
     using S = IterSpecialization;
     if (data.type.bespoke) {
-      if (!data.type.base_const) return IterNextIndex::Array;
+      if (!data.baseConst) return IterNextIndex::Array;
       if (data.layout.is_struct()) return IterNextIndex::StructDict;
       return IterNextIndex::Array;
     }
     switch (data.type.base_type) {
       case S::Vec: {
-        auto is_ptr_iter = data.type.base_const
+        auto is_ptr_iter = data.baseConst
                         && !data.outputKey
                         && VanillaVec::stores_unaligned_typed_values;
         return is_ptr_iter
@@ -216,7 +216,7 @@ int32_t iteratorType(const IterTypeData& data) {
           : IterNextIndex::VanillaVec;
       }
       case S::Dict: {
-        return data.type.base_const
+        return data.baseConst
           ? IterNextIndex::ArrayMixedPointer
           : IterNextIndex::ArrayMixed;
       }

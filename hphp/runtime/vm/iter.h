@@ -80,13 +80,11 @@ struct IterSpecialization {
       uint8_t key_types: 2;
 
       // When we JIT a specialized iterator, we set `specialized` to true,
-      // We set `base_const` if we know the base is const during iteration.
       bool specialized: 1;
-      bool base_const: 1;
       bool bespoke: 1;
 
-      // 2 free bits. Maybe we'll need a 2-bit enum for the layout?
-      bool padding: 2;
+      // 3 free bits. Maybe we'll need a 2-bit enum for the layout?
+      bool padding: 3;
     };
   };
 };

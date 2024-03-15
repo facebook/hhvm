@@ -286,10 +286,13 @@ struct Accessor {
 };
 
 struct VecAccessor : public Accessor {
-  explicit VecAccessor(IterSpecialization specialization, bool outputKey) {
-    is_ptr_iter = specialization.base_const
-               && !outputKey
-               && VanillaVec::stores_unaligned_typed_values;
+  explicit VecAccessor(
+    IterSpecialization specialization,
+    bool baseConst,
+    bool outputKey
+  ) {
+    is_ptr_iter =
+      baseConst && !outputKey && VanillaVec::stores_unaligned_typed_values;
     arr_type = getArrType(specialization);
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
@@ -341,8 +344,8 @@ struct VecAccessor : public Accessor {
 };
 
 struct MixedAccessor : public Accessor {
-  explicit MixedAccessor(IterSpecialization specialization) {
-    is_ptr_iter = specialization.base_const;
+  explicit MixedAccessor(IterSpecialization specialization, bool baseConst) {
+    is_ptr_iter = baseConst;
     arr_type = getArrType(specialization);
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
@@ -433,16 +436,21 @@ struct BespokeAccessor : public Accessor {
 };
 
 std::unique_ptr<Accessor> getAccessor(
-    IterSpecialization type, ArrayLayout layout, bool outputKey) {
+    IterSpecialization type,
+    ArrayLayout layout,
+    const IterArgs& data,
+    bool local
+) {
   if (!layout.vanilla()) {
     return std::make_unique<BespokeAccessor>(type, layout);
   }
+  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
   switch (type.base_type) {
     case IterSpecialization::Vec: {
-      return std::make_unique<VecAccessor>(type, outputKey);
+      return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
     }
     case IterSpecialization::Dict: {
-      return std::make_unique<MixedAccessor>(type);
+      return std::make_unique<MixedAccessor>(type, baseConst);
     }
   }
   always_assert(false);
@@ -596,8 +604,9 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
+  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
   auto const ty = IterTypeData(
-      data.iterId, accessor.iter_type, accessor.layout, data.hasKey());
+    data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, StIterBase, id, fp(env), local ? cns(env, nullptr) : arr);
   gen(env, StIterType, ty, fp(env));
   gen(env, StIterEnd,  id, fp(env), accessor.getPos(env, arr, size));
@@ -645,14 +654,15 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* footer,
                          uint32_t baseLocalId) {
   auto const exit = makeExitSlow(env);
+  auto const local = baseLocalId != kInvalidId;
+  auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
   auto const type = IterTypeData(
-      data.iterId, accessor.iter_type, accessor.layout, data.hasKey());
+    data.iterId, accessor.iter_type, accessor.layout, baseConst, data.hasKey());
   gen(env, CheckIter, exit, type, fp(env));
 
   // For LocalBaseMutable iterators specialized on bespoke array-like bases,
   // we unfortunately need to check the layout again at each IterNext.
-  auto const local = baseLocalId != kInvalidId;
-  if (local && !type.type.base_const && type.type.bespoke) {
+  if (!baseConst && type.type.bespoke) {
     auto const dt = accessor.arr_type.unspecialize();
     gen(env, AssertLoc, dt, LocalId(baseLocalId), fp(env));
     auto const base = gen(env, LdLoc, dt, LocalId(baseLocalId), fp(env));
@@ -735,7 +745,6 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // However, we still need to call accessor.check to rule out tombstones.
   auto result = getProfileResult(env, base);
   auto& iter_type = result.top_specialization;
-  iter_type.base_const = !local || (data.flags & IterArgs::Flags::BaseConst);
 
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
@@ -747,7 +756,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     return sl.sideExit ? sl.layouts[0].layout : ArrayLayout::Top();
   }();
   iter_type.bespoke = layout.bespoke();
-  auto const accessor = getAccessor(iter_type, layout, data.hasKey());
+  auto const accessor = getAccessor(iter_type, layout, data, local);
 
   // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
@@ -810,7 +819,7 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   auto const iter = env.iters[body].get();
   if (!iter->iter_type.specialized) return false;
   auto const accessor =
-    getAccessor(iter->iter_type, iter->layout, data.hasKey());
+    getAccessor(iter->iter_type, iter->layout, data, local);
   if (baseLocalId != kInvalidId) {
     auto const type = env.irb->fs().local(baseLocalId).type;
     if (!type.maybe(accessor->arr_type)) return false;

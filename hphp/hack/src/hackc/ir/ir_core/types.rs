@@ -8,14 +8,10 @@ use std::sync::OnceLock;
 
 use maplit::hashmap;
 
-use crate::Attr;
-use crate::Attribute;
 use crate::ClassName;
-use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeConstraintFlags;
 use crate::TypeInfo;
-use crate::TypedValue;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BaseType {
@@ -207,17 +203,6 @@ fn cvt_constraint_type(name: StringId) -> BaseType {
         .get(name.as_str())
         .copied()
         .unwrap_or_else(|| BaseType::Class(ClassName::new(name)))
-}
-
-#[derive(Clone, Debug)]
-pub struct Typedef {
-    pub name: ClassName,
-    pub attributes: Vec<Attribute>,
-    pub type_info_union: Vec<TypeInfo>,
-    pub type_structure: TypedValue,
-    pub loc: SrcLoc,
-    pub attrs: Attr,
-    pub case_type: bool,
 }
 
 #[cfg(test)]

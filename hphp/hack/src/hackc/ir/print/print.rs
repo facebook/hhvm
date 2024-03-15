@@ -609,6 +609,15 @@ fn print_top_level_loc(w: &mut dyn Write, src_loc: Option<&SrcLoc>) -> Result {
     Ok(())
 }
 
+fn print_top_level_span(w: &mut dyn Write, span: Option<&Span>) -> Result {
+    if let Some(span) = span {
+        writeln!(w, ".srcloc {}", FmtFullLoc(&SrcLoc::from_span(span)))?;
+    } else {
+        writeln!(w, ".srcloc none")?;
+    }
+    Ok(())
+}
+
 fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
     print_top_level_loc(w, f.func.get_loc(f.func.loc_id))?;
     writeln!(
@@ -2072,14 +2081,14 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef) -> Result {
     let Typedef {
         attributes,
         attrs,
-        loc,
+        span,
         name,
         type_info_union,
         type_structure,
         case_type,
     } = typedef;
 
-    print_top_level_loc(w, Some(loc))?;
+    print_top_level_span(w, Some(span))?;
 
     writeln!(
         w,
@@ -2111,8 +2120,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
                 imports: _,
                 exports: _,
             } = module;
-            let src_loc = SrcLoc::from_span(span);
-            print_top_level_loc(w, Some(&src_loc))?;
+            print_top_level_span(w, Some(span))?;
             write!(
                 w,
                 "module {name} [{attributes}] ",

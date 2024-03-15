@@ -25,16 +25,9 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
     let unit_state = UnitState { adata_lookup };
 
     let constants = unit.constants.clone().into();
-
     let file_attributes = unit.file_attributes.clone().into();
-
     let modules: Vec<ir::Module> = unit.modules.clone().into();
-
-    let typedefs: Vec<_> = unit
-        .typedefs
-        .iter()
-        .map(crate::types::convert_typedef)
-        .collect();
+    let typedefs: Vec<_> = unit.typedefs.clone().into();
 
     let mut ir_unit = ir::Unit {
         classes: Default::default(),

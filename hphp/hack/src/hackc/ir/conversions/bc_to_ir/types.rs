@@ -11,27 +11,3 @@ pub(crate) fn convert_maybe_type(ty: Maybe<&hhbc::TypeInfo>) -> ir::TypeInfo {
         Maybe::Nothing => ir::TypeInfo::empty(),
     }
 }
-
-pub(crate) fn convert_typedef(td: &hhbc::Typedef) -> ir::Typedef {
-    let hhbc::Typedef {
-        name,
-        attributes,
-        type_info_union,
-        type_structure,
-        span,
-        attrs,
-        case_type,
-    } = td;
-
-    let loc = ir::SrcLoc::from_span(span);
-
-    ir::Typedef {
-        name: *name,
-        attributes: attributes.clone().into(),
-        type_info_union: type_info_union.clone().into(),
-        type_structure: type_structure.clone(),
-        loc,
-        attrs: *attrs,
-        case_type: *case_type,
-    }
-}

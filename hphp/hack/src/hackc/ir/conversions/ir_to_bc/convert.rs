@@ -25,12 +25,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
     let mut unit = unit.finish();
 
     unit.file_attributes = ir_unit.file_attributes.into();
-    unit.typedefs = ir_unit
-        .typedefs
-        .into_iter()
-        .map(crate::types::convert_typedef)
-        .collect::<Vec<_>>()
-        .into();
+    unit.typedefs = ir_unit.typedefs.into();
     unit.constants = ir_unit.constants.into();
     unit.modules = ir_unit.modules.into();
     unit.module_use = ir_unit.module_use.into();

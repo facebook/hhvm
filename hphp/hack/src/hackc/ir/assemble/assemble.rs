@@ -254,11 +254,11 @@ impl UnitParser {
         let loc = self.get_cur_src_loc();
 
         self.unit.typedefs.push(Typedef {
-            attributes,
+            attributes: attributes.into(),
             attrs,
-            loc,
+            span: loc.to_span(),
             name,
-            type_info_union,
+            type_info_union: type_info_union.into(),
             type_structure,
             case_type: &vis.0 == b"case_type",
         });

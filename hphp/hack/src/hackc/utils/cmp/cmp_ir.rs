@@ -1489,7 +1489,7 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
         attributes: a_attributes,
         type_info_union: a_type_info_union,
         type_structure: a_type_structure,
-        loc: a_loc,
+        span: a_span,
         attrs: a_attrs,
         case_type: a_case_type,
     } = a;
@@ -1498,7 +1498,7 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
         attributes: b_attributes,
         type_info_union: b_type_info_union,
         type_structure: b_type_structure,
-        loc: b_loc,
+        span: b_span,
         attrs: b_attrs,
         case_type: b_case_type,
     } = b;
@@ -1510,7 +1510,7 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
         cmp_type_info,
     )?;
     cmp_typed_value(a_type_structure, b_type_structure).qualified("type_structure")?;
-    cmp_src_loc(a_loc, b_loc).qualified("loc")?;
+    cmp_span(a_span, b_span).qualified("span")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     cmp_eq(a_case_type, b_case_type).qualified("case_type")?;
     Ok(())
@@ -1601,12 +1601,6 @@ mod mapping {
     impl MapName for (&ClassName, &TParamBounds) {
         fn get_name(&self) -> String {
             self.0.as_str().to_owned()
-        }
-    }
-
-    impl MapName for &Typedef {
-        fn get_name(&self) -> String {
-            self.name.as_str().to_owned()
         }
     }
 }

@@ -37,9 +37,7 @@ pub(crate) fn convert_ty(ty: &EnforceableType) -> textual::Ty {
 
     if modifiers != TypeConstraintFlags::NoFlags {
         textual_todo! {
-            message = ("MODIFIERS: {modifiers:?}\n{}",
-                       ir::print::FmtEnforceableType(ty)
-            ),
+            message = ("MODIFIERS: {modifiers:?}\n{:?}", ty),
             base = textual::Ty::Type(TypeName::UnmangledRef("TODO_NoFlags"));
         }
     }

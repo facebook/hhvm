@@ -60,6 +60,7 @@ pub use hhbc::Coeffects;
 pub use hhbc::CollectionType;
 pub use hhbc::ConstName;
 pub use hhbc::Constant;
+pub use hhbc::Constraint;
 pub use hhbc::ContCheckOp;
 pub use hhbc::CtxConstant;
 pub use hhbc::DictEntry;

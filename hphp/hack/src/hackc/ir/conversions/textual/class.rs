@@ -227,7 +227,7 @@ impl ClassState<'_, '_> {
             }
         }
 
-        let ty = convert_ty(&type_info.enforced);
+        let ty = convert_ty(&ir::EnforceableType::from_type_info(type_info));
 
         fields.push(textual::Field {
             name,

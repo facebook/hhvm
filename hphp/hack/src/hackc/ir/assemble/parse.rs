@@ -11,7 +11,6 @@ use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
 use ir_core::Attribute;
 use ir_core::BareThisOp;
-use ir_core::BaseType;
 use ir_core::BlockId;
 use ir_core::BytesId;
 use ir_core::ClassGetCMode;
@@ -19,8 +18,8 @@ use ir_core::ClassName;
 use ir_core::CollectionType;
 use ir_core::ConstName;
 use ir_core::Constant;
+use ir_core::Constraint;
 use ir_core::DictEntry;
-use ir_core::EnforceableType;
 use ir_core::FatalOp;
 use ir_core::FloatBits;
 use ir_core::FunctionName;
@@ -166,41 +165,6 @@ pub(crate) fn parse_attributes(
     } else {
         Ok(Vec::new())
     }
-}
-
-fn parse_base_type(tokenizer: &mut Tokenizer<'_>) -> Result<BaseType> {
-    let base_type = tokenizer.expect_any_identifier()?;
-    Ok(match base_type.identifier() {
-        "array" => BaseType::AnyArray,
-        "arraykey" => BaseType::Arraykey,
-        "bool" => BaseType::Bool,
-        "class" => BaseType::Class(parse_class_name(tokenizer)?),
-        "classname" => BaseType::Classname,
-        "darray" => BaseType::Darray,
-        "dict" => BaseType::Dict,
-        "float" => BaseType::Float,
-        "int" => BaseType::Int,
-        "keyset" => BaseType::Keyset,
-        "mixed" => BaseType::Mixed,
-        "none" => BaseType::None,
-        "nonnull" => BaseType::Nonnull,
-        "noreturn" => BaseType::Noreturn,
-        "nothing" => BaseType::Nothing,
-        "null" => BaseType::Null,
-        "num" => BaseType::Num,
-        "resource" => BaseType::Resource,
-        "string" => BaseType::String,
-        "this" => BaseType::This,
-        "typename" => BaseType::Typename,
-        "varray" => BaseType::Varray,
-        "varray_or_darray" => BaseType::VarrayOrDarray,
-        "vec" => BaseType::Vec,
-        "vec_or_dict" => BaseType::VecOrDict,
-        "void" => BaseType::Void,
-        s => {
-            return Err(base_type.bail(format!("BaseType expected but got '{}'", s)));
-        }
-    })
 }
 
 pub(crate) fn convert_bid(ident: &Token) -> Result<BlockId> {
@@ -684,7 +648,7 @@ pub(crate) fn parse_string_id(tokenizer: &mut Tokenizer<'_>) -> Result<BytesId> 
 }
 
 pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo> {
-    parse!(tokenizer, "<" <user_type:tok> <ty:parse_base_type> <modifiers:parse_type_constraint_flags> ">");
+    parse!(tokenizer, "<" <user_type:tok> <name:tok> <flags:parse_type_constraint_flags> ">");
 
     let user_type = if user_type.is_identifier("N") {
         None
@@ -696,9 +660,22 @@ pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo>
         )?))
     };
 
+    let name = if name.is_identifier("N") {
+        None
+    } else if !name.is_any_string() {
+        return Err(name.bail(format!("String expected but got '{name}'")));
+    } else {
+        Some(ir_core::intern(std::str::from_utf8(
+            &name.unescaped_string()?,
+        )?))
+    };
+
     Ok(TypeInfo {
         user_type,
-        enforced: EnforceableType { ty, modifiers },
+        type_constraint: Constraint {
+            name: name.into(),
+            flags,
+        },
     })
 }
 

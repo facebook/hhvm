@@ -452,7 +452,7 @@ impl LowerInstrs<'_> {
             .func
             .get_param_by_lid(lid)
             .expect("Unknown parameter in verify_out_type()");
-        let param_type = param.ty.enforced.clone();
+        let param_type = ir::EnforceableType::from_type_info(&param.ty);
         let pred = builder.emit_is(obj, &param_type, loc);
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
         Instr::copy(obj)
@@ -472,7 +472,7 @@ impl LowerInstrs<'_> {
     }
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder, obj: ValueId, loc: LocId) -> Instr {
-        let return_type = builder.func.return_type.enforced.clone();
+        let return_type = ir::EnforceableType::from_type_info(&builder.func.return_type);
         if return_type
             .modifiers
             .contains(ir::TypeConstraintFlags::TypeVar)

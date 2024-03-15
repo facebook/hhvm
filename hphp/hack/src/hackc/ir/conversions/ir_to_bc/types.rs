@@ -4,84 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use hhbc::Constraint;
 use hhbc::TypeInfo;
-use ir::BaseType;
-use ir::TypeConstraintFlags;
 
 fn convert_type(ty: &ir::TypeInfo) -> TypeInfo {
-    let mut user_type = ty.user_type;
-    let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
-        if user_type.is_none() {
-            let nullable = ty
-                .enforced
-                .modifiers
-                .contains(TypeConstraintFlags::Nullable);
-            let soft = ty.enforced.modifiers.contains(TypeConstraintFlags::Soft);
-            user_type = Some(if !nullable && !soft {
-                hhbc::intern(name)
-            } else {
-                let len = name.len() + nullable as usize + soft as usize;
-                let mut p = String::with_capacity(len);
-                if soft {
-                    p.push('@');
-                }
-                if nullable {
-                    p.push('?');
-                }
-                p.push_str(name);
-                hhbc::intern(p)
-            });
-        }
-        Some(hhbc::intern(name))
-    } else {
-        match ty.enforced.ty {
-            BaseType::Mixed | BaseType::Void => None,
-            BaseType::Class(name) => Some(name.as_string_id()),
-            _ => unreachable!(),
-        }
-    };
-
     TypeInfo {
-        user_type: user_type.into(),
-        type_constraint: Constraint {
-            name: name.into(),
-            flags: ty.enforced.modifiers,
-        },
+        user_type: ty.user_type.into(),
+        type_constraint: ty.type_constraint.clone(),
     }
 }
 
 fn convert_types(tis: &[ir::TypeInfo]) -> Vec<TypeInfo> {
     tis.iter().map(convert_type).collect()
-}
-
-fn base_type_string(ty: &ir::BaseType) -> Option<&'static str> {
-    match ty {
-        BaseType::Class(_) | BaseType::Mixed | BaseType::Void => None,
-        BaseType::None => Some(""),
-        BaseType::AnyArray => Some(ir::types::BUILTIN_NAME_ANY_ARRAY),
-        BaseType::Arraykey => Some(ir::types::BUILTIN_NAME_ARRAYKEY),
-        BaseType::Bool => Some(ir::types::BUILTIN_NAME_BOOL),
-        BaseType::Classname => Some(ir::types::BUILTIN_NAME_CLASSNAME),
-        BaseType::Darray => Some(ir::types::BUILTIN_NAME_DARRAY),
-        BaseType::Dict => Some(ir::types::BUILTIN_NAME_DICT),
-        BaseType::Float => Some(ir::types::BUILTIN_NAME_FLOAT),
-        BaseType::Int => Some(ir::types::BUILTIN_NAME_INT),
-        BaseType::Keyset => Some(ir::types::BUILTIN_NAME_KEYSET),
-        BaseType::Nonnull => Some(ir::types::BUILTIN_NAME_NONNULL),
-        BaseType::Noreturn => Some(ir::types::BUILTIN_NAME_NORETURN),
-        BaseType::Nothing => Some(ir::types::BUILTIN_NAME_NOTHING),
-        BaseType::Null => Some(ir::types::BUILTIN_NAME_NULL),
-        BaseType::Num => Some(ir::types::BUILTIN_NAME_NUM),
-        BaseType::Resource => Some(ir::types::BUILTIN_NAME_RESOURCE),
-        BaseType::String => Some(ir::types::BUILTIN_NAME_STRING),
-        BaseType::This => Some(ir::types::BUILTIN_NAME_THIS),
-        BaseType::Typename => Some(ir::types::BUILTIN_NAME_TYPENAME),
-        BaseType::Varray => Some(ir::types::BUILTIN_NAME_VARRAY),
-        BaseType::VarrayOrDarray => Some(ir::types::BUILTIN_NAME_VARRAY_OR_DARRAY),
-        BaseType::Vec => Some(ir::types::BUILTIN_NAME_VEC),
-        BaseType::VecOrDict => Some(ir::types::BUILTIN_NAME_VEC_OR_DICT),
-    }
 }
 
 pub(crate) fn convert(ty: &ir::TypeInfo) -> Maybe<TypeInfo> {

@@ -1419,67 +1419,16 @@ fn cmp_type_constant(a: &TypeConstant, b: &TypeConstant) -> Result {
 fn cmp_type_info(a: &TypeInfo, b: &TypeInfo) -> Result {
     let TypeInfo {
         user_type: a_user_type,
-        enforced: a_enforced,
+        type_constraint: a_type_constraint,
     } = a;
     let TypeInfo {
         user_type: b_user_type,
-        enforced: b_enforced,
+        type_constraint: b_type_constraint,
     } = b;
 
     cmp_option(*a_user_type, *b_user_type, cmp_eq).qualified("user_type")?;
-
-    let EnforceableType {
-        ty: a_ty,
-        modifiers: a_modifiers,
-    } = a_enforced;
-    let EnforceableType {
-        ty: b_ty,
-        modifiers: b_modifiers,
-    } = b_enforced;
-
-    cmp_base_ty(a_ty, b_ty)
-        .qualified("ty")
-        .qualified("enforced")?;
-    cmp_eq(a_modifiers, b_modifiers)
-        .qualified("modifiers")
-        .qualified("enforced")?;
+    cmp_eq(a_type_constraint, b_type_constraint).qualified("type_constraint")?;
     Ok(())
-}
-
-fn cmp_base_ty(a: &BaseType, b: &BaseType) -> Result {
-    cmp_eq(std::mem::discriminant(a), std::mem::discriminant(b))?;
-    match (a, b) {
-        (BaseType::Class(a), BaseType::Class(b)) => cmp_eq(a, b),
-
-        (BaseType::AnyArray, _)
-        | (BaseType::Arraykey, _)
-        | (BaseType::Bool, _)
-        | (BaseType::Classname, _)
-        | (BaseType::Darray, _)
-        | (BaseType::Dict, _)
-        | (BaseType::Float, _)
-        | (BaseType::Int, _)
-        | (BaseType::Keyset, _)
-        | (BaseType::Mixed, _)
-        | (BaseType::None, _)
-        | (BaseType::Nonnull, _)
-        | (BaseType::Noreturn, _)
-        | (BaseType::Nothing, _)
-        | (BaseType::Null, _)
-        | (BaseType::Num, _)
-        | (BaseType::Resource, _)
-        | (BaseType::String, _)
-        | (BaseType::This, _)
-        | (BaseType::Typename, _)
-        | (BaseType::Varray, _)
-        | (BaseType::VarrayOrDarray, _)
-        | (BaseType::Vec, _)
-        | (BaseType::VecOrDict, _)
-        | (BaseType::Void, _) => Ok(()),
-
-        // these should never happen
-        (BaseType::Class(_), _) => unreachable!(),
-    }
 }
 
 fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {

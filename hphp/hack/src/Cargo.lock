@@ -382,7 +382,6 @@ dependencies = [
  "ir",
  "itertools 0.11.0",
  "log",
- "maplit",
  "newtype",
 ]
 
@@ -2647,6 +2646,7 @@ dependencies = [
  "indexmap 2.1.0",
  "intern",
  "macros",
+ "maplit",
  "naming_special_names_rust",
  "newtype",
  "smallvec",

@@ -4,12 +4,16 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fmt;
+use std::sync::OnceLock;
 
+use ffi::Maybe;
+use maplit::hashmap;
 use naming_special_names_rust as naming_special_names;
 
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassName;
+use crate::Constraint;
 use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeConstraintFlags;
@@ -148,38 +152,40 @@ impl EnforceableType {
         }
     }
 
-    pub fn write(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Constraint { ty: ")?;
-        self.ty.write(f)?;
-        f.write_str(", modifiers: ")?;
-
-        if self.modifiers == TypeConstraintFlags::NoFlags {
-            f.write_str("none")?;
-        } else {
-            let mut sep = "";
-            let mut check = |flag: TypeConstraintFlags, s: &str| {
-                if self.modifiers.contains(flag) {
-                    write!(f, "{sep}{s}")?;
-                    sep = " | ";
-                }
-                Ok(())
-            };
-
-            check(TypeConstraintFlags::Nullable, "nullable")?;
-            check(TypeConstraintFlags::Nullable, "case_type")?;
-            check(TypeConstraintFlags::ExtendedHint, "extended_hint")?;
-            check(TypeConstraintFlags::TypeVar, "type_var")?;
-            check(TypeConstraintFlags::Soft, "soft")?;
-            check(TypeConstraintFlags::TypeConstant, "type_constant")?;
-            check(TypeConstraintFlags::Resolved, "resolved")?;
-            check(TypeConstraintFlags::DisplayNullable, "display_nullable")?;
-            check(TypeConstraintFlags::UpperBound, "upper_bound")?;
-        }
-        f.write_str(" }")
-    }
-
     pub fn is_this(&self) -> bool {
         self.ty.is_this()
+    }
+
+    pub fn from_type_info(ty: &TypeInfo) -> Self {
+        let user_type = ty.user_type;
+        let name = ty.type_constraint.name;
+        let constraint_ty = match name.into_option() {
+            // Checking for emptiness to filter out cases where the type constraint
+            // is not enforceable, (e.g. name = "", hint = type_const).
+            Some(name) if !name.is_empty() => cvt_constraint_type(name),
+            Some(_) => BaseType::None,
+            _ => user_type
+                .as_ref()
+                .and_then(|user_type| {
+                    use std::collections::HashMap;
+                    static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<&'static str, BaseType>> =
+                        OnceLock::new();
+                    let unconstrained_by_name = UNCONSTRAINED_BY_NAME.get_or_init(|| {
+                        hashmap! {
+                            BUILTIN_NAME_VOID => BaseType::Void,
+                            BUILTIN_NAME_SOFT_VOID => BaseType::Void,
+                        }
+                    });
+
+                    unconstrained_by_name.get(user_type.as_str()).cloned()
+                })
+                .unwrap_or(BaseType::Mixed),
+        };
+
+        Self {
+            ty: constraint_ty,
+            modifiers: ty.type_constraint.flags,
+        }
     }
 }
 
@@ -209,89 +215,98 @@ pub struct TypeInfo {
     /// chars (like '?').  If None then this is directly computable from the
     /// enforced type.
     pub user_type: Option<StringId>,
+
     /// The underlying type this TypeInfo is constrained as.
-    pub enforced: EnforceableType,
+    pub type_constraint: Constraint,
 }
 
 impl TypeInfo {
     pub fn empty() -> Self {
         Self {
             user_type: None,
-            enforced: EnforceableType::default(),
+            type_constraint: Constraint {
+                name: Maybe::Just(StringId::EMPTY),
+                flags: Default::default(),
+            },
         }
     }
 
     pub fn is_empty(&self) -> bool {
-        matches!(
-            self,
-            TypeInfo {
-                user_type: None,
-                enforced: EnforceableType {
-                    ty: BaseType::None,
-                    modifiers: TypeConstraintFlags::NoFlags
+        self.user_type.is_none()
+            && matches!(
+                self.type_constraint,
+                Constraint {
+                    name: Maybe::Just(StringId::EMPTY),
+                    flags: TypeConstraintFlags::NoFlags
                 }
-            }
-        )
-    }
-
-    pub fn write(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("TypeInfo { user_type: ")?;
-        if let Some(ut) = self.user_type {
-            write!(f, "\"{}\"", ut)?;
-        } else {
-            f.write_str("none")?;
-        }
-        f.write_str(", constraint: ")?;
-        self.enforced.write(f)?;
-        f.write_str("}")
-    }
-
-    pub fn display<'a>(&'a self) -> impl fmt::Display + 'a {
-        struct D<'a> {
-            self_: &'a TypeInfo,
-        }
-
-        impl fmt::Display for D<'_> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                self.self_.write(f)
-            }
-        }
-
-        D { self_: self }
+            )
     }
 
     pub fn from_typed_value(v: &TypedValue) -> Self {
-        match v {
-            TypedValue::Bool(_) => BaseType::Bool.into(),
-            TypedValue::Dict(_) => BaseType::Dict.into(),
-            TypedValue::Float(_) => BaseType::Float.into(),
-            TypedValue::Int(_) => BaseType::Int.into(),
-            TypedValue::Keyset(_) => BaseType::Keyset.into(),
-            TypedValue::LazyClass(_) => BaseType::String.into(),
-            TypedValue::Null => BaseType::Null.into(),
-            TypedValue::String(_) => BaseType::String.into(),
-            TypedValue::Uninit => TypeInfo::empty(),
-            TypedValue::Vec(_) => BaseType::Vec.into(),
+        let name = match v {
+            TypedValue::Bool(_) => BUILTIN_NAME_BOOL,
+            TypedValue::Dict(_) => BUILTIN_NAME_DICT,
+            TypedValue::Float(_) => BUILTIN_NAME_FLOAT,
+            TypedValue::Int(_) => BUILTIN_NAME_INT,
+            TypedValue::Keyset(_) => BUILTIN_NAME_KEYSET,
+            TypedValue::LazyClass(_) => BUILTIN_NAME_STRING, // XXX CLASSNAME?
+            TypedValue::Null => BUILTIN_NAME_NULL,
+            TypedValue::String(_) => BUILTIN_NAME_STRING,
+            TypedValue::Uninit => return TypeInfo::empty(),
+            TypedValue::Vec(_) => BUILTIN_NAME_VEC,
+        };
+        let name = crate::intern(name);
+        Self {
+            user_type: Some(name),
+            type_constraint: Constraint {
+                name: Maybe::Just(name),
+                flags: TypeConstraintFlags::NoFlags,
+            },
         }
+    }
+
+    pub fn is_reference_type(&self) -> bool {
+        matches!(
+            EnforceableType::from_type_info(self).ty,
+            BaseType::Class(_) | BaseType::This
+        )
     }
 }
 
-impl From<EnforceableType> for TypeInfo {
-    fn from(enforced: EnforceableType) -> TypeInfo {
-        TypeInfo {
-            user_type: None,
-            enforced,
+fn cvt_constraint_type(name: StringId) -> BaseType {
+    use std::collections::HashMap;
+    static CONSTRAINT_BY_NAME: OnceLock<HashMap<&'static str, BaseType>> = OnceLock::new();
+    let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
+        hashmap! {
+            BUILTIN_NAME_ANY_ARRAY => BaseType::AnyArray,
+            BUILTIN_NAME_ARRAYKEY => BaseType::Arraykey,
+            BUILTIN_NAME_BOOL => BaseType::Bool,
+            BUILTIN_NAME_CLASSNAME => BaseType::Classname,
+            BUILTIN_NAME_DARRAY => BaseType::Darray,
+            BUILTIN_NAME_DICT => BaseType::Dict,
+            BUILTIN_NAME_FLOAT => BaseType::Float,
+            BUILTIN_NAME_INT => BaseType::Int,
+            BUILTIN_NAME_KEYSET => BaseType::Keyset,
+            BUILTIN_NAME_NONNULL => BaseType::Nonnull,
+            BUILTIN_NAME_NORETURN => BaseType::Noreturn,
+            BUILTIN_NAME_NOTHING => BaseType::Nothing,
+            BUILTIN_NAME_NULL => BaseType::Null,
+            BUILTIN_NAME_NUM => BaseType::Num,
+            BUILTIN_NAME_RESOURCE => BaseType::Resource,
+            BUILTIN_NAME_STRING => BaseType::String,
+            BUILTIN_NAME_THIS => BaseType::This,
+            BUILTIN_NAME_TYPENAME => BaseType::Typename,
+            BUILTIN_NAME_VARRAY => BaseType::Varray,
+            BUILTIN_NAME_VARRAY_OR_DARRAY => BaseType::VarrayOrDarray,
+            BUILTIN_NAME_VEC => BaseType::Vec,
+            BUILTIN_NAME_VEC_OR_DICT => BaseType::VecOrDict,
         }
-    }
-}
+    });
 
-impl From<BaseType> for TypeInfo {
-    fn from(ty: BaseType) -> TypeInfo {
-        TypeInfo {
-            user_type: None,
-            enforced: ty.into(),
-        }
-    }
+    constraint_by_name
+        .get(name.as_str())
+        .copied()
+        .unwrap_or_else(|| BaseType::Class(ClassName::new(name)))
 }
 
 #[derive(Clone, Debug)]
@@ -303,4 +318,17 @@ pub struct Typedef {
     pub loc: SrcLoc,
     pub attrs: Attr,
     pub case_type: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ti_default() {
+        assert_eq!(
+            EnforceableType::default(),
+            EnforceableType::from_type_info(&TypeInfo::empty()),
+        );
+    }
 }

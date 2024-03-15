@@ -118,15 +118,15 @@ fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) 
         add_attr(attr, format!(".const_type=\"{}\"", type_const))
     }
 
-    if ty.enforced.is_this() {
+    let enforced = ir::EnforceableType::from_type_info(ty);
+    if enforced.is_this() {
         add_attr(attr, ".this")
     }
-    let is_typevar = ty
-        .enforced
+    let is_typevar = enforced
         .modifiers
         .contains(ir::TypeConstraintFlags::TypeVar);
     if is_typevar {
-        let name = match ty.enforced.ty {
+        let name = match enforced.ty {
             ir::BaseType::Class(cid) => TypeName::Class(cid),
             _ => unreachable!(),
         };
@@ -134,7 +134,7 @@ fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) 
         add_attr(attr, text);
         textual::Ty::mixed_ptr()
     } else {
-        convert_ty(&ty.enforced)
+        convert_ty(&enforced)
     }
 }
 

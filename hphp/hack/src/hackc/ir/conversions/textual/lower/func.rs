@@ -101,9 +101,9 @@ fn add_reified_parameter(func: &mut Func) {
         user_attributes: Default::default(),
         ty: ir::TypeInfo {
             user_type: None,
-            enforced: ir::EnforceableType {
-                ty: ir::BaseType::Vec,
-                modifiers: ir::TypeConstraintFlags::NoFlags,
+            type_constraint: ir::Constraint {
+                name: Some(ir::intern(ir::types::BUILTIN_NAME_VEC)).into(),
+                flags: ir::TypeConstraintFlags::NoFlags,
             },
         },
         default_value: None,

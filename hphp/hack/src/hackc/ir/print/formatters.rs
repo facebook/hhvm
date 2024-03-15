@@ -782,14 +782,6 @@ impl Display for FmtVisibility {
     }
 }
 
-pub struct FmtEnforceableType<'a>(pub &'a EnforceableType);
-
-impl<'a> Display for FmtEnforceableType<'a> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        self.0.write(f)
-    }
-}
-
 pub(crate) struct FmtTypeInfo<'a>(pub &'a TypeInfo);
 
 impl<'a> Display for FmtTypeInfo<'a> {
@@ -803,37 +795,15 @@ impl<'a> Display for FmtTypeInfo<'a> {
         }
         f.write_str(" ")?;
 
-        match ti.enforced.ty {
-            BaseType::AnyArray => f.write_str("array")?,
-            BaseType::Arraykey => f.write_str("arraykey")?,
-            BaseType::Bool => f.write_str("bool")?,
-            BaseType::Class(cid) => write!(f, "class {}", FmtIdentifierId(cid.as_bytes_id()))?,
-            BaseType::Classname => f.write_str("classname")?,
-            BaseType::Darray => f.write_str("darray")?,
-            BaseType::Dict => f.write_str("dict")?,
-            BaseType::Float => f.write_str("float")?,
-            BaseType::Int => f.write_str("int")?,
-            BaseType::Keyset => f.write_str("keyset")?,
-            BaseType::Mixed => f.write_str("mixed")?,
-            BaseType::None => f.write_str("none")?,
-            BaseType::Nonnull => f.write_str("nonnull")?,
-            BaseType::Noreturn => f.write_str("noreturn")?,
-            BaseType::Nothing => f.write_str("nothing")?,
-            BaseType::Null => f.write_str("null")?,
-            BaseType::Num => f.write_str("num")?,
-            BaseType::Resource => f.write_str("resource")?,
-            BaseType::String => f.write_str("string")?,
-            BaseType::This => f.write_str("this")?,
-            BaseType::Typename => f.write_str("typename")?,
-            BaseType::Varray => f.write_str("varray")?,
-            BaseType::VarrayOrDarray => f.write_str("varray_or_darray")?,
-            BaseType::Vec => f.write_str("vec")?,
-            BaseType::VecOrDict => f.write_str("vec_or_dict")?,
-            BaseType::Void => f.write_str("void")?,
+        if let Some(id) = ti.type_constraint.name.into_option() {
+            FmtQuotedStringId(id.as_bytes()).fmt(f)?;
+        } else {
+            f.write_str("N")?;
         }
+        f.write_str(" ")?;
 
         use TypeConstraintFlags as TCF;
-        let mut mods = ti.enforced.modifiers;
+        let mut mods = ti.type_constraint.flags;
         [
             get_bit(&mut mods, TCF::DisplayNullable, "display_nullable"),
             get_bit(&mut mods, TCF::ExtendedHint, "extended"),
@@ -847,7 +817,7 @@ impl<'a> Display for FmtTypeInfo<'a> {
         .into_iter()
         .flatten()
         .try_for_each(|s| write!(f, " {s}"))?;
-        assert!(mods == TCF::NoFlags, "MOD: {:?}", ti.enforced.modifiers);
+        assert!(mods == TCF::NoFlags, "MOD: {:?}", ti.type_constraint.flags);
 
         write!(f, ">")?;
 

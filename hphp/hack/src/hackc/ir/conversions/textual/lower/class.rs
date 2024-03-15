@@ -1,13 +1,11 @@
 use bstr::ByteSlice;
 use ir::instr;
-// use ir::print::print;
 use ir::Attr;
 use ir::Attribute;
-use ir::BaseType;
 use ir::Class;
 use ir::ClassName;
 use ir::Constant;
-use ir::EnforceableType;
+use ir::Constraint;
 use ir::FuncBuilder;
 use ir::Immediate;
 use ir::Instr;
@@ -177,6 +175,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         class.properties.push(prop);
     }
 
+    let dict_constraint_name = Some(ir::intern(ir::types::BUILTIN_NAME_DICT));
     for tc in class.type_constants.drain(..) {
         let TypeConstant {
             name,
@@ -201,9 +200,9 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
         }
         let type_info = TypeInfo {
             user_type: None,
-            enforced: EnforceableType {
-                ty: BaseType::Dict,
-                modifiers,
+            type_constraint: Constraint {
+                name: dict_constraint_name.into(),
+                flags: modifiers,
             },
         };
         let prop = Property {

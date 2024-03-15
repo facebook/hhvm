@@ -6565,60 +6565,35 @@ end = struct
                   @@ Secondary.Typing_too_many_args
                        { pos; decl_pos; expected; actual })))
 
-  let simplify
+  let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ sub_supportdyn; ty_sub = ety_sub }
-      ~rhs:
-        ({
-           reason_super = r_super;
-           destructure = { d_required; d_optional; d_variadic; d_kind };
-         } as rhs)
+      ~rhs:({ reason_super = r_super; destructure } as rhs)
       env =
-    let cty_super =
-      mk_constraint_type
-        (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind })
-    in
-    let ety_super = ConstraintType cty_super in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ety_sub }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = ety_super;
-            }
-          env)
-    in
-    let invalid_env_with env f = invalid ~fail:f env in
-
     begin
+      let (env, ety_sub) = Env.expand_internal_type env ety_sub in
       match ety_sub with
-      | ConstraintType _ -> default_subtype_help env
+      | ConstraintType _ -> invalid ~fail env
       | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (r, Ttuple tyl) ->
+        (match (deref ty_sub, destructure.d_kind) with
+        | ((r, Ttuple tyl), _) ->
           destructure_tuple
             ~subtype_env
             ~this_ty
             (sub_supportdyn, r, tyl)
             rhs
             env
-        | (r, Tclass ((_, x), _, tyl)) when String.equal x SN.Collections.cPair
-          ->
+        | ((r, Tclass ((_, x), _, tyl)), _)
+          when String.equal x SN.Collections.cPair ->
           destructure_tuple
             ~subtype_env
             ~this_ty
             (sub_supportdyn, r, tyl)
             rhs
             env
-        | (_, Tclass ((_, x), _, [elt_type]))
+        | ((_, Tclass ((_, x), _, [elt_type])), _)
           when String.equal x SN.Collections.cVector
                || String.equal x SN.Collections.cImmVector
                || String.equal x SN.Collections.cVec
@@ -6629,58 +6604,131 @@ end = struct
             (sub_supportdyn, elt_type)
             rhs
             env
-        | (_, Tdynamic) ->
+        | ((_, Tdynamic), _) ->
           destructure_dynamic
             ~subtype_env
             ~this_ty
             (sub_supportdyn, ty_sub)
             rhs
             env
-        | (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
-          (* TODO(T69551141) handle type arguments of Tgeneric? *)
-          default_subtype_help env
-        | _ -> begin
-          match d_kind with
-          | SplatUnpack ->
-            (* Allow splatting of arbitrary Traversables *)
-            let (env, ty_inner) = Env.fresh_type env Pos.none in
-            let traversable = MakeType.traversable r_super ty_inner in
+        | ((_, Tvar _), _) ->
+          mk_issubtype_prop
+            ~sub_supportdyn
+            ~coerce:subtype_env.Subtype_env.coerce
             env
-            |> Subtype.(
-                 simplify_subtype
-                   ~subtype_env
-                   ~this_ty
-                   ~lhs:{ sub_supportdyn; ty_sub }
-                   ~rhs:
-                     {
-                       super_like = false;
-                       super_supportdyn = false;
-                       ty_super = traversable;
-                     })
-            &&& destructure_array ~subtype_env ~this_ty (None, ty_inner) rhs
-          | ListDestructure ->
-            let ty_sub_descr =
-              lazy
-                (Typing_print.with_blank_tyvars (fun () ->
-                     Typing_print.full_strip_ns env ty_sub))
-            in
-            default_subtype_help env
-            |> if_unsat @@ fun env ->
-               invalid_env_with
-                 env
-                 (Option.map
-                    subtype_env.Subtype_env.on_error
-                    ~f:
-                      Typing_error.(
-                        fun on_error ->
-                          apply_reasons ~on_error
-                          @@ Secondary.Invalid_destructure
-                               {
-                                 pos = Reason.to_pos r_super;
-                                 decl_pos = get_pos ty_sub;
-                                 ty_name = ty_sub_descr;
-                               }))
-        end)
+            (LoclType ty_sub)
+            (ConstraintType
+               (mk_constraint_type (r_super, Tdestructure destructure)))
+        | ((_, Tunion ty_subs), _) ->
+          Common.simplify_union_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, ty_subs)
+            rhs
+            env
+        | ((r_sub, Tintersection ty_subs), _) ->
+          (* A & B <: C iif A <: C | !B *)
+          (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+          | (env, Some non_ty, tyl) ->
+            let ty_sub = MakeType.intersection r_sub tyl in
+            TCunion.(
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~fail
+                ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
+                ~rhs:
+                  {
+                    super_supportdyn = false;
+                    super_like = false;
+                    lty_super = non_ty;
+                    reason_super = r_super;
+                    cty_super =
+                      mk_constraint_type (r_super, Tdestructure destructure);
+                  }
+                env)
+          | _ ->
+            Common.simplify_intersection_l
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~mk_prop:simplify
+              (sub_supportdyn, ty_subs)
+              rhs
+              env)
+        | ((r_generic, Tgeneric (generic_nm, generic_ty_args)), _) ->
+          let lift_rhs { reason_super; destructure } =
+            ConstraintType
+              (mk_constraint_type (reason_super, Tdestructure destructure))
+          in
+          Common.simplify_generic_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            ~lift_rhs
+            (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+            rhs
+            rhs
+            env
+        | (_, SplatUnpack) ->
+          (* Allow splatting of arbitrary Traversables *)
+          let (env, ty_inner) = Env.fresh_type env Pos.none in
+          let traversable = MakeType.traversable r_super ty_inner in
+          env
+          |> Subtype.(
+               simplify_subtype
+                 ~subtype_env
+                 ~this_ty
+                 ~lhs:{ sub_supportdyn; ty_sub }
+                 ~rhs:
+                   {
+                     super_like = false;
+                     super_supportdyn = false;
+                     ty_super = traversable;
+                   })
+          &&& destructure_array ~subtype_env ~this_ty (None, ty_inner) rhs
+        | ((r_newtype, Tnewtype (nm, _, ty_newtype)), ListDestructure) ->
+          Common.simplify_newtype_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, r_newtype, nm, ty_newtype)
+            rhs
+            env
+        | ((r_dep, Tdependent (dep_ty, ty_inner_sub)), ListDestructure) ->
+          Common.simplify_dependent_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, r_dep, dep_ty, ty_inner_sub)
+            rhs
+            env
+        | (_, ListDestructure) ->
+          let ty_sub_descr =
+            lazy
+              (Typing_print.with_blank_tyvars (fun () ->
+                   Typing_print.full_strip_ns env ty_sub))
+          in
+          invalid
+            env
+            ~fail:
+              (Option.map
+                 subtype_env.Subtype_env.on_error
+                 ~f:
+                   Typing_error.(
+                     fun on_error ->
+                       apply_reasons ~on_error
+                       @@ Secondary.Invalid_destructure
+                            {
+                              pos = Reason.to_pos r_super;
+                              decl_pos = get_pos ty_sub;
+                              ty_name = ty_sub_descr;
+                            })))
     end
 end
 

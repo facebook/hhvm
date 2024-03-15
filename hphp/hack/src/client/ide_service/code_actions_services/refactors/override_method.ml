@@ -88,16 +88,16 @@ let override_method_refactorings_at ~start_line ~start_col =
 let to_edits
     (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
     (quickfix : t) : Code_action_types.edit list =
-  let pos =
-    match SMap.find_opt quickfix.name classish_information with
-    | Some Quickfix_ffp.{ classish_start; _ } -> classish_start
-    | None ->
-      (* TODO: probably better to return an empty list of edits here
-         but I'm preserving the existing behavior of using Pos.none
-      *)
-      Pos.none
-  in
-  [Code_action_types.{ pos; text = quickfix.text }]
+  match SMap.find_opt quickfix.name classish_information with
+  | Some Quickfix_ffp.{ classish_start; _ } ->
+    [Code_action_types.{ pos = classish_start; text = quickfix.text }]
+  | None ->
+    let () =
+      HackEventLogger.invariant_violation_bug
+        ~data:quickfix.name
+        "Could not find class position for quickfix"
+    in
+    []
 
 let refactor_action
     path

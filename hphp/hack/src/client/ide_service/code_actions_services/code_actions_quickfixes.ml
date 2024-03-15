@@ -14,14 +14,16 @@ let text_edits
   | Quickfix.Eager eager_edits ->
     List.map eager_edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
   | Quickfix.Classish_end { classish_end_new_text; classish_end_name } ->
-    let pos =
-      match SMap.find_opt classish_end_name classish_information with
-      | Some Quickfix_ffp.{ classish_end; _ } -> classish_end
-      | None ->
-        (* TODO: return an empty list here and log invariant_violation_bug instead of using nonsense value *)
-        Pos.none
-    in
-    [Code_action_types.{ pos; text = classish_end_new_text }]
+    (match SMap.find_opt classish_end_name classish_information with
+    | Some Quickfix_ffp.{ classish_end; _ } ->
+      [Code_action_types.{ pos = classish_end; text = classish_end_new_text }]
+    | None ->
+      let () =
+        HackEventLogger.invariant_violation_bug
+          ~data:classish_end_name
+          "Could not find class position for quickfix"
+      in
+      [])
 
 let convert_quickfix
     path

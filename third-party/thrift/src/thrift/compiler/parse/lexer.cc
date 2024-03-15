@@ -26,7 +26,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <boost/functional/hash.hpp>
 #include <thrift/compiler/diagnostic.h>
 
 namespace apache {

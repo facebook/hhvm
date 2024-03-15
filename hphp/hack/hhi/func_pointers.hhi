@@ -19,7 +19,7 @@ namespace HH {
   * Create a function reference to an instance method that can be called on any
   * instance of the same type
   *
-  * The global function `meth_caller('cls_name', 'meth_name')` creates a reference
+  * The global function `meth_caller(C::class, 'meth_name')` creates a reference
   * to an instance method on the specified class.  This method can then be used
   * to execute across a collection of objects of that class.
   *
@@ -45,16 +45,15 @@ namespace HH {
   * $result2 = $v->map(meth_caller(Vector::class, 'count'));
   * $result3 = $v->map($x ==> $x->count());
   * ```
-  * @param $cls_name A constant string with the name of the class, or
-  *                  a class reference using `FullClassName::class`.
+  * @param $cls_name A class reference using `FullClassName::class`.
   * @param $meth_name A constant string with the name of the instance method.
   * @return $func_ref A fully typed function reference to the instance method.
   */
   function meth_caller(
-    string $cls_name,
+    classname<mixed> $cls_name,
     string $meth_name,
   ): \HH\FIXME\MISSING_RETURN_TYPE; // becomes:
-  // function meth_caller(C::class or 'C', 'method')
+  // function meth_caller(C::class, 'method')
   //   : (function(C): <the return type of C::method>)
 
   /**

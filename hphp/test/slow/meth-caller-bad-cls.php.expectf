@@ -1,2 +1,2 @@
 
-Fatal error: Class must be a Class or string type in %s/meth-caller-bad-cls.php on line 6
+Fatal error: Class must be a Class type in %s/meth-caller-bad-cls.php on line 6

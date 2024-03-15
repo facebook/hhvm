@@ -119,9 +119,9 @@ function test() :mixed{
 
 
 
-  $func_name = testFunction(\HH\meth_caller('C', 'B'));
+  $func_name = testFunction(\HH\meth_caller(C::class, 'B'));
   $o->set("c", $func_name);
-  $func_name = testFunction(\HH\meth_caller('D', 'B'));
+  $func_name = testFunction(\HH\meth_caller(D::class, 'B'));
   $o->set("d", $func_name);
 
   // bad argument

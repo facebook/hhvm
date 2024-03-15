@@ -713,7 +713,6 @@ and ('ex, 'en) expr_ =
       (** Instance method reference that can be called with an instance.
        *
        *     meth_caller(FooClass::class, 'some_meth')
-       *     meth_caller('FooClass', 'some_meth')
        *
        * These examples are equivalent to:
        *

@@ -7,7 +7,7 @@ class A {
 }
 
 function static_fn()[write_props] :mixed{
-  $f1 = meth_caller('A', 'f');
+  $f1 = meth_caller(A::class, 'f');
   $f1(new A);
 
   $f2 = HH\dynamic_meth_caller('A', 'f');
@@ -15,7 +15,7 @@ function static_fn()[write_props] :mixed{
 }
 
 function poly_fn(mixed $x)[$x::C] :mixed{
-  $f1 = meth_caller('A', 'f');
+  $f1 = meth_caller(A::class, 'f');
   $f1(new A);
 
   $f2 = HH\dynamic_meth_caller('A', 'f');

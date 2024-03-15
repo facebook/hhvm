@@ -2,7 +2,7 @@
 
 class A {
   function foo() :mixed{
-    $cb = meth_caller('B', 'c');
+    $cb = meth_caller(B::class, 'c');
     $cb(null);
   }
 }

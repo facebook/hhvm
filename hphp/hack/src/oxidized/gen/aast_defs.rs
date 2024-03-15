@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64864a1c8d357f1116ce5733e7b02646>>
+// @generated SignedSource<<eb7a10a8579f666aa33f2023d0f694de>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1045,7 +1045,6 @@ pub enum Expr_<Ex, En> {
     /// Instance method reference that can be called with an instance.
     ///
     ///     meth_caller(FooClass::class, 'some_meth')
-    ///     meth_caller('FooClass', 'some_meth')
     ///
     /// These examples are equivalent to:
     ///

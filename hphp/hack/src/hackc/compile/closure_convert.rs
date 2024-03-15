@@ -1161,15 +1161,7 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
                         Err(Error::fatal_parse(pc, "Invalid class"))
                     }
                 }
-                (Expr_::String(_), Some(_)) => {
-                    let mut res = Expr_::Call(x);
-                    res.recurse(scope, self)?;
-                    Ok(res)
-                }
-                (_, Some(_)) => Err(Error::fatal_parse(
-                    pc,
-                    "Class must be a Class or string type",
-                )),
+                (_, Some(_)) => Err(Error::fatal_parse(pc, "Class must be a Class type")),
                 (_, _) => Err(Error::fatal_parse(
                     pf,
                     "Method name must be a literal string",

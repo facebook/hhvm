@@ -57,9 +57,9 @@ function main_entry(): void {
     Vector {1, 2, 3},
     Vector {1, 2}
   };
-  var_dump($v->map(meth_caller('HH\Vector', 'count')));
-  var_dump(meth_caller('HH\Vector', 'count')->getClassName());
-  var_dump(meth_caller('HH\Vector', 'count')->getMethodName());
+  var_dump($v->map(meth_caller(Vector::class, 'count')));
+  var_dump(meth_caller(Vector::class, 'count')->getClassName());
+  var_dump(meth_caller(Vector::class, 'count')->getMethodName());
 
   $s = Vector {'1', '2', '3'};
   $data = $s->map(intval<>);

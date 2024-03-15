@@ -6,7 +6,6 @@ class C extends B { function cfunc($x, $y) :mixed{ return $x + $y; } }
 
 // test in function scope
 function test_duplicate_meth_caller() :mixed{
-  var_dump(HH\meth_caller("B", "bfunc")(new B(), 2));
   var_dump(HH\meth_caller(B::class, "bfunc")(new B(), 3));
 }
 

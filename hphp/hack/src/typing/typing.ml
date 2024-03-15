@@ -3350,7 +3350,7 @@ end = struct
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         make_result env p (Aast.Id id) ty)
     | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
-      (* meth_caller('X', 'foo') desugars to:
+      (* meth_caller(X::class, 'foo') desugars to:
        * $x ==> $x->foo()
        *)
       let class_ = Env.get_class env class_name in

@@ -96,7 +96,7 @@ namespace HH {
  *   Vector {1, 2, 3},
  *   Vector {1, 2}
  * };
- * $v->map(meth_caller('Vector', 'count'))  // returns Vector {3, 2}
+ * $v->map(meth_caller(Vector::class, 'count'))  // returns Vector {3, 2}
  * ```
  *
  * ...calls the `count` method on the inner vectors, and returns a vector

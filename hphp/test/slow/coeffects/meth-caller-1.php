@@ -7,6 +7,6 @@ class A {
 
 <<__EntryPoint>>
 function main()[write_props] :mixed{
-  $f = meth_caller('A', 'f');
+  $f = meth_caller(A::class, 'f');
   $f(new A);
 }

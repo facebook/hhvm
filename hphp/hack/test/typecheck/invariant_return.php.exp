@@ -2,11 +2,11 @@ File "invariant_return.php", line 12, characters 30-45:
 Invalid return type (Typing[4110])
   File "invariant_return.php", line 12, characters 17-19:
   Expected `int`
-  File "func_pointers.hhi", line 73, characters 8-11:
+  File "func_pointers.hhi", line 72, characters 8-11:
   But got `void`
 File "invariant_return.php", line 13, characters 32-50:
 Invalid return type (Typing[4110])
   File "invariant_return.php", line 13, characters 18-21:
   Expected `bool`
-  File "func_pointers.hhi", line 73, characters 8-11:
+  File "func_pointers.hhi", line 72, characters 8-11:
   But got `void`

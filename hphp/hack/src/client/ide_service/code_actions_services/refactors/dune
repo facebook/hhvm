@@ -1,11 +1,10 @@
 (library
- (name code_actions_services)
- (wrapped true)
+ (name code_actions_services_refactors)
+ (wrapped false)
  (libraries
   annotated_ast
   ast
   code_action_types
-  code_actions_services_refactors
   collections
   decl_provider
   errors

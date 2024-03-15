@@ -298,7 +298,9 @@ void createGlobalNVTable() {
   }
   nvTable->set(s__FILES.get(),             arr.asTypedValue());
   nvTable->set(s__ENV.get(),               arr.asTypedValue());
-  nvTable->set(s__REQUEST.get(),           arr.asTypedValue());
+  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+    nvTable->set(s__REQUEST.get(),           arr.asTypedValue());
+  }
   nvTable->set(s_HTTP_RAW_POST_DATA.get(), init_null_variant.asTypedValue());
 }
 

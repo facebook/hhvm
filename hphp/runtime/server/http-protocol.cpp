@@ -196,7 +196,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   php_global_set(s__GET, emptyArr);
   php_global_set(s__POST, emptyArr);
   php_global_set(s__FILES, emptyArr);
-  php_global_set(s__REQUEST, emptyArr);
+  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+    php_global_set(s__REQUEST, emptyArr);
+  }
   php_global_set(s__ENV, emptyArr);
   if (!RuntimeOption::EvalDisableParsedCookies) {
     php_global_set(s__COOKIE, emptyArr);
@@ -225,7 +227,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   X(POST)
   X(FILES)
   X(SERVER)
-  X(REQUEST)
 
 #undef X
 
@@ -236,8 +237,12 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   };
 
+  auto REQUESTarr = empty_dict_array();
   auto COOKIEarr = empty_dict_array();
   SCOPE_EXIT {
+    if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+      php_global_set(s__REQUEST, REQUESTarr);
+    }
     if (!RuntimeOption::EvalDisableParsedCookies) {
       php_global_set(s__COOKIE, COOKIEarr);
     }
@@ -264,17 +269,20 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   init_server_request_time(SERVERarr);
   PrepareServerVariable(SERVERarr, transport, r, vhost);
 
-  // Request
-  PrepareRequestVariables(REQUESTarr,
-                          GETarr,
-                          POSTarr,
-                          COOKIEarr);
+  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+    // Request
+    PrepareRequestVariables(REQUESTarr,
+                            GETarr,
+                            POSTarr,
+                            COOKIEarr);
+  }
 }
 
 void HttpProtocol::PrepareRequestVariables(Array& request,
                                            const Array& get,
                                            const Array& post,
                                            const Array& cookie) {
+
   CopyParams(request, get);
   CopyParams(request, post);
   // if EvalDisableParsedCookies is set this is just a no-op

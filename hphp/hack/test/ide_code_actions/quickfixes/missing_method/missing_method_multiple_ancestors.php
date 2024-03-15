@@ -13,5 +13,6 @@ trait MyTrait {
 }
 
 class MyClass extends MyParent {
+  //                  ^ at-caret
   use MyTrait;
 }

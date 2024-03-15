@@ -1,0 +1,42 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing inherited methods (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function bar(): void {}\n\n  <<__Override>>\n  public function baz(): void {}\n",
+          "range":{"end":{"character":0,"line":10},"start":{"character":0,"line":10}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing inherited methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+trait FooTrait {
+  abstract public function bar(): void;
+  abstract public function baz(): void;
+}
+
+class Foo {
+//      ^ at-caret
+  use FooTrait;
+
+  <<__Override>>
+  public function bar(): void {}
+
+  <<__Override>>
+  public function baz(): void {}
+}
+

@@ -87,8 +87,7 @@ let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
       |> List.filter_map ~f:(fun (title, _, is_selected) ->
              Option.some_if is_selected title)
     in
-    match selected_titles with
-    | [selected_title] ->
+    let output_code_action selected_title =
       let resolved =
         Code_actions_services.resolve
           ~ctx
@@ -127,10 +126,18 @@ let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
       |> hermeticize_paths
       |> Printf.printf "%s\n";
       Printf.printf "%s\n" text_of_selected
+    in
+    match selected_titles with
+    | [selected_title] -> output_code_action selected_title
     | _ :: _ ->
-      Printf.printf
-        "\nMultiple code action titles match prefix: %s\n"
-        title_prefix
+      begin
+        Printf.printf
+          "\nMultiple code action titles match prefix: '%s'\n"
+          title_prefix
+      end;
+      List.iter selected_titles ~f:(fun selected_title ->
+          Printf.printf "\nCode action title: %s\n" selected_title;
+          output_code_action selected_title)
     | [] ->
       Printf.printf "\nNo code action titles match prefix: %s\n" title_prefix
   end

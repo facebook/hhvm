@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public function bar(int $x, shape(\"y\" => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, mixed $_, int ...$args): void {}\n",
+          "range":{"end":{"character":0,"line":9},"start":{"character":0,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface IFoo {
+  public function bar<T>(int $x, shape('y' => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, ?nonnull $_, int ...$args): void;
+}
+
+class Foo implements IFoo {
+                   // ^ at-caret
+  public function otherMethod(): void {}
+
+  public function bar(int $x, shape("y" => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, mixed $_, int ...$args): void {}
+
+}
+

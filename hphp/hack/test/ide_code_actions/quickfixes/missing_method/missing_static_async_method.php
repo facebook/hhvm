@@ -1,5 +1,3 @@
-Add stubs for missing inherited methods
-
 <?hh
 
 abstract class MyClass {
@@ -7,7 +5,5 @@ abstract class MyClass {
 }
 
 class MyChild extends MyClass {
-
-  <<__Override>>
-  public static async function foo(): Awaitable<void> {}
+                     // ^ at-caret
 }

@@ -1,0 +1,98 @@
+Code actions available:
+------------------------------------------
+Add override for MyParent::methodInGrandParent (CodeActionKind: refactor) SELECTED
+Add override for MyParent::methodInParent (CodeActionKind: refactor) SELECTED
+
+Multiple code action titles match prefix: ''
+
+Code action title: Add override for MyParent::methodInGrandParent
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function methodInGrandParent(): void {}\n\n",
+          "range":{"end":{"character":32,"line":14},"start":{"character":32,"line":14}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for MyParent::methodInGrandParent"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+abstract class MyGrandParent {
+  abstract public function methodInGrandParent(): void;
+}
+
+abstract class MyParent extends MyGrandParent {
+  abstract public function methodInParent(): void;
+}
+
+trait MyTrait {
+  abstract public function methodInTrait(): void;
+}
+
+class MyClass extends MyParent {
+  <<__Override>>
+  public function methodInGrandParent(): void {}
+
+
+  //                  ^ at-caret
+  use MyTrait;
+}
+
+
+Code action title: Add override for MyParent::methodInParent
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function methodInParent(): void {}\n\n",
+          "range":{"end":{"character":32,"line":14},"start":{"character":32,"line":14}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for MyParent::methodInParent"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+abstract class MyGrandParent {
+  abstract public function methodInGrandParent(): void;
+}
+
+abstract class MyParent extends MyGrandParent {
+  abstract public function methodInParent(): void;
+}
+
+trait MyTrait {
+  abstract public function methodInTrait(): void;
+}
+
+class MyClass extends MyParent {
+  <<__Override>>
+  public function methodInParent(): void {}
+
+
+  //                  ^ at-caret
+  use MyTrait;
+}
+

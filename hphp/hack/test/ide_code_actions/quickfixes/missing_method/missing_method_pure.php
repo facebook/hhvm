@@ -5,3 +5,4 @@ abstract class FooParent {
 }
 
 class Foo extends FooParent {}
+  //                  ^ at-caret

@@ -1,5 +1,3 @@
-Add stubs for missing interface methods
-
 <?hh
 
 interface IFoo {
@@ -7,7 +5,6 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
+  //                  ^ at-caret
   public function otherMethod(): void {}
-
-  public async function genBar(): Awaitable<int> {}
 }

@@ -1,8 +1,11 @@
 <?hh
 
-abstract class FooParent {
+trait FooTrait {
   abstract public function bar(): void;
   abstract public function baz(): void;
 }
 
-class Foo extends FooParent {}
+class Foo {
+//      ^ at-caret
+  use FooTrait;
+}

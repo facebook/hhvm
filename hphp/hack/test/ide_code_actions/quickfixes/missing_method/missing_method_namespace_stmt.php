@@ -7,3 +7,4 @@ interface IFoo {
 }
 
 class Foo implements IFoo {}
+  //                  ^ at-caret

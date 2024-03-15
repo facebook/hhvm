@@ -1,0 +1,37 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public function bar(): void {}\n",
+          "range":{"end":{"character":27,"line":8},"start":{"character":27,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+namespace Bar;
+
+interface IFoo {
+  public function bar(): void;
+}
+
+class Foo implements IFoo {
+  public function bar(): void {}
+}
+  //                  ^ at-caret
+

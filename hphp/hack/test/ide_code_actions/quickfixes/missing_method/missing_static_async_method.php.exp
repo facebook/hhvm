@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+Add override for MyClass::foo (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public static async function foo(): Awaitable<void> {}\n\n",
+          "range":{"end":{"character":31,"line":6},"start":{"character":31,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for MyClass::foo"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+abstract class MyClass {
+  abstract public static function foo(): Awaitable<void>;
+}
+
+class MyChild extends MyClass {
+  <<__Override>>
+  public static async function foo(): Awaitable<void> {}
+
+
+                     // ^ at-caret
+}
+

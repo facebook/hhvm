@@ -1,0 +1,37 @@
+Code actions available:
+------------------------------------------
+Add override for FooParent::explicitCapabilityMethods (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function explicitCapabilityMethods()[globals, write_props]: int {}\n\n",
+          "range":{"end":{"character":29,"line":6},"start":{"character":29,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for FooParent::explicitCapabilityMethods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+abstract class FooParent {
+  abstract public function explicitCapabilityMethods()[globals, write_props]: int;
+}
+
+class Foo extends FooParent {
+  <<__Override>>
+  public function explicitCapabilityMethods()[globals, write_props]: int {}
+
+}
+  //                  ^ at-caret
+

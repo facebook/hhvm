@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_quickfixes_missing_method)
+ (deps
+  %{exe:../../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/missing_method/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/missing_method/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/missing_method/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/quickfixes/missing_method
+   --program
+   %{exe:../../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_quickfixes_missing_method)))

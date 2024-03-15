@@ -649,10 +649,16 @@ struct IterData : IRExtraData {
 };
 
 struct IterTypeData : IRExtraData {
-  IterTypeData(uint32_t iterId, IterSpecialization type, ArrayLayout layout)
+  IterTypeData(
+    uint32_t iterId,
+    IterSpecialization type,
+    ArrayLayout layout,
+    bool outputKey
+  )
     : iterId{iterId}
     , type{type}
     , layout{layout}
+    , outputKey{outputKey}
   {
     always_assert(type.specialized);
   }
@@ -660,25 +666,28 @@ struct IterTypeData : IRExtraData {
   std::string show() const {
     auto const type_str = HPHP::show(type);
     auto const layout_str = layout.describe();
-    return folly::format("{}::{}::{}", iterId, type_str, layout_str).str();
+    return folly::format(
+      "{}::{}::{}::{}", iterId, type_str, layout_str, outputKey).str();
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<uint32_t>()(iterId),
       std::hash<uint8_t>()(type.as_byte),
-      std::hash<uint16_t>()(layout.toUint16())
+      std::hash<uint16_t>()(layout.toUint16()),
+      std::hash<bool>()(outputKey)
     );
   }
 
   bool equals(const IterTypeData& o) const {
     return iterId == o.iterId && type.as_byte == o.type.as_byte &&
-           layout == o.layout;
+           layout == o.layout && outputKey == o.outputKey;
   }
 
   uint32_t iterId;
   IterSpecialization type;
   ArrayLayout layout;
+  bool outputKey;
 };
 
 struct IterOffsetData : IRExtraData {

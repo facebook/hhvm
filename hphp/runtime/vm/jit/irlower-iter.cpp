@@ -209,7 +209,7 @@ int32_t iteratorType(const IterTypeData& data) {
     switch (data.type.base_type) {
       case S::Vec: {
         auto is_ptr_iter = data.type.base_const
-                        && !data.type.output_key
+                        && !data.outputKey
                         && VanillaVec::stores_unaligned_typed_values;
         return is_ptr_iter
           ? IterNextIndex::VanillaVecPointer

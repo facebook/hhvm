@@ -74,12 +74,8 @@ std::string show(IterSpecialization type) {
   if (!type.specialized) return "Unspecialized";
   auto const base_const = type.base_const ? "BaseConst" : "BaseMutable";
   auto const base_type  = show((IterSpecialization::BaseType)type.base_type);
-  if (type.output_key) {
-    auto const key_types  = show((IterSpecialization::KeyTypes)type.key_types);
-    return folly::format("{}::{}::{}", base_type, base_const, key_types).str();
-  } else {
-    return folly::format("{}::{}", base_type, base_const).str();
-  }
+  auto const key_types  = show((IterSpecialization::KeyTypes)type.key_types);
+  return folly::format("{}::{}::{}", base_type, base_const, key_types).str();
 }
 
 std::string show(IterSpecialization::BaseType type) {

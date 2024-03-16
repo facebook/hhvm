@@ -380,7 +380,6 @@ dependencies = [
  "hash",
  "hhbc",
  "ir",
- "itertools 0.11.0",
  "log",
  "newtype",
 ]

@@ -4,18 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::Class;
-use itertools::Itertools;
 
 pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
-    let upper_bounds = cls
-        .upper_bounds
-        .iter()
-        .map(|hhbc::UpperBound { name, bounds }| {
-            let tys = bounds.clone().into();
-            (*name, tys)
-        })
-        .collect_vec();
-
     unit.classes.push(ir::Class {
         attributes: cls.attributes.clone().into(),
         base: cls.base.into(),
@@ -32,7 +22,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         requirements: cls.requirements.clone().into(),
         src_loc: ir::SrcLoc::from_span(&cls.span),
         type_constants: cls.type_constants.clone().into(),
-        upper_bounds,
+        upper_bounds: cls.upper_bounds.clone().into(),
         uses: cls.uses.clone().into(),
     });
 }

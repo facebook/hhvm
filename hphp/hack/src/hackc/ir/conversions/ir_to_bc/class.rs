@@ -34,11 +34,6 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
         .map(|et| types::convert(et).unwrap())
         .into();
 
-    let upper_bounds = Vec::from_iter(upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
-        name: *name,
-        bounds: Vec::from_iter(tys.iter().map(|ty| types::convert(ty).unwrap())).into(),
-    }));
-
     let methods = Vec::from_iter(
         methods
             .into_iter()

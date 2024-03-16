@@ -1553,9 +1553,9 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     Ok(())
 }
 
-fn cmp_upper_bounds(a: &(StringId, Vec<TypeInfo>), b: &(StringId, Vec<TypeInfo>)) -> Result {
-    cmp_eq(a.0, b.0).qualified("key")?;
-    cmp_slice(a.1.iter(), b.1.iter(), cmp_type_info).qualified("value")?;
+fn cmp_upper_bounds(a: &UpperBound, b: &UpperBound) -> Result {
+    cmp_eq(a.name, b.name).qualified("name")?;
+    cmp_slice(a.bounds.iter(), b.bounds.iter(), cmp_type_info).qualified("bounds")?;
     Ok(())
 }
 

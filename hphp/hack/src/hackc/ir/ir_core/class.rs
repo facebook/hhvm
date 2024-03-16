@@ -13,9 +13,9 @@ use crate::PropName;
 use crate::Property;
 use crate::Requirement;
 use crate::SrcLoc;
-use crate::StringId;
 use crate::TypeConstant;
 use crate::TypeInfo;
+use crate::UpperBound;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
@@ -58,7 +58,7 @@ pub struct Class {
     pub type_constants: Vec<TypeConstant>,
 
     /// For class generics the upper bounds of each generic.
-    pub upper_bounds: Vec<(StringId, Vec<TypeInfo>)>,
+    pub upper_bounds: Vec<UpperBound>,
 
     pub uses: Vec<ClassName>,
 }

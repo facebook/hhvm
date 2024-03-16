@@ -102,6 +102,7 @@ pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;
 pub use hhbc::TypedValue;
 pub use hhbc::Typedef;
+pub use hhbc::UpperBound;
 pub use hhbc::Visibility;
 pub use hhvm_types_ffi::ffi::Attr;
 pub use hhvm_types_ffi::ffi::TypeConstraintFlags;

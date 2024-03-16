@@ -109,7 +109,7 @@ impl Constraint {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct UpperBound {
     pub name: StringId,

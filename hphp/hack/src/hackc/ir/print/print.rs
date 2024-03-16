@@ -336,12 +336,12 @@ fn print_class(w: &mut dyn Write, class: &Class) -> Result {
         )?;
     }
 
-    for (name, tys) in &class.upper_bounds {
+    for UpperBound { name, bounds } in &class.upper_bounds {
         writeln!(
             w,
             "  upper_bound {}: [{}]",
             FmtIdentifier(name.as_str().as_bytes()),
-            FmtSep::comma(tys.iter(), |w, ty| FmtTypeInfo(ty).fmt(w))
+            FmtSep::comma(bounds.iter(), |w, ty| FmtTypeInfo(ty).fmt(w))
         )?;
     }
 

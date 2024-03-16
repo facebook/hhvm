@@ -13,6 +13,7 @@ use ir_core::Property;
 use ir_core::Requirement;
 use ir_core::TraitReqKind;
 use ir_core::TypeConstant;
+use ir_core::UpperBound;
 use parse_macro_ir::parse;
 
 use crate::parse::parse_attr;
@@ -228,7 +229,10 @@ impl ClassParser {
     fn parse_upper_bound(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <name:parse_user_id> ":" "[" <bounds:parse_type_info,*> "]");
         let name = ir_core::intern(std::str::from_utf8(&name.0)?);
-        self.class.upper_bounds.push((name, bounds));
+        self.class.upper_bounds.push(UpperBound {
+            name,
+            bounds: bounds.into(),
+        });
         Ok(())
     }
 

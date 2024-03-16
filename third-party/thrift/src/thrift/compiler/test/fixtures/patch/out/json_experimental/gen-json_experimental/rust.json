@@ -1,0 +1,369 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "rust",
+  "includes": {
+    "scope": "thrift/annotation/scope.thrift"
+  },
+  "namespaces": {
+    "android": "com.facebook.thrift.annotation.rust_deprecated",
+    "go": "thrift.annotation.rust",
+    "java": "com.facebook.thrift.annotation.rust_deprecated",
+    "py": "thrift.annotation.rust",
+    "py.asyncio": "facebook_thrift_asyncio.annotation.rust"
+  },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift/annotation/rust",
+    "filename": "rust"
+  },
+  "structs" :
+  {
+      "Name" : {
+        "name" : "Name",
+        "structured_annotations": {
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.EnumValue" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "EnumValue",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Enum" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 39,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 27
+      },
+      "Copy" : {
+        "name" : "Copy",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 42
+      },
+      "RequestContext" : {
+        "name" : "RequestContext",
+        "structured_annotations": {
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 49
+      },
+      "Arc" : {
+        "name" : "Arc",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 58
+      },
+      "Box" : {
+        "name" : "Box",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 65
+      },
+      "Exhaustive" : {
+        "name" : "Exhaustive",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 72
+      },
+      "Ord" : {
+        "name" : "Ord",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 81
+      },
+      "NewType" : {
+        "name" : "NewType",
+        "structured_annotations": {
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 89
+      },
+      "Type" : {
+        "name" : "Type",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 264,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 110
+      },
+      "Adapter" : {
+        "name" : "Adapter",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 312,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 267
+      },
+      "Derive" : {
+        "name" : "Derive",
+        "structured_annotations": {
+          "scope.Enum" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "derives" : {
+            "name" : "derives",
+            "key" : 1,
+            "lineno" : 338,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "string"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 315
+      },
+      "ServiceExn" : {
+        "name" : "ServiceExn",
+        "structured_annotations": {
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "anyhow_to_application_exn" : {
+            "name" : "anyhow_to_application_exn",
+            "key" : 1,
+            "lineno" : 392,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 341
+      }
+      },
+  "source_path" : "thrift/annotation/rust",
+  "py_namespace" : "thrift.annotation.rust"
+}

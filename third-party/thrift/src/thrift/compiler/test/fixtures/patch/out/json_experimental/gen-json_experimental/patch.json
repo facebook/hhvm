@@ -6,7 +6,8 @@
     "scope": "thrift/annotation/scope.thrift",
     "cpp": "thrift/annotation/cpp.thrift",
     "standard": "thrift/lib/thrift/standard.thrift",
-    "id": "thrift/lib/thrift/id.thrift"
+    "id": "thrift/lib/thrift/id.thrift",
+    "rust": "thrift/annotation/rust.thrift"
   },
   "namespaces": {
     "cpp2": "apache.thrift.op",
@@ -30,7 +31,7 @@
         "name": "FieldId",
         "type": "i16",
         "is_exception": false,
-        "lineno": 38
+        "lineno": 42
       },
       "FieldIdList": {
         "name": "FieldIdList",
@@ -39,7 +40,7 @@
   "inner_type" : "i16"
 },
         "is_exception": false,
-        "lineno": 267
+        "lineno": 271
       }
   },  "structs" :
   {
@@ -66,7 +67,7 @@
         "docstring" : "An annotation that indicates a patch representation should be generated for\nthe associated definition.\n\nThis is deprecated and we should use the new codegen workflow instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 46
+        "lineno" : 50
       },
       "GeneratePatchNew" : {
         "name" : "GeneratePatchNew",
@@ -83,7 +84,7 @@
         "docstring" : "An annotation that indicates a patch representation should be generated for\nthe associated definition. Similar to `GeneratePatch` but only works for new\ncodegen workflow and it won't work on package level.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 55
+        "lineno" : 59
       },
       "AssignOnlyPatch" : {
         "name" : "AssignOnlyPatch",
@@ -107,7 +108,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 58
+        "lineno" : 62
       },
       "BoolPatch" : {
         "name" : "BoolPatch",
@@ -127,7 +128,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 75,
+            "lineno" : 79,
             "required" : "optional",
             "type" : "bool"
                   },
@@ -135,20 +136,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 78,
+            "lineno" : 82,
             "type" : "bool"
                   },
           "invert" : {
             "name" : "invert",
             "docstring" : "If the bool value should be inverted.\n",
             "key" : 9,
-            "lineno" : 81,
+            "lineno" : 85,
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 63
+        "lineno" : 67
       },
       "BytePatch" : {
         "name" : "BytePatch",
@@ -168,7 +169,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 97,
+            "lineno" : 101,
             "required" : "optional",
             "type" : "byte"
                   },
@@ -176,20 +177,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 100,
+            "lineno" : 104,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 103,
+            "lineno" : 107,
             "type" : "byte"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 85
+        "lineno" : 89
       },
       "I16Patch" : {
         "name" : "I16Patch",
@@ -209,7 +210,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 119,
+            "lineno" : 123,
             "required" : "optional",
             "type" : "i16"
                   },
@@ -217,20 +218,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 122,
+            "lineno" : 126,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 125,
+            "lineno" : 129,
             "type" : "i16"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 107
+        "lineno" : 111
       },
       "I32Patch" : {
         "name" : "I32Patch",
@@ -250,7 +251,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 141,
+            "lineno" : 145,
             "required" : "optional",
             "type" : "i32"
                   },
@@ -258,20 +259,20 @@
             "name" : "clear",
             "docstring" : "Clears any set value.\n",
             "key" : 2,
-            "lineno" : 144,
+            "lineno" : 148,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 147,
+            "lineno" : 151,
             "type" : "i32"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 129
+        "lineno" : 133
       },
       "I64Patch" : {
         "name" : "I64Patch",
@@ -291,7 +292,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 163,
+            "lineno" : 167,
             "required" : "optional",
             "type" : "i64"
                   },
@@ -299,20 +300,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 166,
+            "lineno" : 170,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 169,
+            "lineno" : 173,
             "type" : "i64"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 151
+        "lineno" : 155
       },
       "FloatPatch" : {
         "name" : "FloatPatch",
@@ -332,7 +333,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 185,
+            "lineno" : 189,
             "required" : "optional",
             "type" : "float"
                   },
@@ -340,20 +341,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 188,
+            "lineno" : 192,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 191,
+            "lineno" : 195,
             "type" : "float"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 173
+        "lineno" : 177
       },
       "DoublePatch" : {
         "name" : "DoublePatch",
@@ -373,7 +374,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 207,
+            "lineno" : 211,
             "required" : "optional",
             "type" : "double"
                   },
@@ -381,20 +382,20 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 210,
+            "lineno" : 214,
             "type" : "bool"
                   },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 213,
+            "lineno" : 217,
             "type" : "double"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 195
+        "lineno" : 199
       },
       "StringPatch" : {
         "name" : "StringPatch",
@@ -414,7 +415,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 229,
+            "lineno" : 233,
             "required" : "optional",
             "type" : "string"
                   },
@@ -422,27 +423,27 @@
             "name" : "clear",
             "docstring" : "Clear a given string.\n",
             "key" : 2,
-            "lineno" : 232,
+            "lineno" : 236,
             "type" : "bool"
                   },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 235,
+            "lineno" : 239,
             "type" : "string"
                   },
           "append" : {
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 238,
+            "lineno" : 242,
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 217
+        "lineno" : 221
       },
       "BinaryPatch" : {
         "name" : "BinaryPatch",
@@ -462,7 +463,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other patch operations are ignored.\n\nNote: Only modifies set field values.\n",
             "key" : 1,
-            "lineno" : 254,
+            "lineno" : 258,
             "required" : "optional",
             "type" : "binary"
                   },
@@ -470,27 +471,27 @@
             "name" : "clear",
             "docstring" : "Clear a given binary.\n",
             "key" : 2,
-            "lineno" : 257,
+            "lineno" : 261,
             "type" : "bool"
                   },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 260,
+            "lineno" : 264,
             "type" : "binary"
                   },
           "append" : {
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 263,
+            "lineno" : 267,
             "type" : "binary"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 242
+        "lineno" : 246
       }
       },
   "source_path" : "thrift/lib/thrift/patch",

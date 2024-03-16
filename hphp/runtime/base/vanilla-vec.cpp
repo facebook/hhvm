@@ -120,7 +120,7 @@ VanillaDict* VanillaVec::ToMixedHeader(const ArrayData* old,
   auto const kind    = HeaderKind::Dict;
   auto const aux     = packSizeIndexAndAuxBits(index, 0);
   ad->initHeader_16(kind, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Ints();
   ad->m_size          = oldSize;
   ad->m_layout_index  = old->m_layout_index;
   ad->m_scale_used    = scale | uint64_t{oldSize} << 32; // used=oldSize

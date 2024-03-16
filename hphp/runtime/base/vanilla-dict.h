@@ -18,13 +18,13 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-key-types.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-layout.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict-keys.h"
 
 #include <folly/portability/Constexpr.h>
 
@@ -211,14 +211,14 @@ private:
 public:
   static constexpr size_t kKeyTypesOffset = offsetof(ArrayData, m_extra_lo8);
 
-  const VanillaDictKeys& keyTypes() const {
+  const ArrayKeyTypes& keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return *reinterpret_cast<VanillaDictKeys*>(pointer);
+    return *reinterpret_cast<ArrayKeyTypes*>(pointer);
   }
 
-  VanillaDictKeys* mutableKeyTypes() {
+  ArrayKeyTypes* mutableKeyTypes() {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return reinterpret_cast<VanillaDictKeys*>(pointer);
+    return reinterpret_cast<ArrayKeyTypes*>(pointer);
   }
 
 public:

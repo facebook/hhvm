@@ -40,11 +40,11 @@ struct VanillaDict;
  * optimizations, because we don't often remove keys from arrays. For example,
  * if the bit for non-static str keys is unset, we can skip releasing keys.
  */
-struct VanillaDictKeys {
+struct ArrayKeyTypes {
   /*
    * Equality operator (used in assertions).
    */
-  bool operator==(VanillaDictKeys other) const {
+  bool operator==(ArrayKeyTypes other) const {
     return m_bits == other.m_bits;
   }
 
@@ -83,23 +83,23 @@ struct VanillaDictKeys {
    * Call these methods to get a version of this bitset that can be stored
    * directly to a free byte in an ArrayData.
    */
-  static VanillaDictKeys Empty() {
+  static ArrayKeyTypes Empty() {
     return Init(0);
   }
-  static VanillaDictKeys Ints() {
+  static ArrayKeyTypes Ints() {
     return Init(kIntKey);
   }
-  static VanillaDictKeys StaticStrs() {
+  static ArrayKeyTypes StaticStrs() {
     return Init(kStaticStrKey);
   }
-  static VanillaDictKeys Strs() {
+  static ArrayKeyTypes Strs() {
     return Init(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
   }
 
   /*
    * Call these methods when performing the appropriate bulk operation.
    */
-  void copyFrom(VanillaDictKeys other, bool compact) {
+  void copyFrom(ArrayKeyTypes other, bool compact) {
     m_bits |= other.m_bits & (compact ? ~kTombstoneKey : 0xff);
   }
   void makeCompact() {
@@ -137,8 +137,8 @@ struct VanillaDictKeys {
   bool checkInvariants(const VanillaDict* ad) const;
 
 private:
-  static VanillaDictKeys Init(uint8_t bits) {
-    auto result = VanillaDictKeys{};
+  static ArrayKeyTypes Init(uint8_t bits) {
+    auto result = ArrayKeyTypes{};
     result.m_bits = bits;
     return result;
   }

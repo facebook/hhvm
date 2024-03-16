@@ -89,7 +89,7 @@ struct VanillaDict::DictInitializer {
     ad->m_scale_used   = scale;
     ad->m_nextKI       = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
-    *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+    *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
   }
@@ -109,7 +109,7 @@ struct VanillaDict::MarkedDictArrayInitializer {
     ad->m_scale_used    = scale;
     ad->m_nextKI        = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
-    *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+    *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
   }
@@ -129,7 +129,7 @@ ArrayData* VanillaDict::MakeReserveDict(uint32_t size) {
 
   auto const aux = packSizeIndexAndAuxBits(index, 0);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
   ad->m_size          = 0;
   ad->m_layout_index  = kVanillaLayoutIndex;
   ad->m_scale_used    = scale; // used=0
@@ -154,7 +154,7 @@ VanillaDict* VanillaDict::MakeStructDict(uint32_t size,
   auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -196,7 +196,7 @@ VanillaDict* VanillaDict::AllocStructDict(uint32_t size, const int32_t* hash) {
   auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -229,7 +229,7 @@ VanillaDict* VanillaDict::MakeDict(uint32_t size, const TypedValue* kvs) {
 
   ad->initHash(scale);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -291,7 +291,7 @@ VanillaDict* VanillaDict::MakeDictNatural(uint32_t size, const TypedValue* vals)
 
   ad->initHash(scale);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Ints();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size

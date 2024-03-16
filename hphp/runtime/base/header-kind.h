@@ -129,7 +129,7 @@ enum class GCBits : uint8_t {};
  *  - 1 bit for isSampledArray
  *  - 4 bits unused
  *
- * Now that HAM is done, we can merge the VanillaDictKeys bitset (which also
+ * Now that HAM is done, we can merge the ArrayKeyTypes bitset (which also
  * uses 4 bits) into this field, so the highest byte is always the size class.
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,

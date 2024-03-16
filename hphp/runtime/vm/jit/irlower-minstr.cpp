@@ -520,7 +520,7 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
-  auto const mask = VanillaDictKeys::getMask(inst->typeParam());
+  auto const mask = ArrayKeyTypes::getMask(inst->typeParam());
   always_assert_flog(mask, "Invalid VanillaDict key check: {}",
                      inst->typeParam().toString());
 

@@ -691,6 +691,43 @@ TEST_F(HTTP2CodecTest, BadConnect) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
+TEST_F(HTTP2CodecTest, TemplateDrivenConnect) {
+  // See https://fburl.com/nql0na8x for definition
+  std::string method = "CONNECT";
+  std::string authority = "request-proxy.example";
+  std::string path = "/proxy?target_host=192.0.2.1,2001:db8::1&tcp_port=443";
+  std::string protocol = "connect-tcp";
+
+  std::vector<proxygen::compress::Header> headers = {
+      Header::makeHeaderForTest(headers::kMethod, method),
+      Header::makeHeaderForTest(headers::kAuthority, authority),
+      Header::makeHeaderForTest(headers::kScheme, headers::kHttps),
+      Header::makeHeaderForTest(headers::kPath, path),
+      Header::makeHeaderForTest(headers::kProtocol, protocol),
+  };
+
+  HPACKCodec headerCodec(TransportDirection::UPSTREAM);
+  HTTPCodec::StreamID stream = 1;
+
+  auto encodedHeaders = headerCodec.encode(headers);
+  writeHeaders(output_,
+               std::move(encodedHeaders),
+               stream,
+               folly::none /* priority */,
+               http2::kNoPadding /* padding */,
+               true,
+               true);
+
+  parse();
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(HTTPMethod::CONNECT, callbacks_.msg->getMethod());
+  EXPECT_EQ(path, callbacks_.msg->getURL());
+  const auto& parsedHeaders = callbacks_.msg->getHeaders();
+  EXPECT_EQ(authority,
+            parsedHeaders.getSingleOrEmpty(proxygen::HTTP_HEADER_HOST));
+  EXPECT_EQ(protocol, *callbacks_.msg->getUpgradeProtocol());
+}
+
 void HTTP2CodecTest::testHeaderListSize(bool oversized) {
   if (oversized) {
     auto settings = downstreamCodec_.getEgressSettings();

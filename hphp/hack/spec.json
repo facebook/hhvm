@@ -1,0 +1,72 @@
+{
+  "command": "SandcastleHackCommand",
+  "args": {
+    "artifacts": [
+      {
+        "handle": "@everstore:GEtjvhljex-t6scFAA64jR4ZRDdObnsIAAAL",
+        "name": "hhscripts"
+      },
+      {
+        "handle": "@everstore:GLrtzBlHrrk4gfIAAEmVhegUZbk7bnsIAAAL",
+        "name": "hhtest"
+      },
+      {
+        "handle": "@everstore:GBy00BmMsMxlu1YFAHYHtssH6HwIbnsIAAAL",
+        "name": "hhcontrol"
+      },
+      {
+        "handle": "@everstore:GICWmACQoWDR0ZMFAOQSGhNjccs4bnsIAAAL",
+        "name": "sstest"
+      },
+      {
+        "handle": "@everstore:GICWmADFzsnGQ2cDAMJVov6tOKQ5bnsIAAAL",
+        "name": "sscontrol"
+      },
+      {
+        "handle": "@everstore:GPzdVBmppJksQ2QEAPiNJ1VckNc_bnsIAAAL",
+        "name": "wwwderiv"
+      }
+    ],
+    "oncall": "hack",
+    "report": [],
+    "setupWWW": false,
+    "sparse_profiles": null,
+    "steps": [
+      {
+        "name": "yum install fb-facerub",
+        "shell": "yum install -y fb-facerub",
+        "user": "root"
+      },
+      {
+        "name": "rm -fr /tmp/hh_server",
+        "shell": "rm -fr /tmp/hh_server",
+        "user": "root"
+      },
+      {
+        "name": "rm ~/.hack_rc_mode",
+        "shell": "rm $HOME/.hack_rc_mode || true",
+        "user": "root"
+      },
+      {
+        "logs": {
+          "perf.txt": "Perf results"
+        },
+        "name": "Summarize",
+        "shell": "hhscripts/sandcastle_perf.sh --control '@everstore:GBy00BmMsMxlu1YFAHYHtssH6HwIbnsIAAAL' --test '@everstore:GLrtzBlHrrk4gfIAAEmVhegUZbk7bnsIAAAL' --www '774859ddcc88b0129bd5189b3b62e547ab874ae0' --timestamp '1710512352' --scripts '@everstore:GEtjvhljex-t6scFAA64jR4ZRDdObnsIAAAL' --wwwderiv '@everstore:GPzdVBmppJksQ2QEAPiNJ1VckNc_bnsIAAAL' --sscontrol '@everstore:GICWmADFzsnGQ2cDAMJVov6tOKQ5bnsIAAAL' --sstest '@everstore:GICWmACQoWDR0ZMFAOQSGhNjccs4bnsIAAAL' --reps '16' --desc 'continuous_hourly_rust_decls' --owner 'chronos'  --priority '5' --pingme 'off' --fixmes 'add' --decl 'rust' --worker-type 'www' --instrumentation 'off' --init-kind 'all' --architecture 'hh_server' --scenarios 'all' --poison 2 --re 'off' --results '418215074785752' --output perf.txt",
+        "user": "root"
+      }
+    ],
+    "timeout": 14400
+  },
+  "capabilities": {
+    "os": "centos_8",
+    "sandcastle_package": "www_ci",
+    "tenant": "hh_perf_misc_www",
+    "type": "www",
+    "vcs": "hg",
+    "unicastle_size": "I3_SMALLPLUSPLUS",
+    "reservation_type": "guaranteed|opportunistic",
+    "job_duration": "long_running"
+  },
+  "alias": "hh_perf_results"
+}

@@ -20,13 +20,11 @@ namespace mcrouter {
  */
 FOLLY_ATTR_WEAK std::shared_ptr<void> gSRInitHook(
     std::shared_ptr<folly::IOThreadPoolExecutorBase>,
-    const std::string& /* threadPrefix */,
     const McrouterOptions&);
 
 FOLLY_ATTR_WEAK void gAxonInitHook(
     CarbonRouterInstanceBase& router,
-    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool,
-    const std::string& threadPrefix);
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool);
 
 class StatsApi;
 

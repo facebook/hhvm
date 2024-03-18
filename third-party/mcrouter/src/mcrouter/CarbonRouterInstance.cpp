@@ -34,6 +34,17 @@ bool isValidRouterName(folly::StringPiece name) {
   return true;
 }
 
+std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
+    const McrouterOptions& opts) {
+  const size_t numProxies = opts.num_proxies;
+  auto threadPrefix = folly::to<std::string>("mcrpxy-", opts.router_name);
+  std::shared_ptr<folly::ThreadFactory> threadFactory =
+      std::make_shared<folly::NamedThreadFactory>(threadPrefix);
+
+  return std::make_unique<folly::IOThreadPoolExecutor>(
+      numProxies /* max */, numProxies /* min */, std::move(threadFactory));
+}
+
 } // namespace detail
 
 void freeAllRouters() {
@@ -94,6 +105,7 @@ void CpuStatsWorker::calculateCpuStats() {
   usedCpuTime_ = currUsedCpuTime;
   startMs_ = end;
 }
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

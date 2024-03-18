@@ -43,6 +43,9 @@ namespace detail {
 
 bool isValidRouterName(folly::StringPiece name);
 
+std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
+    const McrouterOptions& opts);
+
 } // namespace detail
 
 template <class RouterInfo>
@@ -256,18 +259,11 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       }
     }
 
-    std::string threadPrefix;
-    // Create an IOThreadPooLExecutor if there are no evbs configured
+    // Create an IOThreadPoolExecutor if there are no evbs configured
     if (!proxyThreads_) {
-      // Create IOThreadPoolExecutor
       try {
-        threadPrefix = folly::to<std::string>("mcrpxy-", opts_.router_name);
-        proxyThreads_ = std::make_shared<folly::IOThreadPoolExecutor>(
-            opts_.num_proxies /* max */,
-            opts_.num_proxies /* min */,
-            std::make_shared<folly::NamedThreadFactory>(threadPrefix));
+        proxyThreads_ = detail::createProxyThreadsExecutor(opts_);
         embeddedMode_ = true;
-
       } catch (...) {
         return folly::makeUnexpected(folly::sformat(
             "Failed to create IOThreadPoolExecutor {}",
@@ -292,7 +288,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
 
     if (opts_.enable_service_router && mcrouter::gSRInitHook) {
       try {
-        setMetadata(mcrouter::gSRInitHook(proxyThreads_, threadPrefix, opts_));
+        setMetadata(mcrouter::gSRInitHook(proxyThreads_, opts_));
       } catch (...) {
         return folly::makeUnexpected(folly::sformat(
             "Failed to create SR {}",
@@ -307,7 +303,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
 
     if (opts_.enable_axonlog && mcrouter::gAxonInitHook) {
       try {
-        mcrouter::gAxonInitHook(*this, proxyThreads_, threadPrefix);
+        mcrouter::gAxonInitHook(*this, proxyThreads_);
       } catch (...) {
         return folly::makeUnexpected(folly::sformat(
             "Failed to create SR for Axon proxy {}",

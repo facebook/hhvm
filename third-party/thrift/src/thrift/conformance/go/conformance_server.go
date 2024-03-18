@@ -268,41 +268,36 @@ func deserialize(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, 
 
 // newSerializer initializes the appropriate serializer for the specific protocol.
 func newSerializer(protoc *protocol.ProtocolStruct) (*thrift.Serializer, error) {
-	factory, err := getProtocolFactory(protoc)
-	if err != nil {
-		return nil, err
+	switch protoc.GetStandard() {
+	case protocol.StandardProtocol_Custom:
+	case protocol.StandardProtocol_Binary:
+		return thrift.NewSerializer(), nil
+	case protocol.StandardProtocol_Compact:
+		return thrift.NewCompactSerializer(), nil
+	case protocol.StandardProtocol_Json:
+		return thrift.NewSimpleJSONSerializer(), nil
+	case protocol.StandardProtocol_SimpleJson:
+		return thrift.NewJSONSerializer(), nil
 	}
-	s := thrift.NewSerializer()
-	s.Protocol = factory.GetProtocol(s.Transport)
-	return s, nil
+	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
+	return thrift.NewCompactSerializer(), nil
 }
 
 // newDeserializer initializes the appropriate deserializer for the specific protocol.
 func newDeserializer(protoc *protocol.ProtocolStruct) (*thrift.Deserializer, error) {
-	factory, err := getProtocolFactory(protoc)
-	if err != nil {
-		return nil, err
-	}
-	d := thrift.NewDeserializer()
-	d.Protocol = factory.GetProtocol(d.Transport)
-	return d, nil
-}
-
-// getProtocolFactory is given a target protocol, which it uses to return a protocol factory that is used to initialise a Serializer or Deserializer.
-func getProtocolFactory(protoc *protocol.ProtocolStruct) (thrift.ProtocolFactory, error) {
 	switch protoc.GetStandard() {
 	case protocol.StandardProtocol_Custom:
 	case protocol.StandardProtocol_Binary:
-		return thrift.NewBinaryProtocolFactoryDefault(), nil
+		return thrift.NewDeserializer(), nil
 	case protocol.StandardProtocol_Compact:
-		return thrift.NewCompactProtocolFactory(), nil
+		return thrift.NewCompactDeserializer(), nil
 	case protocol.StandardProtocol_Json:
-		return thrift.NewSimpleJSONProtocolFactory(), nil
+		return thrift.NewSimpleJSONDeserializer(), nil
 	case protocol.StandardProtocol_SimpleJson:
-		return thrift.NewJSONProtocolFactory(), nil
+		return thrift.NewJSONDeserializer(), nil
 	}
 	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
-	return thrift.NewCompactProtocolFactory(), nil
+	return thrift.NewCompactDeserializer(), nil
 }
 
 // getTargetProtocol returns a consistent target protocol in the ProtocolStruct, whether the target protocol was set or not.

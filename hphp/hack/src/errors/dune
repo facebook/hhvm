@@ -49,7 +49,7 @@
    errors
    highlighted_error_formatter
    phase_error
-   quickfix_ffp
+   classish_positions
    raw_error_formatter
    error_message_sentinel)
  (libraries

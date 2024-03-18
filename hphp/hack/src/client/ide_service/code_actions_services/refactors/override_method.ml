@@ -86,10 +86,11 @@ let override_method_refactorings_at ~start_line ~start_col =
   end
 
 let to_edits
-    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
+    (classish_information :
+      Pos.t Classish_positions.classish_information SMap.t)
     (quickfix : t) : Code_action_types.edit list =
   match SMap.find_opt quickfix.name classish_information with
-  | Some Quickfix_ffp.{ classish_start; _ } ->
+  | Some Classish_positions.{ classish_start; _ } ->
     [Code_action_types.{ pos = classish_start; text = quickfix.text }]
   | None ->
     let () =
@@ -101,7 +102,8 @@ let to_edits
 
 let refactor_action
     path
-    (classish_information : Pos.t Quickfix_ffp.classish_information SMap.t)
+    (classish_information :
+      Pos.t Classish_positions.classish_information SMap.t)
     (quickfix : t) : Code_action_types.refactor =
   let edits =
     lazy
@@ -120,7 +122,7 @@ let find ~entry pos ctx =
   let source_text = Ast_provider.compute_source_text ~entry in
 
   let classish_information =
-    Quickfix_ffp.classish_information tree source_text path
+    Classish_positions.classish_information tree source_text path
   in
 
   let { Tast_provider.Compute_tast.tast; _ } =

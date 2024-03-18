@@ -48,32 +48,28 @@ type Struct interface {
 // NewSerializer create a new serializer using the binary protocol
 func NewSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewBinaryProtocolFactoryDefault().GetProtocol(transport)
-
+	protocol := NewBinaryProtocolTransport(transport)
 	return &Serializer{transport, protocol}
 }
 
 // NewCompactSerializer creates a new serializer using the compact protocol
 func NewCompactSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewCompactProtocolFactory().GetProtocol(transport)
-
+	protocol := NewCompactProtocol(transport)
 	return &Serializer{transport, protocol}
 }
 
 // NewJSONSerializer creates a new serializer using the JSON protocol
 func NewJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewJSONProtocolFactory().GetProtocol(transport)
-
+	protocol := NewJSONProtocol(transport)
 	return &Serializer{transport, protocol}
 }
 
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON protocol
 func NewSimpleJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewSimpleJSONProtocolFactory().GetProtocol(transport)
-
+	protocol := NewSimpleJSONProtocol(transport)
 	return &Serializer{transport, protocol}
 }
 

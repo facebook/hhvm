@@ -516,10 +516,10 @@ struct RuntimeOption {
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
   F(uint32_t, TsameCollisionSampleRate, 1)                              \
-  F(uint32_t, FsameCollisionSampleRate, 1)                              \
+  F(uint32_t, FsameCollisionSampleRate, 0)                              \
   /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
   F(uint32_t, LogTsameCollisions, 0)                                    \
-  F(uint32_t, LogFsameCollisions, 0)                                    \
+  F(uint32_t, LogFsameCollisions, 2)                                    \
   /* CheckBuiltinParamTypeHints
    * 0 - Do not check parameter type hints of builtins
    * 1 - Treat builtin parameter type hints as <<__Soft>>

@@ -30,14 +30,9 @@ let log pos kind =
   in
   Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)
 
-let is_generated pos =
-  String.is_substring
-    ~substring:"generated"
-    (Pos.to_relative_string pos |> Pos.filename)
-
 let is_toplevelish_dynamic env (ty, hint_opt) =
   match hint_opt with
-  | Some (pos, _) when not @@ is_generated pos ->
+  | Some (pos, _) ->
     let rec is_toplevelish_dynamic ty =
       let (_env, ty) = Tast_env.expand_type env ty in
       let ty =
@@ -91,24 +86,20 @@ let create_handler _ctx =
       log_callable_def env m_ret m_params
 
     method! at_expr _env (_, pos, expr) =
-      if not @@ is_generated pos then
-        let log = log pos in
-        match expr with
-        | Aast.Hole (_, _, _, kind) -> begin
-          match kind with
-          | Aast.Typing -> log HH_FIXME
-          | Aast.UnsafeCast _ -> log UNSAFE_CAST
-          | Aast.UnsafeNonnullCast -> log UNSAFE_CAST
-          | _ -> ()
-        end
-        | Aast.As _ -> log TYPE_ASSERTION
-        | Aast.Call
-            Aast.
-              {
-                func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, cid)), _));
-                _;
-              }
-          when String.equal cid nPHPism_FIXME ->
-          log PHPISM
+      let log = log pos in
+      match expr with
+      | Aast.Hole (_, _, _, kind) -> begin
+        match kind with
+        | Aast.Typing -> log HH_FIXME
+        | Aast.UnsafeCast _ -> log UNSAFE_CAST
+        | Aast.UnsafeNonnullCast -> log UNSAFE_CAST
         | _ -> ()
+      end
+      | Aast.As _ -> log TYPE_ASSERTION
+      | Aast.Call
+          Aast.
+            { func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, cid)), _)); _ }
+        when String.equal cid nPHPism_FIXME ->
+        log PHPISM
+      | _ -> ()
   end

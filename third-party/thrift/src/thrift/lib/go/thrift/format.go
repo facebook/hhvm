@@ -105,9 +105,6 @@ type Format interface {
 
 	Skip(fieldType Type) (err error)
 	Flush() (err error)
-
-	// TODO: Remove this once we have regenerated and started using Protocol instead of Format.
-	Close() error
 }
 
 // Compile time check that all serialization formats implement the interface.

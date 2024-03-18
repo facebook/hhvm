@@ -270,7 +270,3 @@ func (tdp *DebugProtocol) Flush() (err error) {
 	log.Printf("%sFlush() (err=%#v)", tdp.LogPrefix, err)
 	return
 }
-
-func (tdp *DebugProtocol) Close() error {
-	return tdp.Delegate.Close()
-}

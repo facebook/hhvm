@@ -1,8 +1,0 @@
-File "enum.php", line 2, characters 7-20:
-Extending Enum is deprecated, please use Hack enum. https://docs.hhvm.com/hack/enums/ (Lint[5542])
-File "enum.php", line 5, characters 7-17:
-Extending Enum is deprecated, please use Hack enum. https://docs.hhvm.com/hack/enums/ (Lint[5542])
-File "enum.php", line 8, characters 7-23:
-Extending ApiEnum is deprecated, please use Hack enum. https://docs.hhvm.com/hack/enums/ (Lint[5542])
-File "enum.php", line 11, characters 7-20:
-Extending ApiEnum is deprecated, please use Hack enum. https://docs.hhvm.com/hack/enums/ (Lint[5542])

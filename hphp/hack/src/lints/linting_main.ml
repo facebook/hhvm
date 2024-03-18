@@ -13,7 +13,6 @@ let untyped_linters =
     Linter_clone.go;
     Linter_foreach_shadow.go;
     Linter_invariant_violation.go;
-    Linter_of_enums.go;
     Linter_await_in_loop.go;
   ]
   @ Linting_service.untyped_linters

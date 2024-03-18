@@ -19,9 +19,9 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnu
       type::ME0,
       type::ME1,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "ME0",
-      "ME1",
+  static constexpr std::array<std::string_view, size> names = {{
+      "ME0"sv,
+      "ME1"sv,
   }};
 };
 
@@ -44,28 +44,28 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUni
       type::map_field,
       type::struct_field,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "bool_field",
-      "byte_field",
-      "short_field",
-      "int_field",
-      "long_field",
-      "float_field",
-      "double_field",
-      "string_field",
-      "binary_field",
-      "enum_field",
-      "list_field",
-      "set_field",
-      "map_field",
-      "struct_field",
+  static constexpr std::array<std::string_view, size> names = {{
+      "bool_field"sv,
+      "byte_field"sv,
+      "short_field"sv,
+      "int_field"sv,
+      "long_field"sv,
+      "float_field"sv,
+      "double_field"sv,
+      "string_field"sv,
+      "binary_field"sv,
+      "enum_field"sv,
+      "list_field"sv,
+      "set_field"sv,
+      "map_field"sv,
+      "struct_field"sv,
   }};
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct> {
   static constexpr const std::size_t fields_size = 0;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -73,15 +73,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyS
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion> {
   static constexpr const std::size_t fields_size = 14;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -89,15 +89,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyU
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -105,15 +105,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyS
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
   static constexpr const std::size_t fields_size = 15;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -121,15 +121,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Str
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
   static constexpr const std::size_t fields_size = 30;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -137,15 +137,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Fie
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
   static constexpr const std::size_t fields_size = 14;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -153,15 +153,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Ter
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields> {
   static constexpr const std::size_t fields_size = 3;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -169,15 +169,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Ada
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -185,15 +185,15 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Wra
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::TerseException> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -201,7 +201,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Ter
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

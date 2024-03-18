@@ -531,8 +531,8 @@ cdef class EnumData:
 
     def get_all_names(self):
         cdef cEnumData* cpp_obj_ptr = self._cpp_obj.get()
-        cdef cRange[const cStringPiece*] names = cpp_obj_ptr.getNames()
-        cdef cStringPiece name
+        cdef cRange[const string_view*] names = cpp_obj_ptr.getNames()
+        cdef string_view name
         for name in names:
             yield sv_to_str(cpp_obj_ptr.getPyName(string_view(name.data())))
 

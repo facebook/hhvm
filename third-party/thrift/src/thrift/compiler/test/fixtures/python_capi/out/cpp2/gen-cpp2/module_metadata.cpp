@@ -34,7 +34,7 @@ void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& me
   enum_metadata.name() = "module.MyEnum";
   using EnumTraits = TEnumTraits<::test::fixtures::python_capi::MyEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMe
   enum_metadata.name() = "module.AnnoyingEnum";
   using EnumTraits = TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
   enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("NormalDecentEnum")}}).cv_struct_ref());
 }

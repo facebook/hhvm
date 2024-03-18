@@ -33,9 +33,9 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::A>::name = "A";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::A>::fields_names = {{
-  "some_map",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::A>::name = "A";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::A>::fields_names = {{
+  "some_map"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::A>::fields_ids = {{
   1,
@@ -43,16 +43,16 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thr
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::A>::fields_types = {{
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::A>::storage_names = {{
-  "__fbthrift_field_some_map",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::A>::storage_names = {{
+  "__fbthrift_field_some_map"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::test::A>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::B>::name = "B";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::B>::fields_names = {{
-  "field",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::B>::name = "B";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::B>::fields_names = {{
+  "field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::B>::fields_ids = {{
   1,
@@ -60,8 +60,8 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thr
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::B>::fields_types = {{
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::B>::storage_names = {{
-  "__fbthrift_field_field",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::B>::storage_names = {{
+  "__fbthrift_field_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::test::B>::isset_indexes = {{
   0,

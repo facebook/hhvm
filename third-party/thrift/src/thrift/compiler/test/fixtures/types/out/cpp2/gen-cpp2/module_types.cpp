@@ -15,13 +15,13 @@
 namespace apache { namespace thrift {
 
 folly::Range<::apache::thrift::fixtures::types::has_bitwise_ops const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names);
 
-bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -31,13 +31,13 @@ bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(
 namespace apache { namespace thrift {
 
 folly::Range<::apache::thrift::fixtures::types::is_unscoped const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names);
 
-bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -47,13 +47,13 @@ bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(foll
 namespace apache { namespace thrift {
 
 folly::Range<::apache::thrift::fixtures::types::MyForwardRefEnum const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names);
 
-bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 

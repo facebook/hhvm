@@ -34,7 +34,7 @@ void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata
   enum_metadata.name() = "module.Color";
   using EnumTraits = TEnumTraits<::facebook::thrift::test::Color>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetadata& metadata) {
@@ -46,7 +46,7 @@ void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetada
   enum_metadata.name() = "module.ThriftAdaptedEnum";
   using EnumTraits = TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

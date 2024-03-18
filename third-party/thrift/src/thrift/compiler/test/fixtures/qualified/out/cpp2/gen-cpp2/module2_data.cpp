@@ -33,10 +33,10 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::module2::Struct>::name = "Struct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::Struct>::fields_names = {{
-  "first",
-  "second",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::module2::Struct>::name = "Struct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::module2::Struct>::fields_names = {{
+  "first"sv,
+  "second"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::module2::Struct>::fields_ids = {{
   1,
@@ -46,19 +46,19 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::mod
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::Struct>::storage_names = {{
-  "__fbthrift_field_first",
-  "__fbthrift_field_second",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::module2::Struct>::storage_names = {{
+  "__fbthrift_field_first"sv,
+  "__fbthrift_field_second"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::module2::Struct>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::module2::BigStruct>::name = "BigStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::BigStruct>::fields_names = {{
-  "s",
-  "id",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::module2::BigStruct>::name = "BigStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::module2::BigStruct>::fields_names = {{
+  "s"sv,
+  "id"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::module2::BigStruct>::fields_ids = {{
   1,
@@ -68,9 +68,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::mod
   TType::T_STRUCT,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::BigStruct>::storage_names = {{
-  "__fbthrift_field_s",
-  "__fbthrift_field_id",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::module2::BigStruct>::storage_names = {{
+  "__fbthrift_field_s"sv,
+  "__fbthrift_field_id"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::module2::BigStruct>::isset_indexes = {{
   0,

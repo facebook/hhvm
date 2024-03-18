@@ -22,12 +22,12 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnum> {
       type::THREE,
       type::FOUR,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "None",
-      "ONE",
-      "TWO",
-      "THREE",
-      "FOUR",
+  static constexpr std::array<std::string_view, size> names = {{
+      "None"sv,
+      "ONE"sv,
+      "TWO"sv,
+      "THREE"sv,
+      "FOUR"sv,
   }};
 };
 
@@ -39,10 +39,10 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed> {
       type::value,
       type::normal,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "name",
-      "value",
-      "normal",
+  static constexpr std::array<std::string_view, size> names = {{
+      "name"sv,
+      "value"sv,
+      "normal"sv,
   }};
 };
 
@@ -55,11 +55,11 @@ template <> struct TEnumDataStorage<::py3::simple::Flags> {
       type::flag_C,
       type::flag_D,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "flag_A",
-      "flag_B",
-      "flag_C",
-      "flag_D",
+  static constexpr std::array<std::string_view, size> names = {{
+      "flag_A"sv,
+      "flag_B"sv,
+      "flag_C"sv,
+      "flag_D"sv,
   }};
 };
 
@@ -69,8 +69,8 @@ template <> struct TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type> {
   static constexpr std::array<type, size> values = {{
       type::best,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "best",
+  static constexpr std::array<std::string_view, size> names = {{
+      "best"sv,
   }};
 };
 
@@ -80,15 +80,15 @@ template <> struct TEnumDataStorage<::py3::simple::BinaryUnion::Type> {
   static constexpr std::array<type, size> values = {{
       type::iobuf_val,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "iobuf_val",
+  static constexpr std::array<std::string_view, size> names = {{
+      "iobuf_val"sv,
   }};
 };
 
 template <> struct TStructDataStorage<::py3::simple::SimpleException> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -96,15 +96,15 @@ template <> struct TStructDataStorage<::py3::simple::SimpleException> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::OptionalRefStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -112,15 +112,15 @@ template <> struct TStructDataStorage<::py3::simple::OptionalRefStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::SimpleStruct> {
   static constexpr const std::size_t fields_size = 8;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -128,15 +128,15 @@ template <> struct TStructDataStorage<::py3::simple::SimpleStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct> {
   static constexpr const std::size_t fields_size = 3;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -144,15 +144,15 @@ template <> struct TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::detail::AdaptedUnion> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -160,15 +160,15 @@ template <> struct TStructDataStorage<::py3::simple::detail::AdaptedUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::HiddenException> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -176,15 +176,15 @@ template <> struct TStructDataStorage<::py3::simple::HiddenException> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::ComplexStruct> {
   static constexpr const std::size_t fields_size = 9;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -192,15 +192,15 @@ template <> struct TStructDataStorage<::py3::simple::ComplexStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::BinaryUnion> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -208,15 +208,15 @@ template <> struct TStructDataStorage<::py3::simple::BinaryUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::py3::simple::BinaryUnionStruct> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -224,7 +224,7 @@ template <> struct TStructDataStorage<::py3::simple::BinaryUnionStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

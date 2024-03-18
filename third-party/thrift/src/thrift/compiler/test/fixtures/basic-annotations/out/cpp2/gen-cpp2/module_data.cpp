@@ -33,9 +33,9 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStructNestedAnnotation>::name = "MyStructNestedAnnotation";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_names = {{
-  "name",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::MyStructNestedAnnotation>::name = "MyStructNestedAnnotation";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_names = {{
+  "name"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_ids = {{
   1,
@@ -43,48 +43,48 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStr
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::storage_names = {{
-  "__fbthrift_field_name",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::storage_names = {{
+  "__fbthrift_field_name"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourUnion>::name = "MyUnion";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_ids = {{
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_types = {{
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::storage_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourUnion>::isset_indexes = {{
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourException>::name = "MyException";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = {{
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourException>::name = "MyException";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_ids = {{
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_types = {{
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::storage_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourException>::isset_indexes = {{
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
-  "major",
-  "abstract",
-  "annotation_with_quote",
-  "class_",
-  "annotation_with_trailing_comma",
-  "empty_annotations",
-  "my_enum",
-  "cpp_type_annotation",
-  "my_union",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
+  "major"sv,
+  "abstract"sv,
+  "annotation_with_quote"sv,
+  "class_"sv,
+  "annotation_with_trailing_comma"sv,
+  "empty_annotations"sv,
+  "my_enum"sv,
+  "cpp_type_annotation"sv,
+  "my_union"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_ids = {{
   2,
@@ -108,16 +108,16 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp
   TType::T_LIST,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
-  "__fbthrift_field_majorVer",
-  "__fbthrift_field_abstract",
-  "__fbthrift_field_annotation_with_quote",
-  "__fbthrift_field_class_",
-  "__fbthrift_field_annotation_with_trailing_comma",
-  "__fbthrift_field_empty_annotations",
-  "__fbthrift_field_my_enum",
-  "__fbthrift_field_cpp_type_annotation",
-  "__fbthrift_field_my_union",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
+  "__fbthrift_field_majorVer"sv,
+  "__fbthrift_field_abstract"sv,
+  "__fbthrift_field_annotation_with_quote"sv,
+  "__fbthrift_field_class_"sv,
+  "__fbthrift_field_annotation_with_trailing_comma"sv,
+  "__fbthrift_field_empty_annotations"sv,
+  "__fbthrift_field_my_enum"sv,
+  "__fbthrift_field_cpp_type_annotation"sv,
+  "__fbthrift_field_my_union"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = {{
   0,
@@ -131,10 +131,10 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::Y
   8,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::SecretStruct>::name = "SecretStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = {{
-  "id",
-  "password",
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::SecretStruct>::name = "SecretStruct";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = {{
+  "id"sv,
+  "password"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_ids = {{
   1,
@@ -144,9 +144,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SecretStruct>::storage_names = {{
-  "__fbthrift_field_id",
-  "__fbthrift_field_password",
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::storage_names = {{
+  "__fbthrift_field_id"sv,
+  "__fbthrift_field_password"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SecretStruct>::isset_indexes = {{
   0,

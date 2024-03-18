@@ -34,7 +34,7 @@ void EnumMetadata<::facebook::thrift::test::Enum>::gen(ThriftMetadata& metadata)
   enum_metadata.name() = "module.Enum";
   using EnumTraits = TEnumTraits<::facebook::thrift::test::Enum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

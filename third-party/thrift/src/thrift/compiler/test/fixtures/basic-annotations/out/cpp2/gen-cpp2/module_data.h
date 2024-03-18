@@ -20,10 +20,10 @@ template <> struct TEnumDataStorage<::cpp2::YourEnum> {
       type::MyValue2,
       type::REALM,
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
-      "MyValue1",
-      "MyValue2",
-      "DOMAIN",
+  static constexpr std::array<std::string_view, size> names = {{
+      "MyValue1"sv,
+      "MyValue2"sv,
+      "DOMAIN"sv,
   }};
 };
 
@@ -32,14 +32,14 @@ template <> struct TEnumDataStorage<::cpp2::detail::YourUnion::Type> {
   static constexpr const std::size_t size = 0;
   static constexpr std::array<type, size> values = {{
   }};
-  static constexpr std::array<folly::StringPiece, size> names = {{
+  static constexpr std::array<std::string_view, size> names = {{
   }};
 };
 
 template <> struct TStructDataStorage<::cpp2::MyStructNestedAnnotation> {
   static constexpr const std::size_t fields_size = 1;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -47,15 +47,15 @@ template <> struct TStructDataStorage<::cpp2::MyStructNestedAnnotation> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::detail::YourUnion> {
   static constexpr const std::size_t fields_size = 0;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -63,15 +63,15 @@ template <> struct TStructDataStorage<::cpp2::detail::YourUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::detail::YourException> {
   static constexpr const std::size_t fields_size = 0;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -79,15 +79,15 @@ template <> struct TStructDataStorage<::cpp2::detail::YourException> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::detail::YourStruct> {
   static constexpr const std::size_t fields_size = 9;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -95,15 +95,15 @@ template <> struct TStructDataStorage<::cpp2::detail::YourStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::cpp2::SecretStruct> {
   static constexpr const std::size_t fields_size = 2;
-  static const folly::StringPiece name;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
 
@@ -111,7 +111,7 @@ template <> struct TStructDataStorage<::cpp2::SecretStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
+  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

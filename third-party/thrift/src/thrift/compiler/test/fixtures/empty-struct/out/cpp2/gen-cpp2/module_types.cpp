@@ -107,13 +107,13 @@ void TccStructTraits<::cpp2::Nada>::translateFieldName(
 namespace apache { namespace thrift {
 
 folly::Range<::cpp2::Nada::Type const*> const TEnumTraits<::cpp2::Nada::Type>::values = folly::range(TEnumDataStorage<::cpp2::Nada::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::Nada::Type>::names = folly::range(TEnumDataStorage<::cpp2::Nada::Type>::names);
+folly::Range<std::string_view const*> const TEnumTraits<::cpp2::Nada::Type>::names = folly::range(TEnumDataStorage<::cpp2::Nada::Type>::names);
 
-bool TEnumTraits<::cpp2::Nada::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::cpp2::Nada::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::Nada::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::cpp2::Nada::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift

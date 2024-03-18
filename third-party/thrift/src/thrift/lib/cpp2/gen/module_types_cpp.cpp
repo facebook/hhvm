@@ -40,7 +40,7 @@ static_assert(
     "oversized");
 
 FOLLY_NOINLINE void translate_field_name(
-    folly::StringPiece fname,
+    std::string_view fname,
     int16_t& fid,
     protocol::TType& ftype,
     const translate_field_name_table& table) noexcept {

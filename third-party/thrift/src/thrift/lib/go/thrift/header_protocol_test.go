@@ -31,11 +31,11 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("wrong number of headers")
 	}
 
-	proto1.(PersistentHeaders).SetPersistentHeader("preferred_cheese", "gouda")
-	if v, _ := proto1.(PersistentHeaders).GetPersistentHeader("preferred_cheese"); v != "gouda" {
+	proto1.SetPersistentHeader("preferred_cheese", "gouda")
+	if v, _ := proto1.GetPersistentHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to set persistent header")
 	}
-	if len(proto1.(PersistentHeaders).GetPersistentHeaders()) != 1 {
+	if len(proto1.GetPersistentHeaders()) != 1 {
 		t.Fatalf("wrong number of headers")
 	}
 
@@ -53,7 +53,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to read message from proto1 in proto2")
 	}
 
-	if v, _ := proto2.(ResponseHeaderGetter).GetResponseHeader("preferred_cheese"); v != "gouda" {
+	if v, _ := proto2.GetResponseHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to read header, got: %s", v)
 	}
 

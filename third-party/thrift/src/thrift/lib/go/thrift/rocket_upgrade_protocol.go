@@ -74,11 +74,11 @@ func (p *upgradeToRocketProtocol) upgradeToRocket() error {
 
 func (p *upgradeToRocketProtocol) SetPersistentHeader(key, value string) {
 	if p.Protocol == nil {
-		p.rocketProtocol.(PersistentHeaders).SetPersistentHeader(key, value)
-		p.headerProtocol.(PersistentHeaders).SetPersistentHeader(key, value)
+		p.rocketProtocol.SetPersistentHeader(key, value)
+		p.headerProtocol.SetPersistentHeader(key, value)
 		return
 	}
-	p.Protocol.(PersistentHeaders).SetPersistentHeader(key, value)
+	p.Protocol.SetPersistentHeader(key, value)
 }
 
 func (p *upgradeToRocketProtocol) GetPersistentHeader(key string) (string, bool) {
@@ -88,23 +88,23 @@ func (p *upgradeToRocketProtocol) GetPersistentHeader(key string) (string, bool)
 
 func (p *upgradeToRocketProtocol) GetPersistentHeaders() map[string]string {
 	if p.Protocol == nil {
-		headers := p.headerProtocol.(PersistentHeaders).GetPersistentHeaders()
-		rocketHeaders := p.rocketProtocol.(PersistentHeaders).GetPersistentHeaders()
+		headers := p.headerProtocol.GetPersistentHeaders()
+		rocketHeaders := p.rocketProtocol.GetPersistentHeaders()
 		for k, v := range rocketHeaders {
 			headers[k] = v
 		}
 		return headers
 	}
-	return p.Protocol.(PersistentHeaders).GetPersistentHeaders()
+	return p.Protocol.GetPersistentHeaders()
 }
 
 func (p *upgradeToRocketProtocol) ClearPersistentHeaders() {
 	if p.Protocol == nil {
-		p.rocketProtocol.(PersistentHeaders).ClearPersistentHeaders()
-		p.headerProtocol.(PersistentHeaders).ClearPersistentHeaders()
+		p.rocketProtocol.ClearPersistentHeaders()
+		p.headerProtocol.ClearPersistentHeaders()
 		return
 	}
-	p.Protocol.(PersistentHeaders).ClearPersistentHeaders()
+	p.Protocol.ClearPersistentHeaders()
 }
 
 func (p *upgradeToRocketProtocol) SetRequestHeader(key, value string) {
@@ -140,12 +140,12 @@ func (p *upgradeToRocketProtocol) GetResponseHeader(key string) (string, bool) {
 
 func (p *upgradeToRocketProtocol) GetResponseHeaders() map[string]string {
 	if p.Protocol == nil {
-		headers := p.headerProtocol.(ResponseHeaderGetter).GetResponseHeaders()
-		rocketHeaders := p.rocketProtocol.(ResponseHeaderGetter).GetResponseHeaders()
+		headers := p.headerProtocol.GetResponseHeaders()
+		rocketHeaders := p.rocketProtocol.GetResponseHeaders()
 		for k, v := range rocketHeaders {
 			headers[k] = v
 		}
 		return headers
 	}
-	return p.Protocol.(ResponseHeaderGetter).GetResponseHeaders()
+	return p.Protocol.GetResponseHeaders()
 }

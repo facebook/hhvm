@@ -579,49 +579,12 @@ cdef class Struct(StructOrUnion):
         _fbthrift_field_cache: Tuple
     """
 
-    def __cinit__(self):
+    def __cinit__(self, **kwargs):
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        self._fbthrift_data = createStructTupleWithDefaultValues(
-            struct_info.cpp_obj.get().getStructInfo()
-        )
+        self._initStructTupleWithValues(kwargs)
         self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
 
     def __init__(self, **kwargs):
-        """
-
-        Args:
-            **kwargs: names and values of the Thrift fields to set for this
-                 instance. All names must match declared fields of this Thrift
-                 Struct (or a `TypeError` will be raised).
-        """
-        cdef StructInfo struct_info = self._fbthrift_struct_info
-        for name, value in kwargs.items():
-            field_index = struct_info.name_to_index.get(name)
-            if field_index is None:
-                raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
-            if value is None:
-                continue
-
-            field_spec = struct_info.fields[field_index]
-
-            # Handle field w/ adapter
-            adapter_info = field_spec[5]
-            if adapter_info is not None:
-                adapter_class, transitive_annotation = adapter_info
-                field_id = field_spec[0]
-                value = adapter_class.to_thrift_field(
-                    value,
-                    field_id,
-                    self,
-                    transitive_annotation=transitive_annotation(),
-                )
-
-            self.try_set_struct_field(
-                    field_index,
-                    struct_info,
-                    name,
-                    value,
-            )
         self._fbthrift_populate_primitive_fields()
 
     def try_set_struct_field(
@@ -792,6 +755,51 @@ cdef class Struct(StructOrUnion):
                     if not isinstance(elem, Struct):
                         break
                     (<Struct>elem)._fbthrift_fully_populate_cache()
+
+    cdef _initStructTupleWithValues(self, kwargs):
+        cdef StructInfo struct_info = self._fbthrift_struct_info
+
+        # If no keyword arguments are provided, initialize the Struct with default values.
+        if not kwargs:
+            self._fbthrift_data = createStructTupleWithDefaultValues(struct_info.cpp_obj.get().getStructInfo())
+            return
+
+        # Instantiate a tuple with 'None' values, then assign the provided keyword arguments
+        # to the respective fields.
+        self._fbthrift_data = createStructTupleWithNones(struct_info.cpp_obj.get().getStructInfo())
+        for name, value in kwargs.items():
+            field_index = struct_info.name_to_index.get(name)
+            if field_index is None:
+                raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
+            if value is None:
+                continue
+
+            field_spec = struct_info.fields[field_index]
+
+            # Handle field w/ adapter
+            adapter_info = field_spec[5]
+            if adapter_info is not None:
+                adapter_class, transitive_annotation = adapter_info
+                field_id = field_spec[0]
+                value = adapter_class.to_thrift_field(
+                            value,
+                            field_id,
+                            self,
+                            transitive_annotation=transitive_annotation(),
+                        )
+
+            self.try_set_struct_field(
+                    field_index,
+                    struct_info,
+                    name,
+                    value,
+            )
+
+        # If any fields remain unset, initialize them with their respective default values.
+        populateStructTupleUnsetFieldsWithDefaultValues(
+                self._fbthrift_data,
+                struct_info.cpp_obj.get().getStructInfo()
+        )
 
     @classmethod
     def _fbthrift_create(cls, data):

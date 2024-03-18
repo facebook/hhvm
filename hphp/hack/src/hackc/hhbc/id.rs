@@ -138,7 +138,6 @@ impl std::fmt::Display for AdataId {
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct ClassName(StringId);
-pub type ClassNameMap<T> = indexmap::IndexMap<ClassName, T, newtype::BuildIdHasher<u32>>;
 
 impl_intern_id!(ClassName);
 

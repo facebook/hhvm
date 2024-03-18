@@ -15,7 +15,6 @@ use crate::BlockId;
 use crate::BlockIdMap;
 use crate::BytesId;
 use crate::ClassName;
-use crate::ClassNameMap;
 use crate::Coeffects;
 use crate::FunctionFlags;
 use crate::FunctionName;
@@ -31,6 +30,7 @@ use crate::MethodName;
 use crate::SrcLoc;
 use crate::StringId;
 use crate::TypeInfo;
+use crate::UpperBound;
 use crate::ValueId;
 use crate::ValueIdMap;
 use crate::Visibility;
@@ -183,7 +183,7 @@ pub struct Func {
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassName>,
     pub loc_id: LocId,
-    pub tparams: ClassNameMap<TParamBounds>,
+    pub upper_bounds: Vec<UpperBound>,
 }
 
 impl Func {
@@ -425,9 +425,4 @@ pub struct Method {
     pub func: Func,
     pub name: MethodName,
     pub visibility: Visibility,
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct TParamBounds {
-    pub bounds: Vec<TypeInfo>,
 }

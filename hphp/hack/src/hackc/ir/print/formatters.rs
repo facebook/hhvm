@@ -31,6 +31,7 @@ use ir_core::ReadonlyOp;
 use ir_core::SetOpOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
+use ir_core::UpperBound;
 use ir_core::*;
 
 use crate::print::FuncContext;
@@ -675,12 +676,12 @@ impl Display for FmtSpecialClsRef {
     }
 }
 
-pub(crate) struct FmtTParams<'a>(pub(crate) &'a ClassNameMap<TParamBounds>);
+pub(crate) struct FmtTParams<'a>(pub(crate) &'a [UpperBound]);
 
 impl Display for FmtTParams<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtTParams(map) = self;
-        if map.is_empty() {
+        let FmtTParams(bounds) = self;
+        if bounds.is_empty() {
             Ok(())
         } else {
             write!(
@@ -688,13 +689,13 @@ impl Display for FmtTParams<'_> {
                 // Since tparams end with '>' we need an extra space to make
                 // sure we don't confuse with '>>'.
                 "<{} >",
-                FmtSep::comma(map.iter(), |f, (name, bounds)| {
+                FmtSep::comma(bounds.iter(), |f, UpperBound { name, bounds }| {
                     FmtIdentifierId(name.as_bytes_id()).fmt(f)?;
-                    if !bounds.bounds.is_empty() {
+                    if !bounds.is_empty() {
                         write!(f, ": ")?;
                         let mut sep = "";
-                        for bound in bounds.bounds.iter() {
-                            write!(f, "{sep}{}", FmtTypeInfo(bound))?;
+                        for t in bounds.iter() {
+                            write!(f, "{sep}{}", FmtTypeInfo(t))?;
                             sep = " + ";
                         }
                     }

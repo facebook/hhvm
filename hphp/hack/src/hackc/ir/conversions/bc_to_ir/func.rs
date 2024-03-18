@@ -12,7 +12,6 @@ use ir::func::DefaultValue;
 use ir::instr::Terminator;
 use ir::CcReified;
 use ir::CcThis;
-use ir::ClassNameMap;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
@@ -99,14 +98,6 @@ fn convert_body<'a>(
         stack_depth: _,
     } = *body;
 
-    let tparams: ClassNameMap<_> = upper_bounds
-        .iter()
-        .map(|hhbc::UpperBound { name, bounds }| {
-            let bounds = bounds.clone().into();
-            (*name, ir::TParamBounds { bounds })
-        })
-        .collect();
-
     let shadowed_tparams: Vec<ir::ClassName> = shadowed_tparams
         .iter()
         .map(|s| ir::ClassName::new(*s))
@@ -134,7 +125,7 @@ fn convert_body<'a>(
         return_type: types::convert_maybe_type(return_type_info.as_ref()),
         shadowed_tparams,
         loc_id: ir::LocId::from_usize(0),
-        tparams,
+        upper_bounds: upper_bounds.clone().into(),
     };
 
     let mut ctx = Context::new(func, body_instrs, unit_state);

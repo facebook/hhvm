@@ -306,7 +306,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         params: a_params,
         return_type: a_return_type,
         shadowed_tparams: a_shadowed_tparams,
-        tparams: a_tparams,
+        upper_bounds: a_upper_bounds,
     } = a;
     let Func {
         attributes: b_attributes,
@@ -325,7 +325,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         params: b_params,
         return_type: b_return_type,
         shadowed_tparams: b_shadowed_tparams,
-        tparams: b_tparams,
+        upper_bounds: b_upper_bounds,
     } = b;
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
@@ -341,7 +341,12 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
     cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
         .qualified("shadowed_tparams")?;
 
-    cmp_map_t(a_tparams, b_tparams, cmp_tparam_bounds).qualified("tparams")?;
+    cmp_slice(
+        a_upper_bounds.iter(),
+        b_upper_bounds.iter(),
+        cmp_tparam_bounds,
+    )
+    .qualified("tparams")?;
 
     cmp_slice(a_blocks.iter(), b_blocks.iter(), cmp_block).qualified("blocks")?;
     cmp_map_t(a_ex_frames.iter(), b_ex_frames.iter(), cmp_ex_frame).qualified("ex_frames")?;
@@ -1383,14 +1388,9 @@ fn cmp_symbol_refs(a: &SymbolRefs, b: &SymbolRefs) -> Result {
     Ok(())
 }
 
-fn cmp_tparam_bounds(
-    (a_id, a): (&ClassName, &TParamBounds),
-    (b_id, b): (&ClassName, &TParamBounds),
-) -> Result {
-    cmp_eq(a_id, b_id).qualified("0")?;
-    cmp_slice(a.bounds.iter(), b.bounds.iter(), cmp_type_info)
-        .qualified("bounds")
-        .qualified("1")?;
+fn cmp_tparam_bounds(a: &UpperBound, b: &UpperBound) -> Result {
+    cmp_eq(a.name, b.name).qualified("name")?;
+    cmp_slice(a.bounds.iter(), b.bounds.iter(), cmp_type_info).qualified("bounds")?;
     Ok(())
 }
 
@@ -1589,12 +1589,6 @@ mod mapping {
     impl MapName for &Method {
         fn get_name(&self) -> String {
             self.name.into_string()
-        }
-    }
-
-    impl MapName for (&ClassName, &TParamBounds) {
-        fn get_name(&self) -> String {
-            self.0.as_str().to_owned()
         }
     }
 }

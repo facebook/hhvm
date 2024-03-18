@@ -78,17 +78,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     }));
 
     let doc_comment = func.doc_comment.map(|c| c.into()).into();
-
-    let upper_bounds = Vec::from_iter(func.tparams.into_iter().map(|(name, tparam)| {
-        hhbc::UpperBound {
-            name,
-            bounds: tparam
-                .bounds
-                .iter()
-                .map(|ty| crate::types::convert(ty).unwrap())
-                .collect(),
-        }
-    }));
+    let upper_bounds = func.upper_bounds.into();
 
     let shadowed_tparams =
         Vec::from_iter(func.shadowed_tparams.iter().map(|name| name.as_string_id()));
@@ -106,7 +96,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
         params: params.into(),
         return_type_info,
         shadowed_tparams: shadowed_tparams.into(),
-        upper_bounds: upper_bounds.into(),
+        upper_bounds,
         stack_depth,
     }
 }

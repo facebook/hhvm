@@ -30,7 +30,6 @@ use ir_core::BytesId;
 use ir_core::CcParam;
 use ir_core::CcReified;
 use ir_core::CcThis;
-use ir_core::ClassNameMap;
 use ir_core::Coeffects;
 use ir_core::CollectionType;
 use ir_core::ExFrameId;
@@ -53,9 +52,9 @@ use ir_core::QueryMOp;
 use ir_core::SetRangeOp;
 use ir_core::StringId;
 use ir_core::SwitchKind;
-use ir_core::TParamBounds;
 use ir_core::TryCatchId;
 use ir_core::UnnamedLocalId;
+use ir_core::UpperBound;
 use ir_core::ValueId;
 use ir_core::Visibility;
 use itertools::Itertools;
@@ -171,19 +170,20 @@ impl<'b> FunctionParser<'b> {
         parse!(tokenizer, <name:parse_func_name>);
 
         let tparams = if tokenizer.next_is_identifier("<")? {
-            let mut tparams = ClassNameMap::default();
+            let mut tparams = Vec::new();
             parse_comma_list(tokenizer, false, |tokenizer| {
                 let name = parse_class_name(tokenizer)?;
-                let mut bounds = TParamBounds::default();
+                let mut bounds = Vec::new();
                 if tokenizer.next_is_identifier(":")? {
                     loop {
-                        bounds.bounds.push(parse_type_info(tokenizer)?);
+                        bounds.push(parse_type_info(tokenizer)?);
                         if !tokenizer.next_is_identifier("+")? {
                             break;
                         }
                     }
                 }
-                tparams.insert(name, bounds);
+                let bounds = bounds.into();
+                tparams.push(UpperBound { name, bounds });
                 Ok(())
             })?;
 
@@ -206,7 +206,7 @@ impl<'b> FunctionParser<'b> {
         let mut builder = FuncBuilder::with_func(Func {
             return_type,
             params,
-            tparams,
+            upper_bounds: tparams,
             shadowed_tparams,
             attrs,
             ..Default::default()

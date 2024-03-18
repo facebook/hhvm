@@ -125,12 +125,12 @@ macro_rules! newtype_int {
 
 /// A Vec indexable by a newtype_int.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct IdVec<N: Into<usize>, T> {
+pub struct IdVec<N, T> {
     pub vec: Vec<T>,
     phantom: core::marker::PhantomData<N>,
 }
 
-impl<N: Into<usize>, T> IdVec<N, T> {
+impl<N, T> IdVec<N, T> {
     pub fn new() -> IdVec<N, T> {
         IdVec::new_from_vec(Vec::new())
     }
@@ -149,6 +149,12 @@ impl<N: Into<usize>, T> IdVec<N, T> {
         }
     }
 
+    pub fn capacity_bytes(&self) -> usize {
+        std::mem::size_of::<T>() * self.vec.capacity()
+    }
+}
+
+impl<N: Into<usize>, T> IdVec<N, T> {
     pub fn get(&self, index: N) -> Option<&T> {
         self.vec.get(index.into())
     }
@@ -157,16 +163,12 @@ impl<N: Into<usize>, T> IdVec<N, T> {
         self.vec.get_mut(index.into())
     }
 
-    pub fn capacity_bytes(&self) -> usize {
-        std::mem::size_of::<T>() * self.vec.capacity()
-    }
-
     pub fn swap(&mut self, a: N, b: N) {
         self.vec.swap(a.into(), b.into());
     }
 }
 
-impl<N: FromUsize + Into<usize>, T> IdVec<N, T> {
+impl<N: FromUsize, T> IdVec<N, T> {
     pub fn keys(&self) -> impl DoubleEndedIterator<Item = N> + '_ {
         (0..self.vec.len()).into_iter().map(|i| N::from_usize(i))
     }
@@ -178,27 +180,27 @@ impl<N: FromUsize + Into<usize>, T> IdVec<N, T> {
     }
 }
 
-impl<N: Into<usize>, T: PartialEq> PartialEq for IdVec<N, T> {
+impl<N, T: PartialEq> PartialEq for IdVec<N, T> {
     fn eq(&self, rhs: &Self) -> bool {
         self.vec.eq(&rhs.vec)
     }
 }
 
-impl<N: Into<usize>, T: Eq> Eq for IdVec<N, T> {}
+impl<N, T: Eq> Eq for IdVec<N, T> {}
 
-impl<N: Into<usize>, T: Hash> Hash for IdVec<N, T> {
+impl<N, T: Hash> Hash for IdVec<N, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.vec.hash(state)
     }
 }
 
-impl<N: Into<usize>, T> Default for IdVec<N, T> {
+impl<N, T> Default for IdVec<N, T> {
     fn default() -> Self {
         IdVec::new_from_vec(Vec::new())
     }
 }
 
-impl<N: Into<usize>, T> IntoIterator for IdVec<N, T> {
+impl<N, T> IntoIterator for IdVec<N, T> {
     type Item = T;
     type IntoIter = ::std::vec::IntoIter<T>;
 
@@ -207,7 +209,7 @@ impl<N: Into<usize>, T> IntoIterator for IdVec<N, T> {
     }
 }
 
-impl<N: Into<usize>, T> FromIterator<T> for IdVec<N, T> {
+impl<N, T> FromIterator<T> for IdVec<N, T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         IdVec {
             vec: Vec::from_iter(iter),
@@ -229,7 +231,7 @@ impl<N: Into<usize>, T> std::ops::IndexMut<N> for IdVec<N, T> {
     }
 }
 
-impl<N: Into<usize>, T> std::ops::Deref for IdVec<N, T> {
+impl<N, T> std::ops::Deref for IdVec<N, T> {
     type Target = Vec<T>;
 
     #[inline]
@@ -238,7 +240,7 @@ impl<N: Into<usize>, T> std::ops::Deref for IdVec<N, T> {
     }
 }
 
-impl<N: Into<usize>, T> std::ops::DerefMut for IdVec<N, T> {
+impl<N, T> std::ops::DerefMut for IdVec<N, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Vec<T> {
         &mut self.vec

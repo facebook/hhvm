@@ -22,6 +22,10 @@ const McrouterOptions& ProxyBase::getRouterOptions() const {
   return router_.opts();
 }
 
+void ProxyBase::registerProxyThread() {
+  isProxyThread_ = true;
+}
+
 folly::fibers::FiberManager::Options ProxyBase::getFiberManagerOptions(
     const McrouterOptions& opts) {
   folly::fibers::FiberManager::Options fmOpts;

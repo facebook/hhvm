@@ -7,6 +7,7 @@
 
 #include "CarbonRouterInstance.h"
 
+#include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/json/json.h>
 
@@ -40,6 +41,8 @@ std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
   auto threadPrefix = folly::to<std::string>("mcrpxy-", opts.router_name);
   std::shared_ptr<folly::ThreadFactory> threadFactory =
       std::make_shared<folly::NamedThreadFactory>(threadPrefix);
+  threadFactory = std::make_shared<folly::InitThreadFactory>(
+      std::move(threadFactory), [] { ProxyBase::registerProxyThread(); });
 
   return std::make_unique<folly::IOThreadPoolExecutor>(
       numProxies /* max */, numProxies /* min */, std::move(threadFactory));

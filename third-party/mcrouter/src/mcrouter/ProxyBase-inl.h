@@ -35,7 +35,6 @@ ProxyBase::ProxyBase(
       stats_(router_.getStatsEnabledPools()),
       flushCallback_(*this),
       destinationMap_(std::make_unique<ProxyDestinationMap>(this)) {
-  eventBase_.runInEventBaseThread([]() { isProxyThread_ = true; });
   // Setup a full random seed sequence
   folly::Random::seed(randomGenerator_);
 

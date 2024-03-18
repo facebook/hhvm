@@ -120,6 +120,8 @@ class ProxyBase {
     return isProxyThread_;
   }
 
+  static void registerProxyThread();
+
   virtual bool messageQueueFull() const noexcept = 0;
 
  private:

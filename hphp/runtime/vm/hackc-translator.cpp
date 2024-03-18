@@ -550,7 +550,7 @@ void translateClassBody(TranslationState& ts,
 }
 
 void translateUbs(const hhbc::UpperBound& ub, UpperBoundMap& ubs) {
-  auto const& name = toStaticString(ub.name);
+  auto const& name = toStaticString(ub.name._0);
 
   auto infos = range(ub.bounds);
   for (auto const& i : infos) {

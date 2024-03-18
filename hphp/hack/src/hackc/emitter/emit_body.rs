@@ -17,6 +17,7 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use hash::HashSet;
 use hhbc::Body;
+use hhbc::ClassName;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::IsTypeOp;
@@ -688,7 +689,7 @@ pub fn emit_generics_upper_bounds(
         match &ubs[..] {
             [] => None,
             _ => Some(UpperBound {
-                name: hhbc::intern(get_tp_name(tparam)),
+                name: ClassName::intern(get_tp_name(tparam)),
                 bounds: ubs.into(),
             }),
         }

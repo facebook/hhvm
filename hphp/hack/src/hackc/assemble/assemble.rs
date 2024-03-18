@@ -17,6 +17,7 @@ use anyhow::Result;
 use ffi::Maybe;
 use ffi::Vector;
 use hhbc::BytesId;
+use hhbc::ClassName;
 use hhbc::ModuleName;
 use hhbc::StringId;
 use hhbc::StringIdMap;
@@ -1081,7 +1082,7 @@ fn assemble_upper_bounds(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::UpperBo
 fn assemble_upper_bound(token_iter: &mut Lexer<'_>) -> Result<hhbc::UpperBound> {
     parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
-        name: hhbc::intern(std::str::from_utf8(id.as_bytes())?),
+        name: ClassName::intern(std::str::from_utf8(id.as_bytes())?),
         bounds: tis.into(),
     })
 }

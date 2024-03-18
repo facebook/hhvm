@@ -103,7 +103,7 @@ fn convert_body<'a>(
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
             let bounds = bounds.clone().into();
-            (ir::ClassName::new(*name), ir::TParamBounds { bounds })
+            (*name, ir::TParamBounds { bounds })
         })
         .collect();
 

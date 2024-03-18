@@ -10,6 +10,7 @@ use intern::string::StringId;
 use naming_special_names_rust as naming_special_names;
 use serde::Serialize;
 
+use crate::ClassName;
 use crate::TypedValue;
 
 /// A TypeInfo represents a type written by the user. It consists of the type
@@ -112,14 +113,17 @@ impl Constraint {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct UpperBound {
-    pub name: StringId,
+    /// A type parameter name like `T`
+    pub name: ClassName,
+
+    /// The bounds applied to the type parameter
     pub bounds: Vector<TypeInfo>,
 }
 
 impl Default for UpperBound {
     fn default() -> Self {
         Self {
-            name: StringId::EMPTY,
+            name: ClassName::new(StringId::EMPTY),
             bounds: Default::default(),
         }
     }

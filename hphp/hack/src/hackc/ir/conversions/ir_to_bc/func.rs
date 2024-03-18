@@ -81,7 +81,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let upper_bounds = Vec::from_iter(func.tparams.into_iter().map(|(name, tparam)| {
         hhbc::UpperBound {
-            name: name.as_string_id(),
+            name,
             bounds: tparam
                 .bounds
                 .iter()

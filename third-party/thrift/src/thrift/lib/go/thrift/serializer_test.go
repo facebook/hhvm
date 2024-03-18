@@ -66,9 +66,9 @@ func compareStructs(m, m1 MyTestStruct) (bool, error) {
 	return true, nil
 }
 
-func ProtocolTest1(test *testing.T, pf ProtocolFactory) (bool, error) {
+func ProtocolTest1(test *testing.T, pf FormatFactory) (bool, error) {
 	t := NewSerializer()
-	t.Protocol = pf.GetProtocol(t.Transport)
+	t.Protocol = pf.GetFormat(t.Transport)
 	var m = MyTestStruct{}
 	m.On = true
 	m.B = byte(0)
@@ -89,7 +89,7 @@ func ProtocolTest1(test *testing.T, pf ProtocolFactory) (bool, error) {
 	}
 
 	t1 := NewDeserializer()
-	t1.Protocol = pf.GetProtocol(t1.Transport)
+	t1.Protocol = pf.GetFormat(t1.Transport)
 	var m1 = MyTestStruct{}
 	if err = t1.ReadString(&m1, s); err != nil {
 		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
@@ -100,9 +100,9 @@ func ProtocolTest1(test *testing.T, pf ProtocolFactory) (bool, error) {
 
 }
 
-func ProtocolTest2(test *testing.T, pf ProtocolFactory) (bool, error) {
+func ProtocolTest2(test *testing.T, pf FormatFactory) (bool, error) {
 	t := NewSerializer()
-	t.Protocol = pf.GetProtocol(t.Transport)
+	t.Protocol = pf.GetFormat(t.Transport)
 	var m = MyTestStruct{}
 	m.On = false
 	m.B = byte(0)
@@ -124,7 +124,7 @@ func ProtocolTest2(test *testing.T, pf ProtocolFactory) (bool, error) {
 	}
 
 	t1 := NewDeserializer()
-	t1.Protocol = pf.GetProtocol(t1.Transport)
+	t1.Protocol = pf.GetFormat(t1.Transport)
 	var m1 = MyTestStruct{}
 	if err = t1.ReadString(&m1, s); err != nil {
 		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
@@ -137,15 +137,15 @@ func ProtocolTest2(test *testing.T, pf ProtocolFactory) (bool, error) {
 
 func TestSerializer(t *testing.T) {
 
-	var protocol_factories map[string]ProtocolFactory
-	protocol_factories = make(map[string]ProtocolFactory)
+	var protocol_factories map[string]FormatFactory
+	protocol_factories = make(map[string]FormatFactory)
 	protocol_factories["Binary"] = NewBinaryProtocolFactoryDefault()
 	protocol_factories["Compact"] = NewCompactProtocolFactory()
 	//protocol_factories["SimpleJSON"] = NewSimpleJSONProtocolFactory() - write only, can't be read back by design
 	protocol_factories["JSON"] = NewJSONProtocolFactory()
 
-	var tests map[string]func(*testing.T, ProtocolFactory) (bool, error)
-	tests = make(map[string]func(*testing.T, ProtocolFactory) (bool, error))
+	var tests map[string]func(*testing.T, FormatFactory) (bool, error)
+	tests = make(map[string]func(*testing.T, FormatFactory) (bool, error))
 	tests["Test 1"] = ProtocolTest1
 	tests["Test 2"] = ProtocolTest2
 	//tests["Test 3"] = ProtocolTest3 // Example of how to add additional tests

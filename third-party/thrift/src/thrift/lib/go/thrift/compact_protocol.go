@@ -79,7 +79,7 @@ func NewCompactProtocolFactory() *CompactProtocolFactory {
 	return &CompactProtocolFactory{}
 }
 
-func (p *CompactProtocolFactory) GetProtocol(trans Transport) Protocol {
+func (p *CompactProtocolFactory) GetFormat(trans Transport) Format {
 	return NewCompactProtocol(trans)
 }
 

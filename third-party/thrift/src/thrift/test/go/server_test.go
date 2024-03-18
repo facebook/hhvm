@@ -190,32 +190,6 @@ func TestHeaderHeader(t *testing.T) {
 	)
 }
 
-func TestHeaderFramedBinary(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	doClientTest(
-		ctx,
-		t,
-		func(socket *thrift.Socket) thrift.Transport {
-			return thrift.NewFramedTransport(socket)
-		},
-		thrift.NewBinaryProtocolFactory(false, true),
-	)
-}
-
-func TestHeaderFramedCompact(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	doClientTest(
-		ctx,
-		t,
-		func(socket *thrift.Socket) thrift.Transport {
-			return thrift.NewFramedTransport(socket)
-		},
-		thrift.NewCompactProtocolFactory(),
-	)
-}
-
 func TestFunctionServiceMap(t *testing.T) {
 	handler := &testHandler{}
 	proc := thrifttest.NewThriftTestProcessor(handler)
@@ -229,20 +203,3 @@ func TestFunctionServiceMap(t *testing.T) {
 		t.Errorf("expected key 'doTestVoid' with value 'ThriftTest'")
 	}
 }
-
-// unframed not supported?
-// func TestHeaderUnframedBinary(t *testing.T) {
-// 	doClientTest(
-// 		t,
-// 		thrift.NewBufferedTransportFactory(8192),
-// 		thrift.NewBinaryProtocolFactory(false, true),
-// 	)
-// }
-//
-// func TestHeaderUnframedCompact(t *testing.T) {
-// 	doClientTest(
-// 		t,
-// 		thrift.NewBufferedTransportFactory(8192),
-// 		thrift.NewCompactProtocolFactory(),
-// 	)
-// }

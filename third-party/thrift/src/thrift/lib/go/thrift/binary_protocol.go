@@ -66,7 +66,7 @@ func NewBinaryProtocolFactory(strictRead, strictWrite bool) *BinaryProtocolFacto
 	return &BinaryProtocolFactory{strictRead: strictRead, strictWrite: strictWrite}
 }
 
-func (p *BinaryProtocolFactory) GetProtocol(t Transport) Protocol {
+func (p *BinaryProtocolFactory) GetFormat(t Transport) Format {
 	return NewBinaryProtocol(t, p.strictRead, p.strictWrite)
 }
 

@@ -85,7 +85,7 @@ func NewSimpleJSONProtocol(t Transport) *SimpleJSONProtocol {
 // Factory
 type SimpleJSONProtocolFactory struct{}
 
-func (p *SimpleJSONProtocolFactory) GetProtocol(trans Transport) Protocol {
+func (p *SimpleJSONProtocolFactory) GetFormat(trans Transport) Format {
 	return NewSimpleJSONProtocol(trans)
 }
 

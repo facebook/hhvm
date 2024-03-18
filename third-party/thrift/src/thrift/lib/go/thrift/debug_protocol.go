@@ -21,25 +21,25 @@ import (
 )
 
 type DebugProtocol struct {
-	Delegate  Protocol
+	Delegate  Format
 	LogPrefix string
 }
 
 type DebugProtocolFactory struct {
-	Underlying ProtocolFactory
+	Underlying FormatFactory
 	LogPrefix  string
 }
 
-func NewDebugProtocolFactory(underlying ProtocolFactory, logPrefix string) *DebugProtocolFactory {
+func NewDebugProtocolFactory(underlying FormatFactory, logPrefix string) *DebugProtocolFactory {
 	return &DebugProtocolFactory{
 		Underlying: underlying,
 		LogPrefix:  logPrefix,
 	}
 }
 
-func (t *DebugProtocolFactory) GetProtocol(trans Transport) Protocol {
+func (t *DebugProtocolFactory) GetFormat(trans Transport) Format {
 	return &DebugProtocol{
-		Delegate:  t.Underlying.GetProtocol(trans),
+		Delegate:  t.Underlying.GetFormat(trans),
 		LogPrefix: t.LogPrefix,
 	}
 }

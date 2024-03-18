@@ -33,7 +33,7 @@ func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {
 	m.Bin = nil
 	s := NewDeserializer()
 	f := NewBinaryProtocolFactoryDefault()
-	s.Protocol = f.GetProtocol(s.Transport)
+	s.Protocol = f.GetFormat(s.Transport)
 	transport := s.Transport.(*MemoryBuffer)
 	transport.Buffer = bytes.NewBuffer([]byte(nil))
 	if err := m.Write(s.Protocol); err != nil {
@@ -45,7 +45,7 @@ func TestSkipUnknownTypeBinaryProtocol(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	f := NewBinaryProtocolFactoryDefault()
-	d.Protocol = f.GetProtocol(d.Transport)
+	d.Protocol = f.GetFormat(d.Transport)
 	// skip over a map with invalid key/value type and ~550M entries
 	data := make([]byte, 1100000000)
 	copy(data[:], []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tsl ce\x00"))
@@ -68,7 +68,7 @@ func TestInitialAllocationMapBinaryProtocol(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	f := NewBinaryProtocolFactoryDefault()
-	d.Protocol = f.GetProtocol(d.Transport)
+	d.Protocol = f.GetFormat(d.Transport)
 	// attempts to allocate a map with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tslice\x00")
 	err := d.Read(&m, data)
@@ -83,7 +83,7 @@ func TestInitialAllocationListBinaryProtocol(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	f := NewBinaryProtocolFactoryDefault()
-	d.Protocol = f.GetProtocol(d.Transport)
+	d.Protocol = f.GetFormat(d.Transport)
 	// attempts to allocate a list with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\x0f\n\tslice\x00")
 	err := d.Read(&m, data)
@@ -98,7 +98,7 @@ func TestInitialAllocationSetBinaryProtocol(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	f := NewBinaryProtocolFactoryDefault()
-	d.Protocol = f.GetProtocol(d.Transport)
+	d.Protocol = f.GetFormat(d.Transport)
 	// attempts to allocate a set with 1.8B elements for a 20 byte message
 	data := []byte("\n\x12\rO\t6\x03\n\n\n\x10\x0e\n\tslice\x00")
 	err := d.Read(&m, data)

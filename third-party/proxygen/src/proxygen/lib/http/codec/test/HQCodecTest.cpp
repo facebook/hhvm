@@ -615,6 +615,29 @@ TEST_F(HQCodecTest, BasicConnect) {
   EXPECT_EQ(authority, headers.getSingleOrEmpty(proxygen::HTTP_HEADER_HOST));
 }
 
+TEST_F(HQCodecTest, TemplateDrivenConnect) {
+  // See https://fburl.com/nql0na8x for definition
+  std::string authority = "request-proxy.example";
+  std::string path = "/proxy?target_host=192.0.2.1,2001:db8::1&tcp_port=443";
+  std::string protocol = "connect-tcp";
+
+  HTTPMessage request;
+  request.setMethod(HTTPMethod::CONNECT);
+  request.getHeaders().add(proxygen::HTTP_HEADER_HOST, authority);
+  request.setURL(path);
+  request.setUpgradeProtocol(protocol);
+
+  auto streamId = upstreamCodec_->createStream();
+  upstreamCodec_->generateHeader(queue_, streamId, request, false /* eom */);
+
+  parse();
+  callbacks_.expectMessage(false, 1, path);
+  EXPECT_EQ(HTTPMethod::CONNECT, callbacks_.msg->getMethod());
+  const auto& headers = callbacks_.msg->getHeaders();
+  EXPECT_EQ(authority, headers.getSingleOrEmpty(proxygen::HTTP_HEADER_HOST));
+  EXPECT_EQ(protocol, *callbacks_.msg->getUpgradeProtocol());
+}
+
 TEST_F(HQCodecTest, TrimLwsInHeaderValue) {
   HTTPMessage req = getGetRequest("/test");
   req.getHeaders().add(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE,

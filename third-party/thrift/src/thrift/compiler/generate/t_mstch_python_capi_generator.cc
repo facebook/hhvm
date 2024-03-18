@@ -24,7 +24,6 @@
 #include <vector>
 #include <fmt/format.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_field.h>
@@ -639,7 +638,7 @@ void t_mstch_python_capi_generator::set_mstch_factories() {
 
 boost::filesystem::path t_mstch_python_capi_generator::package_to_path() {
   auto package = get_py3_namespace(get_program());
-  return boost::algorithm::join(package, "/");
+  return fmt::format("{}", fmt::join(package, "/"));
 }
 
 void t_mstch_python_capi_generator::generate_file(

@@ -43,8 +43,8 @@ namespace {
  * Gets the java namespace, throws a runtime error if not found.
  */
 std::string get_namespace_or_default(const t_program& prog) {
-  auto prog_namespace = boost::algorithm::join(
-      prog.gen_namespace_or_default("java.swift", {}), ".");
+  auto prog_namespace = fmt::format(
+      "{}", fmt::join(prog.gen_namespace_or_default("java.swift", {}), "."));
   if (prog_namespace != "") {
     return prog_namespace;
   } else {

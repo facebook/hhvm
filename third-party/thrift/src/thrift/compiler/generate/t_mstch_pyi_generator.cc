@@ -20,8 +20,8 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_type.h>
@@ -182,8 +182,9 @@ std::vector<std::string> gather_import_modules(
     }
 
     if (has_types(prog)) {
-      import_modules.push_back(boost::algorithm::join(
-          get_py_namespaces_raw(prog, is_asyncio, "ttypes"), "."));
+      import_modules.push_back(fmt::format(
+          "{}",
+          fmt::join(get_py_namespaces_raw(prog, is_asyncio, "ttypes"), ".")));
     }
   }
 

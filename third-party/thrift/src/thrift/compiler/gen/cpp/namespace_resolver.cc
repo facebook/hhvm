@@ -16,7 +16,7 @@
 
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 
-#include <boost/algorithm/string/join.hpp>
+#include <fmt/format.h>
 
 namespace apache {
 namespace thrift {
@@ -43,7 +43,7 @@ std::string namespace_resolver::gen_namespace(const t_program& program) {
 std::string namespace_resolver::gen_unprefixed_namespace(
     const t_program& program) {
   const auto components = gen_namespace_components(program);
-  return boost::algorithm::join(components, "::");
+  return fmt::format("{}", fmt::join(components, "::"));
 }
 
 } // namespace cpp

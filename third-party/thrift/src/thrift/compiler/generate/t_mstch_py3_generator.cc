@@ -15,7 +15,6 @@
  */
 
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <fmt/format.h>
@@ -592,7 +591,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   mstch::node modulePath() {
-    return "_" + boost::algorithm::join(get_type_py3_namespace(), "_");
+    return fmt::format("_{}", fmt::join(get_type_py3_namespace(), "_"));
   }
 
   mstch::node flatName() { return cached_props_.flatName; }

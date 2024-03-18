@@ -1162,7 +1162,7 @@ void t_mstch_python_generator::set_mstch_factories() {
 
 boost::filesystem::path t_mstch_python_generator::package_to_path() {
   auto package = get_py3_namespace(get_program());
-  return boost::algorithm::join(package, "/");
+  return fmt::format("{}", fmt::join(package, "/"));
 }
 
 void t_mstch_python_generator::generate_file(

@@ -893,7 +893,7 @@ class t_hack_generator : public t_concat_generator {
           p->package().domain().end() - 1);
     }
     if (!pkg_path.empty()) {
-      std::string pkg_ns = boost::algorithm::join(pkg_path, "\\");
+      std::string pkg_ns = fmt::format("{}", fmt::join(pkg_path, "\\"));
       return pkg_ns;
     }
     return "";

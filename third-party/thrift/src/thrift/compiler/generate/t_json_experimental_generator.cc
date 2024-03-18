@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <boost/algorithm/string.hpp>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/json.h>
@@ -124,7 +123,7 @@ class json_experimental_program : public mstch_program {
           domain_prefix.end(), domain.begin(), std::prev(domain.end()));
       result.push_back(mstch::map{
           {"key", std::string("domain_prefix")},
-          {"value", boost::join(domain_prefix, ".")},
+          {"value", fmt::format("{}", fmt::join(domain_prefix, "."))},
           {"last?", false}});
       result.push_back(mstch::map{
           {"key", std::string("domain_suffix")},
@@ -134,7 +133,7 @@ class json_experimental_program : public mstch_program {
     if (!package.path().empty()) {
       result.push_back(mstch::map{
           {"key", std::string("path")},
-          {"value", boost::join(package.path(), "/")},
+          {"value", fmt::format("{}", fmt::join(package.path(), "/"))},
           {"last?", false}});
     }
     result.push_back(mstch::map{

@@ -16,7 +16,7 @@ namespace fizz {
 
 struct AESOCB128 {
   static const EVP_CIPHER* Cipher() {
-#if FOLLY_OPENSSL_IS_110 && !defined(OPENSSL_NO_OCB)
+#if !defined(OPENSSL_NO_OCB)
     return EVP_aes_128_ocb();
 #else
     throw std::runtime_error(

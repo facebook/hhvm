@@ -906,7 +906,7 @@ INSTANTIATE_TEST_SUITE_P(
                 false,
                 CipherSuite::TLS_CHACHA20_POLY1305_SHA256}));
 #endif
-#if FOLLY_OPENSSL_IS_110 && !defined(OPENSSL_NO_OCB)
+#if !defined(OPENSSL_NO_OCB)
 // Adapted from openssl's evptests.txt AES OCB Test vectors
 INSTANTIATE_TEST_SUITE_P(
     OCBTestVectors,

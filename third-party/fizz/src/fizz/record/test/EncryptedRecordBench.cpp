@@ -209,7 +209,7 @@ BENCHMARK_PARAM(touchEveryByte, 10);
 BENCHMARK_PARAM(touchEveryByte, 1000);
 BENCHMARK_PARAM(touchEveryByte, 8000);
 
-#if FOLLY_OPENSSL_IS_110 && !defined(OPENSSL_NO_OCB)
+#if !defined(OPENSSL_NO_OCB)
 void encryptOCB(uint32_t n, size_t size) {
   std::unique_ptr<Aead> aead;
   std::vector<fizz::TLSMessage> msgs;

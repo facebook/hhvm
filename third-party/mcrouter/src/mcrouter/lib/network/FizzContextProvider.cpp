@@ -61,7 +61,7 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   }
 
   if (preferOcbCipher) {
-#if FOLLY_OPENSSL_IS_110 && !defined(OPENSSL_NO_OCB)
+#if !defined(OPENSSL_NO_OCB)
     auto ciphers = folly::copy(ctx->getSupportedCiphers());
     ciphers.insert(
         ciphers.begin(),
@@ -116,7 +116,7 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     ctx->setClientAuthMode(fizz::server::ClientAuthMode::Required);
   }
   if (preferOcbCipher) {
-#if FOLLY_OPENSSL_IS_110 && !defined(OPENSSL_NO_OCB)
+#if !defined(OPENSSL_NO_OCB)
     auto serverCiphers = folly::copy(ctx->getSupportedCiphers());
     serverCiphers.insert(
         serverCiphers.begin(),

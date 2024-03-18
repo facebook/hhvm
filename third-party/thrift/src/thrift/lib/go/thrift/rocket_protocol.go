@@ -24,7 +24,7 @@ import (
 )
 
 type rocketProtocol struct {
-	Protocol
+	Format
 	trans        *rocketTransport
 	responseChan chan payload.Payload
 	errChan      chan error
@@ -71,7 +71,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 
 func (p *rocketProtocol) resetProtocol() error {
 	p.trans.resetBuffers()
-	if p.Protocol != nil && p.protoID == p.trans.ProtocolID() {
+	if p.Format != nil && p.protoID == p.trans.ProtocolID() {
 		return nil
 	}
 
@@ -79,9 +79,9 @@ func (p *rocketProtocol) resetProtocol() error {
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Protocol = NewBinaryProtocol(p.trans, false, true)
+		p.Format = NewBinaryProtocol(p.trans, false, true)
 	case ProtocolIDCompact:
-		p.Protocol = NewCompactProtocol(p.trans)
+		p.Format = NewCompactProtocol(p.trans)
 	default:
 		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}

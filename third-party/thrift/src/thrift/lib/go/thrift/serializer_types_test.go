@@ -179,7 +179,7 @@ func (p *MyTestStruct) GetStringSet() map[string]bool {
 func (p *MyTestStruct) GetE() MyTestEnum {
 	return p.E
 }
-func (p *MyTestStruct) Read(iprot Protocol) error {
+func (p *MyTestStruct) Read(iprot Format) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -260,7 +260,7 @@ func (p *MyTestStruct) Read(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField1(iprot Protocol) error {
+func (p *MyTestStruct) ReadField1(iprot Format) error {
 	if v, err := iprot.ReadBool(); err != nil {
 		return PrependError("error reading field 1: ", err)
 	} else {
@@ -269,7 +269,7 @@ func (p *MyTestStruct) ReadField1(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField2(iprot Protocol) error {
+func (p *MyTestStruct) ReadField2(iprot Format) error {
 	if v, err := iprot.ReadByte(); err != nil {
 		return PrependError("error reading field 2: ", err)
 	} else {
@@ -279,7 +279,7 @@ func (p *MyTestStruct) ReadField2(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField3(iprot Protocol) error {
+func (p *MyTestStruct) ReadField3(iprot Format) error {
 	if v, err := iprot.ReadI16(); err != nil {
 		return PrependError("error reading field 3: ", err)
 	} else {
@@ -288,7 +288,7 @@ func (p *MyTestStruct) ReadField3(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField4(iprot Protocol) error {
+func (p *MyTestStruct) ReadField4(iprot Format) error {
 	if v, err := iprot.ReadI32(); err != nil {
 		return PrependError("error reading field 4: ", err)
 	} else {
@@ -297,7 +297,7 @@ func (p *MyTestStruct) ReadField4(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField5(iprot Protocol) error {
+func (p *MyTestStruct) ReadField5(iprot Format) error {
 	if v, err := iprot.ReadI64(); err != nil {
 		return PrependError("error reading field 5: ", err)
 	} else {
@@ -306,7 +306,7 @@ func (p *MyTestStruct) ReadField5(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField6(iprot Protocol) error {
+func (p *MyTestStruct) ReadField6(iprot Format) error {
 	if v, err := iprot.ReadDouble(); err != nil {
 		return PrependError("error reading field 6: ", err)
 	} else {
@@ -315,7 +315,7 @@ func (p *MyTestStruct) ReadField6(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField7(iprot Protocol) error {
+func (p *MyTestStruct) ReadField7(iprot Format) error {
 	if v, err := iprot.ReadFloat(); err != nil {
 		return PrependError("error reading field 7: ", err)
 	} else {
@@ -324,7 +324,7 @@ func (p *MyTestStruct) ReadField7(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField8(iprot Protocol) error {
+func (p *MyTestStruct) ReadField8(iprot Format) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return PrependError("error reading field 8: ", err)
 	} else {
@@ -333,7 +333,7 @@ func (p *MyTestStruct) ReadField8(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField9(iprot Protocol) error {
+func (p *MyTestStruct) ReadField9(iprot Format) error {
 	if v, err := iprot.ReadBinary(); err != nil {
 		return PrependError("error reading field 9: ", err)
 	} else {
@@ -342,7 +342,7 @@ func (p *MyTestStruct) ReadField9(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField10(iprot Protocol) error {
+func (p *MyTestStruct) ReadField10(iprot Format) error {
 	_, _, size, err := iprot.ReadMapBegin()
 	if err != nil {
 		return PrependError("error reading map begin: ", err)
@@ -370,7 +370,7 @@ func (p *MyTestStruct) ReadField10(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField11(iprot Protocol) error {
+func (p *MyTestStruct) ReadField11(iprot Format) error {
 	_, size, err := iprot.ReadListBegin()
 	if err != nil {
 		return PrependError("error reading list begin: ", err)
@@ -392,7 +392,7 @@ func (p *MyTestStruct) ReadField11(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField12(iprot Protocol) error {
+func (p *MyTestStruct) ReadField12(iprot Format) error {
 	_, size, err := iprot.ReadSetBegin()
 	if err != nil {
 		return PrependError("error reading set begin: ", err)
@@ -414,7 +414,7 @@ func (p *MyTestStruct) ReadField12(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField13(iprot Protocol) error {
+func (p *MyTestStruct) ReadField13(iprot Format) error {
 	if v, err := iprot.ReadI32(); err != nil {
 		return PrependError("error reading field 13: ", err)
 	} else {
@@ -424,7 +424,7 @@ func (p *MyTestStruct) ReadField13(iprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) Write(oprot Protocol) error {
+func (p *MyTestStruct) Write(oprot Format) error {
 	if err := oprot.WriteStructBegin("MyTestStruct"); err != nil {
 		return PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
@@ -476,7 +476,7 @@ func (p *MyTestStruct) Write(oprot Protocol) error {
 	return nil
 }
 
-func (p *MyTestStruct) writeField1(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField1(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("on", BOOL, 1); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 1:on: ", p), err)
 	}
@@ -489,7 +489,7 @@ func (p *MyTestStruct) writeField1(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField2(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField2(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("b", BYTE, 2); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 2:b: ", p), err)
 	}
@@ -502,7 +502,7 @@ func (p *MyTestStruct) writeField2(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField3(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField3(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("int16", I16, 3); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 3:int16: ", p), err)
 	}
@@ -515,7 +515,7 @@ func (p *MyTestStruct) writeField3(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField4(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField4(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("int32", I32, 4); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 4:int32: ", p), err)
 	}
@@ -528,7 +528,7 @@ func (p *MyTestStruct) writeField4(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField5(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField5(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("int64", I64, 5); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 5:int64: ", p), err)
 	}
@@ -541,7 +541,7 @@ func (p *MyTestStruct) writeField5(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField6(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField6(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("d", DOUBLE, 6); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 6:d: ", p), err)
 	}
@@ -554,7 +554,7 @@ func (p *MyTestStruct) writeField6(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField7(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField7(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("f", FLOAT, 7); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 7:f: ", p), err)
 	}
@@ -567,7 +567,7 @@ func (p *MyTestStruct) writeField7(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField8(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField8(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("st", STRING, 8); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 8:st: ", p), err)
 	}
@@ -580,7 +580,7 @@ func (p *MyTestStruct) writeField8(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField9(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField9(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("bin", STRING, 9); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 9:bin: ", p), err)
 	}
@@ -593,7 +593,7 @@ func (p *MyTestStruct) writeField9(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField10(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField10(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("stringMap", MAP, 10); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 10:stringMap: ", p), err)
 	}
@@ -617,7 +617,7 @@ func (p *MyTestStruct) writeField10(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField11(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField11(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("stringList", LIST, 11); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 11:stringList: ", p), err)
 	}
@@ -638,7 +638,7 @@ func (p *MyTestStruct) writeField11(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField12(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField12(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("stringSet", SET, 12); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 12:stringSet: ", p), err)
 	}
@@ -659,7 +659,7 @@ func (p *MyTestStruct) writeField12(oprot Protocol) (err error) {
 	return err
 }
 
-func (p *MyTestStruct) writeField13(oprot Protocol) (err error) {
+func (p *MyTestStruct) writeField13(oprot Format) (err error) {
 	if err := oprot.WriteFieldBegin("e", I32, 13); err != nil {
 		return PrependError(fmt.Sprintf("%T write field begin error 13:e: ", p), err)
 	}

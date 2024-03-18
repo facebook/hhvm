@@ -165,7 +165,7 @@ func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	return rConn, wConn
 }
 
-type protocolTest func(t testing.TB, p Protocol, trans Transport)
+type protocolTest func(t testing.TB, p Format, trans Transport)
 
 // ReadWriteProtocolParallelTest tests that a given protocol is safe to read
 // from and write to in different goroutines. This requires both a protocol
@@ -215,7 +215,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, protocolFactory ProtocolFactory
 	doForAllTransportsParallel(ReadStruct, WriteStruct)
 
 	// perform set of many sequenced sets of reads and writes
-	doForAllTransportsParallel(func(t testing.TB, p Protocol, trans Transport) {
+	doForAllTransportsParallel(func(t testing.TB, p Format, trans Transport) {
 		ReadBool(t, p, trans)
 		ReadByte(t, p, trans)
 		ReadI16(t, p, trans)
@@ -226,7 +226,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, protocolFactory ProtocolFactory
 		ReadString(t, p, trans)
 		ReadBinary(t, p, trans)
 		ReadStruct(t, p, trans)
-	}, func(t testing.TB, p Protocol, trans Transport) {
+	}, func(t testing.TB, p Format, trans Transport) {
 		WriteBool(t, p, trans)
 		WriteByte(t, p, trans)
 		WriteI16(t, p, trans)
@@ -270,7 +270,7 @@ func ReadWriteProtocolTest(t *testing.T, protocolFactory ProtocolFactory) {
 	doForAllTransports(ReadWriteStruct)
 
 	// perform set of many sequenced reads and writes
-	doForAllTransports(func(t testing.TB, p Protocol, trans Transport) {
+	doForAllTransports(func(t testing.TB, p Format, trans Transport) {
 		ReadWriteI64(t, p, trans)
 		ReadWriteDouble(t, p, trans)
 		ReadWriteFloat(t, p, trans)
@@ -280,7 +280,7 @@ func ReadWriteProtocolTest(t *testing.T, protocolFactory ProtocolFactory) {
 	})
 }
 
-func ReadBool(t testing.TB, p Protocol, trans Transport) {
+func ReadBool(t testing.TB, p Format, trans Transport) {
 	thetype := Type(BOOL)
 	thelen := len(boolValues)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -311,7 +311,7 @@ func ReadBool(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func WriteBool(t testing.TB, p Protocol, trans Transport) {
+func WriteBool(t testing.TB, p Format, trans Transport) {
 	thetype := Type(BOOL)
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
@@ -334,12 +334,12 @@ func WriteBool(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteBool(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteBool(t testing.TB, p Format, trans Transport) {
 	WriteBool(t, p, trans)
 	ReadBool(t, p, trans)
 }
 
-func WriteByte(t testing.TB, p Protocol, trans Transport) {
+func WriteByte(t testing.TB, p Format, trans Transport) {
 	thetype := Type(BYTE)
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
@@ -362,7 +362,7 @@ func WriteByte(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadByte(t testing.TB, p Protocol, trans Transport) {
+func ReadByte(t testing.TB, p Format, trans Transport) {
 	thetype := Type(BYTE)
 	thelen := len(byteValues)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -393,12 +393,12 @@ func ReadByte(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteByte(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteByte(t testing.TB, p Format, trans Transport) {
 	WriteByte(t, p, trans)
 	ReadByte(t, p, trans)
 }
 
-func WriteI16(t testing.TB, p Protocol, trans Transport) {
+func WriteI16(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I16)
 	thelen := len(int16Values)
 	p.WriteListBegin(thetype, thelen)
@@ -409,7 +409,7 @@ func WriteI16(t testing.TB, p Protocol, trans Transport) {
 	p.Flush()
 }
 
-func ReadI16(t testing.TB, p Protocol, trans Transport) {
+func ReadI16(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I16)
 	thelen := len(int16Values)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -440,12 +440,12 @@ func ReadI16(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteI16(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteI16(t testing.TB, p Format, trans Transport) {
 	WriteI16(t, p, trans)
 	ReadI16(t, p, trans)
 }
 
-func WriteI32(t testing.TB, p Protocol, trans Transport) {
+func WriteI32(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I32)
 	thelen := len(int32Values)
 	p.WriteListBegin(thetype, thelen)
@@ -456,7 +456,7 @@ func WriteI32(t testing.TB, p Protocol, trans Transport) {
 	p.Flush()
 }
 
-func ReadI32(t testing.TB, p Protocol, trans Transport) {
+func ReadI32(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I32)
 	thelen := len(int32Values)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -486,12 +486,12 @@ func ReadI32(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteI32(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteI32(t testing.TB, p Format, trans Transport) {
 	WriteI32(t, p, trans)
 	ReadI32(t, p, trans)
 }
 
-func WriteI64(t testing.TB, p Protocol, trans Transport) {
+func WriteI64(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I64)
 	thelen := len(int64Values)
 	p.WriteListBegin(thetype, thelen)
@@ -502,7 +502,7 @@ func WriteI64(t testing.TB, p Protocol, trans Transport) {
 	p.Flush()
 }
 
-func ReadI64(t testing.TB, p Protocol, trans Transport) {
+func ReadI64(t testing.TB, p Format, trans Transport) {
 	thetype := Type(I64)
 	thelen := len(int64Values)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -532,12 +532,12 @@ func ReadI64(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteI64(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteI64(t testing.TB, p Format, trans Transport) {
 	WriteI64(t, p, trans)
 	ReadI64(t, p, trans)
 }
 
-func WriteDouble(t testing.TB, p Protocol, trans Transport) {
+func WriteDouble(t testing.TB, p Format, trans Transport) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := Type(DOUBLE)
 	thelen := len(doubleValues)
@@ -550,7 +550,7 @@ func WriteDouble(t testing.TB, p Protocol, trans Transport) {
 
 }
 
-func ReadDouble(t testing.TB, p Protocol, trans Transport) {
+func ReadDouble(t testing.TB, p Format, trans Transport) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := Type(DOUBLE)
 	thelen := len(doubleValues)
@@ -583,12 +583,12 @@ func ReadDouble(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteDouble(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteDouble(t testing.TB, p Format, trans Transport) {
 	WriteDouble(t, p, trans)
 	ReadDouble(t, p, trans)
 }
 
-func WriteFloat(t testing.TB, p Protocol, trans Transport) {
+func WriteFloat(t testing.TB, p Format, trans Transport) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := Type(FLOAT)
@@ -602,7 +602,7 @@ func WriteFloat(t testing.TB, p Protocol, trans Transport) {
 
 }
 
-func ReadFloat(t testing.TB, p Protocol, trans Transport) {
+func ReadFloat(t testing.TB, p Format, trans Transport) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := Type(FLOAT)
@@ -638,12 +638,12 @@ func ReadFloat(t testing.TB, p Protocol, trans Transport) {
 
 }
 
-func ReadWriteFloat(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteFloat(t testing.TB, p Format, trans Transport) {
 	WriteFloat(t, p, trans)
 	ReadFloat(t, p, trans)
 }
 
-func WriteString(t testing.TB, p Protocol, trans Transport) {
+func WriteString(t testing.TB, p Format, trans Transport) {
 	thetype := Type(STRING)
 	thelen := len(stringValues)
 	p.WriteListBegin(thetype, thelen)
@@ -654,7 +654,7 @@ func WriteString(t testing.TB, p Protocol, trans Transport) {
 	p.Flush()
 }
 
-func ReadString(t testing.TB, p Protocol, trans Transport) {
+func ReadString(t testing.TB, p Format, trans Transport) {
 	thetype := Type(STRING)
 	thelen := len(stringValues)
 
@@ -685,18 +685,18 @@ func ReadString(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteString(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteString(t testing.TB, p Format, trans Transport) {
 	WriteString(t, p, trans)
 	ReadString(t, p, trans)
 }
 
-func WriteBinary(t testing.TB, p Protocol, trans Transport) {
+func WriteBinary(t testing.TB, p Format, trans Transport) {
 	v := protocolBdata
 	p.WriteBinary(v)
 	p.Flush()
 }
 
-func ReadBinary(t testing.TB, p Protocol, trans Transport) {
+func ReadBinary(t testing.TB, p Format, trans Transport) {
 	v := protocolBdata
 	value, err := p.ReadBinary()
 	if err != nil {
@@ -714,12 +714,12 @@ func ReadBinary(t testing.TB, p Protocol, trans Transport) {
 
 }
 
-func ReadWriteBinary(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteBinary(t testing.TB, p Format, trans Transport) {
 	WriteBinary(t, p, trans)
 	ReadBinary(t, p, trans)
 }
 
-func WriteStruct(t testing.TB, p Protocol, trans Transport) {
+func WriteStruct(t testing.TB, p Format, trans Transport) {
 	v := structTestData
 	p.WriteStructBegin(v.name)
 	p.WriteFieldBegin(v.fields[0].name, v.fields[0].typ, v.fields[0].id)
@@ -741,7 +741,7 @@ func WriteStruct(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadStruct(t testing.TB, p Protocol, trans Transport) {
+func ReadStruct(t testing.TB, p Format, trans Transport) {
 	v := structTestData
 	_, err := p.ReadStructBegin()
 	if err != nil {
@@ -801,7 +801,7 @@ func ReadStruct(t testing.TB, p Protocol, trans Transport) {
 	}
 }
 
-func ReadWriteStruct(t testing.TB, p Protocol, trans Transport) {
+func ReadWriteStruct(t testing.TB, p Format, trans Transport) {
 	WriteStruct(t, p, trans)
 	ReadStruct(t, p, trans)
 }

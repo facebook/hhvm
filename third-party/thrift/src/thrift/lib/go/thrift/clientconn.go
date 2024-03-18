@@ -36,12 +36,12 @@ func NewClientConn(proto Protocol) ClientConn {
 
 // IRequest represents a request to be sent to a thrift endpoint
 type IRequest interface {
-	Write(p Protocol) error
+	Write(p Format) error
 }
 
 // IResponse represents a response received from a thrift call
 type IResponse interface {
-	Read(p Protocol) error
+	Read(p Format) error
 }
 
 // Close closes the client connection

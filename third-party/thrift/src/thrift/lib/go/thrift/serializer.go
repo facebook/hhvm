@@ -19,12 +19,12 @@ package thrift
 // A Serializer is used to turn a Struct in to a byte stream
 type Serializer struct {
 	Transport *MemoryBuffer
-	Protocol  Protocol
+	Protocol  Format
 }
 
 // WritableStruct is an interface used to encapsulate a message that can be written to a protocol
 type WritableStruct interface {
-	Write(p Protocol) error
+	Write(p Format) error
 }
 
 // WritableException is an interface used to encapsulate an exception that can be written to a protocol
@@ -41,8 +41,8 @@ type WritableResult interface {
 
 // Struct is the interface used to encapsulate a message that can be read and written to a protocol
 type Struct interface {
-	Write(p Protocol) error
-	Read(p Protocol) error
+	Write(p Format) error
+	Read(p Format) error
 }
 
 // NewSerializer create a new serializer using the binary protocol

@@ -21,7 +21,7 @@ import (
 )
 
 type headerProtocol struct {
-	Protocol
+	Format
 	origTransport Transport
 	trans         *HeaderTransport
 
@@ -57,7 +57,7 @@ func NewHeaderProtocol(trans Transport) Protocol {
 }
 
 func (p *headerProtocol) ResetProtocol() error {
-	if p.Protocol != nil && p.protoID == p.trans.ProtocolID() {
+	if p.Format != nil && p.protoID == p.trans.ProtocolID() {
 		return nil
 	}
 
@@ -65,9 +65,9 @@ func (p *headerProtocol) ResetProtocol() error {
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Protocol = NewBinaryProtocol(p.trans, false, true)
+		p.Format = NewBinaryProtocol(p.trans, false, true)
 	case ProtocolIDCompact:
-		p.Protocol = NewCompactProtocol(p.trans)
+		p.Format = NewCompactProtocol(p.trans)
 	default:
 		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
@@ -86,7 +86,7 @@ func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqi
 	if typeId == CALL || typeId == ONEWAY {
 		p.trans.SetSeqID(uint32(seqid))
 	}
-	return p.Protocol.WriteMessageBegin(name, typeId, seqid)
+	return p.Format.WriteMessageBegin(name, typeId, seqid)
 }
 
 //
@@ -109,7 +109,7 @@ func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, se
 	// TODO:  This is a bug. if we are speaking header protocol, we should be using
 	// seq id from the header. However, doing it here creates a non-backwards
 	// compatible code between client and server, since they both use this code.
-	return p.Protocol.ReadMessageBegin()
+	return p.Format.ReadMessageBegin()
 }
 
 func (p *headerProtocol) Flush() (err error) {

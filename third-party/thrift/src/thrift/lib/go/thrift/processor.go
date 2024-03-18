@@ -44,11 +44,11 @@ type Processor interface {
 // order to perform io and message processing
 type ProcessorFunction interface {
 	// Read a serializable message from the input protocol.
-	Read(iprot Protocol) (Struct, Exception)
+	Read(iprot Format) (Struct, Exception)
 	// Process a message handing it to the client handler.
 	Run(args Struct) (WritableStruct, ApplicationException)
 	// Write a serializable responsne
-	Write(seqID int32, result WritableStruct, oprot Protocol) Exception
+	Write(seqID int32, result WritableStruct, oprot Format) Exception
 }
 
 // Process is a utility function to take a processor and an input and output
@@ -86,9 +86,9 @@ func (p ctxProcessorAdapter) GetProcessorFunctionContext(name string) (Processor
 
 // ProcessorFunctionContext is a ProcessorFunction that supports contexts.
 type ProcessorFunctionContext interface {
-	Read(iprot Protocol) (Struct, Exception)
+	Read(iprot Format) (Struct, Exception)
 	RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException)
-	Write(seqID int32, result WritableStruct, oprot Protocol) Exception
+	Write(seqID int32, result WritableStruct, oprot Format) Exception
 }
 
 // NewProcessorFunctionContextAdapter creates a ProcessorFunctionContext from a regular ProcessorFunction.

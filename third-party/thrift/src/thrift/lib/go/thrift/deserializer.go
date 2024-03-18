@@ -18,7 +18,7 @@ package thrift
 
 type Deserializer struct {
 	Transport Transport
-	Protocol  Protocol
+	Protocol  Format
 }
 
 func NewDeserializer() *Deserializer {

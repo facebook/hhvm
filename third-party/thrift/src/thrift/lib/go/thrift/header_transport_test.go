@@ -33,7 +33,7 @@ func TestHeaderTransport(t *testing.T) {
 // Reflect the result after going through the header pipeline, and make sure that:
 // The original proto could still read what it sent
 // Header found the correct protocol from the incoming frame
-func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, proto Protocol, headertrans *HeaderTransport) {
+func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, proto Format, headertrans *HeaderTransport) {
 	tFname, tTypeID, tID, tData := "func", CALL, int32(1), "ASDF"
 	err := proto.WriteMessageBegin(tFname, tTypeID, tID)
 	if err != nil {

@@ -6,7 +6,7 @@ authors = [
 ]
 description = "Watchman client for Python"
 license = { file = "LICENSE" }
-readme = "../README.md"
+readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 5 - Production/Stable",

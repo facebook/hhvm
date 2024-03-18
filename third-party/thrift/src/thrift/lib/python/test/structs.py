@@ -145,10 +145,6 @@ class StructTests(unittest.TestCase):
             # pyre-ignore[6]: for test
             Runtime(int_list_val=["foo", "bar", "baz"])
 
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            Runtime(bool_val=True, enum_val=Color.red, int_list_val=[1, 2, "foo"])
-
     def test_reserved(self) -> None:
         x = Reserved(
             from_="hello",

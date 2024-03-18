@@ -22,6 +22,12 @@ type Protocol interface {
 
 	// used by SerialChannel and generated thrift Clients
 	Close() error
+
+	PersistentHeaders
+	ResponseHeaderGetter
+
+	// Deprecated
+	RequestHeaders
 }
 
 // Compile time check for interface conformance

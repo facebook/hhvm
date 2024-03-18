@@ -116,6 +116,11 @@ func (p *upgradeToRocketProtocol) SetRequestHeader(key, value string) {
 	p.Protocol.(RequestHeaders).SetRequestHeader(key, value)
 }
 
+func (p *upgradeToRocketProtocol) GetRequestHeader(key string) (value string, ok bool) {
+	v, ok := p.GetRequestHeaders()[key]
+	return v, ok
+}
+
 func (p *upgradeToRocketProtocol) GetRequestHeaders() map[string]string {
 	if p.Protocol == nil {
 		headers := p.headerProtocol.(RequestHeaders).GetRequestHeaders()

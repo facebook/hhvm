@@ -38,7 +38,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
-	got := protocol.Headers()
+	got := protocol.(RequestHeaders).GetRequestHeaders()
 	assert.Equal(t, want, got)
 }
 

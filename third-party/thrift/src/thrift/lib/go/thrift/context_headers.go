@@ -46,6 +46,7 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 // Deprecated: RequestHeaders will eventually be private.
 type RequestHeaders interface {
 	SetRequestHeader(key, value string)
+	GetRequestHeader(key string) (value string, ok bool)
 	GetRequestHeaders() map[string]string
 }
 

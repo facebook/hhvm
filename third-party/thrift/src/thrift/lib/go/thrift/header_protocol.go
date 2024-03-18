@@ -38,7 +38,7 @@ func (p *HeaderProtocolFactory) GetProtocol(trans Transport) Protocol {
 	return NewHeaderProtocol(trans)
 }
 
-func NewHeaderProtocol(trans Transport) *headerProtocol {
+func NewHeaderProtocol(trans Transport) Protocol {
 	p := &headerProtocol{
 		origTransport: trans,
 		protoID:       ProtocolIDCompact,

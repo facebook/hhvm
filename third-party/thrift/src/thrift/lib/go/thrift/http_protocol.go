@@ -64,6 +64,11 @@ func (p *httpProtocol) GetResponseHeaders() map[string]string {
 	return nil
 }
 
+func (p *httpProtocol) GetRequestHeader(key string) (value string, ok bool) {
+	v, ok := p.GetRequestHeaders()[key]
+	return v, ok
+}
+
 func (p *httpProtocol) SetRequestHeader(key, value string) {
 	p.transport.SetHeader(key, value)
 }

@@ -24,8 +24,8 @@ import (
 
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 	protocol := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
-	protocol.SetPersistentHeader("key", "value")
-	v, ok := protocol.GetPersistentHeader("key")
+	protocol.(PersistentHeaders).SetPersistentHeader("key", "value")
+	v, ok := protocol.(PersistentHeaders).GetPersistentHeader("key")
 	assert.True(t, ok)
 	assert.Equal(t, "value", v)
 }

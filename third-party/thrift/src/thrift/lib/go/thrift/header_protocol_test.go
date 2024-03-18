@@ -23,24 +23,24 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	proto1 := NewHeaderProtocol(tmb)
 	proto2 := NewHeaderProtocol(tmb)
 
-	proto1.SetRequestHeader("preferred_cheese", "cheddar")
-	if v, _ := proto1.GetRequestHeader("preferred_cheese"); v != "cheddar" {
+	proto1.(RequestHeaders).SetRequestHeader("preferred_cheese", "cheddar")
+	if v, _ := proto1.(RequestHeaders).GetRequestHeader("preferred_cheese"); v != "cheddar" {
 		t.Fatalf("failed to set header")
 	}
-	if len(proto1.Headers()) != 1 {
+	if len(proto1.(RequestHeaders).GetRequestHeaders()) != 1 {
 		t.Fatalf("wrong number of headers")
 	}
 
-	proto1.SetPersistentHeader("preferred_cheese", "gouda")
-	if v, _ := proto1.GetPersistentHeader("preferred_cheese"); v != "gouda" {
+	proto1.(PersistentHeaders).SetPersistentHeader("preferred_cheese", "gouda")
+	if v, _ := proto1.(PersistentHeaders).GetPersistentHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to set persistent header")
 	}
-	if len(proto1.GetPersistentHeaders()) != 1 {
+	if len(proto1.(PersistentHeaders).GetPersistentHeaders()) != 1 {
 		t.Fatalf("wrong number of headers")
 	}
 
-	proto1.SetIdentity("batman")
-	if proto1.Identity() != "batman" {
+	proto1.(*headerProtocol).SetIdentity("batman")
+	if proto1.(*headerProtocol).Identity() != "batman" {
 		t.Fatalf("failed to set identity")
 	}
 
@@ -53,11 +53,11 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to read message from proto1 in proto2")
 	}
 
-	if v, _ := proto2.GetResponseHeader("preferred_cheese"); v != "gouda" {
+	if v, _ := proto2.(ResponseHeaderGetter).GetResponseHeader("preferred_cheese"); v != "gouda" {
 		t.Fatalf("failed to read header, got: %s", v)
 	}
 
-	if proto2.peerIdentity() != "batman" {
+	if proto2.(*headerProtocol).peerIdentity() != "batman" {
 		t.Fatalf("failed to peer identity")
 	}
 }

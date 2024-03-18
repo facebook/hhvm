@@ -241,6 +241,11 @@ func (p *rocketProtocol) SetRequestHeader(key, value string) {
 	p.reqMetadata.Other[key] = value
 }
 
+func (p *rocketProtocol) GetRequestHeader(key string) (value string, ok bool) {
+	v, ok := p.GetRequestHeaders()[key]
+	return v, ok
+}
+
 func (p *rocketProtocol) GetRequestHeaders() map[string]string {
 	return p.reqMetadata.Other
 }

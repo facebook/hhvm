@@ -72,12 +72,7 @@ type state_handler = {
     unit;
 }
 
-type tracker_v1_event_state = {
-  mutable is_in_hg_update_state: bool;
-  mutable is_in_hg_transaction_state: bool;
-}
-
-type tracker_v2_event_state = { mutable outstanding_events: event_list }
+type tracker_event_state = { mutable outstanding_events: event_list }
 
 let tracker_state =
   {
@@ -105,45 +100,7 @@ let add_query ~(hg_rev : Hg.Rev.t) root =
     Queue.enqueue tracker_state.pending_queries hg_rev
   )
 
-let v1_handler_fn () : state_handler =
-  let state =
-    { is_in_hg_update_state = false; is_in_hg_transaction_state = false }
-  in
-  let on_state_enter state_name =
-    match state_name with
-    | "hg.update" -> state.is_in_hg_update_state <- true
-    | "hg.transaction" -> state.is_in_hg_transaction_state <- true
-    | _ -> ()
-  in
-  let on_state_leave root state_name state_metadata =
-    match state_name with
-    | "hg.update" ->
-      if not state.is_in_hg_update_state then
-        HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
-      state.is_in_hg_update_state <- false;
-      Hh_logger.log "ServerRevisionTracker: leaving hg.update";
-      Option.Monad_infix.(
-        Option.iter
-          (state_metadata >>= Watchman_utils.rev_in_state_change)
-          ~f:(fun hg_rev ->
-            match state_metadata >>= Watchman_utils.merge_in_state_change with
-            | Some true ->
-              Hh_logger.log
-                "ServerRevisionTracker: Ignoring merge rev %s"
-                (Hg.Rev.to_string hg_rev)
-            | _ -> add_query ~hg_rev root))
-    | "hg.transaction" ->
-      if not state.is_in_hg_transaction_state then
-        HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
-      state.is_in_hg_transaction_state <- false
-    | _ -> ()
-  in
-  let is_hg_updating () =
-    state.is_in_hg_transaction_state || state.is_in_hg_update_state
-  in
-  { on_state_enter; on_state_leave; is_hg_updating }
-
-let v2_handler_fn () =
+let handler_fn () =
   let state = { outstanding_events = [] } in
   let is_in_state (outstanding : event_list) : bool =
     List.exists outstanding ~f:(fun e -> e.is_enter)
@@ -247,27 +204,14 @@ let v2_handler_fn () =
   let is_hg_updating () = is_in_state state.outstanding_events in
   { on_state_enter; on_state_leave; is_hg_updating }
 
-let v1_handler = v1_handler_fn ()
+let handler = handler_fn ()
 
-let v2_handler = v2_handler_fn ()
+let on_state_enter state_name = handler.on_state_enter state_name
 
-let on_state_enter state_name use_tracker_v2 =
-  if use_tracker_v2 then
-    v2_handler.on_state_enter state_name
-  else
-    v1_handler.on_state_enter state_name
+let on_state_leave root state_name state_metadata =
+  handler.on_state_leave root state_name state_metadata
 
-let on_state_leave root state_name state_metadata use_tracker_v2 =
-  if use_tracker_v2 then
-    v2_handler.on_state_leave root state_name state_metadata
-  else
-    v1_handler.on_state_leave root state_name state_metadata
-
-let is_hg_updating use_tracker_v2 =
-  if use_tracker_v2 then
-    v2_handler.is_hg_updating ()
-  else
-    v1_handler.is_hg_updating ()
+let is_hg_updating = handler.is_hg_updating
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

@@ -154,9 +154,6 @@ let async_changes_from_watchman_changes
     ~(root : Path.t)
     ~(local_config : ServerLocalConfig.t)
     (watchman_changes : Watchman.pushed_changes) : changes =
-  let use_tracker_v2 =
-    local_config.ServerLocalConfig.use_server_revision_tracker_v2
-  in
   match watchman_changes with
   | Watchman.Changed_merge_base _ ->
     let () =
@@ -165,11 +162,11 @@ let async_changes_from_watchman_changes
     raise Exit_status.(Exit_with Watchman_invalid_result)
   | Watchman.State_enter (name, metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
-      ServerRevisionTracker.on_state_enter name use_tracker_v2;
+      ServerRevisionTracker.on_state_enter name;
     StateEnter (name, metadata)
   | Watchman.State_leave (name, metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
-      ServerRevisionTracker.on_state_leave root name metadata use_tracker_v2;
+      ServerRevisionTracker.on_state_leave root name metadata;
     StateLeave (name, metadata)
   | Watchman.Files_changed changes ->
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);

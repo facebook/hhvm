@@ -232,8 +232,6 @@ type t = {
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
-  use_server_revision_tracker_v2: bool;
-      (** control serverRevisionTracker.ml watchman subscription event tracking *)
   use_distc: bool;
       (** use remote type-checking (hh_distc) rather than only local type-checking*)
   hh_distc_fanout_threshold: int;
@@ -333,7 +331,6 @@ let default =
     cache_remote_decls = false;
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
-    use_server_revision_tracker_v2 = false;
     use_distc = true;
     use_compressed_dep_graph = true;
     use_old_decls_from_cas = false;
@@ -980,13 +977,6 @@ let load_
       ~current_version
       config
   in
-  let use_server_revision_tracker_v2 =
-    bool_if_min_version
-      "use_server_revision_tracker_v2"
-      ~default:default.use_server_revision_tracker_v2
-      ~current_version
-      config
-  in
   let use_distc =
     bool_if_min_version
       "use_distc"
@@ -1151,7 +1141,6 @@ let load_
     cache_remote_decls;
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
-    use_server_revision_tracker_v2;
     use_distc;
     use_compressed_dep_graph;
     use_old_decls_from_cas;
@@ -1196,7 +1185,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
       load_state_natively_v4 = options.load_state_natively;
-      use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;
       use_compressed_dep_graph = options.use_compressed_dep_graph;

@@ -8,6 +8,7 @@
 #include "CarbonRouterInstance.h"
 
 #include <folly/executors/thread_factory/InitThreadFactory.h>
+#include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/json/json.h>
 
@@ -44,8 +45,19 @@ std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
   threadFactory = std::make_shared<folly::InitThreadFactory>(
       std::move(threadFactory), [] { ProxyBase::registerProxyThread(); });
 
-  return std::make_unique<folly::IOThreadPoolExecutor>(
-      numProxies /* max */, numProxies /* min */, std::move(threadFactory));
+  if (opts.use_mux_io_thread_pool) {
+    return std::make_unique<folly::MuxIOThreadPoolExecutor>(
+        numProxies,
+        folly::MuxIOThreadPoolExecutor::Options{}
+            .setWakeUpInterval(std::chrono::microseconds{
+                opts.mux_io_thread_pool_wake_up_interval_us})
+            .setIdleSpinMax(std::chrono::microseconds{
+                opts.mux_io_thread_pool_idle_spin_max_us}),
+        std::move(threadFactory));
+  } else {
+    return std::make_unique<folly::IOThreadPoolExecutor>(
+        numProxies /* max */, numProxies /* min */, std::move(threadFactory));
+  }
 }
 
 } // namespace detail

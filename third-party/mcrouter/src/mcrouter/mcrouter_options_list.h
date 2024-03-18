@@ -84,6 +84,31 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "adjust how many proxy threads to run")
 
+MCROUTER_OPTION_TOGGLE(
+    use_mux_io_thread_pool,
+    false,
+    "use-mux-io-thread-pool",
+    no_short,
+    "EXPERIMENTAL: Use MuxIOThreadPoolExecutor for mcrouter IO threads")
+
+MCROUTER_OPTION_INTEGER(
+    size_t,
+    mux_io_thread_pool_wake_up_interval_us,
+    100,
+    no_long,
+    no_short,
+    "If use_mux_io_thread_pool is enabled, use this "
+    "for wakeUpInterval in MuxIOThreadPoolExecutor")
+
+MCROUTER_OPTION_INTEGER(
+    size_t,
+    mux_io_thread_pool_idle_spin_max_us,
+    10,
+    no_long,
+    no_short,
+    "If use_mux_io_thread_pool is enabled, use this "
+    "for idleSpinMax in MuxIOThreadPoolExecutor")
+
 MCROUTER_OPTION_INTEGER(
     size_t,
     client_queue_size,

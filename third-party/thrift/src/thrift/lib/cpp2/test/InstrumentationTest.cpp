@@ -1001,15 +1001,21 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
     RequestStateMachine stateMachine_;
 
    public:
+    template <typename... Args>
+    static auto colocateWithDebugStub(
+        RequestsRegistry::DebugStubColocator& /* alloc */, Args&...) {
+      return [](auto&& /* make */) { return folly::unit; };
+    }
+
     MockRequest(
-        RequestsRegistry::DebugStub* stub,
+        RequestsRegistry::ColocatedData<folly::Unit> colocationParams,
         std::shared_ptr<RequestsRegistry> registry)
         : registry_(std::move(registry)),
           stateMachine_(
               true,
               serverConfigs->getAdaptiveConcurrencyController(),
               serverConfigs->getCPUConcurrencyController()) {
-      new (stub) RequestsRegistry::DebugStub(
+      new (colocationParams.debugStubToInit) RequestsRegistry::DebugStub(
           *registry_,
           *this,
           mockReqCtx_,

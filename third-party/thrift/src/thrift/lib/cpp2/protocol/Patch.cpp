@@ -54,6 +54,15 @@ using value_field_id =
 template <typename Tag>
 using value_native_type = op::get_native_type<Value, value_field_id<Tag>>;
 
+void checkNotSafePatch(const Object& patch) {
+  const Value* version = patch.if_contains(FieldId{1});
+  const Value* data = patch.if_contains(FieldId{2});
+  if (version && version->is_i32() && data && data->is_binary()) {
+    folly::throw_exception<std::runtime_error>(
+        "Safe Patch provided. Use `fromSafePatch` to convert to Dynamic Patch first.");
+  }
+}
+
 PatchOp toOp(FieldId id) {
   auto op = static_cast<PatchOp>(id);
   if (util::enumName<PatchOp>(op) == nullptr) {
@@ -67,6 +76,7 @@ void checkOps(
     const Object& patch,
     Value::Type valueType,
     folly::F14FastSet<PatchOp> supportedOps) {
+  checkNotSafePatch(patch);
   for (const auto& field : patch) {
     auto op = toOp(FieldId{field.first});
     if (supportedOps.find(op) == supportedOps.end()) {
@@ -683,16 +693,19 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
 } // namespace detail
 
 ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch) {
+  detail::checkNotSafePatch(patch);
   return detail::extractMaskFromPatch(patch, true);
 }
 
 ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
+  detail::checkNotSafePatch(patch);
   return detail::extractMaskFromPatch(patch, false);
 }
 
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
     const protocol::Object& patch, const folly::IOBuf& buf) {
+  detail::checkNotSafePatch(patch);
   // TODO: create method for this operation
   static_assert(
       Protocol == type::StandardProtocol::Binary ||

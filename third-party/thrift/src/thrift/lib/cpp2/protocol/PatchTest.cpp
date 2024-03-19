@@ -1675,5 +1675,18 @@ TEST_F(PatchTest, SafePatchInvalidForwardConsumption) {
   EXPECT_THROW(fromSafePatch(dynSafePatch), std::runtime_error);
 }
 
+TEST_F(PatchTest, SafePatchException) {
+  auto dynSafePatch = toSafePatch({});
+  Object obj;
+  folly::IOBuf buf;
+  EXPECT_THROW(applyPatch(dynSafePatch, obj), std::runtime_error);
+  EXPECT_THROW(extractMaskFromPatch(dynSafePatch), std::runtime_error);
+  EXPECT_THROW(extractMaskViewFromPatch(dynSafePatch), std::runtime_error);
+  EXPECT_THROW(
+      applyPatchToSerializedData<type::StandardProtocol::Compact>(
+          dynSafePatch, buf),
+      std::runtime_error);
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

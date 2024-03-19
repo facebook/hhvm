@@ -92,7 +92,8 @@ std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
 
 /**
  * Returns a Thrift Dynamic Patch instance corresponding to the (decoded)
- * `SafePatch` in Protocol Object.
+ * `SafePatch` in Protocol Object. Note, `SafePatch` needs to be converted to
+ * Thrift Dynamic Patch before applying or extracting field mask.
  *
  * @throws std::runtime_error if the given `SafePatch` cannot be successfully
  * decoded or safely applied in this process (eg. if the version of the Thrift

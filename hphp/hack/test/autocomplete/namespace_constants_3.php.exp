@@ -1,0 +1,24 @@
+Bar\bar_a
+  INSERT Bar\bar_a
+  constant
+SORT TEXT: none
+Bar\bar_b
+  INSERT Bar\bar_b
+  constant
+SORT TEXT: none
+Bar\foo_a
+  INSERT Bar\foo_a
+  constant
+SORT TEXT: none
+bar_a
+  INSERT bar_a
+  constant
+SORT TEXT: none
+foo_a
+  INSERT foo_a
+  constant
+SORT TEXT: none
+foo_b
+  INSERT foo_b
+  constant
+SORT TEXT: none

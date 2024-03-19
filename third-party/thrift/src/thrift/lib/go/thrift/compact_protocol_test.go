@@ -57,9 +57,7 @@ func TestReadWriteCompactProtocol(t *testing.T) {
 
 func TestInitialAllocationMapCompactProtocol(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
-	f := NewCompactProtocolFactory()
-	d.Protocol = f.GetFormat(d.Transport)
+	d := NewCompactDeserializer()
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
 	err := d.Read(&m, data)
@@ -72,9 +70,7 @@ func TestInitialAllocationMapCompactProtocol(t *testing.T) {
 
 func TestInitialAllocationListCompactProtocol(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
-	f := NewCompactProtocolFactory()
-	d.Protocol = f.GetFormat(d.Transport)
+	d := NewCompactDeserializer()
 	// attempts to allocate a list of 950M elements for an 11 byte message
 	data := []byte("%0\x98\xfa\xb7\xb7\xc4\xc4\x03\x01a")
 	err := d.Read(&m, data)
@@ -87,9 +83,7 @@ func TestInitialAllocationListCompactProtocol(t *testing.T) {
 
 func TestInitialAllocationSetCompactProtocol(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
-	f := NewCompactProtocolFactory()
-	d.Protocol = f.GetFormat(d.Transport)
+	d := NewCompactDeserializer()
 	// attempts to allocate a list of 950M elements for an 11 byte message
 	data := []byte("%0\xa8\xfa\x97\xb7\xc4\xc4\x03\x01a")
 	err := d.Read(&m, data)

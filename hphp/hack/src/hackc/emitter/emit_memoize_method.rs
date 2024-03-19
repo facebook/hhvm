@@ -177,7 +177,8 @@ fn make_memoize_wrapper_method<'a, 'd>(
         method_id: &name,
         flags: arg_flags,
     };
-    let body = emit_memoize_wrapper_body(emitter, env, &mut args)?;
+    let span = Span::from_pos(&method.span);
+    let body = emit_memoize_wrapper_body(emitter, env, &mut args, span)?;
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
@@ -197,7 +198,6 @@ fn make_memoize_wrapper_method<'a, 'd>(
         visibility: Visibility::from(method.visibility),
         name,
         body,
-        span: Span::from_pos(&method.span),
         coeffects,
         flags,
         attrs,
@@ -208,6 +208,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
+    span: Span,
 ) -> Result<Body> {
     let mut tparams: Vec<&str> = args
         .scope
@@ -223,7 +224,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
     let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
-    emit(emitter, env, hhas_params, return_type_info, args)
+    emit(emitter, env, hhas_params, return_type_info, span, args)
 }
 
 fn emit<'a, 'd>(
@@ -231,6 +232,7 @@ fn emit<'a, 'd>(
     env: &mut Env<'a>,
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
+    span: Span,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     let pos = &args.method.span;
@@ -243,6 +245,7 @@ fn emit<'a, 'd>(
         hhas_params,
         decl_vars,
         return_type_info,
+        span,
         args,
     )
 }
@@ -511,6 +514,7 @@ fn make_wrapper<'a, 'd>(
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     return_type_info: TypeInfo,
+    span: Span,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     emit_body::make_body(
@@ -525,6 +529,7 @@ fn make_wrapper<'a, 'd>(
         Some(return_type_info),
         None,
         Some(env),
+        span,
     )
 }
 

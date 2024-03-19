@@ -307,7 +307,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Re
         &AttrContext::Func,
         &fun_def.attrs,
     )?;
-    print_span(w, &fun_def.span)?;
+    print_span(w, &body.span)?;
     w.write_all(b" ")?;
     option(w, body.return_type_info.as_ref(), |w, ti| {
         print_type_info(w, ti)?;
@@ -515,7 +515,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -
         &AttrContext::Func,
         &method_def.attrs,
     )?;
-    print_span(w, &method_def.span)?;
+    print_span(w, &body.span)?;
     w.write_all(b" ")?;
     option(w, body.return_type_info.as_ref(), |w, t| {
         print_type_info(w, t)?;

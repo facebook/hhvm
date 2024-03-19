@@ -120,6 +120,7 @@ fn make_86method<'d>(
         method_return_type,
         method_doc_comment,
         method_env,
+        span,
     )?;
 
     Ok(Method {
@@ -127,7 +128,6 @@ fn make_86method<'d>(
         attributes: attributes.into(),
         name,
         flags,
-        span,
         coeffects,
         visibility,
         attrs,

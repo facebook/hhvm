@@ -60,6 +60,7 @@ pub fn emit_body<'a, 'd>(
                     shadowed_tparams: Default::default(),
                     stack_depth,
                     upper_bounds: Default::default(),
+                    span: Default::default(),
                 })
             })
         })

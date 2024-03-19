@@ -126,6 +126,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
             ast_body,
             instr::null(),
             scope,
+            Span::from_pos(&f.span),
             EmitBodyArgs {
                 flags: body_flags,
                 deprecation_info,
@@ -159,7 +160,6 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     let normal_function = Function {
         attributes: user_attrs.into(),
         name: renamed_id,
-        span: Span::from_pos(&f.span),
         coeffects,
         body,
         flags,

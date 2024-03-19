@@ -193,6 +193,7 @@ fn sem_diff_body<'a>(
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
         stack_depth: _,
+        span: a_span,
     } = a;
     let Body {
         body_instrs: _,
@@ -206,6 +207,7 @@ fn sem_diff_body<'a>(
         return_type_info: b_return_type_info,
         doc_comment: b_doc_comment,
         stack_depth: _,
+        span: b_span,
     } = b;
 
     sem_diff_eq(&path.qualified("num_iters"), a_num_iters, b_num_iters)?;
@@ -241,6 +243,7 @@ fn sem_diff_body<'a>(
         a_shadowed_tparams,
         b_shadowed_tparams,
     )?;
+    sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
 
     // Don't bother comparing decl_vars - when we use named vars later we'll
     // compare the names to ensure we're using the same ones.
@@ -518,7 +521,6 @@ fn sem_diff_function<'a>(
         attributes: a_attributes,
         name: a_name,
         body: a_body,
-        span: a_span,
         coeffects: a_coeffects,
         flags: a_flags,
         attrs: a_attrs,
@@ -527,7 +529,6 @@ fn sem_diff_function<'a>(
         attributes: b_attributes,
         name: b_name,
         body: b_body,
-        span: b_span,
         coeffects: b_coeffects,
         flags: b_flags,
         attrs: b_attrs,
@@ -536,7 +537,6 @@ fn sem_diff_function<'a>(
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
-    sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     sem_diff_eq(&path.qualified("attrs"), a_attrs, b_attrs)?;
@@ -556,7 +556,6 @@ fn sem_diff_method<'a>(
         visibility: a_visibility,
         name: a_name,
         body: a_body,
-        span: a_span,
         coeffects: a_coeffects,
         flags: a_flags,
         attrs: a_attrs,
@@ -566,7 +565,6 @@ fn sem_diff_method<'a>(
         visibility: b_visibility,
         name: b_name,
         body: b_body,
-        span: b_span,
         coeffects: b_coeffects,
         flags: b_flags,
         attrs: b_attrs,
@@ -575,7 +573,6 @@ fn sem_diff_method<'a>(
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
-    sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     sem_diff_eq(&path.qualified("attrs"), a_attrs, b_attrs)?;

@@ -13,7 +13,6 @@ use crate::Body;
 use crate::Coeffects;
 use crate::FunctionName;
 use crate::ParamEntry;
-use crate::Span;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
@@ -22,7 +21,6 @@ pub struct Function {
     pub name: FunctionName,
     pub body: Body,
 
-    pub span: Span,
     pub coeffects: Coeffects,
     pub flags: FunctionFlags,
     pub attrs: Attr,

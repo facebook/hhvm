@@ -24,13 +24,11 @@ use crate::types;
 pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let span = ir::SrcLoc::from_span(&src.span);
     let func = convert_body(
         &src.body,
         &src.attributes,
         src.attrs,
         &src.coeffects,
-        span,
         unit_state,
     );
     ir::verify::verify_func(&func, &Default::default());
@@ -53,13 +51,11 @@ pub(crate) fn convert_method<'a>(
 ) {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let span = ir::SrcLoc::from_span(&src.span);
     let func = convert_body(
         &src.body,
         &src.attributes,
         src.attrs,
         &src.coeffects,
-        span,
         unit_state,
     );
     ir::verify::verify_func(&func, &Default::default());
@@ -80,7 +76,6 @@ fn convert_body<'a>(
     attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
     coeffects: &hhbc::Coeffects,
-    src_loc: ir::SrcLoc,
     unit_state: &UnitState,
 ) -> ir::Func {
     let Body {
@@ -95,6 +90,7 @@ fn convert_body<'a>(
         ref shadowed_tparams,
         ref upper_bounds,
         stack_depth: _,
+        ref span,
     } = *body;
 
     let shadowed_tparams: Vec<ir::ClassName> = shadowed_tparams
@@ -103,7 +99,7 @@ fn convert_body<'a>(
         .collect();
 
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
-    locs.push(src_loc);
+    locs.push(ir::SrcLoc::from_span(span));
 
     let coeffects = convert_coeffects(coeffects);
 

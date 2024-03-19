@@ -12,7 +12,6 @@ use crate::Attribute;
 use crate::Body;
 use crate::Coeffects;
 use crate::MethodName;
-use crate::Span;
 use crate::Visibility;
 
 #[derive(Debug, Serialize)]
@@ -22,7 +21,6 @@ pub struct Method {
     pub visibility: Visibility,
     pub name: MethodName,
     pub body: Body,
-    pub span: Span,
     pub coeffects: Coeffects,
     pub flags: MethodFlags,
     pub attrs: Attr,

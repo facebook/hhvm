@@ -24,6 +24,7 @@ use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
 use hhbc::ParamEntry;
+use hhbc::Span;
 use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -84,6 +85,7 @@ pub fn emit_body<'b, 'd>(
     body: &'b [ast::Stmt],
     return_value: InstrSeq,
     scope: Scope<'_>,
+    span: Span,
     args: Args<'_>,
 ) -> Result<(Body, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
@@ -167,6 +169,7 @@ pub fn emit_body<'b, 'd>(
             Some(return_type_info),
             args.doc_comment.to_owned(),
             Some(&env),
+            span,
         )?,
         is_generator,
         is_pair_generator,
@@ -355,6 +358,7 @@ pub fn make_body<'a, 'd>(
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a>>,
+    span: Span,
 ) -> Result<Body> {
     if emitter.options().compiler_flags.relabel {
         label_rewriter::relabel_function(&mut params, &mut body_instrs);
@@ -417,6 +421,7 @@ pub fn make_body<'a, 'd>(
             .map(|(_, comment)| comment.into_bytes().into())
             .into(),
         stack_depth,
+        span,
     })
 }
 

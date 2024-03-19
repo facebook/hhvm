@@ -64,6 +64,7 @@ fn emit_constant_cinit<'a, 'd>(
             return_type_info,
             None, /* doc_comment */
             Some(env),
+            Span::from_pos(&constant.span),
         )?;
         let mut attrs = Attr::AttrNoInjection;
         attrs.set(Attr::AttrPersistent, e.systemlib());
@@ -73,7 +74,6 @@ fn emit_constant_cinit<'a, 'd>(
             attributes: Default::default(),
             name: original_name,
             body,
-            span: Span::from_pos(&constant.span),
             coeffects: Coeffects::default(),
             flags: FunctionFlags::empty(),
             attrs,

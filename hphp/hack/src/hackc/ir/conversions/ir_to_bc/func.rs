@@ -54,6 +54,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let return_type_info = crate::types::convert(&func.return_type);
 
+    let span = func.loc(func.loc_id).to_span();
     let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {
         ParamEntry {
             param,
@@ -87,12 +88,12 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
         shadowed_tparams: shadowed_tparams.into(),
         upper_bounds,
         stack_depth,
+        span,
     }
 }
 
 pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Function) {
     trace!("convert_function {}", function.name);
-    let span = function.func.loc(function.func.loc_id).to_span();
     let attributes = std::mem::take(&mut function.func.attributes).into();
     let attrs = function.func.attrs;
     let coeffects = convert_coeffects(&function.func.coeffects);
@@ -103,7 +104,6 @@ pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Functio
         coeffects,
         flags: function.flags,
         name: function.name,
-        span,
         attrs,
     };
     unit.functions.push(hhas_func);
@@ -111,7 +111,6 @@ pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Functio
 
 pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataState) -> Method {
     trace!("convert_method {}", method.name);
-    let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
     let attributes = std::mem::take(&mut method.func.attributes).into();
@@ -120,7 +119,6 @@ pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataState) -> 
         attributes,
         name: method.name,
         body,
-        span,
         coeffects,
         flags: method.flags,
         visibility: method.visibility,

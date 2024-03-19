@@ -138,6 +138,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
         stack_depth: a_stack_depth,
+        span: a_span,
     } = a;
     let Body {
         body_instrs: b_body_instrs,
@@ -151,6 +152,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         return_type_info: b_return_type_info,
         doc_comment: b_doc_comment,
         stack_depth: b_stack_depth,
+        span: b_span,
     } = b;
 
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
@@ -163,6 +165,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     cmp_eq(a_return_type_info, b_return_type_info).qualified("return_type_info")?;
     cmp_eq(a_upper_bounds, b_upper_bounds).qualified("upper_bounds")?;
     cmp_eq(a_shadowed_tparams, b_shadowed_tparams).qualified("shadowed_tparams")?;
+    cmp_eq(a_span, b_span).qualified("span")?;
 
     cmp_slice(a_decl_vars, b_decl_vars, cmp_eq).qualified("decl_vars")?;
 
@@ -584,7 +587,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
         attributes: a_attributes,
         name: a_name,
         body: a_body,
-        span: a_span,
         coeffects: a_coeffects,
         flags: a_flags,
         attrs: a_attrs,
@@ -593,7 +595,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
         attributes: b_attributes,
         name: b_name,
         body: b_body,
-        span: b_span,
         coeffects: b_coeffects,
         flags: b_flags,
         attrs: b_attrs,
@@ -602,7 +603,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_body(a_body, b_body).qualified("body")?;
-    cmp_eq(a_span, b_span).qualified("span")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
@@ -616,7 +616,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         visibility: a_visibility,
         name: a_name,
         body: a_body,
-        span: a_span,
         coeffects: a_coeffects,
         flags: a_flags,
         attrs: a_attrs,
@@ -626,7 +625,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         visibility: b_visibility,
         name: b_name,
         body: b_body,
-        span: b_span,
         coeffects: b_coeffects,
         flags: b_flags,
         attrs: b_attrs,
@@ -635,7 +633,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
-    cmp_eq(a_span, b_span).qualified("span")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;

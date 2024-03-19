@@ -10,6 +10,7 @@ use serde::Serialize;
 use crate::DefaultValue;
 use crate::Instruct;
 use crate::Param;
+use crate::Span;
 use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
@@ -31,6 +32,7 @@ pub struct Body {
     /// The statically computed stack depth for this Body. This can be computed
     /// using the hhbc::compute_stack_depth() function.
     pub stack_depth: usize,
+    pub span: Span,
 }
 
 #[derive(Debug, Serialize)]

@@ -463,6 +463,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
         return_type_info,
         shadowed_tparams,
         upper_bounds,
+        span,
     )?;
     // the visibility is printed in the attrs
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
@@ -473,7 +474,6 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
         visibility,
         name,
         body,
-        span,
         coeffects,
         flags,
         attrs,
@@ -1017,12 +1017,12 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
         return_type_info,
         shadowed_tparams,
         upper_bounds,
+        span,
     )?;
     let hhas_func = hhbc::Function {
         attributes: attributes.into(),
         name,
         body,
-        span,
         coeffects,
         flags,
         attrs: attr,
@@ -1340,6 +1340,7 @@ fn assemble_body(
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<StringId>,
     upper_bounds: Vec<hhbc::UpperBound>,
+    span: hhbc::Span,
 ) -> Result<(hhbc::Body, hhbc::Coeffects)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
@@ -1402,6 +1403,7 @@ fn assemble_body(
         shadowed_tparams: shadowed_tparams.into(),
         stack_depth,
         upper_bounds: upper_bounds.into(),
+        span,
     };
     Ok((tr, coeff))
 }

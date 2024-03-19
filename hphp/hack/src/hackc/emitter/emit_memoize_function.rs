@@ -123,6 +123,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         params,
         decl_vars,
         body_instrs,
+        Span::from_pos(&f.span),
     )?;
 
     let mut flags = FunctionFlags::empty();
@@ -134,7 +135,6 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         attributes: attributes.into(),
         name: original_id,
         body,
-        span: Span::from_pos(&f.span),
         coeffects,
         flags,
         attrs,
@@ -375,6 +375,7 @@ fn make_wrapper_body<'a, 'd>(
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     body_instrs: InstrSeq,
+    span: Span,
 ) -> Result<Body> {
     emit_body::make_body(
         emitter,
@@ -388,5 +389,6 @@ fn make_wrapper_body<'a, 'd>(
         Some(return_type_info),
         None, /* doc comment */
         Some(&env),
+        span,
     )
 }

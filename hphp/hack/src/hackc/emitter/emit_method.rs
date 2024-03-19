@@ -262,6 +262,7 @@ pub fn from_ast<'a, 'd>(
             ast_body_block,
             instr::null(),
             scope,
+            Span::from_pos(&method.span),
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 class_tparam_names: class_tparam_names.as_slice(),
@@ -286,11 +287,6 @@ pub fn from_ast<'a, 'd>(
             hhbc::MethodName::from_ast_name(&method.name.1)
         }
     };
-    let span = if is_native_opcode_impl {
-        Span::default()
-    } else {
-        Span::from_pos(&method.span)
-    };
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
     flags.set(MethodFlags::IS_GENERATOR, is_generator);
@@ -312,7 +308,6 @@ pub fn from_ast<'a, 'd>(
         visibility: Visibility::from(visibility),
         name,
         body,
-        span,
         coeffects,
         flags,
         attrs,

@@ -20,8 +20,8 @@
 
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/FutureAdapter.h"
 #include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/SemiFutureAdapter.h"
 
 DECLARE_int64(mysql_mysql_timeout_micros);
 

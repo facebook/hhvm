@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/FutureAdapter.h"
+#include "squangle/mysql_client/SemiFutureAdapter.h"
 #include <folly/futures/Future.h>
 #include <squangle/mysql_client/Operation.h>
 #include "folly/futures/Future.h"

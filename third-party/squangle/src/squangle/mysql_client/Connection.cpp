@@ -7,8 +7,7 @@
  */
 
 #include "squangle/mysql_client/Connection.h"
-
-#include "squangle/mysql_client/FutureAdapter.h"
+#include "squangle/mysql_client/SemiFutureAdapter.h"
 
 namespace facebook::common::mysql_client {
 

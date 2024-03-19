@@ -8,7 +8,7 @@
 
 #include "squangle/mysql_client/AsyncConnectionPool.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/FutureAdapter.h"
+#include "squangle/mysql_client/SemiFutureAdapter.h"
 
 #include <cstddef>
 #include <memory>

@@ -81,6 +81,12 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int64_t ErrorHandling.NoticeFrequency = 1, UNKNOWN
 - int64_t ErrorHandling.WarningFrequency = 1, UNKNOWN
 
+- bool ErrorHandling.VerboseCLIServerLogs = false, paulbiss
+
+  When set print error log messages for each CLI-server request on start and
+  finish. Otherwise logs are only generated for commands which exit with a
+  non-zero return code.
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)

@@ -154,6 +154,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/util/afdt-util.h"
+#include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/configs/xbox.h"
 #include "hphp/util/job-queue.h"
@@ -902,6 +903,21 @@ void runInContext(CLIContext&& ctx,
   std::vector<char*> envp;
   int ret = EXIT_FAILURE;
 
+  if (Cfg::ErrorHandling::VerboseCLIServerLogs && !xbox) {
+    std::string uname;
+    try {
+      UserInfo info{shared->user.uid};
+      uname = info.pw->pw_name;
+    } catch (const Exception&) {
+      uname = "<unknown>";
+    }
+    Logger::FInfo(
+      "Starting command `{}' for user {}",
+      folly::join(" ", shared->argv),
+      uname
+    );
+  }
+
   auto const pspInBackground = get_setting_bool(
     shared->ini,
     "hhvm.unix_server_run_psp_in_background"
@@ -953,6 +969,7 @@ void runInContext(CLIContext&& ctx,
     LightProcess::setThreadLocalAfdtOverride(nullptr);
     Stream::setThreadLocalFileHandler(nullptr);
     Logger::SetThreadHook(nullptr);
+    Logger::ClearThreadLog();
     clearThreadLocalIO();
     tl_env = nullptr;
     tl_context = nullptr;
@@ -961,9 +978,15 @@ void runInContext(CLIContext&& ctx,
     try {
       cli_write(data->client, "exit", ret);
       if (!xbox) {
-        Logger::FInfo("Completed command with return code {}", ret);
-      } else {
-        Logger::FVerbose("CLI Proxied XBox request exiting ({})", ret);
+        if (ret != 0) {
+          Logger::FWarning(
+            "Command `{}' completed with non-zero return code: {}",
+            folly::join(" ", shared->argv),
+            ret
+          );
+        } else if (Cfg::ErrorHandling::VerboseCLIServerLogs) {
+          Logger::FInfo("Command completed successfully");
+        }
       }
     } catch (const Exception& ex) {
       Logger::Warning("Could not send exit code %i to CLI socket: %s\n",

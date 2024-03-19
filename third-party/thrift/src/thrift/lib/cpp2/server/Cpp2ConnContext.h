@@ -71,12 +71,10 @@ class ClientMetadataRef {
 };
 
 namespace detail {
-using ConnectionInternalFieldsT =
-    util::TypeErasedValue<64, alignof(std::max_align_t)>;
+using ConnectionInternalFieldsT = util::TypeErasedValue<64>;
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     ConnectionInternalFieldsT, createPerConnectionInternalFields);
-using RequestInternalFieldsT =
-    util::TypeErasedValue<128, alignof(std::max_align_t)>;
+using RequestInternalFieldsT = util::TypeErasedValue<128>;
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     RequestInternalFieldsT, createPerRequestInternalFields);
 

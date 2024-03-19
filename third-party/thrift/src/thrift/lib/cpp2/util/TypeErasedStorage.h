@@ -18,7 +18,10 @@
 
 #include <string>
 #include <typeinfo>
-#include <glog/logging.h>
+#include <utility>
+
+#include <folly/Portability.h>
+#include <folly/lang/SafeAssert.h>
 
 namespace apache::thrift::util {
 
@@ -32,10 +35,7 @@ class VTable {
   virtual void move(std::byte* dst, std::byte* src) const noexcept = 0;
   virtual void move_assign(std::byte* dst, std::byte* src) const noexcept = 0;
 
-  template <class T>
-  bool holds_alternative() const noexcept {
-    return typeid(T) == typeInfo_;
-  }
+  const std::type_info& type() const noexcept { return typeInfo_; }
 
   virtual ~VTable() = default;
 
@@ -48,67 +48,62 @@ class VTableImpl final : public VTable {
  public:
   VTableImpl() noexcept : VTable(typeid(T)) {}
 
-  void destroy(std::byte* storage) const noexcept override final {
-    getValue(storage).~T();
-  }
-  void move(
-      std::byte* origin, std::byte* destination) const noexcept override final {
-    new (destination) T(std::move(getValue(origin)));
+  void destroy(std::byte* storage) const noexcept final { value(storage).~T(); }
+  void move(std::byte* origin, std::byte* destination) const noexcept final {
+    new (destination) T(std::move(value(origin)));
   }
   void move_assign(
-      std::byte* origin, std::byte* destination) const noexcept override final {
-    getValue(destination) = std::move(getValue(origin));
+      std::byte* origin, std::byte* destination) const noexcept final {
+    value(destination) = std::move(value(origin));
   }
 
  private:
-  static T& getValue(std::byte* storage) noexcept {
+  static T& value(std::byte* storage) noexcept {
     return *reinterpret_cast<T*>(storage);
   }
 };
+
 template <class T>
 inline const VTableImpl<T> vTableImpl;
 
-class TypeErasedStorageImplBase {
- public:
-  bool has_value() const noexcept { return vtable_; }
-
-  template <class T>
-  bool holds_alternative() const noexcept {
-    return has_value() && vtable_->holds_alternative<T>();
-  }
-
- protected:
-  TypeErasedStorageImplBase() noexcept = default;
-
-  TypeErasedStorageImplBase(TypeErasedStorageImplBase&& other) noexcept =
-      default;
-  TypeErasedStorageImplBase& operator=(
-      TypeErasedStorageImplBase&& other) noexcept = default;
-
-  /* Delete copy Ctors */
-  TypeErasedStorageImplBase(const TypeErasedStorageImplBase& other) = delete;
-  TypeErasedStorageImplBase& operator=(const TypeErasedStorageImplBase& other) =
-      delete;
-
-  const VTable* vtable_{nullptr};
-};
+} // namespace detail
 
 /*
- * Internal fields are allocated on the stack, alongside other variables related
- * to Cpp2ConnContext and Cpp2RequestContext.
+ * A type-erased storage type (like std::any) but with guaranteed sizing and
+ * alignment. This is useful, for example, for a closed source type that should
+ * be carried through Thrift's runtime but the overhead of a heap allocation to
+ * hide the implementation is too high.
  *
- * They are used to store non-OSS components in a "safe ish" way.
+ * Unlike `std::any`, which has an unspecified small-buffer, `TypeErasedValue`
+ * is ONLY the small buffer. This ensures that there are no hidden heap
+ * allocations. Trying to emplace an object that is too large for the buffer is
+ * a compile-time error.
+ *
+ * For the most part, the API of `TypeErasedValue` is quite similar to
+ * `std::any`. The main differences versus std::any are:
+ *   - `TypeErasedValue` is move-only. This is intentional so that users can
+ *     choose to use `std::unique_ptr` to move data to the heap in case the data
+ *     is too large.
+ *   - `TypeErasedValue` does not have `any_cast<T>()`. Instead there are member
+ *     functions, `value<T>()` and `value_unchecked<T>()`.
+ *   - `TypeErasedValue`'s constructor does not offer all the variants that
+ *     `std::any` does (although this is not a technical limitation).
+ *   - `TypeErasedValue` has a member function `holds_alternative<T>()`.
  */
-template <std::size_t Size, std::size_t Align>
-class TypeErasedStorageImpl : public TypeErasedStorageImplBase {
+template <std::size_t kSize, std::size_t kAlign = alignof(std::max_align_t)>
+class TypeErasedValue final {
+ public:
+  static constexpr size_t max_size() noexcept { return kSize; }
+  static constexpr size_t alignment() noexcept { return kAlign; }
+
  private:
-  alignas(Align) std::byte storage_[Size];
+  alignas(alignment()) std::byte storage_[max_size()];
+  const detail::VTable* vtable_{nullptr};
 
   template <class T>
-  constexpr void validate() const noexcept {
-    static_assert(
-        sizeof(T) <= getSize(), "Class is too large to fit in TypeErasedValue");
-    static_assert(alignof(T) <= getAlign(), "Class alignment mismatch");
+  FOLLY_ERASE static constexpr void constexpr_validate() noexcept {
+    static_assert(sizeof(T) <= max_size(), "Size of type is too large");
+    static_assert(alignof(T) <= alignment(), "Alignment of type is too large");
     static_assert(
         std::is_nothrow_move_constructible<T>::value,
         "Class move constructor cannot throw");
@@ -117,29 +112,17 @@ class TypeErasedStorageImpl : public TypeErasedStorageImplBase {
         "Class destructor cannot throw");
   }
 
- protected:
-  TypeErasedStorageImpl() noexcept = default;
-
  public:
-  TypeErasedStorageImpl(TypeErasedStorageImpl&& other) noexcept
-      : TypeErasedStorageImplBase(std::move(other)) {
-    if (has_value()) {
-      vtable_->move(other.storage_, storage_);
-      other.reset();
-    }
+  bool has_value() const noexcept { return vtable_ != nullptr; }
+
+  const std::type_info& type() const noexcept {
+    return has_value() ? vtable_->type() : typeid(void);
   }
 
-  TypeErasedStorageImpl& operator=(TypeErasedStorageImpl&& other) noexcept {
-    vtable_ = other.vtable_;
-    if (has_value()) {
-      vtable_->move_assign(other.storage_, storage_);
-      other.reset();
-    }
-    return *this;
+  template <class T>
+  bool holds_alternative() const noexcept {
+    return type() == typeid(T);
   }
-
-  static constexpr size_t getSize() noexcept { return Size; }
-  static constexpr size_t getAlign() noexcept { return Align; }
 
   void reset() noexcept {
     if (has_value()) {
@@ -156,12 +139,9 @@ class TypeErasedStorageImpl : public TypeErasedStorageImplBase {
     return value_unchecked<T>();
   }
 
-  ~TypeErasedStorageImpl() noexcept { reset(); }
-
   template <class T>
   const T& value() const {
-    validate<T>();
-    CHECK(has_value());
+    constexpr_validate<T>();
     if (!holds_alternative<T>()) {
       throw std::bad_cast();
     }
@@ -170,8 +150,7 @@ class TypeErasedStorageImpl : public TypeErasedStorageImplBase {
 
   template <class T>
   T& value() {
-    validate<T>();
-    CHECK(has_value());
+    constexpr_validate<T>();
     if (!holds_alternative<T>()) {
       throw std::bad_cast();
     }
@@ -180,62 +159,48 @@ class TypeErasedStorageImpl : public TypeErasedStorageImplBase {
 
   template <class T>
   const T& value_unchecked() const noexcept {
-    validate<T>();
-    DCHECK(holds_alternative<T>());
+    constexpr_validate<T>();
+    FOLLY_SAFE_DCHECK(
+        holds_alternative<T>(),
+        "Tried to call value_unchecked() on TypeErasedValue with incompatible type");
     return *reinterpret_cast<const T*>(storage_);
   }
 
   template <class T>
   T& value_unchecked() noexcept {
-    validate<T>();
-    DCHECK(holds_alternative<T>());
+    constexpr_validate<T>();
+    FOLLY_SAFE_DCHECK(
+        holds_alternative<T>(),
+        "Tried to call value_unchecked() on TypeErasedValue with incompatible type");
     return *reinterpret_cast<T*>(storage_);
   }
-};
 
-} // namespace detail
-
-// TypeErasedStorage is intended for use in situations where:
-//
-// - You need stack allocation (can't use `std::unique_ptr<void>`)
-// - The type of the object you want to store is not well known.
-//
-// API:
-// .emplace<T>(...) constructs a new value in place
-// .value<T>() -> gets the value, but does expensive runtime type validation
-// .value_unchecked<T>() -> gets the value, no type validation
-template <std::size_t Size, std::size_t Align>
-class TypeErasedStorage final
-    : public detail::TypeErasedStorageImpl<Size, Align> {};
-
-// TypeErasedValue is similar to TypeErasedStorage, except:
-//
-// - The size is known at construction time
-// - You never want the storage to be empty.
-//
-template <std::size_t Size, std::size_t Align>
-class TypeErasedValue final
-    : private detail::TypeErasedStorageImpl<Size, Align> {
  public:
+  TypeErasedValue() noexcept = default;
+
   template <class T, class... Args>
-  static TypeErasedValue make(Args&&... args) {
-    TypeErasedValue value;
-    value.template emplace<T>(std::forward<Args>(args)...);
-    return value;
+  explicit TypeErasedValue(std::in_place_type_t<T>, Args&&... args) {
+    this->emplace<T>(std::forward<Args>(args)...);
   }
 
-  static TypeErasedValue makeEmpty() { return make<std::monostate>(); }
+  TypeErasedValue(TypeErasedValue&& other) noexcept
+      : vtable_(std::move(other.vtable_)) {
+    if (has_value()) {
+      vtable_->move(other.storage_, storage_);
+      other.reset();
+    }
+  }
 
-  using detail::TypeErasedStorageImpl<Size, Align>::emplace;
-  using detail::TypeErasedStorageImpl<Size, Align>::holds_alternative;
-  using detail::TypeErasedStorageImpl<Size, Align>::value;
-  using detail::TypeErasedStorageImpl<Size, Align>::value_unchecked;
-  using detail::TypeErasedStorageImpl<Size, Align>::getSize;
-  using detail::TypeErasedStorageImpl<Size, Align>::getAlign;
+  TypeErasedValue& operator=(TypeErasedValue&& other) noexcept {
+    vtable_ = other.vtable_;
+    if (has_value()) {
+      vtable_->move_assign(other.storage_, storage_);
+      other.reset();
+    }
+    return *this;
+  }
 
-  /* Prevent construction outside of `make` */
- private:
-  TypeErasedValue() noexcept = default;
+  ~TypeErasedValue() noexcept { reset(); }
 };
 
 } // namespace apache::thrift::util

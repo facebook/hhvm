@@ -132,12 +132,12 @@ ClientMetadataRef::getFields() const {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     ConnectionInternalFieldsT, createPerConnectionInternalFields) {
-  return ConnectionInternalFieldsT::makeEmpty();
+  return ConnectionInternalFieldsT();
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     RequestInternalFieldsT, createPerRequestInternalFields) {
-  return RequestInternalFieldsT::makeEmpty();
+  return RequestInternalFieldsT();
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(

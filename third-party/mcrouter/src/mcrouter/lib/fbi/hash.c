@@ -99,7 +99,7 @@ murmur_hash_64A(const void* const key, const size_t len, const uint32_t seed) {
     case 1:
       h ^= (uint64_t)data2[0];
       h *= m;
-  };
+  }
 
   h ^= h >> r;
   h *= m;

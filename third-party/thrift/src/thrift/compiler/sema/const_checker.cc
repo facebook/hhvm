@@ -152,14 +152,6 @@ class const_checker {
     error("type error: const `{}` was declared as {}.", name_, expected);
   }
 
-  void report_type_mismatch_warning(const char* expected) {
-    warning(
-        "type error: const `{}` was declared as {}. This will become an error "
-        "in future versions of thrift.",
-        name_,
-        expected);
-  }
-
   void report_incompatible(const t_const_value* value, const t_type* type) {
     if (const char* category = get_category(value)) {
       error("{} is incompatible with `{}`", category, type->name());
@@ -297,7 +289,7 @@ class const_checker {
 
   void check_exception(const t_exception* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_MAP) {
-      report_type_mismatch_warning("exception");
+      report_type_mismatch("exception");
     }
     check_fields(type, value->get_map());
   }
@@ -352,7 +344,7 @@ class const_checker {
       return;
     }
     if (value->kind() != t_const_value::CV_LIST) {
-      report_type_mismatch_warning("list");
+      report_type_mismatch("list");
       return;
     }
     check_elements(&type->elem_type().deref(), value->get_list());
@@ -364,7 +356,7 @@ class const_checker {
       return;
     }
     if (value->kind() != t_const_value::CV_LIST) {
-      report_type_mismatch_warning("set");
+      report_type_mismatch("set");
       return;
     }
     check_elements(&type->elem_type().deref(), value->get_list());

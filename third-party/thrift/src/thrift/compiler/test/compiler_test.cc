@@ -385,7 +385,7 @@ TEST(CompilerTest, const_wrong_type) {
   check_compile(R"(
     const i32 wrongInt = "stringVal"; # expected-error: type error: const `wrongInt` was declared as i32.
     const set<string> wrongSet = {1: 2};
-      # expected-warning@-1: type error: const `wrongSet` was declared as set. This will become an error in future versions of thrift.
+      # expected-error@-1: type error: const `wrongSet` was declared as set.
     const map<i32, i32> wrongMap = [1,32,3];
       # expected-error@-1: type error: const `wrongMap` was declared as map.
     const map<i32, i32> weirdMap = [];
@@ -539,7 +539,7 @@ TEST(CompilerTest, struct_fields_wrong_type) {
 
     @Annot{val="hi", otherVal=5, structField=G{}}
       # expected-error@-1: type error: const `.val` was declared as i32.
-      # expected-warning@-2: type error: const `.otherVal` was declared as list. This will become an error in future versions of thrift.
+      # expected-error@-2: type error: const `.otherVal` was declared as list.
       # expected-error@-3: type mismatch: expected test.F, got test.G
     struct BadFields {
       1: i32 badInt = "str"; # expected-error: type error: const `badInt` was declared as i32.

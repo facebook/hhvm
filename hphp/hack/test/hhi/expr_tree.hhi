@@ -19,7 +19,8 @@ class ExampleDsl {
     shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>, ?'type' => (function (): TInfer),
+      'static_methods' => vec<mixed>,
+      ?'type' => (function(): TInfer),
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {
@@ -47,13 +48,13 @@ class ExampleDsl {
     throw new Exception();
   }
   public static function symbolType<T>(
-    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(
+      ExampleContext,
+    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
   ): T {
     throw new Exception();
   }
-  public static function lambdaType<T>(
-    T $_,
-  ): ExampleFunction<T> {
+  public static function lambdaType<T>(T $_): ExampleFunction<T> {
     throw new Exception();
   }
 
@@ -93,6 +94,14 @@ class ExampleDsl {
     throw new Exception();
   }
 
+  public function visitKeyedCollection(
+    ?ExprPos $_,
+    string $collection,
+    (ExampleDsl::TAst, ExampleDsl::TAst) ...$operand
+  ): ExampleDsl::TAst {
+    throw new Exception();
+  }
+
   public function visitLocal(?ExprPos $_, string $_): ExampleDsl::TAst {
     throw new Exception();
   }
@@ -107,14 +116,18 @@ class ExampleDsl {
 
   public function visitGlobalFunction<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(
+      ExampleContext,
+    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
   )[]: ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitStaticMethod<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(
+      ExampleContext,
+    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
   ): ExampleDsl::TAst {
     throw new Exception();
   }
@@ -160,7 +173,10 @@ class ExampleDsl {
   ): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitReturn(?ExprPos $_, ?ExampleDsl::TAst $_): ExampleDsl::TAst {
+  public function visitReturn(
+    ?ExprPos $_,
+    ?ExampleDsl::TAst $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
   public function visitFor(
@@ -233,7 +249,10 @@ interface ExampleMixed {
   public function __tripleEquals(ExampleMixed $_): ExampleBool;
   public function __notTripleEquals(ExampleMixed $_): ExampleBool;
 }
-interface ExampleInt extends ExampleMixed {
+
+interface ExampleArraykey extends ExampleMixed {}
+
+interface ExampleInt extends ExampleArraykey {
   public function __plus(ExampleInt $_): ExampleInt;
   public function __minus(ExampleInt $_): ExampleInt;
   public function __star(ExampleInt $_): ExampleInt;
@@ -263,7 +282,7 @@ interface ExampleBool extends ExampleMixed {
   public function __exclamationMark(): ExampleBool;
 }
 
-interface ExampleString extends ExampleMixed, XHPChild {
+interface ExampleString extends ExampleArraykey, XHPChild {
   public function __dot(ExampleString $_): ExampleString;
 }
 
@@ -275,6 +294,18 @@ interface ExampleVoid {}
 
 interface ExampleFunction<T> {
   public function __unwrap(): T;
+}
+
+abstract class ExampleKeyedCollection<+Tkey as ExampleArraykey, +Tvalue> {
+  public static function __makeType<Tk as ExampleArraykey, Tv>(
+    (Tk, Tv) ...$_
+  ): ExampleKeyedCollection<Tk, Tv>;
+}
+
+abstract class ExampleKeyedCollectionMut<Tkey as ExampleArraykey, Tvalue> {
+  public static function __makeType<Tk as ExampleArraykey, Tv>(
+    (Tk, Tv) ...$_
+  ): ExampleKeyedCollectionMut<Tk, Tv>;
 }
 
 type ExampleDslExpression<T> = Spliceable<ExampleDsl, ExampleDsl::TAst, T>;

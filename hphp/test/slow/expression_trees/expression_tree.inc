@@ -216,6 +216,15 @@ class Code {
       ">";
   }
 
+   public function visitKeyedCollection(
+    ?ExprPos $_,
+    string $collection,
+    (Code::TAst, Code::TAst) ...$operand
+   ): Code::TAst {
+   $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
+   return "$collection {".concat_arg_list($v)."}";
+  }
+
   // Splice
   public function splice<T>(
     ?ExprPos $_,

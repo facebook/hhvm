@@ -12,6 +12,7 @@ use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::Visitor;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast;
+use oxidized::ast::Afield;
 use oxidized::ast::ClassId;
 use oxidized::ast::ClassId_;
 use oxidized::ast::Expr;
@@ -540,22 +541,28 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
     Expr::new((), pos.clone(), c)
 }
 
-fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+fn static_meth_call_with_meth_pos(
+    classname: &str,
+    meth_name: &str,
+    meth_pos: &Pos,
+    args: Vec<Expr>,
+    pos: &Pos,
+) -> Expr {
     let callee = Expr::new(
         (),
-        pos.clone(),
+        meth_pos.clone(),
         Expr_::ClassConst(Box::new((
             // TODO: Refactor ClassId creation with new_obj
             ClassId(
                 (),
-                pos.clone(),
+                meth_pos.clone(),
                 ClassId_::CIexpr(Expr::new(
                     (),
-                    pos.clone(),
-                    Expr_::Id(Box::new(Id(pos.clone(), classname.to_string()))),
+                    meth_pos.clone(),
+                    Expr_::Id(Box::new(Id(meth_pos.clone(), classname.to_string()))),
                 )),
             ),
-            (pos.clone(), meth_name.to_string()),
+            (meth_pos.clone(), meth_name.to_string()),
         ))),
     );
     Expr::new(
@@ -568,6 +575,10 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
             unpacked_arg: None,
         })),
     )
+}
+
+fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+    static_meth_call_with_meth_pos(classname, meth_name, pos, args, pos)
 }
 
 /// Join a slice of positions together into a single, larger position.
@@ -1467,6 +1478,64 @@ fn rewrite_expr(
                 ],
                 &pos,
             );
+            RewriteResult {
+                virtual_expr,
+                desugar_expr,
+            }
+        }
+        // Source: MyDsl`ClientMap {...}`
+        // Virtualized: ClientMap::__make(...)
+        // Desugared: $0v->visitKeyedCollection('ClientMap', ...)
+        Collection(box (ast::Id(name_pos, name), targ, fields)) => {
+            let mut rewritten_fields_virtual = vec![];
+            let mut rewritten_fields_desugar = vec![];
+            for kv in fields {
+                match kv {
+                    Afield::AFvalue(v) => {
+                        rewrite_expr(temps, v, visitor_name, errors);
+                        errors.push((
+                            pos.clone(),
+                            "Collections in expression trees must have `key => value` entries"
+                                .into(),
+                        ))
+                    }
+                    Afield::AFkvalue(k, v) => {
+                        let pos = match Pos::merge(&k.1, &v.1) {
+                            Ok(pos) => pos,
+                            _ => k.1.clone(),
+                        };
+                        let k_rewr = rewrite_expr(temps, k, visitor_name, errors);
+                        let v_rewr = rewrite_expr(temps, v, visitor_name, errors);
+                        rewritten_fields_virtual.push(Expr::new(
+                            (),
+                            pos.clone(),
+                            Expr_::Tuple(vec![k_rewr.virtual_expr, v_rewr.virtual_expr]),
+                        ));
+                        rewritten_fields_desugar.push(Expr::new(
+                            (),
+                            pos,
+                            Expr_::Tuple(vec![k_rewr.desugar_expr, v_rewr.desugar_expr]),
+                        ))
+                    }
+                }
+            }
+            let mut args = vec![pos_expr, string_literal(name_pos.clone(), &name)];
+            args.append(&mut rewritten_fields_desugar);
+            let desugar_expr = v_meth_call(et::VISIT_KEYED_COLLECTION, args, &pos);
+            let virtual_expr = static_meth_call_with_meth_pos(
+                &name,
+                et::MAKE_KEYED_COLLECTION_TYPE,
+                &name_pos,
+                rewritten_fields_virtual,
+                &pos,
+            );
+            match targ {
+                None => {}
+                Some(_) => errors.push((
+                    pos.clone(),
+                    "Collections in expression trees must not have explicit type hints".into(),
+                )),
+            }
             RewriteResult {
                 virtual_expr,
                 desugar_expr,

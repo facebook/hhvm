@@ -10,5 +10,5 @@ File "async_generator.php", line 6, characters 14-38:
 Invalid return type (Typing[4110])
   File "async_generator.php", line 6, characters 14-38:
   Expected `AsyncGenerator<_, _, _>` (result of `async function` containing a `yield`)
-  File "expr_tree.hhi", line 46, characters 38-48:
+  File "expr_tree.hhi", line 47, characters 38-48:
   But got `ExampleVoid`

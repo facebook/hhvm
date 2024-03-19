@@ -112,6 +112,7 @@ pub enum UnstableFeatures {
     ClassType,
     FunctionReferences,
     FunctionTypeOptionalParams,
+    ExpressionTreeMap,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -146,6 +147,7 @@ impl UnstableFeatures {
             UnstableFeatures::ClassType => Unstable,
             UnstableFeatures::FunctionReferences => Unstable,
             UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
+            UnstableFeatures::ExpressionTreeMap => Preview,
         }
     }
 }
@@ -3343,6 +3345,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             CollectionLiteralExpression(x) => {
                 enum Status {
                     ValidClass(String),
+                    ValidClassEt(String),
                     InvalidClass,
                     InvalidBraceKind,
                 }
@@ -3363,6 +3366,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let use_key_value_initializers = |lc_name: &str| {
                     lc_name.eq_ignore_ascii_case("map") || lc_name.eq_ignore_ascii_case("immmap")
                 };
+                let use_vector_initializers = |lc_name: &str| {
+                    lc_name.eq_ignore_ascii_case("pair")
+                        || lc_name.eq_ignore_ascii_case("vector")
+                        || lc_name.eq_ignore_ascii_case("set")
+                        || lc_name.eq_ignore_ascii_case("immvector")
+                        || lc_name.eq_ignore_ascii_case("immset")
+                };
                 let is_qualified_std_collection = |l, r| {
                     token_kind(l) == Some(TokenKind::Name)
                         && token_kind(r) == Some(TokenKind::Name)
@@ -3375,7 +3385,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         match self.text(n).to_ascii_lowercase().as_ref() {
                             "dict" | "vec" | "keyset" => InvalidBraceKind,
                             n => {
-                                if is_standard_collection(n) {
+                                if self.env.context.active_expression_tree {
+                                    ValidClassEt(n.to_string())
+                                } else if is_standard_collection(n) {
                                     ValidClass(n.to_string())
                                 } else {
                                     InvalidClass
@@ -3436,22 +3448,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let num_initializers = initializer_list().count();
                 match &status {
                     ValidClass(name)
-                        if use_key_value_initializers(name)
-                            && initializer_list().any(|i| !is_key_value(i)) =>
-                    {
-                        self.errors.push(make_error_from_node(
-                            node,
-                            errors::invalid_value_initializer(self.text(n)),
-                        ));
-                    }
-
-                    ValidClass(name)
-                        if !use_key_value_initializers(name)
+                        if use_vector_initializers(name)
                             && initializer_list().any(is_key_value) =>
                     {
                         self.errors.push(make_error_from_node(
                             node,
                             errors::invalid_key_value_initializer(self.text(n)),
+                        ));
+                    }
+
+                    ValidClass(name)
+                        if (use_key_value_initializers(name)
+                            || self.env.context.active_expression_tree)
+                            && initializer_list().any(|i| !is_key_value(i)) =>
+                    {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            errors::invalid_value_initializer(self.text(n)),
                         ));
                     }
 
@@ -3469,6 +3482,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
 
                     ValidClass(_) => {}
+                    ValidClassEt(_) => {
+                        self.check_can_use_feature(node, &UnstableFeatures::ExpressionTreeMap)
+                    }
                     InvalidBraceKind => self.errors.push(make_error_from_node(
                         node,
                         errors::invalid_brace_kind_in_collection_initializer,

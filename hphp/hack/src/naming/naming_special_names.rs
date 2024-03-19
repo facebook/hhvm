@@ -1176,6 +1176,8 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_XHP: &str = "visitXhp";
+    pub const VISIT_KEYED_COLLECTION: &str = "visitKeyedCollection";
+    pub const MAKE_KEYED_COLLECTION_TYPE: &str = "__makeType";
 
     pub const SPLICE: &str = "splice";
 

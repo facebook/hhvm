@@ -459,7 +459,9 @@ struct RequestSetupMetadata {
   11: optional i32 qosPolicyId;
   // Other metadata
   9: optional ClientMetadata clientMetadata;
-} // next-id: 12
+  // RSocket KeepAliveFrame Timeout
+  12: optional i32 keepAliveTimeoutMs;
+} // next-id: 13
 
 struct SetupResponse {
   // The Rocket protocol version that server picked. SHOULD be set. MUST be a

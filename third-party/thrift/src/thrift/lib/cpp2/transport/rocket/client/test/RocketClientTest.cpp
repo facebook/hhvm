@@ -60,14 +60,12 @@ using namespace apache::thrift::concurrency;
 using namespace std::literals;
 using folly::test::find_resource;
 
-DECLARE_bool(rocket_client_enable_keep_alive);
-DECLARE_int64(rocket_client_keep_alive_interval_ms);
-DECLARE_int64(rocket_client_keep_alive_timeout_ms);
-
 class RocketClientTest : public testing::Test {
  public:
-  ClientChannel::Ptr makeChannel(folly::AsyncTransport::UniquePtr socket) {
-    return RocketClientChannel::newChannel(std::move(socket));
+  ClientChannel::Ptr makeChannelWithMetadata(
+      folly::AsyncTransport::UniquePtr socket) {
+    return RocketClientChannel::newChannelWithMetadata(
+        std::move(socket), metadata_);
   }
 
   static std::string getRandomString(size_t len) {
@@ -78,6 +76,8 @@ class RocketClientTest : public testing::Test {
     std::generate_n(str.begin(), len, randomChar);
     return str;
   }
+
+  RequestSetupMetadata metadata_;
 
   class TestInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
@@ -116,16 +116,13 @@ class RocketClientTest : public testing::Test {
 };
 
 // This test is using a big payload to test the keep alive mechanism. The size
-// of payload is 80MB for now to ensure even in test environment, it will take
+// of payload is 8MB for now to ensure even in test environment, it will take
 // a long time to transfer. This test can be flaky if the local transfer speed
 // increased drastically.
 TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
-  FLAGS_rocket_client_enable_keep_alive = true;
-  // Smaller numbers to make keep_alive sensitive.
-  FLAGS_rocket_client_keep_alive_interval_ms = 10;
-  FLAGS_rocket_client_keep_alive_timeout_ms = 100;
   // Increase this if test is flaky.
-  size_t payloadSize = /*80MB*/ 80000000;
+  size_t payloadSize = /*8MB*/ 8000000;
+  metadata_.keepAliveTimeoutMs() = 100;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
@@ -134,7 +131,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
       nullptr, [&](auto socket) {
         // Set send buffer size to minimum to similate slow network.
         socket->setSendBufSize(0);
-        return makeChannel(std::move(socket));
+        return makeChannelWithMetadata(std::move(socket));
       });
 
   // Call to shrink server socket buffer
@@ -161,10 +158,10 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
    * Turn-off Keep Alive and Do the same thing. The large payload should not
    * have problem finishing transfer.
    */
-  FLAGS_rocket_client_enable_keep_alive = false;
-
+  metadata_.keepAliveTimeoutMs() = 0;
   auto client1 = runner.newStickyClient<apache::thrift::Client<TestService>>(
-      nullptr, [&](auto socket) { return makeChannel(std::move(socket)); });
+      nullptr,
+      [&](auto socket) { return makeChannelWithMetadata(std::move(socket)); });
 
   client1->sync_echoRequest(response, "");
   client1->sync_echoRequest(response, getRandomString(payloadSize));
@@ -177,11 +174,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
 // process the request, however KeepAlive will be blocked during the response,
 // and close the connection.
 TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
-  FLAGS_rocket_client_enable_keep_alive = true;
-  // Smaller numbers to make keep_alive sensitive.
-  FLAGS_rocket_client_keep_alive_interval_ms = 10;
-  FLAGS_rocket_client_keep_alive_timeout_ms = 100;
-
+  metadata_.keepAliveTimeoutMs() = 100;
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
 
@@ -189,7 +182,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
       nullptr, [&](auto socket) {
         // Set send buffer size to minimum to similate slow network.
         socket->setSendBufSize(0);
-        return makeChannel(std::move(socket));
+        return makeChannelWithMetadata(std::move(socket));
       });
 
   // Call to shrink server socket buffer
@@ -220,10 +213,10 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
    * Turn-off Keep Alive and Do the same thing. The large payload should not
    * have problem finishing transfer.
    */
-  FLAGS_rocket_client_enable_keep_alive = false;
-
+  metadata_.keepAliveTimeoutMs() = 0;
   auto client1 = runner.newStickyClient<apache::thrift::Client<TestService>>(
-      nullptr, [&](auto socket) { return makeChannel(std::move(socket)); });
+      nullptr,
+      [&](auto socket) { return makeChannelWithMetadata(std::move(socket)); });
 
   // Call to shrink server socket buffer
   client1->semifuture_echoInt(0).get();
@@ -239,12 +232,9 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
 // This test ensure KeepAlive works as normal when connection was bouncing
 // between eventbases.
 TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
-  FLAGS_rocket_client_enable_keep_alive = true;
-  // Smaller numbers to make keep_alive sensitive.
-  FLAGS_rocket_client_keep_alive_interval_ms = 10;
-  FLAGS_rocket_client_keep_alive_timeout_ms = 100;
   // Increase this if test is flaky.
-  size_t payloadSize = /*80MB*/ 80000000;
+  size_t payloadSize = /*8MB*/ 8000000;
+  metadata_.keepAliveTimeoutMs() = 100;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
@@ -254,7 +244,7 @@ TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
         // Set send buffer size to minimum to similate slow network.
         socket->setSendBufSize(0);
         // KeepAlive will be created and started here.
-        auto channel = makeChannel(std::move(socket));
+        auto channel = makeChannelWithMetadata(std::move(socket));
         auto evb = channel->getEventBase();
         // KeepAlive will be stopped here.
         channel->detachEventBase();

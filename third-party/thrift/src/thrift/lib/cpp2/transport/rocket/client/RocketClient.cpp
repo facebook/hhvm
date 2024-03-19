@@ -54,25 +54,6 @@ THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
 
 THRIFT_FLAG_DEFINE_bool(rocket_client_enable_keep_alive, true);
 
-#if defined(__linux__) && !FOLLY_MOBILE
-// TODO(T180000926): Remove this and add API to set it up after Warm Storage
-// Testing.
-DEFINE_bool(
-    rocket_client_enable_keep_alive, false, "True to enable keep alive.");
-DEFINE_int64(
-    rocket_client_keep_alive_interval_ms,
-    1000 * 20,
-    "KeepAlive Sending Frequency.");
-DEFINE_int64(
-    rocket_client_keep_alive_timeout_ms,
-    1000 * 90,
-    "Timeout Connection if no keep alive frames received.");
-#else
-static constexpr bool FLAGS_rocket_client_enable_keep_alive = false;
-static constexpr int64_t FLAGS_rocket_client_keep_alive_interval_ms = 20000;
-static constexpr int64_t FLAGS_rocket_client_keep_alive_timeout_ms = 90000;
-#endif
-
 namespace apache {
 namespace thrift {
 
@@ -115,6 +96,7 @@ RocketClient::RocketClient(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<SetupFrame> setupFrame,
+    int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : evb_(&evb),
       writeLoopCallback_(*this),
@@ -130,17 +112,11 @@ RocketClient::RocketClient(
     socket_2->setCloseOnFailedWrite(false);
   }
 
-  if (FLAGS_rocket_client_enable_keep_alive &&
-      THRIFT_FLAG(rocket_client_enable_keep_alive)) {
+  if (THRIFT_FLAG(rocket_client_enable_keep_alive) && keepAliveTimeoutMs > 0) {
     keepAliveWatcher_ = std::unique_ptr<
         KeepAliveWatcher,
         folly::DelayedDestruction::Destructor>(new KeepAliveWatcher(
-        evb_,
-        socket_.get(),
-        std::chrono::milliseconds(FLAGS_rocket_client_keep_alive_interval_ms),
-        std::chrono::milliseconds(FLAGS_rocket_client_keep_alive_timeout_ms)));
-    // If enabled, KeepAliveFrame will be send first, so it will need to attach
-    // setupFrame.
+        evb_, socket_.get(), std::chrono::milliseconds(keepAliveTimeoutMs)));
     auto setupFrameMoveOut = moveOutSetupFrame();
     keepAliveWatcher_->start(setupFrameMoveOut.get());
   }
@@ -166,9 +142,14 @@ RocketClient::Ptr RocketClient::create(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<SetupFrame> setupFrame,
+    int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr) {
   return Ptr(new RocketClient(
-      evb, std::move(socket), std::move(setupFrame), std::move(allocatorPtr)));
+      evb,
+      std::move(socket),
+      std::move(setupFrame),
+      keepAliveTimeoutMs,
+      std::move(allocatorPtr)));
 }
 
 void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {

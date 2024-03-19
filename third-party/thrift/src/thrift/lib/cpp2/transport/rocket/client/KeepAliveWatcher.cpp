@@ -18,12 +18,23 @@
 #include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 
 namespace apache::thrift::rocket {
+
+constexpr int8_t kTimeoutToInterval = 5;
+
 KeepAliveWatcher::KeepAliveWatcher(
     folly::EventBase* evb,
     folly::AsyncTransport* socket,
-    const std::chrono::milliseconds interval,
     const std::chrono::milliseconds timeout)
-    : evb_(evb), socket_(socket), interval_(interval), timeout_(timeout) {}
+    : evb_(evb),
+      socket_(socket),
+      interval_(timeout / kTimeoutToInterval),
+      timeout_(timeout) {
+  if (interval_.count() == 0) {
+    LOG(FATAL) << fmt::format(
+        "KeepAlive Timeout is too small to be meanlingful: {}ms!",
+        timeout.count());
+  }
+}
 
 void KeepAliveWatcher::start(SetupFrame* setupFrame) {
   if (started_) {

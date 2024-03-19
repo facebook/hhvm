@@ -45,7 +45,7 @@ void incrementProxyTlsKtlsSslStats(
           [[fallthrough]];
         case Status::RESUMPTION_ATTEMPTED_AND_FAILED:
           proxy.stats().increment(num_tls_to_plain_resumption_attempts_stat);
-      };
+      }
     } else {
       proxy.stats().increment(num_tls_to_plain_fallback_failures_stat);
     }

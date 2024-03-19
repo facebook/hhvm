@@ -103,7 +103,7 @@ std::string getLifecycleFuncName(LifecycleFunc func) {
     case LifecycleFunc::ON_STOP_REQUESTED: {
       return "onStopRequested";
     }
-  };
+  }
 }
 
 folly::SemiFuture<folly::Unit>

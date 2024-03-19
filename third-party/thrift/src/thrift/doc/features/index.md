@@ -25,8 +25,8 @@ feature in different languages.
 | [Universal names](/features/universal-name.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Streaming](/fb/features/streaming/index.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Supported/> |
 | [Interactions](/fb/features/interactions.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> |
-| [Adapters](/features/adapters.md) | <Supported/> | <InProgress/> | <Supported/> | <Supported/> |
-| [Dynamic values (Any)](/features/any.md) | <InProgress/> | <Unsupported/> | <Unsupported/> | <Unsupported/> |
+| [Adapters](/features/adapters.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
+| [Dynamic values (Any)](/features/any.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Terse write](/features/terse-write.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 
 [^1]: You can write Thrift clients but not servers using this feature. These

@@ -442,53 +442,6 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
 }
 #endif
 
-#if !(FOLLY_OPENSSL_IS_110) && !defined(OPENSSL_IS_BORINGSSL)
-TEST(SSLContextManagerTest, TestSessionContextIfSupplied) {
-  SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", getSettings(), nullptr);
-  SSLContextConfig ctxConfig;
-  ctxConfig.sessionContext = "test";
-  ctxConfig.addCertificateBuf(kTestCert1PEM, kTestCert1Key);
-
-  SSLCacheOptions cacheOptions;
-  SocketAddress addr;
-
-  sslCtxMgr.addSSLContextConfig(
-      ctxConfig, cacheOptions, nullptr, addr, nullptr);
-
-  using namespace std::string_literals;
-  auto ctx = sslCtxMgr.getSSLCtx("test.com"s);
-  ASSERT_NE(ctx, nullptr);
-  auto sessCtxFromCtx = std::string(
-      reinterpret_cast<char*>(ctx->getSSLCtx()->sid_ctx),
-      ctx->getSSLCtx()->sid_ctx_length);
-  EXPECT_EQ(*ctxConfig.sessionContext, sessCtxFromCtx);
-}
-
-TEST(SSLContextManagerTest, TestSessionContextIfSessionCacheAbsent) {
-  SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", getSettings(), nullptr);
-  SSLContextConfig ctxConfig;
-  ctxConfig.sessionContext = "test";
-  ctxConfig.sessionCacheEnabled = false;
-  ctxConfig.addCertificateBuf(kTestCert1PEM, kTestCert1Key);
-
-  SSLCacheOptions cacheOptions;
-  SocketAddress addr;
-
-  sslCtxMgr.addSSLContextConfig(
-      ctxConfig, cacheOptions, nullptr, addr, nullptr);
-
-  using namespace std::string_literals;
-  auto ctx = sslCtxMgr.getSSLCtx("test.com"s);
-  ASSERT_NE(ctx, nullptr);
-  auto sessCtxFromCtx = std::string(
-      reinterpret_cast<char*>(ctx->getSSLCtx()->sid_ctx),
-      ctx->getSSLCtx()->sid_ctx_length);
-  EXPECT_EQ(*ctxConfig.sessionContext, sessCtxFromCtx);
-}
-#endif
-
 TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
   SSLContextManagerForTest sslCtxMgr(
       "vip_ssl_context_manager_test_", getSettings(), nullptr);

@@ -285,7 +285,6 @@ SSL_SESSION* SSLSessionCacheManager::getSession(
 
   // look it up in the local cache first
   session.reset(localCache_->lookupSession(sessionId));
-#if FOLLY_OPENSSL_IS_110
   if (session == nullptr && externalCache_) {
     foreign = true;
     DCHECK(folly::fibers::onFiber());
@@ -304,7 +303,6 @@ SSL_SESSION* SSLSessionCacheManager::getSession(
       missReason = "reason: request not running on fiber;";
     }
   }
-#endif
 
   bool hit = (session != nullptr);
   if (stats_) {

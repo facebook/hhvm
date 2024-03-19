@@ -190,11 +190,7 @@ class SSLSessionCacheManager {
    */
   static void removeSessionCallback(SSL_CTX* ctx, SSL_SESSION* session);
 
-#if FOLLY_OPENSSL_IS_110
   using session_callback_arg_session_id_t = const unsigned char*;
-#else
-  using session_callback_arg_session_id_t = unsigned char*;
-#endif
 
   static SSL_SESSION* getSessionCallback(
       SSL* ssl,

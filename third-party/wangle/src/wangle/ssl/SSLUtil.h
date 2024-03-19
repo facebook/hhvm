@@ -106,11 +106,7 @@ class SSLUtil {
  private:
   // The following typedefs are needed for compatibility across various OpenSSL
   // versions since each change the dup function param types ever so slightly
-#if FOLLY_OPENSSL_IS_110 || defined(OPENSSL_IS_BORINGSSL)
   using ex_data_dup_from_arg_t = const CRYPTO_EX_DATA*;
-#else
-  using ex_data_dup_from_arg_t = CRYPTO_EX_DATA*;
-#endif
 
 #if defined(OPENSSL_IS_BORINGSSL) || FOLLY_OPENSSL_PREREQ(3, 0, 0)
   using ex_data_dup_ptr_arg_t = void**;

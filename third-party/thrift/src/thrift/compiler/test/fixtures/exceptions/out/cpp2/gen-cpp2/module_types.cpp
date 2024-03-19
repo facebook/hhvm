@@ -17,7 +17,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Fiery>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Fiery>;
@@ -35,11 +35,11 @@ void TccStructTraits<::cpp2::Fiery>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece Fiery::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Fiery::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Fiery>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Fiery::__fbthrift_get_class_name() {
+std::string_view Fiery::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Fiery>::name;
 }
 
@@ -113,7 +113,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Serious>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Serious>;
@@ -131,11 +131,11 @@ void TccStructTraits<::cpp2::Serious>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece Serious::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Serious::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Serious>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Serious::__fbthrift_get_class_name() {
+std::string_view Serious::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Serious>::name;
 }
 
@@ -214,7 +214,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ComplexFieldNames>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ComplexFieldNames>;
@@ -232,11 +232,11 @@ void TccStructTraits<::cpp2::ComplexFieldNames>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece ComplexFieldNames::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ComplexFieldNames::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexFieldNames>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ComplexFieldNames::__fbthrift_get_class_name() {
+std::string_view ComplexFieldNames::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ComplexFieldNames>::name;
 }
 
@@ -321,7 +321,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::CustomFieldNames>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::CustomFieldNames>;
@@ -339,11 +339,11 @@ void TccStructTraits<::cpp2::CustomFieldNames>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece CustomFieldNames::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view CustomFieldNames::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CustomFieldNames>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece CustomFieldNames::__fbthrift_get_class_name() {
+std::string_view CustomFieldNames::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<CustomFieldNames>::name;
 }
 
@@ -428,7 +428,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ExceptionWithPrimitiveField>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>;
@@ -446,11 +446,11 @@ void TccStructTraits<::cpp2::ExceptionWithPrimitiveField>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece ExceptionWithPrimitiveField::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ExceptionWithPrimitiveField::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ExceptionWithPrimitiveField>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ExceptionWithPrimitiveField::__fbthrift_get_class_name() {
+std::string_view ExceptionWithPrimitiveField::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ExceptionWithPrimitiveField>::name;
 }
 
@@ -536,7 +536,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ExceptionWithStructuredAnnotation>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ExceptionWithStructuredAnnotation>;
@@ -554,11 +554,11 @@ void TccStructTraits<::cpp2::ExceptionWithStructuredAnnotation>::translateFieldN
 
 namespace cpp2 {
 
-const folly::StringPiece ExceptionWithStructuredAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ExceptionWithStructuredAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ExceptionWithStructuredAnnotation>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ExceptionWithStructuredAnnotation::__fbthrift_get_class_name() {
+std::string_view ExceptionWithStructuredAnnotation::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ExceptionWithStructuredAnnotation>::name;
 }
 
@@ -644,7 +644,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Banal>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Banal>;
@@ -662,11 +662,11 @@ void TccStructTraits<::cpp2::Banal>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece Banal::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Banal::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Banal>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Banal::__fbthrift_get_class_name() {
+std::string_view Banal::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Banal>::name;
 }
 

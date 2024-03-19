@@ -18,28 +18,28 @@ namespace detail {
 template <>
 struct TccStructTraits<::some::ns::ModuleA> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::ns::ModuleB> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::ns::detail::DirectlyAdapted> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::ns::CppRef> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };

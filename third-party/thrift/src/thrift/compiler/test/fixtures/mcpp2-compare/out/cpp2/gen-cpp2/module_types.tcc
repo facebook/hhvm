@@ -18,105 +18,105 @@ namespace detail {
 template <>
 struct TccStructTraits<::some::valid::ns::Empty> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::ASimpleStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::ASimpleStructNoexcept> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::MyStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::SimpleUnion> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::ComplexUnion> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::AnException> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::AnotherException> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::containerStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::MyIncludedStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::AnnotatedStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::ComplexContainerStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::FloatStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::FloatUnion> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };

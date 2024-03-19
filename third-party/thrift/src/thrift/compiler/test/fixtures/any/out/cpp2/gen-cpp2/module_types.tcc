@@ -18,21 +18,21 @@ namespace detail {
 template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };

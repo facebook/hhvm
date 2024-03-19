@@ -17,7 +17,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Empty>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Empty>;
@@ -35,11 +35,11 @@ void TccStructTraits<::cpp2::Empty>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece Empty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Empty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Empty>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Empty::__fbthrift_get_class_name() {
+std::string_view Empty::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Empty>::name;
 }
 
@@ -88,7 +88,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Nada>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Nada>;
@@ -119,11 +119,11 @@ bool TEnumTraits<::cpp2::Nada::Type>::findValue(std::string_view name, type* out
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece Nada::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Nada::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Nada>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Nada::__fbthrift_get_class_name() {
+std::string_view Nada::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Nada>::name;
 }
 

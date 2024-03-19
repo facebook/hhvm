@@ -92,11 +92,11 @@ FOLLY_POP_WARNING
 
 namespace test { namespace fixtures { namespace tablebased {
 
-const folly::StringPiece TrivialTypesStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view TrivialTypesStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TrivialTypesStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece TrivialTypesStruct::__fbthrift_get_class_name() {
+std::string_view TrivialTypesStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<TrivialTypesStruct>::name;
 }
 
@@ -262,11 +262,11 @@ constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_Trivia
 
 namespace test { namespace fixtures { namespace tablebased {
 
-const folly::StringPiece ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ContainerStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ContainerStruct::__fbthrift_get_class_name() {
+std::string_view ContainerStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ContainerStruct>::name;
 }
 
@@ -536,11 +536,11 @@ bool TEnumTraits<::test::fixtures::tablebased::ExampleUnion::Type>::findValue(st
 }} // apache::thrift
 namespace test { namespace fixtures { namespace tablebased {
 
-const folly::StringPiece ExampleUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ExampleUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ExampleUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ExampleUnion::__fbthrift_get_class_name() {
+std::string_view ExampleUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ExampleUnion>::name;
 }
 

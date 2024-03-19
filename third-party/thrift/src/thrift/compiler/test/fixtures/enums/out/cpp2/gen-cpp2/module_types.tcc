@@ -18,14 +18,14 @@ namespace detail {
 template <>
 struct TccStructTraits<::test::fixtures::enums::SomeStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::test::fixtures::enums::MyStruct> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };

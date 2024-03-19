@@ -21,7 +21,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<<%struct:cpp_fullname%>>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<<%struct:cpp_fullname%>>;

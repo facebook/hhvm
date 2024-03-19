@@ -1040,8 +1040,8 @@ class union1 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui,
     ::apache::thrift::ident::ud,
@@ -1434,8 +1434,8 @@ class union2 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui_2,
     ::apache::thrift::ident::ud_2,
@@ -1828,8 +1828,8 @@ class union3 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui_3,
     ::apache::thrift::ident::ud_3,
@@ -2222,8 +2222,8 @@ class structA final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a,
     ::apache::thrift::ident::b
@@ -2431,8 +2431,8 @@ class unionA final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::i,
     ::apache::thrift::ident::d,
@@ -2902,8 +2902,8 @@ class structB final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::c,
     ::apache::thrift::ident::d
@@ -3106,8 +3106,8 @@ class structC final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a,
     ::apache::thrift::ident::b,
@@ -4803,8 +4803,8 @@ class struct1 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -5228,8 +5228,8 @@ class struct2 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB,
@@ -5704,8 +5704,8 @@ class struct3 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB,
@@ -6763,8 +6763,8 @@ class struct4 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -7069,8 +7069,8 @@ class struct5 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -7439,8 +7439,8 @@ class struct_binary final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::bi
   >;
@@ -7594,8 +7594,8 @@ class dep_A_struct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::b,
     ::apache::thrift::ident::c,
@@ -7849,8 +7849,8 @@ class dep_B_struct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::b,
     ::apache::thrift::ident::c,
@@ -8104,8 +8104,8 @@ class annotated final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a
   >;
@@ -8253,8 +8253,8 @@ class union_with_special_names final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::get,
     ::apache::thrift::ident::getter,
@@ -10091,8 +10091,8 @@ class struct_with_special_names final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::get,
     ::apache::thrift::ident::getter,
@@ -11725,8 +11725,8 @@ class struct_with_indirections final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::real,
     ::apache::thrift::ident::fake,

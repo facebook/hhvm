@@ -146,8 +146,8 @@ class SerializedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s,
     ::apache::thrift::ident::i,
@@ -475,8 +475,8 @@ class SerializedUnion final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s,
     ::apache::thrift::ident::i
@@ -748,8 +748,8 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::msg,
     ::apache::thrift::ident::os,
@@ -1033,8 +1033,8 @@ class MarshalStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s,
     ::apache::thrift::ident::i,
@@ -1362,8 +1362,8 @@ class MarshalUnion final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s,
     ::apache::thrift::ident::i
@@ -1635,8 +1635,8 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::msg,
     ::apache::thrift::ident::os,

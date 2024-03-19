@@ -153,8 +153,8 @@ class ComplexUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::intValue,
     ::apache::thrift::ident::stringValue,
@@ -740,8 +740,8 @@ class ListUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::intListValue,
     ::apache::thrift::ident::stringListValue
@@ -1027,8 +1027,8 @@ class DataUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::binaryData,
     ::apache::thrift::ident::stringData
@@ -1316,8 +1316,8 @@ class Val final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::strVal,
     ::apache::thrift::ident::intVal,
@@ -1578,8 +1578,8 @@ class ValUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::v1,
     ::apache::thrift::ident::v2
@@ -1865,8 +1865,8 @@ class VirtualComplexUnion  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::thingOne,
     ::apache::thrift::ident::thingTwo
@@ -2154,8 +2154,8 @@ class NonCopyableStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::num
   >;
@@ -2299,8 +2299,8 @@ class NonCopyableUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s
   >;

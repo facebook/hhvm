@@ -33,7 +33,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Foo>;
@@ -55,11 +55,11 @@ const char* Foo::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Foo";
 }
 
-const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Foo::__fbthrift_get_class_name() {
+std::string_view Foo::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Foo>::name;
 }
 
@@ -115,7 +115,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Bar>;
@@ -137,11 +137,11 @@ const char* Bar::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Bar";
 }
 
-const folly::StringPiece Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Bar>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Bar::__fbthrift_get_class_name() {
+std::string_view Bar::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Bar>::name;
 }
 
@@ -224,7 +224,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Baz>;
@@ -246,11 +246,11 @@ const char* Baz::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/Baz";
 }
 
-const folly::StringPiece Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Baz>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Baz::__fbthrift_get_class_name() {
+std::string_view Baz::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Baz>::name;
 }
 
@@ -347,7 +347,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::facebook::thrift::test::OpEncodeStruct>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>;
@@ -369,11 +369,11 @@ const char* OpEncodeStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/OpEncodeStruct";
 }
 
-const folly::StringPiece OpEncodeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view OpEncodeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OpEncodeStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece OpEncodeStruct::__fbthrift_get_class_name() {
+std::string_view OpEncodeStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<OpEncodeStruct>::name;
 }
 

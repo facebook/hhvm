@@ -17,7 +17,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ComplexUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ComplexUnion>;
@@ -48,11 +48,11 @@ bool TEnumTraits<::cpp2::ComplexUnion::Type>::findValue(std::string_view name, t
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece ComplexUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ComplexUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ComplexUnion::__fbthrift_get_class_name() {
+std::string_view ComplexUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ComplexUnion>::name;
 }
 
@@ -189,7 +189,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ListUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ListUnion>;
@@ -220,11 +220,11 @@ bool TEnumTraits<::cpp2::ListUnion::Type>::findValue(std::string_view name, type
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece ListUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ListUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ListUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ListUnion::__fbthrift_get_class_name() {
+std::string_view ListUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ListUnion>::name;
 }
 
@@ -323,7 +323,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::DataUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::DataUnion>;
@@ -354,11 +354,11 @@ bool TEnumTraits<::cpp2::DataUnion::Type>::findValue(std::string_view name, type
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece DataUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view DataUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DataUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece DataUnion::__fbthrift_get_class_name() {
+std::string_view DataUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<DataUnion>::name;
 }
 
@@ -457,7 +457,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::Val>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Val>;
@@ -475,11 +475,11 @@ void TccStructTraits<::cpp2::Val>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece Val::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view Val::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Val>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece Val::__fbthrift_get_class_name() {
+std::string_view Val::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Val>::name;
 }
 
@@ -575,7 +575,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::ValUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ValUnion>;
@@ -606,11 +606,11 @@ bool TEnumTraits<::cpp2::ValUnion::Type>::findValue(std::string_view name, type*
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece ValUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ValUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ValUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece ValUnion::__fbthrift_get_class_name() {
+std::string_view ValUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ValUnion>::name;
 }
 
@@ -721,7 +721,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::VirtualComplexUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::VirtualComplexUnion>;
@@ -752,11 +752,11 @@ bool TEnumTraits<::cpp2::VirtualComplexUnion::Type>::findValue(std::string_view 
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece VirtualComplexUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view VirtualComplexUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<VirtualComplexUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece VirtualComplexUnion::__fbthrift_get_class_name() {
+std::string_view VirtualComplexUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<VirtualComplexUnion>::name;
 }
 
@@ -855,7 +855,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::NonCopyableStruct>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::NonCopyableStruct>;
@@ -873,11 +873,11 @@ void TccStructTraits<::cpp2::NonCopyableStruct>::translateFieldName(
 
 namespace cpp2 {
 
-const folly::StringPiece NonCopyableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view NonCopyableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NonCopyableStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece NonCopyableStruct::__fbthrift_get_class_name() {
+std::string_view NonCopyableStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<NonCopyableStruct>::name;
 }
 
@@ -933,7 +933,7 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::cpp2::NonCopyableUnion>::translateFieldName(
-    folly::StringPiece _fname,
+    std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::NonCopyableUnion>;
@@ -964,11 +964,11 @@ bool TEnumTraits<::cpp2::NonCopyableUnion::Type>::findValue(std::string_view nam
 }} // apache::thrift
 namespace cpp2 {
 
-const folly::StringPiece NonCopyableUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view NonCopyableUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NonCopyableUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece NonCopyableUnion::__fbthrift_get_class_name() {
+std::string_view NonCopyableUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<NonCopyableUnion>::name;
 }
 

@@ -18,7 +18,7 @@ namespace detail {
 template <>
 struct TccStructTraits<::test::namespace_from_package_without_module_name::Foo> {
   static void translateFieldName(
-      folly::StringPiece _fname,
+      std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };

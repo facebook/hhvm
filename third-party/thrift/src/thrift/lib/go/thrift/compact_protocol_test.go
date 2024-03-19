@@ -23,9 +23,9 @@ import (
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, NewCompactProtocolFactory())
+	ReadWriteProtocolTest(t, func(transport Transport) Format { return NewCompactProtocol(transport) })
 	// CompactProtocol is capable of reading and writing in different goroutines.
-	ReadWriteProtocolParallelTest(t, NewCompactProtocolFactory())
+	ReadWriteProtocolParallelTest(t, func(transport Transport) Format { return NewCompactProtocol(transport) })
 	transports := []Transport{
 		NewMemoryBuffer(),
 		NewFramedTransport(NewMemoryBuffer()),

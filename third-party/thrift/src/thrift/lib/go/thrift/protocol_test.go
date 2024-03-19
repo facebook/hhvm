@@ -174,7 +174,7 @@ type protocolTest func(t testing.TB, p Format, trans Transport)
 // It also should only be used with an underlying Transport that is capable of
 // blocking reads and writes (socket, stream), since other golang Transport
 // implementations require that the data exists to be read when they are called (like bytes.Buffer)
-func ReadWriteProtocolParallelTest(t *testing.T, protocolFactory FormatFactory) {
+func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(Transport) Format) {
 	rConn, wConn := tcpStreamSetupForTest(t)
 	rdr, writer := io.Pipe()
 	transports := []TransportFactory{
@@ -186,7 +186,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, protocolFactory FormatFactory) 
 	doForAllTransportsParallel := func(read, write protocolTest) {
 		for _, tf := range transports {
 			trans := tf.GetTransport(nil)
-			p := protocolFactory.GetFormat(trans)
+			p := newFormat(trans)
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
@@ -240,7 +240,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, protocolFactory FormatFactory) 
 	})
 }
 
-func ReadWriteProtocolTest(t *testing.T, protocolFactory FormatFactory) {
+func ReadWriteProtocolTest(t *testing.T, newFormat func(Transport) Format) {
 	l := HTTPClientSetupForTest(t)
 	defer l.Close()
 	transports := []TransportFactory{
@@ -252,7 +252,7 @@ func ReadWriteProtocolTest(t *testing.T, protocolFactory FormatFactory) {
 	doForAllTransports := func(protTest protocolTest) {
 		for _, tf := range transports {
 			trans := tf.GetTransport(nil)
-			p := protocolFactory.GetFormat(trans)
+			p := newFormat(trans)
 			protTest(t, p, trans)
 			trans.Close()
 		}

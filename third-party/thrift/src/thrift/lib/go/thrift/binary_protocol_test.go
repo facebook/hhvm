@@ -25,7 +25,7 @@ import (
 )
 
 func TestReadWriteBinaryProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, NewBinaryProtocolFactoryDefault())
+	ReadWriteProtocolTest(t, func(transport Transport) Format { return NewBinaryProtocolTransport(transport) })
 }
 
 func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {

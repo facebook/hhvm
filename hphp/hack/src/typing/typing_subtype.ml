@@ -6089,58 +6089,28 @@ end = struct
       ~subtype_env
       ~this_ty
       ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-      ~rhs:
-        {
-          super_like;
-          reason_super = r_sup;
-          lty_super = lty_sup;
-          cty_super = cty_sup;
-          _;
-        }
+      ~lhs:{ sub_supportdyn; ty_sub }
+      ~rhs:{ super_like; super_supportdyn; lty_super; cty_super; _ }
       env =
-    let cty_super =
-      mk_constraint_type (r_sup, TCintersection (lty_sup, cty_sup))
-    in
-    let ety_super = ConstraintType cty_super in
-    let default_subtype_help env =
+    let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+    match ty_sub with
+    | LoclType ty_sub ->
+      let lhs = { sub_supportdyn; ty_sub = LoclType ty_sub } in
       Subtype.(
-        default_subtype
+        simplify_subtype_i
           ~subtype_env
           ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = ety_super }
+          ~lhs
+          ~rhs:{ super_like; super_supportdyn; ty_super = LoclType lty_super }
           env)
-    in
-    match ity_sub with
-    | LoclType t when is_union t -> default_subtype_help env
-    | ConstraintType t when is_constraint_type_union t ->
-      default_subtype_help env
-    | _ ->
-      env
-      |> Subtype.(
-           simplify_subtype_i
-             ~subtype_env
-             ~this_ty:None
-             ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-             ~rhs:
-               {
-                 super_like = false;
-                 super_supportdyn = false;
-                 ty_super = LoclType lty_sup;
-               })
-      &&& Subtype.(
-            simplify_subtype_i
+      &&& Subtype_constraint_super.(
+            simplify
               ~subtype_env
-              ~this_ty:None
-              ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-              ~rhs:
-                {
-                  super_like = false;
-                  super_supportdyn = false;
-                  ty_super = ConstraintType cty_sup;
-                })
+              ~this_ty
+              ~fail
+              ~lhs
+              ~rhs:{ super_like; super_supportdyn; cty_super })
+    | ConstraintType _ -> invalid env ~fail
 end
 
 and TCunion : sig

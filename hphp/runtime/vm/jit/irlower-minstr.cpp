@@ -520,13 +520,11 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
-  auto const mask = ArrayKeyTypes::getMask(inst->typeParam());
-  always_assert_flog(mask, "Invalid VanillaDict key check: {}",
-                     inst->typeParam().toString());
+  auto const mask = ~inst->extra<CheckDictKeys>()->keyTypes.toBits();
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testbim{int8_t(*mask), src[VanillaDict::kKeyTypesOffset], sf};
+  v << testbim{int8_t(mask), src[VanillaDict::kKeyTypesOffset], sf};
   v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

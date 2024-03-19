@@ -87,16 +87,13 @@ private:
   static constexpr size_t kNumProfiledValues = 16;
 
   size_t m_num_iterations;
-  uint32_t m_base_type_counts[IterSpecialization::kNumBaseTypes];
-  uint32_t m_key_types_counts[IterSpecialization::kNumKeyTypes];
+  std::array<uint32_t, (size_t)IterSpecialization::BaseType::kNumBaseTypes>
+    m_base_type_counts;
+  ArrayKeyTypes m_key_types = ArrayKeyTypes::Empty();
 
   // For bases that aren't a specialized base type, we increment m_generic
   // instead of any of the m_base_types elements.
   uint32_t m_generic_base_count;
-
-  // We have a generic ArrayKey option in m_key_types, but we don't want to
-  // increment it for empty bases, because empty bases fit all key types.
-  uint32_t m_empty_count;
 
   // the first bucket keeps track of the number of zeros. yes, that makes the
   // keyTypes count of empty redundant. the question here is... since we're

@@ -22,14 +22,12 @@
 
 namespace HPHP {
 
-Optional<uint8_t> ArrayKeyTypes::getMask(const jit::Type& type) {
+void ArrayKeyTypes::toJitType(jit::Type& type) const {
   using namespace jit;
-  auto const str = kNonStaticStrKey | kStaticStrKey;
-  if (type == TInt)          return ~kIntKey;
-  if (type == (TInt | TStr)) return ~(kIntKey | str);
-  if (type == TStaticStr)    return ~kStaticStrKey;
-  if (type == TStr)          return ~str;
-  return std::nullopt;
+  type = TBottom;
+  if (m_bits & kNonStaticStrKey) type |= TStr;
+  if (m_bits & kStaticStrKey) type |= TStaticStr;
+  if (m_bits & kIntKey) type |= TInt;
 }
 
 bool ArrayKeyTypes::checkInvariants(const VanillaDict* ad) const {
@@ -50,6 +48,16 @@ bool ArrayKeyTypes::checkInvariants(const VanillaDict* ad) const {
               true_bits, m_bits);
   assertx((m_bits & ~all) == 0);
   return true;
+}
+
+std::string ArrayKeyTypes::show() const {
+  if (!m_bits) return "Empty";
+  auto types = std::vector<std::string>();
+  if (m_bits & kNonStaticStrKey) types.push_back("NonStaticStr");
+  if (m_bits & kStaticStrKey) types.push_back("StaticStr");
+  if (m_bits & kIntKey) types.push_back("Int");
+  if (m_bits & kTombstoneKey) types.push_back("Tombstone");
+  return folly::join('|', types);
 }
 
 } // namespace HPHP

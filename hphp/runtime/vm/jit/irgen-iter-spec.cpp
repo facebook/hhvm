@@ -206,25 +206,18 @@ namespace HPHP::jit::irgen {
 
 namespace {
 
+using BT = IterSpecialization::BaseType;
+
 const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
 
 //////////////////////////////////////////////////////////////////////
 // Simple getters for IterSpecialization.
 
 Type getArrType(IterSpecialization specialization) {
-  switch (specialization.base_type) {
-    case IterSpecialization::Vec:    return TVec;
-    case IterSpecialization::Dict:   return TDict;
-  }
-  always_assert(false);
-}
-
-Type getKeyType(IterSpecialization specialization) {
-  switch (specialization.key_types) {
-    case IterSpecialization::ArrayKey:  return TInt | TStr;
-    case IterSpecialization::Int:       return TInt;
-    case IterSpecialization::Str:       return TStr;
-    case IterSpecialization::StaticStr: return TStaticStr;
+  switch (specialization.baseType()) {
+    case BT::Vec:           return TVec;
+    case BT::Dict:          return TDict;
+    case BT::kNumBaseTypes: always_assert(false);
   }
   always_assert(false);
 }
@@ -351,14 +344,16 @@ struct MixedAccessor : public Accessor {
       arr_type = arr_type.narrowToVanilla();
     }
     pos_type = is_ptr_iter ? TPtrToElem : TInt;
-    key_type = getKeyType(specialization);
+    key_types = specialization.keyTypes();
+    specialization.keyTypes().toJitType(key_jit_type);
     layout = ArrayLayout::Vanilla();
     iter_type = specialization;
   }
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
+    auto const data = ArrayKeyTypesData{key_types};
     auto const arr = gen(env, CheckType, exit, arr_type, base);
-    gen(env, CheckDictKeys, exit, key_type, arr);
+    gen(env, CheckDictKeys, exit, data, key_jit_type, arr);
     return arr;
   }
 
@@ -371,13 +366,13 @@ struct MixedAccessor : public Accessor {
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, LdPtrIterKey, key_type, elm);
+    return gen(env, LdPtrIterKey, key_jit_type, elm);
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
     auto const valType = arrLikeElemType(
       is_ptr_iter ? arr_type : arr->type(),
-      key_type,
+      key_jit_type,
       curClass(env)
     ).first;
     return gen(env, LdPtrIterVal, valType, elm);
@@ -391,7 +386,8 @@ struct MixedAccessor : public Accessor {
 
 private:
   bool is_ptr_iter = false;
-  Type key_type;
+  ArrayKeyTypes key_types;
+  Type key_jit_type;
 };
 
 struct BespokeAccessor : public Accessor {
@@ -445,13 +441,15 @@ std::unique_ptr<Accessor> getAccessor(
     return std::make_unique<BespokeAccessor>(type, layout);
   }
   auto const baseConst = !local || (data.flags & IterArgs::Flags::BaseConst);
-  switch (type.base_type) {
-    case IterSpecialization::Vec: {
+  switch (type.baseType()) {
+    case BT::Vec: {
       return std::make_unique<VecAccessor>(type, baseConst, data.hasKey());
     }
-    case IterSpecialization::Dict: {
+    case BT::Dict: {
       return std::make_unique<MixedAccessor>(type, baseConst);
     }
+    case BT::kNumBaseTypes:
+      always_assert(false);
   }
   always_assert(false);
 }
@@ -746,6 +744,11 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   auto result = getProfileResult(env, base);
   auto& iter_type = result.top_specialization;
 
+  if (!iter_type.specialized) {
+    FTRACE(2, "Failure to specialize IterInit: no profiled specialization.\n");
+    return despecialize();
+  }
+
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
@@ -761,10 +764,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // Check all the conditions for iterator specialization, with logging.
   FTRACE(2, "Trying to specialize IterInit: {} @ {}\n",
          show(iter_type), layout.describe());
-  if (!iter_type.specialized) {
-    FTRACE(2, "Failure: no profiled specialization.\n");
-    return despecialize();
-  } else if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
+  if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
     FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
     return despecialize();
   } else if (iter && iter->iter_type.as_byte != iter_type.as_byte) {

@@ -200,14 +200,15 @@ Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
 
 int32_t iteratorType(const IterTypeData& data) {
   auto const nextHelperIndex = [&]{
-    using S = IterSpecialization;
+    using BT = IterSpecialization::BaseType;
+
     if (data.type.bespoke) {
       if (!data.baseConst) return IterNextIndex::Array;
       if (data.layout.is_struct()) return IterNextIndex::StructDict;
       return IterNextIndex::Array;
     }
-    switch (data.type.base_type) {
-      case S::Vec: {
+    switch (data.type.baseType()) {
+      case BT::Vec: {
         auto is_ptr_iter = data.baseConst
                         && !data.outputKey
                         && VanillaVec::stores_unaligned_typed_values;
@@ -215,11 +216,13 @@ int32_t iteratorType(const IterTypeData& data) {
           ? IterNextIndex::VanillaVecPointer
           : IterNextIndex::VanillaVec;
       }
-      case S::Dict: {
+      case BT::Dict: {
         return data.baseConst
           ? IterNextIndex::ArrayMixedPointer
           : IterNextIndex::ArrayMixed;
       }
+      case BT::kNumBaseTypes:
+        always_assert(false);
     }
     always_assert(false);
   }();

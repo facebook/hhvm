@@ -40,8 +40,8 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
   switch (arr->kind()) {
     case ArrayData::kVecKind: {
       result.specialized = true;
-      result.base_type = S::Vec;
-      result.key_types = S::Int;
+      result.setBaseType(S::BaseType::Vec);
+      result.setKeyTypes(ArrayKeyTypes::Ints());
       return result;
     }
 
@@ -49,13 +49,8 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
       auto const keys = VanillaDict::as(arr)->keyTypes();
       if (keys.mayIncludeTombstone()) return result;
       result.specialized = true;
-      result.base_type = S::Dict;
-      result.key_types = [&]{
-        if (keys.mustBeStaticStrs()) return S::StaticStr;
-        if (keys.mustBeInts()) return S::Int;
-        if (keys.mustBeStrs()) return S::Str;
-        return S::ArrayKey;
-      }();
+      result.setBaseType(S::BaseType::Dict);
+      result.setKeyTypes(keys);
       return result;
     }
 
@@ -68,38 +63,32 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayIterProfile::Result ArrayIterProfile::result() const {
+  using BT = IterSpecialization::BaseType;
+
   ArrayIterProfile::Result result;
   assertx(!result.top_specialization.specialized);
   result.value_type = m_value_type;
 
   result.num_arrays = m_generic_base_count;
   result.num_iterations = m_num_iterations;
-  for (uint32_t i = 0; i < IterSpecialization::kNumBaseTypes; ++i) {
+  for (uint32_t i = 0; i < m_base_type_counts.size(); ++i) {
     auto const count = m_base_type_counts[i];
     result.num_arrays += count;
     if (count > result.top_count) {
-      result.top_specialization.base_type = (IterSpecialization::BaseType)i;
       result.top_specialization.specialized = true;
+      result.top_specialization.setBaseType((BT)i);
       result.top_count = count;
     }
   }
 
-  auto key_types_total = m_empty_count;
-  for (uint32_t i = 0; i < IterSpecialization::kNumKeyTypes; ++i) {
-    key_types_total += m_key_types_counts[i];
+  if (result.top_specialization.specialized) {
+    result.top_specialization.setKeyTypes(
+      result.top_specialization.baseType() == BT::Vec
+        ? ArrayKeyTypes::Ints()
+        : m_key_types
+    );
   }
-  auto const counts  = m_key_types_counts;
-  auto const statics = m_empty_count + counts[IterSpecialization::StaticStr];
-  auto const ints    = m_empty_count + counts[IterSpecialization::Int];
-  auto const strs    = statics + counts[IterSpecialization::Str];
-  result.top_specialization.key_types = [&]{
-    auto const type = result.top_specialization.base_type;
-    if (type == IterSpecialization::Vec) return IterSpecialization::Int;
-    if (statics == key_types_total)      return IterSpecialization::StaticStr;
-    if (ints    == key_types_total)      return IterSpecialization::Int;
-    if (strs    == key_types_total)      return IterSpecialization::Str;
-    return IterSpecialization::ArrayKey;
-  }();
+
   return result;
 }
 
@@ -111,11 +100,7 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
   auto const size = arr->size();
   auto const specialization = getIterSpecialization(arr);
   if (specialization.specialized) {
-    if (arr->empty()) {
-      m_empty_count++;
-    } else {
-      m_key_types_counts[specialization.key_types]++;
-    }
+    m_key_types.copyFrom(specialization.keyTypes(), false /* compact */);
     m_num_iterations += size;
     m_base_type_counts[specialization.base_type]++;
     size_t num_profiled_values = 0;
@@ -135,15 +120,12 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
 }
 
 void ArrayIterProfile::reduce(ArrayIterProfile& l, const ArrayIterProfile& r) {
-  for (uint32_t i = 0; i < IterSpecialization::kNumBaseTypes; ++i) {
+  for (uint32_t i = 0; i < l.m_base_type_counts.size(); ++i) {
     l.m_base_type_counts[i] += r.m_base_type_counts[i];
   }
-  for (uint32_t i = 0; i < IterSpecialization::kNumKeyTypes; ++i) {
-    l.m_key_types_counts[i] += r.m_key_types_counts[i];
-  }
+  l.m_key_types.copyFrom(r.m_key_types, false /* compact */);
   l.m_num_iterations += r.m_num_iterations;
   l.m_generic_base_count += r.m_generic_base_count;
-  l.m_empty_count += r.m_empty_count;
   l.m_value_type |= r.m_value_type;
   for (uint32_t i = 0; i < kNumApproximateCountBuckets; ++i) {
     l.m_approximate_iteration_buckets[i] += r.m_approximate_iteration_buckets[i];
@@ -154,18 +136,11 @@ folly::dynamic ArrayIterProfile::toDynamic() const {
   using folly::dynamic;
 
   dynamic base_type = dynamic::object();
-  for (uint32_t i = 0; i < IterSpecialization::kNumBaseTypes; ++i) {
+  for (uint32_t i = 0; i < m_base_type_counts.size(); ++i) {
     auto const str = show((IterSpecialization::BaseType)i);
     base_type[str] = m_base_type_counts[i];
   }
   base_type["Generic"] = m_generic_base_count;
-
-  dynamic key_types = dynamic::object();
-  for (uint32_t i = 0; i < IterSpecialization::kNumKeyTypes; ++i) {
-    auto const str = show((IterSpecialization::KeyTypes)i);
-    key_types[str] = m_key_types_counts[i];
-  }
-  key_types["Empty"] = m_empty_count;
 
   dynamic approx_counts = dynamic::object();
   for (uint32_t i = 0; i < kNumApproximateCountBuckets; ++i) {
@@ -176,7 +151,7 @@ folly::dynamic ArrayIterProfile::toDynamic() const {
     approx_counts[std::to_string(i)] = count_for_bucket;
   }
 
-  return dynamic::object("keyTypes", key_types)
+  return dynamic::object("keyTypes", m_key_types.show())
                         ("baseType", base_type)
                         ("valueType", m_value_type.toString())
                         // consider adding the base here so you know
@@ -192,17 +167,12 @@ std::string ArrayIterProfile::toString() const {
   out << "NumIterations: " << m_num_iterations;
   out << "\nValueType: " << m_value_type.toString();
   out << "\n\nBaseType:";
-  for (uint32_t i = 0; i < IterSpecialization::kNumBaseTypes; ++i) {
+  for (uint32_t i = 0; i < m_base_type_counts.size(); ++i) {
     auto const str = show((IterSpecialization::BaseType)i);
     out << "\n  " << str << ": " << m_base_type_counts[i];
   }
   out << "\n  Generic" << ": " << m_generic_base_count;
-  out << "\n\nKeyTypes:";
-  for (uint32_t i = 0; i < IterSpecialization::kNumKeyTypes; ++i) {
-    auto const str = show((IterSpecialization::KeyTypes)i);
-    out << "\n  " << str << ": " << m_key_types_counts[i];
-  }
-  out << "\n  Empty" << ": " << m_empty_count;
+  out << "\n\nKeyTypes: " << m_key_types.show();
   return out.str();
 }
 

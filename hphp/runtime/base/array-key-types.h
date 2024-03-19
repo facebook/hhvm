@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/string-data.h"
 
@@ -70,30 +72,30 @@ struct ArrayKeyTypes {
   }
 
   /*
-   * Call this helper to get a 1-byte mask to test against when JITing code
-   * to optimistically check the keys of a VanillaDict. If you and this mask
-   * with the key bitset and the result is zero, then all keys match `type`.
-   *
-   * Some types can't be tested against this bitset; for these types, this
-   * method will return std::nullopt.
-   */
-  static Optional<uint8_t> getMask(const jit::Type& type);
-
-  /*
    * Call these methods to get a version of this bitset that can be stored
    * directly to a free byte in an ArrayData.
    */
-  static ArrayKeyTypes Empty() {
-    return Init(0);
+  static constexpr ArrayKeyTypes Empty() {
+    return FromBits(0);
   }
-  static ArrayKeyTypes Ints() {
-    return Init(kIntKey);
+  static constexpr ArrayKeyTypes Ints() {
+    return FromBits(kIntKey);
   }
-  static ArrayKeyTypes StaticStrs() {
-    return Init(kStaticStrKey);
+  static constexpr ArrayKeyTypes StaticStrs() {
+    return FromBits(kStaticStrKey);
   }
-  static ArrayKeyTypes Strs() {
-    return Init(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
+  static constexpr ArrayKeyTypes Strs() {
+    return FromBits(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
+  }
+
+  static constexpr ArrayKeyTypes FromBits(uint8_t bits) {
+    auto result = ArrayKeyTypes{};
+    result.m_bits = bits;
+    return result;
+  }
+
+  uint8_t toBits() const {
+    return m_bits;
   }
 
   /*
@@ -131,18 +133,24 @@ struct ArrayKeyTypes {
   }
 
   /*
+   * Make a jit::Type for all possible array key values, ignoring tombstones.
+   *
+   * Output by reference to avoid dependency on jit/type.h.
+   */
+  void toJitType(jit::Type& type) const;
+
+  /*
    * Check that m_bits is a valid key types bitset for the given VanillaDict.
    * This check is very slow - it requires a full traversal of the array.
    */
   bool checkInvariants(const VanillaDict* ad) const;
 
-private:
-  static ArrayKeyTypes Init(uint8_t bits) {
-    auto result = ArrayKeyTypes{};
-    result.m_bits = bits;
-    return result;
-  }
+  /*
+   * Debugging output.
+   */
+  std::string show() const;
 
+private:
   static constexpr uint8_t kNonStaticStrKey = 0b0001;
   static constexpr uint8_t kStaticStrKey    = 0b0010;
   static constexpr uint8_t kIntKey          = 0b0100;

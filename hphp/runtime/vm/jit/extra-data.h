@@ -709,6 +709,20 @@ struct IterOffsetData : IRExtraData {
   int16_t offset;
 };
 
+struct ArrayKeyTypesData : IRExtraData {
+  explicit ArrayKeyTypesData(ArrayKeyTypes keyTypes) : keyTypes(keyTypes) {}
+
+  std::string show() const { return keyTypes.show(); }
+
+  size_t stableHash() const { return std::hash<uint8_t>()(keyTypes.toBits()); }
+
+  bool equals(const ArrayKeyTypesData& o) const {
+    return keyTypes.toBits() == o.keyTypes.toBits();
+  }
+
+  ArrayKeyTypes keyTypes;
+};
+
 /*
  * RDS handle.
  */
@@ -3102,6 +3116,7 @@ X(InitStructElem,               KeyedIndexData);
 X(LdTypeStructureValCns,        KeyedData);
 X(CreateCCWH,                   CreateCCWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
+X(CheckDictKeys,                ArrayKeyTypesData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);
 X(ProfileArrayCOW,              RDSHandleData);

@@ -37,11 +37,6 @@ type BinaryProtocol struct {
 	buffer        [64]byte
 }
 
-type BinaryProtocolFactory struct {
-	strictRead  bool
-	strictWrite bool
-}
-
 func NewBinaryProtocolTransport(t Transport) *BinaryProtocol {
 	return NewBinaryProtocol(t, false, true)
 }
@@ -56,18 +51,6 @@ func NewBinaryProtocol(t Transport, strictRead, strictWrite bool) *BinaryProtoco
 	p.reader = p.trans
 	p.writer = p.trans
 	return p
-}
-
-func NewBinaryProtocolFactoryDefault() *BinaryProtocolFactory {
-	return NewBinaryProtocolFactory(false, true)
-}
-
-func NewBinaryProtocolFactory(strictRead, strictWrite bool) *BinaryProtocolFactory {
-	return &BinaryProtocolFactory{strictRead: strictRead, strictWrite: strictWrite}
-}
-
-func (p *BinaryProtocolFactory) GetFormat(t Transport) Format {
-	return NewBinaryProtocol(t, p.strictRead, p.strictWrite)
 }
 
 /**

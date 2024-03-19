@@ -25,25 +25,6 @@ type DebugProtocol struct {
 	LogPrefix string
 }
 
-type DebugProtocolFactory struct {
-	Underlying FormatFactory
-	LogPrefix  string
-}
-
-func NewDebugProtocolFactory(underlying FormatFactory, logPrefix string) *DebugProtocolFactory {
-	return &DebugProtocolFactory{
-		Underlying: underlying,
-		LogPrefix:  logPrefix,
-	}
-}
-
-func (t *DebugProtocolFactory) GetFormat(trans Transport) Format {
-	return &DebugProtocol{
-		Delegate:  t.Underlying.GetFormat(trans),
-		LogPrefix: t.LogPrefix,
-	}
-}
-
 func (tdp *DebugProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
 	err := tdp.Delegate.WriteMessageBegin(name, typeId, seqid)
 	log.Printf("%sWriteMessageBegin(name=%#v, typeId=%#v, seqid=%#v) => %#v", tdp.LogPrefix, name, typeId, seqid, err)

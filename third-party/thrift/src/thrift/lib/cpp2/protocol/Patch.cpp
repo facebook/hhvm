@@ -54,9 +54,12 @@ using value_field_id =
 template <typename Tag>
 using value_native_type = op::get_native_type<Value, value_field_id<Tag>>;
 
+constexpr FieldId kSafePatchVersionId = FieldId{1};
+constexpr FieldId kSafePatchDataId = FieldId{2};
+
 void checkNotSafePatch(const Object& patch) {
-  const Value* version = patch.if_contains(FieldId{1});
-  const Value* data = patch.if_contains(FieldId{2});
+  const Value* version = patch.if_contains(kSafePatchVersionId);
+  const Value* data = patch.if_contains(kSafePatchDataId);
   if (version && version->is_i32() && data && data->is_binary()) {
     folly::throw_exception<std::runtime_error>(
         "Safe Patch provided. Use `fromSafePatch` to convert to Dynamic Patch first.");
@@ -734,8 +737,8 @@ applyPatchToSerializedData<type::StandardProtocol::Compact>(
     const protocol::Object& patch, const folly::IOBuf& buf);
 
 Object fromSafePatch(const protocol::Object& safePatch) {
-  const Value* version = safePatch.if_contains(FieldId{1});
-  const Value* data = safePatch.if_contains(FieldId{2});
+  const Value* version = safePatch.if_contains(detail::kSafePatchVersionId);
+  const Value* data = safePatch.if_contains(detail::kSafePatchDataId);
   if (!(version && version->is_i32() && data && data->is_binary())) {
     throw std::runtime_error("Invalid safe patch");
   }
@@ -753,8 +756,9 @@ Object fromSafePatch(const protocol::Object& safePatch) {
 
 Object toSafePatch(const protocol::Object& patch) {
   Object safePatch;
-  safePatch[FieldId{1}].emplace_i32(op::detail::kThriftDynamicPatchVersion);
-  safePatch[FieldId{2}].emplace_binary(
+  safePatch[detail::kSafePatchVersionId].emplace_i32(
+      op::detail::kThriftDynamicPatchVersion);
+  safePatch[detail::kSafePatchDataId].emplace_binary(
       *serializeObject<CompactProtocolWriter>(patch));
   return safePatch;
 }

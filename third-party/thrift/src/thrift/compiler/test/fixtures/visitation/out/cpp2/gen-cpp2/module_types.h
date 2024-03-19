@@ -909,10 +909,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -935,10 +931,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -961,10 +953,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -987,10 +975,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -12120,10 +12104,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union1::Type> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -12143,10 +12123,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union2::Type> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -12166,10 +12142,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union3::Type> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -12189,10 +12161,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -12212,10 +12180,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_n
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  static bool findName(type value, folly::StringPiece* out) noexcept {
-    std::string_view outp;
-    return findName(value, &outp) && ((*out = outp), true);
-  }
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

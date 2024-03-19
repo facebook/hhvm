@@ -82,7 +82,6 @@ struct TEnumTraits {
   //      static bool findName(type value, std::string_view* out) noexcept;
   //      static bool findValue(std::string_view name, type* out) noexcept;
   //
-  //      static bool findName(type value, folly::StringPiece* out) noexcept;
   //      static char const* findName(type value) noexcept;
   //
   //  When instantiated with an enum type T which is not empty, includes:

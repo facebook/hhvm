@@ -6171,70 +6171,26 @@ end = struct
     cty_super: Typing_defs.constraint_type;
   }
 
-  let simplify
+  let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
       ~rhs:
-        {
-          super_like;
-          reason_super = r_sup;
-          lty_super = lty_sup;
-          cty_super = cty_sup;
-          _;
-        }
+        ({ reason_super = r_sup; lty_super = lty_sup; cty_super = cty_sup; _ }
+        as rhs)
       env =
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super =
-                ConstraintType
-                  (mk_constraint_type (r_sup, TCunion (lty_sup, cty_sup)));
-            }
-          env)
-    in
+    let (env, ity_sub) = Env.expand_internal_type env ity_sub in
     let invalid_env env = invalid ~fail env in
     let ( ||| ) = ( ||| ) ~fail in
 
     match (lty_sup, cty_sup) with
     | (lty_super, cty_super) ->
       (match ity_sub with
-      | ConstraintType cty when is_constraint_type_union cty ->
-        default_subtype_help env
       | ConstraintType _ ->
-        env
-        |> Subtype.(
-             simplify_subtype_i
-               ~subtype_env
-               ~this_ty:None
-               ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-               ~rhs:
-                 {
-                   super_like = false;
-                   super_supportdyn = false;
-                   ty_super = ConstraintType cty_super;
-                 })
-        ||| Subtype.(
-              simplify_subtype_i
-                ~subtype_env
-                ~this_ty:None
-                ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-                ~rhs:
-                  {
-                    super_like = false;
-                    super_supportdyn = false;
-                    ty_super = LoclType lty_super;
-                  })
-        ||| default_subtype_help
+        (* Whilst we can encode [ConstraintType] <: TCunion(LoclType,ConstraintType)
+           it isn't meaningful *)
+        invalid env ~fail
       | LoclType lty ->
         (match deref lty with
         | (r, Toption ty) ->
@@ -6269,20 +6225,66 @@ end = struct
                           (mk_constraint_type
                              (r_sup, TCunion (lty_sup, cty_sup)));
                     })
-        | (_, (Tintersection _ | Tunion _ | Tvar _)) -> default_subtype_help env
-        | _ ->
-          env
-          |> Subtype.(
-               simplify_subtype_i
-                 ~subtype_env
-                 ~this_ty:None
-                 ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-                 ~rhs:
-                   {
-                     super_like = false;
-                     super_supportdyn = false;
-                     ty_super = ConstraintType cty_super;
-                   })
+        | (_, Tintersection ty_subs) ->
+          Common.simplify_intersection_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, ty_subs)
+            rhs
+            env
+        | (_, Tunion ty_subs) ->
+          Common.simplify_union_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, ty_subs)
+            rhs
+            env
+        | (_, Tvar _) ->
+          mk_issubtype_prop
+            ~sub_supportdyn
+            ~coerce:subtype_env.Subtype_env.coerce
+            env
+            (LoclType lty)
+            (ConstraintType
+               (mk_constraint_type (r_sup, TCunion (lty_sup, cty_sup))))
+        | (r_generic, Tgeneric (nm, tyargs)) ->
+          let lift_rhs { reason_super; lty_super; cty_super; _ } =
+            ConstraintType
+              (mk_constraint_type
+                 (reason_super, TCunion (lty_super, cty_super)))
+          in
+          Common.simplify_generic_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            ~lift_rhs
+            (sub_supportdyn, r_generic, nm, tyargs)
+            rhs
+            rhs
+            env
+        | (r_dep, Tdependent (dep_ty, ty_sub_inner)) ->
+          Common.simplify_dependent_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:simplify
+            (sub_supportdyn, r_dep, dep_ty, ty_sub_inner)
+            rhs
+            env
+        | (r_newtype, Tnewtype (nm, _, ty_newtype)) ->
+          Subtype_constraint_super.(
+            simplify
+              ~subtype_env
+              ~this_ty:None
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+              ~rhs:{ super_like = false; super_supportdyn = false; cty_super }
+              env)
           ||| Subtype.(
                 simplify_subtype_i
                   ~subtype_env
@@ -6294,7 +6296,38 @@ end = struct
                       super_supportdyn = false;
                       ty_super = LoclType lty_super;
                     })
-          ||| default_subtype_help))
+          ||| Common.simplify_newtype_l
+                ~subtype_env
+                ~this_ty
+                ~fail
+                ~mk_prop:simplify
+                (sub_supportdyn, r_newtype, nm, ty_newtype)
+                rhs
+        | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+          valid env
+        | ( _,
+            ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull
+            | Tunapplied_alias _ | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _
+            | Taccess _ | Tclass _ ) ) ->
+          Subtype_constraint_super.(
+            simplify
+              ~subtype_env
+              ~this_ty:None
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+              ~rhs:{ super_like = false; super_supportdyn = false; cty_super }
+              env)
+          ||| Subtype.(
+                simplify_subtype_i
+                  ~subtype_env
+                  ~this_ty:None
+                  ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+                  ~rhs:
+                    {
+                      super_like = false;
+                      super_supportdyn = false;
+                      ty_super = LoclType lty_super;
+                    })))
 end
 
 and Destructure : sig

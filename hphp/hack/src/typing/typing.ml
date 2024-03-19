@@ -4041,7 +4041,6 @@ end = struct
           ~class_id:(CIexpr e1)
           ~explicit_targs:None
       in
-      let lty1 = LoclType ty1 in
       let ((env, ty_err_opt), result_ty, ty_mismatch_opt) =
         match nullflavor with
         | OG_nullthrows ->
@@ -4050,7 +4049,7 @@ end = struct
               p1
               Reason.URnone
               env
-              lty1
+              (LoclType ty1)
               has_member_ty
               Typing_error.Callback.unify_error
           in
@@ -4059,26 +4058,30 @@ end = struct
           in
           ((env, ty_err_opt), mem_ty, ty_mismatch)
         | OG_nullsafe ->
-          (* In that case ty1 is a subtype of ?Thas_member(m, #1)
-             and the result is ?#1 if ty1 is nullable. *)
+          (* A nullsafe access is equivalent to an `if` where the receiver is
+             refined to `nonnull` (`null`) in the true (false) branches *)
           let r = Reason.Rnullsafe_op p in
-          let null_ty = MakeType.null r in
-          let (env, null_has_mem_ty) =
-            Union.union_i env r has_member_ty null_ty
-          in
+          let ty_null = MakeType.null r and ty_nonnull = MakeType.nonnull r in
+
+          (* For the true case, we need to intersect the receiver type with
+             `nonnull` and assert the `has_member` constraint *)
           let (env, ty_err_opt) =
             Type.sub_type_i
               p1
               Reason.URnone
               env
-              lty1
-              null_has_mem_ty
+              (LoclType (MakeType.intersection r [ty1; ty_nonnull]))
+              has_member_ty
               Typing_error.Callback.unify_error
           in
           let ty_mismatch =
             mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
           in
-          let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
+          (* For the false case, if the reciever was nullable then the
+             member type should be made nullable. We do this by taking the
+             intersection of the receiver type with `null` and then
+             taking the union with the member type *)
+          let (env, null_or_nothing_ty) = Inter.intersect env ~r ty_null ty1 in
           let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
           ((env, ty_err_opt), result_ty, ty_mismatch)
       in

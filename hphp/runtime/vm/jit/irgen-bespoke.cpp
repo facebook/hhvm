@@ -1306,10 +1306,9 @@ Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 
   // Even if the bytecode is layout-sensitive, it may be applied to e.g. an
   // object input, or our known types may be too general for us to guard.
-  auto const gc = isIteratorOp(sk.op()) ? DataTypeIterBase : DataTypeSpecific;
-  auto const type = env.irb->typeOf(*loc, gc);
+  auto const type = env.irb->typeOf(*loc, DataTypeSpecific);
   auto const needsGuard = type != TBottom && type <= TArrLike &&
-                          typeFitsConstraint(type, gc);
+                          typeFitsConstraint(type, DataTypeSpecific);
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: location {}: {} {} layout guard\n",
              sk.offset(), opcodeToName(sk.op()), show(*loc), type,
              needsGuard ? "needs" : "does not need");

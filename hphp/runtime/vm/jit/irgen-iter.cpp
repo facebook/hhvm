@@ -110,7 +110,7 @@ void widenLocalIterBase(IRGS& env, int baseLocalId) {
 //////////////////////////////////////////////////////////////////////
 
 void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
-  auto const base = topC(env, BCSPRelOffset{0}, DataTypeIterBase);
+  auto const base = topC(env, BCSPRelOffset{0}, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, doneOffset, base, false)) return;
   specializeIterInit(env, doneOffset, ita, kInvalidId);
@@ -135,7 +135,7 @@ void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
 
 void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
-  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base, true)) return;
   specializeIterInit(env, doneOffset, ita, baseLocalId);
@@ -154,7 +154,7 @@ void emitLIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
   if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
-  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
 
   auto const result = [&]{
@@ -175,7 +175,7 @@ void emitIterFree(IRGS& env, int32_t iterId) {
 }
 
 void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
-  auto const baseType = env.irb->local(baseLocalId, DataTypeIterBase).type;
+  auto const baseType = env.irb->local(baseLocalId, DataTypeSpecific).type;
   if (!baseType.subtypeOfAny(TArrLike, TObj)) PUNT(LIterFree);
   if (!(baseType <= TArrLike)) gen(env, IterFree, IterId(iterId), fp(env));
   gen(env, KillIter, IterId(iterId), fp(env));

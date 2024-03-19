@@ -207,7 +207,6 @@ using MaybeDataType = Optional<DataType>;
 // These categories must be kept in order from least to most specific.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
-  func(IterBase)                                \
   func(CountnessInit)                           \
   func(Specific)                                \
   func(Specialized)

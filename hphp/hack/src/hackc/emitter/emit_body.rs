@@ -13,7 +13,6 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use ffi::Maybe;
 use ffi::Maybe::*;
 use hash::HashSet;
 use hhbc::Body;
@@ -24,6 +23,7 @@ use hhbc::IsTypeOp;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -376,20 +376,23 @@ pub fn make_body<'a, 'd>(
     // to make it available for reflection.
     let params = params
         .into_iter()
-        .map(|(mut p, default_value)| {
-            p.default_value = Maybe::from(default_value.as_ref().map(|(label, expr)| {
-                use print_expr::Context;
-                let ctx = Context::new(emitter);
-                let expr_env = body_env.as_ref();
-                let mut buf = Vec::new();
-                let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
-                    .map_or_else(|e| e.to_string().into_bytes(), |_| buf);
-                hhbc::DefaultValue {
-                    label: *label,
-                    expr: expr.into(),
-                }
-            }));
-            p
+        .map(|(param, default_value)| {
+            let dv = default_value
+                .as_ref()
+                .map(|(label, expr)| {
+                    use print_expr::Context;
+                    let ctx = Context::new(emitter);
+                    let expr_env = body_env.as_ref();
+                    let mut buf = Vec::new();
+                    let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
+                        .map_or_else(|e| e.to_string().into_bytes(), |_| buf);
+                    hhbc::DefaultValue {
+                        label: *label,
+                        expr: expr.into(),
+                    }
+                })
+                .into();
+            ParamEntry { param, dv }
         })
         .collect::<Vec<_>>();
 

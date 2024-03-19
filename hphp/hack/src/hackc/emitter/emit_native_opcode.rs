@@ -6,9 +6,10 @@ use ast_scope::Scope;
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
-use ffi::Maybe::Just;
+use ffi::Maybe;
 use hhbc::Body;
 use hhbc::Local;
+use hhbc::ParamEntry;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::aast;
@@ -40,14 +41,17 @@ pub fn emit_body<'a, 'd>(
         params.and_then(|params| {
             return_type_info.and_then(|rti| {
                 let body_instrs = Vec::from_iter(body_instrs.iter().cloned());
-                let params = Vec::from_iter(params.into_iter().map(|p| p.0));
-                let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs)
+                let params = Vec::from_iter(params.into_iter().map(|(param, _)| ParamEntry {
+                    param,
+                    dv: Maybe::Nothing,
+                }));
+                let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs)
                     .map_err(error::Error::from_error)?;
 
                 Ok(Body {
                     body_instrs: body_instrs.into(),
                     params: params.into(),
-                    return_type_info: Just(rti),
+                    return_type_info: Maybe::Just(rti),
                     decl_vars: Default::default(),
                     doc_comment: Default::default(),
                     is_memoize_wrapper: Default::default(),

@@ -93,7 +93,7 @@ pub(crate) fn lower_func(mut func: Func, func_info: &mut FuncInfo<'_>) -> Func {
 }
 
 fn add_reified_parameter(func: &mut Func) {
-    func.params.push(ir::Param {
+    let param = ir::Param {
         name: ir::intern(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
         is_variadic: false,
         is_inout: false,
@@ -106,23 +106,25 @@ fn add_reified_parameter(func: &mut Func) {
                 flags: ir::TypeConstraintFlags::NoFlags,
             },
         },
-        default_value: None,
-    });
+    };
+    func.params.push((param, None));
 }
 
 fn add_self_trait_parameter(func: &mut Func) {
     // We insert a `self` parameter so infer's analysis can
     // do its job. We don't use `$` so we are sure we don't clash with
     // existing Hack user defined variables.
-    func.params.push(ir::Param {
-        name: ir::string_id!("self"),
-        is_variadic: false,
-        is_inout: false,
-        is_readonly: false,
-        user_attributes: vec![],
-        ty: ir::TypeInfo::empty(),
-        default_value: None,
-    });
+    func.params.push((
+        ir::Param {
+            name: ir::string_id!("self"),
+            is_variadic: false,
+            is_inout: false,
+            is_readonly: false,
+            user_attributes: vec![],
+            ty: ir::TypeInfo::empty(),
+        },
+        None,
+    ));
 }
 
 fn call_base_func(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>, loc: LocId) {

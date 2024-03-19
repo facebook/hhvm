@@ -127,7 +127,7 @@ impl<'a> Body<'a> {
         let mut n = local.as_usize();
         let p = self.hhbc_body.params.len();
         if n < p {
-            return Some(self.hhbc_body.params[n].name);
+            return Some(self.hhbc_body.params[n].param.name);
         }
         n -= p;
         let v = self.hhbc_body.decl_vars.len();

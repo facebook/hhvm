@@ -1055,7 +1055,8 @@ void translateParameter(TranslationState& ts,
                         const UpperBoundMap& classUbs,
                         const TParamNameVec& shadowedTParams,
                         bool hasReifiedGenerics,
-                        const hhbc::Param& p) {
+                        const hhbc::ParamEntry& e) {
+  auto& p = e.param;
   FuncEmitter::ParamInfo param;
   translateUserAttributes(p.user_attributes, param.userAttributes);
   if (p.is_variadic) {
@@ -1071,7 +1072,7 @@ void translateParameter(TranslationState& ts,
   upperBoundsHelper(ts, ubs, classUbs, shadowedTParams, param.upperBounds,
                     param.typeConstraint, hasReifiedGenerics, true);
 
-  auto const dv = maybe(p.default_value);
+  auto const dv = maybe(e.dv);
   if (dv) translateDefaultParameterValue(ts, dv.value(), param);
   auto const name = toNamedLocalStaticString(p.name);
 

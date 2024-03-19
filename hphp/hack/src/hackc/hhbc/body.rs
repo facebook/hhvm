@@ -7,6 +7,7 @@ use ffi::Maybe;
 use ffi::Vector;
 use serde::Serialize;
 
+use crate::DefaultValue;
 use crate::Instruct;
 use crate::Param;
 use crate::StringId;
@@ -24,10 +25,17 @@ pub struct Body {
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vector<UpperBound>,
     pub shadowed_tparams: Vector<StringId>,
-    pub params: Vector<Param>,
+    pub params: Vector<ParamEntry>,
     pub return_type_info: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
     /// The statically computed stack depth for this Body. This can be computed
     /// using the hhbc::compute_stack_depth() function.
     pub stack_depth: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[repr(C)]
+pub struct ParamEntry {
+    pub param: Param,
+    pub dv: Maybe<DefaultValue>,
 }

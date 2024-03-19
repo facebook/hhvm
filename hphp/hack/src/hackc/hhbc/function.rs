@@ -12,7 +12,7 @@ use crate::Attribute;
 use crate::Body;
 use crate::Coeffects;
 use crate::FunctionName;
-use crate::Param;
+use crate::ParamEntry;
 use crate::Span;
 
 #[derive(Debug, Serialize)]
@@ -56,7 +56,7 @@ impl Function {
         self.flags.contains(FunctionFlags::MEMOIZE_IMPL)
     }
 
-    pub fn params(&self) -> &[Param] {
+    pub fn params(&self) -> &[ParamEntry] {
         self.body.params.as_ref()
     }
 }

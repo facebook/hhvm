@@ -46,12 +46,12 @@ pub fn run(func: &mut Func) -> bool {
 
     // Function params
     for idx in 0..func.params.len() {
-        if let Some(dv) = &func.params[idx].default_value {
+        if let (_, Some(dv)) = &func.params[idx] {
             if let Some(target) = forward_edge(func, dv.init, 1, &predecessors) {
                 changed = true;
                 predecessors[dv.init] -= 1;
                 predecessors[target] += 1;
-                func.params[idx].default_value.as_mut().unwrap().init = target;
+                func.params[idx].1.as_mut().unwrap().init = target;
             }
         }
     }
@@ -165,19 +165,21 @@ mod test {
     use ir_core::Param;
     use ir_core::TypeInfo;
 
-    fn mk_param(name: &str, dv: BlockId) -> Param {
-        Param {
-            name: ir_core::intern(name),
-            is_variadic: false,
-            is_inout: false,
-            is_readonly: false,
-            user_attributes: vec![],
-            ty: TypeInfo::default(),
-            default_value: Some(DefaultValue {
+    fn mk_param(name: &str, dv: BlockId) -> (Param, Option<DefaultValue>) {
+        (
+            Param {
+                name: ir_core::intern(name),
+                is_variadic: false,
+                is_inout: false,
+                is_readonly: false,
+                user_attributes: vec![],
+                ty: TypeInfo::default(),
+            },
+            Some(DefaultValue {
                 init: dv,
                 expr: b"1".to_vec(),
             }),
-        }
+        )
     }
 
     #[test]

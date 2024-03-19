@@ -110,6 +110,7 @@ pub use naming_special_names_rust::coeffects::Ctx;
 
 pub use self::block::Block;
 pub use self::class::Class;
+pub use self::func::DefaultValue;
 pub use self::func::ExFrameId;
 pub use self::func::Filename;
 pub use self::func::Func;

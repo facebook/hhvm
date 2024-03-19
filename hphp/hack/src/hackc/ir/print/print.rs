@@ -1779,14 +1779,17 @@ fn incdec_what(op: IncDecOp) -> (&'static str, &'static str) {
     }
 }
 
-pub(crate) fn print_param(w: &mut dyn Write, func: &Func, param: &Param) -> Result {
+pub(crate) fn print_param(
+    w: &mut dyn Write,
+    func: &Func,
+    (param, default_value): &(Param, Option<DefaultValue>),
+) -> Result {
     let Param {
         is_inout,
         is_readonly,
         is_variadic,
         ref ty,
         name,
-        ref default_value,
         ref user_attributes,
     } = *param;
 

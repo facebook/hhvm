@@ -49,8 +49,8 @@ fn compute_general_po(
 
     mark_block(&mut stack, &mut already_pushed, func, Func::ENTRY_BID);
 
-    for param in &func.params {
-        if let Some(dv) = param.default_value.as_ref() {
+    for (_, dv) in &func.params {
+        if let Some(dv) = dv {
             mark_block(&mut stack, &mut already_pushed, func, dv.init);
         }
     }

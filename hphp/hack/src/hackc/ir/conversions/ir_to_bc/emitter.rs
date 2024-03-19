@@ -162,8 +162,8 @@ impl Labeler {
 
 fn compute_block_entry_edges(func: &ir::Func) -> BlockIdMap<usize> {
     let mut edges = BlockIdMap::default();
-    for param in &func.params {
-        if let Some(dv) = param.default_value.as_ref() {
+    for (_, dv) in &func.params {
+        if let Some(dv) = dv {
             edges.entry(dv.init).and_modify(|e| *e += 1).or_insert(1);
         }
     }
@@ -224,7 +224,7 @@ impl<'b> InstrEmitter<'b> {
             .params
             .iter()
             .enumerate()
-            .map(|(_, param)| {
+            .map(|(_, (param, _))| {
                 let name = LocalId::Named(param.name);
                 let local = hhbc::Local::from_usize(next_local_idx);
                 next_local_idx += 1;

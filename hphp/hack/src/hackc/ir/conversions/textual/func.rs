@@ -139,7 +139,7 @@ fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) 
 }
 
 fn compute_func_params<'a, 'b>(
-    params: &Vec<ir::Param>,
+    params: &[(ir::Param, Option<ir::DefaultValue>)],
     this_ty: textual::Ty,
 ) -> Vec<(textual::Param<'b>, LocalId)> {
     let mut result = Vec::new();
@@ -153,7 +153,7 @@ fn compute_func_params<'a, 'b>(
     };
     result.push((this_param, this_lid));
 
-    for p in params {
+    for (p, _) in params {
         let mut attrs = None;
         if p.is_variadic {
             add_attr(&mut attrs, textual::VARIADIC);
@@ -198,7 +198,7 @@ pub(crate) fn lower_and_write_func(
         write_func(txf, this_ty, func, Arc::new(func_info))
     }
 
-    let has_defaults = func.params.iter().any(|p| p.default_value.is_some());
+    let has_defaults = func.params.iter().any(|(_, dv)| dv.is_some());
     if has_defaults {
         // When a function has defaults we need to split it into multiple
         // functions which each take a different number of parameters,
@@ -237,7 +237,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
     let min_params = orig_func
         .params
         .iter()
-        .take_while(|p| p.default_value.is_none())
+        .take_while(|(_, dv)| dv.is_none())
         .count();
     if min_params == max_params {
         return None;
@@ -245,7 +245,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
     let has_reified = orig_func.is_reified();
     let mut variadic_idx = None;
-    if orig_func.params[max_params - 1].is_variadic {
+    if orig_func.params[max_params - 1].0.is_variadic {
         max_params -= 1;
         variadic_idx = Some(max_params);
     }
@@ -257,13 +257,10 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             arguments: vec![].into(),
         });
 
-        let target_bid = func.params[param_count]
-            .default_value
-            .as_ref()
-            .map(|dv| dv.init);
+        let target_bid = func.params[param_count].1.as_ref().map(|dv| dv.init);
         func.params.truncate(param_count);
         for i in min_params..param_count {
-            func.params[i].default_value = None;
+            func.params[i].1 = None;
         }
 
         // replace the entrypoint with a jump to the initializer.
@@ -275,7 +272,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
                 let new_vec = func.alloc_imm(Immediate::Array(Arc::new(ir::TypedValue::Vec(
                     vec![].into(),
                 ))));
-                let lid = LocalId::Named(orig_func.params[variadic_idx].name);
+                let lid = LocalId::Named(orig_func.params[variadic_idx].0.name);
                 let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);
             }
@@ -292,7 +289,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
         let exit_bid = {
             let mut block = ir::Block::default();
             let mut params = Vec::new();
-            for param in &orig_func.params {
+            for (param, _) in &orig_func.params {
                 let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
                 let iid = func.alloc_instr(instr);
                 block.iids.push(iid);

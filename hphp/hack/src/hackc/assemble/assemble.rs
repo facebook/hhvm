@@ -19,6 +19,7 @@ use ffi::Vector;
 use hhbc::BytesId;
 use hhbc::ClassName;
 use hhbc::ModuleName;
+use hhbc::ParamEntry;
 use hhbc::StringId;
 use hhbc::StringIdMap;
 use hhvm_types_ffi::Attr;
@@ -1274,7 +1275,7 @@ fn assemble_type_constraint(
 }
 
 /// ((a, )*a) | () where a is a param
-fn assemble_params(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<Vec<hhbc::Param>> {
+fn assemble_params(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<Vec<ParamEntry>> {
     token_iter.expect(Token::is_open_paren)?;
     let mut params = Vec::new();
     while !token_iter.peek_is(Token::is_close_paren) {
@@ -1288,7 +1289,7 @@ fn assemble_params(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result
 }
 
 /// a: [user_attributes]? inout? readonly? ...?<type_info>?name (= default_value)?
-fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<hhbc::Param> {
+fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<ParamEntry> {
     let mut ua_vec = Vec::new();
     if token_iter.peek_is(Token::is_open_bracket) {
         token_iter.expect(Token::is_open_bracket)?;
@@ -1304,16 +1305,16 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let name = token_iter.expect_with(Token::into_variable)?;
     let name = hhbc::intern(std::str::from_utf8(name)?);
     decl_map.insert(name, decl_map.len() as u32);
-    let default_value = assemble_default_value(token_iter)?;
-    Ok(hhbc::Param {
+    let dv = assemble_default_value(token_iter)?;
+    let param = hhbc::Param {
         name,
         is_variadic,
         is_inout,
         is_readonly,
         user_attributes: ua_vec.into(),
         type_info,
-        default_value,
-    })
+    };
+    Ok(ParamEntry { param, dv })
 }
 
 /// Ex: $skip_top_libcore = DV13("""true""")
@@ -1335,7 +1336,7 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
 fn assemble_body(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
-    params: Vec<hhbc::Param>,
+    params: Vec<ParamEntry>,
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<StringId>,
     upper_bounds: Vec<hhbc::UpperBound>,

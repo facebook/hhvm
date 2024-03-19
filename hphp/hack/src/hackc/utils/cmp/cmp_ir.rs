@@ -1250,7 +1250,10 @@ fn cmp_module(a: &Module, b: &Module) -> Result {
     Ok(())
 }
 
-fn cmp_param(a: &Param, b: &Param) -> Result {
+fn cmp_param(
+    (a, a_dv): &(Param, Option<DefaultValue>),
+    (b, b_dv): &(Param, Option<DefaultValue>),
+) -> Result {
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,
@@ -1258,7 +1261,6 @@ fn cmp_param(a: &Param, b: &Param) -> Result {
         is_readonly: a_is_readonly,
         user_attributes: a_user_attributes,
         ty: a_ty,
-        default_value: a_default_value,
     } = a;
     let Param {
         name: b_name,
@@ -1267,7 +1269,6 @@ fn cmp_param(a: &Param, b: &Param) -> Result {
         is_readonly: b_is_readonly,
         user_attributes: b_user_attributes,
         ty: b_ty,
-        default_value: b_default_value,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
@@ -1276,12 +1277,7 @@ fn cmp_param(a: &Param, b: &Param) -> Result {
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_type_info(a_ty, b_ty).qualified("ty")?;
-    cmp_option(
-        a_default_value.as_ref(),
-        b_default_value.as_ref(),
-        cmp_default_value,
-    )
-    .qualified("default_value")?;
+    cmp_option(a_dv.as_ref(), b_dv.as_ref(), cmp_default_value).qualified("default_value")?;
     Ok(())
 }
 

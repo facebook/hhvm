@@ -23,7 +23,6 @@ pub struct Param {
     pub is_readonly: bool,
     pub user_attributes: Vector<Attribute>,
     pub type_info: Maybe<TypeInfo>,
-    pub default_value: Maybe<DefaultValue>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -34,12 +33,6 @@ pub struct DefaultValue {
 }
 
 impl Param {
-    pub fn replace_default_value_label(&mut self, new_label: Label) {
-        if let Just(dv) = self.default_value.as_mut() {
-            dv.label = new_label;
-        }
-    }
-
     pub fn clear_type(&mut self) {
         if let Just(ti) = self.type_info.as_mut() {
             ti.type_constraint = Constraint::default()

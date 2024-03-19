@@ -423,7 +423,6 @@ fn emit_reified_init_method<'a, 'd>(
             is_readonly: false,
             user_attributes: Default::default(),
             type_info: Just(TypeInfo::new(Just(hhbc::intern("HH\\varray")), tc)),
-            default_value: Nothing,
         }];
 
         let body_instrs =
@@ -665,7 +664,6 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
             is_readonly: false,
             user_attributes: Default::default(),
             type_info: Nothing, // string?
-            default_value: Nothing,
         }];
         let default_label = emitter.label_gen_mut().next_regular();
         let mut cases = Vec::with_capacity(initialized_constants.len() + 1);

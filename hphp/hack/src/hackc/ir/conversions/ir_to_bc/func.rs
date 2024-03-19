@@ -5,6 +5,7 @@
 
 use hhbc::AdataState;
 use hhbc::Method;
+use hhbc::ParamEntry;
 use log::trace;
 
 use crate::convert::UnitBuilder;
@@ -53,27 +54,24 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let return_type_info = crate::types::convert(&func.return_type);
 
-    let params = Vec::from_iter(func.params.into_iter().map(|param| {
+    let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {
         let name = param.name;
         let user_attributes = param.user_attributes.into();
-        let default_value = param
-            .default_value
-            .map(|dv| {
-                let label = labeler.lookup_bid(dv.init);
-                hhbc::DefaultValue {
-                    label,
+        ParamEntry {
+            dv: dv
+                .map(|dv| hhbc::DefaultValue {
+                    label: labeler.lookup_bid(dv.init),
                     expr: dv.expr.into(),
-                }
-            })
-            .into();
-        hhbc::Param {
-            name,
-            is_variadic: param.is_variadic,
-            is_inout: param.is_inout,
-            is_readonly: param.is_readonly,
-            user_attributes,
-            type_info: crate::types::convert(&param.ty),
-            default_value,
+                })
+                .into(),
+            param: hhbc::Param {
+                name,
+                is_variadic: param.is_variadic,
+                is_inout: param.is_inout,
+                is_readonly: param.is_readonly,
+                user_attributes,
+                type_info: crate::types::convert(&param.ty),
+            },
         }
     }));
 
@@ -84,7 +82,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
         Vec::from_iter(func.shadowed_tparams.iter().map(|name| name.as_string_id()));
 
     let body_instrs = body_instrs.to_vec();
-    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs).unwrap();
+    let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs).unwrap();
 
     hhbc::Body {
         body_instrs: body_instrs.into(),

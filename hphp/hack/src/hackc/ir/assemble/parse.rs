@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use ir_core::func::DefaultValue;
 use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
 use ir_core::Attribute;
@@ -19,6 +18,7 @@ use ir_core::CollectionType;
 use ir_core::ConstName;
 use ir_core::Constant;
 use ir_core::Constraint;
+use ir_core::DefaultValue;
 use ir_core::DictEntry;
 use ir_core::FatalOp;
 use ir_core::FloatBits;
@@ -526,7 +526,7 @@ where
     Ok(None)
 }
 
-pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<Param> {
+pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Option<DefaultValue>)> {
     parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <user_attributes:parse_attributes("[")> <ty:parse_type_info>);
 
     let is_variadic = tokenizer.next_is_identifier("...")?;
@@ -540,15 +540,15 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<Param> {
         None
     };
 
-    Ok(Param {
+    let param = Param {
         name,
         ty,
         is_variadic,
         is_inout: inout.is_some(),
         is_readonly: readonly.is_some(),
         user_attributes,
-        default_value,
-    })
+    };
+    Ok((param, default_value))
 }
 
 pub(crate) fn parse_prop_id(tokenizer: &mut Tokenizer<'_>) -> Result<PropName> {

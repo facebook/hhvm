@@ -7,7 +7,7 @@ use ffi::Maybe;
 use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
-use hhbc::Param;
+use hhbc::ParamEntry;
 use ir::func::DefaultValue;
 use ir::instr::Terminator;
 use ir::CcReified;
@@ -130,10 +130,10 @@ fn convert_body<'a>(
 
     let mut ctx = Context::new(func, body_instrs, unit_state);
 
-    for param in params.as_ref() {
-        let ir_param = convert_param(&mut ctx, param);
+    for e in params.as_ref() {
+        let ir_param = convert_param(&mut ctx, e);
         ctx.builder.func.params.push(ir_param);
-        if let ffi::Just(dv) = param.default_value.as_ref() {
+        if let ffi::Just(dv) = e.dv.as_ref() {
             // This default value will jump to a different start than the
             // Func::ENTRY_BID.
             let addr = ctx.label_to_addr[&dv.label];
@@ -184,8 +184,11 @@ fn convert_body<'a>(
     func
 }
 
-fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
-    let default_value = match &param.default_value {
+fn convert_param(
+    ctx: &mut Context<'_>,
+    ParamEntry { param, dv }: &ParamEntry,
+) -> (ir::Param, Option<ir::DefaultValue>) {
+    let default_value = match dv {
         Maybe::Just(dv) => {
             let init = ctx.target_from_label(dv.label, 0);
             Some(DefaultValue {
@@ -199,15 +202,15 @@ fn convert_param(ctx: &mut Context<'_>, param: &Param) -> ir::Param {
     let name = param.name;
     ctx.named_local_lookup.push(LocalId::Named(name));
     let user_attributes = param.user_attributes.clone().into();
-    ir::Param {
-        default_value,
+    let param = ir::Param {
         name,
         is_variadic: param.is_variadic,
         is_inout: param.is_inout,
         is_readonly: param.is_readonly,
         ty: types::convert_maybe_type(param.type_info.as_ref()),
         user_attributes,
-    }
+    };
+    (param, default_value)
 }
 
 fn convert_coeffects(coeffects: &hhbc::Coeffects) -> ir::Coeffects {

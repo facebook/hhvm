@@ -15,6 +15,7 @@ use hhbc::Method;
 use hhbc::Module;
 use hhbc::Opcode;
 use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::Property;
 use hhbc::Rule;
 use hhbc::StringId;
@@ -334,24 +335,30 @@ fn cmp_instr(a: &Instruct, b: &Instruct) -> Result {
     )
 }
 
-fn cmp_param(a: &Param, b: &Param) -> Result {
-    let Param {
-        name: a_name,
-        is_variadic: a_is_variadic,
-        is_inout: a_is_inout,
-        is_readonly: a_is_readonly,
-        user_attributes: a_user_attributes,
-        type_info: a_type_info,
-        default_value: a_default_value,
+fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
+    let ParamEntry {
+        param:
+            Param {
+                name: a_name,
+                is_variadic: a_is_variadic,
+                is_inout: a_is_inout,
+                is_readonly: a_is_readonly,
+                user_attributes: a_user_attributes,
+                type_info: a_type_info,
+            },
+        dv: a_dv,
     } = a;
-    let Param {
-        name: b_name,
-        is_variadic: b_is_variadic,
-        is_inout: b_is_inout,
-        is_readonly: b_is_readonly,
-        user_attributes: b_user_attributes,
-        type_info: b_type_info,
-        default_value: b_default_value,
+    let ParamEntry {
+        param:
+            Param {
+                name: b_name,
+                is_variadic: b_is_variadic,
+                is_inout: b_is_inout,
+                is_readonly: b_is_readonly,
+                user_attributes: b_user_attributes,
+                type_info: b_type_info,
+            },
+        dv: b_dv,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
@@ -362,8 +369,8 @@ fn cmp_param(a: &Param, b: &Param) -> Result {
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_eq(a_type_info, b_type_info).qualified("type_info")?;
     cmp_option(
-        a_default_value.as_ref().into_option(),
-        b_default_value.as_ref().into_option(),
+        a_dv.as_ref().into_option(),
+        b_dv.as_ref().into_option(),
         |a, b| cmp_eq(&a.expr, &b.expr),
     )
     .qualified("default_value")?;

@@ -8,6 +8,7 @@ use hash::HashMap;
 use hash::HashSet;
 use hhbc::AdataId;
 use hhbc::Local;
+use hhbc::ParamEntry;
 use hhbc::TypedValue;
 use log::trace;
 
@@ -35,7 +36,7 @@ impl<'a> WorkQueue<'a> {
         let mut b_state = State::new(b, "B", b_adata);
 
         // Also need to handle entrypoints for defaults!
-        for (idx, (param_a, param_b)) in a
+        for (idx, (ParamEntry { dv: dv_a, .. }, ParamEntry { dv: dv_b, .. })) in a
             .hhbc_body
             .params
             .iter()
@@ -49,7 +50,7 @@ impl<'a> WorkQueue<'a> {
             a_state.local_set(&local, value);
             b_state.local_set(&local, value);
 
-            match (&param_a.default_value, &param_b.default_value) {
+            match (dv_a, dv_b) {
                 (Maybe::Just(a), Maybe::Just(b)) => {
                     // The text should have already been compared.
                     let a_state = a_state.clone_with_jmp(&a.label);

@@ -57,20 +57,18 @@ pub struct Param {
     pub is_readonly: bool,
     pub user_attributes: Vec<Attribute>,
     pub ty: TypeInfo,
-    /// This is the BlockId which is the entrypoint for where initialization of
-    /// this param begins.  The string is the code string which was used to
-    /// compile the initialization value (for reflection).
-    ///
-    /// For example, for the function:
-    ///   function myfn(int $a = 2 + 3)
-    ///
-    /// The block will initialize `$a` to 5 and the string will be "2 + 3".
-    pub default_value: Option<DefaultValue>,
 }
 
+/// DefaultValue encodes the offset of a DV initializer and the source text
+/// of the initializer expression. For example, for the function:
+///
+///   function myfn(int $a = 2 + 3)
+///
+/// The `init` block will initialize `$a` to 5 and `expr` will be "2 + 3".
 #[derive(Clone, Debug)]
 pub struct DefaultValue {
-    /// What block to jump to to initialize this default value
+    /// This is the BlockId which is the entrypoint for where initialization of
+    /// this param begins.
     pub init: BlockId,
 
     /// Source text for the default value initializer expression (for reflection).
@@ -177,7 +175,7 @@ pub struct Func {
     pub imms: IdVec<ImmId, Immediate>,
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
-    pub params: Vec<Param>,
+    pub params: Vec<(Param, Option<DefaultValue>)>,
     pub return_type: TypeInfo,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
@@ -305,7 +303,9 @@ impl Func {
 
     pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param> {
         match lid {
-            LocalId::Named(name) => self.params.iter().find(|p| p.name == name),
+            LocalId::Named(name) => {
+                (self.params.iter()).find_map(|(p, _)| if p.name == name { Some(p) } else { None })
+            }
             LocalId::Unnamed(_) => None,
         }
     }
@@ -380,8 +380,8 @@ impl Func {
     /// themselves (so a remapping with b1 -> b2 won't remap block b1 to b2,
     /// just references to b1 will be remapped to b2).
     pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
-        for param in &mut self.params {
-            if let Some(dv) = param.default_value.as_mut() {
+        for (_, dv) in &mut self.params {
+            if let Some(dv) = dv.as_mut() {
                 dv.init = remap.get(&dv.init).copied().unwrap_or(dv.init);
             }
         }

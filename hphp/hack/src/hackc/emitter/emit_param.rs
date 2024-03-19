@@ -12,10 +12,10 @@ use env::Env;
 use error::Error;
 use error::Result;
 use ffi::Maybe;
-use ffi::Nothing;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::StringIdMap;
 use hhbc::StringIdSet;
 use hhbc::TypeInfo;
@@ -35,8 +35,8 @@ use oxidized::pos::Pos;
 use crate::emit_attribute;
 use crate::emit_expression;
 
-pub fn has_variadic(params: &[Param]) -> bool {
-    params.iter().any(|v| v.is_variadic)
+pub fn has_variadic(params: &[ParamEntry]) -> bool {
+    params.iter().rev().any(|p| p.param.is_variadic)
 }
 
 pub fn from_asts<'a, 'd>(
@@ -165,10 +165,6 @@ fn from_ast<'a, 'd>(
             is_readonly,
             user_attributes: attrs.into(),
             type_info: Maybe::from(type_info),
-            // - Write hhas_param.default_value as `Nothing` while keeping `default_value` around
-            //   for emitting decl vars and default value setters
-            // - emit_body::make_body will rewrite hhas_param.default_value using `default_value`
-            default_value: Nothing,
         },
         default_value,
     )))

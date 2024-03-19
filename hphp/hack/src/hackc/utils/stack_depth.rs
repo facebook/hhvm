@@ -5,12 +5,12 @@
 
 use std::collections::VecDeque;
 
-use ffi::Just;
+use ffi::Maybe::Just;
 use hhbc::DefaultValue;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Opcode;
-use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::Pseudo;
 use hhbc::Targets;
 use hhbc_gen::InstrFlags;
@@ -26,7 +26,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// Given an hhbc::Body compute the maximum stack needed when executing that
 /// body. In general dead code will not be tracked however all catch blocks are
 /// assumed to start out live.
-pub fn compute_stack_depth(params: &[Param], body_instrs: &[Instruct]) -> Result<usize> {
+pub fn compute_stack_depth(params: &[ParamEntry], body_instrs: &[Instruct]) -> Result<usize> {
     let mut csd = ComputeStackDepth {
         body_instrs,
         labels: Default::default(),
@@ -87,7 +87,7 @@ struct ComputeStackDepth<'a> {
 }
 
 impl ComputeStackDepth<'_> {
-    fn run(&mut self, params: &[Param], body_instrs: &[Instruct]) -> Result<()> {
+    fn run(&mut self, params: &[ParamEntry], body_instrs: &[Instruct]) -> Result<()> {
         debug!("ComputeStackDepth::run");
         self.precompute(body_instrs);
 
@@ -95,8 +95,8 @@ impl ComputeStackDepth<'_> {
         self.work.push_back(PendingWork::new(Addr(0), 0));
 
         // A depth-0 entrypoint for each default value.
-        for param in params {
-            if let Just(DefaultValue { label, .. }) = param.default_value.as_ref() {
+        for ParamEntry { dv, param: _ } in params {
+            if let Just(DefaultValue { label, .. }) = dv.as_ref() {
                 let addr = self.labels[*label];
                 self.work.push_back(PendingWork::new(addr, 0));
             }

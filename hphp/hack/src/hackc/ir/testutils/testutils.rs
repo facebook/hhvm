@@ -248,11 +248,8 @@ fn cmp_func_struct_eq(func_a: &Func, func_b: &Func) -> Result<(), String> {
         func_b.params.len(),
         "param length mismatch",
     )?;
-    for (param_a, param_b) in func_a.params.iter().zip(func_b.params.iter()) {
-        match (
-            param_a.default_value.as_ref(),
-            param_b.default_value.as_ref(),
-        ) {
+    for ((_, dv_a), (_, dv_b)) in func_a.params.iter().zip(func_b.params.iter()) {
+        match (dv_a, dv_b) {
             (Some(dv_a), Some(dv_b)) => {
                 pending_cmp.push((dv_a.init, dv_b.init));
             }

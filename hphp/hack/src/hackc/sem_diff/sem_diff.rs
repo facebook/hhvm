@@ -16,6 +16,7 @@ use hhbc::Function;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::Rule;
 use hhbc::SymbolRefs;
 use hhbc::TypeConstant;
@@ -252,24 +253,30 @@ fn sem_diff_body<'a>(
     crate::body::compare_bodies(path, a, a_adata, b, b_adata)
 }
 
-fn sem_diff_param(path: &CodePath<'_>, a: &Param, b: &Param) -> Result<()> {
-    let Param {
-        name: a_name,
-        is_variadic: a_is_variadic,
-        is_inout: a_is_inout,
-        is_readonly: a_is_readonly,
-        user_attributes: a_user_attributes,
-        type_info: a_type_info,
-        default_value: a_default_value,
+fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result<()> {
+    let ParamEntry {
+        param:
+            Param {
+                name: a_name,
+                is_variadic: a_is_variadic,
+                is_inout: a_is_inout,
+                is_readonly: a_is_readonly,
+                user_attributes: a_user_attributes,
+                type_info: a_type_info,
+            },
+        dv: a_dv,
     } = a;
-    let Param {
-        name: b_name,
-        is_variadic: b_is_variadic,
-        is_inout: b_is_inout,
-        is_readonly: b_is_readonly,
-        user_attributes: b_user_attributes,
-        type_info: b_type_info,
-        default_value: b_default_value,
+    let ParamEntry {
+        param:
+            Param {
+                name: b_name,
+                is_variadic: b_is_variadic,
+                is_inout: b_is_inout,
+                is_readonly: b_is_readonly,
+                user_attributes: b_user_attributes,
+                type_info: b_type_info,
+            },
+        dv: b_dv,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
@@ -284,8 +291,8 @@ fn sem_diff_param(path: &CodePath<'_>, a: &Param, b: &Param) -> Result<()> {
     sem_diff_eq(&path.qualified("type_info"), a_type_info, b_type_info)?;
     sem_diff_option(
         &path.qualified("default_value"),
-        a_default_value.as_ref().into_option(),
-        b_default_value.as_ref().into_option(),
+        a_dv.as_ref().into_option(),
+        b_dv.as_ref().into_option(),
         |path, a, b| sem_diff_eq(path, &a.expr, &b.expr),
     )?;
 

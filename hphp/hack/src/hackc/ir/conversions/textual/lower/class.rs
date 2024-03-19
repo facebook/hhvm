@@ -230,15 +230,15 @@ fn create_default_closure_constructor(class: &mut Class) {
         // '$this' parameter is implied.
 
         for prop in &class.properties {
-            fb.func.params.push(Param {
+            let param = Param {
                 name: prop.name.as_string_id(),
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
                 user_attributes: Vec::new(),
                 ty: prop.type_info.clone(),
-                default_value: None,
-            });
+            };
+            fb.func.params.push((param, None));
 
             let lid = LocalId::Named(prop.name.as_string_id());
             let value = fb.emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, loc)));

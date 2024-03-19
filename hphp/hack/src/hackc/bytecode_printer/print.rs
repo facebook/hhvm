@@ -38,6 +38,7 @@ use hhbc::MethodFlags;
 use hhbc::Module;
 use hhbc::ModuleName;
 use hhbc::Param;
+use hhbc::ParamEntry;
 use hhbc::Property;
 use hhbc::Pseudo;
 use hhbc::Requirement;
@@ -829,7 +830,7 @@ fn print_body(
     let local_names: Vec<_> = body
         .params
         .iter()
-        .map(|param| param.name)
+        .map(|e| e.param.name)
         .chain(body.decl_vars.iter().copied())
         .collect();
     print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names)
@@ -952,10 +953,10 @@ fn print_instr<'a, 'b>(
 
 /// Build a set containing the labels for param default-value initializers
 /// so they can be formatted as `DV123` instead of `L123`.
-fn find_dv_labels(params: &[Param]) -> HashSet<Label> {
+fn find_dv_labels(params: &[ParamEntry]) -> HashSet<Label> {
     params
         .iter()
-        .filter_map(|param| match &param.default_value {
+        .filter_map(|e| match &e.dv {
             Just(dv) => Some(dv.label),
             _ => None,
         })
@@ -965,7 +966,7 @@ fn find_dv_labels(params: &[Param]) -> HashSet<Label> {
 fn print_params(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    params: &[Param],
+    params: &[ParamEntry],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
@@ -976,7 +977,7 @@ fn print_params(
 fn print_param(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    param: &Param,
+    ParamEntry { param, dv }: &ParamEntry,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
@@ -988,7 +989,7 @@ fn print_param(
         w.write_all(b" ")
     })?;
     w.write_all(param.name.as_str().as_bytes())?;
-    option(w, param.default_value.as_ref(), |w, dv: &DefaultValue| {
+    option(w, dv.as_ref(), |w, dv: &DefaultValue| {
         print_param_default_value(w, dv.label, &dv.expr, dv_labels)
     })
 }

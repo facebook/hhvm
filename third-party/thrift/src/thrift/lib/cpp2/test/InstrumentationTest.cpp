@@ -990,23 +990,27 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
   }
 
   class MockRequest : public ResponseChannelRequest {
+    std::unique_ptr<server::ServerConfigsMock> serverConfigs =
+        std::make_unique<server::ServerConfigsMock>();
+
     Cpp2ConnContext mockConnCtx_;
     Cpp2RequestContext mockReqCtx_{&mockConnCtx_};
 
     // mock ResponseChannelRequest so that it keeps registry alive.
     std::shared_ptr<RequestsRegistry> registry_;
+    RequestStateMachine stateMachine_;
 
    public:
     MockRequest(
         RequestsRegistry::DebugStub* stub,
         std::shared_ptr<RequestsRegistry> registry)
-        : registry_(registry),
+        : registry_(std::move(registry)),
           stateMachine_(
               true,
-              serverConfigs.getAdaptiveConcurrencyController(),
-              serverConfigs.getCPUConcurrencyController()) {
+              serverConfigs->getAdaptiveConcurrencyController(),
+              serverConfigs->getCPUConcurrencyController()) {
       new (stub) RequestsRegistry::DebugStub(
-          *registry,
+          *registry_,
           *this,
           mockReqCtx_,
           std::make_shared<folly::RequestContext>(0),
@@ -1038,10 +1042,6 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
         sendErrorWrapped,
         (folly::exception_wrapper, std::string),
         (override));
-
-   private:
-    server::ServerConfigsMock serverConfigs;
-    RequestStateMachine stateMachine_;
   };
 };
 

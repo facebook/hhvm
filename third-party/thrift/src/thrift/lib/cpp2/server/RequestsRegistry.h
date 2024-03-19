@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/util/AllocationColocator.h>
 
 namespace apache {
 namespace thrift {
@@ -259,14 +260,30 @@ class RequestsRegistry {
     DebugStub* stub_;
   };
 
-  template <typename T, typename... Args>
-  static std::unique_ptr<T, Deleter> makeRequest(Args&&... args) {
-    static_assert(std::is_base_of<ResponseChannelRequest, T>::value, "");
-    auto offset = sizeof(std::aligned_storage_t<sizeof(DebugStub), alignof(T)>);
-    DebugStub* pStub = reinterpret_cast<DebugStub*>(malloc(offset + sizeof(T)));
-    T* pT = reinterpret_cast<T*>(reinterpret_cast<char*>(pStub) + offset);
-    new (pT) T(pStub, std::forward<Args>(args)...);
-    return std::unique_ptr<T, Deleter>(pT, pStub);
+  template <typename TRequest, typename... Args>
+  static std::unique_ptr<TRequest, Deleter> makeRequest(Args&&... args) {
+    static_assert(std::is_base_of_v<ResponseChannelRequest, TRequest>);
+
+    using Alloc = util::AllocationColocator<void>;
+    Alloc alloc;
+    Alloc::Ptr mem = alloc.allocate([&,
+                                     stub = alloc.object<DebugStub>(),
+                                     request = alloc.object<TRequest>()](
+                                        auto make) mutable {
+      auto* pStub =
+          reinterpret_cast<DebugStub*>(make.uninitialized(std::move(stub)));
+      make(std::move(request), pStub, std::forward<Args>(args)...).release();
+    });
+
+    auto cursor = Alloc::unsafeCursor(mem);
+    auto* pStub = cursor.object<DebugStub>();
+    auto* pTRequest = cursor.object<TRequest>();
+
+    // DebugStub forms an intrusive list and manages its own lifetime via
+    // ref-counting. See DebugStub::decRef().
+    // @lint-ignore CLANGTIDY facebook-hte-UnassignedReleasedUniquePointer
+    mem.release();
+    return std::unique_ptr<TRequest, Deleter>(pTRequest, pStub);
   }
 
   intptr_t genRootId();

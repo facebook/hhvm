@@ -261,7 +261,7 @@ void RequestsRegistry::DebugStub::incRef() noexcept {
 void RequestsRegistry::DebugStub::decRef() noexcept {
   if (--refCount_ == 0) {
     this->~DebugStub();
-    free(this);
+    util::AllocationColocator<void>::Deleter()(this);
   }
 }
 

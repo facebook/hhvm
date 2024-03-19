@@ -99,13 +99,13 @@ fn add_reified_parameter(func: &mut Func) {
         is_inout: false,
         is_readonly: false,
         user_attributes: Default::default(),
-        ty: ir::TypeInfo {
+        type_info: ir::Maybe::Just(ir::TypeInfo {
             user_type: None.into(),
             type_constraint: ir::Constraint {
                 name: Some(ir::intern(hhbc::BUILTIN_NAME_VEC)).into(),
                 flags: ir::TypeConstraintFlags::NoFlags,
             },
-        },
+        }),
     };
     func.params.push((param, None));
 }
@@ -120,8 +120,8 @@ fn add_self_trait_parameter(func: &mut Func) {
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
-            user_attributes: vec![],
-            ty: ir::TypeInfo::empty(),
+            user_attributes: vec![].into(),
+            type_info: ir::Maybe::Nothing,
         },
         None,
     ));

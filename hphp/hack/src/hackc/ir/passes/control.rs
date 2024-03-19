@@ -162,8 +162,8 @@ mod test {
     use ir_core::BlockId;
     use ir_core::Instr;
     use ir_core::InstrId;
+    use ir_core::Maybe;
     use ir_core::Param;
-    use ir_core::TypeInfo;
 
     fn mk_param(name: &str, dv: BlockId) -> (Param, Option<DefaultValue>) {
         (
@@ -172,8 +172,8 @@ mod test {
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
-                user_attributes: vec![],
-                ty: TypeInfo::default(),
+                user_attributes: vec![].into(),
+                type_info: Maybe::Nothing,
             },
             Some(DefaultValue {
                 init: dv,

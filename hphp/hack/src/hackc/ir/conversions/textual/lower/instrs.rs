@@ -452,7 +452,7 @@ impl LowerInstrs<'_> {
             .func
             .get_param_by_lid(lid)
             .expect("Unknown parameter in verify_out_type()");
-        let param_type = ir::EnforceableType::from_type_info(&param.ty);
+        let param_type = ir::EnforceableType::from_type_info(&param.ty());
         let pred = builder.emit_is(obj, &param_type, loc);
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
         Instr::copy(obj)

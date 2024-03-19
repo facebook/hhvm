@@ -1260,7 +1260,7 @@ fn cmp_param(
         is_inout: a_is_inout,
         is_readonly: a_is_readonly,
         user_attributes: a_user_attributes,
-        ty: a_ty,
+        type_info: a_type_info,
     } = a;
     let Param {
         name: b_name,
@@ -1268,7 +1268,7 @@ fn cmp_param(
         is_inout: b_is_inout,
         is_readonly: b_is_readonly,
         user_attributes: b_user_attributes,
-        ty: b_ty,
+        type_info: b_type_info,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
@@ -1276,7 +1276,12 @@ fn cmp_param(
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
-    cmp_type_info(a_ty, b_ty).qualified("ty")?;
+    cmp_option(
+        a_type_info.as_ref().into(),
+        b_type_info.as_ref().into(),
+        cmp_type_info,
+    )
+    .qualified("type_info")?;
     cmp_option(a_dv.as_ref(), b_dv.as_ref(), cmp_default_value).qualified("default_value")?;
     Ok(())
 }

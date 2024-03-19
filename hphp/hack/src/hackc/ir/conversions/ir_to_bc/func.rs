@@ -55,23 +55,14 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let return_type_info = crate::types::convert(&func.return_type);
 
     let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {
-        let name = param.name;
-        let user_attributes = param.user_attributes.into();
         ParamEntry {
+            param,
             dv: dv
                 .map(|dv| hhbc::DefaultValue {
                     label: labeler.lookup_bid(dv.init),
                     expr: dv.expr.into(),
                 })
                 .into(),
-            param: hhbc::Param {
-                name,
-                is_variadic: param.is_variadic,
-                is_inout: param.is_inout,
-                is_readonly: param.is_readonly,
-                user_attributes,
-                type_info: crate::types::convert(&param.ty),
-            },
         }
     }));
 

@@ -42,4 +42,11 @@ impl Param {
     pub fn set_name(&mut self, name: &str) {
         self.name = crate::intern(name)
     }
+
+    pub fn ty(&self) -> TypeInfo {
+        match &self.type_info {
+            Maybe::Just(ty) => ty.clone(),
+            Maybe::Nothing => TypeInfo::empty(),
+        }
+    }
 }

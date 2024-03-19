@@ -31,6 +31,7 @@ use ir_core::InstrId;
 use ir_core::IsLogAsDynamicCallOp;
 use ir_core::IsTypeOp;
 use ir_core::MOpMode;
+use ir_core::Maybe;
 use ir_core::MethodName;
 use ir_core::ModuleName;
 use ir_core::OODeclExistsOp;
@@ -383,9 +384,9 @@ pub(crate) fn parse_hack_constant(tokenizer: &mut Tokenizer<'_>) -> Result<Const
     parse!(tokenizer, <attrs:parse_attr> <name:parse_const_name>);
 
     let value = if tokenizer.next_is_identifier("=")? {
-        ir_core::Maybe::Just(parse_typed_value(tokenizer)?)
+        Maybe::Just(parse_typed_value(tokenizer)?)
     } else {
-        ir_core::Maybe::Nothing
+        Maybe::Nothing
     };
 
     Ok(Constant { name, value, attrs })
@@ -542,11 +543,15 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Optio
 
     let param = Param {
         name,
-        ty,
+        type_info: if ty.is_empty() {
+            Maybe::Nothing
+        } else {
+            Maybe::Just(ty)
+        },
         is_variadic,
         is_inout: inout.is_some(),
         is_readonly: readonly.is_some(),
-        user_attributes,
+        user_attributes: user_attributes.into(),
     };
     Ok((param, default_value))
 }

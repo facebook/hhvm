@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Maybe;
 use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
@@ -188,29 +187,16 @@ fn convert_param(
     ctx: &mut Context<'_>,
     ParamEntry { param, dv }: &ParamEntry,
 ) -> (ir::Param, Option<ir::DefaultValue>) {
-    let default_value = match dv {
-        Maybe::Just(dv) => {
-            let init = ctx.target_from_label(dv.label, 0);
-            Some(DefaultValue {
-                init,
-                expr: dv.expr.to_vec(),
-            })
-        }
-        Maybe::Nothing => None,
-    };
+    let default_value = dv
+        .as_ref()
+        .map(|dv| DefaultValue {
+            init: ctx.target_from_label(dv.label, 0),
+            expr: dv.expr.to_vec(),
+        })
+        .into();
 
-    let name = param.name;
-    ctx.named_local_lookup.push(LocalId::Named(name));
-    let user_attributes = param.user_attributes.clone().into();
-    let param = ir::Param {
-        name,
-        is_variadic: param.is_variadic,
-        is_inout: param.is_inout,
-        is_readonly: param.is_readonly,
-        ty: types::convert_maybe_type(param.type_info.as_ref()),
-        user_attributes,
-    };
-    (param, default_value)
+    ctx.named_local_lookup.push(LocalId::Named(param.name));
+    (param.clone(), default_value)
 }
 
 fn convert_coeffects(coeffects: &hhbc::Coeffects) -> ir::Coeffects {

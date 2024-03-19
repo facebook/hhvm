@@ -158,7 +158,7 @@ fn compute_func_params<'a, 'b>(
         if p.is_variadic {
             add_attr(&mut attrs, textual::VARIADIC);
         }
-        let ty = compute_func_ty(&mut attrs, &p.ty);
+        let ty = compute_func_ty(&mut attrs, &p.ty());
         let lid = LocalId::Named(p.name);
         let param = textual::Param {
             name: VarName::Local(lid),

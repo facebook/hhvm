@@ -27,8 +27,8 @@ use crate::LocId;
 use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
+use crate::Param;
 use crate::SrcLoc;
-use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
 use crate::ValueId;
@@ -46,17 +46,6 @@ impl Default for Filename {
 
 impl Filename {
     pub const NONE: Filename = Filename(BytesId::EMPTY);
-}
-
-/// Func parameters.
-#[derive(Clone, Debug)]
-pub struct Param {
-    pub name: StringId,
-    pub is_variadic: bool,
-    pub is_inout: bool,
-    pub is_readonly: bool,
-    pub user_attributes: Vec<Attribute>,
-    pub ty: TypeInfo,
 }
 
 /// DefaultValue encodes the offset of a DV initializer and the source text

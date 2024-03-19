@@ -1784,11 +1784,12 @@ pub(crate) fn print_param(
     func: &Func,
     (param, default_value): &(Param, Option<DefaultValue>),
 ) -> Result {
+    let ty = param.ty();
     let Param {
         is_inout,
         is_readonly,
         is_variadic,
-        ref ty,
+        type_info: _,
         name,
         ref user_attributes,
     } = *param;
@@ -1812,7 +1813,7 @@ pub(crate) fn print_param(
     write!(
         w,
         "{} {}{}",
-        FmtTypeInfo(ty),
+        FmtTypeInfo(&ty),
         ellipsis_for_variadic,
         FmtIdentifierId(name.as_bytes())
     )?;

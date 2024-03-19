@@ -235,8 +235,8 @@ fn create_default_closure_constructor(class: &mut Class) {
                 is_variadic: false,
                 is_inout: false,
                 is_readonly: false,
-                user_attributes: Vec::new(),
-                ty: prop.type_info.clone(),
+                user_attributes: vec![].into(),
+                type_info: ir::Maybe::Just(prop.type_info.clone()),
             };
             fb.func.params.push((param, None));
 

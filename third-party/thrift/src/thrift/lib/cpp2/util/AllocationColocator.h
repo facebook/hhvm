@@ -143,6 +143,20 @@
  * Ideally, the cursor API should be avoided, especially when used with
  * non-trivial types.
  *
+ * If a "root" object is not desirable, then `AllocationColocator<void>` can be
+ * used instead. Note that this is inherently unsafe because accessing the
+ * colocated objects must happen via the cursor API.
+ *
+ *   AllocationColocator<void> alloc;
+ *   auto ptr = alloc.allocate(
+ *       [&, i = alloc.object<int>(), s = alloc.string(2)](auto make) mutable {
+ *         make(std::move(i), 42);
+ *         make(std::move(s), "hi");
+ *       });
+ *   auto cursor = AllocationColocator<void>::unsafeCursor(ptr.get());
+ *   EXPECT_EQ(cursor.object<int>(), 42);
+ *   EXPECT_EQ(cursor.string(2), "hi");
+ *
  * A few important details to keep in mind when using this API:
  *   - The reservation methods reserve space in the order in which they are
  *     called.
@@ -224,16 +238,35 @@ class UnsafeCursorBase {
   MaybeConstByte* buffer_;
 };
 
+template <typename T>
+constexpr std::size_t sizeof_voidIs0() {
+  if constexpr (std::is_void_v<T>) {
+    return 0;
+  } else {
+    return sizeof(T);
+  }
+}
+
+template <typename T>
+constexpr std::size_t alignof_voidIs0() {
+  if constexpr (std::is_void_v<T>) {
+    return 0;
+  } else {
+    return alignof(T);
+  }
+}
+
 // For testing access only
 class AllocationColocatorInternals;
 
 } // namespace detail
 
-template <typename Root = void>
+template <typename Root = detail::AllocationColocatorInternals>
 class AllocationColocator;
 
+// This class contains common types shared across all AllocationColocator<T>
 template <>
-class AllocationColocator<void> {
+class AllocationColocator<detail::AllocationColocatorInternals> {
  public:
   template <typename T>
   struct ObjectLocator : public detail::LocatorBase {
@@ -483,7 +516,9 @@ class AllocationColocator {
   struct Deleter {
     void operator()(Root* pointer) const {
       if (pointer) {
-        pointer->~Root();
+        if constexpr (!std::is_void_v<Root>) {
+          pointer->~Root();
+        }
         delete[] reinterpret_cast<std::byte*>(pointer);
       }
     }
@@ -491,7 +526,29 @@ class AllocationColocator {
   using Ptr = std::unique_ptr<Root, Deleter>;
   static_assert(sizeof(Ptr) == sizeof(Root*));
 
-  template <typename F>
+  template <
+      typename F,
+      typename TRoot = Root,
+      std::enable_if_t<std::is_void_v<TRoot>, int> = 0>
+  Ptr allocate(F&& build) const {
+    auto buffer = new std::byte[bytes_];
+    FOLLY_SAFE_DCHECK(
+        (std::uintptr_t(buffer) % __STDCPP_DEFAULT_NEW_ALIGNMENT__) == 0,
+        "Allocated buffer is under-aligned");
+
+    try {
+      build(Builder(buffer));
+      return Ptr(reinterpret_cast<void*>(buffer), Deleter());
+    } catch (...) {
+      delete[] buffer;
+      throw;
+    }
+  }
+
+  template <
+      typename F,
+      typename TRoot = Root,
+      std::enable_if_t<!std::is_void_v<TRoot>, int> = 0>
   Ptr allocate(F&& build) const {
     auto buffer = new std::byte[bytes_];
     FOLLY_SAFE_DCHECK(
@@ -508,12 +565,14 @@ class AllocationColocator {
   }
 
   static AllocationColocator<>::UnsafeCursor unsafeCursor(Root* root) {
-    auto colocationBegin = reinterpret_cast<std::byte*>(root + 1);
+    auto colocationBegin =
+        reinterpret_cast<std::byte*>(root) + detail::sizeof_voidIs0<Root>();
     return AllocationColocator<>::UnsafeCursor(colocationBegin);
   }
   static AllocationColocator<>::ConstUnsafeCursor unsafeCursor(
       const Root* root) {
-    auto colocationBegin = reinterpret_cast<const std::byte*>(root + 1);
+    auto colocationBegin = reinterpret_cast<const std::byte*>(root) +
+        detail::sizeof_voidIs0<Root>();
     return AllocationColocator<>::ConstUnsafeCursor(colocationBegin);
   }
   static AllocationColocator<>::UnsafeCursor unsafeCursor(const Ptr& root) {
@@ -521,7 +580,7 @@ class AllocationColocator {
   }
 
  private:
-  std::size_t bytes_ = sizeof(Root);
+  std::size_t bytes_ = detail::sizeof_voidIs0<Root>();
 
   friend class detail::AllocationColocatorInternals;
 };

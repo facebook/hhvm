@@ -176,6 +176,23 @@ TEST(AllocationColocatorTest, Alignment) {
   EXPECT_EQ(cursor.object<FatInt>()->value, 1);
 }
 
+TEST(AllocationColocator, Void) {
+  AllocationColocator<void> alloc;
+  auto ptr = alloc.allocate(
+      [&, i = alloc.object<int>(), s = alloc.string(2)](auto make) mutable {
+        make(std::move(i), 42);
+        make(std::move(s), "hi");
+      });
+
+  auto cursor = AllocationColocator<void>::unsafeCursor(ptr.get());
+  auto i = cursor.object<int>();
+  EXPECT_EQ(*i, 42);
+  EXPECT_EQ(cursor.string(2), "hi");
+
+  // No memory should be allocated for the root object
+  EXPECT_EQ(std::uintptr_t(ptr.get()), std::uintptr_t(i));
+}
+
 TEST(AllocationColocatorTest, NonTrivialDestructor) {
   struct Foo {
     struct NonTrivial {

@@ -156,45 +156,25 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 	}
 
 	processor := p.processorFactoryContext.GetProcessorContext(client)
-	var (
-		inputTransport, outputTransport Transport
-		inputProtocol, outputProtocol   Protocol
-	)
 
-	inputTransport = p.transportFactory.GetTransport(client)
-
-	// Special case for Header, it requires that the transport/protocol for
-	// input/output is the same object (to track session state).
-	if _, ok := inputTransport.(*HeaderTransport); ok {
-		outputTransport = nil
-		inputProtocol = p.protocolFactory.GetProtocol(inputTransport)
-		outputProtocol = inputProtocol
-	} else {
-		outputTransport = p.transportFactory.GetTransport(client)
-		inputProtocol = p.protocolFactory.GetProtocol(inputTransport)
-		outputProtocol = p.protocolFactory.GetProtocol(outputTransport)
-	}
+	transport := p.transportFactory.GetTransport(client)
+	protocol := p.protocolFactory.GetProtocol(transport)
 
 	// Store the input protocol on the context so handlers can query headers.
 	// See HeadersFromContext.
-	ctx = WithProtocol(ctx, inputProtocol)
+	ctx = WithProtocol(ctx, protocol)
 
 	defer func() {
 		if err := recover(); err != nil {
 			p.log.Printf("panic in processor: %v: %s", err, debug.Stack())
 		}
 	}()
-	if inputTransport != nil {
-		defer inputTransport.Close()
-	}
-	if outputTransport != nil {
-		defer outputTransport.Close()
-	}
+	defer transport.Close()
 	intProcessor := WrapInterceptorContext(p.interceptor, processor)
 	for {
-		keepOpen, exc := ProcessContext(ctx, intProcessor, inputProtocol, outputProtocol)
+		keepOpen, exc := ProcessContext(ctx, intProcessor, protocol, protocol)
 		if exc != nil {
-			outputProtocol.Flush()
+			protocol.Flush()
 			return exc
 		}
 		if !keepOpen {

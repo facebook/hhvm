@@ -42,6 +42,9 @@ import {{included_module_path}}.thrift_types
 import {{included_module_path}}.thrift_clients
 {{/has_services?}}
 {{/program:include_namespaces}}
+{{#program:adapter_modules}}
+import {{module_path}}
+{{/program:adapter_modules}}
 {{#program:services?}}
 {{#program:services}}
 

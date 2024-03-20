@@ -29,6 +29,10 @@ let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
       brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width:_ ->
       offset
     in
+    let* classish_after_closing_brace_offset =
+      brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width ->
+      offset + width
+    in
     Some
       {
         classish_start_of_body =
@@ -39,6 +43,10 @@ let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
           to_pos
             classish_before_closing_brace_offset
             classish_before_closing_brace_offset;
+        classish_closing_brace =
+          to_pos
+            classish_before_closing_brace_offset
+            classish_after_closing_brace_offset;
       }
   | _ -> None
 
@@ -118,8 +126,9 @@ let extract
 
 let map_pos ~f = function
   | Precomputed p -> Precomputed (f p)
-  | Classish_start_of_body class_name -> Classish_start_of_body class_name
-  | Classish_end_of_body class_name -> Classish_end_of_body class_name
+  | ( Classish_start_of_body _ | Classish_end_of_body _
+    | Classish_closing_brace _ ) as p ->
+    p
 
 let find pos t =
   let map_class class_name f = SMap.find_opt class_name t |> Option.map ~f in
@@ -129,3 +138,5 @@ let find pos t =
     map_class class_name @@ fun c -> c.classish_start_of_body
   | Classish_end_of_body class_name ->
     map_class class_name @@ fun c -> c.classish_end_of_body
+  | Classish_closing_brace class_name ->
+    map_class class_name @@ fun c -> c.classish_closing_brace

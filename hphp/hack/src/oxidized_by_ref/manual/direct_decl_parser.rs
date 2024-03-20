@@ -72,7 +72,7 @@ pub struct ParsedFileWithHashes<'a> {
     /// (the hash is order-sensitive)
     pub file_decls_hash: hh24_types::FileDeclsHash,
 
-    /// Decls along with a position *sensitive* hash. Internally they're stored in reverse
+    /// Decls, position-sensitive hash, and sort text. Internally they're stored in reverse
     /// lexical order. The choice of what to go into this list (remove dupes? remove php_stdlib
     /// in hhi files? transform class decls by removing php_stdlib members?) is determined
     /// by how it was constructed. The field is private: the only way to access it

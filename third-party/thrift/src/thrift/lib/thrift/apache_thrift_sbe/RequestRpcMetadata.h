@@ -967,6 +967,25 @@ public:
             return bytesToCopy;
         }
 
+        char* putOtherMetadataKey(const std::uint32_t length)
+        {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+            onOtherMetadataKeyAccessed();
+#endif
+            std::uint64_t lengthOfLengthField = 4;
+            std::uint64_t lengthPosition = sbePosition();
+            std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+            sbePosition(lengthPosition + lengthOfLengthField);
+            std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+            if (length != std::uint32_t(0))
+            {
+                std::uint64_t pos = sbePosition();
+                sbePosition(pos + length);
+                return m_buffer + pos;
+            }
+            return nullptr;
+        }
+
         OtherMetadata &putOtherMetadataKey(const char *src, const std::uint32_t length)
         {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
@@ -1202,6 +1221,25 @@ public:
             sbePosition(pos + dataLength);
             std::memcpy(dst, m_buffer + pos, static_cast<std::size_t>(bytesToCopy));
             return bytesToCopy;
+        }
+
+        char* putOtherMetadataValue(const std::uint32_t length)
+        {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+            onOtherMetadataValueAccessed();
+#endif
+            std::uint64_t lengthOfLengthField = 4;
+            std::uint64_t lengthPosition = sbePosition();
+            std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+            sbePosition(lengthPosition + lengthOfLengthField);
+            std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+            if (length != std::uint32_t(0))
+            {
+                std::uint64_t pos = sbePosition();
+                sbePosition(pos + length);
+                return m_buffer + pos;
+            }
+            return nullptr;
         }
 
         OtherMetadata &putOtherMetadataValue(const char *src, const std::uint32_t length)
@@ -1570,6 +1608,25 @@ public:
         return bytesToCopy;
     }
 
+    char* putName(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onNameAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
+    }
+
     RequestRpcMetadata &putName(const char *src, const std::uint32_t length)
     {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
@@ -1802,6 +1859,25 @@ public:
         return bytesToCopy;
     }
 
+    char* putInteractionMetadata(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onInteractionMetadataAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
+    }
+
     RequestRpcMetadata &putInteractionMetadata(const char *src, const std::uint32_t length)
     {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
@@ -2032,6 +2108,25 @@ public:
         sbePosition(pos + dataLength);
         std::memcpy(dst, m_buffer + pos, static_cast<std::size_t>(bytesToCopy));
         return bytesToCopy;
+    }
+
+    char* putOptionalMetdata(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onOptionalMetdataAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
     }
 
     RequestRpcMetadata &putOptionalMetdata(const char *src, const std::uint32_t length)

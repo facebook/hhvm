@@ -729,6 +729,25 @@ public:
         return bytesToCopy;
     }
 
+    char* putFrameworkMetadata(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onFrameworkMetadataAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
+    }
+
     ResponseRpcMetadataOptional &putFrameworkMetadata(const char *src, const std::uint32_t length)
     {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)

@@ -598,6 +598,25 @@ public:
         return bytesToCopy;
     }
 
+    char* putName_utf8(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onName_utf8Accessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
+    }
+
     ExceptionMetadata &putName_utf8(const char *src, const std::uint32_t length)
     {
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
@@ -828,6 +847,25 @@ public:
         sbePosition(pos + dataLength);
         std::memcpy(dst, m_buffer + pos, static_cast<std::size_t>(bytesToCopy));
         return bytesToCopy;
+    }
+
+    char* putWhat_utf8(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onWhat_utf8Accessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
     }
 
     ExceptionMetadata &putWhat_utf8(const char *src, const std::uint32_t length)

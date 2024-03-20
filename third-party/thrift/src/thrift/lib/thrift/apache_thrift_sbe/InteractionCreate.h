@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_INTERACTIONCREATE_CXX_H_
 #define _APACHE_THRIFT_SBE_INTERACTIONCREATE_CXX_H_
 
@@ -718,7 +717,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in InteractionCreate");
         }
         return putInteractionName(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -728,7 +727,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in InteractionCreate");
         }
         return putInteractionName(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -785,7 +784,7 @@ SBE_NODISCARD static std::size_t computeLength(std::size_t interactionNameLength
     length += interactionNameHeaderLength();
     if (interactionNameLength > 1073741824LL)
     {
-        throw std::runtime_error("interactionNameLength too long for length type [E109]");
+        throw std::runtime_error("interactionNameLength too long for length type [E109]  in InteractionCreate");
     }
     length += interactionNameLength;
 
@@ -795,6 +794,8 @@ SBE_NODISCARD static std::size_t computeLength(std::size_t interactionNameLength
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string InteractionCreate::STATE_NAME_LOOKUP[3] =
 {
@@ -810,6 +811,7 @@ const std::string InteractionCreate::STATE_TRANSITIONS_LOOKUP[3] =
     "",
 };
 
+#endif
 }
 }
 }

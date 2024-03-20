@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_ERRORSAFETY_CXX_H_
 #define _APACHE_THRIFT_SBE_ERRORSAFETY_CXX_H_
 

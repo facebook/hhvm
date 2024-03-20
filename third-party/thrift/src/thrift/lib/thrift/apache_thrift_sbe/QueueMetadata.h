@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_QUEUEMETADATA_CXX_H_
 #define _APACHE_THRIFT_SBE_QUEUEMETADATA_CXX_H_
 
@@ -125,7 +124,7 @@ public:
     {
         if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + 8) > m_bufferLength), false))
         {
-            throw std::runtime_error("buffer too short for flyweight [E107]");
+            throw std::runtime_error("buffer too short for flyweight [E107] in QueueMetadata");
         }
     }
 
@@ -157,7 +156,7 @@ public:
 
         if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + 8) > m_bufferLength), false))
         {
-            throw std::runtime_error("buffer too short for flyweight [E107]");
+            throw std::runtime_error("buffer too short for flyweight [E107] in QueueMetadata");
         }
 
         return *this;

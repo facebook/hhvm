@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_REQUESTRPCMETADATA_CXX_H_
 #define _APACHE_THRIFT_SBE_REQUESTRPCMETADATA_CXX_H_
 
@@ -781,7 +780,7 @@ public:
         {
             if (SBE_BOUNDS_CHECK_EXPECT((position > m_bufferLength), false))
             {
-                throw std::runtime_error("buffer too short [E100]");
+                throw std::runtime_error("buffer too short [E100]OtherMetadata");
             }
             return position;
         }
@@ -805,7 +804,7 @@ public:
         {
             if (m_index >= m_count)
             {
-                throw std::runtime_error("index >= count [E108]");
+                throw std::runtime_error("index >= count [E108] in OtherMetadata");
             }
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
             onNextElementAccessed();
@@ -813,7 +812,7 @@ public:
             m_offset = *m_positionPtr;
             if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + m_blockLength) > m_bufferLength), false))
             {
-                throw std::runtime_error("buffer too short for next group index [E108]");
+                throw std::runtime_error("buffer too short for next group index [E108] in OtherMetadata");
             }
             *m_positionPtr = m_offset + m_blockLength;
             ++m_index;
@@ -1063,7 +1062,7 @@ public:
         {
             if (str.length() > 1073741824)
             {
-                throw std::runtime_error("std::string too long for length type [E109]");
+                throw std::runtime_error("std::string too long for length type [E109] in OtherMetadata");
             }
             return putOtherMetadataKey(str.data(), static_cast<std::uint32_t>(str.length()));
         }
@@ -1073,7 +1072,7 @@ public:
         {
             if (str.length() > 1073741824)
             {
-                throw std::runtime_error("std::string too long for length type [E109]");
+                throw std::runtime_error("std::string too long for length type [E109] in OtherMetadata");
             }
             return putOtherMetadataKey(str.data(), static_cast<std::uint32_t>(str.length()));
         }
@@ -1300,7 +1299,7 @@ public:
         {
             if (str.length() > 1073741824)
             {
-                throw std::runtime_error("std::string too long for length type [E109]");
+                throw std::runtime_error("std::string too long for length type [E109] in OtherMetadata");
             }
             return putOtherMetadataValue(str.data(), static_cast<std::uint32_t>(str.length()));
         }
@@ -1310,7 +1309,7 @@ public:
         {
             if (str.length() > 1073741824)
             {
-                throw std::runtime_error("std::string too long for length type [E109]");
+                throw std::runtime_error("std::string too long for length type [E109] in OtherMetadata");
             }
             return putOtherMetadataValue(str.data(), static_cast<std::uint32_t>(str.length()));
         }
@@ -1358,14 +1357,14 @@ public:
             length += otherMetadataKeyHeaderLength();
             if (otherMetadataKeyLength > 1073741824LL)
             {
-                throw std::runtime_error("otherMetadataKeyLength too long for length type [E109]");
+                throw std::runtime_error("otherMetadataKeyLength too long for length type [E109]  in RequestRpcMetadata");
             }
             length += otherMetadataKeyLength;
 
             length += otherMetadataValueHeaderLength();
             if (otherMetadataValueLength > 1073741824LL)
             {
-                throw std::runtime_error("otherMetadataValueLength too long for length type [E109]");
+                throw std::runtime_error("otherMetadataValueLength too long for length type [E109]  in RequestRpcMetadata");
             }
             length += otherMetadataValueLength;
 
@@ -1666,7 +1665,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putName(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1676,7 +1675,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putName(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1898,7 +1897,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putInteractionMetadata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1908,7 +1907,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putInteractionMetadata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -2130,7 +2129,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putOptionalMetdata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -2140,7 +2139,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadata");
         }
         return putOptionalMetdata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -2239,7 +2238,7 @@ SBE_NODISCARD static std::size_t computeLength(
     length += OtherMetadata::sbeHeaderSize();
     if (otherMetadataItemLengths.size() > 65534LL)
     {
-        throw std::runtime_error("otherMetadataItemLengths.size() outside of allowed range [E110]");
+        throw std::runtime_error("otherMetadataItemLengths.size() outside of allowed range [E110] in RequestRpcMetadata");
     }
 
     for (const auto &e: otherMetadataItemLengths)
@@ -2254,21 +2253,21 @@ SBE_NODISCARD static std::size_t computeLength(
     length += nameHeaderLength();
     if (nameLength > 1073741824LL)
     {
-        throw std::runtime_error("nameLength too long for length type [E109]");
+        throw std::runtime_error("nameLength too long for length type [E109]  in RequestRpcMetadata");
     }
     length += nameLength;
 
     length += interactionMetadataHeaderLength();
     if (interactionMetadataLength > 1073741824LL)
     {
-        throw std::runtime_error("interactionMetadataLength too long for length type [E109]");
+        throw std::runtime_error("interactionMetadataLength too long for length type [E109]  in RequestRpcMetadata");
     }
     length += interactionMetadataLength;
 
     length += optionalMetdataHeaderLength();
     if (optionalMetdataLength > 1073741824LL)
     {
-        throw std::runtime_error("optionalMetdataLength too long for length type [E109]");
+        throw std::runtime_error("optionalMetdataLength too long for length type [E109]  in RequestRpcMetadata");
     }
     length += optionalMetdataLength;
 
@@ -2278,6 +2277,8 @@ SBE_NODISCARD static std::size_t computeLength(
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string RequestRpcMetadata::STATE_NAME_LOOKUP[13] =
 {
@@ -2313,6 +2314,7 @@ const std::string RequestRpcMetadata::STATE_TRANSITIONS_LOOKUP[13] =
     "",
 };
 
+#endif
 }
 }
 }

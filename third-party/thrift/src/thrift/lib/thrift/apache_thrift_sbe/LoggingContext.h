@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_LOGGINGCONTEXT_CXX_H_
 #define _APACHE_THRIFT_SBE_LOGGINGCONTEXT_CXX_H_
 
@@ -804,7 +803,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
         }
         return putRequestId(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -814,7 +813,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
         }
         return putRequestId(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1036,7 +1035,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
         }
         return putRoutingTarget(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1046,7 +1045,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
         }
         return putRoutingTarget(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1115,14 +1114,14 @@ SBE_NODISCARD static std::size_t computeLength(
     length += requestIdHeaderLength();
     if (requestIdLength > 1073741824LL)
     {
-        throw std::runtime_error("requestIdLength too long for length type [E109]");
+        throw std::runtime_error("requestIdLength too long for length type [E109]  in LoggingContext");
     }
     length += requestIdLength;
 
     length += routingTargetHeaderLength();
     if (routingTargetLength > 1073741824LL)
     {
-        throw std::runtime_error("routingTargetLength too long for length type [E109]");
+        throw std::runtime_error("routingTargetLength too long for length type [E109]  in LoggingContext");
     }
     length += routingTargetLength;
 
@@ -1132,6 +1131,8 @@ SBE_NODISCARD static std::size_t computeLength(
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string LoggingContext::STATE_NAME_LOOKUP[4] =
 {
@@ -1149,6 +1150,7 @@ const std::string LoggingContext::STATE_TRANSITIONS_LOOKUP[4] =
     "",
 };
 
+#endif
 }
 }
 }

@@ -24,5 +24,3 @@ buck2 run thrift/vendor/simple-binary-encoding/sbe-tool:sbe_tool -- \
   -J-Dsbe.output.dir=thrift/lib/thrift \
   thrift/lib/thrift/RpcMetadata.xml
 
-# mark all generated source code as `@generated`
-sed -i '1i // @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh' thrift/lib/thrift/apache_thrift_sbe/*.h

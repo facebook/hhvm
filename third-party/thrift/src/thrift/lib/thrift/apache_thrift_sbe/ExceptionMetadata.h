@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_EXCEPTIONMETADATA_CXX_H_
 #define _APACHE_THRIFT_SBE_EXCEPTIONMETADATA_CXX_H_
 
@@ -694,7 +693,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ExceptionMetadata");
         }
         return putName_utf8(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -704,7 +703,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ExceptionMetadata");
         }
         return putName_utf8(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -926,7 +925,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ExceptionMetadata");
         }
         return putWhat_utf8(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -936,7 +935,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ExceptionMetadata");
         }
         return putWhat_utf8(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1001,14 +1000,14 @@ SBE_NODISCARD static std::size_t computeLength(
     length += name_utf8HeaderLength();
     if (name_utf8Length > 1073741824LL)
     {
-        throw std::runtime_error("name_utf8Length too long for length type [E109]");
+        throw std::runtime_error("name_utf8Length too long for length type [E109]  in ExceptionMetadata");
     }
     length += name_utf8Length;
 
     length += what_utf8HeaderLength();
     if (what_utf8Length > 1073741824LL)
     {
-        throw std::runtime_error("what_utf8Length too long for length type [E109]");
+        throw std::runtime_error("what_utf8Length too long for length type [E109]  in ExceptionMetadata");
     }
     length += what_utf8Length;
 
@@ -1018,6 +1017,8 @@ SBE_NODISCARD static std::size_t computeLength(
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string ExceptionMetadata::STATE_NAME_LOOKUP[4] =
 {
@@ -1035,6 +1036,7 @@ const std::string ExceptionMetadata::STATE_TRANSITIONS_LOOKUP[4] =
     "",
 };
 
+#endif
 }
 }
 }

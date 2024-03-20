@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_RESPONSERPCMETADATAOPTIONAL_CXX_H_
 #define _APACHE_THRIFT_SBE_RESPONSERPCMETADATAOPTIONAL_CXX_H_
 
@@ -825,7 +824,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ResponseRpcMetadataOptional");
         }
         return putFrameworkMetadata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -835,7 +834,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in ResponseRpcMetadataOptional");
         }
         return putFrameworkMetadata(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -899,7 +898,7 @@ SBE_NODISCARD static std::size_t computeLength(std::size_t frameworkMetadataLeng
     length += frameworkMetadataHeaderLength();
     if (frameworkMetadataLength > 1073741824LL)
     {
-        throw std::runtime_error("frameworkMetadataLength too long for length type [E109]");
+        throw std::runtime_error("frameworkMetadataLength too long for length type [E109]  in ResponseRpcMetadataOptional");
     }
     length += frameworkMetadataLength;
 
@@ -909,6 +908,8 @@ SBE_NODISCARD static std::size_t computeLength(std::size_t frameworkMetadataLeng
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string ResponseRpcMetadataOptional::STATE_NAME_LOOKUP[3] =
 {
@@ -924,6 +925,7 @@ const std::string ResponseRpcMetadataOptional::STATE_TRANSITIONS_LOOKUP[3] =
     "",
 };
 
+#endif
 }
 }
 }

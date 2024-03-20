@@ -199,12 +199,12 @@ public class CppGenerator implements CodeGenerator
 
                 final StringBuilder sb = new StringBuilder();
                 generateFields(sb, className, fields, fieldPrecedenceModel, BASE_INDENT);
-                generateGroups(sb, groups, fieldPrecedenceModel, BASE_INDENT);
+                generateGroups(className, sb, groups, fieldPrecedenceModel, BASE_INDENT);
                 generateVarData(sb, className, varData, fieldPrecedenceModel, BASE_INDENT);
                 generateDisplay(sb, msgToken.name(), fields, groups, varData);
-                sb.append(generateMessageLength(groups, varData, BASE_INDENT));
+                sb.append(generateMessageLength(className, groups, varData, BASE_INDENT));
                 sb.append("};\n");
-                generateLookupTableDefinitions(sb, className, fieldPrecedenceModel);
+                generateLookupTableDefinitions(sb, className, fieldPrecedenceModel, precedenceChecksFlagName);
                 sb.append(CppUtil.closingBraces(ir.namespaces().length)).append("#endif\n");
                 out.append(sb);
             }
@@ -571,6 +571,7 @@ public class CppGenerator implements CodeGenerator
     }
 
     private void generateGroups(
+        final String className,
         final StringBuilder sb,
         final List<Token> tokens,
         final FieldPrecedenceModel fieldPrecedenceModel,
@@ -600,14 +601,14 @@ public class CppGenerator implements CodeGenerator
 
             final List<Token> groups = new ArrayList<>();
             i = collectGroups(tokens, i, groups);
-            generateGroups(sb, groups, fieldPrecedenceModel, indent + INDENT);
+            generateGroups(className, sb, groups, fieldPrecedenceModel, indent + INDENT);
 
             final List<Token> varData = new ArrayList<>();
             i = collectVarData(tokens, i, varData);
             generateVarData(sb, formatClassName(groupName), varData, fieldPrecedenceModel, indent + INDENT);
 
             sb.append(generateGroupDisplay(groupName, fields, groups, varData, indent + INDENT + INDENT));
-            sb.append(generateMessageLength(groups, varData, indent + INDENT + INDENT));
+            sb.append(generateMessageLength(className, groups, varData, indent + INDENT + INDENT));
 
             sb.append(indent).append("    };\n");
             generateGroupProperty(sb, groupName, groupToken, cppTypeForNumInGroup, fieldPrecedenceModel, indent);
@@ -818,7 +819,7 @@ public class CppGenerator implements CodeGenerator
             indent + "    {\n" +
             indent + "        if (SBE_BOUNDS_CHECK_EXPECT((position > m_bufferLength), false))\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"buffer too short [E100]\");\n" +
+            indent + "            throw std::runtime_error(\"buffer too short [E100]" + groupClassName + "\");\n" +
             indent + "        }\n" +
             indent + "        return position;\n" +
             indent + "    }\n\n" +
@@ -842,13 +843,13 @@ public class CppGenerator implements CodeGenerator
             indent + "    {\n" +
             indent + "        if (m_index >= m_count)\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"index >= count [E108]\");\n" +
+            indent + "            throw std::runtime_error(\"index >= count [E108] in " + groupClassName + "\");\n" +
             indent + "        }\n" +
             "%4$s" +
             indent + "        m_offset = *m_positionPtr;\n" +
             indent + "        if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + m_blockLength) > m_bufferLength), false))\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"buffer too short for next group index [E108]\");\n" +
+            indent + "            throw std::runtime_error(\"buffer too short for next group index [E108] in " + groupClassName + "\");\n" +
             indent + "        }\n" +
             indent + "        *m_positionPtr = m_offset + m_blockLength;\n" +
             indent + "        ++m_index;\n\n" +
@@ -1194,7 +1195,7 @@ public class CppGenerator implements CodeGenerator
                 indent + "    {\n" +
                 indent + "        if (str.length() > %4$d)\n" +
                 indent + "        {\n" +
-                indent + "            throw std::runtime_error(\"std::string too long for length type [E109]\");\n" +
+                indent + "            throw std::runtime_error(\"std::string too long for length type [E109] in %1$s\");\n" +
                 indent + "        }\n" +
                 indent + "        return put%2$s(str.data(), static_cast<%3$s>(str.length()));\n" +
                 indent + "    }\n",
@@ -1209,7 +1210,7 @@ public class CppGenerator implements CodeGenerator
                 indent + "    {\n" +
                 indent + "        if (str.length() > %4$d)\n" +
                 indent + "        {\n" +
-                indent + "            throw std::runtime_error(\"std::string too long for length type [E109]\");\n" +
+                indent + "            throw std::runtime_error(\"std::string too long for length type [E109] in %1$s\");\n" +
                 indent + "        }\n" +
                 indent + "        return put%2$s(str.data(), static_cast<%3$s>(str.length()));\n" +
                 indent + "    }\n" +
@@ -2098,7 +2099,7 @@ public class CppGenerator implements CodeGenerator
             indent + "    {\n" +
             indent + "        if (index >= %3$d)\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"index out of range for %2$s [E104]\");\n" +
+            indent + "            throw std::runtime_error(\"index out of range for %2$s [E104] in %7$s\");\n" +
             indent + "        }\n\n" +
             "%4$s" +
             "%6$s" +
@@ -2109,7 +2110,8 @@ public class CppGenerator implements CodeGenerator
             arrayLength,
             generateFieldNotPresentCondition(propertyToken.version(), encodingToken.encoding(), indent),
             loadValue,
-            accessOrderListenerCall);
+            accessOrderListenerCall,
+            containingClassName);
 
         final CharSequence storeValue = generateStoreValue(
             primitiveType,
@@ -2123,7 +2125,7 @@ public class CppGenerator implements CodeGenerator
             indent + "    {\n" +
             indent + "        if (index >= %4$d)\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"index out of range for %2$s [E105]\");\n" +
+            indent + "            throw std::runtime_error(\"index out of range for %2$s [E105] in %7$s\");\n" +
             indent + "        }\n\n" +
 
             "%6$s" +
@@ -2135,14 +2137,15 @@ public class CppGenerator implements CodeGenerator
             cppTypeName,
             arrayLength,
             storeValue,
-            accessOrderListenerCall);
+            accessOrderListenerCall,
+            containingClassName);
 
         new Formatter(sb).format("\n" +
             indent + "    std::uint64_t get%1$s(char *const dst, const std::uint64_t length) const\n" +
             indent + "    {\n" +
             indent + "        if (length > %2$d)\n" +
             indent + "        {\n" +
-            indent + "            throw std::runtime_error(\"length too large for get%1$s [E106]\");\n" +
+            indent + "            throw std::runtime_error(\"length too large for get%1$s [E106] in %7$s\");\n" +
             indent + "        }\n\n" +
 
             "%3$s" +
@@ -2156,7 +2159,8 @@ public class CppGenerator implements CodeGenerator
             generateArrayFieldNotPresentCondition(propertyToken.version(), indent),
             offset,
             cppTypeName,
-            accessOrderListenerCall);
+            accessOrderListenerCall,
+            containingClassName);
 
         new Formatter(sb).format("\n" +
             indent + "    %1$s &put%2$s(const char *const src)%7$s\n" +
@@ -2261,7 +2265,7 @@ public class CppGenerator implements CodeGenerator
                 indent + "        const std::size_t srcLength = str.length();\n" +
                 indent + "        if (srcLength > %4$d)\n" +
                 indent + "        {\n" +
-                indent + "            throw std::runtime_error(\"string too large for put%2$s [E106]\");\n" +
+                indent + "            throw std::runtime_error(\"string too large for put%2$s [E106]  in %1$s\");\n" +
                 indent + "        }\n\n" +
 
                 "%5$s" +
@@ -2476,7 +2480,7 @@ public class CppGenerator implements CodeGenerator
             "    {\n" +
             "        if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + %2$s) > m_bufferLength), false))\n" +
             "        {\n" +
-            "            throw std::runtime_error(\"buffer too short for flyweight [E107]\");\n" +
+            "            throw std::runtime_error(\"buffer too short for flyweight [E107] in " + className + "\");\n" +
             "        }\n" +
             "    }\n\n" +
 
@@ -2508,7 +2512,7 @@ public class CppGenerator implements CodeGenerator
 
             "        if (SBE_BOUNDS_CHECK_EXPECT(((m_offset + %2$s) > m_bufferLength), false))\n" +
             "        {\n" +
-            "            throw std::runtime_error(\"buffer too short for flyweight [E107]\");\n" +
+            "            throw std::runtime_error(\"buffer too short for flyweight [E107] in " + className + "\");\n" +
             "        }\n\n" +
 
             "        return *this;\n" +
@@ -2921,13 +2925,15 @@ public class CppGenerator implements CodeGenerator
     private static void generateLookupTableDefinitions(
         final StringBuilder sb,
         final String className,
-        final FieldPrecedenceModel fieldPrecedenceModel)
+        final FieldPrecedenceModel fieldPrecedenceModel,
+        final String precedenceChecksFlagName)
     {
         if (null == fieldPrecedenceModel)
         {
             return;
         }
-
+        sb.append("// prevent double free error\n");
+        sb.append("#if defined(").append(precedenceChecksFlagName).append(")\n");
         sb.append("\n").append("const std::string ").append(className).append("::STATE_NAME_LOOKUP[")
             .append(fieldPrecedenceModel.stateCount()).append("] =\n")
             .append("{\n");
@@ -2962,6 +2968,7 @@ public class CppGenerator implements CodeGenerator
             sb.append("\",\n");
         });
         sb.append("};\n\n");
+        sb.append("#endif\n");
     }
 
     private static CharSequence qualifiedStateCase(final FieldPrecedenceModel.State state)
@@ -4047,7 +4054,7 @@ public class CppGenerator implements CodeGenerator
         return sb;
     }
 
-    private CharSequence generateMessageLength(final List<Token> groups, final List<Token> varData, final String indent)
+private CharSequence generateMessageLength(final String className, final List<Token> groups, final List<Token> varData, final String indent)
     {
         final StringBuilder sbEncode = new StringBuilder();
         final StringBuilder sbSkip = new StringBuilder();
@@ -4083,21 +4090,22 @@ public class CppGenerator implements CodeGenerator
                 new Formatter(sbEncode).format(
                     indent + "    if (%3$s%4$s)\n" +
                     indent + "    {\n" +
-                    indent + "        throw std::runtime_error(\"%5$s outside of allowed range [E110]\");\n" +
+                    indent + "        throw std::runtime_error(\"%5$s outside of allowed range [E110] in %5$s\");\n" +
                     indent + "    }\n" +
                     indent + "    length += %1$sLength *%2$s::sbeBlockLength();\n",
                     formatPropertyName(groupToken.name()),
                     formatClassName(groupToken.name()),
                     minCheck,
                     maxCheck,
-                    countName);
+                    countName,
+                    className);
             }
             else
             {
                 new Formatter(sbEncode).format(
                     indent + "    if (%3$s%4$s)\n" +
                     indent + "    {\n" +
-                    indent + "        throw std::runtime_error(\"%5$s outside of allowed range [E110]\");\n" +
+                    indent + "        throw std::runtime_error(\"%5$s outside of allowed range [E110] in %7$s\");\n" +
                     indent + "    }\n\n" +
                     indent + "    for (const auto &e: %1$sItemLengths)\n" +
                     indent + "    {\n" +
@@ -4112,7 +4120,8 @@ public class CppGenerator implements CodeGenerator
                     minCheck,
                     maxCheck,
                     countName,
-                    generateMessageLengthCallPre17Helper(thisGroup));
+                    generateMessageLengthCallPre17Helper(thisGroup),
+                    className);
             }
 
             new Formatter(sbSkip).format(
@@ -4141,11 +4150,12 @@ public class CppGenerator implements CodeGenerator
                 indent + "    length += %1$sHeaderLength();\n" +
                 indent + "    if (%1$sLength > %2$dLL)\n" +
                 indent + "    {\n" +
-                indent + "        throw std::runtime_error(\"%1$sLength too long for length type [E109]\");\n" +
+                indent + "        throw std::runtime_error(\"%1$sLength too long for length type [E109]  in %3$s\");\n" +
                 indent + "    }\n" +
                 indent + "    length += %1$sLength;\n",
                 formatPropertyName(varDataToken.name()),
-                lengthToken.encoding().applicableMaxValue().longValue());
+                lengthToken.encoding().applicableMaxValue().longValue(),
+                className);
 
             new Formatter(sbSkip).format(
                 indent + "    skip%1$s();\n",

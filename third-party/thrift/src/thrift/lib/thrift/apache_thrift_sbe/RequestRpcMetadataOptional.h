@@ -1,5 +1,4 @@
-// @generated using thrift/lib/thrift/generate-rpc-metadata-sbe.sh
-/* Generated SBE (Simple Binary Encoding) message codec */
+/* Generated @generated SBE (Simple Binary Encoding) message codec */
 #ifndef _APACHE_THRIFT_SBE_REQUESTRPCMETADATAOPTIONAL_CXX_H_
 #define _APACHE_THRIFT_SBE_REQUESTRPCMETADATAOPTIONAL_CXX_H_
 
@@ -1078,7 +1077,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putLoadMetric(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1088,7 +1087,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putLoadMetric(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1310,7 +1309,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putTenantId(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1320,7 +1319,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putTenantId(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1542,7 +1541,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putServiceTraceMeta(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1552,7 +1551,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putServiceTraceMeta(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1774,7 +1773,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putLoggingContext(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1784,7 +1783,7 @@ public:
     {
         if (str.length() > 1073741824)
         {
-            throw std::runtime_error("std::string too long for length type [E109]");
+            throw std::runtime_error("std::string too long for length type [E109] in RequestRpcMetadataOptional");
         }
         return putLoggingContext(str.data(), static_cast<std::uint32_t>(str.length()));
     }
@@ -1881,28 +1880,28 @@ SBE_NODISCARD static std::size_t computeLength(
     length += loadMetricHeaderLength();
     if (loadMetricLength > 1073741824LL)
     {
-        throw std::runtime_error("loadMetricLength too long for length type [E109]");
+        throw std::runtime_error("loadMetricLength too long for length type [E109]  in RequestRpcMetadataOptional");
     }
     length += loadMetricLength;
 
     length += tenantIdHeaderLength();
     if (tenantIdLength > 1073741824LL)
     {
-        throw std::runtime_error("tenantIdLength too long for length type [E109]");
+        throw std::runtime_error("tenantIdLength too long for length type [E109]  in RequestRpcMetadataOptional");
     }
     length += tenantIdLength;
 
     length += serviceTraceMetaHeaderLength();
     if (serviceTraceMetaLength > 1073741824LL)
     {
-        throw std::runtime_error("serviceTraceMetaLength too long for length type [E109]");
+        throw std::runtime_error("serviceTraceMetaLength too long for length type [E109]  in RequestRpcMetadataOptional");
     }
     length += serviceTraceMetaLength;
 
     length += loggingContextHeaderLength();
     if (loggingContextLength > 1073741824LL)
     {
-        throw std::runtime_error("loggingContextLength too long for length type [E109]");
+        throw std::runtime_error("loggingContextLength too long for length type [E109]  in RequestRpcMetadataOptional");
     }
     length += loggingContextLength;
 
@@ -1912,6 +1911,8 @@ SBE_NODISCARD static std::size_t computeLength(
 #endif
 }
 };
+// prevent double free error
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
 const std::string RequestRpcMetadataOptional::STATE_NAME_LOOKUP[6] =
 {
@@ -1933,6 +1934,7 @@ const std::string RequestRpcMetadataOptional::STATE_TRANSITIONS_LOOKUP[6] =
     "",
 };
 
+#endif
 }
 }
 }

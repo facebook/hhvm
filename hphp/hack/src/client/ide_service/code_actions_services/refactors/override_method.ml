@@ -88,8 +88,9 @@ let override_method_refactorings_at ~start_line ~start_col =
 let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
     Code_action_types.edit list =
   match
-    Classish_positions.(
-      find (Classish_start_of_body quickfix.name) classish_positions)
+    Classish_positions.find
+      (Classish_positions.Classish_start_of_body quickfix.name)
+      classish_positions
   with
   | Some classish_start ->
     [Code_action_types.{ pos = classish_start; text = quickfix.text }]

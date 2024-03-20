@@ -1067,7 +1067,7 @@ def _make_readonly_setattr():
 
 
 class StructMeta(type):
-    """Metaclass for all generated Thrift Struct types."""
+    """Metaclass for all generated (immutable) thrift-python Struct types."""
 
     def __new__(cls, cls_name, bases, dct):
         """
@@ -1167,6 +1167,23 @@ class StructMeta(type):
         """
         for name in (<StructInfo>cls._fbthrift_struct_info).name_to_index.keys():
             yield name, None
+
+
+class MutableStructMeta(type):
+    """Metaclass for all generated (mutable) thrift-python Struct types."""
+
+    def __new__(cls, cls_name, bases, dct):
+        """
+        Returns a new mutable Thrift Struct class with the given name and
+        members.
+
+        Raises:
+            NotImplementedError: always (not implemented YET).
+        """
+        raise NotImplementedError(
+            "MutableStructMeta: thrift-python mutable types are not "
+            "implemented yet, cannot create class for Thrift Struct: "
+            f"{cls_name}")
 
 
 def gen_enum(fields):

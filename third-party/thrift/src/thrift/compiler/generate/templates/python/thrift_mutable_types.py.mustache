@@ -21,4 +21,45 @@ Generated Python classes for mutable thrift-python types.
 # EXPERIMENTAL - DO NOT USE !!!
 # See `experimental_generate_mutable_types` documentation in thrift compiler
 
-raise NotImplementedError(f"thrift-python mutable types are not implemented yet, do not import module: {__name__}")
+import {{program:base_library_package}}.types as _fbthrift_python_types
+{{!
+For now, process all structs that are neither exceptions nor unions.
+}}{{#program:structs}}{{^struct:exception?}}{{^struct:union?}}
+
+class {{> structs/unadapted_name}}(metaclass=_fbthrift_python_types.MutableStructMeta):
+    _fbthrift_SPEC = (
+        {{#struct:fields_ordered_by_id}}
+        (
+            {{field:key}},  # id
+            _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
+            "{{field:py_name}}",  # name
+            {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:user_default_value}}{{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{/field:type}}{{> types/constant_value }}{{/field:user_default_value}}{{!
+            }}{{^field:user_default_value}}None{{/field:user_default_value}},  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
+        ),
+        {{/struct:fields_ordered_by_id}}
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{> structs/unadapted_name}}"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return {{#struct:thrift_uri}}"{{struct:thrift_uri}}"{{/struct:thrift_uri}}{{!
+            }}{{^struct:thrift_uri}}None{{/struct:thrift_uri}}
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+    def to_immutable(self):
+        raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
+
+{{#struct:has_adapter?}}
+raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
+{{/struct:has_adapter?}}{{!
+}}{{/struct:union?}}{{/struct:exception?}}{{/program:structs}}
+

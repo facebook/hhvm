@@ -156,18 +156,6 @@ let (make_union_ref : make_union ref) = ref (not_implemented "make_union")
 
 let make_union env = !make_union_ref env
 
-type union_i =
-  env ->
-  ?approx_cancel_neg:bool ->
-  Reason.t ->
-  internal_type ->
-  locl_ty ->
-  env * internal_type
-
-let (union_i_ref : union_i ref) = ref (not_implemented "union")
-
-let union_i x = !union_i_ref x
-
 type union_list =
   env -> ?approx_cancel_neg:bool -> Reason.t -> locl_ty list -> env * locl_ty
 
@@ -323,20 +311,6 @@ let is_tyvar_error env ty =
 types which involve mixed or nothing. *)
 let simplify_constraint_type env ty =
   match deref_constraint_type ty with
-  | (_, TCunion (lty, cty)) ->
-    if is_nothing env lty then
-      (env, ConstraintType cty)
-    else if is_mixed env lty then
-      (env, LoclType lty)
-    else
-      (env, ConstraintType ty)
-  | (_, TCintersection (lty, cty)) ->
-    if is_nothing env lty then
-      (env, LoclType lty)
-    else if is_mixed env lty then
-      (env, ConstraintType cty)
-    else
-      (env, ConstraintType ty)
   | (_, Thas_member _)
   | (_, Thas_type_member _)
   | (_, Tcan_index _)

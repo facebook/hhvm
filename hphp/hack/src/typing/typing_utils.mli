@@ -277,24 +277,6 @@ val make_union :
   Typing_reason.t option ->
   Typing_env_types.env * Typing_defs.locl_ty
 
-type union_i =
-  Typing_env_types.env ->
-  ?approx_cancel_neg:bool ->
-  Typing_reason.t ->
-  Typing_defs.internal_type ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.internal_type
-
-val union_i_ref : union_i ref
-
-val union_i :
-  Typing_env_types.env ->
-  ?approx_cancel_neg:bool ->
-  Typing_reason.t ->
-  Typing_defs.internal_type ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.internal_type
-
 type union_list =
   Typing_env_types.env ->
   ?approx_cancel_neg:bool ->

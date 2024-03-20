@@ -5667,17 +5667,7 @@ end = struct
       | (_, Ttype_switch _) ->
         Markdown_lite.md_codify
           (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_i env (ConstraintType ty)))
-      | (_, TCunion (lty, cty)) ->
-        Printf.sprintf
-          "%s or %s"
-          (describe_ty_super env (LoclType lty))
-          (describe_ty_super env (ConstraintType cty))
-      | (_, TCintersection (lty, cty)) ->
-        Printf.sprintf
-          "%s and %s"
-          (describe_ty_super env (LoclType lty))
-          (describe_ty_super env (ConstraintType cty)))
+               Typing_print.full_strip_ns_i env (ConstraintType ty))))
 
   let describe_ty_sub ~is_coeffect env ety =
     let ty_descr = describe_ty ~is_coeffect env ety in

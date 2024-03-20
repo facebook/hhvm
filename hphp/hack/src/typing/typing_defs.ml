@@ -463,11 +463,6 @@ let is_neg t =
   | Tneg _ -> true
   | _ -> false
 
-let is_constraint_type_union t =
-  match deref_constraint_type t with
-  | (_, TCunion _) -> true
-  | _ -> false
-
 let is_has_member t =
   match deref_constraint_type t with
   | (_, Thas_member _) -> true

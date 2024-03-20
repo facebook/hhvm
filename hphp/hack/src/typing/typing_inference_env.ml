@@ -650,7 +650,7 @@ module Size = struct
     in
     ty_size_visitor#on_type 0 ty
 
-  let rec constraint_type_size env ty =
+  let constraint_type_size env ty =
     let type_size_list env l =
       List.fold ~init:0 ~f:(fun size ty -> size + ty_size env ty) l
     in
@@ -668,9 +668,6 @@ module Size = struct
     | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
     | (_, Tcan_traverse ct) ->
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key
-    | (_, TCunion (lty, cty))
-    | (_, TCintersection (lty, cty)) ->
-      1 + ty_size env lty + constraint_type_size env cty
     | (_, Ttype_switch { predicate = _; ty_true; ty_false }) ->
       1 + ty_size env ty_true + ty_size env ty_false
 

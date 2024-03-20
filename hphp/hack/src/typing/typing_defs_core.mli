@@ -627,8 +627,6 @@ type constraint_type_ =
   | Tdestructure of destructure
       (** The type of a list destructuring assignment.
           Implements valid destructuring operations via subtyping. *)
-  | TCunion of locl_ty * constraint_type
-  | TCintersection of locl_ty * constraint_type
   | Ttype_switch of {
       predicate: type_predicate;
       ty_true: locl_ty;

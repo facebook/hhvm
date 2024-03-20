@@ -388,8 +388,6 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       | Tcan_index ci -> this#on_tcan_index acc r ci
       | Tcan_traverse ct -> this#on_tcan_traverse acc r ct
       | Tdestructure des -> this#on_tdestructure acc r des
-      | TCunion (lty, cty) -> this#on_tcunion acc r lty cty
-      | TCintersection (lty, cty) -> this#on_tcintersection acc r lty cty
       | Ttype_switch { predicate; ty_true; ty_false } ->
         this#on_ttype_switch acc r predicate ty_true ty_false
 

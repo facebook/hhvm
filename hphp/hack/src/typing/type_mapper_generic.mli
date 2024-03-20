@@ -177,20 +177,6 @@ class type ['env] constraint_type_mapper_type =
       Typing_defs.destructure ->
       'env * Typing_defs.constraint_type
 
-    method on_TCunion :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
-      'env * Typing_defs.constraint_type
-
-    method on_TCintersection :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
-      'env * Typing_defs.constraint_type
-
     method on_Ttype_switch :
       'env ->
       Typing_reason.t ->

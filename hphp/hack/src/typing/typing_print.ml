@@ -1200,7 +1200,6 @@ module Full = struct
 
   let rec constraint_type_ ~fuel to_doc st penv x =
     let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in
-    let k' ~fuel cty = constraint_type ~fuel to_doc st penv cty in
     match x with
     | Thas_member hm -> thas_member ~fuel k hm
     | Thas_type_member htm ->
@@ -1243,20 +1242,6 @@ module Full = struct
           ]
       in
       (fuel, ttype_switch_doc)
-    | TCunion (lty, cty) ->
-      let (fuel, lty_doc) = k ~fuel lty in
-      let (fuel, cty_doc) = k' ~fuel cty in
-      let cunion_doc =
-        Concat [text "("; lty_doc; text "|"; cty_doc; text ")"]
-      in
-      (fuel, cunion_doc)
-    | TCintersection (lty, cty) ->
-      let (fuel, lty_doc) = k ~fuel lty in
-      let (fuel, cty_doc) = k' ~fuel cty in
-      let cintersection_doc =
-        Concat [text "("; lty_doc; text "&"; cty_doc; text ")"]
-      in
-      (fuel, cintersection_doc)
 
   and constraint_type ~fuel to_doc st penv ty =
     let (r, x) = deref_constraint_type ty in

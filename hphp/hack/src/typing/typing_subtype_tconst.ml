@@ -18,7 +18,7 @@ let make_type_const_equal
   let subtype_error =
     Option.map ~f:Typing_error.Reasons_callback.type_constant_mismatch on_error
   in
-  let rec make_equal env ty =
+  let make_equal env ty =
     match ty with
     | LoclType ty ->
       let ety_env = empty_expand_env in
@@ -64,16 +64,7 @@ let make_type_const_equal
       | (_, Tcan_traverse _)
       | (_, Ttype_switch _)
       | (_, Tdestructure _) ->
-        (env, None)
-      | (_, TCunion (lty, cty)) ->
-        let (env, e1) = make_equal env (LoclType lty) in
-        let (env, e2) = make_equal env (ConstraintType cty) in
-        (env, Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.union [e1; e2]))
-      | (_, TCintersection (lty, cty)) ->
-        let (env, e1) = make_equal env (LoclType lty) in
-        let (env, e2) = make_equal env (ConstraintType cty) in
-        (* TODO: should we be taking the intersection of the errors? *)
-        (env, Option.merge ~f:Typing_error.both e1 e2))
+        (env, None))
   in
   make_equal env ty
 

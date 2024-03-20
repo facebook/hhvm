@@ -365,7 +365,7 @@ let refresh_type_opt renv v tyo =
     let (renv, ty, ch) = refresh_type renv v ty in
     (renv, Some ty, ch)
 
-let rec refresh_ctype renv v cty_orig =
+let refresh_ctype renv v cty_orig =
   let inv = Ast_defs.Invariant in
   with_default ~default:cty_orig
   @@
@@ -411,14 +411,6 @@ let rec refresh_ctype renv v cty_orig =
     ( renv,
       mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }),
       ch1 || ch2 )
-  | (r, TCunion (lty, cty)) ->
-    let (renv, lty, ch1) = refresh_type renv v lty in
-    let (renv, cty, ch2) = refresh_ctype renv v cty in
-    (renv, mk_constraint_type (r, TCunion (lty, cty)), ch1 || ch2)
-  | (r, TCintersection (lty, cty)) ->
-    let (renv, lty, ch1) = refresh_type renv v lty in
-    let (renv, cty, ch2) = refresh_ctype renv v cty in
-    (renv, mk_constraint_type (r, TCintersection (lty, cty)), ch1 || ch2)
 
 let refresh_bounds renv v tys =
   ITySet.fold

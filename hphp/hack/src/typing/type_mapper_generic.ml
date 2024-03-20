@@ -341,12 +341,6 @@ class type ['env] constraint_type_mapper_type =
     method on_Tdestructure :
       'env -> Reason.t -> destructure -> 'env * constraint_type
 
-    method on_TCunion :
-      'env -> Reason.t -> locl_ty -> constraint_type -> 'env * constraint_type
-
-    method on_TCintersection :
-      'env -> Reason.t -> locl_ty -> constraint_type -> 'env * constraint_type
-
     method on_Ttype_switch :
       'env ->
       Reason.t ->
@@ -378,8 +372,6 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | Tcan_index ci -> this#on_Tcan_index env r ci
       | Tcan_traverse ct -> this#on_Tcan_traverse env r ct
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
-      | TCunion (lty, cty) -> this#on_TCunion env r lty cty
-      | TCintersection (lty, cty) -> this#on_TCintersection env r lty cty
       | Ttype_switch { predicate; ty_true; ty_false } ->
         this#on_Ttype_switch env r predicate ty_true ty_false
 
@@ -418,16 +410,6 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       ( env,
         mk_constraint_type
           (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) )
-
-    method on_TCunion env r lty cty =
-      let (env, lty) = this#on_type env lty in
-      let (env, cty) = this#on_constraint_type env cty in
-      (env, mk_constraint_type (r, TCunion (lty, cty)))
-
-    method on_TCintersection env r lty cty =
-      let (env, lty) = this#on_type env lty in
-      let (env, cty) = this#on_constraint_type env cty in
-      (env, mk_constraint_type (r, TCintersection (lty, cty)))
 
     method on_Ttype_switch env r predicate lty_true lty_false =
       let (env, ty_true) = this#on_type env lty_true in

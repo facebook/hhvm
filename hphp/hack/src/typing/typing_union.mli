@@ -46,11 +46,3 @@ val simplify_unions :
   ?on_tyvar:(env -> Reason.t -> Tvid.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
-
-val union_i :
-  env ->
-  ?approx_cancel_neg:bool ->
-  Typing_reason.t ->
-  internal_type ->
-  locl_ty ->
-  env * internal_type

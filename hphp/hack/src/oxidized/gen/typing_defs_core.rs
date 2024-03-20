@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c0773581ac5fad7fbd6a5fd1affd1ee9>>
+// @generated SignedSource<<fb63995bceda13f1b120ebde1b939dcb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1105,8 +1105,6 @@ pub enum ConstraintType_ {
     TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`
     Tdestructure(Destructure),
-    TCunion(Ty, ConstraintType),
-    TCintersection(Ty, ConstraintType),
     #[rust_to_ocaml(name = "Ttype_switch")]
     TtypeSwitch {
         predicate: TypePredicate,

@@ -1279,8 +1279,6 @@ type constraint_type_ =
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
       (** The type of container destructuring via list() or splat `...` *)
-  | TCunion of locl_ty * constraint_type
-  | TCintersection of locl_ty * constraint_type
   | Ttype_switch of {
       predicate: type_predicate;
       ty_true: locl_ty;
@@ -1421,14 +1419,12 @@ let constraint_ty_con_ordinal cty =
   match cty with
   | Thas_member _ -> 0
   | Tdestructure _ -> 1
-  | TCunion _ -> 2
-  | TCintersection _ -> 3
-  | Tcan_index _ -> 4
-  | Tcan_traverse _ -> 5
-  | Thas_type_member _ -> 6
-  | Ttype_switch _ -> 7
+  | Tcan_index _ -> 2
+  | Tcan_traverse _ -> 3
+  | Thas_type_member _ -> 4
+  | Ttype_switch _ -> 5
 
-let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
+let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   let (_, ty1) = deref_constraint_type ty1 in
   let (_, ty2) = deref_constraint_type ty2 in
   match (ty1, ty2) with
@@ -1449,13 +1445,6 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
     can_traverse_compare ~normalize_lists ct1 ct2
   | (Tdestructure d1, Tdestructure d2) ->
     destructure_compare ~normalize_lists d1 d2
-  | (TCunion (lty1, cty1), TCunion (lty2, cty2))
-  | (TCintersection (lty1, cty1), TCintersection (lty2, cty2)) ->
-    let comp1 = ty_compare ~normalize_lists lty1 lty2 in
-    if not @@ Int.equal comp1 0 then
-      comp1
-    else
-      constraint_ty_compare ~normalize_lists cty1 cty2
   | ( Ttype_switch
         { predicate = predicate1; ty_true = ty_true1; ty_false = ty_false1 },
       Ttype_switch
@@ -1472,8 +1461,7 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
     comp
   | ( _,
       ( Thas_member _ | Tcan_index _ | Tcan_traverse _ | Tdestructure _
-      | TCunion _ | TCintersection _ | Thas_type_member _ | Ttype_switch _ ) )
-    ->
+      | Thas_type_member _ | Ttype_switch _ ) ) ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =

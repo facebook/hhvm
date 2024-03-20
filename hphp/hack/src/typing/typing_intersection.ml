@@ -534,58 +534,6 @@ let intersect env ~r ty1 ty2 =
   Typing_log.log_intersection ~level:1 env r ty1 ty2 ~inter_ty;
   (env, inter_ty)
 
-let rec intersect_i env r ty1 lty2 =
-  let ty2 = LoclType lty2 in
-  if Utils.is_sub_type_for_union_i env ty1 ty2 then
-    (env, ty1)
-  else if Utils.is_sub_type_for_union_i env ty2 ty1 then
-    (env, ty2)
-  else
-    let (env, ty) =
-      match ty1 with
-      | LoclType lty1 ->
-        let (env, ty) = intersect env ~r lty1 lty2 in
-        (env, LoclType ty)
-      | ConstraintType cty1 ->
-        (match deref_constraint_type cty1 with
-        | (r, TCintersection (lty1, cty1)) ->
-          let (env, lty) = intersect env ~r lty1 lty2 in
-          ( env,
-            ConstraintType (mk_constraint_type (r, TCintersection (lty, cty1)))
-          )
-        | (r, TCunion (lty1, cty1)) ->
-          (* Distribute intersection over union.
-             At the moment local types in TCunion can only be
-             unions or intersections involving only null and nonnull,
-             so applying distributivity allows for simplifying the types. *)
-          let (env, lty) = intersect env ~r lty1 lty2 in
-          let (env, ty) = intersect_i env r (ConstraintType cty1) lty2 in
-          (match ty with
-          | LoclType ty ->
-            let (env, ty) = Utils.union env lty ty in
-            (env, LoclType ty)
-          | ConstraintType cty ->
-            (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty)))))
-        | (reason, Ttype_switch { predicate; ty_true; ty_false }) ->
-          let (env, ty_true) = intersect env ~r ty_true lty2 in
-          let (env, ty_false) = intersect env ~r ty_false lty2 in
-          ( env,
-            ConstraintType
-              (mk_constraint_type
-                 (reason, Ttype_switch { predicate; ty_true; ty_false })) )
-        | (_, Thas_member _)
-        | (_, Thas_type_member _)
-        | (_, Tcan_index _)
-        | (_, Tcan_traverse _)
-        | (_, Tdestructure _) ->
-          ( env,
-            ConstraintType (mk_constraint_type (r, TCintersection (lty2, cty1)))
-          ))
-    in
-    match ty with
-    | LoclType _ -> (env, ty)
-    | ConstraintType ty -> Utils.simplify_constraint_type env ty
-
 let () = Utils.negate_type_ref := negate_type
 
 let () = Utils.simplify_intersections_ref := simplify_intersections

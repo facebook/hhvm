@@ -40,43 +40,9 @@ type HTTPClient struct {
 	nsecReadTimeout    int64
 }
 
-type HTTPClientTransportFactory struct {
-	options httpClientOptions
-	url     string
-	isPost  bool
-}
-
-func (p *HTTPClientTransportFactory) GetTransport(trans Transport) Transport {
-	if trans != nil {
-		t, ok := trans.(*HTTPClient)
-		if ok && t.url != nil {
-			if t.requestBuffer != nil {
-				t2, _ := newHTTPPostClientWithOptions(t.url.String(), p.options)
-				return t2
-			}
-			t2, _ := newHTTPClientWithOptions(t.url.String(), p.options)
-			return t2
-		}
-	}
-	if p.isPost {
-		s, _ := newHTTPPostClientWithOptions(p.url, p.options)
-		return s
-	}
-	s, _ := newHTTPClientWithOptions(p.url, p.options)
-	return s
-}
-
 type httpClientOptions struct {
 	// If nil, DefaultHTTPClient is used
 	Client *http.Client
-}
-
-func newHTTPPostClientTransportFactory(url string) *HTTPClientTransportFactory {
-	return newHTTPPostClientTransportFactoryWithOptions(url, httpClientOptions{})
-}
-
-func newHTTPPostClientTransportFactoryWithOptions(url string, options httpClientOptions) *HTTPClientTransportFactory {
-	return &HTTPClientTransportFactory{url: url, isPost: true, options: options}
 }
 
 func newHTTPClientWithOptions(urlstr string, options httpClientOptions) (Transport, error) {

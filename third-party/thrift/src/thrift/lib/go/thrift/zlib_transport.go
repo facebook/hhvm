@@ -22,27 +22,11 @@ import (
 	"log"
 )
 
-// ZlibTransportFactory is a factory for ZlibTransport instances
-type ZlibTransportFactory struct {
-	level int
-}
-
 // ZlibTransport is a Transport implementation that makes use of zlib compression.
 type ZlibTransport struct {
 	reader    io.ReadCloser
 	transport Transport
 	writer    *zlib.Writer
-}
-
-// GetTransport constructs a new instance of NewZlibTransport
-func (p *ZlibTransportFactory) GetTransport(trans Transport) Transport {
-	t, _ := NewZlibTransport(trans, p.level)
-	return t
-}
-
-// NewZlibTransportFactory constructs a new instance of NewZlibTransportFactory
-func NewZlibTransportFactory(level int) *ZlibTransportFactory {
-	return &ZlibTransportFactory{level: level}
 }
 
 // NewZlibTransport constructs a new instance of ZlibTransport

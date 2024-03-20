@@ -20,21 +20,9 @@ import (
 	"bufio"
 )
 
-type BufferedTransportFactory struct {
-	size int
-}
-
 type BufferedTransport struct {
 	bufio.ReadWriter
 	tp Transport
-}
-
-func (p *BufferedTransportFactory) GetTransport(trans Transport) Transport {
-	return NewBufferedTransport(trans, p.size)
-}
-
-func NewBufferedTransportFactory(bufferSize int) *BufferedTransportFactory {
-	return &BufferedTransportFactory{size: bufferSize}
 }
 
 func NewBufferedTransport(trans Transport, bufferSize int) *BufferedTransport {

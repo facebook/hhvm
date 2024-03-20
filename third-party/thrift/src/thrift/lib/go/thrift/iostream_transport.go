@@ -29,50 +29,6 @@ type StreamTransport struct {
 	closed       bool
 }
 
-type StreamTransportFactory struct {
-	Reader       io.Reader
-	Writer       io.Writer
-	isReadWriter bool
-}
-
-func (p *StreamTransportFactory) GetTransport(trans Transport) Transport {
-	if trans != nil {
-		t, ok := trans.(*StreamTransport)
-		if ok {
-			if t.isReadWriter {
-				return NewStreamTransportRW(t.Reader.(io.ReadWriter))
-			}
-			if t.Reader != nil && t.Writer != nil {
-				return NewStreamTransport(t.Reader, t.Writer)
-			}
-			if t.Reader != nil && t.Writer == nil {
-				return NewStreamTransportR(t.Reader)
-			}
-			if t.Reader == nil && t.Writer != nil {
-				return NewStreamTransportW(t.Writer)
-			}
-			return &StreamTransport{}
-		}
-	}
-	if p.isReadWriter {
-		return NewStreamTransportRW(p.Reader.(io.ReadWriter))
-	}
-	if p.Reader != nil && p.Writer != nil {
-		return NewStreamTransport(p.Reader, p.Writer)
-	}
-	if p.Reader != nil && p.Writer == nil {
-		return NewStreamTransportR(p.Reader)
-	}
-	if p.Reader == nil && p.Writer != nil {
-		return NewStreamTransportW(p.Writer)
-	}
-	return &StreamTransport{}
-}
-
-func newStreamTransportFactory(reader io.Reader, writer io.Writer, isReadWriter bool) *StreamTransportFactory {
-	return &StreamTransportFactory{Reader: reader, Writer: writer, isReadWriter: isReadWriter}
-}
-
 func NewStreamTransport(r io.Reader, w io.Writer) *StreamTransport {
 	return &StreamTransport{Reader: bufio.NewReader(r), Writer: bufio.NewWriter(w)}
 }

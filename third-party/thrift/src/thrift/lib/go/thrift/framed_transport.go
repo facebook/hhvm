@@ -38,23 +38,6 @@ type FramedTransport struct {
 	maxLength uint32
 }
 
-type framedTransportFactory struct {
-	factory   transportFactory
-	maxLength uint32
-}
-
-func newFramedTransportFactory(factory transportFactory) transportFactory {
-	return &framedTransportFactory{factory: factory, maxLength: DEFAULT_MAX_LENGTH}
-}
-
-func newFramedTransportFactoryMaxLength(factory transportFactory, maxLength uint32) transportFactory {
-	return &framedTransportFactory{factory: factory, maxLength: maxLength}
-}
-
-func (p *framedTransportFactory) GetTransport(base Transport) Transport {
-	return NewFramedTransportMaxLength(p.factory.GetTransport(base), p.maxLength)
-}
-
 func NewFramedTransport(transport Transport) *FramedTransport {
 	return &FramedTransport{transport: transport, reader: bufio.NewReader(transport), maxLength: DEFAULT_MAX_LENGTH}
 }

@@ -39,15 +39,15 @@ type FramedTransport struct {
 }
 
 type framedTransportFactory struct {
-	factory   TransportFactory
+	factory   transportFactory
 	maxLength uint32
 }
 
-func NewFramedTransportFactory(factory TransportFactory) TransportFactory {
+func newFramedTransportFactory(factory transportFactory) transportFactory {
 	return &framedTransportFactory{factory: factory, maxLength: DEFAULT_MAX_LENGTH}
 }
 
-func NewFramedTransportFactoryMaxLength(factory TransportFactory, maxLength uint32) TransportFactory {
+func newFramedTransportFactoryMaxLength(factory transportFactory, maxLength uint32) transportFactory {
 	return &framedTransportFactory{factory: factory, maxLength: maxLength}
 }
 

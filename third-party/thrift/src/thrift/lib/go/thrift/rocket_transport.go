@@ -29,7 +29,7 @@ import (
 type rocketTransportFactory struct{}
 
 // NewRocketTransportFactory makes it possible to create a RocketTransport using a thrift.Socket
-func NewRocketTransportFactory() TransportFactory {
+func newRocketTransportFactory() transportFactory {
 	return &rocketTransportFactory{}
 }
 

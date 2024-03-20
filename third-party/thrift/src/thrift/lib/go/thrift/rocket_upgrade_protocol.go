@@ -22,15 +22,15 @@ import (
 
 // upgradeProtocolFactory is a ProtocolFactory for a protocol that upgrades from Header to Rocket protocol.
 type upgradeToRocketProtocolFactory struct {
-	headerProtocolFactory ProtocolFactory
-	rocketProtocolFactory ProtocolFactory
+	headerProtocolFactory protocolFactory
+	rocketProtocolFactory protocolFactory
 }
 
 // NewUpgradeToRocketProtocolFactory creates a new upgradeProtocolFactory that upgrades from Header to Rocket protocol.
-func NewUpgradeToRocketProtocolFactory() ProtocolFactory {
+func NewUpgradeToRocketProtocolFactory() protocolFactory {
 	return &upgradeToRocketProtocolFactory{
-		headerProtocolFactory: NewHeaderProtocolFactory(),
-		rocketProtocolFactory: NewRocketProtocolFactory(),
+		headerProtocolFactory: newHeaderProtocolFactory(),
+		rocketProtocolFactory: newRocketProtocolFactory(),
 	}
 }
 

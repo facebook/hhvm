@@ -38,8 +38,8 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 type SimpleServer struct {
 	processorFactoryContext      ProcessorFactoryContext
 	serverTransport              ServerTransport
-	transportFactory             TransportFactory
-	protocolFactory              ProtocolFactory
+	transportFactory             transportFactory
+	protocolFactory              protocolFactory
 	configurableRequestProcessor func(ctx context.Context, client Transport) error
 	*ServerOptions
 }
@@ -52,8 +52,8 @@ func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport
 	return &SimpleServer{
 		processorFactoryContext: NewProcessorFactoryContext(processor),
 		serverTransport:         serverTransport,
-		transportFactory:        NewHeaderTransportFactory(NewTransportFactory()),
-		protocolFactory:         NewHeaderProtocolFactory(),
+		transportFactory:        newHeaderTransportFactory(newTransportFactory()),
+		protocolFactory:         newHeaderProtocolFactory(),
 		ServerOptions:           simpleServerOptions(options...),
 	}
 }

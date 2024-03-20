@@ -69,7 +69,7 @@ func (p *StreamTransportFactory) GetTransport(trans Transport) Transport {
 	return &StreamTransport{}
 }
 
-func NewStreamTransportFactory(reader io.Reader, writer io.Writer, isReadWriter bool) *StreamTransportFactory {
+func newStreamTransportFactory(reader io.Reader, writer io.Writer, isReadWriter bool) *StreamTransportFactory {
 	return &StreamTransportFactory{Reader: reader, Writer: writer, isReadWriter: isReadWriter}
 }
 

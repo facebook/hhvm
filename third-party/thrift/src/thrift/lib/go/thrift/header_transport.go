@@ -31,10 +31,10 @@ const (
 )
 
 type tHeaderTransportFactory struct {
-	factory TransportFactory
+	factory transportFactory
 }
 
-func NewHeaderTransportFactory(factory TransportFactory) TransportFactory {
+func newHeaderTransportFactory(factory transportFactory) transportFactory {
 	return &tHeaderTransportFactory{factory: factory}
 }
 

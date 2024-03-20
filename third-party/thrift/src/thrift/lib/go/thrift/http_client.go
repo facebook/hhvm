@@ -71,7 +71,7 @@ type httpClientOptions struct {
 	Client *http.Client
 }
 
-func NewHTTPPostClientTransportFactory(url string) *HTTPClientTransportFactory {
+func newHTTPPostClientTransportFactory(url string) *HTTPClientTransportFactory {
 	return newHTTPPostClientTransportFactoryWithOptions(url, httpClientOptions{})
 }
 

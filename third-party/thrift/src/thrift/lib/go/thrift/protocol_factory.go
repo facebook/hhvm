@@ -16,7 +16,7 @@
 
 package thrift
 
-// ProtocolFactory interface for constructing protocol instances.
-type ProtocolFactory interface {
+// protocolFactory interface for constructing protocol instances.
+type protocolFactory interface {
 	GetProtocol(trans Transport) Protocol
 }

@@ -177,9 +177,9 @@ type protocolTest func(t testing.TB, p Format, trans Transport)
 func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(Transport) Format) {
 	rConn, wConn := tcpStreamSetupForTest(t)
 	rdr, writer := io.Pipe()
-	transports := []TransportFactory{
-		NewFramedTransportFactory(NewStreamTransportFactory(rdr, writer, false)),  // framed over pipe
-		NewFramedTransportFactory(NewStreamTransportFactory(rConn, wConn, false)), // framed over tcp
+	transports := []transportFactory{
+		newFramedTransportFactory(newStreamTransportFactory(rdr, writer, false)),  // framed over pipe
+		newFramedTransportFactory(newStreamTransportFactory(rConn, wConn, false)), // framed over tcp
 	}
 	const iterations = 100
 
@@ -243,10 +243,10 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(Transport) Forma
 func ReadWriteProtocolTest(t *testing.T, newFormat func(Transport) Format) {
 	l := HTTPClientSetupForTest(t)
 	defer l.Close()
-	transports := []TransportFactory{
-		NewMemoryBufferTransportFactory(1024),
-		NewFramedTransportFactory(NewMemoryBufferTransportFactory(1024)),
-		NewHTTPPostClientTransportFactory("http://" + l.Addr().String()),
+	transports := []transportFactory{
+		newMemoryBufferTransportFactory(1024),
+		newFramedTransportFactory(newMemoryBufferTransportFactory(1024)),
+		newHTTPPostClientTransportFactory("http://" + l.Addr().String()),
 	}
 
 	doForAllTransports := func(protTest protocolTest) {

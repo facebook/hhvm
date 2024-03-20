@@ -20,18 +20,18 @@ package thrift
 // This is used primarily in servers, which get Transports from
 // a ServerTransport and then may want to mutate them (i.e. create
 // a BufferedTransport from the underlying base transport)
-type TransportFactory interface {
+type transportFactory interface {
 	GetTransport(trans Transport) Transport
 }
 
-type transportFactory struct{}
+type baseTransportFactory struct{}
 
 // Return a wrapped instance of the base Transport.
-func (p *transportFactory) GetTransport(trans Transport) Transport {
+func (p *baseTransportFactory) GetTransport(trans Transport) Transport {
 	return trans
 }
 
-// NewTransportFactory returns a new TransportFactory
-func NewTransportFactory() TransportFactory {
-	return &transportFactory{}
+// newTransportFactory returns a new TransportFactory
+func newTransportFactory() transportFactory {
+	return &baseTransportFactory{}
 }

@@ -27,11 +27,11 @@ import (
 func TestEnsureTransportsAreRich(t *testing.T) {
 	buf := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	transports := []TransportFactory{
-		NewMemoryBufferTransportFactory(1024),
-		NewStreamTransportFactory(buf, buf, true),
-		NewFramedTransportFactory(NewMemoryBufferTransportFactory(1024)),
-		NewHTTPPostClientTransportFactory("http://127.0.0.1"),
+	transports := []transportFactory{
+		newMemoryBufferTransportFactory(1024),
+		newStreamTransportFactory(buf, buf, true),
+		newFramedTransportFactory(newMemoryBufferTransportFactory(1024)),
+		newHTTPPostClientTransportFactory("http://127.0.0.1"),
 	}
 	for _, tf := range transports {
 		trans := tf.GetTransport(nil)

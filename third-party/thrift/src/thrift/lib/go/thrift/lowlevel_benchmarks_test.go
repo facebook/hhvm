@@ -23,10 +23,10 @@ import (
 
 var buf = bytes.NewBuffer(make([]byte, 0, 1024))
 
-var tfv = []TransportFactory{
-	NewMemoryBufferTransportFactory(1024),
-	NewStreamTransportFactory(buf, buf, true),
-	NewFramedTransportFactory(NewMemoryBufferTransportFactory(1024)),
+var tfv = []transportFactory{
+	newMemoryBufferTransportFactory(1024),
+	newStreamTransportFactory(buf, buf, true),
+	newFramedTransportFactory(newMemoryBufferTransportFactory(1024)),
 }
 
 func BenchmarkBinaryBool_0(b *testing.B) {

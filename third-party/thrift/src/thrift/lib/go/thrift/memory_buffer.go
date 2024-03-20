@@ -40,7 +40,7 @@ func (p *MemoryBufferTransportFactory) GetTransport(trans Transport) Transport {
 	return NewMemoryBufferLen(p.size)
 }
 
-func NewMemoryBufferTransportFactory(size int) *MemoryBufferTransportFactory {
+func newMemoryBufferTransportFactory(size int) *MemoryBufferTransportFactory {
 	return &MemoryBufferTransportFactory{size: size}
 }
 

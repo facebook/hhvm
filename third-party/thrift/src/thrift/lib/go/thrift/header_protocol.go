@@ -30,7 +30,7 @@ type headerProtocol struct {
 
 type HeaderProtocolFactory struct{}
 
-func NewHeaderProtocolFactory() *HeaderProtocolFactory {
+func newHeaderProtocolFactory() *HeaderProtocolFactory {
 	return &HeaderProtocolFactory{}
 }
 

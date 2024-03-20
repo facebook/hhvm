@@ -40,7 +40,7 @@ type rocketProtocol struct {
 type rocketProtocolFactory struct{}
 
 // NewRocketProtocolFactory makes it possible to create a RocketProtocol using a RocketTransport
-func NewRocketProtocolFactory() ProtocolFactory {
+func newRocketProtocolFactory() protocolFactory {
 	return &rocketProtocolFactory{}
 }
 

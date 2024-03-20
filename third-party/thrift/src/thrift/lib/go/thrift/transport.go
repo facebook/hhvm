@@ -23,6 +23,20 @@ import (
 
 var errTransportInterrupted = errors.New("Transport Interrupted")
 
+// TransportID is the type of the transport, header, rocket, etc.
+type TransportID int16
+
+const (
+	// TransportIDUnknown is the default value for TransportID
+	TransportIDUnknown TransportID = 0
+	// TransportIDHeader is the header transport
+	TransportIDHeader TransportID = 1
+	// TransportIDRocket is the rocket transport
+	TransportIDRocket TransportID = 2
+	// TransportIDUpgradeToRocket is the transport that upgrades header to rocket
+	TransportIDUpgradeToRocket TransportID = 3
+)
+
 // Flusher is the interface that wraps the basic Flush method
 type Flusher interface {
 	Flush() (err error)

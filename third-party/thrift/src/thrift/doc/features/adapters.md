@@ -367,7 +367,7 @@ function timeSinceCreated(Document $doc): Duration {
 @hack.Adapter{name = "CustomTypeAdapter"}
 typedef i32 AdaptedInt
 
-@hack.Wrappper{name = "CustomTypeWrapper"}
+@hack.Wrapper{name = "CustomTypeWrapper"}
 typedef i32 WrappedInt
 
 struct Foo {

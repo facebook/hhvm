@@ -111,7 +111,7 @@ func (p *StreamTransport) Open() error {
 	}
 }
 
-// Closes both the input and output streams.
+// Closes both the reader and writer streams.
 func (p *StreamTransport) Close() error {
 	if p.closed {
 		return NewTransportException(NOT_OPEN, "StreamTransport already closed.")

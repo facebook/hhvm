@@ -43,20 +43,12 @@ type Processor interface {
 // ProcessorFunction is the interface that must be implemented in
 // order to perform io and message processing
 type ProcessorFunction interface {
-	// Read a serializable message from the input protocol.
-	Read(iprot Format) (Struct, Exception)
+	// Read a serializable message from the protocol.
+	Read(prot Format) (Struct, Exception)
 	// Process a message handing it to the client handler.
 	Run(args Struct) (WritableStruct, ApplicationException)
 	// Write a serializable responsne
-	Write(seqID int32, result WritableStruct, oprot Format) Exception
-}
-
-// Process is a utility function to take a processor and an input and output
-// protocol, and fully process a message.  It understands the thrift protocol.
-// A framework could be written outside of the thrift library but would need to
-// duplicate this logic.
-func Process(processor Processor, iprot, oprot Protocol) (keepOpen bool, exc Exception) {
-	return ProcessContext(context.Background(), NewProcessorContextAdapter(processor), iprot, oprot)
+	Write(seqID int32, result WritableStruct, prot Format) Exception
 }
 
 // ProcessorContext is a Processor that supports contexts.
@@ -86,9 +78,9 @@ func (p ctxProcessorAdapter) GetProcessorFunctionContext(name string) (Processor
 
 // ProcessorFunctionContext is a ProcessorFunction that supports contexts.
 type ProcessorFunctionContext interface {
-	Read(iprot Format) (Struct, Exception)
+	Read(prot Format) (Struct, Exception)
 	RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException)
-	Write(seqID int32, result WritableStruct, oprot Format) Exception
+	Write(seqID int32, result WritableStruct, prot Format) Exception
 }
 
 // NewProcessorFunctionContextAdapter creates a ProcessorFunctionContext from a regular ProcessorFunction.
@@ -111,9 +103,12 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
-// ProcessContext is a Process that supports contexts.
-func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, oprot Protocol) (keepOpen bool, ext Exception) {
-	name, messageType, seqID, rerr := iprot.ReadMessageBegin()
+// processContext is a utility function to take a processor and a protocol,
+// and fully process a message. It understands the thrift protocol.
+// A framework could be written outside of the thrift library but would need to
+// duplicate this logic.
+func processContext(ctx context.Context, processor ProcessorContext, prot Protocol) (keepOpen bool, ext Exception) {
+	name, messageType, seqID, rerr := prot.ReadMessageBegin()
 	if rerr != nil {
 		if err, ok := rerr.(TransportException); ok && err.TypeID() == END_OF_FILE {
 			// connection terminated because client closed connection
@@ -144,14 +139,14 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 	// if there was an error before we could find the Processor function, attempt to skip the
 	// rest of the invalid message but keep the connection open.
 	if err != nil {
-		if e2 := iprot.Skip(STRUCT); e2 != nil {
+		if e2 := prot.Skip(STRUCT); e2 != nil {
 			return false, e2
-		} else if e2 := iprot.ReadMessageEnd(); e2 != nil {
+		} else if e2 := prot.ReadMessageEnd(); e2 != nil {
 			return false, e2
 		}
 		// for ONEWAY, we have no way to report that the processing failed.
 		if messageType != ONEWAY {
-			if e2 := sendException(oprot, name, seqID, err); e2 != nil {
+			if e2 := sendException(prot, name, seqID, err); e2 != nil {
 				return false, e2
 			}
 		}
@@ -162,7 +157,7 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 		panic("logic error in thrift.Process() handler.  processor function may not be nil")
 	}
 
-	argStruct, e2 := pfunc.Read(iprot)
+	argStruct, e2 := pfunc.Read(prot)
 	if e2 != nil {
 		// close connection on read failure
 		return false, e2
@@ -174,12 +169,8 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 	if messageType == CALL {
 		// protect message writing
 		if err != nil {
-			switch oprotHeader := oprot.(type) {
-			case *headerProtocol:
-				// set header for ServiceRouter
-				oprotHeader.SetRequestHeader("uex", errorType(err))
-				oprotHeader.SetRequestHeader("uexw", err.Error())
-			}
+			prot.SetRequestHeader("uex", errorType(err))
+			prot.SetRequestHeader("uexw", err.Error())
 			// it's an application generated error, so serialize it
 			// to the client
 			result = err
@@ -187,18 +178,15 @@ func ProcessContext(ctx context.Context, processor ProcessorContext, iprot, opro
 
 		// If we got a structured exception back, write metadata about it into headers
 		if rr, ok := result.(WritableResult); ok && rr.Exception() != nil {
-			switch oprotHeader := oprot.(type) {
-			case *headerProtocol:
-				terr := rr.Exception()
-				oprotHeader.SetRequestHeader("uex", errorType(terr))
-				oprotHeader.SetRequestHeader("uexw", terr.Error())
-			}
+			terr := rr.Exception()
+			prot.SetRequestHeader("uex", errorType(terr))
+			prot.SetRequestHeader("uexw", terr.Error())
 		}
 
 		// if result was nil, call was oneway
 		// often times oneway calls do not even have msgType ONEWAY
 		if result != nil {
-			if e2 := pfunc.Write(seqID, result, oprot); e2 != nil {
+			if e2 := pfunc.Write(seqID, result, prot); e2 != nil {
 				// close connection on write failure
 				return false, err
 			}

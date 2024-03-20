@@ -271,7 +271,7 @@ func (t *HeaderTransport) ResetProtocol() error {
 	// Needs benchmark to test.
 
 	hdr := &tHeader{}
-	// Consume the header from the input stream
+	// Consume the header from the stream
 	err := hdr.Read(t.rbuf)
 	if err != nil {
 		return NewTransportExceptionFromError(err)

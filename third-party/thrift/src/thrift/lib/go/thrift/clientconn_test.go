@@ -24,10 +24,10 @@ import (
 
 var errFakeResponseRead = errors.New("error reading from FakeResponse")
 var errFakeRequestWrite = errors.New("error writing FakeRequest")
-var errFakeIprotoReadMessageBegin = errors.New("error reading message begin from FakeIproto")
-var errFakeOprotoWriteMessageBegin = errors.New("error writing message begin from FakeIproto")
-var errFakeOprotoWriteMessageEnd = errors.New("error writing message end from FakeOproto")
-var errFakeOprotoFlush = errors.New("error flushing FakeOproto")
+var errFakeProtoReadMessageBegin = errors.New("error reading message begin from FakeProto")
+var errFakeProtoWriteMessageBegin = errors.New("error writing message begin from FakeProto")
+var errFakeProtoWriteMessageEnd = errors.New("error writing message end from FakeProto")
+var errFakeProtoFlush = errors.New("error flushing FakeProto")
 
 type fakeResponse struct {
 	IResponse
@@ -39,52 +39,48 @@ type fakeRequest struct {
 	shouldReturnError bool
 }
 
-type fakeIproto struct {
+type fakeProto struct {
 	Protocol
 	method            string
 	typeID            MessageType
 	seqID             int32
 	shouldReturnError bool
-}
-
-type fakeOproto struct {
-	Protocol
 	errOnMessageBegin bool
 	errOnMessageEnd   bool
 	errOnFlush        bool
 }
 
-func (f *fakeRequest) Write(oproto Format) error {
+func (f *fakeRequest) Write(proto Format) error {
 	if f.shouldReturnError {
 		return errFakeRequestWrite
 	}
 	return nil
 }
 
-func (f *fakeOproto) WriteMessageBegin(method string, typeID MessageType, seqID int32) error {
+func (f *fakeProto) WriteMessageBegin(method string, typeID MessageType, seqID int32) error {
 	if f.errOnMessageBegin {
-		return errFakeOprotoWriteMessageBegin
+		return errFakeProtoWriteMessageBegin
 	}
 	return nil
 }
 
-func (f *fakeOproto) WriteMessageEnd() error {
+func (f *fakeProto) WriteMessageEnd() error {
 	if f.errOnMessageEnd {
-		return errFakeOprotoWriteMessageEnd
+		return errFakeProtoWriteMessageEnd
 	}
 	return nil
 }
 
-func (f *fakeOproto) Flush() error {
+func (f *fakeProto) Flush() error {
 	if f.errOnFlush {
-		return errFakeOprotoFlush
+		return errFakeProtoFlush
 	}
 	return nil
 }
 
-func (f *fakeIproto) ReadMessageBegin() (method string, typeID MessageType, seqID int32, err error) {
+func (f *fakeProto) ReadMessageBegin() (method string, typeID MessageType, seqID int32, err error) {
 	if f.shouldReturnError {
-		err = errFakeIprotoReadMessageBegin
+		err = errFakeProtoReadMessageBegin
 		return
 	}
 
@@ -106,26 +102,26 @@ func TestSendMsgError(t *testing.T) {
 	}{
 		// Bad WriteMessageBegin
 		{
-			proto:    &fakeOproto{errOnMessageBegin: true},
-			expected: errFakeOprotoWriteMessageBegin,
+			proto:    &fakeProto{errOnMessageBegin: true},
+			expected: errFakeProtoWriteMessageBegin,
 		},
 		// Bad request.Write
 		{
-			proto:    &fakeOproto{errOnMessageBegin: true},
+			proto:    &fakeProto{errOnMessageBegin: true},
 			request:  &fakeRequest{shouldReturnError: true},
-			expected: errFakeOprotoWriteMessageBegin,
+			expected: errFakeProtoWriteMessageBegin,
 		},
 		// Bad WriteMessageEnd
 		{
-			proto:    &fakeOproto{errOnMessageEnd: true},
+			proto:    &fakeProto{errOnMessageEnd: true},
 			request:  &fakeRequest{shouldReturnError: false},
-			expected: errFakeOprotoWriteMessageEnd,
+			expected: errFakeProtoWriteMessageEnd,
 		},
 		// Bad Flush
 		{
-			proto:    &fakeOproto{errOnFlush: true},
+			proto:    &fakeProto{errOnFlush: true},
 			request:  &fakeRequest{shouldReturnError: false},
-			expected: errFakeOprotoFlush,
+			expected: errFakeProtoFlush,
 		},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -149,31 +145,31 @@ func TestRecvMsgError(t *testing.T) {
 	}{
 		// Error reading message begin
 		{
-			proto:    &fakeIproto{shouldReturnError: true},
-			expected: errFakeIprotoReadMessageBegin,
+			proto:    &fakeProto{shouldReturnError: true},
+			expected: errFakeProtoReadMessageBegin,
 		},
 
 		// Bad method name in response
 		{
-			proto:    &fakeIproto{method: "foobar2"},
+			proto:    &fakeProto{method: "foobar2"},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: wrong method name"),
 		},
 
 		// Bad seqID in response
 		{
-			proto:    &fakeIproto{method: "foobar", seqID: -1},
+			proto:    &fakeProto{method: "foobar", seqID: -1},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: out of sequence response"),
 		},
 
 		// Bad typeID in response
 		{
-			proto:    &fakeIproto{method: "foobar", seqID: 0, typeID: -1},
+			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: -1},
 			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: invalid message type"),
 		},
 
 		// Bad REPLY response body read
 		{
-			proto:    &fakeIproto{method: "foobar", seqID: 0, typeID: REPLY},
+			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: REPLY},
 			response: &fakeResponse{shouldReturnError: true},
 			expected: errFakeResponseRead,
 		},

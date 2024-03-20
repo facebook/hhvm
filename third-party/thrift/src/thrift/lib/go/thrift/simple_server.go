@@ -160,7 +160,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 	transport := p.transportFactory.GetTransport(client)
 	protocol := p.protocolFactory.GetProtocol(transport)
 
-	// Store the input protocol on the context so handlers can query headers.
+	// Store the protocol on the context so handlers can query headers.
 	// See HeadersFromContext.
 	ctx = WithProtocol(ctx, protocol)
 
@@ -172,7 +172,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 	defer transport.Close()
 	intProcessor := WrapInterceptorContext(p.interceptor, processor)
 	for {
-		keepOpen, exc := ProcessContext(ctx, intProcessor, protocol, protocol)
+		keepOpen, exc := processContext(ctx, intProcessor, protocol)
 		if exc != nil {
 			protocol.Flush()
 			return exc

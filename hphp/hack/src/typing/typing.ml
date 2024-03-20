@@ -2437,6 +2437,9 @@ module rec Expr : sig
 
   val lvalue : env -> Nast.expr -> env * Tast.expr * locl_ty
 
+  val type_switch :
+    env -> Tast.expr -> (env * Aast.lid * locl_ty * locl_ty) option
+
   (** Build an environment for the true or false branch of
   conditional statements. *)
   val condition : env -> bool -> Tast.expr -> env * branch_info
@@ -6864,6 +6867,51 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
+  and type_switch env ((_ty, p, e) : Tast.expr) =
+    let open Option.Let_syntax in
+    let* (env, errs, ivar, pos_hint, predicate) =
+      match e with
+      | Aast.Is (ivar, hint) ->
+        let ((env, ty_err_opt), hint_ty) =
+          Typing_phase.localize_hint_for_refinement env hint
+        in
+        let* (env, predicate) =
+          Typing_refinement.TyPredicate.of_ty env hint_ty
+        in
+        Some (env, ty_err_opt, ivar, fst hint, predicate)
+      | _ -> None
+    in
+    let (env, locl_opt) =
+      make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
+    in
+    let* locl = locl_opt in
+
+    let env = Env.open_tyvars env p in
+    let (env, ty_true) = Env.fresh_type env p in
+    let (env, ty_false) = Env.fresh_type env p in
+    let type_switch_constraint =
+      ConstraintType
+        (mk_constraint_type
+           (Reason.Ris pos_hint, Ttype_switch { predicate; ty_true; ty_false }))
+    in
+    let env = Env.set_tyvar_variance_i env type_switch_constraint in
+    let ty = fst3 ivar in
+    let (env, ty_err) =
+      Type.sub_type_i
+        ~is_coeffect:false
+        p
+        Reason.URnone
+        env
+        (LoclType ty)
+        type_switch_constraint
+        Typing_error.Callback.unify_error
+    in
+    let errs = Option.merge errs ty_err ~f:Typing_error.both in
+    let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
+    let errs = Option.merge errs ty_err ~f:Typing_error.both in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
+    return (env, locl, ty_true, ty_false)
+
   and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     match e with
     | Aast.Hole (e, _, _, _) -> condition env tparamet e
@@ -7272,41 +7320,62 @@ end = struct
         Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       let (env, tb1, tb2) =
-        branch
-          ~join_pos:pos
-          env
-          (fun env ->
-            let (env, { pkgs }) = Expr.condition env true te in
-            let (env, b1) =
-              Env.with_packages env pkgs @@ fun env -> block env b1
-            in
-            let rec get_loaded_packages_from_invariant (_, _, e) acc =
-              match e with
-              | Aast.Package (_, pkg) -> SSet.add pkg acc
-              | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
-                get_loaded_packages_from_invariant lhs acc
-                |> get_loaded_packages_from_invariant rhs
-              | _ -> acc
-            in
-            (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
-               revisit the branch and harvest packages loaded in `cond` if the branch contains an
-               invariant statement. *)
-            let env =
-              List.fold ~init:env b1 ~f:(fun env (_, tst) ->
-                  match (te, tst) with
-                  | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
-                      Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ }) )
-                    when String.equal
-                           s
-                           SN.AutoimportedFunctions.invariant_violation ->
-                    get_loaded_packages_from_invariant e SSet.empty
-                    |> Env.load_packages env
-                  | _ -> env)
-            in
-            (env, b1))
-          (fun env ->
-            let (env, { pkgs }) = Expr.condition env false te in
-            Env.with_packages env pkgs @@ fun env -> block env b2)
+        match Expr.type_switch env te with
+        | Some (env, locl_ivar, ty_true, ty_false) ->
+          let (_, local_id) = locl_ivar in
+          let bound_ty =
+            (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+          in
+          branch
+            ~join_pos:pos
+            env
+            (fun env ->
+              let env =
+                set_local ~is_defined:true ~bound_ty env locl_ivar ty_true
+              in
+              block env b1)
+            (fun env ->
+              let env =
+                set_local ~is_defined:true ~bound_ty env locl_ivar ty_false
+              in
+              block env b2)
+        | None ->
+          branch
+            ~join_pos:pos
+            env
+            (fun env ->
+              let (env, { pkgs }) = Expr.condition env true te in
+              let (env, b1) =
+                Env.with_packages env pkgs @@ fun env -> block env b1
+              in
+              let rec get_loaded_packages_from_invariant (_, _, e) acc =
+                match e with
+                | Aast.Package (_, pkg) -> SSet.add pkg acc
+                | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
+                  get_loaded_packages_from_invariant lhs acc
+                  |> get_loaded_packages_from_invariant rhs
+                | _ -> acc
+              in
+              (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
+                 revisit the branch and harvest packages loaded in `cond` if the branch contains an
+                 invariant statement. *)
+              let env =
+                List.fold ~init:env b1 ~f:(fun env (_, tst) ->
+                    match (te, tst) with
+                    | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
+                        Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ })
+                      )
+                      when String.equal
+                             s
+                             SN.AutoimportedFunctions.invariant_violation ->
+                      get_loaded_packages_from_invariant e SSet.empty
+                      |> Env.load_packages env
+                    | _ -> env)
+              in
+              (env, b1))
+            (fun env ->
+              let (env, { pkgs }) = Expr.condition env false te in
+              Env.with_packages env pkgs @@ fun env -> block env b2)
       in
       (* TODO TAST: annotate with joined types *)
       (env, Aast.If (te, tb1, tb2))

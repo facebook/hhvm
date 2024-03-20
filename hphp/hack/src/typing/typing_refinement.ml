@@ -177,3 +177,10 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
     span = TyPartition.span partition;
     right = TyPartition.right partition;
   }
+
+module TyPredicate = struct
+  let of_ty env ty =
+    match get_node ty with
+    | Tprim Aast.Tbool -> Some (env, IsBool)
+    | _ -> None
+end

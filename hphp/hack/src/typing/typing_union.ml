@@ -425,6 +425,12 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
             (env, Some inter_ty)
           | _ -> (env, Some (MakeType.intersection r (union_ty :: common_tyl))))))
     (* TODO with Tclass, union type arguments if covariant *)
+    | (ty, (_, Tneg (Neg_predicate predicate)))
+    | ((_, Tneg (Neg_predicate predicate)), ty) ->
+      (match Typing_refinement.TyPredicate.of_ty env (mk ty) with
+      | Some (env, other) when equal_type_predicate predicate other ->
+        (env, Some (MakeType.mixed r))
+      | _ -> ty_equiv env ty1 ty2 ~are_ty_param:false)
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
           | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Tvar _ | Tvec_or_dict _

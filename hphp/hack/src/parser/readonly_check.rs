@@ -682,6 +682,22 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
                 }
             }
+            aast::Expr_::Unop(x) => {
+                let (operator, operand) = x.as_mut();
+                if let Uop::Upincr | Uop::Updecr | Uop::Uincr | Uop::Udecr = operator {
+                    check_assignment_validity(
+                        context,
+                        self,
+                        &p.1,
+                        operand,
+                        // Expr_::Int("1".to_string()) might be more accurate
+                        // but for this analysis we really just want any
+                        // non-ReadonlyExpr as an implicit RHS
+                        // when treating a these unops as binops
+                        &mut Expr((), Pos::NONE, Expr_::Omitted),
+                    );
+                }
+            }
             aast::Expr_::Call(x) => {
                 let aast::CallExpr { func, args, .. } = &mut **x;
 

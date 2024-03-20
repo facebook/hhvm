@@ -63,6 +63,6 @@ let get_title (quickfix : 'a t) : string = quickfix.title
 
 let get_edits (quickfix : Pos.t t) : Pos.t edits = quickfix.edits
 
-let get_hint_styles (quickfix : Pos.t t) :
-    Pos.t Classish_positions.pos hint_style list =
+let get_hint_styles (quickfix : 'p t) :
+    'p Classish_positions.pos hint_style list =
   quickfix.hint_styles

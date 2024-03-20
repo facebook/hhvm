@@ -54,6 +54,6 @@ val get_title : Pos.t t -> string
 
 val get_edits : Pos.t t -> Pos.t edits
 
-val get_hint_styles : Pos.t t -> Pos.t Classish_positions.pos hint_style list
+val get_hint_styles : 'pos t -> 'pos Classish_positions.pos hint_style list
 
 val to_absolute : Pos.t t -> Pos.absolute t

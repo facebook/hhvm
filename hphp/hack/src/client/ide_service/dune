@@ -18,6 +18,7 @@
   server_env_build
   server_go_to
   server_rewrite
+  ide_diagnostics
   ide_search
   state_loader
   naming_table_builder_ffi_externs
@@ -98,4 +99,30 @@
   search_core
   search_utils
   server_autocomplete_services
+  utils_core))
+
+(library
+ (name ide_diagnostics)
+ (wrapped false)
+ (modules ide_diagnostics)
+ (libraries
+  annotated_ast
+  ast
+  client_ide_message
+  code_action_types
+  code_actions_services_refactors
+  collections
+  decl_provider
+  errors
+  extract_classish
+  extract_method
+  inline_method
+  full_fidelity
+  logging
+  lsp
+  pos
+  provider_context
+  tast_env
+  tast_provider
+  typing_skeleton
   utils_core))

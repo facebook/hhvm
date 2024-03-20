@@ -97,7 +97,7 @@ type diagnostic = {
 }
 [@@deriving show]
 
-let diagnostic_of_finalized_error diagnostic_error =
+let diagnostic_of_finalized_error_without_related_hints diagnostic_error =
   { diagnostic_error; diagnostic_related_hints = [] }
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on

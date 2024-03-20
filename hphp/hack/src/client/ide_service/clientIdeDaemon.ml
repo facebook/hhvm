@@ -727,9 +727,9 @@ let handle_request
     in
     let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
     let diagnostics =
-      List.map errors ~f:(fun e ->
-          ClientIdeMessage.
-            { diagnostic_error = e; diagnostic_related_hints = [] })
+      List.map
+        errors
+        ~f:ClientIdeMessage.diagnostic_of_finalized_error_without_related_hints
     in
     ( Initialized
         { istate with iopen_files = close_file istate.iopen_files path },
@@ -754,11 +754,7 @@ let handle_request
     let errors = get_user_facing_errors ~ctx ~entry in
     published_errors_ref := Some errors;
     let errors = Errors.sort_and_finalize errors in
-    let diagnostics =
-      List.map errors ~f:(fun e ->
-          ClientIdeMessage.
-            { diagnostic_error = e; diagnostic_related_hints = [] })
-    in
+    let diagnostics = Ide_diagnostics.convert ~ctx ~entry errors in
     (Initialized istate, Ok diagnostics)
   (* Document Symbol *)
   | (During_init dstate, Document_symbol document) ->

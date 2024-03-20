@@ -111,6 +111,18 @@ let classish_positions_of_syntax ~(to_pos : int -> int -> Pos.t) (s : Syntax.t)
 
 let empty = SMap.empty
 
+let map_classish_positions ~f (classish_positions : 'pos classish_positions) =
+  let { classish_start_of_body; classish_end_of_body; classish_closing_brace } =
+    classish_positions
+  in
+  {
+    classish_start_of_body = f classish_start_of_body;
+    classish_end_of_body = f classish_end_of_body;
+    classish_closing_brace = f classish_closing_brace;
+  }
+
+let map ~f (t : _ t) = SMap.map (map_classish_positions ~f) t
+
 let extract
     (s : Syntax.t)
     (source_text : Full_fidelity_source_text.t)

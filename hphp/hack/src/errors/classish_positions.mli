@@ -22,6 +22,9 @@ val extract :
 (** An empty positional map *)
 val empty : 'pos t
 
+(** Map over the embedded positions. *)
+val map : f:('pos -> 'qos) -> 'pos t -> 'qos t
+
 (** Map over the embedded positions *)
 val map_pos : f:('pos -> 'qos) -> 'pos pos -> 'qos pos
 

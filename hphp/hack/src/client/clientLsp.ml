@@ -3655,7 +3655,9 @@ let handle_errors_file_item
               let diagnostics =
                 List.map
                   file_errors
-                  ~f:ClientIdeMessage.diagnostic_of_finalized_error
+                  ~f:
+                    ClientIdeMessage
+                    .diagnostic_of_finalized_error_without_related_hints
               in
               publish (hack_errors_to_lsp_diagnostic path diagnostics);
               UriMap.add uri (timestamp, Diagnostics_from_errors_file) acc)

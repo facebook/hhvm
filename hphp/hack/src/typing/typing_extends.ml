@@ -315,7 +315,13 @@ let stub_all_methods_quickfix
     ~edits:
       (Quickfix.Classish_end
          { classish_end_new_text; classish_end_name = class_name })
-    ~hint_styles:[Quickfix.HintStylePrimaryError]
+    ~hint_styles:
+      Quickfix.
+        [
+          HintStylePrimaryError;
+          HintStyleHint
+            (Classish_positions_types.Classish_closing_brace class_name);
+        ]
 
 (* Emit an error for every missing method or property in this
    class. Offer a single quickfix for adding all the missing

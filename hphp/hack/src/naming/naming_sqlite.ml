@@ -16,6 +16,7 @@ type insertion_error = {
   hash: Int64.t;
   name_kind: Naming_types.name_kind;
   name: string;
+  sort_text: string option;
   origin_exception: Exception.t;
       [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
 }
@@ -32,12 +33,12 @@ type save_result = {
 let empty_save_result ~(checksum : Int64.t) =
   { files_added = 0; symbols_added = 0; errors = []; checksum }
 
-let insert_safe ~name ~name_kind ~hash ~canon_hash f :
+let insert_safe ~name ~name_kind ~hash ~canon_hash ~sort_text f :
     (unit, insertion_error) result =
   try Ok (f ()) with
   | e ->
     let origin_exception = Exception.wrap e in
-    Error { canon_hash; hash; name_kind; name; origin_exception }
+    Error { canon_hash; hash; name_kind; name; origin_exception; sort_text }
 
 type 'a forward_naming_table_delta =
   | Modified of 'a
@@ -364,7 +365,7 @@ module FileInfoTable = struct
         Core.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
               let pos = FileInfo.File (name_type, path) in
-              FileInfo.{ pos; name; decl_hash = None }))
+              FileInfo.{ pos; name; decl_hash = None; sort_text = None }))
       | Sqlite3.Data.NULL -> []
       | _ -> failwith "Unexpected column type when retrieving names"
     in
@@ -533,7 +534,7 @@ module SymbolTable = struct
   let insert
       db stmt_cache ~name ~hash ~canon_hash ~name_kind ~file_info_id ~decl_hash
       : (unit, insertion_error) result =
-    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
+    insert_safe ~name ~name_kind ~hash ~canon_hash ~sort_text:None @@ fun () ->
     let flags = name_kind |> Naming_types.name_kind_to_enum |> Int64.of_int in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -666,7 +667,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let insert ~name_kind ~dep_ctor (symbols_inserted, errors, checksum) file_info
       =
-    let { FileInfo.pos = _; name; decl_hash } = file_info in
+    let { FileInfo.pos = _; name; decl_hash; sort_text = _ } = file_info in
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
       name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64

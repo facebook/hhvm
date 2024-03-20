@@ -13,6 +13,7 @@ type insertion_error = {
   hash: Int64.t;
   name_kind: Naming_types.name_kind;
   name: string;
+  sort_text: string option;
   origin_exception: Exception.t;
       [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
 }

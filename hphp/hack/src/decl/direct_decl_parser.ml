@@ -24,7 +24,7 @@ type parsed_file = {
 type parsed_file_with_hashes = {
   pfh_mode: FileInfo.mode option;
   pfh_hash: FileInfo.pfh_hash;
-  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t * string option) list;
 }
 
 external parse_decls :
@@ -47,34 +47,34 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
     List.fold
       parsed_file.pfh_decls
       ~init:FileInfo.empty_ids
-      ~f:(fun acc (name, decl, hash) ->
+      ~f:(fun acc (name, decl, hash, sort_text) ->
         let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
         match decl with
         | Shallow_decl_defs.Class c ->
           let pos = pos (fst c.Shallow_decl_defs.sc_name) in
           let decl_hash = Some hash in
-          let info = FileInfo.{ pos; name; decl_hash } in
+          let info = FileInfo.{ pos; name; decl_hash; sort_text } in
           FileInfo.{ acc with classes = info :: acc.classes }
         | Shallow_decl_defs.Fun f ->
           let pos = pos f.Typing_defs.fe_pos in
           let decl_hash = Some hash in
-          let info = FileInfo.{ pos; name; decl_hash } in
+          let info = FileInfo.{ pos; name; decl_hash; sort_text } in
           FileInfo.{ acc with funs = info :: acc.funs }
         | Shallow_decl_defs.Typedef tf ->
           let pos = pos tf.Typing_defs.td_pos in
 
           let decl_hash = Some hash in
-          let info = FileInfo.{ pos; name; decl_hash } in
+          let info = FileInfo.{ pos; name; decl_hash; sort_text } in
           FileInfo.{ acc with typedefs = info :: acc.typedefs }
         | Shallow_decl_defs.Const c ->
           let pos = pos c.Typing_defs.cd_pos in
           let decl_hash = Some hash in
-          let info = FileInfo.{ pos; name; decl_hash } in
+          let info = FileInfo.{ pos; name; decl_hash; sort_text } in
           FileInfo.{ acc with consts = info :: acc.consts }
         | Shallow_decl_defs.Module m ->
           let pos = pos m.Typing_defs.mdt_pos in
           let decl_hash = Some hash in
-          let info = FileInfo.{ pos; name; decl_hash } in
+          let info = FileInfo.{ pos; name; decl_hash; sort_text } in
           FileInfo.{ acc with modules = info :: acc.modules })
   in
   { FileInfo.ids; position_free_decl_hash; file_mode; comments = None }
@@ -82,7 +82,9 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
 let decls_to_addenda (parsed_file : parsed_file_with_hashes) :
     FileInfo.si_addendum list =
   (* NB: Must be manually kept in sync with Rust function `si_addenum::get_si_addenda` *)
-  List.filter_map parsed_file.pfh_decls ~f:(fun (name, decl, _hash) ->
+  List.filter_map
+    parsed_file.pfh_decls
+    ~f:(fun (name, decl, _hash, _sort_text) ->
       let sia_name = Utils.strip_ns name in
       let sia_kind =
         match decl with

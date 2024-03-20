@@ -20,7 +20,7 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
   | Some parsed_file ->
     let decls = parsed_file.Direct_decl_utils.pfh_decls in
     List.find_map decls ~f:(function
-        | (decl_name, decl, _) when String.equal decl_name name ->
+        | (decl_name, decl, _, _) when String.equal decl_name name ->
           extract_decl_opt decl
         | _ -> None)
 

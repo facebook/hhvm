@@ -202,7 +202,7 @@ let get_defs (ast : program) : defs =
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
-  let to_id (a, b) = (a, b, None) in
+  let to_id (a, b) = (a, b, None, None) in
   (* TODO(hgoldstein): Just have this return four values, not five *)
   let rec get_defs ast (acc : defs * int) =
     List.fold_right ast ~init:acc ~f:(fun def (defs, stmt_count) ->
@@ -229,7 +229,7 @@ let get_defs (ast : program) : defs =
           | Stmt st ->
             let pos = fst st in
             let id = "#stmt_" ^ string_of_int stmt_count in
-            let st = (FileInfo.pos_full (pos, id, None), st) in
+            let st = (FileInfo.pos_full (pos, id, None, None), st) in
             ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
           | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
           | NamespaceUse _

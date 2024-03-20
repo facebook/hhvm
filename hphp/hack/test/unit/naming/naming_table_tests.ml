@@ -314,7 +314,15 @@ let test_local_changes () =
               {
                 FileInfo.empty_ids with
                 FileInfo.consts =
-                  [FileInfo.{ pos = a_pos; name = a_name; decl_hash }];
+                  [
+                    FileInfo.
+                      {
+                        pos = a_pos;
+                        name = a_name;
+                        decl_hash;
+                        sort_text = None;
+                      };
+                  ];
               };
             position_free_decl_hash = Some (Int64.of_int 1234567);
           }
@@ -808,6 +816,7 @@ let test_naming_table_query_by_dep_hash () =
                             Relative_path.from_root ~suffix:"bar.php" );
                       name = "\\Baz";
                       decl_hash = None;
+                      sort_text = None;
                     };
                 ];
             };

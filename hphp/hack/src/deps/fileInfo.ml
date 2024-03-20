@@ -113,6 +113,7 @@ type id = {
   pos: pos;
   name: string;
   decl_hash: Int64.t option;
+  sort_text: string option;
 }
 [@@deriving eq, show]
 
@@ -159,9 +160,9 @@ let empty_t =
     comments = Some [];
   }
 
-let pos_full (p, name, decl_hash) =
+let pos_full (p, name, decl_hash, sort_text) =
   let pos = Full p in
-  { pos : pos; name; decl_hash }
+  { pos : pos; name; decl_hash; sort_text }
 
 let get_pos_filename = function
   | Full p -> Pos.filename p
@@ -260,23 +261,33 @@ let from_saved fn saved =
   let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
     List.map (SSet.elements sn_funs) ~f:(fun x ->
-        { pos = File (Fun, fn); name = x; decl_hash = None })
+        { pos = File (Fun, fn); name = x; decl_hash = None; sort_text = None })
   in
   let classes =
     List.map (SSet.elements sn_classes) ~f:(fun x ->
-        { pos = File (Class, fn); name = x; decl_hash = None })
+        { pos = File (Class, fn); name = x; decl_hash = None; sort_text = None })
   in
   let typedefs =
     List.map (SSet.elements sn_types) ~f:(fun x ->
-        { pos = File (Typedef, fn); name = x; decl_hash = None })
+        {
+          pos = File (Typedef, fn);
+          name = x;
+          decl_hash = None;
+          sort_text = None;
+        })
   in
   let consts =
     List.map (SSet.elements sn_consts) ~f:(fun x ->
-        { pos = File (Const, fn); name = x; decl_hash = None })
+        { pos = File (Const, fn); name = x; decl_hash = None; sort_text = None })
   in
   let modules =
     List.map (SSet.elements sn_modules) ~f:(fun m ->
-        { pos = File (Module, fn); name = m; decl_hash = None })
+        {
+          pos = File (Module, fn);
+          name = m;
+          decl_hash = None;
+          sort_text = None;
+        })
   in
   {
     file_mode = s_mode;

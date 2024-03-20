@@ -35,10 +35,11 @@ impl FileSummary {
             file_decls_hash: parsed_file.file_decls_hash,
             decls: parsed_file
                 .iter()
-                .map(|&(symbol, decl, hash)| DeclSummary {
+                .map(|&(symbol, decl, hash, sort_text)| DeclSummary {
                     name_type: decl.kind(),
                     symbol: symbol.to_owned(),
                     hash,
+                    sort_text: sort_text.map(|s| s.to_string()),
                 })
                 .collect(),
             file_digest: None,
@@ -85,6 +86,7 @@ pub struct DeclSummary {
     pub name_type: file_info::NameType,
     pub symbol: String,
     pub hash: DeclHash,
+    pub sort_text: Option<String>,
 }
 
 impl DeclSummary {

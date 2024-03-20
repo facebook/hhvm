@@ -190,7 +190,7 @@ let invalidate_decls_upon_change
              in
              let new_sc =
                List.find_map pfh_decls ~f:(function
-                   | (decl_name, Shallow_decl_defs.Class decl, _hash)
+                   | (decl_name, Shallow_decl_defs.Class decl, _hash, _sort_text)
                      when String.equal name decl_name ->
                      Some decl
                    | _ -> None)

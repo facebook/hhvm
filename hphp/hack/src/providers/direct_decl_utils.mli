@@ -9,7 +9,7 @@
 type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
   pfh_mode: FileInfo.mode option;
   pfh_hash: FileInfo.pfh_hash;
-  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t * string option) list;
 }
 
 (** NOTE: this produces decls in reverse lexical order *)
@@ -28,7 +28,7 @@ val direct_decl_parse :
 val cache_decls :
   Provider_context.t ->
   Relative_path.t ->
-  (string * Shallow_decl_defs.decl * Int64.t) list ->
+  (string * Shallow_decl_defs.decl * Int64.t * string option) list ->
   unit
 
 (** NOTE: this takes decls in reverse lexical order, and emits a FileInfo.t with them in forward lexical order *)

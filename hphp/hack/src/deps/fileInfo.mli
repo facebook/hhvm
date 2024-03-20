@@ -93,10 +93,11 @@ type id = {
   pos: pos;
   name: string;
   decl_hash: Int64.t option;
+  sort_text: string option;
 }
 [@@deriving eq, show]
 
-val pos_full : Pos.t * string * Int64.t option -> id
+val pos_full : Pos.t * string * Int64.t option * string option -> id
 
 val get_pos_filename : pos -> Relative_path.t
 

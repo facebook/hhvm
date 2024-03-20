@@ -229,7 +229,7 @@ let ast_to_toplevels (ast : Nast.program) :
 we find from the direct-decl-parser. *)
 let decls_to_toplevels (decls : Direct_decl_parser.parsed_file_with_hashes) :
     (FileInfo.name_type * Ast_defs.id) list =
-  List.map decls.pfh_decls ~f:(fun (name, decl, _hash) ->
+  List.map decls.pfh_decls ~f:(fun (name, decl, _hash, _sort_text) ->
       let (name_type, pos) =
         match decl with
         | Shallow_decl_defs.Class { Shallow_decl_defs.sc_name = (pos, _id); _ }

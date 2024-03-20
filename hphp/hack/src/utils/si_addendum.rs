@@ -11,7 +11,7 @@ use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 pub fn get_si_addenda<'a>(with_hashes: &ParsedFileWithHashes<'a>) -> Vec<SiAddendum> {
     with_hashes
         .iter()
-        .filter_map(|(name, decl, _hash)| {
+        .filter_map(|(name, decl, _hash, _sort_text)| {
             use oxidized::file_info::SiKind::*;
             use oxidized_by_ref::shallow_decl_defs::Decl;
             let kind = match decl {

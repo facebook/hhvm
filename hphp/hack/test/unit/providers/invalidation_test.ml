@@ -21,13 +21,31 @@ let change_class path name =
         Some
           {
             empty_ids with
-            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+            classes =
+              [
+                FileInfo.
+                  {
+                    pos = Full Pos.none;
+                    name;
+                    decl_hash = None;
+                    sort_text = None;
+                  };
+              ];
           };
       new_ids =
         Some
           {
             empty_ids with
-            classes = [FileInfo.{ pos = Full Pos.none; name; decl_hash = None }];
+            classes =
+              [
+                FileInfo.
+                  {
+                    pos = Full Pos.none;
+                    name;
+                    decl_hash = None;
+                    sort_text = None;
+                  };
+              ];
           };
       new_pfh_hash = None;
     }

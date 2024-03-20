@@ -16,7 +16,7 @@ let make_env
   | None -> ()
   | Some parsed_file ->
     List.iter parsed_file.Direct_decl_utils.pfh_decls ~f:(function
-        | (name, Shallow_decl_defs.Class _, _) ->
+        | (name, Shallow_decl_defs.Class _, _, _) ->
           (match Provider_context.get_backend ctx with
           | Provider_backend.Rust_provider_backend backend ->
             Rust_provider_backend.Decl.declare_folded_class

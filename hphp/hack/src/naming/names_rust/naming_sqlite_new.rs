@@ -271,7 +271,7 @@ impl Names {
         let decl_hash = item.hash;
         let kind = item.name_type;
         let name = &item.symbol;
-        let sort_text = &item.symbol; // should probably read sort_text off the declaration/attribute
+        let sort_text = &item.sort_text;
 
         if let Some(old) = self.get_row(symbol_hash)? {
             assert_eq!(symbol_hash, old.hash);

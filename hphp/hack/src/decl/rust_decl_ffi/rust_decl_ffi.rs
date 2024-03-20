@@ -45,11 +45,12 @@ impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes<'_> {
             alloc.add_copy(Int64(self.0.file_decls_hash.as_u64() as i64)),
         );
         let mut hd = alloc.add(&());
-        for (name, decl, hash) in self.0.iter() {
-            let mut tuple = alloc.block_with_size(3);
+        for (name, decl, hash, sort_text) in self.0.iter() {
+            let mut tuple = alloc.block_with_size(4);
             alloc.set_field(&mut tuple, 0, alloc.add(name));
             alloc.set_field(&mut tuple, 1, alloc.add(decl));
             alloc.set_field(&mut tuple, 2, alloc.add_copy(Int64(hash.as_u64() as i64)));
+            alloc.set_field(&mut tuple, 3, alloc.add(sort_text));
 
             let mut cons_cell = alloc.block_with_size(2);
             alloc.set_field(&mut cons_cell, 0, tuple.build());

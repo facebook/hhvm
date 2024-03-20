@@ -262,7 +262,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:FileInfo.{ pos; name; decl_hash }
+          ~canonical_id:FileInfo.{ pos; name; decl_hash; sort_text = None }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -289,7 +289,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:FileInfo.{ pos; name; decl_hash }
+          ~canonical_id:FileInfo.{ pos; name; decl_hash; sort_text = None }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -313,7 +313,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:FileInfo.{ pos; name; decl_hash }
+          ~canonical_id:FileInfo.{ pos; name; decl_hash; sort_text = None }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->
@@ -344,7 +344,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:FileInfo.{ pos; name; decl_hash }
+          ~canonical_id:FileInfo.{ pos; name; decl_hash; sort_text = None }
       in
       (current_file_symbols_acc, is_okay_acc && not is_error)
     | None ->

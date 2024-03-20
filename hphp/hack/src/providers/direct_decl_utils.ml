@@ -11,7 +11,7 @@ open Hh_prelude
 type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
   pfh_mode: FileInfo.mode option;
   pfh_hash: FileInfo.pfh_hash;
-  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t * string option) list;
 }
 
 (* If any decls in the list have the same name, retain only the first
@@ -93,7 +93,7 @@ let cache_decls ctx file decls =
   let decls =
     decls
     |> List.rev_map (* direct decl parser produces reverse of syntactic order *)
-         ~f:(fun (name, decl, _hash) -> (name, decl))
+         ~f:(fun (name, decl, _hash, _sort_text) -> (name, decl))
     |> Sequence.of_list
     |> dedup_decls
     |> remove_naming_conflict_losers ctx file

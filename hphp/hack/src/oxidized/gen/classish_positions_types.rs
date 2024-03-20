@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<326f8ab67fb430a38728a94ab37be045>>
+// @generated SignedSource<<3a45b5c47cbea16bf6182da0fda15e2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,8 +64,8 @@ pub enum Pos<P> {
 #[rust_to_ocaml(prefix = "classish_")]
 #[repr(C)]
 pub struct ClassishPositions<P> {
-    pub start: P,
-    pub end: P,
+    pub start_of_body: P,
+    pub end_of_body: P,
 }
 
 /// Positional information for a collection of classes

@@ -16,8 +16,8 @@ type 'p pos =
 
 (** Positional information for a single class *)
 type 'p classish_positions = {
-  classish_start: 'p;
-  classish_end: 'p;
+  classish_start_of_body: 'p;
+  classish_end_of_body: 'p;
 }
 
 (** Positional information for a collection of classes *)

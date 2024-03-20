@@ -10,9 +10,8 @@ open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 include Classish_positions_types
 
-type classish_body_offsets = int classish_positions
-
-let classish_body_braces_offsets s : classish_body_offsets option =
+let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
+    Pos.t classish_positions option =
   let open Syntax in
   let brace_to_offset brace (f : offset:int -> width:int -> int) : int option =
     match brace.syntax with
@@ -22,15 +21,25 @@ let classish_body_braces_offsets s : classish_body_offsets option =
   match s.syntax with
   | ClassishBody cb ->
     let open Option.Let_syntax in
-    let* classish_start =
+    let* classish_after_opening_brace_offset =
       brace_to_offset cb.classish_body_left_brace @@ fun ~offset ~width ->
       offset + width
     in
-    let* classish_end =
+    let* classish_before_closing_brace_offset =
       brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width:_ ->
       offset
     in
-    Some { classish_start; classish_end }
+    Some
+      {
+        classish_start_of_body =
+          to_pos
+            classish_after_opening_brace_offset
+            classish_after_opening_brace_offset;
+        classish_end_of_body =
+          to_pos
+            classish_before_closing_brace_offset
+            classish_before_closing_brace_offset;
+      }
   | _ -> None
 
 let namespace_name (s : Syntax.t) : string option =
@@ -49,11 +58,11 @@ let namespace_name (s : Syntax.t) : string option =
 let name_from_parts (parts : string list) : string =
   String.concat (List.map parts ~f:(fun p -> "\\" ^ p))
 
-let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
-  let open Syntax in
-  let rec aux (acc : classish_body_offsets SMap.t * string list) (s : Syntax.t)
-      =
-    let (offsets, namespace) = acc in
+let classish_positions_of_syntax ~(to_pos : int -> int -> Pos.t) (s : Syntax.t)
+    : Pos.t t =
+  let rec aux (acc : Pos.t t * string list) (s : Syntax.t) =
+    let open Syntax in
+    let (positions, namespace) = acc in
     match s.syntax with
     | Syntax.Script s -> aux acc s.script_declarations
     | Syntax.SyntaxList sl -> List.fold sl ~init:acc ~f:aux
@@ -67,10 +76,10 @@ let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
           | Some name -> name :: namespace
           | None -> namespace
         in
-        let (offsets, _) =
-          aux (offsets, inner_namespace) nb.namespace_declarations
+        let (positions, _) =
+          aux (positions, inner_namespace) nb.namespace_declarations
         in
-        (offsets, namespace)
+        (positions, namespace)
       | Syntax.NamespaceEmptyBody _ ->
         (* We're looking at: namespace Foo; *)
         let namespace =
@@ -78,14 +87,14 @@ let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
           | Some name -> name :: namespace
           | None -> namespace
         in
-        (offsets, namespace)
+        (positions, namespace)
       | _ -> acc)
     | Syntax.ClassishDeclaration c ->
-      (match classish_body_braces_offsets c.classish_body with
-      | Some class_offsets ->
+      (match classish_positions_for ~to_pos c.classish_body with
+      | Some classish_positions ->
         let name = name_from_parts (namespace @ [text c.classish_name]) in
-        let offsets = SMap.add name class_offsets offsets in
-        (offsets, namespace)
+        let positions = SMap.add name classish_positions positions in
+        (positions, namespace)
       | _ -> acc)
     | _ -> acc
   in
@@ -98,17 +107,14 @@ let extract
     (s : Syntax.t)
     (source_text : Full_fidelity_source_text.t)
     (filename : Relative_path.t) : Pos.t t =
-  let offsets = classish_start_offsets s in
-  let to_pos offset =
-    Full_fidelity_source_text.relative_pos filename source_text offset offset
+  let to_pos offset_start offset_end =
+    Full_fidelity_source_text.relative_pos
+      filename
+      source_text
+      offset_start
+      offset_end
   in
-  SMap.map
-    (fun { classish_start; classish_end } ->
-      {
-        classish_start = to_pos classish_start;
-        classish_end = to_pos classish_end;
-      })
-    offsets
+  classish_positions_of_syntax ~to_pos s
 
 let map_pos ~f = function
   | Precomputed p -> Precomputed (f p)
@@ -120,6 +126,6 @@ let find pos t =
   match pos with
   | Precomputed pos -> Some pos
   | Classish_start_of_body class_name ->
-    map_class class_name @@ fun c -> c.classish_start
+    map_class class_name @@ fun c -> c.classish_start_of_body
   | Classish_end_of_body class_name ->
-    map_class class_name @@ fun c -> c.classish_end
+    map_class class_name @@ fun c -> c.classish_end_of_body

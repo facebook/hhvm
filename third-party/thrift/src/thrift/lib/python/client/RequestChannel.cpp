@@ -29,7 +29,7 @@ namespace client {
 
 using namespace apache::thrift;
 
-RequestChannel_ptr createHeaderChannel(
+RequestChannel::Ptr createHeaderChannel(
     folly::AsyncTransport::UniquePtr sock,
     CLIENT_TYPE client,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
@@ -46,7 +46,7 @@ RequestChannel_ptr createHeaderChannel(
       std::move(sock), std::move(options));
 }
 
-folly::Future<RequestChannel_ptr> createThriftChannelTCP(
+folly::Future<RequestChannel::Ptr> createThriftChannelTCP(
     const std::string& host,
     uint16_t port,
     uint32_t connect_timeout,
@@ -54,7 +54,7 @@ folly::Future<RequestChannel_ptr> createThriftChannelTCP(
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
-  auto future = folly::via(eb, [=]() -> RequestChannel_ptr {
+  auto future = folly::via(eb, [=]() -> RequestChannel::Ptr {
     auto socket =
         folly::AsyncSocket::newSocket(eb, host, port, connect_timeout);
     if (client_t == THRIFT_HEADER_CLIENT_TYPE ||
@@ -78,7 +78,7 @@ folly::Future<RequestChannel_ptr> createThriftChannelTCP(
   return future;
 }
 
-RequestChannel_ptr sync_createThriftChannelTCP(
+RequestChannel::Ptr sync_createThriftChannelTCP(
     const std::string& host,
     uint16_t port,
     uint32_t connect_timeout,
@@ -90,13 +90,13 @@ RequestChannel_ptr sync_createThriftChannelTCP(
   return std::move(future.wait().value());
 }
 
-folly::Future<RequestChannel_ptr> createThriftChannelUnix(
+folly::Future<RequestChannel::Ptr> createThriftChannelUnix(
     const std::string& path,
     uint32_t connect_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
-  auto future = folly::via(eb, [=]() -> RequestChannel_ptr {
+  auto future = folly::via(eb, [=]() -> RequestChannel::Ptr {
     auto socket = folly::AsyncSocket::newSocket(
         eb, folly::SocketAddress::makeFromPath(path), connect_timeout);
     if (client_t == THRIFT_HEADER_CLIENT_TYPE) {
@@ -112,7 +112,7 @@ folly::Future<RequestChannel_ptr> createThriftChannelUnix(
   return future;
 }
 
-RequestChannel_ptr sync_createThriftChannelUnix(
+RequestChannel::Ptr sync_createThriftChannelUnix(
     const std::string& path,
     uint32_t connect_timeout,
     CLIENT_TYPE client_t,

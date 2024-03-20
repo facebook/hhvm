@@ -42,7 +42,7 @@ ConnectHandler::ConnectHandler(
       proto_(proto),
       endpoint_(endpoint) {}
 
-folly::Future<RequestChannel_ptr> ConnectHandler::connect() {
+folly::Future<apache::thrift::RequestChannel::Ptr> ConnectHandler::connect() {
   folly::DelayedDestruction::DestructorGuard dg(this);
   socket_->connect(
       this,
@@ -59,7 +59,7 @@ void ConnectHandler::setSupportedApplicationProtocols(
 
 void ConnectHandler::connectSuccess() noexcept {
   UniquePtr p(this);
-  promise_.setValue([this]() mutable -> RequestChannel_ptr {
+  promise_.setValue([this]() mutable -> apache::thrift::RequestChannel::Ptr {
     if (client_t_ == CLIENT_TYPE::THRIFT_ROCKET_CLIENT_TYPE) {
       auto chan =
           apache::thrift::RocketClientChannel::newChannel(std::move(socket_));
@@ -81,7 +81,7 @@ void ConnectHandler::connectErr(
 /**
  * Create a thrift channel by connecting to a host:port over TCP then SSL.
  */
-folly::Future<RequestChannel_ptr> createThriftChannelTCP(
+folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
     const std::shared_ptr<folly::SSLContext>& ctx,
     const std::string& host,
     const uint16_t port,
@@ -122,7 +122,7 @@ folly::Future<RequestChannel_ptr> createThriftChannelTCP(
       });
 }
 
-RequestChannel_ptr sync_createThriftChannelTCP(
+apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
     const std::shared_ptr<folly::SSLContext>& ctx,
     const std::string& host,
     const uint16_t port,

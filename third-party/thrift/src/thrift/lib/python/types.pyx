@@ -463,11 +463,20 @@ cdef class StructTypeInfo:
     cdef const cTypeInfo* get(self):
         return &self.cpp_obj
 
-    # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
-        # `value` should either be an instance of `self._class`, or a py3 struct
-        # which, when converted to thrift-python, returns an instance of
-        # `self._class`. Otherwise, raise `TypeError`.
+        """
+        Validates and converts the given (struct) `value` to a format that the
+        serializer can udnerstand.
+
+        Args:
+            value: should either be an instance of `self._class`, or a py3
+              struct which, when converted to thrift-python, returns an instance
+              of `self._class`. Otherwise, raises `TypeError`.
+
+        Raises:
+            TypeError if `value` is not an instance of `self._class` (even after
+              py3 to thrift-python conversion, if applicable).
+        """
         if not isinstance(value, self._class):
             if not _is_py3_struct(value):
                 raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
@@ -498,8 +507,24 @@ cdef class EnumTypeInfo:
     def __cinit__(self, klass):
         self._class = klass
 
-    # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
+        """
+        Validates and converts the given (enum) `value` to a format that the
+        serializaer can understand.
+
+        Args:
+            value: should either be an instance of `self._class` or `BadEnum`.
+              If it is an instance of `BadEnum`, `value` is converted to an
+              `int` and returned.
+              If `value` is not an instance of `self._class`, but is a py3 enum,
+              it is auto-converted to a thrift-python (which must then be an
+              instance of `self._class`).
+
+        Raises:
+            TypeError: the given `value` is neither a `BadEnum` nor an instance
+                of `self._class` (even after py3 to thrift-python conversion, if
+                applicable).
+        """
         if isinstance(value, BadEnum):
             return int(value)
 

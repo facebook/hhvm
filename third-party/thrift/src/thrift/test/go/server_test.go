@@ -69,8 +69,6 @@ type transportFactory = func(socket *thrift.Socket) thrift.Transport
 // connectTestHeaderServer Create a client and connect to a test server
 func connectTestHeaderServer(
 	addr net.Addr,
-	transportFactory func(socket *thrift.Socket) thrift.Transport,
-	protocolFactory thrift.ProtocolFactory,
 ) (*thrifttest.ThriftTestChannelClient, error) {
 	socket, err := thrift.NewSocket(thrift.SocketAddr(addr.String()), thrift.SocketTimeout(localConnTimeout))
 	if err != nil {
@@ -82,12 +80,11 @@ func connectTestHeaderServer(
 		return nil, err
 	}
 
-	trans := transportFactory(socket)
-	prot := protocolFactory.GetProtocol(trans)
+	prot := thrift.NewHeaderProtocol(socket)
 	return thrifttest.NewThriftTestChannelClient(thrift.NewSerialChannel(prot)), nil
 }
 
-func doClientTest(ctx context.Context, t *testing.T, transportFactory transportFactory, protocolFactory thrift.ProtocolFactory) {
+func doClientTest(ctx context.Context, t *testing.T) {
 	handler := &testHandler{}
 	serv, addr, err := createTestHeaderServer(handler)
 	if err != nil {
@@ -95,7 +92,7 @@ func doClientTest(ctx context.Context, t *testing.T, transportFactory transportF
 	}
 	defer serv.Stop()
 
-	client, err := connectTestHeaderServer(addr, transportFactory, protocolFactory)
+	client, err := connectTestHeaderServer(addr)
 	if err != nil {
 		t.Fatalf("failed to connect to test server: %s", err.Error())
 	}
@@ -178,14 +175,7 @@ func doClientTest(ctx context.Context, t *testing.T, transportFactory transportF
 func TestHeaderHeader(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	doClientTest(
-		ctx,
-		t,
-		func(socket *thrift.Socket) thrift.Transport {
-			return thrift.NewHeaderTransport(socket)
-		},
-		thrift.NewHeaderProtocolFactory(),
-	)
+	doClientTest(ctx, t)
 }
 
 func TestFunctionServiceMap(t *testing.T) {

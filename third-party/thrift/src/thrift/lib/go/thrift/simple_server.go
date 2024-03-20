@@ -43,11 +43,6 @@ type SimpleServer struct {
 	*ServerOptions
 }
 
-// NewSimpleServer create a new server
-func NewSimpleServer(processor Processor, serverTransport ServerTransport, transportFactory TransportFactory, protocolFactory ProtocolFactory, options ...func(*ServerOptions)) *SimpleServer {
-	return NewSimpleServerContext(NewProcessorContextAdapter(processor), serverTransport, transportFactory, protocolFactory, options...)
-}
-
 // NewSimpleServerContext creates a new server that supports contexts
 func NewSimpleServerContext(processor ProcessorContext, serverTransport ServerTransport, transportFactory TransportFactory, protocolFactory ProtocolFactory, options ...func(*ServerOptions)) *SimpleServer {
 	return &SimpleServer{

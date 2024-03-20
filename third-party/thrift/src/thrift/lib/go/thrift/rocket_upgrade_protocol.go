@@ -21,23 +21,15 @@ import (
 )
 
 // upgradeProtocolFactory is a ProtocolFactory for a protocol that upgrades from Header to Rocket protocol.
-type upgradeToRocketProtocolFactory struct {
-	headerProtocolFactory protocolFactory
-	rocketProtocolFactory protocolFactory
-}
+type upgradeToRocketProtocolFactory struct{}
 
 // NewUpgradeToRocketProtocolFactory creates a new upgradeProtocolFactory that upgrades from Header to Rocket protocol.
 func NewUpgradeToRocketProtocolFactory() protocolFactory {
-	return &upgradeToRocketProtocolFactory{
-		headerProtocolFactory: newHeaderProtocolFactory(),
-		rocketProtocolFactory: newRocketProtocolFactory(),
-	}
+	return &upgradeToRocketProtocolFactory{}
 }
 
 func (p *upgradeToRocketProtocolFactory) GetProtocol(trans Transport) Protocol {
-	headerProtocol := p.headerProtocolFactory.GetProtocol(trans).(*headerProtocol)
-	rocketProtocol := p.rocketProtocolFactory.GetProtocol(trans).(*rocketProtocol)
-	return NewUpgradeToRocketProtocol(rocketProtocol, headerProtocol)
+	return NewUpgradeToRocketProtocol(trans)
 }
 
 type upgradeToRocketProtocol struct {
@@ -46,8 +38,16 @@ type upgradeToRocketProtocol struct {
 	headerProtocol Protocol
 }
 
-// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol.
-func NewUpgradeToRocketProtocol(rocketProtocol Protocol, headerProtocol Protocol) Protocol {
+// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol from a transport.
+func NewUpgradeToRocketProtocol(trans Transport) Protocol {
+	return &upgradeToRocketProtocol{
+		rocketProtocol: NewRocketProtocol(trans),
+		headerProtocol: NewHeaderProtocol(trans),
+	}
+}
+
+// NewUpgradeToRocketProtocol creates a protocol that upgrades from Header to Rocket protocol given both protocols.
+func NewUpgradeToRocketProtocols(rocketProtocol, headerProtocol Protocol) Protocol {
 	return &upgradeToRocketProtocol{
 		rocketProtocol: rocketProtocol,
 		headerProtocol: headerProtocol,

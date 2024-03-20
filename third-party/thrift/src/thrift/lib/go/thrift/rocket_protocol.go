@@ -55,10 +55,10 @@ func NewRocketProtocol(trans Transport) Protocol {
 		persistentHeaders: make(map[string]string),
 	}
 	switch t := trans.(type) {
-	case *Socket:
-		p.trans = NewRocketTransport(t).(*rocketTransport)
 	case *rocketTransport:
 		p.trans = t
+	case rocketSocket:
+		p.trans = NewRocketTransport(t).(*rocketTransport)
 	default:
 		panic(NewTransportException(
 			NOT_IMPLEMENTED,

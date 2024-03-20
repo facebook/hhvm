@@ -51,6 +51,7 @@ func TestHeaderProtocolSetNilHeaders(t *testing.T) {
 }
 
 type pipe struct {
+	Transport
 	client net.Conn
 	server net.Conn
 }
@@ -58,8 +59,9 @@ type pipe struct {
 func newPipe() *pipe {
 	client, server := net.Pipe()
 	return &pipe{
-		client: client,
-		server: server,
+		Transport: NewMemoryBuffer(),
+		client:    client,
+		server:    server,
 	}
 }
 
@@ -119,10 +121,7 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol := NewUpgradeToRocketProtocol(
-		NewRocketProtocol(NewRocketTransport(newPipe())),
-		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
-	)
+	protocol := NewUpgradeToRocketProtocol(newPipe())
 	if err := setRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
@@ -132,11 +131,8 @@ func TestUpgradeToRocketProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
-	transport := NewUpgradeToRocketProtocol(
-		NewRocketProtocol(NewRocketTransport(newPipe())),
-		NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer())),
-	)
-	if err := setRequestHeaders(nil, transport); err != nil {
+	protocol := NewUpgradeToRocketProtocol(newPipe())
+	if err := setRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
 }

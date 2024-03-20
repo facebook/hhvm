@@ -112,16 +112,15 @@ FizzConfigUtil::createFizzContext(const ServerSocketConfig& config) {
       ctx->setClientAuthMode(ClientAuthMode::None);
   }
 
-  std::string& caFile = config.sslContextConfigs.front().clientCAFile;
-  std::vector<std::string>& caFiles =
-      config.sslContextConfigs.front().clientCAFiles;
+  const auto& caFile = config.sslContextConfigs.front().clientCAFile;
+  const auto& caFiles = config.sslContextConfigs.front().clientCAFiles;
 
   std::vector<std::string> combinedCAFiles = {};
 
   if (!caFile.empty()) {
     combinedCAFiles.push_back(caFile);
   }
-  for (std::string& singleCAFile : caFiles) {
+  for (const auto& singleCAFile : caFiles) {
     if (!singleCAFile.empty()) {
       combinedCAFiles.push_back((singleCAFile));
     }

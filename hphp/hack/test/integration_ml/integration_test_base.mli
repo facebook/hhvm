@@ -49,17 +49,18 @@ module Client : sig
 
   val setup_disk : env -> (string * string) list -> env
 
-  val open_file : env -> string -> env * ServerCommandTypes.diagnostic_errors
+  val open_file : env -> string -> env * ClientIdeMessage.diagnostic list SMap.t
 
-  val close_file : env -> string -> env * ServerCommandTypes.diagnostic_errors
+  val close_file :
+    env -> string -> env * ClientIdeMessage.diagnostic list SMap.t
 
   val edit_file :
-    env -> string -> string -> env * ServerCommandTypes.diagnostic_errors
+    env -> string -> string -> env * ClientIdeMessage.diagnostic list SMap.t
 
-  val assert_no_diagnostics : ServerCommandTypes.diagnostic_errors -> unit
+  val assert_no_diagnostics : ClientIdeMessage.diagnostic list SMap.t -> unit
 
   val assert_diagnostics_string :
-    ServerCommandTypes.diagnostic_errors -> string -> unit
+    ClientIdeMessage.diagnostic list SMap.t -> string -> unit
 end
 
 val doc :

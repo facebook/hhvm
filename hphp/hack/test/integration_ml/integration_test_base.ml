@@ -286,13 +286,6 @@ let in_daemon f =
   | (_, Unix.WEXITED 0) -> ()
   | _ -> assert false
 
-let diagnostics_to_string (x : ServerCommandTypes.diagnostic_errors) =
-  let buf = Buffer.create 1024 in
-  SMap.iter x ~f:(fun path errors ->
-      Printf.bprintf buf "%s:\n" path;
-      errors_to_string buf errors);
-  Buffer.contents buf
-
 let list_to_string l =
   let buf = Buffer.create 1024 in
   List.iter l ~f:(Printf.bprintf buf "%s ");
@@ -404,27 +397,23 @@ module Client = struct
       (Relative_path.Set.of_list (List.map files_and_contents ~f:fst))
 
   let edit_file (env : env) (suffix : string) (contents : string) :
-      env * ServerCommandTypes.diagnostic_errors =
+      env * ClientIdeMessage.diagnostic list SMap.t =
     let message = ClientIdeMessage.(Did_open_or_change (doc suffix contents)) in
     let (env, ()) = ClientIdeDaemon.Test.handle env message in
     let message = ClientIdeMessage.(Diagnostics (doc suffix contents)) in
     let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
-    (* TODO(hverr): update tests *)
-    let diagnostics =
-      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
-    in
     let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
     (env, diagnostics)
 
   let open_file (env : env) (suffix : string) :
-      env * ServerCommandTypes.diagnostic_errors =
+      env * ClientIdeMessage.diagnostic list SMap.t =
     let contents =
       TestDisk.get (Relative_path.from_root ~suffix |> Relative_path.to_absolute)
     in
     edit_file env suffix contents
 
   let close_file (env : env) (suffix : string) :
-      env * ServerCommandTypes.diagnostic_errors =
+      env * ClientIdeMessage.diagnostic list SMap.t =
     let message =
       ClientIdeMessage.(
         Did_close
@@ -433,14 +422,27 @@ module Client = struct
           |> Path.make))
     in
     let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
-    let diagnostics =
-      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
-    in
     let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
     (env, diagnostics)
 
-  let assert_no_diagnostics (diagnostics : ServerCommandTypes.diagnostic_errors)
-      =
+  let diagnostics_to_string buf x =
+    List.iter x ~f:(fun diagnostic ->
+        (* For testing we just compare the error itself. Other tests
+           exercise full diagnostics information *)
+        Printf.bprintf
+          buf
+          "%s\n"
+          (Errors.to_string diagnostic.ClientIdeMessage.diagnostic_error))
+
+  let diagnostics_to_string (x : ClientIdeMessage.diagnostic list SMap.t) =
+    let buf = Buffer.create 1024 in
+    SMap.iter x ~f:(fun path diagnostics ->
+        Printf.bprintf buf "%s:\n" path;
+        diagnostics_to_string buf diagnostics);
+    Buffer.contents buf
+
+  let assert_no_diagnostics
+      (diagnostics : ClientIdeMessage.diagnostic list SMap.t) =
     let is_any =
       FileMap.exists diagnostics ~f:(fun _file d -> not (List.is_empty d))
     in
@@ -454,8 +456,8 @@ module Client = struct
     end
 
   let assert_diagnostics_string
-      (diagnostics : ServerCommandTypes.diagnostic_errors) (expected : string) :
-      unit =
+      (diagnostics : ClientIdeMessage.diagnostic list SMap.t)
+      (expected : string) : unit =
     let diagnostics_as_string =
       diagnostics_to_string diagnostics |> relativize
     in

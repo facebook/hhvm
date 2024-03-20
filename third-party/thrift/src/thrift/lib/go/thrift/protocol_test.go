@@ -177,15 +177,20 @@ type protocolTest func(t testing.TB, p Format, trans Transport)
 func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(Transport) Format) {
 	rConn, wConn := tcpStreamSetupForTest(t)
 	rdr, writer := io.Pipe()
-	transports := []transportFactory{
-		newFramedTransportFactory(newStreamTransportFactory(rdr, writer, false)),  // framed over pipe
-		newFramedTransportFactory(newStreamTransportFactory(rConn, wConn, false)), // framed over tcp
+
+	transports := []func() Transport{
+		func() Transport {
+			return NewFramedTransportMaxLength(NewStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
+		}, // framed over pipe
+		func() Transport {
+			return NewFramedTransportMaxLength(NewStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
+		}, // framed over tcp
 	}
 	const iterations = 100
 
 	doForAllTransportsParallel := func(read, write protocolTest) {
 		for _, tf := range transports {
-			trans := tf.GetTransport(nil)
+			trans := tf()
 			p := newFormat(trans)
 			var wg sync.WaitGroup
 			wg.Add(1)
@@ -243,15 +248,22 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(Transport) Forma
 func ReadWriteProtocolTest(t *testing.T, newFormat func(Transport) Format) {
 	l := HTTPClientSetupForTest(t)
 	defer l.Close()
-	transports := []transportFactory{
-		newMemoryBufferTransportFactory(1024),
-		newFramedTransportFactory(newMemoryBufferTransportFactory(1024)),
-		newHTTPPostClientTransportFactory("http://" + l.Addr().String()),
+
+	transports := []func() Transport{
+		func() Transport { return NewMemoryBufferLen(1024) },
+		func() Transport { return NewFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH) },
+		func() Transport {
+			http, err := newHTTPPostClientWithOptions("http://"+l.Addr().String(), httpClientOptions{})
+			if err != nil {
+				panic(err)
+			}
+			return http
+		},
 	}
 
 	doForAllTransports := func(protTest protocolTest) {
 		for _, tf := range transports {
-			trans := tf.GetTransport(nil)
+			trans := tf()
 			p := newFormat(trans)
 			protTest(t, p, trans)
 			trans.Close()

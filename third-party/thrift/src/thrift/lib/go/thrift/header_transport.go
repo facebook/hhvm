@@ -30,18 +30,6 @@ const (
 	DefaultClientType = HeaderClientType
 )
 
-type tHeaderTransportFactory struct {
-	factory transportFactory
-}
-
-func newHeaderTransportFactory(factory transportFactory) transportFactory {
-	return &tHeaderTransportFactory{factory: factory}
-}
-
-func (p *tHeaderTransportFactory) GetTransport(base Transport) Transport {
-	return NewHeaderTransport(p.factory.GetTransport(base))
-}
-
 type HeaderTransport struct {
 	transport Transport
 

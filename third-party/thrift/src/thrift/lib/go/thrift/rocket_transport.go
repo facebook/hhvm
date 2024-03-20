@@ -26,23 +26,6 @@ import (
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
-type rocketTransportFactory struct{}
-
-// NewRocketTransportFactory makes it possible to create a RocketTransport using a thrift.Socket
-func newRocketTransportFactory() transportFactory {
-	return &rocketTransportFactory{}
-}
-
-func (p *rocketTransportFactory) GetTransport(socket Transport) Transport {
-	tsocket, ok := socket.(*Socket)
-	if !ok {
-		panic(NewTransportException(
-			NOT_IMPLEMENTED,
-			fmt.Sprintf("Rocket Transport only supports Socket and does not support: %T", socket)))
-	}
-	return NewRocketTransport(tsocket)
-}
-
 // rocketSocket is a minimal interface for thrift.Socket
 type rocketSocket interface {
 	Conn() net.Conn

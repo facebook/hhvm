@@ -38,7 +38,6 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 type SimpleServer struct {
 	processorFactoryContext      ProcessorFactoryContext
 	serverTransport              ServerTransport
-	transportFactory             transportFactory
 	protocolFactory              protocolFactory
 	configurableRequestProcessor func(ctx context.Context, client Transport) error
 	*ServerOptions
@@ -52,7 +51,6 @@ func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport
 	return &SimpleServer{
 		processorFactoryContext: NewProcessorFactoryContext(processor),
 		serverTransport:         serverTransport,
-		transportFactory:        newHeaderTransportFactory(newTransportFactory()),
 		protocolFactory:         newHeaderProtocolFactory(),
 		ServerOptions:           simpleServerOptions(options...),
 	}
@@ -157,8 +155,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 
 	processor := p.processorFactoryContext.GetProcessorContext(client)
 
-	transport := p.transportFactory.GetTransport(client)
-	protocol := p.protocolFactory.GetProtocol(transport)
+	protocol := p.protocolFactory.GetProtocol(client)
 
 	// Store the protocol on the context so handlers can query headers.
 	// See HeadersFromContext.
@@ -169,7 +166,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 			p.log.Printf("panic in processor: %v: %s", err, debug.Stack())
 		}
 	}()
-	defer transport.Close()
+	defer protocol.Close()
 	intProcessor := WrapInterceptorContext(p.interceptor, processor)
 	for {
 		keepOpen, exc := processContext(ctx, intProcessor, protocol)

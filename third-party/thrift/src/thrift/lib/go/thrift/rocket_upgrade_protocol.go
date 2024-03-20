@@ -20,18 +20,6 @@ import (
 	"context"
 )
 
-// upgradeProtocolFactory is a ProtocolFactory for a protocol that upgrades from Header to Rocket protocol.
-type upgradeToRocketProtocolFactory struct{}
-
-// NewUpgradeToRocketProtocolFactory creates a new upgradeProtocolFactory that upgrades from Header to Rocket protocol.
-func NewUpgradeToRocketProtocolFactory() protocolFactory {
-	return &upgradeToRocketProtocolFactory{}
-}
-
-func (p *upgradeToRocketProtocolFactory) GetProtocol(trans Transport) Protocol {
-	return NewUpgradeToRocketProtocol(trans)
-}
-
 type upgradeToRocketProtocol struct {
 	Protocol
 	rocketProtocol Protocol

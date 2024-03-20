@@ -28,16 +28,6 @@ type headerProtocol struct {
 	protoID ProtocolID
 }
 
-type HeaderProtocolFactory struct{}
-
-func newHeaderProtocolFactory() *HeaderProtocolFactory {
-	return &HeaderProtocolFactory{}
-}
-
-func (p *HeaderProtocolFactory) GetProtocol(trans Transport) Protocol {
-	return NewHeaderProtocol(trans)
-}
-
 func NewHeaderProtocol(trans Transport) Protocol {
 	p := &headerProtocol{
 		origTransport: trans,

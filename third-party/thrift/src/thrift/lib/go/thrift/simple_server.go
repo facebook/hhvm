@@ -38,7 +38,7 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 type SimpleServer struct {
 	processorFactoryContext      ProcessorFactoryContext
 	serverTransport              ServerTransport
-	protocolFactory              protocolFactory
+	newProtocol                  func(Transport) Protocol
 	configurableRequestProcessor func(ctx context.Context, client Transport) error
 	*ServerOptions
 }
@@ -51,7 +51,7 @@ func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport
 	return &SimpleServer{
 		processorFactoryContext: NewProcessorFactoryContext(processor),
 		serverTransport:         serverTransport,
-		protocolFactory:         newHeaderProtocolFactory(),
+		newProtocol:             NewHeaderProtocol,
 		ServerOptions:           simpleServerOptions(options...),
 	}
 }
@@ -155,7 +155,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 
 	processor := p.processorFactoryContext.GetProcessorContext(client)
 
-	protocol := p.protocolFactory.GetProtocol(client)
+	protocol := p.newProtocol(client)
 
 	// Store the protocol on the context so handlers can query headers.
 	// See HeadersFromContext.

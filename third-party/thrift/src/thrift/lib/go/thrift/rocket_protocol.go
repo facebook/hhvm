@@ -37,17 +37,6 @@ type rocketProtocol struct {
 	persistentHeaders map[string]string
 }
 
-type rocketProtocolFactory struct{}
-
-// NewRocketProtocolFactory makes it possible to create a RocketProtocol using a RocketTransport
-func newRocketProtocolFactory() protocolFactory {
-	return &rocketProtocolFactory{}
-}
-
-func (p *rocketProtocolFactory) GetProtocol(trans Transport) Protocol {
-	return NewRocketProtocol(trans)
-}
-
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
 func NewRocketProtocol(trans Transport) Protocol {
 	p := &rocketProtocol{

@@ -3,7 +3,7 @@ These are the options that exists for HHVM
 If you add a new section you need to update generate_configs in
 hphp/runtime/base/configs/TARGETS
 
-The format can be found in hphp/runtime/base/configs/generate-script.rs
+The format can be found in hphp/tools/configs/generate-configs.rs
 
 # Autoload
 
@@ -455,6 +455,27 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 - bool PHP7.UVS = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
 - bool PHP7.LTRAssign = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)
+
+# Proxy
+
+  Options related to reverse proxying. Origin and Percentage
+  may be mutated by background threads and should only be read or written
+  using the helper functions defined with HttpRequestHandler.
+
+- std::string Proxy.Origin = "", UNKNOWN
+- int Proxy.Percentage = 0, UNKNOWN
+- int Proxy.Retry = 3, UNKNOWN
+- std::set<std::string> Proxy.ServeURLs = {}, UNKNOWN
+- bool Proxy.UseServeURLs = false, UNKNOWN, lookuppath(Proxy.ServeURLs)
+
+  Loads from ServeURLs and check if config is non-empty
+
+- std::set<std::string> Proxy.ProxyURLs = {}, UNKNOWN
+- bool Proxy.UseProxyURLs = false, UNKNOWN, lookuppath(Proxy.ProxyURLs)
+
+  Loads from ProxyURLs and check if config is non-empty
+
+- std::vector<std::string> Proxy.ProxyPatterns = {}, UNKNOWN
 
 # Server
 

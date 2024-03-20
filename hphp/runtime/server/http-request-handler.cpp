@@ -43,6 +43,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/proxy.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
@@ -85,19 +86,19 @@ static bool matchAnyPattern(const std::string &path,
 static bool shouldProxyPath(const std::string& path) {
   ReadLock lock(s_proxyMutex);
 
-  if (RuntimeOption::ProxyOriginRaw.empty()) return false;
+  if (Cfg::Proxy::Origin.empty()) return false;
 
-  if (RuntimeOption::UseServeURLs && RuntimeOption::ServeURLs.count(path)) {
+  if (Cfg::Proxy::UseServeURLs && Cfg::Proxy::ServeURLs.count(path)) {
     return true;
   }
 
-  if (RuntimeOption::UseProxyURLs) {
-    if (RuntimeOption::ProxyURLs.count(path)) return true;
-    if (matchAnyPattern(path, RuntimeOption::ProxyPatterns)) return true;
+  if (Cfg::Proxy::UseProxyURLs) {
+    if (Cfg::Proxy::ProxyURLs.count(path)) return true;
+    if (matchAnyPattern(path, Cfg::Proxy::ProxyPatterns)) return true;
   }
 
-  if (RuntimeOption::ProxyPercentageRaw > 0) {
-    if ((abs(rand_r(&s_randState)) % 100) < RuntimeOption::ProxyPercentageRaw) {
+  if (Cfg::Proxy::Percentage > 0) {
+    if ((abs(rand_r(&s_randState)) % 100) < Cfg::Proxy::Percentage) {
       return true;
     }
   }
@@ -108,14 +109,14 @@ static bool shouldProxyPath(const std::string& path) {
 static std::string getProxyPath(const char* origPath) {
   ReadLock lock(s_proxyMutex);
 
-  return RuntimeOption::ProxyOriginRaw + origPath;
+  return Cfg::Proxy::Origin + origPath;
 }
 
 void setProxyOriginPercentage(const std::string& origin, int percentage) {
   WriteLock lock(s_proxyMutex);
 
-  RuntimeOption::ProxyOriginRaw = origin;
-  RuntimeOption::ProxyPercentageRaw = percentage;
+  Cfg::Proxy::Origin = origin;
+  Cfg::Proxy::Percentage = percentage;
   Logger::Warning("Updated proxy origin to `%s' and percentage to %d\n",
                   origin.c_str(), percentage);
 }
@@ -351,8 +352,8 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // proxy any URLs that not specified in ServeURLs
   if (shouldProxyPath(path)) {
-    for (int i = 0; i < RuntimeOption::ProxyRetry; i++) {
-      bool force = (i == RuntimeOption::ProxyRetry - 1); // last one
+    for (int i = 0; i < Cfg::Proxy::Retry; i++) {
+      bool force = (i == Cfg::Proxy::Retry - 1); // last one
       if (handleProxyRequest(transport, force)) break;
     }
     return;

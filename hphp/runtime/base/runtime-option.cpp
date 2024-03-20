@@ -677,15 +677,6 @@ std::set<std::string> RuntimeOption::AdminPasswords;
 std::set<std::string> RuntimeOption::HashedAdminPasswords;
 std::string RuntimeOption::AdminDumpPath;
 
-std::string RuntimeOption::ProxyOriginRaw;
-int RuntimeOption::ProxyPercentageRaw = 0;
-int RuntimeOption::ProxyRetry = 3;
-bool RuntimeOption::UseServeURLs;
-std::set<std::string> RuntimeOption::ServeURLs;
-bool RuntimeOption::UseProxyURLs;
-std::set<std::string> RuntimeOption::ProxyURLs;
-std::vector<std::string> RuntimeOption::ProxyPatterns;
-
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 
@@ -1890,17 +1881,6 @@ void RuntimeOption::Load(
       Config::GetSet(ini, config, "AdminServer.HashedPasswords");
     Config::Bind(AdminDumpPath, ini, config,
                  "AdminServer.DumpPath", "/tmp/hhvm_admin_dump");
-  }
-  {
-    // Proxy
-    Config::Bind(ProxyOriginRaw, ini, config, "Proxy.Origin");
-    Config::Bind(ProxyPercentageRaw, ini, config, "Proxy.Percentage", 0);
-    Config::Bind(ProxyRetry, ini, config, "Proxy.Retry", 3);
-    Config::Bind(UseServeURLs, ini, config, "Proxy.ServeURLs");
-    Config::Bind(ServeURLs, ini, config, "Proxy.ServeURLs");
-    Config::Bind(UseProxyURLs, ini, config, "Proxy.ProxyURLs");
-    Config::Bind(ProxyURLs, ini, config, "Proxy.ProxyURLs");
-    Config::Bind(ProxyPatterns, ini, config, "Proxy.ProxyPatterns");
   }
   {
     // Http

@@ -360,20 +360,6 @@ struct RuntimeOption {
 
   static std::string AdminDumpPath;
 
-  /*
-   * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw
-   * may be mutated by background threads and should only be read or written
-   * using the helper functions defined with HttpRequestHandler.
-   */
-  static std::string ProxyOriginRaw;
-  static int ProxyPercentageRaw;
-  static int ProxyRetry;
-  static bool UseServeURLs;
-  static std::set<std::string> ServeURLs;
-  static bool UseProxyURLs;
-  static std::set<std::string> ProxyURLs;
-  static std::vector<std::string> ProxyPatterns;
-
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
 

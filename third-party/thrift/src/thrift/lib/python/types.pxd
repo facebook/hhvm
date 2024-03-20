@@ -154,6 +154,7 @@ cdef class Struct(StructOrUnion):
     cdef tuple _fbthrift_field_cache
     cdef folly.iobuf.IOBuf _serialize(Struct self, Protocol proto)
     cdef uint32_t _deserialize(Struct self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
+    cdef _fbthrift_get_field_value(Struct self, int16_t index)
     cdef _fbthrift_populate_primitive_fields(Struct self)
     cdef _fbthrift_fully_populate_cache(Struct self)
 

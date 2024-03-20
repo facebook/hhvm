@@ -95,15 +95,48 @@ PyObject* createStructTuple(int16_t numFields);
  * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
  *
  * However, the remaining elements (1 through `numFields + 1`) are initialized
- * with the appropriate default value for the corresponding field. The order
- * corresponds to the order of fields in the given `structInfo` (i.e., the
- * insertion order, NOT the field ids).
+ * with the appropriate default value for the corresponding field (see below).
+ * The order corresponds to the order of fields in the given `structInfo` (i.e.,
+ * the insertion order, NOT the field ids).
  *
+ * The default value for optional fields is always `Py_None`. For other fields,
+ * the default value is either specified by the user or the following "standard"
+ * value for the corresponding type:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if  applicable).
+ *   * empty tuple for lists and maps.
+ *   * empty `frozenset` for sets.
+ *   * recursively default-initialized instance for structs and unions.
+ *
+ * All values in the returned tuple are stored in the "internal data"
+ * representation (as opposed to the "Python value" representation - see the
+ * various `*TypeInfo` Python classes). For example, `false` is actually
+ * `Py_False`.
  */
 PyObject* createStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo);
 
-void setStructIsset(void* object, int16_t index, bool set);
+/**
+ * Sets the "isset" flag of the `index`-th field of the given struct tuple
+ * `object` to the given `value`.
+ *
+ * @param object Pointer to a "struct tuple" (see `createStructTuple() above).
+ *        This is assumed to be a `PyTupleObject`, whose memory holds the
+ *        elements (starting with the "isset" bytearray) after a header
+ *        consisting of `PyVarObject`. The memory immediately after the
+ *        `sizeof(PyVarObject)` bytes is expected to correspond to a
+ *        `PyBytesObject` that holds the isset flags bytearray (see above).
+ *        If the bytearray is not properly initialized, or `index` is invalid
+ *        (i.e., negative or greather than the number of fields), behavior is
+ *        undefined.
+ *
+ * @throws if unable to read a bytearray from the expected isset flags bytearray
+ *         (see `object` param documentation above).
+ */
+void setStructIsset(void* object, int16_t index, bool value);
 
 struct PyObjectDeleter {
   void operator()(PyObject* p) { Py_XDECREF(p); }
@@ -111,6 +144,15 @@ struct PyObjectDeleter {
 
 using UniquePyObjectPtr = std::unique_ptr<PyObject, PyObjectDeleter>;
 
+/**
+ * Sets the Python object pointed to by `object` to the given `value` (releasing
+ * the previous one, if any).
+ *
+ * @params object double pointer to a `PyObject` (i.e., `PyObject**`).
+ *
+ * @return the newly set Python object pointer, i.e. the pointer previously held
+ *         by the `value` parameter (and now pointed to by `object`).
+ */
 inline PyObject* setPyObject(void* object, UniquePyObjectPtr value) {
   PyObject** pyObjPtr = toPyObjectPtr(object);
   PyObject* oldObject = *pyObjPtr;
@@ -455,7 +497,9 @@ class DynamicStructInfo {
    * Sets the value for the field with the given `index`.
    *
    * The given `fieldValue` will be included in the underlying
-   * `StructInfo::customExt`, at the given `index`.
+   * `StructInfo::customExt`, at the given `index`. It is expected to be in the
+   * "internal data" representation (see `to_internal_data()` methods in the
+   * various `*TypeInfo` classes in Python).
    *
    * If `fieldValue` is `nullptr`, behavior is undefined.
    */
@@ -492,6 +536,10 @@ class DynamicStructInfo {
   /**
    * Default values (if any) for each field (indexed by field position in
    * `fieldNames_`).
+   *
+   * If present, values are in the "internal data" representation (as opposed to
+   * the "Python value" representation - see the various `*TypeInfo` Python
+   * classes).
    */
   FieldValueMap fieldValues_;
 };

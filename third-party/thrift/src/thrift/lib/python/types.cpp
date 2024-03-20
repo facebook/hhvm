@@ -212,29 +212,30 @@ PyObject* createStructTupleWithDefaultValues(
   // Initialize tuple[1:numFields+1] with default field values.
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
-  for (int i = 0; i < numFields; ++i) {
-    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
+  for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      PyTuple_SET_ITEM(tuple.get(), i + 1, Py_None);
+      PyTuple_SET_ITEM(tuple.get(), fieldIndex + 1, Py_None);
       Py_INCREF(Py_None);
     } else {
       PyTuple_SET_ITEM(
           tuple.get(),
-          i + 1,
-          getDefaultValue(fieldInfo.typeInfo, defaultValues, i).release());
+          fieldIndex + 1,
+          getDefaultValue(fieldInfo.typeInfo, defaultValues, fieldIndex)
+              .release());
     }
   }
   return tuple.release();
 }
 
-void setStructIsset(void* object, int16_t index, bool set) {
-  PyObject** isset_bytes_ptr =
+void setStructIsset(void* object, int16_t index, bool value) {
+  PyObject** issetPyBytesPtr =
       toPyObjectPtr(static_cast<char*>(object) + kHeadOffset);
-  char* flags = PyBytes_AsString(*isset_bytes_ptr);
-  if (!flags) {
+  char* flags = PyBytes_AsString(*issetPyBytesPtr);
+  if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  flags[index] = set;
+  flags[index] = value;
 }
 
 void* setStruct(void* object, const detail::TypeInfo& typeInfo) {
@@ -258,8 +259,8 @@ bool getIsset(const void* object, ptrdiff_t offset) {
   return flags[offset];
 }
 
-void setIsset(void* object, ptrdiff_t offset, bool set) {
-  return setStructIsset(object, offset, set);
+void setIsset(void* object, ptrdiff_t offset, bool value) {
+  return setStructIsset(object, offset, value);
 }
 
 void clearUnion(void* object) {
@@ -305,22 +306,46 @@ const detail::UnionExtN<1> unionExt = {
     /* .initMember */ {nullptr},
 };
 
+/**
+ * Returns a view into the string contained in the given Python bytes referred
+ * to by `object`.
+ *
+ * Note that, if this method returns, the returned optional always holds a
+ * `ThriftValue` with a `stringViewValue`.
+ *
+ * @param object double pointer to a Python bytes object (i.e., a
+ *        [`PyBytesObject**`](https://docs.python.org/3/c-api/bytes.html#c.PyBytesObject))
+ *
+ * @throws if `object` does not contain a valid string.
+ */
 detail::OptionalThriftValue getString(
     const void* object, const detail::TypeInfo& /* typeInfo */) {
-  PyObject* pyObj = *toPyObjectPtr(object);
+  // Note: `PyObject` is a parent class of `PyBytesObject`, so the following
+  // assignment is correct.
+  PyObject* pyBytesObject = *toPyObjectPtr(object);
+
   Py_ssize_t len = 0;
   char* buf = nullptr;
-  if (PyBytes_AsStringAndSize(pyObj, &buf, &len) == -1) {
+  if (PyBytes_AsStringAndSize(pyBytesObject, &buf, &len) == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
   return folly::make_optional<detail::ThriftValue>(
       folly::StringPiece{buf, static_cast<std::size_t>(len)});
 }
 
+/**
+ * Copies the given string `value` into a new `PyBytesObject` instance, and
+ * updates the given `object` to hold a pointer to that instance.
+ *
+ * @param object a `PyBytesObject**` (see `getString()` above).
+ * @param value String whose copy will be in a new Python bytes object.
+ *
+ * @throws if `value` cannot be copied to a new `PyBytesObject`.
+ */
 void setString(void* object, const std::string& value) {
   UniquePyObjectPtr bytesObj{
       PyBytes_FromStringAndSize(value.data(), value.size())};
-  if (!bytesObj) {
+  if (bytesObj == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   setPyObject(object, std::move(bytesObj));

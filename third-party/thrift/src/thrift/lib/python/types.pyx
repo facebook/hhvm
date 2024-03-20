@@ -48,18 +48,23 @@ except ImportError:
     def _is_py3_enum(obj):
         return False
 
+def _make_noncached_property(getter_function, struct_class, field_name):
+    prop = property(getter_function)
+    prop.__set_name__(struct_class, field_name)
+    return prop
 
 try:
     import cinder
-    def _make_cached_property(f, owner, name):
-        return cinder.cached_property(f, getattr(owner, name))
+    def _make_cached_property(getter_function, struct_class, field_name):
+        return cinder.cached_property(
+            getter_function,
+            getattr(struct_class, field_name)
+        )
 except ImportError:
     # On MacOS/Windows where Cinder is not available, degrade to not-cached property.
     # Field values are always cached in Cython level, we just lose the Python level cache.
-    def _make_cached_property(f, owner, name):
-        prop = property(f)
-        prop.__set_name__(owner, name)
-        return prop
+    def _make_cached_property(getter_function, struct_class, field_name):
+        return _make_noncached_property(getter_function, struct_class, field_name)
 
 
 cdef public api cIOBuf* get_cIOBuf(object buf):
@@ -127,6 +132,10 @@ cdef class StringTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, object value not None):
+        """
+        Returns a new Python bytes object (i.e. string) containing the UTF-8
+        encoding of the given unicode object.
+        """
         try:
             return PyUnicode_AsUTF8String(value)
         except TypeError as e:
@@ -137,7 +146,18 @@ cdef class StringTypeInfo:
 
     # convert deserialized data to user format
     def to_python_value(self, object value):
-        return PyUnicode_FromEncodedObject(value, NULL, NULL)
+        """
+        Returns a Unicode object decoded from the given encoded string.
+
+        Args:
+            value: A Python bytes object containing a UTF-8 encoded unicode
+                 object.
+        """
+        return PyUnicode_FromEncodedObject(
+                value,
+                NULL, # encoding
+                NULL, # errors
+        )
 
     def to_container_value(self, object value not None):
         if not isinstance(value, str):
@@ -428,14 +448,14 @@ cdef class MapTypeInfo:
 cdef class StructTypeInfo:
     def __cinit__(self, klass):
         self._class = klass
-        info = klass._fbthrift_struct_info
+        py_struct_info = klass._fbthrift_struct_info
         cdef cDynamicStructInfo* c_struct_info
-        if isinstance(info, UnionInfo):
+        if isinstance(py_struct_info, UnionInfo):
             self.is_union = True
-            c_struct_info = (<UnionInfo>info).cpp_obj.get()
+            c_struct_info = (<UnionInfo>py_struct_info).cpp_obj.get()
         else:
             self.is_union = False
-            c_struct_info = (<StructInfo>info).cpp_obj.get()
+            c_struct_info = (<StructInfo>py_struct_info).cpp_obj.get()
         self.cpp_obj = createStructTypeInfo(
             deref(c_struct_info)
         )
@@ -445,13 +465,17 @@ cdef class StructTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
+        # `value` should either be an instance of `self._class`, or a py3 struct
+        # which, when converted to thrift-python, returns an instance of
+        # `self._class`. Otherwise, raise `TypeError`.
         if not isinstance(value, self._class):
-            if _is_py3_struct(value):
-                value = value._to_python()
-                if not isinstance(value, self._class):
-                    raise TypeError(f"value {value} is a py3 struct of type {type(value)}, can not be converted to {self._class !r}.")
-            else:
+            if not _is_py3_struct(value):
                 raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
+
+            value = value._to_python()
+            if not isinstance(value, self._class):
+                raise TypeError(f"value {value} is a py3 struct of type {type(value)}, can not be converted to {self._class !r}.")
+
         if isinstance(value, Struct):
             return (<Struct>value)._fbthrift_data
         if isinstance(value, GeneratedError):
@@ -478,13 +502,15 @@ cdef class EnumTypeInfo:
     def to_internal_data(self, value not None):
         if isinstance(value, BadEnum):
             return int(value)
+
         if not isinstance(value, self._class):
-            if _is_py3_enum(value):
-                value = value._to_python()
-                if not isinstance(value, self._class):
-                    raise TypeError(f"value {value} is a py3 enum of type {type(value)}, can not be converted to {self._class !r}.")
-            else:
+            if not _is_py3_enum(value):
                 raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
+
+            value = value._to_python()
+            if not isinstance(value, self._class):
+                raise TypeError(f"value {value} is a py3 enum of type {type(value)}, can not be converted to {self._class !r}.")
+
         return value._fbthrift_value_
 
     # convert deserialized data to user format
@@ -538,8 +564,8 @@ cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
         struct_tuple: see `createStructTupleWithDefaultValues()`
         index: field index, as defined by its insertion order in the parent
             `StructInfo` (this is not the field id).
-        value: new value for this field.
-
+        value: new value for this field, in "internal data" represntation (as
+            opposed to "Python value" representation - see `*TypeInfo` classes).
     """
     setStructIsset(struct_tuple, index, 1)
     old_value = struct_tuple[index + 1]
@@ -576,7 +602,10 @@ cdef class Struct(StructOrUnion):
         _fbthrift_data: "struct tuple" that holds the "isset" flag array and
             values for all fields. See `createStructTupleWithDefaultValues()`.
 
-        _fbthrift_field_cache: Tuple
+        _fbthrift_field_cache: Tuple of length numFields. Each item may contain
+            a previously retrieved value for a non-primitive (or adapted) field.
+            If present, values are in the "Python" representation (as opposed to
+            the "internal data" representations - see `*TypeInfo` classes).
     """
 
     def __cinit__(self):
@@ -592,7 +621,9 @@ cdef class Struct(StructOrUnion):
         Args:
             **kwargs: names and values of the Thrift fields to set for this
                  instance. All names must match declared fields of this Thrift
-                 Struct (or a `TypeError` will be raised).
+                 Struct (or a `TypeError` will be raised). Values are in
+                 "Python value" representation, as opposed to "internal data"
+                 representation (see `*TypeInfo` classes in this file).
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
         for name, value in kwargs.items():
@@ -744,16 +775,17 @@ cdef class Struct(StructOrUnion):
         return len
 
     cdef _fbthrift_get_field_value(self, int16_t index):
-        cdef PyObject* value = PyTuple_GET_ITEM(self._fbthrift_field_cache, index)
-        if value != NULL:
-            return <object>value
-        cdef StructInfo info = self._fbthrift_struct_info
-        field_info = info.fields[index]
+        cdef PyObject* cached_value = PyTuple_GET_ITEM(self._fbthrift_field_cache, index)
+        if cached_value != NULL:
+            return <object>cached_value
+
+        cdef StructInfo struct_info = self._fbthrift_struct_info
+        field_info = struct_info.fields[index]
         field_id = field_info[0]
         adapter_info = field_info[5]
         data = self._fbthrift_data[index + 1]
         if data is not None:
-            py_value = info.type_infos[index].to_python_value(data)
+            py_value = struct_info.type_infos[index].to_python_value(data)
             if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
                 py_value = adapter_class.from_thrift_field(
@@ -764,6 +796,7 @@ cdef class Struct(StructOrUnion):
                 )
         else:
             py_value = None
+
         PyTuple_SET_ITEM(self._fbthrift_field_cache, index, py_value)
         Py_INCREF(py_value)
         return py_value
@@ -773,6 +806,14 @@ cdef class Struct(StructOrUnion):
         Copies the values of all primitive fields from the underlying struct
         tuple (`_fbthrift_primitive_types`), or None if n/a, to instance
         attributes with the same names.
+
+        This method is typically called exactly once, just prior to returning a
+        newly constructed instance of this Struct, i.e.:
+          * `__init__()`, after processing all kwargs
+          * `__call__()`, after creating a new instance and processing all
+            previous and new values. This method is called on the new instance.
+          * `_deserialize()`
+          * `Struct._fbthrift_create()`
         """
         for index, name, type_info in self._fbthrift_primitive_types:
             data = self._fbthrift_data[index + 1]
@@ -965,6 +1006,15 @@ cdef class Union(StructOrUnion):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 
 cdef make_fget_struct(i):
+    """
+    Returns a function that takes a `Struct` instance and returns the value of
+    the field with index `i`, or `None` if n/a.
+
+    The field must be either a non-primitive or adapted type.
+
+    The value is returned in "Python value" representation (as opposed to
+    "internal data representation", see `*TypeInfo` classes.
+    """
     return lambda self: (<Struct>self)._fbthrift_get_field_value(i)
 
 cdef make_fget_union(type_value, adapter_info):
@@ -981,9 +1031,14 @@ cdef make_fget_union(type_value, adapter_info):
     return property(lambda self: (<Union>self)._fbthrift_get_field_value(type_value))
 
 
-def _fbthrift_readonly_setattr(name, _):
-    """Setter for read-only attributes, always throws AttributeError."""
-    raise AttributeError(f"can't set attribute '{name}'")
+def _make_readonly_setattr():
+    """
+    Returns a setter for read-only attributes, always throws AttributeError.
+    """
+    def _readonly_setattr(self, name, _value):
+        raise AttributeError(f"Cannot set attribute '{name}' in Thrift struct '{type(self)}'.")
+
+    return _readonly_setattr
 
 
 class StructMeta(type):
@@ -1052,7 +1107,7 @@ class StructMeta(type):
                     field_name,
                 )
             )
-        klass.__setattr__ = _fbthrift_readonly_setattr
+        klass.__setattr__ = _make_readonly_setattr()
         return klass
 
     def _fbthrift_fill_spec(cls):

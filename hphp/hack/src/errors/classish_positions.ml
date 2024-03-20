@@ -9,6 +9,11 @@
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 
+type 'pos pos =
+  | Precomputed of 'pos
+  | Classish_end_of_body of string
+  | Classish_start_of_body of string
+
 (** Positional information for a single class *)
 type 'pos classish_positions = {
   classish_start: 'pos;
@@ -118,12 +123,11 @@ let extract
       })
     offsets
 
-let body_start_for ~class_name t =
-  let open Option.Let_syntax in
-  let* c = SMap.find_opt class_name t in
-  Some c.classish_start
-
-let body_end_for ~class_name t =
-  let open Option.Let_syntax in
-  let* c = SMap.find_opt class_name t in
-  Some c.classish_end
+let find pos t =
+  let map_class class_name f = SMap.find_opt class_name t |> Option.map ~f in
+  match pos with
+  | Precomputed pos -> Some pos
+  | Classish_start_of_body class_name ->
+    map_class class_name @@ fun c -> c.classish_start
+  | Classish_end_of_body class_name ->
+    map_class class_name @@ fun c -> c.classish_end

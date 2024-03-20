@@ -15,9 +15,8 @@ let text_edits
     List.map eager_edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
   | Quickfix.Classish_end { classish_end_new_text; classish_end_name } ->
     (match
-       Classish_positions.body_end_for
-         ~class_name:classish_end_name
-         classish_positions
+       Classish_positions.(
+         find (Classish_end_of_body classish_end_name) classish_positions)
      with
     | Some classish_end ->
       [Code_action_types.{ pos = classish_end; text = classish_end_new_text }]

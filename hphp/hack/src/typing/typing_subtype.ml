@@ -831,23 +831,42 @@ end = struct
             (LoclType lty_sub)
             ty_super)
     | (r_sub, Tintersection tyl) ->
-      let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
-        simplify_subtype_i ~subtype_env ~this_ty:None ~lhs ~rhs env
-      in
       (* A & B <: C iif A <: C | !B *)
       (match Subtype_negation.find_type_with_exact_negation env tyl with
-      | (env, Some non_ty, tyl) ->
-        let (env, ty_super) =
-          TUtils.union_i env (get_reason non_ty) ty_super non_ty
-        in
-        let ty_sub = MakeType.intersection r_sub tyl in
-        simplify_subtype_i
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-          env
+      | (env, Some non_ty, tyl) -> begin
+        match ty_super with
+        | LoclType ty_super ->
+          let (env, ty_super) = TUtils.union env ty_super non_ty in
+          let ty_sub = MakeType.intersection r_sub tyl in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            env
+        | ConstraintType cty_super ->
+          let (env, ty_fresh) = Env.fresh_type env Pos.none in
+          let (env, ty_super) = TUtils.union env ty_fresh non_ty in
+          let ty_sub = MakeType.intersection r_sub tyl in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            env
+          &&& Subtype_constraint_super.(
+                simplify
+                  ~subtype_env
+                  ~this_ty:None
+                  ~fail
+                  ~lhs:{ sub_supportdyn = None; ty_sub = LoclType ty_fresh }
+                  ~rhs:
+                    { super_like = false; super_supportdyn = false; cty_super })
+      end
       | _ ->
+        let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
+          simplify_subtype_i ~subtype_env ~this_ty:None ~lhs ~rhs env
+        in
         (* Otherwise use the incomplete common case which doesn't require inspection of the rhs *)
         Common.simplify_intersection_l
           ~subtype_env

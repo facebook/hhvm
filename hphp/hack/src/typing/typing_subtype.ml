@@ -7637,7 +7637,74 @@ end = struct
           ~rhs:{ super_supportdyn = false; super_like; ty_super }
           env)
     in
-    default_subtype_help env
+    match ety_sub with
+    | ConstraintType _ -> default_subtype_help env
+    | LoclType ty_sub ->
+      (match get_node ty_sub with
+      | Tvar _
+      | Tunion _ ->
+        default_subtype_help env
+      | _ ->
+        let partition = Typing_refinement.partition_ty env ty_sub predicate in
+        let intersect tyl = MakeType.intersection reason_super tyl in
+        let simplify_subtype ~f tyl ty_super env =
+          Subtype.(
+            simplify_subtype
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub = f tyl }
+              ~rhs:{ super_supportdyn = false; super_like; ty_super }
+              env)
+        in
+        (* When we split a type we have some component that is a subset and
+           some component that is a span. For the component that is a subset
+           we need to ensure it is a subtype of the given super type, but
+           for the span we need to refine the type down to a type we know
+           would pass the given predicate. *)
+        let simplify_split
+            ~init
+            ~refine
+            (subset : Typing_refinement.dnf_ty)
+            (span : Typing_refinement.dnf_ty)
+            ty_sup =
+          let init =
+            List.fold_left subset ~init ~f:(fun res tyl ->
+                res &&& simplify_subtype ~f:intersect tyl ty_sup)
+          in
+          List.fold_left span ~init ~f:(fun res tyl ->
+              res &&& simplify_subtype ~f:refine tyl ty_sup)
+        in
+
+        let refine_true tyl =
+          match predicate with
+          | IsBool -> intersect (MakeType.bool reason_super :: tyl)
+        in
+        let refine_false tyl =
+          intersect (MakeType.neg reason_super (Neg_predicate predicate) :: tyl)
+        in
+
+        let (ty_true, ty_false_opt) =
+          match ty_super_opt with
+          | None -> (MakeType.nothing reason_super, None)
+          | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
+        in
+        let (env, props) =
+          simplify_split
+            ~refine:refine_true
+            ~init:(env, TL.valid)
+            partition.Typing_refinement.left
+            partition.Typing_refinement.span
+            ty_true
+        in
+        let f init ty_false =
+          simplify_split
+            ~refine:refine_false
+            ~init
+            partition.Typing_refinement.right
+            partition.Typing_refinement.span
+            ty_false
+        in
+        Option.fold ty_false_opt ~init:(env, props) ~f)
 end
 
 and Common : sig

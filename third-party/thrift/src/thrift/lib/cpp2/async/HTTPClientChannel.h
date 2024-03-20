@@ -165,13 +165,13 @@ class HTTPClientChannel : public ClientChannel,
       std::shared_ptr<apache::thrift::transport::THeader>,
       RequestClientCallback::Ptr);
 
- private:
   HTTPClientChannel(
       folly::AsyncTransport::UniquePtr transport,
       std::unique_ptr<proxygen::HTTPCodec> codec);
 
   ~HTTPClientChannel() override;
 
+ private:
   class HTTPTransactionCallback
       : public MessageChannel::SendCallback,
         public proxygen::HTTPTransactionHandler,

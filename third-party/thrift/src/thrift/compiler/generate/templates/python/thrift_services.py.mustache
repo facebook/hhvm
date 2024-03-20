@@ -37,10 +37,13 @@ import {{included_module_path}}.thrift_services
 {{#has_types?}}
 import {{included_module_path}}.thrift_types
 {{/has_types?}}
+{{/program:include_namespaces}}
 {{#program:adapter_modules}}
 import {{module_path}}
 {{/program:adapter_modules}}
-{{/program:include_namespaces}}
+{{#program:adapter_type_hint_modules}}
+import {{module_path}}
+{{/program:adapter_type_hint_modules}}
 
 {{#program:services}}
 class {{service:name}}Interface(

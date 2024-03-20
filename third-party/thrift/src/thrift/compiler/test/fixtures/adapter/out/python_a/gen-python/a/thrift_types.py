@@ -15,8 +15,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import b.thrift_types
 
 import c.thrift_types
-import two
 import three
+import two
 import one
 
 
@@ -96,3 +96,52 @@ _fbthrift_all_structs = [
     MyStruct,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+
+
+
+class _fbthrift_MyService_adapted_return_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(b.thrift_types._fbthrift_unadapted_B), one.AdapterOne, lambda: None),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_MyService_adapted_param_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "param",  # name
+            lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_types.StructTypeInfo(c.thrift_types.C2), two.AdapterTwo, lambda: None),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+class _fbthrift_MyService_adapted_param_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+
+_fbthrift_python_types.fill_specs(
+    _fbthrift_MyService_adapted_return_args,
+    _fbthrift_MyService_adapted_return_result,
+    _fbthrift_MyService_adapted_param_args,
+    _fbthrift_MyService_adapted_param_result,
+    
+)

@@ -45,6 +45,9 @@ import {{included_module_path}}.thrift_clients
 {{#program:adapter_modules}}
 import {{module_path}}
 {{/program:adapter_modules}}
+{{#program:adapter_type_hint_modules}}
+import {{module_path}}
+{{/program:adapter_type_hint_modules}}
 {{#program:services?}}
 {{#program:services}}
 

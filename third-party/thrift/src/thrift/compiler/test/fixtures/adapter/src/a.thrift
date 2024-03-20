@@ -21,3 +21,8 @@ struct MyStruct {
   2: b.C1 b;
   3: b.C2 c;
 }
+
+service MyService {
+  b.B adapted_return();
+  void adapted_param(1: b.C2 param);
+}

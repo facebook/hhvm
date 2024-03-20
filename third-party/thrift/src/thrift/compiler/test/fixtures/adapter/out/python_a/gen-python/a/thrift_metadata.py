@@ -45,9 +45,57 @@ def gen_metadata_struct_MyStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
 
+def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_MyService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "a.MyService"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="adapted_return", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="b._fbthrift_unadapted_B")), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="adapted_param", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="c.C2")), name="param", is_optional=False, structured_annotations=[
+            ]),
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+    new_struct = b.thrift_metadata._fbthrift_gen_metadata_struct__fbthrift_unadapted_B(new_struct) # return value
+    
+    
+    new_struct = c.thrift_metadata._fbthrift_gen_metadata_struct_C2(new_struct) # param
+    
+    
+     # return value
+    
+    
+    return new_struct
+
+def _fbthrift_metadata_service_response_MyService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_MyService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["a.MyService"], module=_fbthrift_metadata.ThriftModuleContext(name="a"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     meta = _fbthrift_gen_metadata_struct_MyStruct(meta)
+    meta = _fbthrift_gen_metadata_service_MyService(meta)
     return meta

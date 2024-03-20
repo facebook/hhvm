@@ -17,8 +17,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import b.thrift_types
 
 import c.thrift_types
-import typeshed_two
 import typeshed_three
+import typeshed_two
 import typeshed_one
 
 
@@ -47,3 +47,55 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "a.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "a.ttypes.MyStruct": ...  # type: ignore
+
+
+class _fbthrift_MyService_adapted_return_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyService_adapted_return_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[typeshed_one.AdapterOneType[b.thrift_types.B]]
+
+    def __init__(
+        self, *, success: _typing.Optional[typeshed_one.AdapterOneType[b.thrift_types.B]] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            typeshed_one.AdapterOneType[b.thrift_types.B],
+        ]]]: ...
+
+
+class _fbthrift_MyService_adapted_param_args(_fbthrift_python_types.Struct):
+    param: _typing.Final[typeshed_two.AdapterTwoType[c.thrift_types.C2]] = ...
+
+    def __init__(
+        self, *,
+        param: _typing.Optional[typeshed_two.AdapterTwoType[c.thrift_types.C2]]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None, typeshed_two.AdapterTwoType[c.thrift_types.C2]]]]: ...
+
+
+class _fbthrift_MyService_adapted_param_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...

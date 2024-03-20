@@ -1058,9 +1058,12 @@ let diagnostics_to_exclude_from_notebooks =
     ]
 
 let hack_errors_to_lsp_diagnostic
-    (filename : string) (errors : Errors.finalized_error list) :
+    (filename : string) (diagnostics : ClientIdeMessage.diagnostic list) :
     PublishDiagnostics.params =
   let open Lsp.Location in
+  let errors =
+    List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
+  in
   let location_message (message : Pos.absolute * string) :
       Lsp.Location.t * string =
     let (pos, message) = message in
@@ -3411,11 +3414,11 @@ let report_recheck_telemetry
     ~(trigger : errors_trigger)
     ~(ref_unblocked_time : float ref)
     (uri : DocumentUri.t)
-    (result : (Errors.finalized_error list, unit) Result.t) : unit =
+    (result : (ClientIdeMessage.diagnostic list, unit) Result.t) : unit =
   let (result, result_count) =
     match result with
-    | Ok errors when List.is_empty errors -> ("publishedEmpty", Some 0)
-    | Ok errors -> ("publishedErrors", Some (List.length errors))
+    | Ok [] -> ("publishedEmpty", Some 0)
+    | Ok diagnostics -> ("publishedErrors", Some (List.length diagnostics))
     | Error () -> ("cancelled", None)
   in
   let notification =
@@ -3496,13 +3499,10 @@ let publish_and_report_after_recomputing_live_squiggles
           )
           uris
     in
-    let errors =
-      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
-    in
-    let params = hack_errors_to_lsp_diagnostic file_path errors in
+    let params = hack_errors_to_lsp_diagnostic file_path diagnostics in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
-    report_recheck_telemetry ~trigger ~ref_unblocked_time uri (Ok errors);
+    report_recheck_telemetry ~trigger ~ref_unblocked_time uri (Ok diagnostics);
 
     let new_state =
       Running { lenv with Run_env.uris_with_standalone_diagnostics }
@@ -3648,7 +3648,16 @@ let handle_errors_file_item
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
-              publish (hack_errors_to_lsp_diagnostic path file_errors);
+              (* We do not precompute additional diagnostic information (like
+                 where to display additional LSP visual hints) for errors
+                 received from the server. They will in general only be received
+                 for closed files anyways. *)
+              let diagnostics =
+                List.map
+                  file_errors
+                  ~f:ClientIdeMessage.diagnostic_of_finalized_error
+              in
+              publish (hack_errors_to_lsp_diagnostic path diagnostics);
               UriMap.add uri (timestamp, Diagnostics_from_errors_file) acc)
     in
     state := Running { lenv with Run_env.uris_with_standalone_diagnostics };

@@ -85,8 +85,20 @@ of locations where a "hint" should be displayed for that error. *)
 type diagnostic = {
   diagnostic_error: Errors.finalized_error;
   diagnostic_related_hints: Pos.absolute list;
+      (** Note that these will be displayed in the IDE, so this field
+          only gets set when diagnostics are computed by clientIdeDaemon, and
+          not when  they are computed by hh_server.
+
+          This is fine because:
+          (1) When a file is open in the IDE, we ignore hh_server signal
+          (2) When a file is closed in the IDE, we use hh_server signal, but we
+              can't show hint locations anyways!
+      *)
 }
 [@@deriving show]
+
+let diagnostic_of_finalized_error diagnostic_error =
+  { diagnostic_error; diagnostic_related_hints = [] }
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)

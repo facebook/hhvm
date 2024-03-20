@@ -13,40 +13,44 @@ include Classish_positions_types
 let classish_positions_for ~(to_pos : int -> int -> Pos.t) s :
     Pos.t classish_positions option =
   let open Syntax in
-  let brace_to_offset brace (f : offset:int -> width:int -> int) : int option =
+  let map_brace_token brace (f : Token.t -> 'a) : 'a option =
     match brace.syntax with
-    | Token t -> Some (f ~offset:t.Token.offset ~width:t.Token.width)
+    | Token t -> Some (f t)
     | _ -> None
+  in
+  let brace_to_offset brace (f : offset:int -> width:int -> int) : int option =
+    map_brace_token brace (fun t ->
+        f ~offset:t.Token.offset ~width:t.Token.width)
   in
   match s.syntax with
   | ClassishBody cb ->
     let open Option.Let_syntax in
-    let* classish_after_opening_brace_offset =
+    let* classish_start_of_body_offset =
       brace_to_offset cb.classish_body_left_brace @@ fun ~offset ~width ->
       offset + width
     in
-    let* classish_before_closing_brace_offset =
+    let* classish_end_of_body_offset =
       brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width:_ ->
       offset
     in
-    let* classish_after_closing_brace_offset =
-      brace_to_offset cb.classish_body_right_brace @@ fun ~offset ~width ->
-      offset + width
+    let* classish_just_before_closing_brace_offset =
+      map_brace_token cb.classish_body_right_brace @@ fun t ->
+      t.Token.offset + t.Token.leading_width
+    in
+    let* classish_just_after_closing_brace_offset =
+      map_brace_token cb.classish_body_right_brace @@ fun t ->
+      t.Token.offset + t.Token.leading_width + t.Token.width
     in
     Some
       {
         classish_start_of_body =
-          to_pos
-            classish_after_opening_brace_offset
-            classish_after_opening_brace_offset;
+          to_pos classish_start_of_body_offset classish_start_of_body_offset;
         classish_end_of_body =
-          to_pos
-            classish_before_closing_brace_offset
-            classish_before_closing_brace_offset;
+          to_pos classish_end_of_body_offset classish_end_of_body_offset;
         classish_closing_brace =
           to_pos
-            classish_before_closing_brace_offset
-            classish_after_closing_brace_offset;
+            classish_just_before_closing_brace_offset
+            classish_just_after_closing_brace_offset;
       }
   | _ -> None
 

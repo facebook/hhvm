@@ -1057,13 +1057,10 @@ let diagnostics_to_exclude_from_notebooks =
       "await cannot be used in a toplevel statement";
     ]
 
-let hack_errors_to_lsp_diagnostic
+let ide_diagnostics_to_lsp_diagnostics
     (filename : string) (diagnostics : ClientIdeMessage.diagnostic list) :
     PublishDiagnostics.params =
   let open Lsp.Location in
-  let errors =
-    List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
-  in
   let location_message (message : Pos.absolute * string) :
       Lsp.Location.t * string =
     let (pos, message) = message in
@@ -1079,9 +1076,12 @@ let hack_errors_to_lsp_diagnostic
     let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
     ({ Location.uri; range }, Markdown_lite.render message)
   in
-  let hack_error_to_lsp_diagnostic (error : Errors.finalized_error) =
+  let ide_diagnostic_to_lsp_diagnostics
+      (diagnostic : ClientIdeMessage.diagnostic) :
+      Lsp.PublishDiagnostics.diagnostic list =
+    let diagnostic_error = diagnostic.ClientIdeMessage.diagnostic_error in
     let all_messages =
-      User_error.to_list error |> List.map ~f:location_message
+      User_error.to_list diagnostic_error |> List.map ~f:location_message
     in
     let (first_message, additional_messages) =
       match all_messages with
@@ -1107,19 +1107,35 @@ let hack_errors_to_lsp_diagnostic
     in
     let first_loc = fst first_message in
     let custom_errors =
-      List.map error.User_error.custom_msgs ~f:(fun relatedMessage ->
+      List.map diagnostic_error.User_error.custom_msgs ~f:(fun relatedMessage ->
           PublishDiagnostics.{ relatedLocation = first_loc; relatedMessage })
     in
     let relatedInformation = relatedInformation @ custom_errors in
-    {
-      Lsp.PublishDiagnostics.range;
-      severity = Some Lsp.PublishDiagnostics.Error;
-      code = PublishDiagnostics.IntCode (User_error.get_code error);
-      source = Some "Hack";
-      message;
-      relatedInformation;
-      relatedLocations = relatedInformation (* legacy FB extension *);
-    }
+    let error_for_diagnostic =
+      {
+        Lsp.PublishDiagnostics.range;
+        severity = Some Lsp.PublishDiagnostics.Error;
+        code = PublishDiagnostics.IntCode (User_error.get_code diagnostic_error);
+        source = Some "Hack";
+        message;
+        relatedInformation;
+        relatedLocations = relatedInformation (* legacy FB extension *);
+      }
+    in
+    let additional_diagnostics =
+      List.map
+        diagnostic.ClientIdeMessage.diagnostic_related_hints
+        ~f:(fun hint_pos ->
+          let { uri = _; range } =
+            hack_pos_to_lsp_location hint_pos ~default_path:filename
+          in
+          {
+            error_for_diagnostic with
+            Lsp.PublishDiagnostics.range;
+            severity = Some Lsp.PublishDiagnostics.Hint;
+          })
+    in
+    error_for_diagnostic :: additional_diagnostics
   in
   let should_include_diagnostic { Lsp.PublishDiagnostics.message; _ } =
     not
@@ -1130,8 +1146,8 @@ let hack_errors_to_lsp_diagnostic
      the following path_to_lsp_uri will fall back to the default path - which
      is also empty - and throw, logging appropriate telemetry. *)
   let diagnostics =
-    errors
-    |> List.map ~f:hack_error_to_lsp_diagnostic
+    diagnostics
+    |> List.bind ~f:ide_diagnostic_to_lsp_diagnostics
     |> List.filter ~f:should_include_diagnostic
   in
 
@@ -3499,7 +3515,7 @@ let publish_and_report_after_recomputing_live_squiggles
           )
           uris
     in
-    let params = hack_errors_to_lsp_diagnostic file_path diagnostics in
+    let params = ide_diagnostics_to_lsp_diagnostics file_path diagnostics in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
     report_recheck_telemetry ~trigger ~ref_unblocked_time uri (Ok diagnostics);
@@ -3659,7 +3675,7 @@ let handle_errors_file_item
                     ClientIdeMessage
                     .diagnostic_of_finalized_error_without_related_hints
               in
-              publish (hack_errors_to_lsp_diagnostic path diagnostics);
+              publish (ide_diagnostics_to_lsp_diagnostics path diagnostics);
               UriMap.add uri (timestamp, Diagnostics_from_errors_file) acc)
     in
     state := Running { lenv with Run_env.uris_with_standalone_diagnostics };

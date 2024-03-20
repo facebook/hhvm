@@ -309,7 +309,7 @@ let const_without_typehint pos name type_ =
   in
   User_error.make
     Error_code.(to_enum AddATypehint)
-    ~quickfixes:[Quickfix.make_eager ~title ~new_text pos]
+    ~quickfixes:[Quickfix.make_eager_primary ~title ~new_text pos]
     (pos, msg)
     []
 
@@ -349,9 +349,10 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
   let suggest_name = Render.strip_ns suggest_name in
   let quickfixes =
     [
-      Quickfix.make
+      Quickfix.make_eager_primary
         ~title:("Change to " ^ suggest_name)
-        ~edits:(Quickfix.Eager [(suggest_name, pos)]);
+        ~new_text:suggest_name
+        pos;
     ]
   in
   User_error.make
@@ -588,7 +589,7 @@ let undefined pos var_name did_you_mean =
               |> Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos);
           ],
           [
-            Quickfix.make_eager
+            Quickfix.make_eager_primary
               ~title:("Change to " ^ did_you_mean)
               ~new_text:did_you_mean
               pos;
@@ -613,7 +614,7 @@ let undefined_in_expr_tree pos var_name dsl did_you_mean =
               Printf.sprintf "Did you forget to splice in `%s`?" did_you_mean );
           ],
           [
-            Quickfix.make_eager
+            Quickfix.make_eager_primary
               ~title:("Splice in " ^ did_you_mean)
               ~new_text:(Printf.sprintf "${%s}" did_you_mean)
               pos;
@@ -749,7 +750,7 @@ let unbound_attribute_name pos attr_name closest_attr_name =
       | None -> []
       | Some close_name ->
         [
-          Quickfix.make_eager
+          Quickfix.make_eager_primary
             ~title:("Change to " ^ Markdown_lite.md_codify close_name)
             ~new_text:close_name
             pos;
@@ -990,7 +991,7 @@ let lvar_in_obj_get pos lvar_pos lvar_name =
   in
   let quickfixes =
     [
-      Quickfix.make_eager
+      Quickfix.make_eager_primary
         ~title:("Change to " ^ suggestion)
         ~new_text:lvar_no_dollar
         pos;

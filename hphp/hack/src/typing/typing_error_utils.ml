@@ -739,7 +739,7 @@ end = struct
                   (Markdown_lite.md_codify similar_name) );
             ],
             [
-              Quickfix.make_eager
+              Quickfix.make_eager_primary
                 ~title:("Change to " ^ Markdown_lite.md_codify similar_name)
                 ~new_text:similar_name
                 pos;
@@ -1031,7 +1031,7 @@ end = struct
       let qf_pos = Pos.shrink_to_start pos in
       let quickfixes =
         [
-          Quickfix.make_eager
+          Quickfix.make_eager_primary
             ~title:"Insert `readonly`"
             ~new_text:"readonly "
             qf_pos;
@@ -1184,7 +1184,7 @@ end = struct
         | None -> []
         | Some hint_pos ->
           [
-            Quickfix.make_eager
+            Quickfix.make_eager_primary
               ~title:("Change to " ^ Markdown_lite.md_codify return_type)
               ~new_text:"void"
               (Pos_or_decl.unsafe_to_raw_pos hint_pos);
@@ -1251,7 +1251,7 @@ end = struct
       in
       let quickfixes =
         [
-          Quickfix.make_eager
+          Quickfix.make_eager_primary
             ~title:("Change to " ^ Markdown_lite.md_codify return_type)
             ~new_text:return_type
             hint_pos;
@@ -1911,7 +1911,12 @@ end = struct
     in
     let quickfixes =
       Option.value_map hint ~default:[] ~f:(fun (_, _, new_text) ->
-          [Quickfix.make_eager ~title:("Change to ->" ^ new_text) ~new_text pos])
+          [
+            Quickfix.make_eager_primary
+              ~title:("Change to ->" ^ new_text)
+              ~new_text
+              pos;
+          ])
     in
     ( Error_code.MemberNotFound,
       claim,
@@ -2206,7 +2211,7 @@ end = struct
             |> Pos.set_col_end rhs_pos_start_column
           in
           [
-            Quickfix.make_eager
+            Quickfix.make_eager_primary
               ~title:"Add null-safe get"
               ~new_text:"?->"
               quickfix_pos;
@@ -2451,7 +2456,7 @@ end = struct
       claim,
       reason,
       [
-        Quickfix.make_eager
+        Quickfix.make_eager_primary
           ~title:"Insert `inout` annotation"
           ~new_text:"inout "
           pos;
@@ -2473,7 +2478,12 @@ end = struct
     ( Error_code.InoutAnnotationUnexpected,
       claim,
       reason,
-      [Quickfix.make_eager ~title:"Remove `inout` annotation" ~new_text:"" pos3],
+      [
+        Quickfix.make_eager_primary
+          ~title:"Remove `inout` annotation"
+          ~new_text:""
+          pos3;
+      ],
       User_error_flags.empty )
 
   let inout_argument_bad_type pos reasons =
@@ -3845,7 +3855,7 @@ end = struct
       | true ->
         let newpos = Pos.shrink_to_start pos in
         [
-          Quickfix.make_eager
+          Quickfix.make_eager_primary
             ~title:("Add " ^ Markdown_lite.md_codify "new")
             ~new_text:"new "
             newpos;
@@ -4004,7 +4014,7 @@ end = struct
   let self_abstract_call call_pos meth_name self_pos decl_pos =
     let quickfixes =
       [
-        Quickfix.make_eager
+        Quickfix.make_eager_primary
           ~title:
             ("Change to " ^ Markdown_lite.md_codify ("static::" ^ meth_name))
           ~new_text:"static"
@@ -4705,7 +4715,12 @@ end = struct
             ("Shapes::idx(", Pos.shrink_to_start recv_pos);
           ]
       in
-      [Quickfix.make ~title:"Change to `Shapes::idx()`" ~edits]
+      [
+        Quickfix.make
+          ~title:"Change to `Shapes::idx()`"
+          ~edits
+          ~hint_styles:[Quickfix.HintStylePrimaryError];
+      ]
     in
     ( Error_code.ArrayGetWithOptionalField,
       lazy

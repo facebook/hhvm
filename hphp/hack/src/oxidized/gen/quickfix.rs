@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<096a24516641f3f486c3a83d2957bd55>>
+// @generated SignedSource<<c3dc0bf692b10ba1315d55aa41101961>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,6 +17,29 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[repr(C, u8)]
+pub enum HintStyle<Pos> {
+    HintStylePrimaryError,
+    HintStyleSilent(Pos),
+    HintStyleHint(Pos),
+}
 
 #[derive(
     Clone,
@@ -67,4 +90,5 @@ pub enum Edits<Pos> {
 pub struct Quickfix<Pos> {
     pub title: String,
     pub edits: Edits<Pos>,
+    pub hint_styles: Vec<HintStyle<classish_positions_types::Pos<Pos>>>,
 }

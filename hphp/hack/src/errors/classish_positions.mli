@@ -7,18 +7,11 @@
  *)
 
 (** Positional information for a collection of classes *)
-type 'pos t
+type 'pos t = 'pos Classish_positions_types.t
 
 (** A relative position specifier in a class. Can later be
 evaluated to an actual position in a file. *)
-type 'pos pos =
-  | Precomputed of 'pos  (** Use the precomputed position. *)
-  | Classish_end_of_body of string
-      (** Position at the end of the class body. Will return a zero-length
-          position just before the closing brace. *)
-  | Classish_start_of_body of string
-      (** Position at the start of the class body. Will return a zero-length
-          position just after the opening brace. *)
+type 'pos pos = 'pos Classish_positions_types.pos
 
 val extract :
   Full_fidelity_positioned_syntax.t ->
@@ -28,6 +21,9 @@ val extract :
 
 (** An empty positional map *)
 val empty : 'pos t
+
+(** Map over the embedded positions *)
+val map_pos : f:('pos -> 'qos) -> 'pos pos -> 'qos pos
 
 (** Find a position in the map. *)
 val find : 'pos pos -> 'pos t -> 'pos option

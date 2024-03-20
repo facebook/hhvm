@@ -65,6 +65,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/naming/naming_error.ml                                        \
   hphp/hack/src/typing/nast_check/nast_check_error.ml                         \
   hphp/hack/src/parser/parsing_error.ml                                       \
+  hphp/hack/src/errors/classish_positions_types.ml                            \
   hphp/hack/src/errors/quickfix.ml                                            \
   hphp/hack/src/naming/naming_phase_error.ml                                  \
   hphp/hack/src/options/declParserOptions.ml                                  \

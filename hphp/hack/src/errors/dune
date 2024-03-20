@@ -29,6 +29,7 @@
     user_error_flags)
   (libraries
     core_kernel
+    classish_positions
     pos_or_decl
     hh_autoimport
     utils_multifile
@@ -44,7 +45,8 @@
    ppx_deriving.std
    ppx_hash))
  (modules
-   classish_positions)
+   classish_positions
+   classish_positions_types)
  (libraries
   core_kernel
   full_fidelity

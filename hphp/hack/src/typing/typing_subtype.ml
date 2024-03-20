@@ -4484,7 +4484,7 @@ end = struct
             in
             Some
               [
-                Quickfix.make_eager
+                Quickfix.make_eager_primary
                   ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
                   ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
                   fix_pos;
@@ -7008,7 +7008,7 @@ end = struct
               |> Pos.set_col_end rhs_pos_start_column
             in
             [
-              Quickfix.make_eager
+              Quickfix.make_eager_primary
                 ~title:"Add null-safe get"
                 ~new_text:"?->"
                 quickfix_pos;

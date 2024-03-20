@@ -72,6 +72,7 @@ mod gen;
 
 pub use gen::aast_defs;
 pub use gen::ast_defs;
+pub use gen::classish_positions_types;
 pub use gen::custom_error;
 pub use gen::custom_error_config;
 pub use gen::decl_defs;

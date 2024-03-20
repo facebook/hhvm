@@ -89,7 +89,7 @@ let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
     Code_action_types.edit list =
   match
     Classish_positions.find
-      (Classish_positions.Classish_start_of_body quickfix.name)
+      (Classish_positions_types.Classish_start_of_body quickfix.name)
       classish_positions
   with
   | Some classish_start ->

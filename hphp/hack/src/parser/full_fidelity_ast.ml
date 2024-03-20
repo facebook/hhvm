@@ -134,7 +134,10 @@ let process_syntax_errors
               (List.map edits ~f:(fun (start_offset, end_offset, new_text) ->
                    (new_text, pos_of_offsets start_offset end_offset)))
           in
-          Quickfix.make ~title ~edits)
+          Quickfix.make
+            ~title
+            ~edits
+            ~hint_styles:[Quickfix.HintStylePrimaryError])
     in
 
     Errors.add_error

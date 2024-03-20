@@ -8,6 +8,12 @@
 
 open Hh_prelude
 
+type 'pos hint_style =
+  | HintStylePrimaryError
+  | HintStyleSilent of 'pos
+  | HintStyleHint of 'pos
+[@@deriving eq, ord, show]
+
 type 'pos edits =
   | Eager of (string * 'pos) list
   | Classish_end of {
@@ -21,15 +27,20 @@ type 'pos edits =
 type 'pos t = {
   title: string;
   edits: 'pos edits;
+  hint_styles: 'pos Classish_positions_types.pos hint_style list;
 }
 [@@deriving eq, ord, show]
 
-let make ~title ~edits = { title; edits }
+let make ~title ~edits ~hint_styles = { title; edits; hint_styles }
 
-let make_eager ~title ~new_text pos = { title; edits = Eager [(new_text, pos)] }
+let make_eager ~title ~new_text ~hint_styles pos =
+  { title; edits = Eager [(new_text, pos)]; hint_styles }
+
+let make_eager_primary ~title ~new_text pos =
+  make_eager ~title ~new_text ~hint_styles:[HintStylePrimaryError] pos
 
 let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
- fun { title; edits } ~f ->
+ fun { title; edits; hint_styles } ~f ->
   let transform_edits = function
     | Eager edits ->
       let edits = List.map edits ~f:(fun (s, p) -> (s, f p)) in
@@ -37,10 +48,21 @@ let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
     | Classish_end fields -> Classish_end fields
   in
   let edits = transform_edits edits in
-  { title; edits }
+
+  let transform_hint_style = function
+    | HintStylePrimaryError -> HintStylePrimaryError
+    | HintStyleSilent p -> HintStyleSilent (Classish_positions.map_pos ~f p)
+    | HintStyleHint p -> HintStyleHint (Classish_positions.map_pos ~f p)
+  in
+  let hint_styles = List.map hint_styles ~f:transform_hint_style in
+  { title; edits; hint_styles }
 
 let to_absolute : Pos.t t -> Pos.absolute t = map_positions ~f:Pos.to_absolute
 
 let get_title (quickfix : 'a t) : string = quickfix.title
 
 let get_edits (quickfix : Pos.t t) : Pos.t edits = quickfix.edits
+
+let get_hint_styles (quickfix : Pos.t t) :
+    Pos.t Classish_positions.pos hint_style list =
+  quickfix.hint_styles

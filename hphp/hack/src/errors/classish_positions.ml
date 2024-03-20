@@ -8,20 +8,7 @@
 
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
-
-type 'pos pos =
-  | Precomputed of 'pos
-  | Classish_end_of_body of string
-  | Classish_start_of_body of string
-
-(** Positional information for a single class *)
-type 'pos classish_positions = {
-  classish_start: 'pos;
-  classish_end: 'pos;
-}
-
-(** Positional information for a collection of classes *)
-type 'pos t = 'pos classish_positions SMap.t
+include Classish_positions_types
 
 type classish_body_offsets = int classish_positions
 
@@ -122,6 +109,11 @@ let extract
         classish_end = to_pos classish_end;
       })
     offsets
+
+let map_pos ~f = function
+  | Precomputed p -> Precomputed (f p)
+  | Classish_start_of_body class_name -> Classish_start_of_body class_name
+  | Classish_end_of_body class_name -> Classish_end_of_body class_name
 
 let find pos t =
   let map_class class_name f = SMap.find_opt class_name t |> Option.map ~f in

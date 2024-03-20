@@ -146,6 +146,7 @@ impl Naming {
             vec![Quickfix {
                 title: format!("Change to `{}`", correct_name),
                 edits: Edits::Eager(vec![(correct_name.into(), p)]),
+                hint_styles: vec![],
             }],
             Default::default(),
         )
@@ -170,14 +171,17 @@ impl Naming {
                 Quickfix {
                     title: "Add `private` modifier".into(),
                     edits: Edits::Eager(vec![("private ".into(), fix_pos.clone())]),
+                    hint_styles: vec![],
                 },
                 Quickfix {
                     title: "Add `protected` modifier".into(),
                     edits: Edits::Eager(vec![("protected ".into(), fix_pos.clone())]),
+                    hint_styles: vec![],
                 },
                 Quickfix {
                     title: "Add `public` modifier".into(),
                     edits: Edits::Eager(vec![("public ".into(), (fix_pos.clone()))]),
+                    hint_styles: vec![],
                 },
             ],
             Default::default(),

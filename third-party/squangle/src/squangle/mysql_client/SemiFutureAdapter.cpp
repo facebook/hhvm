@@ -6,16 +6,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/SemiFutureAdapter.h"
-#include <folly/futures/Future.h>
-#include <squangle/mysql_client/Operation.h>
-#include "folly/futures/Future.h"
-#include "squangle/mysql_client/AsyncHelpers.h"
-#include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/DbResult.h"
-
 #include <folly/MoveWrapper.h>
+#include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
+
+#include "squangle/mysql_client/AsyncHelpers.h"
+#include "squangle/mysql_client/DbResult.h"
+#include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/SemiFutureAdapter.h"
 
 namespace facebook {
 namespace common {

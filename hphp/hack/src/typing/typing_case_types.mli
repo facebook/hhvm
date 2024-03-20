@@ -61,3 +61,28 @@ val filter_variants_using_datatype :
    variant types. If the case type doesn't exist, returns [None].
 *)
 val get_variant_tys : env -> string -> locl_ty list -> env * locl_ty list option
+
+(** Computes runtime data types for types that cannot be decomposed into smaller types *)
+module AtomicDataTypes : sig
+  type t
+
+  (** Types we consider as atomic *)
+  type atomic_ty =
+    | Primitive of Aast.tprim
+    | Function
+    | Nonnull
+    | Tuple
+    | Shape
+    | Class of string
+
+  val of_ty : env -> atomic_ty -> t
+
+  val of_predicate : env -> type_predicate -> t
+
+  (** Computes the complement for the set of values contained in [t] *)
+  val complement : t -> t
+
+  (** Returns true if the given data types are known to have no values in
+      common, otherwise returns false *)
+  val are_disjoint : env -> t -> t -> bool
+end

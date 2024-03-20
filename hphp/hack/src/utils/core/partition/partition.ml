@@ -39,6 +39,10 @@ end) : S with type set := AtomicSet.t = struct
     (* The empty conjunction is the top type, i.e. "true" *)
     let top = DNF (And [])
 
+    let is_bottom = function
+      | DNF (Or []) -> true
+      | _ -> false
+
     let singleton ty = DNF (And [ty])
 
     (** Unions two abstract sets *)
@@ -166,6 +170,19 @@ end) : S with type set := AtomicSet.t = struct
         Lattice.Infix_ops.(
           right1 &&& right2 ||| (right1 &&& span2) ||| (right2 &&& span1));
     }
+
+  (* If the partition is fully within the left, span or right we can
+     simplify the DNF to be [set], otherwise return [t] unchanged *)
+  let simplify t set =
+    match
+      ( Lattice.is_bottom t.left,
+        Lattice.is_bottom t.span,
+        Lattice.is_bottom t.right )
+    with
+    | (false, true, true) -> mk_left set
+    | (true, false, true) -> mk_span set
+    | (true, true, false) -> mk_right set
+    | _ -> t
 
   let left t = Lattice.to_list t.left
 

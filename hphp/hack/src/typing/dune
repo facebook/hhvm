@@ -322,6 +322,7 @@
   typing_ops
   typing_partial_enforcement
   typing_phase
+  typing_refinement
   typing_return
   typing_solver
   typing_solver_utils
@@ -340,7 +341,8 @@
   typing_visibility
   decl_typedef_expand
   lru
-  approx_set)
+  approx_set
+  partition)
  (preprocess
   (pps ppx_deriving.std)))
 

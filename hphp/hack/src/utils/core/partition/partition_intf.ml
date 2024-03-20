@@ -46,6 +46,10 @@ module type S = sig
   (** Intersects two partitions together producing another partition *)
   val meet : t -> t -> t
 
+  (** If the partition is fully within the left, span or right we can
+     simplify the DNF to be [set], otherwise return [t] unchanged *)
+  val simplify : t -> set -> t
+
   (* Accessors *)
 
   (** Returns the component of the partition that

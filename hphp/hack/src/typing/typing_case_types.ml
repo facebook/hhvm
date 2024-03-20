@@ -3,7 +3,7 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
- *These 'Unbound module' errors can be fixed... [read more](https://fburl.com/ocaml_hack_and_flow)
+ *
  *)
 
 open Hh_prelude
@@ -313,6 +313,20 @@ module DataType = struct
         [IntData; StringData]
     | Tnoreturn -> Set.empty
 
+  let fun_to_datatypes ~trail : 'phase t =
+    mixed ~reason:DataTypeReason.(make Functions trail)
+
+  let nonnull_to_datatypes ~trail : 'phase t =
+    Set.of_list
+      ~reason:DataTypeReason.(make NoSubreason trail)
+      Tag.all_nonnull_tags
+
+  let tuple_to_datatypes ~trail : 'phase t =
+    Set.singleton ~reason:DataTypeReason.(make Tuples trail) Tag.VecData
+
+  let shape_to_datatypes ~trail : 'phase t =
+    Set.singleton ~reason:DataTypeReason.(make Shapes trail) Tag.DictData
+
   module Class = struct
     (* Set of interfaces that contain non-object members *)
     let special_interfaces =
@@ -497,7 +511,7 @@ module DataType = struct
     in
     match get_node ty with
     | Tprim prim -> prim_to_datatypes ~trail prim
-    | Tnonnull -> Set.of_list ~reason Tag.all_nonnull_tags
+    | Tnonnull -> nonnull_to_datatypes ~trail
     | Tdynamic -> mixed ~reason
     | Tany _ -> mixed ~reason
     | Toption ty ->
@@ -507,11 +521,9 @@ module DataType = struct
     (* For now say it has the same tags as `nonnull`.
      * We should be able to be more precise, but need to
      * validate what are all the data types that are valid callables *)
-    | Tfun _ -> mixed ~reason:DataTypeReason.(make Functions trail)
-    | Ttuple _ ->
-      Set.singleton ~reason:DataTypeReason.(make Tuples trail) VecData
-    | Tshape _ ->
-      Set.singleton ~reason:DataTypeReason.(make Shapes trail) DictData
+    | Tfun _ -> fun_to_datatypes ~trail
+    | Ttuple _ -> tuple_to_datatypes ~trail
+    | Tshape _ -> shape_to_datatypes ~trail
     | Tvar _ -> mixed ~reason
     | Tgeneric (name, tyl) ->
       let upper_bounds =
@@ -757,3 +769,45 @@ let get_variant_tys env name ty_args :
     in
     (env, Some tyl)
   | _ -> (env, None)
+
+module AtomicDataTypes = struct
+  type t = unit DataType.t
+
+  type atomic_ty =
+    | Primitive of Aast.tprim
+    | Function
+    | Nonnull
+    | Tuple
+    | Shape
+    | Class of string
+
+  let trail =
+    DataTypeReason.make_trail
+      (Typing_make_type.bool Reason.none)
+      Type_expansions.empty
+
+  let function_ = DataType.fun_to_datatypes ~trail
+
+  let nonnull = DataType.nonnull_to_datatypes ~trail
+
+  let tuple = DataType.tuple_to_datatypes ~trail
+
+  let shape = DataType.shape_to_datatypes ~trail
+
+  let mixed = DataType.mixed ~reason:DataTypeReason.(make NoSubreason trail)
+
+  let of_ty env = function
+    | Primitive prim -> DataType.prim_to_datatypes ~trail prim
+    | Function -> function_
+    | Nonnull -> nonnull
+    | Tuple -> tuple
+    | Shape -> shape
+    | Class name -> DataType.Class.to_datatypes ~trail env name
+
+  let of_predicate env = function
+    | IsBool -> of_ty env (Primitive Aast.Tbool)
+
+  let complement dt = DataType.Set.diff mixed dt
+
+  let are_disjoint env dt1 dt2 = DataType.Set.are_disjoint env dt1 dt2
+end

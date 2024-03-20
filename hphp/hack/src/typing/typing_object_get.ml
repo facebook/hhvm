@@ -124,7 +124,7 @@ let smember_not_found
     let quickfixes =
       Option.value_map hint ~default:[] ~f:(fun (_, _, new_text) ->
           [
-            Quickfix.make_eager_primary
+            Quickfix.make_eager_default_hint_style
               ~title:("Change to ::" ^ new_text)
               ~new_text
               pos;

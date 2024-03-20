@@ -20,11 +20,9 @@ type 'pos edits =
       which requires FFP to compute the { position. *)
 [@@deriving eq, ord, show]
 
-(** How should we indicate to the user that a quickfix is available? *)
+(** How should we indicate to the user that a quickfix is available,
+additional to the primary error red-squiggle? *)
 type 'pos hint_style =
-  | HintStylePrimaryError
-      (** Make the quickfix available when the user has their cursor where the
-      primary error is located. *)
   | HintStyleSilent of 'pos
       (** Make the quickfix available for the given position, but don't provide
       any visual indication. *)
@@ -47,8 +45,9 @@ val make_eager :
   Pos.t ->
   Pos.t t
 
-(** Helper for [make_eager] fixing the hint style to [HintStylePrimaryError] *)
-val make_eager_primary : title:string -> new_text:string -> Pos.t -> Pos.t t
+(** Helper for [make_eager] to create a quickfix with no additional hint styles] *)
+val make_eager_default_hint_style :
+  title:string -> new_text:string -> Pos.t -> Pos.t t
 
 val get_title : Pos.t t -> string
 

@@ -318,7 +318,6 @@ let stub_all_methods_quickfix
     ~hint_styles:
       Quickfix.
         [
-          HintStylePrimaryError;
           HintStyleHint
             (Classish_positions_types.Classish_closing_brace class_name);
         ]

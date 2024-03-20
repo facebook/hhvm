@@ -43,6 +43,23 @@ let convert_quickfix
   Code_action_types.
     { title = Quickfix.get_title quickfix; edits; kind = `Quickfix }
 
+let quickfix_positions_for_error
+    (classish_positions : Pos.t Classish_positions.t) (error : Errors.error) :
+    Pos.t list =
+  let quickfixes = User_error.quickfixes error in
+  let hint_styles = List.bind ~f:Quickfix.get_hint_styles quickfixes in
+  let available_positions =
+    List.filter_map
+      hint_styles
+      ~f:
+        Quickfix.(
+          function
+          | HintStyleSilent p
+          | HintStyleHint p ->
+            Classish_positions.find p classish_positions)
+  in
+  User_error.get_pos error :: available_positions
+
 let errors_to_quickfixes
     (ctx : Provider_context.t)
     (entry : Provider_context.entry)
@@ -53,8 +70,10 @@ let errors_to_quickfixes
   let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
-        let e_pos = User_error.get_pos e in
-        Pos.contains e_pos selection)
+        let available_positions =
+          quickfix_positions_for_error classish_positions e
+        in
+        List.exists available_positions ~f:(fun p -> Pos.contains p selection))
   in
   let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
   let standard_quickfixes =

@@ -17,9 +17,7 @@ let convert_error ~classish_positions error =
       ~f:
         Quickfix.(
           function
-          | HintStylePrimaryError
-          | HintStyleSilent _ ->
-            None
+          | HintStyleSilent _ -> None
           | HintStyleHint p -> Classish_positions.find p classish_positions)
   in
   ClientIdeMessage.

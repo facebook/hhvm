@@ -9,7 +9,6 @@
 open Hh_prelude
 
 type 'pos hint_style =
-  | HintStylePrimaryError
   | HintStyleSilent of 'pos
   | HintStyleHint of 'pos
 [@@deriving eq, ord, show]
@@ -36,8 +35,8 @@ let make ~title ~edits ~hint_styles = { title; edits; hint_styles }
 let make_eager ~title ~new_text ~hint_styles pos =
   { title; edits = Eager [(new_text, pos)]; hint_styles }
 
-let make_eager_primary ~title ~new_text pos =
-  make_eager ~title ~new_text ~hint_styles:[HintStylePrimaryError] pos
+let make_eager_default_hint_style ~title ~new_text pos =
+  make_eager ~title ~new_text ~hint_styles:[] pos
 
 let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
  fun { title; edits; hint_styles } ~f ->
@@ -50,7 +49,6 @@ let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
   let edits = transform_edits edits in
 
   let transform_hint_style = function
-    | HintStylePrimaryError -> HintStylePrimaryError
     | HintStyleSilent p -> HintStyleSilent (Classish_positions.map_pos ~f p)
     | HintStyleHint p -> HintStyleHint (Classish_positions.map_pos ~f p)
   in

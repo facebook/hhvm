@@ -234,18 +234,6 @@ function enum_exists(string $enumname,
 function type_alias_exists(string $name,
                            bool $autoload = true)[]: bool;
 
-
-/**
- * Checks if the module exists
- *
- * @param string $modulename -
- * @param bool $autoload -
- *
- * @return bool - Returns TRUE if module exists, FALSE if not
- */
-<<__Native>>
-function module_exists(string $modulename,
-                       bool $autoload = true)[]: bool;
 }
 
 namespace HH {
@@ -289,4 +277,16 @@ function meth_caller_get_class(readonly mixed $meth_caller)[]: string;
  */
 <<__Native, __IsFoldable>>
 function meth_caller_get_method(readonly mixed $meth_caller)[]: string;
+
+/**
+ * Checks if the module exists
+ *
+ * @param string $modulename -
+ * @param bool $autoload -
+ *
+ * @return bool - Returns TRUE if module exists, FALSE if not
+ */
+<<__Native>>
+function module_exists(string $modulename,
+                       bool $autoload = true)[]: bool;
 }

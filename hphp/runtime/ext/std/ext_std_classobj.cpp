@@ -108,12 +108,6 @@ bool HHVM_FUNCTION(type_alias_exists, const String& name,
   return typeAlias != nullptr;
 }
 
-bool HHVM_FUNCTION(module_exists, const String& module_name,
-                   bool autoload /* = true */) {
-  if (autoload) return Module::load(module_name.get()) != nullptr;
-  return Module::lookup(module_name.get()) != nullptr;
-}
-
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
@@ -414,6 +408,13 @@ String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {
                         StrNR {val(v).plazyclass.name()};
 }
 
+bool HHVM_FUNCTION(HH_module_exists, const String& module_name,
+                   bool autoload /* = true */) {
+  if (autoload) return Module::load(module_name.get()) != nullptr;
+  return Module::lookup(module_name.get()) != nullptr;
+}
+
+
 namespace {
 const StaticString
   s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
@@ -530,7 +531,6 @@ void StandardExtension::registerNativeClassobj() {
   HHVM_FE(trait_exists);
   HHVM_FE(enum_exists);
   HHVM_FE(type_alias_exists);
-  HHVM_FE(module_exists);
   HHVM_FE(get_class_methods);
   HHVM_FE(get_class_constants);
   HHVM_FE(get_class_vars);
@@ -546,6 +546,7 @@ void StandardExtension::registerNativeClassobj() {
   HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);
   HHVM_FALIAS(HH\\meth_caller_get_method, HH_meth_caller_get_method);
   HHVM_FALIAS(HH\\class_get_class_name, HH_class_get_class_name);
+  HHVM_FALIAS(HH\\module_exists, HH_module_exists);
 }
 
 

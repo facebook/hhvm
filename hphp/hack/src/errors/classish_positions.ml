@@ -9,12 +9,16 @@
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 
-type 'pos classish_information = {
+(** Positional information for a single class *)
+type 'pos classish_positions = {
   classish_start: 'pos;
   classish_end: 'pos;
 }
 
-type classish_body_offsets = int classish_information
+(** Positional information for a collection of classes *)
+type 'pos t = 'pos classish_positions SMap.t
+
+type classish_body_offsets = int classish_positions
 
 let classish_body_braces_offsets s : classish_body_offsets option =
   let open Syntax in
@@ -96,12 +100,12 @@ let classish_start_offsets (s : Syntax.t) : classish_body_offsets SMap.t =
 
   fst (aux (SMap.empty, []) s)
 
-(** Return the position of the start "{" in every classish in this
-    file. *)
-let classish_information
+let empty = SMap.empty
+
+let extract
     (s : Syntax.t)
     (source_text : Full_fidelity_source_text.t)
-    (filename : Relative_path.t) : Pos.t classish_information SMap.t =
+    (filename : Relative_path.t) : Pos.t t =
   let offsets = classish_start_offsets s in
   let to_pos offset =
     Full_fidelity_source_text.relative_pos filename source_text offset offset
@@ -113,3 +117,13 @@ let classish_information
         classish_end = to_pos classish_end;
       })
     offsets
+
+let body_start_for ~class_name t =
+  let open Option.Let_syntax in
+  let* c = SMap.find_opt class_name t in
+  Some c.classish_start
+
+let body_end_for ~class_name t =
+  let open Option.Let_syntax in
+  let* c = SMap.find_opt class_name t in
+  Some c.classish_end

@@ -85,12 +85,14 @@ let override_method_refactorings_at ~start_line ~start_col =
       List.concat meth_actions @ acc
   end
 
-let to_edits
-    (classish_information :
-      Pos.t Classish_positions.classish_information SMap.t)
-    (quickfix : t) : Code_action_types.edit list =
-  match SMap.find_opt quickfix.name classish_information with
-  | Some Classish_positions.{ classish_start; _ } ->
+let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
+    Code_action_types.edit list =
+  match
+    Classish_positions.body_start_for
+      ~class_name:quickfix.name
+      classish_positions
+  with
+  | Some classish_start ->
     [Code_action_types.{ pos = classish_start; text = quickfix.text }]
   | None ->
     let () =
@@ -101,15 +103,11 @@ let to_edits
     []
 
 let refactor_action
-    path
-    (classish_information :
-      Pos.t Classish_positions.classish_information SMap.t)
-    (quickfix : t) : Code_action_types.refactor =
+    path (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
+    Code_action_types.refactor =
   let edits =
     lazy
-      (Relative_path.Map.singleton
-         path
-         (to_edits classish_information quickfix))
+      (Relative_path.Map.singleton path (to_edits classish_positions quickfix))
   in
 
   Code_action_types.{ title = quickfix.title; edits; kind = `Refactor }
@@ -121,9 +119,7 @@ let find ~entry pos ctx =
   let path = entry.Provider_context.path in
   let source_text = Ast_provider.compute_source_text ~entry in
 
-  let classish_information =
-    Classish_positions.classish_information tree source_text path
-  in
+  let classish_positions = Classish_positions.extract tree source_text path in
 
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
@@ -136,4 +132,4 @@ let find ~entry pos ctx =
   in
   List.map
     override_method_refactorings
-    ~f:(refactor_action path classish_information)
+    ~f:(refactor_action path classish_positions)

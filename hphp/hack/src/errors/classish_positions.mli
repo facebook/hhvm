@@ -5,13 +5,23 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-type 'pos classish_information = {
-  classish_start: 'pos;
-  classish_end: 'pos;
-}
 
-val classish_information :
+(** Positional information for a collection of classes *)
+type 'pos t
+
+val extract :
   Full_fidelity_positioned_syntax.t ->
   Full_fidelity_source_text.t ->
   Relative_path.t ->
-  Pos.t classish_information SMap.t
+  Pos.t t
+
+(** An empty positional map *)
+val empty : 'pos t
+
+(** Position at the start of the class body. Will return a zero-length
+position just after the opening brace. *)
+val body_start_for : class_name:string -> 'pos t -> 'pos option
+
+(** Position at the end of the class body. Will return a zero-length
+position just before the closing brace. *)
+val body_end_for : class_name:string -> 'pos t -> 'pos option

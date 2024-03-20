@@ -53,10 +53,8 @@ func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, e
 	if err = socket.Listen(); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("failed listen on %s", addr))
 	}
-	tFactory := thrift.NewHeaderTransportFactory(thrift.NewTransportFactory())
-	pFactory := thrift.NewHeaderProtocolFactory()
 
-	return thrift.NewSimpleServerContext(processor, socket, tFactory, pFactory), nil
+	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), nil
 }
 
 // Echo - does echo

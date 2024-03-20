@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"errors"
+	"fmt"
 	"runtime/debug"
 )
 
@@ -43,13 +44,16 @@ type SimpleServer struct {
 	*ServerOptions
 }
 
-// NewSimpleServerContext creates a new server that supports contexts
-func NewSimpleServerContext(processor ProcessorContext, serverTransport ServerTransport, transportFactory TransportFactory, protocolFactory ProtocolFactory, options ...func(*ServerOptions)) *SimpleServer {
+// NewSimpleServer creates a new server that only supports Header Transport.
+func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport, transportType TransportID, options ...func(*ServerOptions)) *SimpleServer {
+	if transportType != TransportIDHeader {
+		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %s", transportType))
+	}
 	return &SimpleServer{
 		processorFactoryContext: NewProcessorFactoryContext(processor),
 		serverTransport:         serverTransport,
-		transportFactory:        transportFactory,
-		protocolFactory:         protocolFactory,
+		transportFactory:        NewHeaderTransportFactory(NewTransportFactory()),
+		protocolFactory:         NewHeaderProtocolFactory(),
 		ServerOptions:           simpleServerOptions(options...),
 	}
 }

@@ -33,8 +33,6 @@ const testCallString = "this is a fairly lengthy test string \\ that ' has \x20 
 // createTestHeaderServer Create and bind a test server to localhost
 func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer, net.Addr, error) {
 	processor := thrifttest.NewThriftTestProcessor(handler)
-	transportFactory := thrift.NewHeaderTransportFactory(thrift.NewTransportFactory())
-	protocolFactory := thrift.NewHeaderProtocolFactory()
 
 	transport, err := thrift.NewServerSocket("[::]:0")
 	if err != nil {
@@ -47,7 +45,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 	}
 	taddr := transport.Addr()
 
-	server := thrift.NewSimpleServerContext(processor, transport, transportFactory, protocolFactory)
+	server := thrift.NewSimpleServer(processor, transport, thrift.TransportIDHeader)
 	go func(server *thrift.SimpleServer) {
 		err = server.Serve()
 		if err != nil && err != thrift.ErrServerClosed {

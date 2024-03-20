@@ -53,6 +53,7 @@ type mode =
       title_prefix: string;
       use_snippet_edits: bool;
     }
+  | Ide_diagnostics
   | Find_local of int * int
   | Get_member of string
   | Outline
@@ -425,6 +426,10 @@ let parse_options () =
               (Ide_code_actions { title_prefix; use_snippet_edits = false })
               ()),
         "<title_prefix> Like --ide-code-actions, but do not use any nonstandard LSP features (experimental capabilities)."
+      );
+      ( "--ide-diagnostics",
+        Arg.Unit (set_mode Ide_diagnostics),
+        " Compute where IDE diagnostics (squiggles and dotted lines) will be displayed."
       );
       ( "--identify-symbol",
         (let line = ref 0 in
@@ -1940,6 +1945,13 @@ let handle_mode
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range_exn src in
     Code_actions_cli_lib.run ctx entry range ~title_prefix ~use_snippet_edits
+  | Ide_diagnostics ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let (errors, _tasts) =
+      compute_tasts_expand_types ctx files_info files_contents
+    in
+    Ide_diagnostics_cli_lib.run ctx entry errors
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

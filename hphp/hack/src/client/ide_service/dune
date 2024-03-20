@@ -126,3 +126,16 @@
   tast_provider
   typing_skeleton
   utils_core))
+
+(library
+ (name ide_diagnostics_cli_lib)
+ (wrapped true)
+ (modules ide_diagnostics_cli_lib)
+ (libraries
+  full_fidelity
+  lsp
+  pos
+  ide_diagnostics
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

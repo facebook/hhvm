@@ -68,6 +68,12 @@ struct SSLContextConfig {
     return defaultCiphersuites;
   }
 
+  static const std::string& getDefaultSigAlgs() {
+    static const std::string& defaultSigAlgs =
+        folly::join(':', folly::ssl::SSLServerOptions::sigalgs());
+    return defaultSigAlgs;
+  }
+
   struct KeyOffloadParams {
     // What keys do we want to offload
     // Currently supported values: "rsa", "ec" (can also be empty)
@@ -123,7 +129,7 @@ struct SSLContextConfig {
   bool sessionTicketEnabled{true};
   std::string sslCiphers{getDefaultCiphers()};
   std::string sslCiphersuites{getDefaultCiphersuites()};
-  folly::Optional<std::string> sigAlgs;
+  std::string sigAlgs{getDefaultSigAlgs()};
   std::string eccCurveName{"prime256v1"};
 
   // Weighted lists of NPN strings to advertise

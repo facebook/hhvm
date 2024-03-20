@@ -678,10 +678,7 @@ SSLContextManager::SslContexts::buildServerSSLContext(
 #if FOLLY_OPENSSL_PREREQ(1, 1, 1)
   sslCtx->setCiphersuitesOrThrow(ctxConfig.sslCiphersuites);
 #endif
-
-  if (ctxConfig.sigAlgs) {
-    sslCtx->setSigAlgsOrThrow(*ctxConfig.sigAlgs);
-  }
+  sslCtx->setSigAlgsOrThrow(ctxConfig.sigAlgs);
 
   // Use a fix DH param
   DH* dh = get_dh2048();

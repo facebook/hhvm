@@ -80,6 +80,14 @@ type go_to_impl_result =
 
 type completion_request = { is_manually_invoked: bool }
 
+(** Currently, a diagnostic is always an error with (optionally) a list
+of locations where a "hint" should be displayed for that error. *)
+type diagnostic = {
+  diagnostic_error: Errors.finalized_error;
+  diagnostic_related_hints: Pos.absolute list;
+}
+[@@deriving show]
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -93,7 +101,7 @@ type _ t =
       and resolving symlinks (even resolving root symlink for a deleted file...) *)
   | Did_open_or_change : document -> unit t
       (** Lets ClientIdeDaemon know that the document is open, so we should start caching it. *)
-  | Did_close : Path.t -> Errors.finalized_error list t
+  | Did_close : Path.t -> diagnostic list t
       (** Lets ClientIdeDaemon know the document is closed, so we no longer cache it.
 
       This returns diagnostics for the file as it is on disk.
@@ -103,7 +111,7 @@ type _ t =
       restore squiggles to what would be appropriate for the file on disk.
       It'd be possible to return an [Errors.t option], and only return [Some]
       if the file had been closed while modified, if perf here is ever a concern. *)
-  | Diagnostics : document -> Errors.finalized_error list t
+  | Diagnostics : document -> diagnostic list t
       (** Obtains latest diagnostics for file. *)
   | Verbose_to_file : bool -> unit t
   | Hover : document * location -> HoverService.result t

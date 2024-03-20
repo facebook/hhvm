@@ -409,6 +409,10 @@ module Client = struct
     let (env, ()) = ClientIdeDaemon.Test.handle env message in
     let message = ClientIdeMessage.(Diagnostics (doc suffix contents)) in
     let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
+    (* TODO(hverr): update tests *)
+    let diagnostics =
+      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
+    in
     let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
     (env, diagnostics)
 
@@ -429,6 +433,9 @@ module Client = struct
           |> Path.make))
     in
     let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
+    let diagnostics =
+      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
+    in
     let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
     (env, diagnostics)
 

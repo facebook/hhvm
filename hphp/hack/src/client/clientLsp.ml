@@ -73,15 +73,15 @@ type incoming_metadata = {
       (** This is just [activity_id].[tracking_suffix]. Is handy to keep it in one place. *)
 }
 
-type errors_from =
-  | Errors_from_clientIdeDaemon of {
-      errors: Errors.finalized_error list;
+type diagnostics_from =
+  | Diagnostics_from_clientIdeDaemon of {
+      diagnostics: ClientIdeMessage.diagnostic list;
       validated: bool;
     }
       (** TEMPORARY, FOR VALIDATION ONLY. The validated flag says whether we've validated that
       errors-file contained the exact same errors as this list. Once we've done validation,
       we'll need neither. *)
-  | Errors_from_errors_file
+  | Diagnostics_from_errors_file
 [@@deriving show { with_path = false }]
 
 (** This type describes our connection to the errors.bin file, where hh_server writes
@@ -193,7 +193,7 @@ module Run_env = struct
         This isn't needed for correctness; only for validation...
         validation that error squiggles from clientIdeDaemon are the
         same *for unmodified files* as what hh_server's errors.bin says. *)
-    uris_with_standalone_diagnostics: (float * errors_from) UriMap.t;
+    uris_with_standalone_diagnostics: (float * diagnostics_from) UriMap.t;
         (** these are diagnostics which arrived from serverless-ide or by tailing hh_server's
         errors.bin file, each with a timestamp of when they were discovered.
         THis isnt needed for correctness; only for validation...
@@ -2031,10 +2031,12 @@ let state_to_rage (state : state) : string =
     |> String.concat ~sep:","
   in
   let timestamped_uris_to_string uris =
-    List.map uris ~f:(fun (DocumentUri.Uri uri, (timestamp, errors_from)) ->
+    List.map
+      uris
+      ~f:(fun (DocumentUri.Uri uri, (timestamp, diagnostics_from)) ->
         Printf.sprintf
           "%s [%s] @ %0.2f"
-          (show_errors_from errors_from)
+          (show_diagnostics_from diagnostics_from)
           uri
           timestamp)
     |> String.concat ~sep:","
@@ -3202,9 +3204,9 @@ let do_autoclose
 let validate_error_TEMPORARY
     (uri : DocumentUri.t)
     (lenv : Run_env.t)
-    (actual : float * errors_from)
+    (actual : float * diagnostics_from)
     ~(expected : Errors.finalized_error list)
-    ~(start_time : float) : (float * errors_from) * string list =
+    ~(start_time : float) : (float * diagnostics_from) * string list =
   (* helper to diff two sorted lists: "list_diff ([],[]) xs ys" will return a pair
      (only_xs, only_ys) with those elements that are only in xs, and those only in ys. *)
   let rec list_diff (only_xs, only_ys) xs ys ~compare =
@@ -3238,32 +3240,35 @@ let validate_error_TEMPORARY
   in
 
   match actual with
-  | (_timestamp, Errors_from_errors_file) ->
+  | (_timestamp, Diagnostics_from_errors_file) ->
     (* What was most recently published for [uri] came from a previous errors-file *)
     (actual, [])
-  | (timestamp, Errors_from_clientIdeDaemon _)
+  | (timestamp, Diagnostics_from_clientIdeDaemon _)
     when Float.(timestamp > start_time) ->
     (* What was most recently published for [uri] came from clientIdeDaemon, but
        came from something (e.g. a didChange) that happened after the start of the typecheck,
        so it might reflect something that hh_server wasn't aware of, so we can't make a useful check. *)
     (actual, [])
-  | (_timestamp, Errors_from_clientIdeDaemon _)
+  | (_timestamp, Diagnostics_from_clientIdeDaemon _)
     when UriSet.mem uri lenv.Run_env.uris_with_unsaved_changes ->
     (* What was most recently published for [uri] came from clientIdeDaemon, but it
        reflects unsaved changes, and hence reflects something that hh_server isn't aware of,
        so we can't make a useful check *)
     (actual, [])
-  | (_timestamp, Errors_from_clientIdeDaemon _)
+  | (_timestamp, Diagnostics_from_clientIdeDaemon _)
     when Option.is_none (UriMap.find_opt uri lenv.Run_env.editor_open_files) ->
     (* What was most recently published for [uri] came from clientIdeDaemon before the start of the
        typecheck, but it was closed prior to the start of the typecheck, so we don't know if hh_server
        is looking at file-changes to it after it had been closed and we can't make a useful check. *)
     (actual, [])
-  | (_timestamp, Errors_from_clientIdeDaemon { validated = true; _ }) ->
+  | (_timestamp, Diagnostics_from_clientIdeDaemon { validated = true; _ }) ->
     (* Here is an open file whose errors were published from clientIdeDaemon prior to the start of not only this
        current typecheck, but also prior to the start of the *previous* typecheck. We need no further validation. *)
     (actual, [])
-  | (timestamp, Errors_from_clientIdeDaemon { errors; _ }) ->
+  | (timestamp, Diagnostics_from_clientIdeDaemon { diagnostics; _ }) ->
+    let errors =
+      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
+    in
     let (absent_from_clientIdeDaemon, extra_in_clientIdeDaemon) =
       list_diff ([], []) expected errors ~compare:Errors.compare_finalized
     in
@@ -3271,7 +3276,9 @@ let validate_error_TEMPORARY
       format_diff "absent_from_clientIdeDaemon" absent_from_clientIdeDaemon
       @ format_diff "extra_in_clientIdeDaemon" extra_in_clientIdeDaemon
     in
-    ((timestamp, Errors_from_clientIdeDaemon { errors; validated = true }), diff)
+    ( ( timestamp,
+        Diagnostics_from_clientIdeDaemon { diagnostics; validated = true } ),
+      diff )
 
 (** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399
 Validates that errors reported by clientIdeDaemon are same as what was reported by hh_server.
@@ -3343,7 +3350,8 @@ let validate_error_item_TEMPORARY
              was before the typecheck started and see whether errors-file agrees. *)
           let pretend_actual =
             ( start_time,
-              Errors_from_clientIdeDaemon { validated = false; errors = [] } )
+              Diagnostics_from_clientIdeDaemon
+                { validated = false; diagnostics = [] } )
           in
           let (_pretend_actual, diff) =
             validate_error_TEMPORARY
@@ -3370,7 +3378,7 @@ by hh_server.
 This function is called when [handle_errors_file_item] is told that the errors-file is
 completed. It validates that, if there are any unmodified files which had last received
 errors from clientIdeDaemon prior to the start of the typecheck, then all of them
-have [Errors_from.validated] flag true, meaning that they have been checked against
+have [Diagnostics_from.validated] flag true, meaning that they have been checked against
 the errors-file by [validate_error_presence]. If a file hasn't, then it's a false
 positive reported by clientIdeStandalone. *)
 let validate_error_complete_TEMPORARY (lenv : Run_env.t) ~(start_time : float) :
@@ -3467,7 +3475,7 @@ as necessary, (2) sends an LSP telemetry/event to say what it has done. *)
 let publish_and_report_after_recomputing_live_squiggles
     (state : state)
     (file_path : Path.t)
-    (errors : Errors.finalized_error list)
+    (diagnostics : ClientIdeMessage.diagnostic list)
     ~(trigger : errors_trigger)
     ~(ref_unblocked_time : float ref) : state =
   match state with
@@ -3478,14 +3486,18 @@ let publish_and_report_after_recomputing_live_squiggles
     let uri = path_string_to_lsp_uri file_path ~default_path:file_path in
     let uris = lenv.Run_env.uris_with_standalone_diagnostics in
     let uris_with_standalone_diagnostics =
-      if List.is_empty errors then
+      if List.is_empty diagnostics then
         UriMap.remove uri uris
       else
         UriMap.add
           uri
           ( Unix.gettimeofday (),
-            Errors_from_clientIdeDaemon { errors; validated = false } )
+            Diagnostics_from_clientIdeDaemon { diagnostics; validated = false }
+          )
           uris
+    in
+    let errors =
+      List.map diagnostics ~f:(fun d -> d.ClientIdeMessage.diagnostic_error)
     in
     let params = hack_errors_to_lsp_diagnostic file_path errors in
     let notification = PublishDiagnosticsNotification params in
@@ -3578,12 +3590,12 @@ let handle_errors_file_item
            and our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
         let uris_with_standalone_diagnostics =
           lenv.Run_env.uris_with_standalone_diagnostics
-          |> UriMap.filter_map (fun uri (existing_time, errors_from) ->
+          |> UriMap.filter_map (fun uri (existing_time, diagnostics_from) ->
                  if
                    UriMap.mem uri lenv.Run_env.editor_open_files
                    || Float.(existing_time > start_time)
                  then begin
-                   Some (existing_time, errors_from)
+                   Some (existing_time, diagnostics_from)
                  end else begin
                    publish (empty_diagnostics uri);
                    None
@@ -3632,12 +3644,12 @@ let handle_errors_file_item
             acc
           else
             match UriMap.find_opt uri acc with
-            | Some (existing_timestamp, _errors_from)
+            | Some (existing_timestamp, _diagnostics_from)
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
               publish (hack_errors_to_lsp_diagnostic path file_errors);
-              UriMap.add uri (timestamp, Errors_from_errors_file) acc)
+              UriMap.add uri (timestamp, Diagnostics_from_errors_file) acc)
     in
     state := Running { lenv with Run_env.uris_with_standalone_diagnostics };
     Lwt.return_none
@@ -4223,7 +4235,7 @@ let handle_editor_buffer_message
   | NotificationMessage (DidCloseNotification params) ->
     let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
     let file_path = uri_to_path uri in
-    let%lwt errors =
+    let%lwt diagnostics =
       ide_rpc
         ide_service
         ~tracking_id:metadata.tracking_id
@@ -4234,7 +4246,7 @@ let handle_editor_buffer_message
       publish_and_report_after_recomputing_live_squiggles
         !state
         file_path
-        errors
+        diagnostics
         ~trigger:(Message_trigger { message; metadata })
         ~ref_unblocked_time;
     begin
@@ -4868,7 +4880,7 @@ let handle_deferred_check
       | Initialize_trigger -> Random_id.short_string ()
       | Message_trigger { metadata; _ } -> metadata.tracking_id
     in
-    let%lwt errors =
+    let%lwt diagnostics =
       ide_rpc
         ide_service
         ~tracking_id
@@ -4879,7 +4891,7 @@ let handle_deferred_check
       publish_and_report_after_recomputing_live_squiggles
         !state
         file_path
-        errors
+        diagnostics
         ~trigger
         ~ref_unblocked_time
     in

@@ -31,7 +31,7 @@
  (modules clientIdeMessage)
  (libraries lwt_utils server_command_types server_services sys_utils)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name client_ide_utils)

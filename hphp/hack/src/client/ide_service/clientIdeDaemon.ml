@@ -726,9 +726,14 @@ let handle_request
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
+    let diagnostics =
+      List.map errors ~f:(fun e ->
+          ClientIdeMessage.
+            { diagnostic_error = e; diagnostic_related_hints = [] })
+    in
     ( Initialized
         { istate with iopen_files = close_file istate.iopen_files path },
-      Ok errors )
+      Ok diagnostics )
   (* didOpen or didChange *)
   | (During_init dstate, Did_open_or_change { file_path; file_contents }) ->
     let path =
@@ -748,7 +753,13 @@ let handle_request
     in
     let errors = get_user_facing_errors ~ctx ~entry in
     published_errors_ref := Some errors;
-    (Initialized istate, Ok (Errors.sort_and_finalize errors))
+    let errors = Errors.sort_and_finalize errors in
+    let diagnostics =
+      List.map errors ~f:(fun e ->
+          ClientIdeMessage.
+            { diagnostic_error = e; diagnostic_related_hints = [] })
+    in
+    (Initialized istate, Ok diagnostics)
   (* Document Symbol *)
   | (During_init dstate, Document_symbol document) ->
     let (dopen_files, entry, _) = update_file dstate.dopen_files document in

@@ -18,6 +18,42 @@ set(COMPILER_DIR ${CMAKE_CURRENT_BINARY_DIR})
 # Override the default install path for `make install` step.
 set(CMAKE_INSTALL_PREFIX ${THRIFT_SOURCE_DIR})
 
+check_cxx_source_compiles("
+  #include <type_traits>
+  #if _GLIBCXX_RELEASE
+  int main() {}
+  #endif"
+  FBTHRIFT_COMPILER_STDLIB_LIBSTDCXX
+)
+check_cxx_source_compiles("
+  #include <type_traits>
+  #if _GLIBCXX_RELEASE >= 9
+  int main() {}
+  #endif"
+  FBTHRIFT_COMPILER_STDLIB_LIBSTDCXX_GE_9
+)
+check_cxx_source_compiles("
+  #include <type_traits>
+  #if _LIBCPP_VERSION
+  int main() {}
+  #endif"
+  FBTHRIFT_COMPILER_STDLIB_LIBCXX
+)
+check_cxx_source_compiles("
+  #include <type_traits>
+  #if _LIBCPP_VERSION >= 9000
+  int main() {}
+  #endif"
+  FBTHRIFT_COMPILER_STDLIB_LIBCXX_GE_9
+)
+
+if (FBTHRIFT_COMPILER_STDLIB_LIBSTDCXX AND NOT FBTHRIFT_COMPILER_STDLIB_LIBSTDCXX_GE_9)
+  list (APPEND FBTHRIFT_COMPILER_LINK_CXXFS stdc++fs)
+endif()
+if (FBTHRIFT_COMPILER_STDLIB_LIBCXX AND NOT FBTHRIFT_COMPILER_STDLIB_LIBCXX_GE_9)
+  list (APPEND FBTHRIFT_COMPILER_LINK_CXXFS c++fs)
+endif ()
+
 # The Thrift AST library.
 add_library(
   compiler_ast
@@ -78,8 +114,8 @@ target_compile_definitions(
 target_link_libraries(
   compiler_base
   compiler_ast
-  Boost::filesystem
   fmt::fmt
+  ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 
 # The Thrift compiler library.
@@ -99,8 +135,8 @@ add_library(
 target_link_libraries(
   compiler
   compiler_ast
-  Boost::filesystem
   fmt::fmt
+  ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 
 add_library(
@@ -137,6 +173,7 @@ target_link_libraries(
   thrift1
   compiler_ast
   compiler_base
+  ${FBTHRIFT_COMPILER_LINK_CXXFS}
   ${GENERATE_LINKED}
 )
 # Force compiler_generators linking (compiler will optimize it out otherwise).

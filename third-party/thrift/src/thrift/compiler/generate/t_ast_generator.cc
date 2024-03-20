@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_include.h>
@@ -118,7 +117,7 @@ class t_ast_generator : public t_generator {
 };
 
 void t_ast_generator::generate_program() {
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
   std::string fname = fmt::format("{}/{}.ast", get_out_dir(), program_->name());
   f_out_.open(fname.c_str(), std::ios::out | std::ios::binary);
 

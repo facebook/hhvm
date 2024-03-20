@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -27,8 +28,6 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/detail/system.h>
@@ -52,10 +51,12 @@ const std::string* get_py_adapter(const t_type* type) {
   return t_typedef::get_first_annotation_or_null(type, {"py.adapter"});
 }
 
-void mark_file_executable(const boost::filesystem::path& path) {
-  namespace fs = boost::filesystem;
+void mark_file_executable(const std::filesystem::path& path) {
+  namespace fs = std::filesystem;
   fs::permissions(
-      path, fs::add_perms | fs::owner_exe | fs::group_exe | fs::others_exe);
+      path,
+      fs::perms::owner_exec | fs::perms::group_exec | fs::perms::others_exec,
+      fs::perm_options::add);
 }
 
 string prefix_temporary(const string& name) {
@@ -339,7 +340,7 @@ class t_py_generator : public t_concat_generator {
   std::ofstream f_consts_;
   std::ofstream f_service_;
 
-  boost::filesystem::path package_dir_;
+  std::filesystem::path package_dir_;
 
   std::map<std::string, const std::vector<t_function*>> func_map_;
 
@@ -741,11 +742,10 @@ void t_py_generator::init_generator() {
   string module = get_real_py_module(program_);
   package_dir_ =
       add_gen_dir() ? detail::format_abs_path(get_out_dir()) : get_out_path();
-  boost::filesystem::create_directory(package_dir_);
+  std::filesystem::create_directory(package_dir_);
   while (true) {
-    boost::filesystem::create_directory(package_dir_);
-    // TODO: remove call to member native() after switching to std::filesystem
-    std::ofstream init_py((package_dir_ / "__init__.py").native());
+    std::filesystem::create_directory(package_dir_);
+    std::ofstream init_py(package_dir_ / "__init__.py");
     init_py << py_autogen_comment();
     init_py.close();
     if (module.empty()) {
@@ -763,16 +763,16 @@ void t_py_generator::init_generator() {
 
   // Make output file
   auto f_types_path = package_dir_ / "ttypes.py";
-  f_types_.open(f_types_path.native()); // TODO: remove call to member native()
+  f_types_.open(f_types_path);
   record_genfile(f_types_path);
 
   auto f_consts_path = package_dir_ / "constants.py";
-  f_consts_.open(f_consts_path.native()); // TODO: remove call to native()
+  f_consts_.open(f_consts_path);
   record_genfile(f_consts_path);
 
   auto f_init_path = package_dir_ / "__init__.py";
   std::ofstream f_init;
-  f_init.open(f_init_path.native()); // TODO: remove call to member native()
+  f_init.open(f_init_path);
   record_genfile(f_init_path);
   f_init << py_autogen_comment() << "__all__ = ['ttypes', 'constants'";
   for (const auto* tservice : program_->services()) {
@@ -2060,7 +2060,7 @@ void t_py_generator::generate_py_struct_writer(
 void t_py_generator::generate_service(const t_service* tservice) {
   string f_service_filename = rename_reserved_keywords(service_name_) + ".py";
   auto f_service_path = package_dir_ / f_service_filename;
-  f_service_.open(f_service_path.native()); // TODO: remove call to native()
+  f_service_.open(f_service_path);
   record_genfile(f_service_path);
 
   f_service_ << py_autogen_comment() << endl << py_imports() << endl;
@@ -2674,7 +2674,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
   string f_remote_filename = service_name_ + "-remote";
   auto f_remote_path = package_dir_ / f_remote_filename;
   std::ofstream f_remote;
-  f_remote.open(f_remote_path.native()); // TODO: remove call to member native()
+  f_remote.open(f_remote_path);
   record_genfile(f_remote_path);
 
   f_remote << "#!/usr/bin/env python\n"
@@ -2781,7 +2781,7 @@ void t_py_generator::generate_service_fuzzer(const t_service* /*tservice*/) {
   string f_fuzzer_filename = service_name_ + "-fuzzer";
   auto f_fuzzer_path = package_dir_ / f_fuzzer_filename;
   std::ofstream f_fuzzer;
-  f_fuzzer.open(f_fuzzer_path.native()); // TODO: remove call to member native()
+  f_fuzzer.open(f_fuzzer_path);
   record_genfile(f_fuzzer_path);
 
   f_fuzzer << "#!/usr/bin/env python\n"

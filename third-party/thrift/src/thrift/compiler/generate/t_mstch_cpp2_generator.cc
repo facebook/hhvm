@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <filesystem>
 #include <memory>
 #include <queue>
 #include <set>
@@ -2625,7 +2626,7 @@ mstch::node t_mstch_cpp2_generator::include_prefix(
       return include_prefix + "/" + out_dir_base + "/";
     }
   }
-  if (boost::filesystem::path(prefix).has_root_directory()) {
+  if (std::filesystem::path(prefix).has_root_directory()) {
     return include_prefix + "/" + out_dir_base + "/";
   }
   return prefix + out_dir_base + "/";

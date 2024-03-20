@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
@@ -47,8 +48,8 @@ std::string get_filepath(
   if (auto full_path = sm.found_include_file(path)) {
     path = std::move(*full_path);
   }
-  return boost::filesystem::relative(
-             boost::filesystem::canonical(boost::filesystem::path(path)),
+  return std::filesystem::relative(
+             std::filesystem::canonical(std::filesystem::path(path)),
              compiler_path)
       .generic_string();
 }
@@ -150,7 +151,7 @@ class json_experimental_program : public mstch_program {
     if (prefix.empty()) {
       return std::string();
     }
-    return boost::filesystem::path(prefix).has_root_directory()
+    return std::filesystem::path(prefix).has_root_directory()
         ? context_.options["include_prefix"]
         : prefix;
   }
@@ -426,7 +427,7 @@ void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
   const auto* program = get_program();
   data_.current_program = program;
-  data_.compiler_path = boost::filesystem::current_path().generic_string();
+  data_.compiler_path = std::filesystem::current_path().generic_string();
   data_.sm = &source_mgr_;
   set_mstch_factories();
   auto mstch_program = mstch_context_.program_factory->make_mstch_object(

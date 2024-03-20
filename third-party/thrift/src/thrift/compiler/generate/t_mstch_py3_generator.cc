@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+#include <filesystem>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/filesystem.hpp>
 #include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_service.h>
@@ -1263,12 +1264,12 @@ class t_mstch_py3_generator : public t_mstch_generator {
   void generate_file(
       const std::string& file,
       TypesFile is_types_file,
-      const boost::filesystem::path& base);
+      const std::filesystem::path& base);
   void generate_types();
   void generate_services();
-  boost::filesystem::path package_to_path();
+  std::filesystem::path package_to_path();
 
-  boost::filesystem::path generateRootPath_;
+  std::filesystem::path generateRootPath_;
   std::unordered_map<const t_type*, py3_mstch_type::CachedProperties>
       type_props_cache_;
 };
@@ -1304,7 +1305,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
 }
 
 void t_mstch_py3_generator::generate_init_files() {
-  boost::filesystem::path p = generateRootPath_;
+  std::filesystem::path p = generateRootPath_;
   auto mstch_program = make_mstch_program_cached(get_program(), mstch_context_);
   while (!p.empty()) {
     render_to_file(
@@ -1313,9 +1314,9 @@ void t_mstch_py3_generator::generate_init_files() {
   }
 }
 
-boost::filesystem::path t_mstch_py3_generator::package_to_path() {
+std::filesystem::path t_mstch_py3_generator::package_to_path() {
   auto package = get_py3_namespace(get_program());
-  boost::filesystem::path path;
+  std::filesystem::path path;
   for (const auto& path_part : package) {
     path /= path_part;
   }
@@ -1325,7 +1326,7 @@ boost::filesystem::path t_mstch_py3_generator::package_to_path() {
 void t_mstch_py3_generator::generate_file(
     const std::string& file,
     TypesFile is_types_file,
-    const boost::filesystem::path& base = {}) {
+    const std::filesystem::path& base = {}) {
   auto program = get_program();
   const auto& name = program->name();
   if (is_types_file == IsTypesFile) {

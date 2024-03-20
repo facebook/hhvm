@@ -19,6 +19,7 @@
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -31,7 +32,6 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -1500,7 +1500,7 @@ void t_hack_generator::generate_instance_key(std::ofstream& out) {
  */
 void t_hack_generator::init_generator() {
   // Make output directory.
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
   init_codegen_file(
       f_types_, get_out_dir() + get_program()->name() + "_types.php");
 

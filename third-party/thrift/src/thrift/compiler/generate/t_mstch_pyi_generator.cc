@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <set>
 #include <stdexcept>
@@ -560,7 +561,7 @@ class t_mstch_pyi_generator : public t_mstch_generator {
   void generate_program() override;
 
  private:
-  boost::filesystem::path root_path_;
+  std::filesystem::path root_path_;
 
   bool should_resolve_typedefs() const override { return true; }
 
@@ -571,9 +572,9 @@ class t_mstch_pyi_generator : public t_mstch_generator {
   void generate_services();
   void render_file(
       const std::string& template_name,
-      const boost::filesystem::path& path,
+      const std::filesystem::path& path,
       const t_service* service = nullptr);
-  boost::filesystem::path get_root_path() const;
+  std::filesystem::path get_root_path() const;
 };
 
 void t_mstch_pyi_generator::generate_program() {
@@ -597,7 +598,7 @@ void t_mstch_pyi_generator::create_factories() {
 }
 
 void t_mstch_pyi_generator::generate_init_files() {
-  boost::filesystem::path directory;
+  std::filesystem::path directory;
   for (const auto& part : this->root_path_) {
     directory /= part;
 
@@ -626,7 +627,7 @@ void t_mstch_pyi_generator::generate_services() {
 
 void t_mstch_pyi_generator::render_file(
     const std::string& template_name,
-    const boost::filesystem::path& path,
+    const std::filesystem::path& path,
     const t_service* service) {
   auto mstchObject = (service == nullptr)
       ? make_mstch_program_cached(
@@ -637,15 +638,15 @@ void t_mstch_pyi_generator::render_file(
   t_mstch_generator::render_to_file(mstchObject, template_name, path);
 }
 
-boost::filesystem::path t_mstch_pyi_generator::get_root_path() const {
-  boost::filesystem::path path;
+std::filesystem::path t_mstch_pyi_generator::get_root_path() const {
+  std::filesystem::path path;
 
   auto namespaces = get_py_namespaces_raw(
       this->get_program(), t_mstch_generator::has_option("asyncio"));
   for (const auto& ns : namespaces) {
     path /= ns;
   }
-  path += boost::filesystem::path::preferred_separator;
+  path += std::filesystem::path::preferred_separator;
 
   return path;
 }

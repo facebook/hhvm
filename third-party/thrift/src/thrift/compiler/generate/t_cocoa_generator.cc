@@ -17,13 +17,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/generate/t_concat_generator.h>
 
@@ -270,7 +269,7 @@ class t_cocoa_generator : public t_concat_generator {
  */
 void t_cocoa_generator::init_generator() {
   // Make output directory
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
   cocoa_prefix_ = program_->get_namespace("cocoa");
 
   // we have a .h header file...

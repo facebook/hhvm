@@ -17,11 +17,12 @@
 #include <thrift/compiler/test/compiler.h>
 
 #include <algorithm>
+#include <filesystem>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <fmt/ostream.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -57,15 +58,25 @@ bool operator<(const diagnostic& diag1, const diagnostic& diag2) {
 namespace apache::thrift::compiler::test {
 
 struct temp_dir {
-  boost::filesystem::path dir;
+  std::filesystem::path dir;
 
   temp_dir() {
-    dir = boost::filesystem::temp_directory_path() /
-        boost::filesystem::unique_path();
-    boost::filesystem::create_directory(dir);
+    using res_t = std::random_device::result_type;
+    constexpr auto hex = "0123456789abcdef";
+    char buf[16] = {};
+    std::random_device rng;
+    for (size_t i = 0; i < sizeof(buf); i += 2 * sizeof(res_t)) {
+      const auto res = rng();
+      for (size_t j = 0; j < 2 * sizeof(res_t); ++j) {
+        buf[i + j] = hex[(res >> (4 * j)) & 0xf];
+      }
+    }
+    const auto unique = std::string_view(buf, sizeof(buf));
+    dir = std::filesystem::temp_directory_path() / unique;
+    std::filesystem::create_directory(dir);
   }
 
-  ~temp_dir() { boost::filesystem::remove_all(dir); }
+  ~temp_dir() { std::filesystem::remove_all(dir); }
   std::string string() const { return dir.string(); }
 };
 

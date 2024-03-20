@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <filesystem>
 #include <iterator>
 #include <optional>
 #include <string>
@@ -26,7 +27,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_service.h>
@@ -932,15 +932,15 @@ class t_mstch_python_generator : public t_mstch_generator {
   void generate_file(
       const std::string& file,
       TypesFile is_types_file,
-      const boost::filesystem::path& base);
+      const std::filesystem::path& base);
   void set_types_file(bool val);
   void generate_types();
   void generate_metadata();
   void generate_clients();
   void generate_services();
-  boost::filesystem::path package_to_path();
+  std::filesystem::path package_to_path();
 
-  boost::filesystem::path generate_root_path_;
+  std::filesystem::path generate_root_path_;
 };
 
 class python_mstch_const : public mstch_const {
@@ -1160,7 +1160,7 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_deprecated_annotation>();
 }
 
-boost::filesystem::path t_mstch_python_generator::package_to_path() {
+std::filesystem::path t_mstch_python_generator::package_to_path() {
   auto package = get_py3_namespace(get_program());
   return fmt::format("{}", fmt::join(package, "/"));
 }
@@ -1168,7 +1168,7 @@ boost::filesystem::path t_mstch_python_generator::package_to_path() {
 void t_mstch_python_generator::generate_file(
     const std::string& file,
     TypesFile is_types_file,
-    const boost::filesystem::path& base = {}) {
+    const std::filesystem::path& base = {}) {
   auto program = get_program();
   const auto& name = program->name();
   if (is_types_file == IsTypesFile) {

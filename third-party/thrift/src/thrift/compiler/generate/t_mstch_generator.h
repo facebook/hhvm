@@ -16,11 +16,11 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 
-#include <boost/filesystem.hpp>
 #include <thrift/compiler/detail/mustache/mstch.h>
 
 #include <thrift/compiler/generate/mstch_objects.h>
@@ -76,8 +76,7 @@ class t_mstch_generator : public t_generator {
    * Write an output file with the given contents to a path
    * under the output directory.
    */
-  void write_output(
-      const boost::filesystem::path& path, const std::string& data);
+  void write_output(const std::filesystem::path& path, const std::string& data);
 
   /**
    * Render the mstch template with name `template_name` in the given context
@@ -87,7 +86,7 @@ class t_mstch_generator : public t_generator {
   void render_to_file(
       const mstch::map& context,
       const std::string& template_name,
-      const boost::filesystem::path& path);
+      const std::filesystem::path& path);
 
   /**
    * Render the mstch template with name `template_name` in the context of the
@@ -98,7 +97,7 @@ class t_mstch_generator : public t_generator {
   void render_to_file(
       const T& obj,
       const std::string& template_name,
-      const boost::filesystem::path& path) {
+      const std::filesystem::path& path) {
     render_to_file(dump(obj), template_name, path);
   }
 
@@ -107,7 +106,7 @@ class t_mstch_generator : public t_generator {
       const T& obj,
       const mstch::map& extra_context,
       const std::string& template_name,
-      const boost::filesystem::path& path) {
+      const std::filesystem::path& path) {
     mstch::map result = this->dump(obj);
     result.insert(extra_context.begin(), extra_context.end());
     this->render_to_file(result, template_name, path);
@@ -120,7 +119,7 @@ class t_mstch_generator : public t_generator {
   void render_to_file(
       const std::shared_ptr<mstch_base> context,
       const std::string& template_name,
-      const boost::filesystem::path& path) {
+      const std::filesystem::path& path) {
     write_output(path, render(template_name, context));
   }
 
@@ -214,7 +213,7 @@ class t_mstch_generator : public t_generator {
 
   std::map<std::string, std::string> template_map_;
 
-  void gen_template_map(const boost::filesystem::path& root);
+  void gen_template_map(const std::filesystem::path& root);
 
   /**
    * For every key in the map, prepends a prefix to that key for mstch.

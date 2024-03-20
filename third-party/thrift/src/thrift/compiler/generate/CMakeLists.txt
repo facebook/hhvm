@@ -13,7 +13,10 @@
 # limitations under the License.
 
 add_executable(compiler_generate_build_templates build_templates.cc)
-target_link_libraries(compiler_generate_build_templates Boost::filesystem)
+target_link_libraries(
+  compiler_generate_build_templates
+  ${FBTHRIFT_COMPILER_LINK_CXXFS}
+)
 
 file(
   GLOB_RECURSE
@@ -48,6 +51,5 @@ target_link_libraries(
   compiler_base
   compiler
   mustache
-  Boost::filesystem
   ${OPENSSL_LIBRARIES}
 )

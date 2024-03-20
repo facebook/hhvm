@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <list>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <stdlib.h>
 #include <sstream>
@@ -247,7 +246,7 @@ class t_js_generator : public t_concat_generator {
  */
 void t_js_generator::init_generator() {
   // Make output directory
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
 
   string outdir = get_out_dir();
 

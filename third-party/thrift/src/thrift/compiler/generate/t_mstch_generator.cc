@@ -30,7 +30,7 @@
 
 using namespace std;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace apache {
 namespace thrift {
@@ -404,9 +404,9 @@ mstch::map t_mstch_generator::extend_annotation(const annotation&) {
   return {};
 }
 
-void t_mstch_generator::gen_template_map(const boost::filesystem::path& root) {
+void t_mstch_generator::gen_template_map(const std::filesystem::path& root) {
   for (size_t i = 0; i < templates_size; ++i) {
-    auto name = boost::filesystem::path(
+    auto name = std::filesystem::path(
         templates_name_datas[i],
         templates_name_datas[i] + templates_name_sizes[i]);
     auto mm = std::mismatch(name.begin(), name.end(), root.begin(), root.end());
@@ -441,10 +441,10 @@ const std::string& t_mstch_generator::get_template(
 }
 
 void t_mstch_generator::write_output(
-    const boost::filesystem::path& path, const std::string& data) {
-  auto base_path = boost::filesystem::path{get_out_dir()};
+    const std::filesystem::path& path, const std::string& data) {
+  auto base_path = std::filesystem::path{get_out_dir()};
   auto abs_path = detail::make_abs_path(base_path, path);
-  boost::filesystem::create_directories(abs_path.parent_path());
+  std::filesystem::create_directories(abs_path.parent_path());
   std::ofstream ofs{abs_path.string()};
   if (!ofs) {
     std::ostringstream err;
@@ -487,7 +487,7 @@ std::string t_mstch_generator::render(
 void t_mstch_generator::render_to_file(
     const mstch::map& context,
     const std::string& template_name,
-    const boost::filesystem::path& path) {
+    const std::filesystem::path& path) {
   write_output(path, render(template_name, context));
 }
 

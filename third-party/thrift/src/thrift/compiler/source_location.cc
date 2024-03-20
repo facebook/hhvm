@@ -16,13 +16,13 @@
 
 #include <thrift/compiler/source_location.h>
 
-#include <boost/filesystem.hpp>
 #include <fmt/core.h>
 
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include <algorithm>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -180,11 +180,11 @@ source_manager::path_or_error source_manager::find_include_file(
   }
 
   // Absolute path? Just try that.
-  boost::filesystem::path path(filename);
+  std::filesystem::path path(filename);
   if (path.has_root_directory()) {
     try {
-      return found(boost::filesystem::canonical(path).string());
-    } catch (const boost::filesystem::filesystem_error& e) {
+      return found(std::filesystem::canonical(path).string());
+    } catch (const std::filesystem::filesystem_error& e) {
       return source_manager::path_or_error{
           std::in_place_index<1>,
           fmt::format(
@@ -198,28 +198,27 @@ source_manager::path_or_error source_manager::find_include_file(
   auto itr = found_includes_.find(parent_path);
   const std::string& resolved_parent_path =
       itr != found_includes_.end() ? itr->second : parent_path;
-  auto dir =
-      boost::filesystem::path(resolved_parent_path).parent_path().string();
+  auto dir = std::filesystem::path(resolved_parent_path).parent_path().string();
   dir = dir.empty() ? "." : dir;
   sp.insert(sp.begin(), std::move(dir));
   // Iterate through paths.
   std::vector<std::string>::iterator it;
   for (it = sp.begin(); it != sp.end(); it++) {
-    boost::filesystem::path sfilename = filename;
+    std::filesystem::path sfilename = filename;
     if ((*it) != "." && (*it) != "") {
-      sfilename = boost::filesystem::path(*(it)) / filename;
+      sfilename = std::filesystem::path(*(it)) / filename;
     }
-    if (boost::filesystem::exists(sfilename)) {
+    if (std::filesystem::exists(sfilename)) {
       return found(sfilename.string());
     }
 #ifdef _WIN32
     // On Windows, handle files found at potentially long paths.
     sfilename = R"(\\?\)" +
-        boost::filesystem::absolute(sfilename)
+        std::filesystem::absolute(sfilename)
             .make_preferred()
             .lexically_normal()
             .string();
-    if (boost::filesystem::exists(sfilename)) {
+    if (std::filesystem::exists(sfilename)) {
       return found(sfilename.string());
     }
 #endif

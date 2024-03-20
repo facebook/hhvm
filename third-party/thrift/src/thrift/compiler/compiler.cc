@@ -32,11 +32,11 @@
 #include <unistd.h>
 #endif
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <set>
 
 #include <boost/algorithm/string/split.hpp>
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/system.h>
@@ -243,8 +243,8 @@ bool validate_params(const gen_params& gparams) {
       // Invoker specified `-out blah`. We are supposed to output directly
       // into blah, e.g. `blah/Foo.java`. Make the directory if necessary,
       // just like how for `-o blah` we make `blah/gen-java`
-      boost::system::error_code errc;
-      boost::filesystem::create_directory(out_path, errc);
+      std::error_code errc;
+      std::filesystem::create_directory(out_path, errc);
       if (errc) {
         fprintf(
             stderr,
@@ -254,7 +254,7 @@ bool validate_params(const gen_params& gparams) {
         return false;
       }
     }
-    if (!boost::filesystem::is_directory(out_path)) {
+    if (!std::filesystem::is_directory(out_path)) {
       fprintf(
           stderr,
           "Output path %s is unusable or not a directory\n",

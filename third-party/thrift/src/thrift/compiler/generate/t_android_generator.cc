@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/generate/t_java_deprecated_generator.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,7 @@ void t_android_generator::init_generator() {
   out_dir_base_ = "gen-android";
 
   // Make output directory.
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
   namespace_key_ = "android";
   package_name_ = program_->get_namespace(namespace_key_);
 
@@ -62,12 +63,12 @@ void t_android_generator::init_generator() {
   std::string::size_type loc;
   while ((loc = dir.find('.')) != std::string::npos) {
     subdir = subdir + "/" + dir.substr(0, loc);
-    boost::filesystem::create_directory(subdir);
+    std::filesystem::create_directory(subdir);
     dir = dir.substr(loc + 1);
   }
   if (dir.size() > 0) {
     subdir = subdir + "/" + dir;
-    boost::filesystem::create_directory(subdir);
+    std::filesystem::create_directory(subdir);
   }
 
   package_dir_ = subdir;

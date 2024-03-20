@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <memory>
 #include <set>
 #include <string>
@@ -808,7 +809,7 @@ void t_mstch_go_generator::generate_program() {
   }
 
   const auto& prog = cached_program(program);
-  auto package_dir = boost::filesystem::path{
+  auto package_dir = std::filesystem::path{
       go::get_go_package_dir(program, data_.package_override)};
 
   render_to_file(prog, "const.go", package_dir / "const.go");

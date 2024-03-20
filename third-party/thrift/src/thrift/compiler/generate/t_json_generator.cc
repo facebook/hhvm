@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_include.h>
@@ -93,21 +92,21 @@ class t_json_generator : public t_concat_generator {
  */
 void t_json_generator::generate_program() {
   // Make output directory
-  boost::filesystem::create_directory(get_out_dir());
+  std::filesystem::create_directory(get_out_dir());
   string module_name = program_->get_namespace("json");
   string fname = get_out_dir();
   if (module_name.empty()) {
     module_name = program_->name();
   }
   string mangled_module_name = module_name;
-  boost::filesystem::create_directory(fname);
+  std::filesystem::create_directory(fname);
   for (string::size_type pos = mangled_module_name.find('.');
        pos != string::npos;
        pos = mangled_module_name.find('.')) {
     fname += '/';
     fname += mangled_module_name.substr(0, pos);
     mangled_module_name.erase(0, pos + 1);
-    boost::filesystem::create_directory(fname);
+    std::filesystem::create_directory(fname);
   }
 
   fname += '/';

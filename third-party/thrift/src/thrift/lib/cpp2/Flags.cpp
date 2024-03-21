@@ -17,8 +17,67 @@
 #include <thrift/lib/cpp2/Flags.h>
 
 #include <map>
+#include <folly/Synchronized.h>
 
 #include <folly/MapUtil.h>
+
+namespace {
+using namespace apache::thrift;
+using namespace apache::thrift::detail;
+
+class FlagsRegistry {
+ public:
+  void registerInt64Flag(
+      const std::string_view& flagName, FlagWrapper<int64_t>* flag) {
+    int64Flags_.wlock()->emplace(flagName, flag);
+  }
+  void registerBoolFlag(
+      const std::string_view& flagName, FlagWrapper<bool>* flag) {
+    boolFlags_.wlock()->emplace(flagName, flag);
+  }
+  void registerStringFlag(
+      const std::string_view& flagName, FlagWrapper<std::string>* flag) {
+    stringFlags_.wlock()->emplace(flagName, flag);
+  }
+
+  std::vector<ThriftFlagInfo> getAllThriftFlags() {
+    std::vector<ThriftFlagInfo> flags;
+    int64Flags_.withRLock([&](auto& locked) {
+      for (auto& [name, flagWrapper] : locked) {
+        flags.push_back(
+            {std::string{name}, std::to_string(flagWrapper->get())});
+      }
+    });
+
+    boolFlags_.withRLock([&](auto& locked) {
+      for (auto& [name, value] : locked) {
+        flags.push_back({std::string{name}, value->get() ? "true" : "false"});
+      }
+    });
+
+    stringFlags_.withRLock([&](auto& locked) {
+      for (auto& [name, value] : locked) {
+        flags.push_back({std::string{name}, value->get()});
+      }
+    });
+
+    return flags;
+  }
+
+ private:
+  folly::Synchronized<std::map<std::string_view, FlagWrapper<int64_t>*>>
+      int64Flags_;
+  folly::Synchronized<std::map<std::string_view, FlagWrapper<bool>*>>
+      boolFlags_;
+  folly::Synchronized<std::map<std::string_view, FlagWrapper<std::string>*>>
+      stringFlags_;
+};
+
+FlagsRegistry* getFlagsRegistry() {
+  static folly::Indestructible<FlagsRegistry> registry;
+  return registry.get();
+}
+} // namespace
 
 namespace apache {
 namespace thrift {
@@ -70,6 +129,29 @@ apache::thrift::detail::FlagsBackend& getFlagsBackend() {
   }();
   return obj;
 }
+
+template <>
+void registerFlagWrapper<int64_t>(
+    std::string_view name, FlagWrapper<int64_t>* wrapper) {
+  getFlagsRegistry()->registerInt64Flag(name, wrapper);
+}
+
+template <>
+void registerFlagWrapper<bool>(
+    std::string_view name, FlagWrapper<bool>* wrapper) {
+  getFlagsRegistry()->registerBoolFlag(name, wrapper);
+}
+
+template <>
+void registerFlagWrapper<std::string>(
+    std::string_view name, FlagWrapper<std::string>* wrapper) {
+  getFlagsRegistry()->registerStringFlag(name, wrapper);
+}
 } // namespace detail
+
+std::vector<ThriftFlagInfo> getAllThriftFlags() {
+  return getFlagsRegistry()->getAllThriftFlags();
+}
+
 } // namespace thrift
 } // namespace apache

@@ -310,3 +310,32 @@ TEST(Flags, MockValuePreferred) {
   EXPECT_EQ(49, THRIFT_FLAG(test_flag_int_external));
   EXPECT_EQ("mock", THRIFT_FLAG(test_flag_string_external));
 }
+
+void assertFlagValue(
+    std::vector<apache::thrift::ThriftFlagInfo> allFlags,
+    const std::string& name,
+    const std::string& expectedValue) {
+  bool flagFound = false;
+  for (const auto& flag : allFlags) {
+    if (flag.name == name) {
+      EXPECT_EQ(expectedValue, flag.currentValue);
+      flagFound = true;
+    }
+  }
+  EXPECT_TRUE(flagFound);
+}
+
+TEST(Flags, getAllThriftFlags) {
+  // Arrange
+  THRIFT_FLAG_SET_MOCK(test_flag_bool, false);
+  THRIFT_FLAG_SET_MOCK(test_flag_int, 88);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"test string"});
+
+  // Act
+  auto allFlags = apache::thrift::getAllThriftFlags();
+
+  // Assert
+  assertFlagValue(allFlags, "test_flag_bool", "false");
+  assertFlagValue(allFlags, "test_flag_int", "88");
+  assertFlagValue(allFlags, "test_flag_string", "test string");
+}

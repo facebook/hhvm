@@ -6856,14 +6856,13 @@ end = struct
          * the concrete type constant and try to solve the query using it *)
         let ( ||| ) = ( ||| ) ~fail in
         let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
-        Subtype.(
-          simplify_subtype_i
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn = None; ty_sub = LoclType bndty }
-            ~rhs:
-              { super_like = false; super_supportdyn = false; ty_super = htmty }
-            env)
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn = None; ty_sub = LoclType bndty }
+          ~rhs
+          env
         ||| fun env ->
         (* TODO(refinements): The treatment of `this_ty` below is
          * no good; see below. *)

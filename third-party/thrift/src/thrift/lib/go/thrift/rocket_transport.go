@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -44,12 +43,10 @@ type rocketTransport struct {
 	client rsocket.Client
 
 	// Used on read
-	rBuf byteReader
-	// remaining bytes in the current frame. If 0, read in a new frame.
-	rSize uint64
+	rBuf *MemoryBuffer
 
 	// Used on write
-	wbuf *bytes.Buffer
+	wbuf *MemoryBuffer
 
 	// Negotiated
 	protoID ProtocolID
@@ -80,9 +77,8 @@ func (t *rocketTransport) SetProtocolID(protoID ProtocolID) error {
 }
 
 func (t *rocketTransport) resetBuffers() {
-	t.rBuf = newLimitedByteReader(bytes.NewReader(nil), 0)
-	t.rSize = 0
-	t.wbuf = bytes.NewBuffer(nil)
+	t.rBuf = NewMemoryBuffer()
+	t.wbuf = NewMemoryBuffer()
 }
 
 // Open opens the internal transport (required for Transport)
@@ -132,18 +128,11 @@ func (t *rocketTransport) Close() error {
 
 // Read reads from the current rBuffer. EOF if the frame is done. (required for Transport)
 func (t *rocketTransport) Read(buf []byte) (int, error) {
-	n, err := t.rBuf.Read(buf)
-	// Shouldn't be possible, but just in case the frame size was flubbed
-	if uint64(n) > t.rSize {
-		n = int(t.rSize)
-	}
-	t.rSize -= uint64(n)
-	return n, err
+	return t.rBuf.Read(buf)
 }
 
 func (t *rocketTransport) setReadBuf(buf []byte) {
-	t.rSize = uint64(len(buf))
-	t.rBuf = newLimitedByteReader(bytes.NewBuffer(buf), int64(len(buf)))
+	t.rBuf = NewMemoryBufferWithData(buf)
 }
 
 // Write writes multiple bytes to the rBuffer, does not send to transport. (required for Transport)
@@ -156,7 +145,7 @@ func (t *rocketTransport) Write(buf []byte) (int, error) {
 // Used by binary and compact protocols in ReadString, ReadBytes, etc.,
 // This is a defense tactic, so they can't get attacked with large messages and over allocate a buffer.
 func (t *rocketTransport) RemainingBytes() uint64 {
-	return t.rSize
+	return t.rBuf.RemainingBytes()
 }
 
 // Flush (required for Transport)

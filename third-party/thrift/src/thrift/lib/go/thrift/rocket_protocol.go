@@ -45,7 +45,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 	}
 	switch t := trans.(type) {
 	case rocketSocket:
-		p.trans = newRocketTransport(t).(*rocketTransport)
+		p.trans = newRocketTransport(t)
 	default:
 		panic(NewTransportException(
 			NOT_IMPLEMENTED,
@@ -60,11 +60,10 @@ func NewRocketProtocol(trans Transport) Protocol {
 
 func (p *rocketProtocol) resetProtocol() error {
 	p.trans.resetBuffers()
-	if p.Format != nil && p.protoID == p.trans.ProtocolID() {
+	if p.Format != nil {
 		return nil
 	}
 
-	p.protoID = p.trans.ProtocolID()
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation

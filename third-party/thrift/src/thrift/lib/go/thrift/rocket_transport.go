@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"fmt"
 	"net"
 
 	rsocket "github.com/rsocket/rsocket-go"
@@ -43,33 +42,15 @@ type rocketTransport struct {
 	client rsocket.Client
 
 	buf *MemoryBuffer
-
-	// Negotiated
-	protoID ProtocolID
 }
 
 // newRocketTransport creates a new transport given a thrift.Socket.
-func newRocketTransport(socket rocketSocket) Transport {
+func newRocketTransport(socket rocketSocket) *rocketTransport {
 	t := &rocketTransport{
-		socket:  socket,
-		protoID: ProtocolIDCompact,
+		socket: socket,
 	}
 	t.resetBuffers()
 	return t
-}
-
-func (t *rocketTransport) ProtocolID() ProtocolID {
-	return t.protoID
-}
-
-func (t *rocketTransport) SetProtocolID(protoID ProtocolID) error {
-	if !(protoID == ProtocolIDBinary || protoID == ProtocolIDCompact) {
-		return NewTransportException(
-			NOT_IMPLEMENTED, fmt.Sprintf("unimplemented proto ID: %s (%#x)", protoID.String(), int64(protoID)),
-		)
-	}
-	t.protoID = protoID
-	return nil
 }
 
 func (t *rocketTransport) resetBuffers() {

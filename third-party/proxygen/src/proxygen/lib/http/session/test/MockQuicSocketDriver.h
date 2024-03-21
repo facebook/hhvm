@@ -1194,7 +1194,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   }
 
   void closeImpl(folly::Optional<QuicError> errorCode) {
-
     closeConnection();
     if (errorCode) {
       quic::ApplicationErrorCode* err =
@@ -1208,6 +1207,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         QuicError(LocalErrorCode::NO_ERROR, "Closing socket with no error")));
     sock_->connCb_ = nullptr;
     sock_->setupCb_ = nullptr;
+    sockGood_ = false;
   }
   folly::Optional<quic::ApplicationErrorCode> getConnErrorCode() {
     return streams_[kConnectionStreamId].error;

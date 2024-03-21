@@ -54,8 +54,16 @@ module Nast = Aast
  * represents a set of goals
  *   T <: u1, ..., t <: un , t1 <: T, ..., tn <: T
  *)
-module VisitedGoals = struct
-  type t = (ITySet.t * ITySet.t) SMap.t
+module VisitedGoals : sig
+  type t
+
+  val empty : t
+
+  val try_add_visited_generic_sub : t -> string -> locl_ty -> t option
+
+  val try_add_visited_generic_super : t -> locl_ty -> string -> t option
+end = struct
+  type t = (Typing_set.t * Typing_set.t) SMap.t
 
   let empty : t = SMap.empty
 
@@ -64,24 +72,24 @@ module VisitedGoals = struct
    *)
   let try_add_visited_generic_sub v name ty =
     match SMap.find_opt name v with
-    | None -> Some (SMap.add name (ITySet.empty, ITySet.singleton ty) v)
+    | None -> Some (SMap.add name (Typing_set.empty, Typing_set.singleton ty) v)
     | Some (lower, upper) ->
-      if ITySet.mem ty upper then
+      if Typing_set.mem ty upper then
         None
       else
-        Some (SMap.add name (lower, ITySet.add ty upper) v)
+        Some (SMap.add name (lower, Typing_set.add ty upper) v)
 
   (* Return None if (ty <: name) is already present, otherwise return Some v'
    * where v' has the pair added
    *)
   let try_add_visited_generic_super v ty name =
     match SMap.find_opt name v with
-    | None -> Some (SMap.add name (ITySet.singleton ty, ITySet.empty) v)
+    | None -> Some (SMap.add name (Typing_set.singleton ty, Typing_set.empty) v)
     | Some (lower, upper) ->
-      if ITySet.mem ty lower then
+      if Typing_set.mem ty lower then
         None
       else
-        Some (SMap.add name (ITySet.add ty lower, upper) v)
+        Some (SMap.add name (Typing_set.add ty lower, upper) v)
 end
 
 module Subtype_env = struct
@@ -866,21 +874,57 @@ end = struct
           (sub_supportdyn, tyl)
           rhs
           env)
-    | (r_generic, Tgeneric (name_sub, tyargs)) ->
-      let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-        simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
-      in
-      let lift_rhs { ty_super; _ } = ty_super in
-      Common.simplify_generic_l
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~mk_prop
-        ~lift_rhs
-        (sub_supportdyn, r_generic, name_sub, tyargs)
-        { super_like; super_supportdyn = false; ty_super }
-        { super_like = false; super_supportdyn = false; ty_super }
+    | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
         env
+        (LoclType lty_sub)
+        ty_super
+    | (r_generic, Tgeneric (name_sub, tyargs)) -> begin
+      match ty_super with
+      | ConstraintType _ ->
+        let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
+          simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
+        in
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, r_generic, name_sub, tyargs)
+          { super_like; super_supportdyn = false; ty_super }
+          { super_like = false; super_supportdyn = false; ty_super }
+          env
+      | LoclType lty_super ->
+        (match
+           VisitedGoals.try_add_visited_generic_sub
+             subtype_env.Subtype_env.visited
+             name_sub
+             lty_super
+         with
+        | None ->
+          (* If we've seen this type parameter before then we must have gone
+               * round a cycle so we fail
+          *)
+          invalid ~fail env
+        | Some new_visited -> begin
+          let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+
+          let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
+            simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
+          in
+          Common.simplify_generic_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop
+            (sub_supportdyn, r_generic, name_sub, tyargs)
+            { super_like; super_supportdyn = false; ty_super }
+            { super_like = false; super_supportdyn = false; ty_super }
+            env
+        end)
+    end
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env
     | (_, Taccess _) -> invalid ~fail env
@@ -2208,7 +2252,7 @@ end = struct
         match
           VisitedGoals.try_add_visited_generic_super
             subtype_env.Subtype_env.visited
-            (LoclType lty_sub)
+            lty_sub
             name_super
         with
         | None -> invalid_env env
@@ -6355,16 +6399,11 @@ end = struct
               rhs
               env)
         | ((r_generic, Tgeneric (generic_nm, generic_ty_args)), _) ->
-          let lift_rhs { reason_super; destructure } =
-            ConstraintType
-              (mk_constraint_type (reason_super, Tdestructure destructure))
-          in
           Common.simplify_generic_l
             ~subtype_env
             ~this_ty
             ~fail
             ~mk_prop:simplify
-            ~lift_rhs
             (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
             rhs
             rhs
@@ -6701,17 +6740,11 @@ end = struct
               rhs
               env)
         | Tgeneric (generic_nm, generic_ty_args) ->
-          let lift_rhs { reason_super; can_traverse } =
-            ConstraintType
-              (mk_constraint_type (reason_super, Tcan_traverse can_traverse))
-          in
-
           Common.simplify_generic_l
             ~subtype_env
             ~this_ty
             ~fail
             ~mk_prop
-            ~lift_rhs
             (sub_supportdyn, r, generic_nm, generic_ty_args)
             rhs
             rhs
@@ -6935,17 +6968,11 @@ end = struct
           rhs
           env
       | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
-        let lift_rhs { reason_super; has_type_member } =
-          ConstraintType
-            (mk_constraint_type
-               (reason_super, Thas_type_member has_type_member))
-        in
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
           ~fail
           ~mk_prop:simplify
-          ~lift_rhs
           (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
           rhs
           rhs
@@ -7441,7 +7468,6 @@ and Common : sig
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
-    lift_rhs:('rhs -> internal_type) ->
     Reason.t option * locl_phase Reason.t_ * string * locl_ty list ->
     'rhs ->
     'rhs ->
@@ -7555,95 +7581,73 @@ end = struct
       ~this_ty
       ~fail
       ~mk_prop
-      ~lift_rhs
       (sub_supportdyn, reason_generic, generic_nm, generic_ty_args)
       rhs
       rhs_for_mixed
       env =
-    if subtype_env.Subtype_env.require_completeness then
-      mk_issubtype_prop
-        ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
-        env
-        (LoclType (mk (reason_generic, Tgeneric (generic_nm, generic_ty_args))))
-        (lift_rhs rhs)
-    else begin
+    begin
       let ( ||| ) = ( ||| ) ~fail in
       let lty_sub =
         mk (reason_generic, Tgeneric (generic_nm, generic_ty_args))
       in
       let (env, prop) =
-        match
-          VisitedGoals.try_add_visited_generic_sub
-            subtype_env.Subtype_env.visited
-            generic_nm
-            (lift_rhs rhs)
-        with
-        | None ->
-          (* If we've seen this type parameter before then we must have gone
-               * round a cycle so we fail
-          *)
-          invalid ~fail env
-        | Some new_visited ->
-          let subtype_env = Subtype_env.set_visited subtype_env new_visited in
-          (* If the generic is actually an expression dependent type,
-             we need to update this_ty
-          *)
-          let this_ty =
-            if
-              DependentKind.is_generic_dep_ty generic_nm
-              && Option.is_none this_ty
-            then
-              Some lty_sub
-            else
-              this_ty
-          in
-          (* Otherwise, we collect all the upper bounds ("as" constraints) on
-             the generic parameter, and check each of these in turn against
-             ty_super until one of them succeeds
-          *)
-          let rec try_bounds tyl env =
-            match tyl with
-            | [] ->
-              (* Try an implicit mixed = ?nonnull bound before giving up.
-                 This can be useful when checking T <: t, where type t is
-                 equivalent to but syntactically different from ?nonnull.
-                 E.g., if t is a generic type parameter T with nonnull as
-                 a lower bound.
-              *)
-              let r =
-                Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
-              in
-              let tmixed = LoclType (MakeType.mixed r) in
-              mk_prop
-                ~subtype_env
-                ~this_ty
-                ~fail
-                ~lhs:{ sub_supportdyn; ty_sub = tmixed }
-                ~rhs:rhs_for_mixed
-                env
-            | [ty] ->
-              mk_prop
-                ~subtype_env
-                ~this_ty
-                ~fail
-                ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
-                ~rhs
-                env
-            | ty :: tyl ->
-              try_bounds tyl env
-              ||| mk_prop
-                    ~subtype_env
-                    ~this_ty
-                    ~fail
-                    ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
-                    ~rhs
-          in
-          let bounds =
-            Typing_set.elements
-              (Env.get_upper_bounds env generic_nm generic_ty_args)
-          in
-          try_bounds bounds env
+        (* If the generic is actually an expression dependent type,
+           we need to update this_ty
+        *)
+        let this_ty =
+          if
+            DependentKind.is_generic_dep_ty generic_nm && Option.is_none this_ty
+          then
+            Some lty_sub
+          else
+            this_ty
+        in
+        (* Otherwise, we collect all the upper bounds ("as" constraints) on
+           the generic parameter, and check each of these in turn against
+           ty_super until one of them succeeds
+        *)
+        let rec try_bounds tyl env =
+          match tyl with
+          | [] ->
+            (* Try an implicit mixed = ?nonnull bound before giving up.
+               This can be useful when checking T <: t, where type t is
+               equivalent to but syntactically different from ?nonnull.
+               E.g., if t is a generic type parameter T with nonnull as
+               a lower bound.
+            *)
+            let r =
+              Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
+            in
+            let tmixed = LoclType (MakeType.mixed r) in
+            mk_prop
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub = tmixed }
+              ~rhs:rhs_for_mixed
+              env
+          | [ty] ->
+            mk_prop
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
+              ~rhs
+              env
+          | ty :: tyl ->
+            try_bounds tyl env
+            ||| mk_prop
+                  ~subtype_env
+                  ~this_ty
+                  ~fail
+                  ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
+                  ~rhs
+        in
+        let bounds =
+          Typing_set.elements
+            (Env.get_upper_bounds env generic_nm generic_ty_args)
+        in
+        try_bounds bounds env
       in
       (* Turn error into a generic error about the type parameter *)
       if_unsat (invalid ~fail) (env, prop)
@@ -7801,9 +7805,6 @@ end = struct
         in
         mk_subty_prop env &&& mk_cstr_prop
       | (r_generic, Tgeneric (nm, tyargs)) ->
-        let lift_rhs_generic (_, Subtype.{ ty_super; _ }, _) =
-          LoclType ty_super
-        in
         let mk_prop_generic
             ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
             =
@@ -7822,7 +7823,6 @@ end = struct
           ~this_ty
           ~fail
           ~mk_prop:mk_prop_generic
-          ~lift_rhs:lift_rhs_generic
           (sub_supportdyn, r_generic, nm, tyargs)
           rhs
           rhs

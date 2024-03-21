@@ -1480,14 +1480,14 @@ async def SimpleService_get_five_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_five:",
+            "Unexpected error in service handler SimpleService.get_five:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_five:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_five:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1510,14 +1510,14 @@ async def SimpleService_add_five_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler add_five:",
+            "Unexpected error in service handler SimpleService.add_five:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler add_five:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.add_five:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1538,14 +1538,14 @@ async def SimpleService_do_nothing_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler do_nothing:",
+            "Unexpected error in service handler SimpleService.do_nothing:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler do_nothing:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.do_nothing:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1570,14 +1570,14 @@ async def SimpleService_concat_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler concat:",
+            "Unexpected error in service handler SimpleService.concat:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler concat:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.concat:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1600,14 +1600,14 @@ async def SimpleService_get_value_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_value:",
+            "Unexpected error in service handler SimpleService.get_value:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_value:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_value:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1630,14 +1630,14 @@ async def SimpleService_negate_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler negate:",
+            "Unexpected error in service handler SimpleService.negate:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler negate:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.negate:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1660,14 +1660,14 @@ async def SimpleService_tiny_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler tiny:",
+            "Unexpected error in service handler SimpleService.tiny:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler tiny:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.tiny:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1690,14 +1690,14 @@ async def SimpleService_small_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler small:",
+            "Unexpected error in service handler SimpleService.small:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler small:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.small:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1720,14 +1720,14 @@ async def SimpleService_big_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler big:",
+            "Unexpected error in service handler SimpleService.big:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler big:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.big:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1750,14 +1750,14 @@ async def SimpleService_two_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler two:",
+            "Unexpected error in service handler SimpleService.two:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler two:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.two:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1780,14 +1780,14 @@ async def SimpleService_expected_exception_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler expected_exception:",
+            "Unexpected error in service handler SimpleService.expected_exception:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler expected_exception:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.expected_exception:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1808,14 +1808,14 @@ async def SimpleService_unexpected_exception_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler unexpected_exception:",
+            "Unexpected error in service handler SimpleService.unexpected_exception:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler unexpected_exception:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.unexpected_exception:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1838,14 +1838,14 @@ async def SimpleService_sum_i16_list_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler sum_i16_list:",
+            "Unexpected error in service handler SimpleService.sum_i16_list:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler sum_i16_list:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.sum_i16_list:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1868,14 +1868,14 @@ async def SimpleService_sum_i32_list_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler sum_i32_list:",
+            "Unexpected error in service handler SimpleService.sum_i32_list:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler sum_i32_list:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.sum_i32_list:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1898,14 +1898,14 @@ async def SimpleService_sum_i64_list_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler sum_i64_list:",
+            "Unexpected error in service handler SimpleService.sum_i64_list:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler sum_i64_list:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.sum_i64_list:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1928,14 +1928,14 @@ async def SimpleService_concat_many_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler concat_many:",
+            "Unexpected error in service handler SimpleService.concat_many:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler concat_many:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.concat_many:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1958,14 +1958,14 @@ async def SimpleService_count_structs_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler count_structs:",
+            "Unexpected error in service handler SimpleService.count_structs:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler count_structs:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.count_structs:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1988,14 +1988,14 @@ async def SimpleService_sum_set_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler sum_set:",
+            "Unexpected error in service handler SimpleService.sum_set:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler sum_set:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.sum_set:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2020,14 +2020,14 @@ async def SimpleService_contains_word_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler contains_word:",
+            "Unexpected error in service handler SimpleService.contains_word:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler contains_word:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.contains_word:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2052,14 +2052,14 @@ async def SimpleService_get_map_value_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_map_value:",
+            "Unexpected error in service handler SimpleService.get_map_value:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_map_value:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_map_value:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2082,14 +2082,14 @@ async def SimpleService_map_length_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler map_length:",
+            "Unexpected error in service handler SimpleService.map_length:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler map_length:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.map_length:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2112,14 +2112,14 @@ async def SimpleService_sum_map_values_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler sum_map_values:",
+            "Unexpected error in service handler SimpleService.sum_map_values:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler sum_map_values:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.sum_map_values:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2142,14 +2142,14 @@ async def SimpleService_complex_sum_i32_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler complex_sum_i32:",
+            "Unexpected error in service handler SimpleService.complex_sum_i32:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler complex_sum_i32:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.complex_sum_i32:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2172,14 +2172,14 @@ async def SimpleService_repeat_name_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler repeat_name:",
+            "Unexpected error in service handler SimpleService.repeat_name:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler repeat_name:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.repeat_name:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2200,14 +2200,14 @@ async def SimpleService_get_struct_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_struct:",
+            "Unexpected error in service handler SimpleService.get_struct:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_struct:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_struct:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2231,14 +2231,14 @@ async def SimpleService_fib_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler fib:",
+            "Unexpected error in service handler SimpleService.fib:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler fib:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.fib:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2262,14 +2262,14 @@ async def SimpleService_unique_words_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler unique_words:",
+            "Unexpected error in service handler SimpleService.unique_words:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler unique_words:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.unique_words:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2293,14 +2293,14 @@ async def SimpleService_words_count_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler words_count:",
+            "Unexpected error in service handler SimpleService.words_count:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler words_count:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.words_count:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2323,14 +2323,14 @@ async def SimpleService_set_enum_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler set_enum:",
+            "Unexpected error in service handler SimpleService.set_enum:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler set_enum:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.set_enum:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2356,14 +2356,14 @@ async def SimpleService_list_of_lists_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler list_of_lists:",
+            "Unexpected error in service handler SimpleService.list_of_lists:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler list_of_lists:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.list_of_lists:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2387,14 +2387,14 @@ async def SimpleService_word_character_frequency_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler word_character_frequency:",
+            "Unexpected error in service handler SimpleService.word_character_frequency:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler word_character_frequency:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.word_character_frequency:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2418,14 +2418,14 @@ async def SimpleService_list_of_sets_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler list_of_sets:",
+            "Unexpected error in service handler SimpleService.list_of_sets:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler list_of_sets:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.list_of_sets:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2448,14 +2448,14 @@ async def SimpleService_nested_map_argument_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler nested_map_argument:",
+            "Unexpected error in service handler SimpleService.nested_map_argument:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler nested_map_argument:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.nested_map_argument:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2478,14 +2478,14 @@ async def SimpleService_make_sentence_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler make_sentence:",
+            "Unexpected error in service handler SimpleService.make_sentence:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler make_sentence:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.make_sentence:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2509,14 +2509,14 @@ async def SimpleService_get_union_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_union:",
+            "Unexpected error in service handler SimpleService.get_union:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_union:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_union:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2540,14 +2540,14 @@ async def SimpleService_get_keys_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_keys:",
+            "Unexpected error in service handler SimpleService.get_keys:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_keys:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_keys:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2570,14 +2570,14 @@ async def SimpleService_lookup_double_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler lookup_double:",
+            "Unexpected error in service handler SimpleService.lookup_double:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler lookup_double:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.lookup_double:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2600,14 +2600,14 @@ async def SimpleService_retrieve_binary_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler retrieve_binary:",
+            "Unexpected error in service handler SimpleService.retrieve_binary:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler retrieve_binary:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.retrieve_binary:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2631,14 +2631,14 @@ async def SimpleService_contain_binary_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler contain_binary:",
+            "Unexpected error in service handler SimpleService.contain_binary:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler contain_binary:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.contain_binary:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2662,14 +2662,14 @@ async def SimpleService_contain_enum_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler contain_enum:",
+            "Unexpected error in service handler SimpleService.contain_enum:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler contain_enum:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.contain_enum:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2692,14 +2692,14 @@ async def SimpleService_get_binary_union_struct_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_binary_union_struct:",
+            "Unexpected error in service handler SimpleService.get_binary_union_struct:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_binary_union_struct:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.get_binary_union_struct:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2720,14 +2720,14 @@ async def SimpleService_onStartServing_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStartServing:",
+            "Unexpected error in service handler SimpleService.onStartServing:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStartServing:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.onStartServing:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2748,14 +2748,14 @@ async def SimpleService_onStopRequested_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStopRequested:",
+            "Unexpected error in service handler SimpleService.onStopRequested:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStopRequested:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler SimpleService.onStopRequested:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2813,14 +2813,14 @@ async def DerivedService_get_six_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_six:",
+            "Unexpected error in service handler DerivedService.get_six:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_six:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler DerivedService.get_six:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2841,14 +2841,14 @@ async def DerivedService_onStartServing_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStartServing:",
+            "Unexpected error in service handler DerivedService.onStartServing:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStartServing:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler DerivedService.onStartServing:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2869,14 +2869,14 @@ async def DerivedService_onStopRequested_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStopRequested:",
+            "Unexpected error in service handler DerivedService.onStopRequested:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStopRequested:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler DerivedService.onStopRequested:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2934,14 +2934,14 @@ async def RederivedService_get_seven_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler get_seven:",
+            "Unexpected error in service handler RederivedService.get_seven:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler get_seven:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler RederivedService.get_seven:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2962,14 +2962,14 @@ async def RederivedService_onStartServing_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStartServing:",
+            "Unexpected error in service handler RederivedService.onStartServing:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStartServing:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler RederivedService.onStartServing:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -2990,14 +2990,14 @@ async def RederivedService_onStopRequested_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStopRequested:",
+            "Unexpected error in service handler RederivedService.onStopRequested:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStopRequested:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler RederivedService.onStopRequested:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')

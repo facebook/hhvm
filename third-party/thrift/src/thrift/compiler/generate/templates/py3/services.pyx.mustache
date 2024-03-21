@@ -163,14 +163,14 @@ async def runGenerator_{{service:name}}_{{function:name}}(object generator, Prom
         ))
     except Exception as ex:
         print(
-            "Unexpected error in {{service:name.}}{{function:name}}:",
+            "Unexpected error in {{service:name}}.{{function:name}}:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler {{service:name.}}{{function:name}}:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler {{service:name}}.{{function:name}}:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')

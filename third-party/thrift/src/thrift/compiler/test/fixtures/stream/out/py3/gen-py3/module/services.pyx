@@ -104,14 +104,14 @@ async def runGenerator_PubSubStreamingService_returnstream(object generator, Pro
         ))
     except Exception as ex:
         print(
-            "Unexpected error in returnstream:",
+            "Unexpected error in PubSubStreamingService.returnstream:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler returnstream:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.returnstream:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -141,14 +141,14 @@ async def runGenerator_PubSubStreamingService_streamthrows(object generator, Pro
         ))
     except Exception as ex:
         print(
-            "Unexpected error in streamthrows:",
+            "Unexpected error in PubSubStreamingService.streamthrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler streamthrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.streamthrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -176,14 +176,14 @@ async def runGenerator_PubSubStreamingService_servicethrows(object generator, Pr
         ))
     except Exception as ex:
         print(
-            "Unexpected error in servicethrows:",
+            "Unexpected error in PubSubStreamingService.servicethrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler servicethrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.servicethrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -211,14 +211,14 @@ async def runGenerator_PubSubStreamingService_servicethrows2(object generator, P
         ))
     except Exception as ex:
         print(
-            "Unexpected error in servicethrows2:",
+            "Unexpected error in PubSubStreamingService.servicethrows2:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler servicethrows2:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.servicethrows2:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -248,14 +248,14 @@ async def runGenerator_PubSubStreamingService_boththrows(object generator, Promi
         ))
     except Exception as ex:
         print(
-            "Unexpected error in boththrows:",
+            "Unexpected error in PubSubStreamingService.boththrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler boththrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.boththrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -285,14 +285,14 @@ async def runGenerator_PubSubStreamingService_responseandstreamstreamthrows(obje
         ))
     except Exception as ex:
         print(
-            "Unexpected error in responseandstreamstreamthrows:",
+            "Unexpected error in PubSubStreamingService.responseandstreamstreamthrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamstreamthrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamstreamthrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -320,14 +320,14 @@ async def runGenerator_PubSubStreamingService_responseandstreamservicethrows(obj
         ))
     except Exception as ex:
         print(
-            "Unexpected error in responseandstreamservicethrows:",
+            "Unexpected error in PubSubStreamingService.responseandstreamservicethrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamservicethrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamservicethrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -357,14 +357,14 @@ async def runGenerator_PubSubStreamingService_responseandstreamboththrows(object
         ))
     except Exception as ex:
         print(
-            "Unexpected error in responseandstreamboththrows:",
+            "Unexpected error in PubSubStreamingService.responseandstreamboththrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamboththrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamboththrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -392,14 +392,14 @@ async def runGenerator_PubSubStreamingService_returnstreamFast(object generator,
         ))
     except Exception as ex:
         print(
-            "Unexpected error in returnstreamFast:",
+            "Unexpected error in PubSubStreamingService.returnstreamFast:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler returnstreamFast:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.returnstreamFast:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -819,14 +819,14 @@ async def PubSubStreamingService_returnstream_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler returnstream:",
+            "Unexpected error in service handler PubSubStreamingService.returnstream:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler returnstream:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.returnstream:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -853,14 +853,14 @@ async def PubSubStreamingService_streamthrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler streamthrows:",
+            "Unexpected error in service handler PubSubStreamingService.streamthrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler streamthrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.streamthrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -889,14 +889,14 @@ async def PubSubStreamingService_servicethrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler servicethrows:",
+            "Unexpected error in service handler PubSubStreamingService.servicethrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler servicethrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.servicethrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -927,14 +927,14 @@ async def PubSubStreamingService_servicethrows2_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler servicethrows2:",
+            "Unexpected error in service handler PubSubStreamingService.servicethrows2:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler servicethrows2:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.servicethrows2:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -963,14 +963,14 @@ async def PubSubStreamingService_boththrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler boththrows:",
+            "Unexpected error in service handler PubSubStreamingService.boththrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler boththrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.boththrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -999,14 +999,14 @@ async def PubSubStreamingService_responseandstreamstreamthrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler responseandstreamstreamthrows:",
+            "Unexpected error in service handler PubSubStreamingService.responseandstreamstreamthrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamstreamthrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamstreamthrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1037,14 +1037,14 @@ async def PubSubStreamingService_responseandstreamservicethrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler responseandstreamservicethrows:",
+            "Unexpected error in service handler PubSubStreamingService.responseandstreamservicethrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamservicethrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamservicethrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1075,14 +1075,14 @@ async def PubSubStreamingService_responseandstreamboththrows_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler responseandstreamboththrows:",
+            "Unexpected error in service handler PubSubStreamingService.responseandstreamboththrows:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler responseandstreamboththrows:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.responseandstreamboththrows:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1111,14 +1111,14 @@ async def PubSubStreamingService_returnstreamFast_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler returnstreamFast:",
+            "Unexpected error in service handler PubSubStreamingService.returnstreamFast:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler returnstreamFast:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.returnstreamFast:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1139,14 +1139,14 @@ async def PubSubStreamingService_onStartServing_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStartServing:",
+            "Unexpected error in service handler PubSubStreamingService.onStartServing:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStartServing:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.onStartServing:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
@@ -1167,14 +1167,14 @@ async def PubSubStreamingService_onStopRequested_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler onStopRequested:",
+            "Unexpected error in service handler PubSubStreamingService.onStopRequested:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler onStopRequested:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler PubSubStreamingService.onStopRequested:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')

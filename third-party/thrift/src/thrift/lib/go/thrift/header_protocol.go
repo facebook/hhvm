@@ -22,16 +22,14 @@ import (
 
 type headerProtocol struct {
 	Format
-	origTransport Transport
-	trans         *headerTransport
+	trans *headerTransport
 
 	protoID ProtocolID
 }
 
 func NewHeaderProtocol(trans Transport) Protocol {
 	p := &headerProtocol{
-		origTransport: trans,
-		protoID:       ProtocolIDCompact,
+		protoID: ProtocolIDCompact,
 	}
 	if et, ok := trans.(*headerTransport); ok {
 		p.trans = et
@@ -111,7 +109,7 @@ func (p *headerProtocol) Skip(fieldType Type) (err error) {
 }
 
 func (p *headerProtocol) Close() error {
-	return p.origTransport.Close()
+	return p.trans.Close()
 }
 
 // Deprecated: SetSeqID() is a deprecated method.

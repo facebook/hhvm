@@ -9,7 +9,7 @@
 #pragma once
 
 #include <folly/Memory.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <memory>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/compress/HPACKHeader.h>

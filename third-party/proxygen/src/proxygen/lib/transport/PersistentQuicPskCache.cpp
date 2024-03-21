@@ -9,7 +9,7 @@
 #include <proxygen/lib/transport/PersistentQuicPskCache.h>
 
 #include <folly/Conv.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace {
 constexpr auto FIZZ_PSK = "psk";

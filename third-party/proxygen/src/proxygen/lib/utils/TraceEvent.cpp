@@ -9,7 +9,7 @@
 #include <proxygen/lib/utils/TraceEvent.h>
 
 #include <atomic>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <sstream>
 #include <string>
 

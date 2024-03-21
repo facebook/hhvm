@@ -10,7 +10,7 @@
 
 #include <algorithm>
 #include <folly/io/IOBuf.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <fstream>
 #include <glog/logging.h>
 #include <ios>

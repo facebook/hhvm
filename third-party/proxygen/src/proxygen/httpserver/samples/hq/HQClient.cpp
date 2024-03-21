@@ -16,7 +16,7 @@
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/H1QUpstreamSession.h>

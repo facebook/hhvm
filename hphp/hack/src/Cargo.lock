@@ -1272,7 +1272,7 @@ dependencies = [
 name = "delta_log"
 version = "0.0.0"
 dependencies = [
- "env_logger 0.10.0",
+ "env_logger 0.10.2",
  "once_cell",
 ]
 
@@ -1656,9 +1656,9 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.10.0"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
+checksum = "4cd405aab171cb85d6735e5c8d9db038c17d3ca007a4d2c25f337935c3d90580"
 dependencies = [
  "humantime",
  "is-terminal",
@@ -2067,7 +2067,7 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "elab",
- "env_logger 0.10.0",
+ "env_logger 0.10.2",
  "facts",
  "ffi",
  "file_provider",
@@ -2324,7 +2324,7 @@ name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
  "delta_log",
- "env_logger 0.10.0",
+ "env_logger 0.10.2",
  "hh_fanout_build",
  "ocamlrep_ocamlpool",
 ]
@@ -2334,7 +2334,7 @@ name = "hh_fanout_dep_graph_is_subgraph_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph_reader",
- "env_logger 0.10.0",
+ "env_logger 0.10.2",
  "log",
  "ocamlrep_ocamlpool",
 ]
@@ -2344,7 +2344,7 @@ name = "hh_fanout_dep_graph_stats_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph_reader",
- "env_logger 0.10.0",
+ "env_logger 0.10.2",
  "json",
  "log",
  "ocamlrep_ocamlpool",
@@ -2763,9 +2763,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.151"
+version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "302d7ab3130588088d277783b1e2d2e10c9e9e4a16dd9050e6ec93fb3e7048f4"
+checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 
 [[package]]
 name = "libsqlite3-sys"

@@ -1418,16 +1418,16 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const func = lookupImmutableFunc(name);
-  if (!func) {
+  auto const cachedFunc = lookupImmutableFunc(name);
+  if (!cachedFunc) {
     auto const func =
       gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
     emitModuleBoundaryCheck(env, func);
     push(env, func);
     return;
   }
-  emitModuleBoundaryCheckKnown(env, func);
-  push(env, cns(env, func));
+  emitModuleBoundaryCheckKnown(env, cachedFunc);
+  push(env, cns(env, cachedFunc));
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {

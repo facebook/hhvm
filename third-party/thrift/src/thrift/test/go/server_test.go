@@ -64,8 +64,6 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 	return server, taddr, nil
 }
 
-type transportFactory = func(socket *thrift.Socket) thrift.Transport
-
 // connectTestHeaderServer Create a client and connect to a test server
 func connectTestHeaderServer(
 	addr net.Addr,

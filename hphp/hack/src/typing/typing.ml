@@ -876,13 +876,14 @@ let rec set_function_pointer env ty =
     TUtils.make_supportdyn (get_reason ty) env ty1
   | _ -> (env, ty)
 
-let rec set_readonly_this pos env ty =
+(* Set the function type to be capturing readonly values only *)
+let rec set_capture_only_readonly pos env ty =
   match get_node ty with
   | Tfun ft ->
     let ft = set_ft_readonly_this ft true in
     (env, mk (get_reason ty, Tfun ft))
   | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
-    let (env, ty1) = set_readonly_this pos env ty1 in
+    let (env, ty1) = set_capture_only_readonly pos env ty1 in
     TUtils.make_supportdyn (get_reason ty) env ty1
   | _ -> (env, ty)
 
@@ -3437,7 +3438,11 @@ end = struct
               (Cls.tparams class_)
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt3;
-          let local_obj_fp = TUtils.default_fun_param local_obj_ty in
+          let local_obj_fp =
+            TUtils.default_fun_param
+              ~readonly:(get_ft_readonly_this ftype)
+              local_obj_ty
+          in
           let fty =
             { ftype with ft_params = local_obj_fp :: ftype.ft_params }
           in
@@ -3458,6 +3463,8 @@ end = struct
               reason
               caller
           in
+          (* The function type itself is readonly because we don't capture any values *)
+          let (env, ty) = set_capture_only_readonly pos env ty in
           let ty =
             make_function_ref
               ~contains_generics:(not (List.is_empty fty.ft_tparams))
@@ -3488,8 +3495,8 @@ end = struct
       in
       let env = Env.set_tyvar_variance env fpty in
       let (env, fpty) = set_function_pointer env fpty in
-      (* All function pointers are readonly_this since they are either toplevel or static *)
-      let (env, fpty) = set_readonly_this p env fpty in
+      (* All function pointers are readonly since they don't capture any values *)
+      let (env, fpty) = set_capture_only_readonly p env fpty in
       let fpty =
         make_function_ref
           ~contains_generics:(not (List.is_empty tal))
@@ -3781,8 +3788,8 @@ end = struct
       let (env, fty, targs) = fun_type_of_id env fid targs [] in
       let e = Aast.FunctionPointer (FP_id fid, targs) in
       let (env, fty) = set_function_pointer env fty in
-      (* All function pointers are readonly_this since they are always a toplevel function or static method *)
-      let (env, fty) = set_readonly_this p env fty in
+      (* All function pointers are readonly since they capture no values *)
+      let (env, fty) = set_capture_only_readonly p env fty in
       let fty =
         make_function_ref
           ~contains_generics:(not (List.is_empty targs))

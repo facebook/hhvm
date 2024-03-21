@@ -56,8 +56,13 @@ module Fun : sig
 
   val set_returns_readonly : bool -> t -> t
 
+  (** Does function captures only readonly values?
+   *  For methods: is the this parameter readonly?
+   *)
   val readonly_this : t -> bool
 
+  (** Mark the function type as capturing only readonly values,
+   *  or for method definitions, the this parameter is readonly *)
   val set_readonly_this : bool -> t -> t
 
   val support_dynamic_type : t -> bool

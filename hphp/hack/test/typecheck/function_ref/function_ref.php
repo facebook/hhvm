@@ -32,7 +32,7 @@ function acceptFunRef(
 ): void {
 }
 function acceptMethRef(
-  HH\FunctionRef<(function(C, arraykey): arraykey)> $f,
+  HH\FunctionRef<(readonly function(C, arraykey): arraykey)> $f,
 ): void {
 }
 function acceptFunRef2(

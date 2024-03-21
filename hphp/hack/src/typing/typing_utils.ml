@@ -644,7 +644,7 @@ let class_is_final_and_invariant class_ty =
 (* Function parameters *)
 (*****************************************************************************)
 
-let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
+let default_fun_param ~readonly ?(pos = Pos_or_decl.none) ty : 'a fun_param =
   {
     fp_pos = pos;
     fp_name = None;
@@ -654,7 +654,7 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~mode:FPnormal
         ~accept_disposable:false
         ~has_default:false
-        ~readonly:false;
+        ~readonly;
     fp_def_value = None;
   }
 

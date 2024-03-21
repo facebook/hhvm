@@ -38,8 +38,8 @@ File "function_ref.php", line 74, characters 17-18:
 Invalid argument (Typing[4110])
   File "function_ref.php", line 8, characters 19-22:
   Expected `dynamic` because method must be callable in a dynamic context
-  File "function_ref.php", line 35, characters 18-50:
-  Type `(function(C, arraykey): arraykey)` is not a subtype of `dynamic` under dynamic-aware subtyping
+  File "function_ref.php", line 35, characters 18-59:
+  Type `(readonly function(C, arraykey): arraykey)` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "function_ref.php", line 79, characters 16-19:
 Invalid argument (Typing[4110])
   File "function_ref.php", line 31, characters 3-57:
@@ -60,7 +60,7 @@ Invalid argument (Typing[4110])
   But got `(readonly function<T>($x): _)`
 File "function_ref.php", line 94, characters 17-19:
 Invalid argument (Typing[4110])
-  File "function_ref.php", line 35, characters 3-51:
-  Expected `HH\FunctionRef<(function(C, arraykey): arraykey)>`
+  File "function_ref.php", line 35, characters 3-60:
+  Expected `HH\FunctionRef<(readonly function(C, arraykey): arraykey)>`
   File "function_ref.php", line 14, characters 19-30:
-  But got `(function<T>(C, $x): _)`
+  But got `(readonly function<T>(C, $x): _)`

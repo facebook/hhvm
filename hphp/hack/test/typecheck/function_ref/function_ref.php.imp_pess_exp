@@ -54,7 +54,7 @@ Invalid argument (Typing[4110])
   But got `(readonly function<T>($x): ~_)`
 File "function_ref.php", line 94, characters 17-19:
 Invalid argument (Typing[4110])
-  File "function_ref.php", line 35, characters 3-51:
-  Expected `HH\FunctionRef<(function(C, arraykey): ~arraykey)>`
+  File "function_ref.php", line 35, characters 3-60:
+  Expected `HH\FunctionRef<(readonly function(C, arraykey): ~arraykey)>`
   File "function_ref.php", line 14, characters 19-30:
-  But got `(function<T>(C, $x): ~_)`
+  But got `(readonly function<T>(C, $x): ~_)`

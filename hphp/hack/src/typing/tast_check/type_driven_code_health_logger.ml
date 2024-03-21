@@ -25,7 +25,7 @@ let log pos kind =
     Hh_json.JSON_Object
       [
         ("kind", Hh_json.JSON_String (show_kind kind));
-        ("pos", Pos.json (Pos.to_relative_string pos));
+        ("pos", Pos.multiline_json (Pos.to_relative_string pos));
       ]
   in
   Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)

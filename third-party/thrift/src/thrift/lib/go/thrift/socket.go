@@ -177,13 +177,6 @@ func (p *Socket) Flush() error {
 	return nil
 }
 
-func (p *Socket) Interrupt() error {
-	if !p.IsOpen() {
-		return nil
-	}
-	return p.conn.Close()
-}
-
 func (p *Socket) RemainingBytes() uint64 {
 	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

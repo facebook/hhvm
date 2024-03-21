@@ -17,6 +17,8 @@ type kind =
   | EXPLICIT_DYNAMIC
   | TYPE_ASSERTION
   | UNSURFACED_EXCEPTION
+  | ALWAYS_FALSE_ASSERTION
+  | ALWAYS_FALSE_TYPE_TEST
 [@@deriving show { with_path = false }]
 
 let nPHPism_FIXME = "\\PHPism_FIXME"
@@ -30,6 +32,40 @@ let log pos kind =
       ]
   in
   Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)
+
+let nothing_ty = Typing_make_type.nothing Typing_reason.Rnone
+
+let replace_placeholders_with_tvars env ty =
+  let replace_placeholder env ty =
+    match T.get_node ty with
+    | T.Tgeneric (name, []) when String.contains name '#' ->
+      Typing_env.fresh_type env Pos.none
+    | _ -> (env, ty)
+  in
+  match T.get_node ty with
+  | T.Tclass (id, exact, targs) ->
+    let (env, targs) = List.fold_map ~f:replace_placeholder ~init:env targs in
+    (env, T.mk (Typing_reason.Rnone, T.Tclass (id, exact, targs)))
+  | _ -> (env, ty)
+
+let always_false pos kind env lhs_ty rhs_ty =
+  let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
+  let (env, rhs_ty) = Tast_env.expand_type env rhs_ty in
+  let tenv = Tast_env.tast_env_as_typing_env env in
+  let lhs_ty = Typing_utils.strip_dynamic tenv lhs_ty in
+  let rhs_ty = Typing_utils.strip_dynamic tenv rhs_ty in
+  let tenv = Typing_env.open_tyvars tenv Pos.none in
+  let (tenv, rhs_ty) = replace_placeholders_with_tvars tenv rhs_ty in
+  if Tast_env.is_sub_type env lhs_ty nothing_ty then
+    (* If we have a nothing in our hands, there was a bigger problem
+       originating from earlier in the program. Don't flag it here, as it is
+       merely a symptom. *)
+    ()
+  else
+    let env = Tast_env.typing_env_as_tast_env tenv in
+    let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
+    let (_env, rhs_ty) = Tast_env.expand_type env rhs_ty in
+    if Typing_utils.is_type_disjoint tenv lhs_ty rhs_ty then log pos kind
 
 let is_toplevelish_dynamic env (ty, hint_opt) =
   match hint_opt with
@@ -121,7 +157,7 @@ let create_handler _ctx =
     method! at_method_ env Aast.{ m_ret; m_params; _ } =
       log_callable_def env m_ret m_params
 
-    method! at_expr _env (_, pos, expr) =
+    method! at_expr env (_, pos, expr) =
       let log = log pos in
       match expr with
       | Aast.Hole (_, _, _, kind) -> begin
@@ -131,7 +167,20 @@ let create_handler _ctx =
         | Aast.UnsafeNonnullCast -> log UNSAFE_CAST
         | _ -> ()
       end
-      | Aast.As _ -> log TYPE_ASSERTION
+      | Aast.As
+          Aast.
+            {
+              expr = (lhs_ty, _, _);
+              hint;
+              is_nullable = false;
+              enforce_deep = _;
+            } ->
+        log TYPE_ASSERTION;
+        let (env, hint_ty) = Tast_env.localize_hint_for_refinement env hint in
+        always_false pos ALWAYS_FALSE_ASSERTION env lhs_ty hint_ty
+      | Aast.Is ((lhs_ty, _, _), hint) ->
+        let (env, hint_ty) = Tast_env.localize_hint_for_refinement env hint in
+        always_false pos ALWAYS_FALSE_TYPE_TEST env lhs_ty hint_ty
       | Aast.Call
           Aast.
             { func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, cid)), _)); _ }

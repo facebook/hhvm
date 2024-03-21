@@ -120,6 +120,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         emitter,
         env,
         return_type_info,
+        attributes,
         params,
         decl_vars,
         body_instrs,
@@ -129,10 +130,9 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     let mut flags = FunctionFlags::empty();
     flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let has_variadic = emit_param::has_variadic(&body.params);
-    let attrs = get_attrs_for_fun(emitter, fd, &attributes, false, has_variadic);
+    let attrs = get_attrs_for_fun(emitter, fd, &body.attributes, false, has_variadic);
 
     Ok(Function {
-        attributes: attributes.into(),
         name: original_id,
         body,
         coeffects,
@@ -372,6 +372,7 @@ fn make_wrapper_body<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: Env<'a>,
     return_type_info: TypeInfo,
+    attributes: Vec<Attribute>,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     body_instrs: InstrSeq,
@@ -385,6 +386,7 @@ fn make_wrapper_body<'a, 'd>(
         false,  /* is_memoize_wrapper_lsb */
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
+        attributes,
         params,
         Some(return_type_info),
         None, /* doc comment */

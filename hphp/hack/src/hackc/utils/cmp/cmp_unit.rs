@@ -127,6 +127,7 @@ fn cmp_attributes(a: &[Attribute], b: &[Attribute]) -> Result {
 
 fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
+        attributes: a_attributes,
         body_instrs: a_body_instrs,
         decl_vars: a_decl_vars,
         num_iters: a_num_iters,
@@ -141,6 +142,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         span: a_span,
     } = a;
     let Body {
+        attributes: b_attributes,
         body_instrs: b_body_instrs,
         decl_vars: b_decl_vars,
         num_iters: b_num_iters,
@@ -155,6 +157,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         span: b_span,
     } = b;
 
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
     cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
     cmp_eq(a_is_memoize_wrapper, b_is_memoize_wrapper).qualified("is_memoize_wrapper")?;
@@ -584,7 +587,6 @@ fn cmp_coeffects(a: &hhbc::Coeffects, b: &hhbc::Coeffects) -> Result {
 
 fn cmp_function(a: &Function, b: &Function) -> Result {
     let Function {
-        attributes: a_attributes,
         name: a_name,
         body: a_body,
         coeffects: a_coeffects,
@@ -592,7 +594,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
         attrs: a_attrs,
     } = a;
     let Function {
-        attributes: b_attributes,
         name: b_name,
         body: b_body,
         coeffects: b_coeffects,
@@ -601,7 +602,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
-    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_body(a_body, b_body).qualified("body")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
@@ -612,7 +612,6 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
 
 fn cmp_method(a: &Method, b: &Method) -> Result {
     let Method {
-        attributes: a_attributes,
         visibility: a_visibility,
         name: a_name,
         body: a_body,
@@ -621,7 +620,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         attrs: a_attrs,
     } = a;
     let Method {
-        attributes: b_attributes,
         visibility: b_visibility,
         name: b_name,
         body: b_body,
@@ -629,7 +627,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         flags: b_flags,
         attrs: b_attrs,
     } = b;
-    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;

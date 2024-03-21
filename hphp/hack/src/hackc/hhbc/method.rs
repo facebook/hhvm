@@ -4,11 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::Attribute;
 use crate::Body;
 use crate::Coeffects;
 use crate::MethodName;
@@ -17,7 +15,6 @@ use crate::Visibility;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Method {
-    pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
     pub name: MethodName,
     pub body: Body,

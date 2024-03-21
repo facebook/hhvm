@@ -16,6 +16,7 @@ use anyhow::Context;
 use anyhow::Result;
 use ffi::Maybe;
 use ffi::Vector;
+use hhbc::Attribute;
 use hhbc::BytesId;
 use hhbc::ClassName;
 use hhbc::ModuleName;
@@ -81,7 +82,7 @@ struct UnitBuilder {
     constant_refs: Option<Vec<hhbc::ConstName>>,
     constants: Vec<hhbc::Constant>,
     fatal: Option<hhbc::Fatal>,
-    file_attributes: Vec<hhbc::Attribute>,
+    file_attributes: Vec<Attribute>,
     func_refs: Option<Vec<hhbc::FunctionName>>,
     funcs: Vec<hhbc::Function>,
     include_refs: Option<Vec<hhbc::IncludePath>>,
@@ -253,7 +254,7 @@ fn assemble_module_use(token_iter: &mut Lexer<'_>) -> Result<ModuleName> {
 /// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
 fn assemble_file_attributes(
     token_iter: &mut Lexer<'_>,
-    file_attributes: &mut Vec<hhbc::Attribute>,
+    file_attributes: &mut Vec<Attribute>,
 ) -> Result<()> {
     parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(),*> "]" ";");
     file_attributes.extend(attrs);
@@ -459,6 +460,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     let (body, coeffects) = assemble_body(
         token_iter,
         &mut decl_map,
+        attributes,
         params,
         return_type_info,
         shadowed_tparams,
@@ -470,7 +472,6 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     let visibility =
         determine_visibility(&attrs).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
     let met = hhbc::Method {
-        attributes: attributes.into(),
         visibility,
         name,
         body,
@@ -1013,6 +1014,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
     let (body, coeffects) = assemble_body(
         token_iter,
         &mut decl_map,
+        attributes,
         params,
         return_type_info,
         shadowed_tparams,
@@ -1020,7 +1022,6 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
         span,
     )?;
     let hhas_func = hhbc::Function {
-        attributes: attributes.into(),
         name,
         body,
         coeffects,
@@ -1092,7 +1093,7 @@ fn assemble_upper_bound(token_iter: &mut Lexer<'_>) -> Result<hhbc::UpperBound> 
 /// Ex: [abstract final] This example lacks Attributes
 fn assemble_special_and_user_attrs(
     token_iter: &mut Lexer<'_>,
-) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute>)> {
+) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<Attribute>)> {
     let mut user_atts = Vec::new();
     let mut tr = hhvm_types_ffi::ffi::Attr::AttrNone;
     if token_iter.next_is(Token::is_open_bracket) {
@@ -1166,14 +1167,14 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
 
 /// Attributes are printed as follows:
 /// "name"("""v:args.len:{args}""") where args are typed values.
-fn assemble_user_attr(token_iter: &mut Lexer<'_>) -> Result<hhbc::Attribute> {
+fn assemble_user_attr(token_iter: &mut Lexer<'_>) -> Result<Attribute> {
     let nm = escaper::unescape_literal_bytes_into_vec_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
     token_iter.expect(Token::is_open_paren)?;
     let arguments = assemble_user_attr_args(token_iter)?;
     token_iter.expect(Token::is_close_paren)?;
-    Ok(hhbc::Attribute::new(std::str::from_utf8(&nm)?, arguments))
+    Ok(Attribute::new(std::str::from_utf8(&nm)?, arguments))
 }
 
 /// Printed as follows (print_attributes in bcp)
@@ -1336,6 +1337,7 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
 fn assemble_body(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
+    attributes: Vec<Attribute>,
     params: Vec<ParamEntry>,
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<StringId>,
@@ -1392,6 +1394,7 @@ fn assemble_body(
     token_iter.expect(Token::is_close_curly)?;
     let stack_depth = stack_depth::compute_stack_depth(&params, &instrs)?;
     let tr = hhbc::Body {
+        attributes: attributes.into(),
         body_instrs: instrs.into(),
         decl_vars: decl_vars.into(),
         num_iters,

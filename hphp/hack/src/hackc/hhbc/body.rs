@@ -7,6 +7,7 @@ use ffi::Maybe;
 use ffi::Vector;
 use serde::Serialize;
 
+use crate::Attribute;
 use crate::DefaultValue;
 use crate::Instruct;
 use crate::Param;
@@ -18,6 +19,7 @@ use crate::UpperBound;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Body {
+    pub attributes: Vector<Attribute>,
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Vector<Instruct>,
     pub decl_vars: Vector<StringId>,

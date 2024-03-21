@@ -24,13 +24,7 @@ use crate::types;
 pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let func = convert_body(
-        &src.body,
-        &src.attributes,
-        src.attrs,
-        &src.coeffects,
-        unit_state,
-    );
+    let func = convert_body(&src.body, src.attrs, &src.coeffects, unit_state);
     ir::verify::verify_func(&func, &Default::default());
 
     let function = ir::Function {
@@ -51,13 +45,7 @@ pub(crate) fn convert_method<'a>(
 ) {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let func = convert_body(
-        &src.body,
-        &src.attributes,
-        src.attrs,
-        &src.coeffects,
-        unit_state,
-    );
+    let func = convert_body(&src.body, src.attrs, &src.coeffects, unit_state);
     ir::verify::verify_func(&func, &Default::default());
 
     let method = ir::Method {
@@ -73,12 +61,12 @@ pub(crate) fn convert_method<'a>(
 /// Convert a hhbc::Body to an ir::Func
 fn convert_body<'a>(
     body: &Body,
-    attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
     coeffects: &hhbc::Coeffects,
     unit_state: &UnitState,
 ) -> ir::Func {
     let Body {
+        ref attributes,
         ref body_instrs,
         ref decl_vars,
         ref doc_comment,

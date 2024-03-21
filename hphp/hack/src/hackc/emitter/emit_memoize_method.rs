@@ -12,6 +12,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
+use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Coeffects;
 use hhbc::FCallArgs;
@@ -171,14 +172,14 @@ fn make_memoize_wrapper_method<'a, 'd>(
         info,
         method,
         scope: &scope,
-        deprecation_info: hhbc::deprecation_info(&attributes),
+        emit_deprecation_info: true,
         params: &method.params,
         ret,
         method_id: &name,
         flags: arg_flags,
     };
     let span = Span::from_pos(&method.span);
-    let body = emit_memoize_wrapper_body(emitter, env, &mut args, span)?;
+    let body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes)?;
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
@@ -186,7 +187,7 @@ fn make_memoize_wrapper_method<'a, 'd>(
     let attrs = get_attrs_for_method(
         emitter,
         method,
-        &attributes,
+        &body.attributes,
         &method.visibility,
         class,
         false,
@@ -194,7 +195,6 @@ fn make_memoize_wrapper_method<'a, 'd>(
     );
 
     Ok(Method {
-        attributes: attributes.into(),
         visibility: Visibility::from(method.visibility),
         name,
         body,
@@ -209,6 +209,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
     span: Span,
+    attributes: Vec<Attribute>,
 ) -> Result<Body> {
     let mut tparams: Vec<&str> = args
         .scope
@@ -224,7 +225,15 @@ fn emit_memoize_wrapper_body<'a, 'd>(
     let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
-    emit(emitter, env, hhas_params, return_type_info, span, args)
+    emit(
+        emitter,
+        env,
+        hhas_params,
+        return_type_info,
+        span,
+        attributes,
+        args,
+    )
 }
 
 fn emit<'a, 'd>(
@@ -233,10 +242,16 @@ fn emit<'a, 'd>(
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
     span: Span,
+    attributes: Vec<Attribute>,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     let pos = &args.method.span;
-    let (instrs, decl_vars) = make_memoize_method_code(emitter, env, pos, &hhas_params, args)?;
+    let depr_info = match args.emit_deprecation_info {
+        true => hhbc::deprecation_info(&attributes),
+        false => None,
+    };
+    let (instrs, decl_vars) =
+        make_memoize_method_code(emitter, env, pos, &hhas_params, args, depr_info)?;
     let instrs = emit_pos_then(pos, instrs);
     make_wrapper(
         emitter,
@@ -246,6 +261,7 @@ fn emit<'a, 'd>(
         decl_vars,
         return_type_info,
         span,
+        attributes,
         args,
     )
 }
@@ -256,14 +272,15 @@ fn make_memoize_method_code<'a, 'd>(
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
     {
-        make_memoize_method_no_params_code(emitter, args)
+        make_memoize_method_no_params_code(emitter, args, deprecation_info)
     } else {
-        make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
+        make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args, deprecation_info)
     }
 }
 
@@ -274,6 +291,7 @@ fn make_memoize_method_with_params_code<'a, 'd>(
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
@@ -298,7 +316,7 @@ fn make_memoize_method_with_params_code<'a, 'd>(
             .chain(decl_vars.iter().copied()),
     );
     let deprecation_body =
-        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
+        emit_body::emit_deprecation_info(args.scope, deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
@@ -420,12 +438,13 @@ fn make_memoize_method_with_params_code<'a, 'd>(
 fn make_memoize_method_no_params_code<'a, 'd>(
     emitter: &mut Emitter<'d>,
     args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
 ) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
     let deprecation_body =
-        emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
+        emit_body::emit_deprecation_info(args.scope, deprecation_info, emitter.systemlib())?;
 
     let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
@@ -515,6 +534,7 @@ fn make_wrapper<'a, 'd>(
     decl_vars: Vec<StringId>,
     return_type_info: TypeInfo,
     span: Span,
+    attributes: Vec<Attribute>,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     emit_body::make_body(
@@ -525,6 +545,7 @@ fn make_wrapper<'a, 'd>(
         args.flags.contains(Flags::WITH_LSB),
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
+        attributes,
         params,
         Some(return_type_info),
         None,
@@ -547,7 +568,7 @@ struct Args<'r, 'ast> {
     pub info: &'r MemoizeInfo,
     pub method: &'r ast::Method_,
     pub scope: &'r Scope<'ast>,
-    pub deprecation_info: Option<&'r [TypedValue]>,
+    pub emit_deprecation_info: bool,
     pub params: &'r [ast::FunParam],
     pub ret: Option<&'r ast::Hint>,
     pub method_id: &'r hhbc::MethodName,

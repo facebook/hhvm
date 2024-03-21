@@ -1226,7 +1226,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   }
 
   UserAttributeMap userAttrs;
-  translateUserAttributes(f.attributes, userAttrs);
+  translateUserAttributes(f.body.attributes, userAttrs);
 
   Attr attrs = f.attrs;
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
@@ -1286,7 +1286,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   ts.fe->isClosureBody = (bool)(m.flags & hhbc::MethodFlags_IS_CLOSURE_BODY);
 
   UserAttributeMap userAttrs;
-  translateUserAttributes(m.attributes, userAttrs);
+  translateUserAttributes(m.body.attributes, userAttrs);
   ts.fe->userAttributes = userAttrs;
 
   translateCoeffects(ts, m.coeffects);

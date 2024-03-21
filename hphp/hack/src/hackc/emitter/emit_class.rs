@@ -99,7 +99,6 @@ fn make_86method<'d>(
     attrs.set(Attr::AttrPersistent, emitter.systemlib());
     attrs.add(Attr::from(visibility));
 
-    let attributes = vec![];
     let flags = MethodFlags::empty();
     let method_decl_vars = vec![];
     let method_return_type = None;
@@ -114,8 +113,9 @@ fn make_86method<'d>(
         method_decl_vars,
         method_is_memoize_wrapper,
         method_is_memoize_wrapper_lsb,
-        vec![],
-        vec![],
+        vec![], // upper_bounds
+        vec![], // shadowed_tparams
+        vec![], // attributes
         params.into_iter().map(|p| (p, None)).collect::<Vec<_>>(),
         method_return_type,
         method_doc_comment,
@@ -125,7 +125,6 @@ fn make_86method<'d>(
 
     Ok(Method {
         body,
-        attributes: attributes.into(),
         name,
         flags,
         coeffects,

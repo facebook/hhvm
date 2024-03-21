@@ -60,6 +60,7 @@ fn emit_constant_cinit<'a, 'd>(
             false,  /* is_memoize_wrapper_lsb */
             vec![], /* upper_bounds */
             vec![], /* shadowed_params */
+            vec![], /* attributes */
             vec![], /* params */
             return_type_info,
             None, /* doc_comment */
@@ -71,7 +72,6 @@ fn emit_constant_cinit<'a, 'd>(
         attrs.set(Attr::AttrBuiltin, e.systemlib());
 
         Ok(Function {
-            attributes: Default::default(),
             name: original_name,
             body,
             coeffects: Coeffects::default(),

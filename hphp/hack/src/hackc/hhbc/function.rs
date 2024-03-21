@@ -4,11 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::Attribute;
 use crate::Body;
 use crate::Coeffects;
 use crate::FunctionName;
@@ -17,7 +15,6 @@ use crate::ParamEntry;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Function {
-    pub attributes: Vector<Attribute>,
     pub name: FunctionName,
     pub body: Body,
 

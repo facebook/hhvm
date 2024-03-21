@@ -147,11 +147,6 @@ pub fn from_ast<'a, 'd>(
     } else {
         method.visibility
     };
-    let deprecation_info = if is_memoize {
-        None
-    } else {
-        hhbc::deprecation_info(&attributes)
-    };
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal::emit_fatal_runtimeomitframe(
             &method.name.0,
@@ -232,6 +227,7 @@ pub fn from_ast<'a, 'd>(
                 &class.user_attributes,
                 &method.name,
                 &method.params,
+                attributes,
                 method.ret.1.as_ref(),
             )?,
             false,
@@ -263,13 +259,14 @@ pub fn from_ast<'a, 'd>(
             instr::null(),
             scope,
             Span::from_pos(&method.span),
+            attributes,
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 class_tparam_names: class_tparam_names.as_slice(),
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),
                 pos: &method.span,
-                deprecation_info,
+                emit_deprecation_info: !is_memoize,
                 doc_comment: method.doc_comment.clone(),
                 default_dropthrough,
                 call_context,
@@ -297,14 +294,13 @@ pub fn from_ast<'a, 'd>(
     let attrs = get_attrs_for_method(
         emitter,
         method,
-        &attributes,
+        &body.attributes,
         &visibility,
         class,
         is_memoize,
         has_variadic,
     );
     Ok(Method {
-        attributes: attributes.into(),
         visibility: Visibility::from(visibility),
         name,
         body,

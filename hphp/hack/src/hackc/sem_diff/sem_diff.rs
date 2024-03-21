@@ -182,6 +182,7 @@ fn sem_diff_body<'a>(
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Body {
+        attributes: a_attributes,
         body_instrs: _,
         decl_vars: _,
         num_iters: a_num_iters,
@@ -196,6 +197,7 @@ fn sem_diff_body<'a>(
         span: a_span,
     } = a;
     let Body {
+        attributes: b_attributes,
         body_instrs: _,
         decl_vars: _,
         num_iters: b_num_iters,
@@ -210,6 +212,7 @@ fn sem_diff_body<'a>(
         span: b_span,
     } = b;
 
+    sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("num_iters"), a_num_iters, b_num_iters)?;
     sem_diff_slice(
         &path.qualified("params"),
@@ -518,7 +521,6 @@ fn sem_diff_function<'a>(
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Function {
-        attributes: a_attributes,
         name: a_name,
         body: a_body,
         coeffects: a_coeffects,
@@ -526,7 +528,6 @@ fn sem_diff_function<'a>(
         attrs: a_attrs,
     } = a;
     let Function {
-        attributes: b_attributes,
         name: b_name,
         body: b_body,
         coeffects: b_coeffects,
@@ -535,7 +536,6 @@ fn sem_diff_function<'a>(
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
@@ -552,7 +552,6 @@ fn sem_diff_method<'a>(
     b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Method {
-        attributes: a_attributes,
         visibility: a_visibility,
         name: a_name,
         body: a_body,
@@ -561,7 +560,6 @@ fn sem_diff_method<'a>(
         attrs: a_attrs,
     } = a;
     let Method {
-        attributes: b_attributes,
         visibility: b_visibility,
         name: b_name,
         body: b_body,
@@ -569,7 +567,6 @@ fn sem_diff_method<'a>(
         flags: b_flags,
         attrs: b_attrs,
     } = b;
-    sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;

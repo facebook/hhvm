@@ -15,6 +15,7 @@ use error::Error;
 use error::Result;
 use ffi::Maybe::*;
 use hash::HashSet;
+use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::ClassName;
 use hhbc::FCallArgs;
@@ -59,7 +60,7 @@ pub struct Args<'a> {
     pub ast_params: &'a [ast::FunParam],
     pub ret: Option<&'a ast::Hint>,
     pub pos: &'a Pos,
-    pub deprecation_info: Option<&'a [TypedValue]>,
+    pub emit_deprecation_info: bool,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub call_context: Option<StringId>,
@@ -86,6 +87,7 @@ pub fn emit_body<'b, 'd>(
     return_value: InstrSeq,
     scope: Scope<'_>,
     span: Span,
+    attributes: Vec<Attribute>,
     args: Args<'_>,
 ) -> Result<(Body, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
@@ -144,6 +146,11 @@ pub fn emit_body<'b, 'd>(
     emitter.init_named_locals(
         (params.iter().map(|(param, _)| param.name)).chain(decl_vars.iter().copied()),
     );
+    let deprecation_info = if args.emit_deprecation_info {
+        hhbc::deprecation_info(&attributes)
+    } else {
+        None
+    };
     let body_instrs = make_body_instrs(
         emitter,
         &mut env,
@@ -151,7 +158,7 @@ pub fn emit_body<'b, 'd>(
         &tparams,
         body,
         is_generator,
-        args.deprecation_info.clone(),
+        deprecation_info,
         args.pos,
         args.ast_params,
         args.flags,
@@ -165,6 +172,7 @@ pub fn emit_body<'b, 'd>(
             false, // is_memoize_wrapper_lsb
             upper_bounds,
             shadowed_tparams,
+            attributes,
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
@@ -354,6 +362,7 @@ pub fn make_body<'a, 'd>(
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<UpperBound>,
     shadowed_tparams: Vec<String>,
+    attributes: Vec<Attribute>,
     mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
@@ -408,6 +417,7 @@ pub fn make_body<'a, 'd>(
         .map_err(error::Error::from_error)?;
 
     Ok(Body {
+        attributes: attributes.into(),
         body_instrs: body_instrs.into(),
         decl_vars: decl_vars.into(),
         num_iters,

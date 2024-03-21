@@ -303,7 +303,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Re
     print_special_and_user_attrs(
         ctx,
         w,
-        fun_def.attributes.as_ref(),
+        body.attributes.as_ref(),
         &AttrContext::Func,
         &fun_def.attrs,
     )?;
@@ -511,7 +511,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -
     print_special_and_user_attrs(
         ctx,
         w,
-        method_def.attributes.as_ref(),
+        body.attributes.as_ref(),
         &AttrContext::Func,
         &method_def.attrs,
     )?;

@@ -75,8 +75,10 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let body_instrs = body_instrs.to_vec();
     let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs).unwrap();
+    let attributes = std::mem::take(&mut func.attributes).into();
 
     hhbc::Body {
+        attributes,
         body_instrs: body_instrs.into(),
         decl_vars: decl_vars.into(),
         doc_comment,
@@ -92,14 +94,12 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     }
 }
 
-pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Function) {
+pub(crate) fn convert_function(unit: &mut UnitBuilder, function: ir::Function) {
     trace!("convert_function {}", function.name);
-    let attributes = std::mem::take(&mut function.func.attributes).into();
     let attrs = function.func.attrs;
     let coeffects = convert_coeffects(&function.func.coeffects);
     let body = convert_func(function.func, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
-        attributes,
         body,
         coeffects,
         flags: function.flags,
@@ -109,14 +109,12 @@ pub(crate) fn convert_function(unit: &mut UnitBuilder, mut function: ir::Functio
     unit.functions.push(hhas_func);
 }
 
-pub(crate) fn convert_method(mut method: ir::Method, adata: &mut AdataState) -> Method {
+pub(crate) fn convert_method(method: ir::Method, adata: &mut AdataState) -> Method {
     trace!("convert_method {}", method.name);
     let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
-    let attributes = std::mem::take(&mut method.func.attributes).into();
     let body = convert_func(method.func, adata);
     hhbc::Method {
-        attributes,
         name: method.name,
         body,
         coeffects,

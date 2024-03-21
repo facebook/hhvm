@@ -100,10 +100,19 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     {
         coeffects = coeffects.with_backdoor_globals_leak_safe()
     }
-    let ast_body = &f.body.fb_ast;
-    let deprecation_info = hhbc::deprecation_info(&user_attrs);
+    let memoize_wrapper = if memoized {
+        let deprecation_info = hhbc::deprecation_info(&user_attrs);
+        Some(emit_memoize_function::emit_wrapper_function(
+            e,
+            original_id,
+            renamed_id,
+            deprecation_info,
+            fd,
+        )?)
+    } else {
+        None
+    };
     let (body, is_gen, is_pair_gen) = {
-        let deprecation_info = if memoized { None } else { deprecation_info };
         let native = user_attrs.iter().any(|a| ua::is_native(a.name.as_str()));
         use emit_body::Args as EmitBodyArgs;
         use emit_body::Flags as EmitBodyFlags;
@@ -123,13 +132,14 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
         emit_body::emit_body(
             e,
             Arc::clone(&fd.namespace),
-            ast_body,
+            &f.body.fb_ast,
             instr::null(),
             scope,
             Span::from_pos(&f.span),
+            user_attrs,
             EmitBodyArgs {
                 flags: body_flags,
-                deprecation_info,
+                emit_deprecation_info: !memoized,
                 default_dropthrough: None,
                 doc_comment: f.doc_comment.clone(),
                 pos: &f.span,
@@ -143,22 +153,10 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     };
     flags.set(FunctionFlags::GENERATOR, is_gen);
     flags.set(FunctionFlags::PAIR_GENERATOR, is_pair_gen);
-    let memoize_wrapper = if memoized {
-        Some(emit_memoize_function::emit_wrapper_function(
-            e,
-            original_id,
-            renamed_id,
-            deprecation_info,
-            fd,
-        )?)
-    } else {
-        None
-    };
     let has_variadic = emit_param::has_variadic(&body.params);
     let attrs =
-        emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized, has_variadic);
+        emit_memoize_function::get_attrs_for_fun(e, fd, &body.attributes, memoized, has_variadic);
     let normal_function = Function {
-        attributes: user_attrs.into(),
         name: renamed_id,
         coeffects,
         body,

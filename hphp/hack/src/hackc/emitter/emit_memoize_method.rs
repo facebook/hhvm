@@ -12,6 +12,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
+use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Coeffects;
@@ -179,12 +180,12 @@ fn make_memoize_wrapper_method<'a, 'd>(
         flags: arg_flags,
     };
     let span = Span::from_pos(&method.span);
-    let body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes)?;
+    let mut body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes)?;
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
     let has_variadic = emit_param::has_variadic(&body.params);
-    let attrs = get_attrs_for_method(
+    body.attrs = get_attrs_for_method(
         emitter,
         method,
         &body.attributes,
@@ -193,14 +194,12 @@ fn make_memoize_wrapper_method<'a, 'd>(
         false,
         has_variadic,
     );
-
     Ok(Method {
         visibility: Visibility::from(method.visibility),
         name,
         body,
         coeffects,
         flags,
-        attrs,
     })
 }
 
@@ -546,6 +545,7 @@ fn make_wrapper<'a, 'd>(
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
         attributes,
+        Attr::AttrNone,
         params,
         Some(return_type_info),
         None,

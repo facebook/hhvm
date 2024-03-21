@@ -265,7 +265,7 @@ fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef) -> Result<(
         w,
         td.attributes.as_ref(),
         &AttrContext::Alias,
-        &td.attrs,
+        td.attrs,
     )?;
     w.write_all(td.name.as_bstr())?;
     w.write_all(b" = ")?;
@@ -305,7 +305,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Re
         w,
         body.attributes.as_ref(),
         &AttrContext::Func,
-        &fun_def.attrs,
+        body.attrs,
     )?;
     print_span(w, &body.span)?;
     w.write_all(b" ")?;
@@ -413,7 +413,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> 
         w,
         property.attributes.as_ref(),
         &AttrContext::Prop,
-        &property.flags,
+        property.flags,
     )?;
     print_property_doc_comment(w, property)?;
     print_property_type_info(w, property)?;
@@ -434,7 +434,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> 
 fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
-    print_special_and_user_attrs(ctx, w, &[], &AttrContext::Constant, &c.attrs)?;
+    print_special_and_user_attrs(ctx, w, &[], &AttrContext::Constant, c.attrs)?;
     w.write_all(c.name.as_bstr())?;
     match c.value.as_ref() {
         Just(TypedValue::Uninit) => w.write_all(b" = uninit")?,
@@ -513,7 +513,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -
         w,
         body.attributes.as_ref(),
         &AttrContext::Func,
-        &method_def.attrs,
+        body.attrs,
     )?;
     print_span(w, &body.span)?;
     w.write_all(b" ")?;
@@ -556,7 +556,7 @@ fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class) -> R
         w,
         class_def.attributes.as_ref(),
         &AttrContext::Class,
-        &class_def.flags,
+        class_def.flags,
     )?;
     w.write_all(class_def.name.as_bstr())?;
     w.write_all(b" ")?;
@@ -645,7 +645,7 @@ fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -
         w,
         module_def.attributes.as_ref(),
         &AttrContext::Module,
-        &Attr::AttrNone,
+        Attr::AttrNone,
     )?;
     w.write_all(module_def.name.as_bstr())?;
     w.write_all(b" ")?;
@@ -1044,11 +1044,11 @@ fn print_special_and_user_attrs(
     w: &mut dyn Write,
     users: &[Attribute],
     attr_ctx: &AttrContext,
-    attrs: &Attr,
+    attrs: Attr,
 ) -> Result<()> {
     if !users.is_empty() || !attrs.is_empty() {
         square(w, |w| {
-            write!(w, "{}", attrs_to_string_ffi(*attr_ctx, *attrs))?;
+            write!(w, "{}", attrs_to_string_ffi(*attr_ctx, attrs))?;
             if !users.is_empty() {
                 w.write_all(b" ")?;
             }

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::Body;
@@ -20,7 +19,6 @@ pub struct Function {
 
     pub coeffects: Coeffects,
     pub flags: FunctionFlags,
-    pub attrs: Attr,
 }
 
 bitflags! {

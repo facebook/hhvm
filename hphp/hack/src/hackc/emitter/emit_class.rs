@@ -116,6 +116,7 @@ fn make_86method<'d>(
         vec![], // upper_bounds
         vec![], // shadowed_tparams
         vec![], // attributes
+        attrs,
         params.into_iter().map(|p| (p, None)).collect::<Vec<_>>(),
         method_return_type,
         method_doc_comment,
@@ -129,7 +130,6 @@ fn make_86method<'d>(
         flags,
         coeffects,
         visibility,
-        attrs,
     })
 }
 

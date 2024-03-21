@@ -8,6 +8,7 @@ use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use error::Result;
+use hhbc::Attr;
 use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::Function;
@@ -112,7 +113,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     } else {
         None
     };
-    let (body, is_gen, is_pair_gen) = {
+    let (mut body, is_gen, is_pair_gen) = {
         let native = user_attrs.iter().any(|a| ua::is_native(a.name.as_str()));
         use emit_body::Args as EmitBodyArgs;
         use emit_body::Flags as EmitBodyFlags;
@@ -137,6 +138,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
             scope,
             Span::from_pos(&f.span),
             user_attrs,
+            Attr::AttrNone,
             EmitBodyArgs {
                 flags: body_flags,
                 emit_deprecation_info: !memoized,
@@ -154,14 +156,13 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     flags.set(FunctionFlags::GENERATOR, is_gen);
     flags.set(FunctionFlags::PAIR_GENERATOR, is_pair_gen);
     let has_variadic = emit_param::has_variadic(&body.params);
-    let attrs =
+    body.attrs =
         emit_memoize_function::get_attrs_for_fun(e, fd, &body.attributes, memoized, has_variadic);
     let normal_function = Function {
         name: renamed_id,
         coeffects,
         body,
         flags,
-        attrs,
     };
 
     Ok(if let Some(memoize_wrapper) = memoize_wrapper {

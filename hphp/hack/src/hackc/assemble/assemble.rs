@@ -461,6 +461,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
         token_iter,
         &mut decl_map,
         attributes,
+        attrs,
         params,
         return_type_info,
         shadowed_tparams,
@@ -477,7 +478,6 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
         body,
         coeffects,
         flags,
-        attrs,
     };
     Ok(met)
 }
@@ -997,7 +997,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
     token_iter.expect_str(Token::is_decl, ".function")?;
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
-    let (attr, attributes) = assemble_special_and_user_attrs(token_iter)?;
+    let (attrs, attributes) = assemble_special_and_user_attrs(token_iter)?;
     let span = assemble_span(token_iter)?;
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
@@ -1015,6 +1015,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
         token_iter,
         &mut decl_map,
         attributes,
+        attrs,
         params,
         return_type_info,
         shadowed_tparams,
@@ -1026,7 +1027,6 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
         body,
         coeffects,
         flags,
-        attrs: attr,
     };
     Ok(hhas_func)
 }
@@ -1338,6 +1338,7 @@ fn assemble_body(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap,
     attributes: Vec<Attribute>,
+    attrs: hhbc::Attr,
     params: Vec<ParamEntry>,
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<StringId>,
@@ -1395,6 +1396,7 @@ fn assemble_body(
     let stack_depth = stack_depth::compute_stack_depth(&params, &instrs)?;
     let tr = hhbc::Body {
         attributes: attributes.into(),
+        attrs,
         body_instrs: instrs.into(),
         decl_vars: decl_vars.into(),
         num_iters,

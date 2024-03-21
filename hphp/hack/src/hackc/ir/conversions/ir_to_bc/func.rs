@@ -79,6 +79,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     hhbc::Body {
         attributes,
+        attrs: func.attrs,
         body_instrs: body_instrs.into(),
         decl_vars: decl_vars.into(),
         doc_comment,
@@ -96,7 +97,6 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
 pub(crate) fn convert_function(unit: &mut UnitBuilder, function: ir::Function) {
     trace!("convert_function {}", function.name);
-    let attrs = function.func.attrs;
     let coeffects = convert_coeffects(&function.func.coeffects);
     let body = convert_func(function.func, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
@@ -104,14 +104,12 @@ pub(crate) fn convert_function(unit: &mut UnitBuilder, function: ir::Function) {
         coeffects,
         flags: function.flags,
         name: function.name,
-        attrs,
     };
     unit.functions.push(hhas_func);
 }
 
 pub(crate) fn convert_method(method: ir::Method, adata: &mut AdataState) -> Method {
     trace!("convert_method {}", method.name);
-    let attrs = method.func.attrs;
     let coeffects = convert_coeffects(&method.func.coeffects);
     let body = convert_func(method.func, adata);
     hhbc::Method {
@@ -120,7 +118,6 @@ pub(crate) fn convert_method(method: ir::Method, adata: &mut AdataState) -> Meth
         coeffects,
         flags: method.flags,
         visibility: method.visibility,
-        attrs,
     }
 }
 

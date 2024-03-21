@@ -128,6 +128,7 @@ fn cmp_attributes(a: &[Attribute], b: &[Attribute]) -> Result {
 fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
         attributes: a_attributes,
+        attrs: a_attrs,
         body_instrs: a_body_instrs,
         decl_vars: a_decl_vars,
         num_iters: a_num_iters,
@@ -143,6 +144,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     } = a;
     let Body {
         attributes: b_attributes,
+        attrs: b_attrs,
         body_instrs: b_body_instrs,
         decl_vars: b_decl_vars,
         num_iters: b_num_iters,
@@ -158,6 +160,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     } = b;
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
+    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
     cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
     cmp_eq(a_is_memoize_wrapper, b_is_memoize_wrapper).qualified("is_memoize_wrapper")?;
@@ -591,22 +594,18 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
         body: a_body,
         coeffects: a_coeffects,
         flags: a_flags,
-        attrs: a_attrs,
     } = a;
     let Function {
         name: b_name,
         body: b_body,
         coeffects: b_coeffects,
         flags: b_flags,
-        attrs: b_attrs,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
-
     Ok(())
 }
 
@@ -617,7 +616,6 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         body: a_body,
         coeffects: a_coeffects,
         flags: a_flags,
-        attrs: a_attrs,
     } = a;
     let Method {
         visibility: b_visibility,
@@ -625,14 +623,12 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         body: b_body,
         coeffects: b_coeffects,
         flags: b_flags,
-        attrs: b_attrs,
     } = b;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
     cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())
 }
 

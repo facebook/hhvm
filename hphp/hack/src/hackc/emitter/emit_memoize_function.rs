@@ -116,7 +116,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         should_make_ic_inaccessible,
     )?;
     let coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
-    let body = make_wrapper_body(
+    let mut body = make_wrapper_body(
         emitter,
         env,
         return_type_info,
@@ -130,14 +130,12 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     let mut flags = FunctionFlags::empty();
     flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let has_variadic = emit_param::has_variadic(&body.params);
-    let attrs = get_attrs_for_fun(emitter, fd, &body.attributes, false, has_variadic);
-
+    body.attrs = get_attrs_for_fun(emitter, fd, &body.attributes, false, has_variadic);
     Ok(Function {
         name: original_id,
         body,
         coeffects,
         flags,
-        attrs,
     })
 }
 
@@ -387,6 +385,7 @@ fn make_wrapper_body<'a, 'd>(
         vec![], /* upper_bounds */
         vec![], /* shadowed_tparams */
         attributes,
+        Attr::AttrNone,
         params,
         Some(return_type_info),
         None, /* doc comment */

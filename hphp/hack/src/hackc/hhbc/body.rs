@@ -5,6 +5,7 @@
 
 use ffi::Maybe;
 use ffi::Vector;
+pub use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::Attribute;
@@ -20,6 +21,7 @@ use crate::UpperBound;
 #[repr(C)]
 pub struct Body {
     pub attributes: Vector<Attribute>,
+    pub attrs: Attr,
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Vector<Instruct>,
     pub decl_vars: Vector<StringId>,

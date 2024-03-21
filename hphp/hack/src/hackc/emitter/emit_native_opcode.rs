@@ -7,6 +7,7 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Maybe;
+use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Local;
@@ -28,6 +29,7 @@ pub fn emit_body<'a, 'd>(
     name: &ast::Sid,
     params: &[ast::FunParam],
     attributes: Vec<Attribute>,
+    attrs: Attr,
     ret: Option<&aast::Hint>,
 ) -> Result<Body> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs);
@@ -52,6 +54,7 @@ pub fn emit_body<'a, 'd>(
 
                 Ok(Body {
                     attributes: attributes.into(),
+                    attrs,
                     body_instrs: body_instrs.into(),
                     params: params.into(),
                     return_type_info: Maybe::Just(rti),

@@ -1228,7 +1228,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   UserAttributeMap userAttrs;
   translateUserAttributes(f.body.attributes, userAttrs);
 
-  Attr attrs = f.attrs;
+  Attr attrs = f.body.attrs;
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
 
   auto const name = toStaticString(f.name._0);
@@ -1274,7 +1274,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   TParamNameVec shadowedTParams;
   translateShadowedTParams(shadowedTParams, m.body.shadowed_tparams);
 
-  Attr attrs = m.attrs;
+  Attr attrs = m.body.attrs;
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
   auto const name = toStaticString(m.name._0);
   ts.fe = ts.ue->newMethodEmitter(name, ts.pce);

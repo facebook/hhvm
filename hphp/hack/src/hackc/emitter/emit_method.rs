@@ -218,7 +218,7 @@ pub fn from_ast<'a, 'd>(
         }
     }
     let ast_body_block = &method.body.fb_ast;
-    let (body, is_generator, is_pair_generator) = if is_native_opcode_impl {
+    let (mut body, is_generator, is_pair_generator) = if is_native_opcode_impl {
         (
             emit_native_opcode::emit_body(
                 emitter,
@@ -228,6 +228,7 @@ pub fn from_ast<'a, 'd>(
                 &method.name,
                 &method.params,
                 attributes,
+                Attr::AttrNone,
                 method.ret.1.as_ref(),
             )?,
             false,
@@ -260,6 +261,7 @@ pub fn from_ast<'a, 'd>(
             scope,
             Span::from_pos(&method.span),
             attributes,
+            Attr::AttrNone,
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 class_tparam_names: class_tparam_names.as_slice(),
@@ -291,7 +293,7 @@ pub fn from_ast<'a, 'd>(
     flags.set(MethodFlags::IS_CLOSURE_BODY, is_closure_body);
 
     let has_variadic = emit_param::has_variadic(&body.params);
-    let attrs = get_attrs_for_method(
+    body.attrs = get_attrs_for_method(
         emitter,
         method,
         &body.attributes,
@@ -306,6 +308,5 @@ pub fn from_ast<'a, 'd>(
         body,
         coeffects,
         flags,
-        attrs,
     })
 }

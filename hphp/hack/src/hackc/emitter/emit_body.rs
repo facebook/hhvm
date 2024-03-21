@@ -15,6 +15,7 @@ use error::Error;
 use error::Result;
 use ffi::Maybe::*;
 use hash::HashSet;
+use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::ClassName;
@@ -88,6 +89,7 @@ pub fn emit_body<'b, 'd>(
     scope: Scope<'_>,
     span: Span,
     attributes: Vec<Attribute>,
+    attrs: Attr,
     args: Args<'_>,
 ) -> Result<(Body, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
@@ -173,6 +175,7 @@ pub fn emit_body<'b, 'd>(
             upper_bounds,
             shadowed_tparams,
             attributes,
+            attrs,
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
@@ -363,6 +366,7 @@ pub fn make_body<'a, 'd>(
     upper_bounds: Vec<UpperBound>,
     shadowed_tparams: Vec<String>,
     attributes: Vec<Attribute>,
+    attrs: Attr,
     mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
@@ -418,6 +422,7 @@ pub fn make_body<'a, 'd>(
 
     Ok(Body {
         attributes: attributes.into(),
+        attrs,
         body_instrs: body_instrs.into(),
         decl_vars: decl_vars.into(),
         num_iters,

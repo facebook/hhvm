@@ -52,6 +52,9 @@ fn emit_constant_cinit<'a, 'd>(
             Some(_) => instr::verify_ret_type_c(),
         };
         let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::ret_c()]);
+        let mut attrs = Attr::AttrNoInjection;
+        attrs.set(Attr::AttrPersistent, e.systemlib());
+        attrs.set(Attr::AttrBuiltin, e.systemlib());
         let body = emit_body::make_body(
             e,
             instrs,
@@ -61,22 +64,19 @@ fn emit_constant_cinit<'a, 'd>(
             vec![], /* upper_bounds */
             vec![], /* shadowed_params */
             vec![], /* attributes */
+            attrs,
             vec![], /* params */
             return_type_info,
             None, /* doc_comment */
             Some(env),
             Span::from_pos(&constant.span),
         )?;
-        let mut attrs = Attr::AttrNoInjection;
-        attrs.set(Attr::AttrPersistent, e.systemlib());
-        attrs.set(Attr::AttrBuiltin, e.systemlib());
 
         Ok(Function {
             name: original_name,
             body,
             coeffects: Coeffects::default(),
             flags: FunctionFlags::empty(),
-            attrs,
         })
     })
     .transpose()

@@ -18,15 +18,26 @@ package thrift
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"net"
 
+	rsocket "github.com/rsocket/rsocket-go"
+	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
 	"github.com/rsocket/rsocket-go/rx"
 )
 
 type rocketProtocol struct {
 	Format
-	trans        *rocketTransport
+
+	socket rocketSocket
+
+	// rsocket client state
+	ctx    context.Context
+	cancel func()
+	client rsocket.Client
+
 	responseChan chan payload.Payload
 	errChan      chan error
 
@@ -40,6 +51,15 @@ type rocketProtocol struct {
 	buf *MemoryBuffer
 }
 
+// rocketSocket is a minimal interface for thrift.Socket
+type rocketSocket interface {
+	Conn() net.Conn
+	IsOpen() bool
+	Open() error
+	Close() error
+	Flush() error
+}
+
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
 func NewRocketProtocol(trans Transport) Protocol {
 	p := &rocketProtocol{
@@ -49,7 +69,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 	}
 	switch t := trans.(type) {
 	case rocketSocket:
-		p.trans = newRocketTransport(t)
+		p.socket = t
 	default:
 		panic(NewTransportException(
 			NOT_IMPLEMENTED,
@@ -126,12 +146,10 @@ func (p *rocketProtocol) Flush() (err error) {
 	request := payload.New(dataBytes, metadataBytes)
 	p.responseChan = make(chan payload.Payload, 1)
 	p.errChan = make(chan error, 1)
-	if !p.trans.IsOpen() {
-		if err := p.trans.Open(); err != nil {
-			return err
-		}
+	if err := p.open(); err != nil {
+		return err
 	}
-	p.trans.client.RequestResponse(request).Subscribe(p.trans.ctx, rx.OnNext(
+	p.client.RequestResponse(request).Subscribe(p.ctx, rx.OnNext(
 		func(response payload.Payload) error {
 			metadata, _ := response.Metadata()
 			data := response.Data()
@@ -148,7 +166,34 @@ func (p *rocketProtocol) Flush() (err error) {
 		}))
 
 	p.buf.Reset()
-	return NewProtocolException(p.trans.Flush())
+
+	return NewProtocolException(p.socket.Flush())
+}
+
+// Open opens the internal transport (required for Transport)
+func (p *rocketProtocol) open() error {
+	if !p.socket.IsOpen() {
+		if err := p.socket.Open(); err != nil {
+			return err
+		}
+	}
+	if p.client != nil {
+		return nil
+	}
+	conn := p.socket.Conn()
+	setupPayload, err := newRequestSetupPayloadVersion8()
+	if err != nil {
+		return err
+	}
+	transporter := func(ctx context.Context) (*transport.Transport, error) {
+		return transport.NewTCPClientTransport(conn), nil
+	}
+	p.ctx, p.cancel = context.WithCancel(context.Background())
+	p.client, err = rsocket.Connect().
+		SetupPayload(setupPayload).
+		Transport(transporter).
+		Start(p.ctx)
+	return err
 }
 
 func (p *rocketProtocol) readPayload() (resp payload.Payload, err error) {
@@ -266,5 +311,17 @@ func (p *rocketProtocol) GetResponseHeaders() map[string]string {
 }
 
 func (p *rocketProtocol) Close() error {
-	return p.trans.Close()
+	if err := p.socket.Close(); err != nil {
+		return err
+	}
+	if p.client != nil {
+		if err := p.client.Close(); err != nil {
+			return err
+		}
+		p.client = nil
+	}
+	if p.cancel != nil {
+		p.cancel()
+	}
+	return nil
 }

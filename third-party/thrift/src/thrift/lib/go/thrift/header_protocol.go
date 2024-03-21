@@ -31,11 +31,7 @@ func NewHeaderProtocol(trans Transport) Protocol {
 	p := &headerProtocol{
 		protoID: ProtocolIDCompact,
 	}
-	if et, ok := trans.(*headerTransport); ok {
-		p.trans = et
-	} else {
-		p.trans = newHeaderTransport(trans)
-	}
+	p.trans = newHeaderTransport(trans)
 
 	// Effectively an invariant violation.
 	if err := p.ResetProtocol(); err != nil {

@@ -44,8 +44,6 @@ func NewRocketProtocol(trans Transport) Protocol {
 		persistentHeaders: make(map[string]string),
 	}
 	switch t := trans.(type) {
-	case *rocketTransport:
-		p.trans = t
 	case rocketSocket:
 		p.trans = newRocketTransport(t).(*rocketTransport)
 	default:

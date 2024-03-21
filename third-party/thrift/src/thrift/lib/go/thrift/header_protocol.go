@@ -196,6 +196,13 @@ func (p *headerProtocol) ProtocolID() ProtocolID {
 	return p.protoID
 }
 
+func (p *headerProtocol) SetProtocolID(protoID ProtocolID) error {
+	if err := p.trans.SetProtocolID(protoID); err != nil {
+		return err
+	}
+	return p.ResetProtocol()
+}
+
 // Deprecated: GetFlags() is a deprecated method.
 func (t *headerProtocol) GetFlags() HeaderFlags {
 	return t.trans.GetFlags()
@@ -240,6 +247,7 @@ var _ HeaderProtocolFlags = (*headerProtocol)(nil)
 // Deprecated: HeaderProtocolProtocolID is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolProtocolID interface {
 	ProtocolID() ProtocolID
+	SetProtocolID(protoID ProtocolID) error
 }
 
 // Compile time interface enforcer

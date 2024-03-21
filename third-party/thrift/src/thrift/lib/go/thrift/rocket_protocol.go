@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/rsocket/rsocket-go/payload"
@@ -35,6 +36,8 @@ type rocketProtocol struct {
 	seqID        int32
 
 	persistentHeaders map[string]string
+
+	buf *MemoryBuffer
 }
 
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
@@ -42,6 +45,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 	p := &rocketProtocol{
 		protoID:           ProtocolIDCompact,
 		persistentHeaders: make(map[string]string),
+		buf:               NewMemoryBuffer(),
 	}
 	switch t := trans.(type) {
 	case rocketSocket:
@@ -59,7 +63,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 }
 
 func (p *rocketProtocol) resetProtocol() error {
-	p.trans.buf = NewMemoryBuffer()
+	p.buf.Reset()
 	if p.Format != nil {
 		return nil
 	}
@@ -67,9 +71,9 @@ func (p *rocketProtocol) resetProtocol() error {
 	switch p.protoID {
 	case ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Format = NewBinaryProtocol(p.trans, false, true)
+		p.Format = NewBinaryProtocol(p.buf, false, true)
 	case ProtocolIDCompact:
-		p.Format = NewCompactProtocol(p.trans)
+		p.Format = NewCompactProtocol(p.buf)
 	default:
 		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
@@ -111,7 +115,7 @@ func (p *rocketProtocol) Flush() (err error) {
 		return err
 	}
 	// serializer in the protocol field was writing to the transport's memory buffer.
-	dataBytes := p.trans.buf.Bytes()
+	dataBytes := p.buf.Bytes()
 	if p.reqMetadata.Zstd {
 		dataBytes, err = compressZstd(dataBytes)
 		if err != nil {
@@ -143,7 +147,7 @@ func (p *rocketProtocol) Flush() (err error) {
 			close(p.errChan)
 		}))
 
-	p.trans.buf = NewMemoryBuffer()
+	p.buf.Reset()
 	return NewProtocolException(p.trans.Flush())
 }
 
@@ -191,7 +195,8 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 			return name, EXCEPTION, 0, err
 		}
 	}
-	p.trans.buf = NewMemoryBufferWithData(dataBytes)
+	p.buf.Buffer = bytes.NewBuffer(dataBytes)
+	p.buf.size = len(dataBytes)
 	return name, REPLY, p.seqID, err
 }
 

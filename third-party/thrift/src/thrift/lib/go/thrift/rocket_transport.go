@@ -40,15 +40,12 @@ type rocketTransport struct {
 	ctx    context.Context
 	cancel func()
 	client rsocket.Client
-
-	buf *MemoryBuffer
 }
 
 // newRocketTransport creates a new transport given a thrift.Socket.
 func newRocketTransport(socket rocketSocket) *rocketTransport {
 	t := &rocketTransport{
 		socket: socket,
-		buf:    NewMemoryBuffer(),
 	}
 	return t
 }
@@ -96,18 +93,6 @@ func (t *rocketTransport) Close() error {
 		t.cancel()
 	}
 	return nil
-}
-
-func (t *rocketTransport) Read(buf []byte) (int, error) {
-	return t.buf.Read(buf)
-}
-
-func (t *rocketTransport) Write(buf []byte) (int, error) {
-	return t.buf.Write(buf)
-}
-
-func (t *rocketTransport) RemainingBytes() uint64 {
-	return t.buf.RemainingBytes()
 }
 
 func (t *rocketTransport) Flush() error {

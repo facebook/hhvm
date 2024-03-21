@@ -48,13 +48,9 @@ type rocketTransport struct {
 func newRocketTransport(socket rocketSocket) *rocketTransport {
 	t := &rocketTransport{
 		socket: socket,
+		buf:    NewMemoryBuffer(),
 	}
-	t.resetBuffers()
 	return t
-}
-
-func (t *rocketTransport) resetBuffers() {
-	t.buf = NewMemoryBuffer()
 }
 
 // Open opens the internal transport (required for Transport)
@@ -102,33 +98,21 @@ func (t *rocketTransport) Close() error {
 	return nil
 }
 
-// Read reads from the current rBuffer. EOF if the frame is done. (required for Transport)
 func (t *rocketTransport) Read(buf []byte) (int, error) {
 	return t.buf.Read(buf)
 }
 
-func (t *rocketTransport) setReadBuf(buf []byte) {
-	t.buf = NewMemoryBufferWithData(buf)
-}
-
-// Write writes multiple bytes to the rBuffer, does not send to transport. (required for Transport)
 func (t *rocketTransport) Write(buf []byte) (int, error) {
-	n, err := t.buf.Write(buf)
-	return n, NewTransportExceptionFromError(err)
+	return t.buf.Write(buf)
 }
 
-// RemainingBytes returns how many bytes remain in the current recv rBuffer. (required for Transport)
-// Used by binary and compact protocols in ReadString, ReadBytes, etc.,
-// This is a defense tactic, so they can't get attacked with large messages and over allocate a buffer.
 func (t *rocketTransport) RemainingBytes() uint64 {
 	return t.buf.RemainingBytes()
 }
 
-// Flush (required for Transport)
 func (t *rocketTransport) Flush() error {
 	if err := t.socket.Flush(); err != nil {
 		return err
 	}
-	t.resetBuffers()
 	return nil
 }

@@ -59,7 +59,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 }
 
 func (p *rocketProtocol) resetProtocol() error {
-	p.trans.resetBuffers()
+	p.trans.buf = NewMemoryBuffer()
 	if p.Format != nil {
 		return nil
 	}
@@ -143,6 +143,7 @@ func (p *rocketProtocol) Flush() (err error) {
 			close(p.errChan)
 		}))
 
+	p.trans.buf = NewMemoryBuffer()
 	return NewProtocolException(p.trans.Flush())
 }
 
@@ -190,7 +191,7 @@ func (p *rocketProtocol) ReadMessageBegin() (string, MessageType, int32, error) 
 			return name, EXCEPTION, 0, err
 		}
 	}
-	p.trans.setReadBuf(dataBytes)
+	p.trans.buf = NewMemoryBufferWithData(dataBytes)
 	return name, REPLY, p.seqID, err
 }
 

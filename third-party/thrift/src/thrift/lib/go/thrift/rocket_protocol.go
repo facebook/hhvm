@@ -98,6 +98,12 @@ func (p *rocketProtocol) WriteMessageEnd() error {
 }
 
 func (p *rocketProtocol) Flush() (err error) {
+	if p.reqMetadata == nil {
+		p.reqMetadata = &requestRPCMetadata{}
+	}
+	if p.reqMetadata.Other == nil {
+		p.reqMetadata.Other = make(map[string]string)
+	}
 	for k, v := range p.persistentHeaders {
 		p.reqMetadata.Other[k] = v
 	}

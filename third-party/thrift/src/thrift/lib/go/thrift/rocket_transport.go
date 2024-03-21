@@ -118,11 +118,15 @@ func (t *rocketTransport) Close() error {
 	if err := t.socket.Close(); err != nil {
 		return err
 	}
-	defer t.cancel()
-	if err := t.client.Close(); err != nil {
-		return err
+	if t.client != nil {
+		if err := t.client.Close(); err != nil {
+			return err
+		}
+		t.client = nil
 	}
-	t.client = nil
+	if t.cancel != nil {
+		t.cancel()
+	}
 	return nil
 }
 

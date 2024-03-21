@@ -16,6 +16,7 @@ type kind =
   | PHPISM
   | EXPLICIT_DYNAMIC
   | TYPE_ASSERTION
+  | UNSURFACED_EXCEPTION
 [@@deriving show { with_path = false }]
 
 let nPHPism_FIXME = "\\PHPism_FIXME"
@@ -75,6 +76,41 @@ let log_callable_def env ret params =
   List.iter params ~f:(fun param ->
       log_explicit_dynamic env param.Aast.param_type_hint)
 
+let generic_exceptions =
+  [
+    "\\Exception";
+    "\\ViolationException";
+    "\\InvariantViolationException";
+    "\\InvalidOperationException";
+    "\\RuntimeException";
+  ]
+
+let references bl binding =
+  let references =
+    object
+      inherit [_] Aast.reduce
+
+      method zero = false
+
+      method plus = ( || )
+
+      method! on_lid _ (_, lid) = Local_id.equal binding lid
+    end
+  in
+  references#on_block () bl
+
+let log_on_unsurfaced_exception ((_, exn), (pos, exn_binding), bl) =
+  let is_placeholder lid =
+    String.equal (Local_id.get_name lid) SN.SpecialIdents.placeholder
+  in
+  if
+    List.exists
+      ~f:(fun generic_exn -> String.is_suffix ~suffix:generic_exn exn)
+      generic_exceptions
+    && (is_placeholder exn_binding || not (references bl exn_binding))
+  then
+    log pos UNSURFACED_EXCEPTION
+
 let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
@@ -101,5 +137,11 @@ let create_handler _ctx =
             { func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, cid)), _)); _ }
         when String.equal cid nPHPism_FIXME ->
         log PHPISM
+      | _ -> ()
+
+    method! at_stmt _env (_, stmt) =
+      match stmt with
+      | Aast.Try (_, catch_list, _) ->
+        List.iter ~f:log_on_unsurfaced_exception catch_list
       | _ -> ()
   end

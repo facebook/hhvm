@@ -421,45 +421,8 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
   }
 }
 
-trait NestedContainersGetThriftServiceMetadata {
-  private function process_getThriftServiceMetadataHelper(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $reply_type = \TMessageType::REPLY;
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else {
-      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
-    try {
-      $result->success = NestedContainersStaticMetadata::getServiceMetadataResponse();
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-  }
-}
 abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor {
-  use NestedContainersGetThriftServiceMetadata;
+  use \GetThriftServiceMetadata;
   abstract const type TThriftIf as NestedContainersAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'NestedContainers';
@@ -685,7 +648,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $this->eventHandler_->postWrite($handler_ctx, 'turtles', $result);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, NestedContainersStaticMetadata::class);
   }
 }
 class NestedContainersAsyncProcessor extends NestedContainersAsyncProcessorBase {
@@ -693,7 +656,7 @@ class NestedContainersAsyncProcessor extends NestedContainersAsyncProcessorBase 
 }
 
 abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
-  use NestedContainersGetThriftServiceMetadata;
+  use \GetThriftServiceMetadata;
   abstract const type TThriftIf as NestedContainersIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'NestedContainers';
@@ -919,7 +882,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     $this->eventHandler_->postWrite($handler_ctx, 'turtles', $result);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, NestedContainersStaticMetadata::class);
   }
 }
 class NestedContainersSyncProcessor extends NestedContainersSyncProcessorBase {

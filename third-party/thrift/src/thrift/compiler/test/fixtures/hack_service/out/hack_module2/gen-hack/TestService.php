@@ -126,45 +126,8 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
   }
 }
 
-trait TestServiceGetThriftServiceMetadata {
-  private function process_getThriftServiceMetadataHelper(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $reply_type = \TMessageType::REPLY;
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
-    } else {
-      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
-    try {
-      $result->success = TestServiceStaticMetadata::getServiceMetadataResponse();
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-  }
-}
 abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackServiceAsyncProcessorBase {
-  use TestServiceGetThriftServiceMetadata;
+  use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'TestService';
@@ -217,7 +180,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
   }
 }
 class TestServiceAsyncProcessor extends TestServiceAsyncProcessorBase {
@@ -225,7 +188,7 @@ class TestServiceAsyncProcessor extends TestServiceAsyncProcessorBase {
 }
 
 abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceSyncProcessorBase {
-  use TestServiceGetThriftServiceMetadata;
+  use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = 'TestService';
@@ -278,7 +241,7 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
     $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
-    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output);
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
   }
 }
 class TestServiceSyncProcessor extends TestServiceSyncProcessorBase {

@@ -104,7 +104,7 @@ func (p *Socket) pushDeadline(read, write bool) {
 	}
 }
 
-// Connects the socket, creating a new socket object if necessary.
+// Open connects the socket to a server, creating a new socket object if necessary.
 func (p *Socket) Open() error {
 	if p.IsOpen() {
 		return NewTransportException(ALREADY_OPEN, "Socket already connected.")
@@ -125,20 +125,22 @@ func (p *Socket) Open() error {
 	return nil
 }
 
-// Retrieve the underlying net.Conn
+// IsOpen checks to see if we've dialed already.
+func (p *Socket) IsOpen() bool {
+	return p.conn != nil
+}
+
+// Addr returns the address the Socket is listening on.
+func (p *Socket) Addr() net.Addr {
+	return p.addr
+}
+
+// Conn retrieves the underlying net.Conn
 func (p *Socket) Conn() net.Conn {
 	return p.conn
 }
 
-// Returns true if the connection is open
-func (p *Socket) IsOpen() bool {
-	if p.conn == nil {
-		return false
-	}
-	return true
-}
-
-// Closes the socket.
+// Close cleans up all resources used by the Socket.
 func (p *Socket) Close() error {
 	// Close the socket
 	if p.conn != nil {
@@ -151,14 +153,9 @@ func (p *Socket) Close() error {
 	return nil
 }
 
-// Addr returns the remote address of the socket.
-func (p *Socket) Addr() net.Addr {
-	return p.addr
-}
-
 func (p *Socket) Read(buf []byte) (int, error) {
 	if !p.IsOpen() {
-		return 0, NewTransportException(NOT_OPEN, "Connection not open")
+		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
 	p.pushDeadline(true, false)
 	n, err := p.conn.Read(buf)
@@ -167,16 +164,20 @@ func (p *Socket) Read(buf []byte) (int, error) {
 
 func (p *Socket) Write(buf []byte) (int, error) {
 	if !p.IsOpen() {
-		return 0, NewTransportException(NOT_OPEN, "Connection not open")
+		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
 	p.pushDeadline(false, true)
 	return p.conn.Write(buf)
 }
 
+// Flush is not implementable by lower-level transports but must still be kept
+// for interface compatibility with Thrift1.
 func (p *Socket) Flush() error {
 	return nil
 }
 
+// RemainingBytes is not implementable by lower-level transports but must still
+// be kept for interface compatibility with Thrift1.
 func (p *Socket) RemainingBytes() uint64 {
 	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

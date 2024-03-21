@@ -139,6 +139,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
             Span::from_pos(&f.span),
             user_attrs,
             Attr::AttrNone,
+            coeffects,
             EmitBodyArgs {
                 flags: body_flags,
                 emit_deprecation_info: !memoized,
@@ -160,7 +161,6 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
         emit_memoize_function::get_attrs_for_fun(e, fd, &body.attributes, memoized, has_variadic);
     let normal_function = Function {
         name: renamed_id,
-        coeffects,
         body,
         flags,
     };

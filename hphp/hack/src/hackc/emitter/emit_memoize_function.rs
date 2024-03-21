@@ -121,6 +121,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         env,
         return_type_info,
         attributes,
+        coeffects,
         params,
         decl_vars,
         body_instrs,
@@ -134,7 +135,6 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     Ok(Function {
         name: original_id,
         body,
-        coeffects,
         flags,
     })
 }
@@ -371,6 +371,7 @@ fn make_wrapper_body<'a, 'd>(
     env: Env<'a>,
     return_type_info: TypeInfo,
     attributes: Vec<Attribute>,
+    coeffects: Coeffects,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
     body_instrs: InstrSeq,
@@ -386,6 +387,7 @@ fn make_wrapper_body<'a, 'd>(
         vec![], /* shadowed_tparams */
         attributes,
         Attr::AttrNone,
+        coeffects,
         params,
         Some(return_type_info),
         None, /* doc comment */

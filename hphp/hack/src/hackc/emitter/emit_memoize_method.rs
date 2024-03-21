@@ -180,7 +180,7 @@ fn make_memoize_wrapper_method<'a, 'd>(
         flags: arg_flags,
     };
     let span = Span::from_pos(&method.span);
-    let mut body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes)?;
+    let mut body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes, coeffects)?;
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
@@ -198,7 +198,6 @@ fn make_memoize_wrapper_method<'a, 'd>(
         visibility: Visibility::from(method.visibility),
         name,
         body,
-        coeffects,
         flags,
     })
 }
@@ -209,6 +208,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
     args: &mut Args<'_, 'a>,
     span: Span,
     attributes: Vec<Attribute>,
+    coeffects: Coeffects,
 ) -> Result<Body> {
     let mut tparams: Vec<&str> = args
         .scope
@@ -231,6 +231,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
         return_type_info,
         span,
         attributes,
+        coeffects,
         args,
     )
 }
@@ -242,6 +243,7 @@ fn emit<'a, 'd>(
     return_type_info: TypeInfo,
     span: Span,
     attributes: Vec<Attribute>,
+    coeffects: Coeffects,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     let pos = &args.method.span;
@@ -261,6 +263,7 @@ fn emit<'a, 'd>(
         return_type_info,
         span,
         attributes,
+        coeffects,
         args,
     )
 }
@@ -534,6 +537,7 @@ fn make_wrapper<'a, 'd>(
     return_type_info: TypeInfo,
     span: Span,
     attributes: Vec<Attribute>,
+    coeffects: Coeffects,
     args: &Args<'_, 'a>,
 ) -> Result<Body> {
     emit_body::make_body(
@@ -546,6 +550,7 @@ fn make_wrapper<'a, 'd>(
         vec![], /* shadowed_tparams */
         attributes,
         Attr::AttrNone,
+        coeffects,
         params,
         Some(return_type_info),
         None,

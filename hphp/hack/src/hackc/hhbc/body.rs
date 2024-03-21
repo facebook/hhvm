@@ -9,6 +9,7 @@ pub use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::Attribute;
+use crate::Coeffects;
 use crate::DefaultValue;
 use crate::Instruct;
 use crate::Param;
@@ -24,6 +25,7 @@ pub struct Body {
     pub attrs: Attr,
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Vector<Instruct>,
+    pub coeffects: Coeffects,
     pub decl_vars: Vector<StringId>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,

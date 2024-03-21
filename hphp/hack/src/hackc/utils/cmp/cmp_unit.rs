@@ -130,6 +130,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         attributes: a_attributes,
         attrs: a_attrs,
         body_instrs: a_body_instrs,
+        coeffects: a_coeffects,
         decl_vars: a_decl_vars,
         num_iters: a_num_iters,
         is_memoize_wrapper: a_is_memoize_wrapper,
@@ -146,6 +147,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         attributes: b_attributes,
         attrs: b_attrs,
         body_instrs: b_body_instrs,
+        coeffects: b_coeffects,
         decl_vars: b_decl_vars,
         num_iters: b_num_iters,
         is_memoize_wrapper: b_is_memoize_wrapper,
@@ -161,6 +163,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
+    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
     cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
     cmp_eq(a_is_memoize_wrapper, b_is_memoize_wrapper).qualified("is_memoize_wrapper")?;
@@ -592,19 +595,16 @@ fn cmp_function(a: &Function, b: &Function) -> Result {
     let Function {
         name: a_name,
         body: a_body,
-        coeffects: a_coeffects,
         flags: a_flags,
     } = a;
     let Function {
         name: b_name,
         body: b_body,
-        coeffects: b_coeffects,
         flags: b_flags,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
-    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     Ok(())
 }
@@ -614,20 +614,17 @@ fn cmp_method(a: &Method, b: &Method) -> Result {
         visibility: a_visibility,
         name: a_name,
         body: a_body,
-        coeffects: a_coeffects,
         flags: a_flags,
     } = a;
     let Method {
         visibility: b_visibility,
         name: b_name,
         body: b_body,
-        coeffects: b_coeffects,
         flags: b_flags,
     } = b;
     cmp_eq(a_visibility, b_visibility).qualified("visibility")?;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
-    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     Ok(())
 }

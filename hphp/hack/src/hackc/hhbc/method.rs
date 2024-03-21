@@ -7,7 +7,6 @@ use bitflags::bitflags;
 use serde::Serialize;
 
 use crate::Body;
-use crate::Coeffects;
 use crate::MethodName;
 use crate::Visibility;
 
@@ -17,7 +16,6 @@ pub struct Method {
     pub visibility: Visibility,
     pub name: MethodName,
     pub body: Body,
-    pub coeffects: Coeffects,
     pub flags: MethodFlags,
 }
 

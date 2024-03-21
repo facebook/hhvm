@@ -1241,7 +1241,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   ts.fe->isPairGenerator = (bool)(f.flags & hhbc::FunctionFlags_PAIR_GENERATOR);
   ts.fe->userAttributes = userAttrs;
 
-  translateCoeffects(ts, f.coeffects);
+  translateCoeffects(ts, f.body.coeffects);
 
   auto retTypeInfo = maybeOrElse(f.body.return_type_info,
       [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
@@ -1289,7 +1289,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   translateUserAttributes(m.body.attributes, userAttrs);
   ts.fe->userAttributes = userAttrs;
 
-  translateCoeffects(ts, m.coeffects);
+  translateCoeffects(ts, m.body.coeffects);
 
   auto retTypeInfo = maybeOrElse(m.body.return_type_info,
     [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},

@@ -329,7 +329,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Re
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &fun_def.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels)
         })?;
         newline(w)
     })?;
@@ -539,7 +539,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &method_def.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels)
         })?;
         newline(w)?;
         w.write_all(b"  ")

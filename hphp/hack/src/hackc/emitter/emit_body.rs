@@ -19,6 +19,7 @@ use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::ClassName;
+use hhbc::Coeffects;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::IsTypeOp;
@@ -90,6 +91,7 @@ pub fn emit_body<'b, 'd>(
     span: Span,
     attributes: Vec<Attribute>,
     attrs: Attr,
+    coeffects: Coeffects,
     args: Args<'_>,
 ) -> Result<(Body, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
@@ -176,6 +178,7 @@ pub fn emit_body<'b, 'd>(
             shadowed_tparams,
             attributes,
             attrs,
+            coeffects,
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
@@ -367,6 +370,7 @@ pub fn make_body<'a, 'd>(
     shadowed_tparams: Vec<String>,
     attributes: Vec<Attribute>,
     attrs: Attr,
+    coeffects: Coeffects,
     mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
@@ -424,6 +428,7 @@ pub fn make_body<'a, 'd>(
         attributes: attributes.into(),
         attrs,
         body_instrs: body_instrs.into(),
+        coeffects,
         decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,

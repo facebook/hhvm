@@ -117,6 +117,7 @@ fn make_86method<'d>(
         vec![], // shadowed_tparams
         vec![], // attributes
         attrs,
+        coeffects,
         params.into_iter().map(|p| (p, None)).collect::<Vec<_>>(),
         method_return_type,
         method_doc_comment,
@@ -128,7 +129,6 @@ fn make_86method<'d>(
         body,
         name,
         flags,
-        coeffects,
         visibility,
     })
 }

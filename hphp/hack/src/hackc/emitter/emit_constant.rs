@@ -65,6 +65,7 @@ fn emit_constant_cinit<'a, 'd>(
             vec![], /* shadowed_params */
             vec![], /* attributes */
             attrs,
+            Coeffects::default(),
             vec![], /* params */
             return_type_info,
             None, /* doc_comment */
@@ -75,7 +76,6 @@ fn emit_constant_cinit<'a, 'd>(
         Ok(Function {
             name: original_name,
             body,
-            coeffects: Coeffects::default(),
             flags: FunctionFlags::empty(),
         })
     })

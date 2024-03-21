@@ -19,7 +19,10 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
     }
 
     for function in ir_unit.functions.into_iter() {
-        crate::func::convert_function(&mut unit, function);
+        unit.functions.push(crate::func::convert_function(
+            function,
+            &mut unit.adata_cache,
+        ));
     }
 
     let mut unit = unit.finish();

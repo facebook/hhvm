@@ -457,7 +457,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     let mut decl_map = DeclMap::default();
     let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
-    let (body, coeffects) = assemble_body(
+    let body = assemble_body(
         token_iter,
         &mut decl_map,
         attributes,
@@ -472,14 +472,12 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
     let visibility =
         determine_visibility(&attrs).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
-    let met = hhbc::Method {
+    Ok(hhbc::Method {
         visibility,
         name,
         body,
-        coeffects,
         flags,
-    };
-    Ok(met)
+    })
 }
 
 fn assemble_shadowed_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<StringId>> {
@@ -1011,7 +1009,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
     let params = assemble_params(token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
     let shadowed_tparams = Default::default();
-    let (body, coeffects) = assemble_body(
+    let body = assemble_body(
         token_iter,
         &mut decl_map,
         attributes,
@@ -1022,13 +1020,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>) -> Result<hhbc::Function> {
         upper_bounds,
         span,
     )?;
-    let hhas_func = hhbc::Function {
-        name,
-        body,
-        coeffects,
-        flags,
-    };
-    Ok(hhas_func)
+    Ok(hhbc::Function { name, body, flags })
 }
 
 /// Have to parse flags which may or may not appear: isGenerator isAsync isPairGenerator
@@ -1344,12 +1336,12 @@ fn assemble_body(
     shadowed_tparams: Vec<StringId>,
     upper_bounds: Vec<hhbc::UpperBound>,
     span: hhbc::Span,
-) -> Result<(hhbc::Body, hhbc::Coeffects)> {
+) -> Result<hhbc::Body> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
     let mut decl_vars = Vec::new();
     let mut num_iters = 0;
-    let mut coeff = hhbc::Coeffects::default();
+    let mut coeffects = hhbc::Coeffects::default();
     let mut is_memoize_wrapper = false;
     let mut is_memoize_wrapper_lsb = false;
     // For now we don't parse params, so will just have decl_vars (might need to move this later)
@@ -1381,7 +1373,7 @@ fn assemble_body(
             }
             decl_vars = assemble_decl_vars(token_iter, decl_map)?;
         } else if token_iter.peek_is(is_coeffects_decl) {
-            coeff = assemble_coeffects(token_iter)?;
+            coeffects = assemble_coeffects(token_iter)?;
         } else {
             break;
         }
@@ -1394,10 +1386,11 @@ fn assemble_body(
     }
     token_iter.expect(Token::is_close_curly)?;
     let stack_depth = stack_depth::compute_stack_depth(&params, &instrs)?;
-    let tr = hhbc::Body {
+    Ok(hhbc::Body {
         attributes: attributes.into(),
         attrs,
         body_instrs: instrs.into(),
+        coeffects,
         decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,
@@ -1409,8 +1402,7 @@ fn assemble_body(
         stack_depth,
         upper_bounds: upper_bounds.into(),
         span,
-    };
-    Ok((tr, coeff))
+    })
 }
 
 fn is_coeffects_decl(tok: &Token<'_>) -> bool {

@@ -10,6 +10,7 @@ use ffi::Maybe;
 use hhbc::Attr;
 use hhbc::Attribute;
 use hhbc::Body;
+use hhbc::Coeffects;
 use hhbc::Local;
 use hhbc::ParamEntry;
 use instruction_sequence::instr;
@@ -30,6 +31,7 @@ pub fn emit_body<'a, 'd>(
     params: &[ast::FunParam],
     attributes: Vec<Attribute>,
     attrs: Attr,
+    coeffects: Coeffects,
     ret: Option<&aast::Hint>,
 ) -> Result<Body> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs);
@@ -56,6 +58,7 @@ pub fn emit_body<'a, 'd>(
                     attributes: attributes.into(),
                     attrs,
                     body_instrs: body_instrs.into(),
+                    coeffects,
                     params: params.into(),
                     return_type_info: Maybe::Just(rti),
                     decl_vars: Default::default(),

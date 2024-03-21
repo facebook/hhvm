@@ -7,7 +7,6 @@ use bitflags::bitflags;
 use serde::Serialize;
 
 use crate::Body;
-use crate::Coeffects;
 use crate::FunctionName;
 use crate::ParamEntry;
 
@@ -16,8 +15,6 @@ use crate::ParamEntry;
 pub struct Function {
     pub name: FunctionName,
     pub body: Body,
-
-    pub coeffects: Coeffects,
     pub flags: FunctionFlags,
 }
 

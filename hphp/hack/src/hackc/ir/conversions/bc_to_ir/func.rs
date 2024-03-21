@@ -9,8 +9,6 @@ use hhbc::Method;
 use hhbc::ParamEntry;
 use ir::func::DefaultValue;
 use ir::instr::Terminator;
-use ir::CcReified;
-use ir::CcThis;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
@@ -24,7 +22,7 @@ use crate::types;
 pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let func = convert_body(&src.body, &src.coeffects, unit_state);
+    let func = convert_body(&src.body, unit_state);
     ir::verify::verify_func(&func, &Default::default());
 
     let function = ir::Function {
@@ -45,7 +43,7 @@ pub(crate) fn convert_method(
 ) {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let func = convert_body(&src.body, &src.coeffects, unit_state);
+    let func = convert_body(&src.body, unit_state);
     ir::verify::verify_func(&func, &Default::default());
 
     let method = ir::Method {
@@ -59,11 +57,12 @@ pub(crate) fn convert_method(
 }
 
 /// Convert a hhbc::Body to an ir::Func
-fn convert_body(body: &Body, coeffects: &hhbc::Coeffects, unit_state: &UnitState) -> ir::Func {
+fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
     let Body {
         ref attributes,
         attrs,
         ref body_instrs,
+        ref coeffects,
         ref decl_vars,
         ref doc_comment,
         is_memoize_wrapper,
@@ -85,13 +84,11 @@ fn convert_body(body: &Body, coeffects: &hhbc::Coeffects, unit_state: &UnitState
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
     locs.push(ir::SrcLoc::from_span(span));
 
-    let coeffects = convert_coeffects(coeffects);
-
     let func = ir::Func {
         attributes: attributes.to_vec(),
         attrs,
         blocks: Default::default(),
-        coeffects,
+        coeffects: coeffects.clone(),
         doc_comment: doc_comment.clone().map(|c| c.clone().into()).into(),
         ex_frames: Default::default(),
         instrs: Default::default(),
@@ -177,26 +174,4 @@ fn convert_param(
 
     ctx.named_local_lookup.push(LocalId::Named(param.name));
     (param.clone(), default_value)
-}
-
-fn convert_coeffects(coeffects: &hhbc::Coeffects) -> ir::Coeffects {
-    ir::Coeffects {
-        static_coeffects: coeffects.static_coeffects.clone(),
-        unenforced_static_coeffects: coeffects.unenforced_static_coeffects.clone(),
-        fun_param: coeffects.fun_param.clone(),
-        cc_param: coeffects.cc_param.clone(),
-        cc_this: Vec::from_iter(coeffects.get_cc_this().iter().map(|inner| CcThis {
-            types: Vec::from_iter(inner.types.iter().copied()).into(),
-        }))
-        .into(),
-        cc_reified: Vec::from_iter(coeffects.get_cc_reified().iter().map(|inner| CcReified {
-            is_class: inner.is_class,
-            index: inner.index,
-            types: Vec::from_iter(inner.types.iter().copied()).into(),
-        }))
-        .into(),
-        closure_parent_scope: coeffects.is_closure_parent_scope(),
-        generator_this: coeffects.generator_this(),
-        caller: coeffects.caller(),
-    }
 }

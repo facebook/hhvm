@@ -229,6 +229,7 @@ pub fn from_ast<'a, 'd>(
                 &method.params,
                 attributes,
                 Attr::AttrNone,
+                coeffects,
                 method.ret.1.as_ref(),
             )?,
             false,
@@ -262,6 +263,7 @@ pub fn from_ast<'a, 'd>(
             Span::from_pos(&method.span),
             attributes,
             Attr::AttrNone,
+            coeffects,
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 class_tparam_names: class_tparam_names.as_slice(),
@@ -306,7 +308,6 @@ pub fn from_ast<'a, 'd>(
         visibility: Visibility::from(visibility),
         name,
         body,
-        coeffects,
         flags,
     })
 }

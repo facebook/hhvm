@@ -185,6 +185,7 @@ fn sem_diff_body<'a>(
         attributes: a_attributes,
         attrs: a_attrs,
         body_instrs: _,
+        coeffects: a_coeffects,
         decl_vars: _,
         num_iters: a_num_iters,
         is_memoize_wrapper: a_is_memoize_wrapper,
@@ -201,6 +202,7 @@ fn sem_diff_body<'a>(
         attributes: b_attributes,
         attrs: b_attrs,
         body_instrs: _,
+        coeffects: b_coeffects,
         decl_vars: _,
         num_iters: b_num_iters,
         is_memoize_wrapper: b_is_memoize_wrapper,
@@ -216,6 +218,7 @@ fn sem_diff_body<'a>(
 
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("attrs"), a_attrs, b_attrs)?;
+    sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("num_iters"), a_num_iters, b_num_iters)?;
     sem_diff_slice(
         &path.qualified("params"),
@@ -526,19 +529,16 @@ fn sem_diff_function<'a>(
     let Function {
         name: a_name,
         body: a_body,
-        coeffects: a_coeffects,
         flags: a_flags,
     } = a;
     let Function {
         name: b_name,
         body: b_body,
-        coeffects: b_coeffects,
         flags: b_flags,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
-    sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     Ok(())
 }
@@ -554,20 +554,17 @@ fn sem_diff_method<'a>(
         visibility: a_visibility,
         name: a_name,
         body: a_body,
-        coeffects: a_coeffects,
         flags: a_flags,
     } = a;
     let Method {
         visibility: b_visibility,
         name: b_name,
         body: b_body,
-        coeffects: b_coeffects,
         flags: b_flags,
     } = b;
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
-    sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     Ok(())
 }

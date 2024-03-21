@@ -16,6 +16,7 @@ use ir::MethodFlags;
 use ir::MethodName;
 use ir::ReadonlyOp;
 use ir::SpecialClsRef;
+use ir::SrcLoc;
 use ir::TypedValue;
 use log::trace;
 
@@ -142,7 +143,7 @@ fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
 
     builder.start_block(Func::ENTRY_BID);
     let saved = std::mem::take(&mut builder.cur_block_mut().iids);
-    let loc = builder.func.loc_id;
+    let loc = builder.add_loc(SrcLoc::from_span(&builder.func.span));
 
     call_base_func(builder, method_info, loc);
 
@@ -173,7 +174,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
 
     builder.start_block(Func::ENTRY_BID);
     let saved = std::mem::take(&mut builder.cur_block_mut().iids);
-    let loc = builder.func.loc_id;
+    let loc = builder.add_loc(SrcLoc::from_span(&builder.func.span));
 
     call_base_func(builder, method_info, loc);
 
@@ -240,8 +241,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
 
 fn load_closure_vars(func: &mut Func, method_info: &MethodInfo<'_>) {
     let mut instrs = Vec::new();
-
-    let loc = func.loc_id;
+    let loc = ir::LocId::from_usize(0);
 
     // Some magic: We sort the properties such that we always put 'this' at the
     // end. That way when we overwrite the '$this' local we're doing so as the

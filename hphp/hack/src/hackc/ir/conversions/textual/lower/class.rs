@@ -225,7 +225,7 @@ fn create_default_closure_constructor(class: &mut Class) {
 
     let func = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(class.src_loc.clone());
-        fb.func.loc_id = loc;
+        fb.func.span = class.src_loc.to_span();
 
         // '$this' parameter is implied.
 
@@ -265,7 +265,7 @@ fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsSt
 
     let func = FuncBuilder::build_func(|fb| {
         let loc = fb.add_loc(class.src_loc.clone());
-        fb.func.loc_id = loc;
+        fb.func.span = class.src_loc.to_span();
         fb.func.attrs = is_static.as_attr();
         let null = fb.emit_imm(Immediate::Null);
         fb.emit(Instr::ret(null, loc));

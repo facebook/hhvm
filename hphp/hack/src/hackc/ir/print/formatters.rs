@@ -457,7 +457,7 @@ impl Display for FmtInstr<'_> {
         let FmtInstr(func, iid) = self;
         let instr = func.get_instr(*iid).unwrap();
         let mut ctx = FuncContext {
-            cur_loc_id: instr.loc_id(),
+            cur_loc: *func.get_loc(instr.loc_id()).unwrap(),
             live_instrs: Default::default(),
             verbose: true,
         };

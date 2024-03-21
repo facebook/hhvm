@@ -300,7 +300,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         instrs: a_instrs,
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
-        loc_id: a_loc_id,
+        span: a_span,
         locs: _,
         num_iters: a_num_iters,
         params: a_params,
@@ -319,7 +319,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         instrs: b_instrs,
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
-        loc_id: b_loc_id,
+        span: b_span,
         locs: _,
         num_iters: b_num_iters,
         params: b_params,
@@ -357,7 +357,7 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
     )
     .qualified("instrs")?;
 
-    cmp_loc_id((*a_loc_id, a), (*b_loc_id, b)).qualified("loc_id")?;
+    cmp_span(a_span, b_span).qualified("span")?;
 
     Ok(())
 }

@@ -73,7 +73,7 @@ fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
         ref shadowed_tparams,
         ref upper_bounds,
         stack_depth: _,
-        ref span,
+        span,
     } = *body;
 
     let shadowed_tparams: Vec<ir::ClassName> = shadowed_tparams
@@ -82,8 +82,7 @@ fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
         .collect();
 
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
-    locs.push(ir::SrcLoc::from_span(span));
-
+    locs.push(ir::SrcLoc::from_span(&span));
     let func = ir::Func {
         attributes: attributes.to_vec(),
         attrs,
@@ -100,7 +99,7 @@ fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref()),
         shadowed_tparams,
-        loc_id: ir::LocId::from_usize(0),
+        span,
         upper_bounds: upper_bounds.clone().into(),
     };
 

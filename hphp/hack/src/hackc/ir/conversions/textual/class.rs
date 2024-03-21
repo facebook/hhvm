@@ -336,8 +336,8 @@ fn compute_base(class: &ir::Class) -> Option<ir::ClassName> {
 }
 
 fn cmp_method(a: &ir::Method, b: &ir::Method) -> Ordering {
-    let line_a = a.func.locs[a.func.loc_id].line_begin as usize;
-    let line_b = b.func.locs[b.func.loc_id].line_begin as usize;
+    let line_a = a.func.span.line_begin as usize;
+    let line_b = b.func.span.line_begin as usize;
     line_a
         .cmp(&line_b)
         .then_with(|| {

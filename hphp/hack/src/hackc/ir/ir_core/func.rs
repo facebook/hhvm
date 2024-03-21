@@ -28,6 +28,7 @@ use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
 use crate::Param;
+use crate::Span;
 use crate::SrcLoc;
 use crate::TypeInfo;
 use crate::UpperBound;
@@ -169,7 +170,7 @@ pub struct Func {
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassName>,
-    pub loc_id: LocId,
+    pub span: Span,
     pub upper_bounds: Vec<UpperBound>,
 }
 

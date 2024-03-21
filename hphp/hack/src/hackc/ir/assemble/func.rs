@@ -213,9 +213,8 @@ impl<'b> FunctionParser<'b> {
         });
 
         let cur_loc = if let Some(src_loc) = unit_state.src_loc.as_ref() {
-            let loc = builder.add_loc(src_loc.clone());
-            builder.func.loc_id = loc;
-            loc
+            builder.func.span = src_loc.to_span();
+            builder.add_loc(src_loc.clone())
         } else {
             LocId::NONE
         };

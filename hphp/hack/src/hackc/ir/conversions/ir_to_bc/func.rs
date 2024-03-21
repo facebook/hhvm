@@ -53,7 +53,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
 
     let return_type_info = crate::types::convert(&func.return_type);
 
-    let span = func.loc(func.loc_id).to_span();
+    let span = func.span;
     let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {
         ParamEntry {
             param,

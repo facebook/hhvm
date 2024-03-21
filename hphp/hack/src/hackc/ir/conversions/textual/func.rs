@@ -229,7 +229,7 @@ fn is_wrapper_attribute(classid: ClassName) -> bool {
 /// parameter removed).
 fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<Func>> {
     let mut result = Vec::new();
-    let loc = orig_func.loc_id;
+    let loc = ir::LocId::from_usize(0); // LocId 0 must be Func::span
 
     // Caution here: If we have varargs then the final param is "magic".  Since
     // we're before lowering the 0ReifiedGenerics param won't exist yet.
@@ -375,7 +375,7 @@ fn write_func(
         FuncInfo::Function(ref fi) => mangle::FunctionName::Function(fi.name),
     };
 
-    let span = func.loc(func.loc_id).clone();
+    let span = ir::SrcLoc::from_span(&func.span);
 
     let attributes = textual::FuncAttributes {
         is_async: func_info.is_async(),

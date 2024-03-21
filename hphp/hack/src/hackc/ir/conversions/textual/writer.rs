@@ -110,7 +110,7 @@ impl Thing {
     fn line(&self) -> usize {
         match self {
             Thing::Class(c) => c.src_loc.line_begin as usize,
-            Thing::Func(f) => f.func.locs[f.func.loc_id].line_begin as usize,
+            Thing::Func(f) => f.func.span.line_begin as usize,
         }
     }
 

@@ -33,7 +33,7 @@ use crate::util::FmtSep;
 use crate::FmtEscapedString;
 
 pub(crate) struct FuncContext {
-    pub(crate) cur_loc_id: LocId,
+    pub(crate) cur_loc: SrcLoc,
     pub(crate) live_instrs: InstrIdSet,
     pub(crate) verbose: bool,
 }
@@ -545,7 +545,7 @@ pub(crate) fn print_func_body(
     let live_instrs = crate::util::compute_live_instrs(func, verbose);
 
     let mut ctx = FuncContext {
-        cur_loc_id: func.loc_id,
+        cur_loc: SrcLoc::from_span(&func.span),
         live_instrs,
         verbose,
     };
@@ -617,7 +617,7 @@ fn print_top_level_span(w: &mut dyn Write, span: Option<&Span>) -> Result {
 }
 
 fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
-    print_top_level_loc(w, f.func.get_loc(f.func.loc_id))?;
+    print_top_level_loc(w, Some(&SrcLoc::from_span(&f.func.span)))?;
     writeln!(
         w,
         "function {name}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {{",
@@ -1439,9 +1439,9 @@ pub(crate) fn print_ir_to_bc(
 }
 
 fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
-    if ctx.cur_loc_id != loc_id {
-        ctx.cur_loc_id = loc_id;
-        if let Some(loc) = func.get_loc(loc_id) {
+    if let Some(loc) = func.get_loc(loc_id) {
+        if ctx.cur_loc != *loc {
+            ctx.cur_loc = *loc;
             write!(w, "<srcloc {}> ", FmtLoc(loc))?;
         }
     }
@@ -1449,11 +1449,11 @@ fn print_inner_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id
 }
 
 fn print_loc(w: &mut dyn Write, ctx: &mut FuncContext, func: &Func, loc_id: LocId) -> Result {
-    if ctx.cur_loc_id != loc_id {
-        if let Some(loc) = func.get_loc(loc_id) {
+    if let Some(loc) = func.get_loc(loc_id) {
+        if ctx.cur_loc != *loc {
+            ctx.cur_loc = *loc;
             writeln!(w, "  .srcloc {}", FmtLoc(loc))?;
         }
-        ctx.cur_loc_id = loc_id;
     }
     Ok(())
 }
@@ -1728,7 +1728,7 @@ fn print_member_key(
 }
 
 fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: bool) -> Result {
-    print_top_level_loc(w, method.func.get_loc(method.func.loc_id))?;
+    print_top_level_loc(w, Some(&SrcLoc::from_span(&method.func.span)))?;
     writeln!(
         w,
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {vis} {{",

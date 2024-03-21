@@ -3626,10 +3626,11 @@ dependencies = [
 
 [[package]]
 name = "pest"
-version = "2.7.0"
+version = "2.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f73935e4d55e2abf7f130186537b19e7a4abc886a0252380b59248af473a3fc9"
+checksum = "56f8023d0fb78c8e03784ea1c7f3fa36e68a723138990b8d5a47d916b651e7a8"
 dependencies = [
+ "memchr",
  "thiserror",
  "ucd-trie",
 ]

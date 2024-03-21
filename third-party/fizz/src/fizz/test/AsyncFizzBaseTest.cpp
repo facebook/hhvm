@@ -400,6 +400,14 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadEOFNoCallback) {
   this->deliverError(this->eof_);
 }
 
+TYPED_TEST(AsyncFizzBaseTest, TestReadEOFDelayedCallback) {
+  this->deliverError(this->eof_);
+
+  EXPECT_CALL(this->readCallback_, readEOF_());
+  this->setReadCB(&this->readCallback_);
+  EXPECT_EQ(this->getReadCallback(), nullptr);
+}
+
 TYPED_TEST(AsyncFizzBaseTest, TestMovableBuffer) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(true));

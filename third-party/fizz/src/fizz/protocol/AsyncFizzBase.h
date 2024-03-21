@@ -583,6 +583,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   ReadCallback* readCallback_{nullptr};
   std::unique_ptr<folly::IOBuf> appDataBuf_;
+  folly::Optional<folly::AsyncSocketException> pendingReadEx_;
 
   size_t appBytesWritten_{0};
   size_t appBytesReceived_{0};

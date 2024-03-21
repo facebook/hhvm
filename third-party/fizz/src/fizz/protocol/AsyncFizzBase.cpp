@@ -64,7 +64,11 @@ void AsyncFizzBase::setReadCB(AsyncFizzBase::ReadCallback* callback) {
       deliverAppData(nullptr);
     }
 
-    if (!good()) {
+    if (readCallback_ && pendingReadEx_) {
+      auto ex = std::move(*pendingReadEx_);
+      pendingReadEx_ = folly::none;
+      deliverError(ex);
+    } else if (!good()) {
       AsyncSocketException ex(
           AsyncSocketException::NOT_OPEN,
           "setReadCB() called with transport in bad state");
@@ -320,6 +324,8 @@ void AsyncFizzBase::deliverError(
     } else {
       readCallback->readErr(ex);
     }
+  } else {
+    pendingReadEx_ = ex;
   }
 
   if (immediatelyPendingWriteRequest_) {
@@ -546,6 +552,9 @@ void AsyncFizzBase::endOfTLS(std::unique_ptr<folly::IOBuf> endOfData) noexcept {
       auto readCallback = readCallback_;
       readCallback_ = nullptr;
       readCallback->readEOF();
+    } else if (!pendingReadEx_) {
+      pendingReadEx_ =
+          AsyncSocketException(AsyncSocketException::END_OF_FILE, "readEOF()");
     }
     transport_->close();
   }

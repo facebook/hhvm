@@ -21,17 +21,30 @@ type kind =
   | ALWAYS_FALSE_TYPE_TEST
 [@@deriving show { with_path = false }]
 
+let find_level = function
+  | HH_FIXME
+  | UNSAFE_CAST
+  | PHPISM
+  | EXPLICIT_DYNAMIC
+  | TYPE_ASSERTION ->
+    1
+  | UNSURFACED_EXCEPTION
+  | ALWAYS_FALSE_ASSERTION
+  | ALWAYS_FALSE_TYPE_TEST ->
+    2
+
 let nPHPism_FIXME = "\\PHPism_FIXME"
 
-let log pos kind =
-  let json =
-    Hh_json.JSON_Object
-      [
-        ("kind", Hh_json.JSON_String (show_kind kind));
-        ("pos", Pos.multiline_json (Pos.to_relative_string pos));
-      ]
-  in
-  Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)
+let log level pos kind =
+  if find_level kind <= level then
+    let json =
+      Hh_json.JSON_Object
+        [
+          ("kind", Hh_json.JSON_String (show_kind kind));
+          ("pos", Pos.multiline_json (Pos.to_relative_string pos));
+        ]
+    in
+    Hh_logger.log "[TDCH] %s" (Hh_json.json_to_string json)
 
 let nothing_ty = Typing_make_type.nothing Typing_reason.Rnone
 
@@ -48,7 +61,7 @@ let replace_placeholders_with_tvars env ty =
     (env, T.mk (Typing_reason.Rnone, T.Tclass (id, exact, targs)))
   | _ -> (env, ty)
 
-let always_false pos kind env lhs_ty rhs_ty =
+let always_false level pos kind env lhs_ty rhs_ty =
   let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
   let (env, rhs_ty) = Tast_env.expand_type env rhs_ty in
   let tenv = Tast_env.tast_env_as_typing_env env in
@@ -65,7 +78,7 @@ let always_false pos kind env lhs_ty rhs_ty =
     let env = Tast_env.typing_env_as_tast_env tenv in
     let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
     let (_env, rhs_ty) = Tast_env.expand_type env rhs_ty in
-    if Typing_utils.is_type_disjoint tenv lhs_ty rhs_ty then log pos kind
+    if Typing_utils.is_type_disjoint tenv lhs_ty rhs_ty then log level pos kind
 
 let is_toplevelish_dynamic env (ty, hint_opt) =
   match hint_opt with
@@ -102,15 +115,15 @@ let is_toplevelish_dynamic env (ty, hint_opt) =
       None
   | _ -> None
 
-let log_explicit_dynamic env hint =
+let log_explicit_dynamic level env hint =
   match is_toplevelish_dynamic env hint with
-  | Some pos -> log pos EXPLICIT_DYNAMIC
+  | Some pos -> log level pos EXPLICIT_DYNAMIC
   | None -> ()
 
-let log_callable_def env ret params =
-  log_explicit_dynamic env ret;
+let log_callable_def level env ret params =
+  log_explicit_dynamic level env ret;
   List.iter params ~f:(fun param ->
-      log_explicit_dynamic env param.Aast.param_type_hint)
+      log_explicit_dynamic level env param.Aast.param_type_hint)
 
 let generic_exceptions =
   [
@@ -135,7 +148,7 @@ let references bl binding =
   in
   references#on_block () bl
 
-let log_on_unsurfaced_exception ((_, exn), (pos, exn_binding), bl) =
+let log_on_unsurfaced_exception level ((_, exn), (pos, exn_binding), bl) =
   let is_placeholder lid =
     String.equal (Local_id.get_name lid) SN.SpecialIdents.placeholder
   in
@@ -145,20 +158,26 @@ let log_on_unsurfaced_exception ((_, exn), (pos, exn_binding), bl) =
       generic_exceptions
     && (is_placeholder exn_binding || not (references bl exn_binding))
   then
-    log pos UNSURFACED_EXCEPTION
+    log level pos UNSURFACED_EXCEPTION
 
-let create_handler _ctx =
+let create_handler ctx =
+  let level =
+    Provider_context.get_tcopt ctx
+    |> TypecheckerOptions.log_levels
+    |> SMap.find_opt "type_driven_code_health"
+    |> Option.value ~default:1
+  in
   object
     inherit Tast_visitor.handler_base
 
     method! at_fun_ env Aast.{ f_ret; f_params; _ } =
-      log_callable_def env f_ret f_params
+      log_callable_def level env f_ret f_params
 
     method! at_method_ env Aast.{ m_ret; m_params; _ } =
-      log_callable_def env m_ret m_params
+      log_callable_def level env m_ret m_params
 
     method! at_expr env (_, pos, expr) =
-      let log = log pos in
+      let log = log level pos in
       match expr with
       | Aast.Hole (_, _, _, kind) -> begin
         match kind with
@@ -177,10 +196,10 @@ let create_handler _ctx =
             } ->
         log TYPE_ASSERTION;
         let (env, hint_ty) = Tast_env.localize_hint_for_refinement env hint in
-        always_false pos ALWAYS_FALSE_ASSERTION env lhs_ty hint_ty
+        always_false level pos ALWAYS_FALSE_ASSERTION env lhs_ty hint_ty
       | Aast.Is ((lhs_ty, _, _), hint) ->
         let (env, hint_ty) = Tast_env.localize_hint_for_refinement env hint in
-        always_false pos ALWAYS_FALSE_TYPE_TEST env lhs_ty hint_ty
+        always_false level pos ALWAYS_FALSE_TYPE_TEST env lhs_ty hint_ty
       | Aast.Call
           Aast.
             { func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, cid)), _)); _ }
@@ -191,6 +210,6 @@ let create_handler _ctx =
     method! at_stmt _env (_, stmt) =
       match stmt with
       | Aast.Try (_, catch_list, _) ->
-        List.iter ~f:log_on_unsurfaced_exception catch_list
+        List.iter ~f:(log_on_unsurfaced_exception level) catch_list
       | _ -> ()
   end

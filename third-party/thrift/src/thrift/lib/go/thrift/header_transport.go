@@ -57,8 +57,8 @@ type HeaderTransport struct {
 	firstRequest       bool
 }
 
-// NewHeaderTransport creates a new transport with defaults.
-func NewHeaderTransport(transport Transport) *HeaderTransport {
+// newHeaderTransport creates a new transport with defaults.
+func newHeaderTransport(transport Transport) *HeaderTransport {
 	return &HeaderTransport{
 		transport: transport,
 		rbuf:      bufio.NewReader(transport),

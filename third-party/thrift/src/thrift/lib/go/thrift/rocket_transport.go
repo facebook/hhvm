@@ -55,8 +55,8 @@ type rocketTransport struct {
 	protoID ProtocolID
 }
 
-// NewRocketTransport creates a new transport given a thrift.Socket.
-func NewRocketTransport(socket rocketSocket) Transport {
+// newRocketTransport creates a new transport given a thrift.Socket.
+func newRocketTransport(socket rocketSocket) Transport {
 	t := &rocketTransport{
 		socket:  socket,
 		protoID: ProtocolIDCompact,

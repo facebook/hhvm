@@ -25,7 +25,7 @@ import (
 func TestHeaderZstd(t *testing.T) {
 	n := 1
 	tmb := NewMemoryBuffer()
-	trans := NewHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 

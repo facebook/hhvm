@@ -36,7 +36,7 @@ func NewHeaderProtocol(trans Transport) Protocol {
 	if et, ok := trans.(*HeaderTransport); ok {
 		p.trans = et
 	} else {
-		p.trans = NewHeaderTransport(trans)
+		p.trans = newHeaderTransport(trans)
 	}
 
 	// Effectively an invariant violation.

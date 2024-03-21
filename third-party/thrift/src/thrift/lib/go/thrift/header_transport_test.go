@@ -25,7 +25,7 @@ import (
 )
 
 func TestHeaderTransport(t *testing.T) {
-	trans := NewHeaderTransport(NewMemoryBuffer())
+	trans := newHeaderTransport(NewMemoryBuffer())
 	TransportTest(t, trans, trans)
 }
 
@@ -105,7 +105,7 @@ func TestHeaderFramedBinary(t *testing.T) {
 	testHeaderToProto(
 		t, FramedDeprecated, tmb,
 		NewBinaryProtocol(NewFramedTransport(tmb), true, true),
-		NewHeaderTransport(tmb),
+		newHeaderTransport(tmb),
 	)
 }
 
@@ -114,7 +114,7 @@ func TestHeaderFramedCompact(t *testing.T) {
 	testHeaderToProto(
 		t, FramedCompact, tmb,
 		NewCompactProtocol(NewFramedTransport(tmb)),
-		NewHeaderTransport(tmb),
+		newHeaderTransport(tmb),
 	)
 }
 
@@ -122,9 +122,9 @@ func TestHeaderProtoID(t *testing.T) {
 	n := 1
 	tmb := NewMemoryBuffer()
 	// write transport
-	trans1 := NewHeaderTransport(tmb)
+	trans1 := newHeaderTransport(tmb)
 	// read transport
-	trans2 := NewHeaderTransport(tmb)
+	trans2 := newHeaderTransport(tmb)
 	targetID := ProtocolIDBinary
 
 	assertEq(t, DefaulprotoID, trans1.ProtocolID())
@@ -158,9 +158,9 @@ func TestHeaderHeaders(t *testing.T) {
 	n := 1
 	tmb := NewMemoryBuffer()
 	// write transport
-	trans1 := NewHeaderTransport(tmb)
+	trans1 := newHeaderTransport(tmb)
 	// read transport
-	trans2 := NewHeaderTransport(tmb)
+	trans2 := newHeaderTransport(tmb)
 
 	// make sure we don't barf reading header with no frame
 	_, ok := trans1.GetResponseHeader("something")
@@ -220,7 +220,7 @@ func TestHeaderHeaders(t *testing.T) {
 func TestHeaderRWSmall(t *testing.T) {
 	n := 1
 	tmb := NewMemoryBuffer()
-	trans := NewHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDF")
 
 	_, err := trans.Write(data)
@@ -283,7 +283,7 @@ func TestHeaderRWSmall(t *testing.T) {
 func TestHeaderZlib(t *testing.T) {
 	n := 1
 	tmb := NewMemoryBuffer()
-	trans := NewHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 
@@ -354,7 +354,7 @@ func testRWOnce(t *testing.T, n int, data []byte, trans *HeaderTransport) {
 
 func TestHeaderTransportRWMultiple(t *testing.T) {
 	tmb := NewMemoryBuffer()
-	trans := NewHeaderTransport(tmb)
+	trans := newHeaderTransport(tmb)
 
 	// Test Junk Data
 	testRWOnce(t, 1, []byte("ASDF"), trans)
@@ -368,7 +368,7 @@ func BenchmarkHeaderFlush(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		tmb := NewMemoryBuffer()
-		trans1 := NewHeaderTransport(tmb)
+		trans1 := newHeaderTransport(tmb)
 
 		trans1.SetIdentity("localhost")
 		trans1.SetRequestHeader("thrift_protocol", "compact")

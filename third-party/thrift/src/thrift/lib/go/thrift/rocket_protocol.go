@@ -47,7 +47,7 @@ func NewRocketProtocol(trans Transport) Protocol {
 	case *rocketTransport:
 		p.trans = t
 	case rocketSocket:
-		p.trans = NewRocketTransport(t).(*rocketTransport)
+		p.trans = newRocketTransport(t).(*rocketTransport)
 	default:
 		panic(NewTransportException(
 			NOT_IMPLEMENTED,

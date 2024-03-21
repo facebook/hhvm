@@ -23,7 +23,7 @@ import (
 )
 
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
-	protocol := NewHeaderProtocol(NewHeaderTransport(NewMemoryBuffer()))
+	protocol := NewHeaderProtocol(NewMemoryBuffer())
 	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)
@@ -31,7 +31,7 @@ func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 }
 
 func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol := NewRocketProtocol(NewRocketTransport(newPipe()))
+	protocol := NewRocketProtocol(newPipe())
 	protocol.SetPersistentHeader("key", "value")
 	v, ok := protocol.GetPersistentHeader("key")
 	assert.True(t, ok)

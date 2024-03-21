@@ -7313,12 +7313,12 @@ end = struct
     ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
   }
 
-  let simplify
+  let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ ty_sub; sub_supportdyn }
-      ~rhs:{ super_like; reason_super; predicate; ty_super_opt }
+      ~rhs:({ super_like; reason_super; predicate; ty_super_opt } as rhs)
       env =
     let ty_super =
       match ty_super_opt with
@@ -7340,23 +7340,26 @@ end = struct
       ty_sub
       ty_super;
     let (env, ety_sub) = Env.expand_internal_type env ty_sub in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
+    match ety_sub with
+    | ConstraintType _ -> invalid ~fail env
+    | LoclType ty_sub ->
+      (match get_node ty_sub with
+      | Tvar _ ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          ty_super
+      | Tunion ty_subs ->
+        Common.simplify_union_l
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ ty_sub = ety_sub; sub_supportdyn }
-          ~rhs:{ super_supportdyn = false; super_like; ty_super }
-          env)
-    in
-    match ety_sub with
-    | ConstraintType _ -> default_subtype_help env
-    | LoclType ty_sub ->
-      (match get_node ty_sub with
-      | Tvar _
-      | Tunion _ ->
-        default_subtype_help env
+          ~mk_prop:simplify
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
       | _ ->
         let partition = Typing_refinement.partition_ty env ty_sub predicate in
         let intersect tyl = MakeType.intersection reason_super tyl in

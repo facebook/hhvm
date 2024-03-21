@@ -23,7 +23,7 @@ import (
 type headerProtocol struct {
 	Format
 	origTransport Transport
-	trans         *HeaderTransport
+	trans         *headerTransport
 
 	protoID ProtocolID
 }
@@ -33,7 +33,7 @@ func NewHeaderProtocol(trans Transport) Protocol {
 		origTransport: trans,
 		protoID:       ProtocolIDCompact,
 	}
-	if et, ok := trans.(*HeaderTransport); ok {
+	if et, ok := trans.(*headerTransport); ok {
 		p.trans = et
 	} else {
 		p.trans = newHeaderTransport(trans)

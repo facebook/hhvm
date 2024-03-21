@@ -33,7 +33,7 @@ func TestHeaderTransport(t *testing.T) {
 // Reflect the result after going through the header pipeline, and make sure that:
 // The original proto could still read what it sent
 // Header found the correct protocol from the incoming frame
-func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, proto Format, headertrans *HeaderTransport) {
+func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, proto Format, headertrans *headerTransport) {
 	tFname, tTypeID, tID, tData := "func", CALL, int32(1), "ASDF"
 	err := proto.WriteMessageBegin(tFname, tTypeID, tID)
 	if err != nil {
@@ -327,7 +327,7 @@ func TestHeaderZlib(t *testing.T) {
 	}
 }
 
-func testRWOnce(t *testing.T, n int, data []byte, trans *HeaderTransport) {
+func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {
 	_, err := trans.Write(data)
 	if err != nil {
 		t.Fatalf("failed to write frame %d: %s", n, err)

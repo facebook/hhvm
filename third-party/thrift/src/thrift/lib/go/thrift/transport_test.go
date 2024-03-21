@@ -47,8 +47,8 @@ func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	}
 
 	// Special case for header transport -- need to reset protocol on read
-	var headerTrans *HeaderTransport
-	if hdr, ok := readTrans.(*HeaderTransport); ok {
+	var headerTrans *headerTransport
+	if hdr, ok := readTrans.(*headerTransport); ok {
 		headerTrans = hdr
 	}
 

@@ -42,11 +42,7 @@ type rocketTransport struct {
 	cancel func()
 	client rsocket.Client
 
-	// Used on read
-	rBuf *MemoryBuffer
-
-	// Used on write
-	wbuf *MemoryBuffer
+	buf *MemoryBuffer
 
 	// Negotiated
 	protoID ProtocolID
@@ -77,8 +73,7 @@ func (t *rocketTransport) SetProtocolID(protoID ProtocolID) error {
 }
 
 func (t *rocketTransport) resetBuffers() {
-	t.rBuf = NewMemoryBuffer()
-	t.wbuf = NewMemoryBuffer()
+	t.buf = NewMemoryBuffer()
 }
 
 // Open opens the internal transport (required for Transport)
@@ -128,16 +123,16 @@ func (t *rocketTransport) Close() error {
 
 // Read reads from the current rBuffer. EOF if the frame is done. (required for Transport)
 func (t *rocketTransport) Read(buf []byte) (int, error) {
-	return t.rBuf.Read(buf)
+	return t.buf.Read(buf)
 }
 
 func (t *rocketTransport) setReadBuf(buf []byte) {
-	t.rBuf = NewMemoryBufferWithData(buf)
+	t.buf = NewMemoryBufferWithData(buf)
 }
 
 // Write writes multiple bytes to the rBuffer, does not send to transport. (required for Transport)
 func (t *rocketTransport) Write(buf []byte) (int, error) {
-	n, err := t.wbuf.Write(buf)
+	n, err := t.buf.Write(buf)
 	return n, NewTransportExceptionFromError(err)
 }
 
@@ -145,7 +140,7 @@ func (t *rocketTransport) Write(buf []byte) (int, error) {
 // Used by binary and compact protocols in ReadString, ReadBytes, etc.,
 // This is a defense tactic, so they can't get attacked with large messages and over allocate a buffer.
 func (t *rocketTransport) RemainingBytes() uint64 {
-	return t.rBuf.RemainingBytes()
+	return t.buf.RemainingBytes()
 }
 
 // Flush (required for Transport)

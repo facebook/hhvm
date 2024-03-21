@@ -112,7 +112,7 @@ func (p *rocketProtocol) Flush() (err error) {
 		return err
 	}
 	// serializer in the protocol field was writing to the transport's memory buffer.
-	dataBytes := p.trans.wbuf.Bytes()
+	dataBytes := p.trans.buf.Bytes()
 	if p.reqMetadata.Zstd {
 		dataBytes, err = compressZstd(dataBytes)
 		if err != nil {

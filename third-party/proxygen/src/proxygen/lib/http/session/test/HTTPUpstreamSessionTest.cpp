@@ -931,7 +931,7 @@ TEST_F(HTTP2UpstreamSessionTest, FullResponsePriorToEgressCompleteNoError) {
   eventBase_.loop();
 
   // txn should have detached here
-  CHECK_EQ(handler->txn_, nullptr);
+  CHECK(handler->txn_ == nullptr);
 
   httpSession_->dropConnection();
 }
@@ -1002,7 +1002,7 @@ TEST_F(HTTP2UpstreamSessionTest, FullResponsePriorToEgressCompleteCancelError) {
   readAndLoop(input->data(), input->length());
 
   // txn should have detached here
-  CHECK_EQ(handler->txn_, nullptr);
+  CHECK(handler->txn_ == nullptr);
 
   httpSession_->dropConnection();
 }

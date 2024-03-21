@@ -60,9 +60,9 @@ class OutputBufferingHandler : public OutboundBytesToBytesHandler,
     std::swap(sharedPromise, sharedPromise_);
     getContext()
         ->fireWrite(std::move(sends_))
-        .thenTry([sharedPromise = std::move(sharedPromise)](
+        .thenTry([sharedPromise_2 = std::move(sharedPromise)](
                      folly::Try<folly::Unit> t) mutable {
-          sharedPromise.setTry(std::move(t));
+          sharedPromise_2.setTry(std::move(t));
         });
   }
 

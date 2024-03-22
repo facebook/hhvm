@@ -94,7 +94,8 @@ public class ThriftAnyDeserializer {
     } else {
       return deserializeObject(typeStruct);
     }
-  };
+  }
+  ;
 
   private Type findByType(String uri) {
     Type type = uriCache.get(uri);

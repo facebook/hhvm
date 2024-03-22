@@ -81,7 +81,8 @@ public abstract class TTransport implements Closeable {
                 + len
                 + " bytes, but only got "
                 + got
-                + " bytes. (This is often indicative of an internal error on the server side. Please check your server logs.)");
+                + " bytes. (This is often indicative of an internal error on the server side."
+                + " Please check your server logs.)");
       }
       got += ret;
     }

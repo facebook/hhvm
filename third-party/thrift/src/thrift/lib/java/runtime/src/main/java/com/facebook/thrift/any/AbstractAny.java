@@ -95,10 +95,14 @@ abstract class AbstractAny<T, A> {
     deserializerId.put(id, deserializer);
   }
 
-  /** @return Returns payload of Any and SemiAny */
+  /**
+   * @return Returns payload of Any and SemiAny
+   */
   public abstract T get();
 
-  /** @return Returns AnyStruct or SemiAnyStruct */
+  /**
+   * @return Returns AnyStruct or SemiAnyStruct
+   */
   public abstract A getAny();
 
   @Override

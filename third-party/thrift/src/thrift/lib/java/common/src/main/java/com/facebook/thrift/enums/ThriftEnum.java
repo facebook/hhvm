@@ -33,25 +33,35 @@ public abstract class ThriftEnum<T extends ThriftEnum>
   protected int value;
   protected int unrecognizedValue;
 
-  /** @return Returns the integer value of the defined enum. */
+  /**
+   * @return Returns the integer value of the defined enum.
+   */
   @Override
   @ThriftEnumValue
   public int getValue() {
     return this.value;
   }
 
-  /** @return Returns the unrecognized value of the enum if the value is not defined. */
+  /**
+   * @return Returns the unrecognized value of the enum if the value is not defined.
+   */
   public int getUnrecognizedValue() {
     return unrecognizedValue;
   }
 
-  /** @return true if the enum value is unrecognized, false otherwise. */
+  /**
+   * @return true if the enum value is unrecognized, false otherwise.
+   */
   public abstract boolean isValueUnrecognized();
 
-  /** @return Ordinal value of the enum. Unrecognized value has the last ordinal value. */
+  /**
+   * @return Ordinal value of the enum. Unrecognized value has the last ordinal value.
+   */
   public abstract int ordinal();
 
-  /** @return Name of the enum defined in the IDL. */
+  /**
+   * @return Name of the enum defined in the IDL.
+   */
   public abstract String name();
 
   public boolean isClosedEnum() {

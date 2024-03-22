@@ -80,7 +80,9 @@ public abstract class ByteBufTProtocol extends TProtocol {
    */
   public abstract ByteBuf readBinaryAsSlice() throws TException;
 
-  /** @return Returns the current writer index of the ByteBuf */
+  /**
+   * @return Returns the current writer index of the ByteBuf
+   */
   public int mark() {
     return this.byteBuf.writerIndex();
   }
@@ -102,5 +104,6 @@ public abstract class ByteBufTProtocol extends TProtocol {
    */
   public int getEmptyStructSize() {
     return 1;
-  };
+  }
+  ;
 }

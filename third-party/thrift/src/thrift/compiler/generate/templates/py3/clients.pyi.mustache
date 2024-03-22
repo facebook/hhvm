@@ -61,6 +61,7 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 {{/service:supportedFunctions}}
 {{#service:interactions}}
     def create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
+    def async_create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
 {{/service:interactions}}
 {{^service:interactions}}
 {{^service:supportedFunctions}}

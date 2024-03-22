@@ -139,7 +139,10 @@ class Async({{#service:extends}}{{!
         self #{{service:parent_service_name}}
     ) -> {{service:parent_service_name}}_{{service:name}}.Async:
         return self._create_interaction("{{service:name}}", {{service:parent_service_name}}_{{service:name}}.Async)
-
+    async def async_create{{service:name}}(
+        self #{{service:parent_service_name}}
+    ) -> {{service:parent_service_name}}_{{service:name}}.Async:
+        return self.create{{service:name}}()
     {{/service:interactions}}
 class Sync({{#service:extends}}{{!
     }}{{> services/client_module_path}}.Sync{{!

@@ -176,6 +176,11 @@ cdef class A(thrift.py3.client.Client):
         )
         return interaction
 
+    async def async_createI(
+            A self
+    ):
+        return self.createI()
+
     @classmethod
     def __get_reflection__(cls):
         return _services_reflection.get_reflection__A(for_clients=True)
@@ -314,6 +319,11 @@ cdef class C(thrift.py3.client.Client):
             <PyObject *> interaction
         )
         return interaction
+
+    async def async_createI(
+            C self
+    ):
+        return self.createI()
 
     @classmethod
     def __get_reflection__(cls):

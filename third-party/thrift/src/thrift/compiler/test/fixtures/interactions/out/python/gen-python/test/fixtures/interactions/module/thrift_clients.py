@@ -149,17 +149,26 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self #MyService
         ) -> MyService_MyInteraction.Async:
             return self._create_interaction("MyInteraction", MyService_MyInteraction.Async)
-    
+        async def async_createMyInteraction(
+            self #MyService
+        ) -> MyService_MyInteraction.Async:
+            return self.createMyInteraction()
         def createMyInteractionFast(
             self #MyService
         ) -> MyService_MyInteractionFast.Async:
             return self._create_interaction("MyInteractionFast", MyService_MyInteractionFast.Async)
-    
+        async def async_createMyInteractionFast(
+            self #MyService
+        ) -> MyService_MyInteractionFast.Async:
+            return self.createMyInteractionFast()
         def createSerialInteraction(
             self #MyService
         ) -> MyService_SerialInteraction.Async:
             return self._create_interaction("SerialInteraction", MyService_SerialInteraction.Async)
-    
+        async def async_createSerialInteraction(
+            self #MyService
+        ) -> MyService_SerialInteraction.Async:
+            return self.createSerialInteraction()
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

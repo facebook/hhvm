@@ -181,6 +181,11 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         )
         return interaction
 
+    async def async_create{{service:name}}(
+            {{service:parent_service_name}} self
+    ):
+        return self.create{{service:name}}()
+
 {{/service:interactions}}
     @classmethod
     def __get_reflection__(cls):

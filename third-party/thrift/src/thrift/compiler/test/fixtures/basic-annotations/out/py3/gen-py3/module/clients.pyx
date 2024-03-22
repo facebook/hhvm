@@ -634,6 +634,11 @@ cdef class BadService(thrift.py3.client.Client):
         )
         return interaction
 
+    async def async_createBadInteraction(
+            BadService self
+    ):
+        return self.createBadInteraction()
+
     @classmethod
     def __get_reflection__(cls):
         return _services_reflection.get_reflection__BadService(for_clients=True)

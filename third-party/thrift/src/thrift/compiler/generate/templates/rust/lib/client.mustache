@@ -341,7 +341,14 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
             }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
             }}{{field:key}}i16{{!
         }});
-        {{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/write}}{{/field:type_annotation?}}{{/field:type}}(&self.{{field:rust_name}}, p);
+        {{#field:type}}{{!
+          }}{{#type:has_adapter?}}{{!
+            }}::fbthrift::Serialize::write(&{{>lib/adapter/qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.{{field:rust_name}}, {{field:key}}), p){{!
+          }}{{/type:has_adapter?}}{{!
+          }}{{^type:has_adapter?}}{{!
+            }}{{>lib/write}}(&self.{{field:rust_name}}, p){{!
+          }}{{/type:has_adapter?}}{{!
+        }}{{/field:type}};
         p.write_field_end();{{!
         }}{{/function:args}}
         p.write_field_stop();

@@ -359,6 +359,7 @@ struct Args_PubSubStreamingService_returnstream {
     i32_from: ::std::primitive::i32,
     i32_to: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_returnstream {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.returnstream"))]
@@ -391,6 +392,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_streamthrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_streamthrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.streamthrows"))]
@@ -419,6 +421,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_servicethrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_servicethrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.servicethrows"))]
@@ -447,6 +450,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_servicethrows2 {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_servicethrows2 {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.servicethrows2"))]
@@ -475,6 +479,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_boththrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_boththrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.boththrows"))]
@@ -503,6 +508,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_responseandstreamstreamthrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_responseandstreamstreamthrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.responseandstreamstreamthrows"))]
@@ -531,6 +537,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_responseandstreamservicethrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_responseandstreamservicethrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.responseandstreamservicethrows"))]
@@ -559,6 +566,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
 struct Args_PubSubStreamingService_responseandstreamboththrows {
     foo: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_responseandstreamboththrows {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.responseandstreamboththrows"))]
@@ -588,6 +596,7 @@ struct Args_PubSubStreamingService_returnstreamFast {
     i32_from: ::std::primitive::i32,
     i32_to: ::std::primitive::i32,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_returnstreamFast {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.returnstreamFast"))]

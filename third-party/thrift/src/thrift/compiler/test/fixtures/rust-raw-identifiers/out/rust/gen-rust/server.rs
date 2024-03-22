@@ -105,6 +105,7 @@ pub struct FooProcessor<P, H, R, RS> {
 struct Args_Foo_return {
     bar: crate::types::ThereAreNoPascalCaseKeywords,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Foo_return {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Foo.return"))]
@@ -133,6 +134,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
 struct Args_Foo_super {
     bar: crate::types::ThereAreNoPascalCaseKeywords,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Foo_super {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Foo.super"))]

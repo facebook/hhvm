@@ -166,6 +166,7 @@ struct Args_{{service:rust_name}}_{{function:name}} {
     {{field:rust_name}}: {{>lib/fieldtype}},
     {{/function:args}}
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:rust_name}}_{{function:name}} {
     #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
@@ -185,7 +186,11 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
                 (::fbthrift::TType::Stop, _) => break,{{!
                 }}{{#function:args}}
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
-                    }}field_{{field:name}} = ::std::option::Option::Some({{#field:type}}{{#field:type_annotated?}}{{program:crate}}::r#impl::read{{/field:type_annotated?}}{{^field:type_annotated?}}{{>lib/read}}{{/field:type_annotated?}}{{/field:type}}(p)?),{{!
+                    }}field_{{field:name}} = ::std::option::Option::Some({{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
+                    }}),{{!
                 }}{{/function:args}}
                 (fty, _) => p.skip(fty)?,
             }

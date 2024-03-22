@@ -599,7 +599,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         {{#function:return_type}}{{>lib/ttype}}{{/function:return_type}},
                         0i16,
                     );
-                    inner.write(p);
+                    {{#function:return_type}}{{#type:has_adapter?}}::fbthrift::Serialize::write(&{{>lib/adapter/qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(inner, 0), p){{/type:has_adapter?}}{{^type:has_adapter?}}inner.write(p){{/type:has_adapter?}}{{/function:return_type}};
                     p.write_field_end();
                 }{{!
                 }}{{#function:exceptions}}
@@ -651,7 +651,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         once = true;
                         alt = {{!
                             }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
+                            }}Self::Success({{#function:return_type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{/function:return_type}}){{!
                             }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                         }};
                     }{{!
@@ -660,7 +660,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         once = true;
                         alt = {{!
                             }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                            }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                            }}Self::{{field:rust_name}}({{#function:return_type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{/function:return_type}}){{!
                             }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                         }};
                     }{{!

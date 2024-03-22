@@ -105,6 +105,7 @@ pub struct SomeServiceProcessor<P, H, R, RS> {
 struct Args_SomeService_bounce_map {
     m: included__types::SomeMap,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SomeService_bounce_map {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SomeService.bounce_map"))]
@@ -133,6 +134,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_So
 struct Args_SomeService_binary_keyed_map {
     r: ::std::vec::Vec<::std::primitive::i64>,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SomeService_binary_keyed_map {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SomeService.binary_keyed_map"))]

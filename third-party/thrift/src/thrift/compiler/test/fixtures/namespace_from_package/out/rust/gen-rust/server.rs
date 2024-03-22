@@ -78,6 +78,7 @@ pub struct TestServiceProcessor<P, H, R, RS> {
 struct Args_TestService_init {
     int1: ::std::primitive::i64,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_TestService_init {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "TestService.init"))]

@@ -84,6 +84,7 @@ pub struct MyRootProcessor<P, H, R, RS> {
 
 struct Args_MyRoot_do_root {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyRoot_do_root {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyRoot.do_root"))]
@@ -439,6 +440,7 @@ pub struct MyNodeProcessor<P, H, R, RS, SS> {
 
 struct Args_MyNode_do_mid {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyNode_do_mid {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyNode.do_mid"))]
@@ -807,6 +809,7 @@ pub struct MyLeafProcessor<P, H, R, RS, SS> {
 
 struct Args_MyLeaf_do_leaf {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyLeaf_do_leaf {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyLeaf.do_leaf"))]

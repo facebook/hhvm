@@ -54,6 +54,13 @@ pub trait ThriftAnnotations: 'static {
     }
 }
 
+pub struct NoThriftAnnotations;
+impl ThriftAnnotations for NoThriftAnnotations {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        None
+    }
+}
+
 /// Identical to [ThriftAnnotations] but is implemented on the unit type (), for which
 /// `get_structured_annotation` and `get_field_structured_annotation` will always return `None`.
 ///

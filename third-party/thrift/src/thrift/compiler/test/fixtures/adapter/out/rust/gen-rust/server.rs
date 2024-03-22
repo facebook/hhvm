@@ -96,6 +96,7 @@ struct Args_Service_func {
     arg2: ::std::string::String,
     arg3: crate::types::Foo,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Service_func {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Service.func"))]
@@ -113,7 +114,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Se
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_arg1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_arg1 = ::std::option::Option::Some(<crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(::fbthrift::Deserialize::read(p)?, 1)?),
                 (::fbthrift::TType::String, 2) => field_arg2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 3) => field_arg3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
@@ -493,6 +494,7 @@ pub struct AdapterServiceProcessor<P, H, R, RS> {
 
 struct Args_AdapterService_count {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AdapterService_count {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AdapterService.count"))]
@@ -517,6 +519,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ad
 struct Args_AdapterService_adaptedTypes {
     arg: crate::types::HeapAllocated,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AdapterService_adaptedTypes {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AdapterService.adaptedTypes"))]

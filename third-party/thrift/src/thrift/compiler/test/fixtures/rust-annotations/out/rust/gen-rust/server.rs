@@ -102,6 +102,7 @@ pub struct Service1Processor<P, H, R, RS> {
 
 struct Args_Service1_r {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Service1_r {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "S1.r"))]
@@ -458,6 +459,7 @@ pub struct S2Processor<P, H, R, RS> {
 
 struct Args_S2_r {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_S2_r {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "S2.r"))]
@@ -835,6 +837,7 @@ pub struct AllMethodsProcessor<P, H, R, RS> {
 
 struct Args_AllMethods_foo {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AllMethods_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AllMethods.foo"))]
@@ -858,6 +861,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Al
 
 struct Args_AllMethods_bar {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_AllMethods_bar {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "AllMethods.bar"))]
@@ -1313,6 +1317,7 @@ pub struct OneMethodProcessor<P, H, R, RS> {
 
 struct Args_OneMethod_foo {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethod_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethod.foo"))]
@@ -1336,6 +1341,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
 
 struct Args_OneMethod_bar {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethod_bar {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethod.bar"))]
@@ -1791,6 +1797,7 @@ pub struct OneMethodOptOutProcessor<P, H, R, RS> {
 
 struct Args_OneMethodOptOut_foo {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethodOptOut_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethodOptOut.foo"))]
@@ -1814,6 +1821,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
 
 struct Args_OneMethodOptOut_bar {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_OneMethodOptOut_bar {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "OneMethodOptOut.bar"))]

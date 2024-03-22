@@ -154,7 +154,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     fn write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("arg1", ::fbthrift::TType::String, 1i16);
-        ::fbthrift::Serialize::write(&self.arg1, p);
+        ::fbthrift::Serialize::write(&<crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.arg1, 1), p);
         p.write_field_end();
         p.write_field_begin("arg2", ::fbthrift::TType::String, 2i16);
         ::fbthrift::Serialize::write(&self.arg2, p);

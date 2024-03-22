@@ -138,6 +138,7 @@ pub struct CProcessor<P, H, R, RS> {
 
 struct Args_C_f {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_f {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "C.f"))]
@@ -161,6 +162,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_
 
 struct Args_C_numbers {
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_numbers {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "C.numbers"))]
@@ -187,6 +189,7 @@ struct Args_C_thing {
     b: ::std::string::String,
     c: ::std::collections::BTreeSet<::std::primitive::i32>,
 }
+
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_thing {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "C.thing"))]

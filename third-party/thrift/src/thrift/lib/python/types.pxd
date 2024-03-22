@@ -52,6 +52,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         const cTypeInfo* get()
 
     cdef object createStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createStructTupleWithNones(const cStructInfo& structInfo)
+    cdef void populateStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
     cdef object createUnionTuple() except+
     cdef cTypeInfo createStructTypeInfo(const cDynamicStructInfo& structInfo) except+
     cdef void setStructIsset(object, int index, bint set) except+
@@ -157,6 +159,7 @@ cdef class Struct(StructOrUnion):
     cdef _fbthrift_get_field_value(Struct self, int16_t index)
     cdef _fbthrift_populate_primitive_fields(Struct self)
     cdef _fbthrift_fully_populate_cache(Struct self)
+    cdef _initStructTupleWithValues(Struct self, object kwargs) except *
 
 cdef class Union(StructOrUnion):
     cdef readonly object type

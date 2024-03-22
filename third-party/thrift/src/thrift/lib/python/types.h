@@ -138,6 +138,32 @@ PyObject* createStructTupleWithDefaultValues(
  */
 void setStructIsset(void* object, int16_t index, bool value);
 
+/*
+ * Returns a new "struct tuple" with all its elements set to `None`
+ * (i.e., `Py_None`).
+ *
+ * As in `createStructTuple()`, the first element of the tuple is a
+ * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
+ *
+ * However, the remaining elements (1 through `numFields + 1`) are set to `None`
+ *
+ */
+PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
+
+/**
+ * Populates only unset fields of "struct tuple" with default values.
+ *
+ * The `object` should be a valid `tuple` created by `createStructTuple()`
+ *
+ * Iterates through the elements (from 1 to `numFields + 1`). If a field
+ * is unset, it gets populated with the corresponding default value.
+ *
+ * Throws on error
+ *
+ */
+void populateStructTupleUnsetFieldsWithDefaultValues(
+    PyObject* object, const detail::StructInfo& structInfo);
+
 struct PyObjectDeleter {
   void operator()(PyObject* p) { Py_XDECREF(p); }
 };

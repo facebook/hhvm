@@ -162,6 +162,16 @@ UniquePyObjectPtr getDefaultValue(
   return value;
 }
 
+const char* getIssetFlags(const void* object) {
+  PyObject* isset =
+      *toPyObjectPtr(static_cast<const char*>(object) + kHeadOffset);
+  const char* issetFlags = PyBytes_AsString(isset);
+  if (issetFlags == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return issetFlags;
+}
+
 } // namespace
 
 PyObject* createUnionTuple() {
@@ -228,6 +238,21 @@ PyObject* createStructTupleWithDefaultValues(
   return tuple.release();
 }
 
+PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
+  const int16_t numFields = structInfo.numFields;
+  UniquePyObjectPtr tuple{createStructTuple(numFields)};
+  if (tuple == nullptr) {
+    return nullptr;
+  }
+
+  // Initialize tuple[1:numFields+1] with 'None'.
+  for (int i = 0; i < numFields; ++i) {
+    PyTuple_SET_ITEM(tuple.get(), i + 1, Py_None);
+    Py_INCREF(Py_None);
+  }
+  return tuple.release();
+}
+
 void setStructIsset(void* object, int16_t index, bool value) {
   PyObject** issetPyBytesPtr =
       toPyObjectPtr(static_cast<char*>(object) + kHeadOffset);
@@ -250,17 +275,49 @@ void* setUnion(void* object, const detail::TypeInfo& /* typeInfo */) {
 }
 
 bool getIsset(const void* object, ptrdiff_t offset) {
-  PyObject* isset =
-      *toPyObjectPtr(static_cast<const char*>(object) + kHeadOffset);
-  const char* flags = PyBytes_AsString(isset);
-  if (!flags) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
+  const char* flags = getIssetFlags(object);
   return flags[offset];
 }
 
 void setIsset(void* object, ptrdiff_t offset, bool value) {
   return setStructIsset(object, offset, value);
+}
+
+void populateStructTupleUnsetFieldsWithDefaultValues(
+    PyObject* tuple, const detail::StructInfo& structInfo) {
+  if (tuple == nullptr) {
+    throw std::runtime_error("null tuple!");
+  }
+
+  DCHECK(PyTuple_Check(tuple));
+  const int16_t numFields = structInfo.numFields;
+  DCHECK(PyTuple_Size(tuple) == numFields + 1);
+
+  const auto& defaultValues =
+      *static_cast<const FieldValueMap*>(structInfo.customExt);
+  const char* issetFlags = getIssetFlags(tuple);
+  for (int i = 0; i < numFields; ++i) {
+    // If the field is already set, this implies that the constructor has
+    // already assigned a value to the field. In this case, we skip it and
+    // avoid overwriting it with the default value.
+    if (issetFlags[i]) {
+      continue;
+    }
+
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
+    PyObject* oldValue = PyTuple_GET_ITEM(tuple, i + 1);
+    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
+      PyTuple_SET_ITEM(tuple, i + 1, Py_None);
+      Py_INCREF(Py_None);
+    } else {
+      // getDefaultValue calls `Py_INCREF`
+      PyTuple_SET_ITEM(
+          tuple,
+          i + 1,
+          getDefaultValue(fieldInfo.typeInfo, defaultValues, i).release());
+    }
+    Py_DECREF(oldValue);
+  }
 }
 
 void clearUnion(void* object) {

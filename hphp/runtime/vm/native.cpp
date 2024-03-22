@@ -202,12 +202,12 @@ void populateArgs(Registers& regs,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-void callFunc(const Func* const func,
-              const ActRec* fp,
-              const void* const ctx,
-              TypedValue* args,
-              TypedValue& ret,
-              bool isFCallBuiltin) {
+void callFuncImpl(const Func* const func,
+                  const ActRec* fp,
+                  const void* const ctx,
+                  TypedValue* args,
+                  TypedValue& ret,
+                  bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
   auto retType = func->returnTypeConstraint().asSystemlibType();
@@ -305,6 +305,20 @@ void callFunc(const Func* const func,
 
   not_reached();
 }
+
+TypedValue callFunc(const Func* const func,
+                    const ActRec* fp,
+                    const void* const ctx,
+                    TypedValue* args,
+                    bool isFCallBuiltin) {
+  TypedValue rv;
+  rv.m_type = KindOfUninit;
+  callFuncImpl(func, fp, ctx, args, rv, isFCallBuiltin);
+  assertx(tvIsPlausible(rv));
+  assertx(rv.m_type != KindOfUninit);
+  return rv;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -410,11 +424,8 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   coerceFCallArgsFromLocals(ar, numArgs, func);
 
-  TypedValue rv;
-  rv.m_type = KindOfUninit;
-  callFunc(func, ar, nullptr, args, rv, false);
+  TypedValue rv = callFunc(func, ar, nullptr, args, false);
 
-  assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(
     ar,
     func->numLocals(),
@@ -451,11 +462,8 @@ TypedValue* methodWrapper(ActRec* ar) {
     ctx = ar->getClass();
   }
 
-  TypedValue rv;
-  rv.m_type = KindOfUninit;
-  callFunc(func, ar, ctx, args, rv, false);
+  TypedValue rv = callFunc(func, ar, ctx, args, false);
 
-  assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
     frame_free_locals_no_this_inl(
       ar,

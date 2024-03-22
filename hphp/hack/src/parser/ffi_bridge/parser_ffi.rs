@@ -27,7 +27,6 @@ mod ffi {
         disable_xhp_children_declarations: bool,
         interpret_soft_types_as_like_types: bool,
         nameof_precedence: bool,
-        strict_utf8: bool,
     }
 
     extern "Rust" {
@@ -73,7 +72,6 @@ impl ffi::ParserEnv {
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
             nameof_precedence: env.nameof_precedence,
-            strict_utf8: env.strict_utf8,
         }
     }
 }

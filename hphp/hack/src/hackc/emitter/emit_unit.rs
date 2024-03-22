@@ -82,8 +82,6 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
         constants: Default::default(),
         missing_symbols: Default::default(),
         error_symbols: Default::default(),
-        valid_utf8: true,
-        invalid_utf8_offset: 0,
     })
 }
 
@@ -92,9 +90,8 @@ pub fn emit_unit<'a, 'd>(
     emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
-    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit> {
-    let result = emit_unit_(emitter, namespace, tast, invalid_utf8_offset);
+    let result = emit_unit_(emitter, namespace, tast);
     match result {
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => emit_fatal_unit(op, pos, msg),
@@ -157,7 +154,6 @@ fn emit_unit_<'a, 'd>(
     emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
-    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
@@ -233,8 +229,6 @@ fn emit_unit_<'a, 'd>(
         fatal,
         missing_symbols: missing_syms.into(),
         error_symbols: error_syms.into(),
-        valid_utf8: invalid_utf8_offset.is_none(),
-        invalid_utf8_offset: invalid_utf8_offset.unwrap_or(0),
     })
 }
 

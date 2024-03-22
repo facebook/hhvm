@@ -77,43 +77,6 @@ bool fsame_log(const StringData* input, const StringData* arg) {
                   arg->slice());
 }
 
-void non_utf8_log(CodeSource from, folly::StringPiece code, size_t badcharIdx) {
-  auto const rate = RO::EvalEvalNonUtf8SampleRate;
-  bool doLog = StructuredLog::coinflip(rate);
-  bool doTrace = false;
-  ONTRACE(1, { doTrace = true; });
-
-  if (doLog || doTrace) {
-    constexpr size_t CONTEXT = 64;
-    size_t start = std::max(badcharIdx, CONTEXT) - CONTEXT;
-    size_t end = std::min(badcharIdx + CONTEXT, code.size());
-    folly::StringPiece partial{code.begin() + start, code.begin() + end};
-
-    FTRACE(1, "non-utf8 eval: bad={} '{}'\n", badcharIdx - start, partial);
-
-    if (doLog) {
-      auto const code_source = [&] {
-        switch (from) {
-          case CodeSource::User: return "user";
-          case CodeSource::Eval: return "eval";
-          case CodeSource::Debugger: return "debugger";
-          case CodeSource::Systemlib: return "systemlib";
-          default: return "unknown";
-        }
-      }();
-      StructuredLogEntry sample;
-      sample.force_init = true;
-      sample.setInt("sample_rate", rate);
-      sample.setStr("event", "utf8");
-      sample.setStr("lhs", partial);
-      sample.setInt("bad_utf8_index", badcharIdx - start);
-      sample.setStr("code_source", code_source);
-      log_fill_bt(sample);
-      StructuredLog::log("hhvm_isame_collisions", sample);
-    }
-  }
-}
-
 int tstrcmp_log(const char* s1, const char* s2) {
   FTRACE(1, "tstrcmp collision {} != {}\n", s1, s2);
   log_impl("tstrcmp", RO::EvalTsameCollisionSampleRate, s1, s2);

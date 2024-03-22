@@ -184,9 +184,6 @@ struct RepoGlobalData {
   std::set<std::string> RenamableFunctions;
   std::set<std::string> NonInterceptableFunctions;
 
-  // see RuntimeOptions::EvalStrictUtf8Mode
-  int StrictUtf8Mode = 0;
-
   // see RuntimeOptions::EvalLog{T,F}sameCollisions
   int LogTsameCollisions = 0;
   int LogFsameCollisions = 0;
@@ -235,7 +232,6 @@ struct RepoGlobalData {
       (ActiveDeployment)
       (ModuleLevelTraits)
       (TreatCaseTypesAsMixed)
-      (StrictUtf8Mode)
       (LogTsameCollisions)
       (LogFsameCollisions)
       ;

@@ -101,7 +101,6 @@ struct CommonOpts {
     #[clap(short = 'l')]
     long_msg: bool,
 
-    #[allow(dead_code)]
     #[command(flatten)]
     single_file_opts: SingleFileOpts,
 

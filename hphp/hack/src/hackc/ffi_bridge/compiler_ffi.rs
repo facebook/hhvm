@@ -93,7 +93,6 @@ mod ffi {
         enable_class_level_where_clauses: bool,
         disallow_static_constants_in_default_func_args: bool,
         disallow_direct_superglobals_refs: bool,
-        strict_utf8: bool,
     }
 
     struct DeclParserConfig {
@@ -591,7 +590,6 @@ impl ffi::NativeEnv {
                         .parser_flags
                         .disallow_direct_superglobals_refs,
                     po_nameof_precedence: true,
-                    po_strict_utf8: self.parser_flags.strict_utf8,
                     ..Default::default()
                 },
             },

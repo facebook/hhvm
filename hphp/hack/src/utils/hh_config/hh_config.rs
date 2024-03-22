@@ -442,9 +442,6 @@ impl HhConfig {
                 "nameof_precedence" => {
                     go.po_nameof_precedence = parse_json(&value)?;
                 }
-                "strict_utf8" => {
-                    go.po_strict_utf8 = parse_json(&value)?;
-                }
                 "enable_function_references" => {
                     go.tco_enable_function_references = parse_json(&value)?;
                 }

@@ -70,8 +70,6 @@ TRACE_SET_MOD(unit_parse);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 
-void non_utf8_log(CodeSource, folly::StringPiece code, size_t);
-
 namespace {
 
 struct CompileException : Exception {
@@ -151,24 +149,6 @@ CompilerResult hackc_compile(
     }
   }
 
-  switch (RO::EvalStrictUtf8Mode) {
-    case 0:
-      native_env.parser_flags.strict_utf8 = false;
-      break;
-    case 1: {
-      if (codeSource == CodeSource::Eval) {
-        native_env.parser_flags.strict_utf8 = false;
-      } else {
-        native_env.parser_flags.strict_utf8 = true;
-      }
-      break;
-    }
-    case 2:
-      native_env.parser_flags.strict_utf8 = true;
-      break;
-    default: not_reached();
-  }
-
   rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
     tracing::Block _{
       "hackc_translator",
@@ -186,10 +166,6 @@ CompilerResult hackc_compile(
 
   auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
   const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
-
-  if (codeSource != CodeSource::User && !unit->valid_utf8) {
-    non_utf8_log(codeSource, code.data(), unit->invalid_utf8_offset);
-  }
 
   auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
     *unit, filename, sha1, bcSha1, extension,

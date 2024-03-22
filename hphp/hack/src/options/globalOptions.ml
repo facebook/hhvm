@@ -196,7 +196,6 @@ type t = {
   tco_lsp_invalidation: bool;
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;
-  po_strict_utf8: bool;
   po_stack_size: int;
 }
 [@@deriving eq, show]
@@ -327,7 +326,6 @@ let default =
     tco_lsp_invalidation = false;
     tco_autocomplete_sort_text = false;
     po_nameof_precedence = false;
-    po_strict_utf8 = true;
     po_stack_size = 32 * 1024 * 1024;
     (* The largest stack size we can use without requiring sudo *)
   }
@@ -457,7 +455,6 @@ let set
     ?tco_lsp_invalidation
     ?tco_autocomplete_sort_text
     ?po_nameof_precedence
-    ?po_strict_utf8
     ?po_stack_size
     options =
   let setting setting option =
@@ -792,7 +789,6 @@ let set
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     po_nameof_precedence =
       setting po_nameof_precedence options.po_nameof_precedence;
-    po_strict_utf8 = setting po_strict_utf8 options.po_strict_utf8;
     po_stack_size = setting po_stack_size options.po_stack_size;
   }
 

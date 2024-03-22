@@ -126,7 +126,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EnableIntrinsicsExtension)                  \
   R(EvalModuleLevelTraits)                      \
   R(EvalTreatCaseTypesAsMixed)                  \
-  R(EvalStrictUtf8Mode)                         \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

@@ -39,10 +39,6 @@ pub struct Unit {
 
     pub missing_symbols: Vector<StringId>,
     pub error_symbols: Vector<StringId>,
-    // TODO(T120858428): Remove this field once non-utf8 is banned from the
-    // parser.
-    pub valid_utf8: bool,
-    pub invalid_utf8_offset: usize,
 }
 
 /// Fields used when a unit had compile-time errors that should be reported

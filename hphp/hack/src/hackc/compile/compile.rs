@@ -222,7 +222,6 @@ fn rewrite_and_emit<'p, 'd>(
     namespace_env: Arc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
-    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
@@ -232,7 +231,7 @@ fn rewrite_and_emit<'p, 'd>(
     let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_unit_from_ast(emitter, namespace_env, ast, invalid_utf8_offset)
+            emit_unit_from_ast(emitter, namespace_env, ast)
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(fatal_op, pos, msg) => {
@@ -305,9 +304,8 @@ fn emit_unit_from_ast<'d>(
     emitter: &mut Emitter<'d>,
     namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
-    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit, Error> {
-    emit_unit(emitter, namespace, ast, invalid_utf8_offset)
+    emit_unit(emitter, namespace, ast)
 }
 
 fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
@@ -335,11 +333,6 @@ fn emit_unit_from_text<'d>(
     let namespace_env = Arc::new(create_namespace_env(emitter));
     let path = source_text.file_path_rc();
 
-    let invalid_utf8_offset = match std::str::from_utf8(source_text.text()) {
-        Ok(_) => None,
-        Err(e) => Some(e.valid_up_to()),
-    };
-
     let parse_result = parse_file(
         emitter.options(),
         source_text,
@@ -361,13 +354,7 @@ fn emit_unit_from_text<'d>(
             ) {
                 Ok(()) => profile_rust::time(move || {
                     (
-                        rewrite_and_emit(
-                            emitter,
-                            namespace_env,
-                            &mut ast,
-                            profile,
-                            invalid_utf8_offset,
-                        ),
+                        rewrite_and_emit(emitter, namespace_env, &mut ast, profile),
                         profile,
                     )
                 }),

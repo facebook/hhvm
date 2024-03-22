@@ -293,7 +293,6 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
-  gd.StrictUtf8Mode   = RuntimeOption::EvalStrictUtf8Mode;
   gd.LogTsameCollisions = RuntimeOption::EvalLogTsameCollisions;
   gd.LogFsameCollisions = RuntimeOption::EvalLogFsameCollisions;
 

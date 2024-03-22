@@ -85,12 +85,8 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
-        // TODO(T120858428): remove this check (and always verify_utf8) once
-        // we're strict everywhere!
-        if env.parser_options.po_strict_utf8 {
-            if let Some(err) = Self::verify_utf8(indexed_source_text) {
-                return Ok(err);
-            }
+        if let Some(err) = Self::verify_utf8(indexed_source_text) {
+            return Ok(err);
         }
         let start_t = Instant::now();
         let arena = Bump::new();
@@ -316,7 +312,6 @@ impl<'src> AastParser {
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
             nameof_precedence: env.parser_options.po_nameof_precedence,
-            strict_utf8: env.parser_options.po_strict_utf8,
         };
         (language, mode.map(Into::into), parser_env)
     }

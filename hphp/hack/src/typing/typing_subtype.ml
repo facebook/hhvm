@@ -8198,27 +8198,19 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
     ty_sub
     ty_super;
   let old_env = env in
-  let (env, prop) =
-    Subtype.(
-      simplify_subtype
-        ~subtype_env:
-          (Subtype_env.create
-             ~coerce:(Some TL.CoerceFromDynamic)
-             ~log_level:2
-             on_error)
-        ~this_ty:None
-        ~lhs:{ sub_supportdyn = None; ty_sub }
-        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-        env)
+  let subtype_env =
+    Subtype_env.create ~coerce:(Some TL.CoerceFromDynamic) ~log_level:2 on_error
   in
   let (env, ty_err) =
-    Subtype_trans.prop_to_env
+    Subtype_tell.sub_type_inner
+      env
+      ~subtype_env
+      ~sub_supportdyn:None
+      ~this_ty:None
       (LoclType ty_sub)
       (LoclType ty_super)
-      env
-      prop
-      on_error
   in
+
   ( (if Option.is_some ty_err then
       old_env
     else

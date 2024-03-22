@@ -82,14 +82,6 @@ val add_constraints :
 (** Hack to allow for circular dependencies between Ocaml modules. *)
 val set_fun_refs : unit -> unit
 
-val simplify_subtype_i :
-  ?is_coeffect:bool ->
-  env ->
-  internal_type ->
-  internal_type ->
-  on_error:Typing_error.Reasons_callback.t option ->
-  env * Typing_logic.subtype_prop
-
 val subtype_funs :
   check_return:bool ->
   for_override:bool ->

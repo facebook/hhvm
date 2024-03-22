@@ -8225,21 +8225,6 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
       env),
     ty_err )
 
-(* -- simplify_subtype_i entry point ---------------------------------------- *)
-let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
-  Subtype.(
-    simplify_subtype_i
-      ~subtype_env:
-        (Subtype_env.create
-           ~is_coeffect
-           ~no_top_bottom:true
-           ~log_level:2
-           on_error)
-      ~this_ty:None
-      ~lhs:{ sub_supportdyn = None; ty_sub }
-      ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-      env)
-
 (* -- subtype_funs entry point ---------------------------------------------- *)
 let subtype_funs
     ~(check_return : bool)

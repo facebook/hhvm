@@ -92,260 +92,6 @@ end = struct
         Some (SMap.add name (Typing_set.add ty lower, upper) v)
 end
 
-module Subtype_env = struct
-  type t = {
-    require_soundness: bool;
-        (** If set, requires the simplification of subtype constraints to be sound,
-          meaning that the simplified constraint must imply the original one. *)
-    require_completeness: bool;
-        (** If set, requires the simplification of subtype constraints to be complete,
-          meaning that the original constraint must imply the simplified one.
-          If set, we also finish as soon as we see a goal of the form T <: t or
-          t <: T for generic parameter T *)
-    visited: VisitedGoals.t;
-        (** If above is not set, maintain a visited goal set *)
-    no_top_bottom: bool;
-    coerce: TL.coercion_direction option;
-        (** Coerce indicates whether subtyping should allow
-          coercion to or from dynamic. For coercion to dynamic, types that implement
-          dynamic are considered sub-types of dynamic. For coercion from dynamic,
-          dynamic is treated as a sub-type of all types. *)
-    on_error: Typing_error.Reasons_callback.t option;
-    tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
-        (** This is used for better error reporting to flag violated
-          constraints on type parameters, if any. *)
-    is_coeffect: bool;
-        (** A flag which, if set, indicates that coeffects are being subtyped.
-          Note: this is a short-term solution to provide coeffects.pretty-printing of
-          `locl_ty`s that represent coeffects, since there is no good way to
-          tell apart coeffects from regular types *)
-    log_level: int;
-        (** Which level the recursive calls to simplify_subtype should be logged at *)
-    in_transitive_closure: bool;
-        (** This is a subtype check from within transitive closure
-          e.g. string <: #1 <: int doing string <: int *)
-  }
-
-  let set_on_error t on_error = { t with on_error }
-
-  let set_visited t visited = { t with visited }
-
-  let coercing_from_dynamic se =
-    match se.coerce with
-    | Some TL.CoerceFromDynamic -> true
-    | _ -> false
-
-  let coercing_to_dynamic se =
-    match se.coerce with
-    | Some TL.CoerceToDynamic -> true
-    | _ -> false
-
-  let set_coercing_to_dynamic se = { se with coerce = Some TL.CoerceToDynamic }
-
-  let create
-      ?(require_soundness = true)
-      ?(require_completeness = false)
-      ?(no_top_bottom = false)
-      ?(coerce = None)
-      ?(is_coeffect = false)
-      ?(in_transitive_closure = false)
-      ~(log_level : int)
-      on_error =
-    {
-      require_soundness;
-      require_completeness;
-      visited = VisitedGoals.empty;
-      no_top_bottom;
-      coerce;
-      is_coeffect;
-      on_error;
-      tparam_constraints = [];
-      log_level;
-      in_transitive_closure;
-    }
-
-  let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
-    {
-      subtype_env with
-      tparam_constraints =
-        (match (r_super, r_sub) with
-        | (Reason.Rcstr_on_generics (p, tparam), _)
-        | (_, Reason.Rcstr_on_generics (p, tparam)) ->
-          (match subtype_env.tparam_constraints with
-          | (p_prev, tparam_prev) :: _
-            when Pos_or_decl.equal p p_prev
-                 && Typing_defs.equal_pos_id tparam tparam_prev ->
-            (* since tparam_constraints is used for error reporting, it's
-             * unnecessary to add duplicates. *)
-            subtype_env.tparam_constraints
-          | _ -> (p, tparam) :: subtype_env.tparam_constraints)
-        | _ -> subtype_env.tparam_constraints);
-    }
-end
-
-module Logging = struct
-  (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
-   * and add to the accumulated constraints in `constraints` any necessary and
-   * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
-   *   ty_sub <: ty_super iff t1 ck1 u1, ..., tn ckn un
-   * where ck is `as` or `=`. Essentially we are making solution-preserving
-   * simplifications to the subtype assertion, for now, also generating equalities
-   * as well as subtype assertions, for backwards compatibility with use of
-   * unification.
-   *
-   * If `constraints = []` is returned then the subtype assertion is valid.
-   *
-   * If the subtype assertion is unsatisfiable then return `failed = Some f`
-   * where `f` is a `unit-> unit` function that records an error message.
-   * (Sometimes we don't want to call this function e.g. when just checking if
-   *  a subtype holds)
-   *
-   * Elide singleton unions, treat invariant generics as both-ways
-   * subtypes, and actually chase hierarchy for extends and implements.
-   *
-   * Annoyingly, we need to pass env back too, because Typing_phase.localize
-   * expands type constants. (TODO: work out a better way of handling this)
-   *
-   * Special cases:
-   *   If assertion is valid (e.g. string <: arraykey) then
-   *     result can be the empty list (i.e. nothing is added to the result)
-   *   If assertion is unsatisfiable (e.g. arraykey <: string) then
-   *     we record this in the failed field of the result.
-   *)
-
-  let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
-    Typing_log.(
-      log_with_level env "sub" ~level (fun () ->
-          let types =
-            [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
-          in
-          let types =
-            Option.value_map this_ty ~default:types ~f:(fun ty ->
-                Log_type ("this_ty", ty) :: types)
-          in
-          if
-            level >= 3
-            || not
-                 (TUtils.is_capability_i ty_sub
-                 || TUtils.is_capability_i ty_super)
-          then
-            log_types
-              (Reason.to_pos (reason ty_sub))
-              env
-              [Log_head (function_name, types)]
-          else
-            ()))
-
-  let log_subtype ~this_ty ~function_name env ty_sub ty_super =
-    log_subtype_i
-      ~this_ty
-      ~function_name
-      env
-      (LoclType ty_sub)
-      (LoclType ty_super)
-end
-
-module Subtype_negation = struct
-  let is_tprim_disjoint tp1 tp2 =
-    let one_side tp1 tp2 =
-      Aast_defs.(
-        match (tp1, tp2) with
-        | (Tnum, Tint)
-        | (Tnum, Tfloat)
-        | (Tarraykey, Tint)
-        | (Tarraykey, Tstring)
-        | (Tarraykey, Tnum) ->
-          false
-        | ( _,
-            ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
-            | Tresource | Tnoreturn ) ) ->
-          true)
-    in
-    (not (Aast_defs.equal_tprim tp1 tp2))
-    && one_side tp1 tp2
-    && one_side tp2 tp1
-
-  (* Two classes c1 and c2 are disjoint iff there exists no c3 such that
-     c3 <: c1 and c3 <: c2. *)
-  let is_class_disjoint env c1 c2 =
-    let is_interface_or_trait c_def =
-      Ast_defs.(
-        match Cls.kind c_def with
-        | Cinterface
-        | Ctrait ->
-          true
-        | Cclass _
-        | Cenum_class _
-        | Cenum ->
-          false)
-    in
-    if String.equal c1 c2 then
-      false
-    else
-      match (Env.get_class env c1, Env.get_class env c2) with
-      | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
-        let is_disjoint =
-          if Cls.final c1_def then
-            (* if c1 is final, then c3 would have to be equal to c1 *)
-            not (Cls.has_ancestor c1_def c2)
-          else if Cls.final c2_def then
-            (* if c2 is final, then c3 would have to be equal to c2 *)
-            not (Cls.has_ancestor c2_def c1)
-          else
-            (* Given two non-final classes, if either is an interface or trait, then
-               there could be a c3, and so we consider the classes to not be disjoint.
-               However, if they are both classes, then c3 must be either c1 or c2 since
-               we don't have multiple inheritance. *)
-            (not (is_interface_or_trait c1_def))
-            && (not (is_interface_or_trait c2_def))
-            && (not (Cls.has_ancestor c2_def c1))
-            && not (Cls.has_ancestor c1_def c2)
-        in
-        if is_disjoint then (
-          (* We've used the facts that 'c1 is not a subtype of c2'
-           * and 'c2 is not a subtype of c1' to conclude that a type is nothing
-           * and therefore a bunch of things typecheck.
-           * If these facts get invalidated by a decl change,
-           * e.g. adding c2 as a parent of c1, we'd therefore need
-           * to recheck the current def. *)
-          Typing_env.add_not_subtype_dep env c1;
-          Typing_env.add_not_subtype_dep env c2;
-          ()
-        );
-        is_disjoint
-      | _ ->
-        (* This is a decl error that should have already been caught *)
-        false
-
-  (** [negate_ak_null_type env r ty] performs type negation similar to
-  TUtils.negate_type, but restricted to arraykey and null (and their
-  negations). *)
-  let negate_ak_null_type env r ty =
-    let (env, ty) = Env.expand_type env ty in
-    let neg_ty =
-      match get_node ty with
-      | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
-      | Tneg (Neg_prim Aast.Tarraykey) ->
-        Some (MakeType.prim_type r Aast.Tarraykey)
-      | Tnonnull -> Some (MakeType.null r)
-      | _ -> None
-    in
-    (env, neg_ty)
-
-  let find_type_with_exact_negation env tyl =
-    let rec find env tyl acc_tyl =
-      match tyl with
-      | [] -> (env, None, acc_tyl)
-      | ty :: tyl' ->
-        let (env, neg_ty) = negate_ak_null_type env (get_reason ty) ty in
-        (match neg_ty with
-        | None -> find env tyl' (ty :: acc_tyl)
-        | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
-    in
-    find env tyl []
-end
-
 module Pretty : sig
   val describe_ty_default :
     Typing_env_types.env -> Typing_defs.internal_type -> string
@@ -520,6 +266,319 @@ end = struct
         Markdown_lite.md_codify
           (Typing_print.with_blank_tyvars (fun () ->
                Typing_print.full_strip_ns_i env (ConstraintType ty))))
+end
+
+module Subtype_env = struct
+  type t = {
+    require_soundness: bool;
+        (** If set, requires the simplification of subtype constraints to be sound,
+          meaning that the simplified constraint must imply the original one. *)
+    require_completeness: bool;
+        (** If set, requires the simplification of subtype constraints to be complete,
+          meaning that the original constraint must imply the simplified one.
+          If set, we also finish as soon as we see a goal of the form T <: t or
+          t <: T for generic parameter T *)
+    visited: VisitedGoals.t;
+        (** If above is not set, maintain a visited goal set *)
+    no_top_bottom: bool;
+    coerce: TL.coercion_direction option;
+        (** Coerce indicates whether subtyping should allow
+          coercion to or from dynamic. For coercion to dynamic, types that implement
+          dynamic are considered sub-types of dynamic. For coercion from dynamic,
+          dynamic is treated as a sub-type of all types. *)
+    on_error: Typing_error.Reasons_callback.t option;
+    tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
+        (** This is used for better error reporting to flag violated
+          constraints on type parameters, if any. *)
+    is_coeffect: bool;
+        (** A flag which, if set, indicates that coeffects are being subtyped.
+          Note: this is a short-term solution to provide coeffects.pretty-printing of
+          `locl_ty`s that represent coeffects, since there is no good way to
+          tell apart coeffects from regular types *)
+    log_level: int;
+        (** Which level the recursive calls to simplify_subtype should be logged at *)
+    in_transitive_closure: bool;
+        (** This is a subtype check from within transitive closure
+          e.g. string <: #1 <: int doing string <: int *)
+  }
+
+  let set_on_error t on_error = { t with on_error }
+
+  let set_visited t visited = { t with visited }
+
+  let coercing_from_dynamic se =
+    match se.coerce with
+    | Some TL.CoerceFromDynamic -> true
+    | _ -> false
+
+  let coercing_to_dynamic se =
+    match se.coerce with
+    | Some TL.CoerceToDynamic -> true
+    | _ -> false
+
+  let set_coercing_to_dynamic se = { se with coerce = Some TL.CoerceToDynamic }
+
+  let create
+      ?(require_soundness = true)
+      ?(require_completeness = false)
+      ?(no_top_bottom = false)
+      ?(coerce = None)
+      ?(is_coeffect = false)
+      ?(in_transitive_closure = false)
+      ~(log_level : int)
+      on_error =
+    {
+      require_soundness;
+      require_completeness;
+      visited = VisitedGoals.empty;
+      no_top_bottom;
+      coerce;
+      is_coeffect;
+      on_error;
+      tparam_constraints = [];
+      log_level;
+      in_transitive_closure;
+    }
+
+  let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
+    {
+      subtype_env with
+      tparam_constraints =
+        (match (r_super, r_sub) with
+        | (Reason.Rcstr_on_generics (p, tparam), _)
+        | (_, Reason.Rcstr_on_generics (p, tparam)) ->
+          (match subtype_env.tparam_constraints with
+          | (p_prev, tparam_prev) :: _
+            when Pos_or_decl.equal p p_prev
+                 && Typing_defs.equal_pos_id tparam tparam_prev ->
+            (* since tparam_constraints is used for error reporting, it's
+             * unnecessary to add duplicates. *)
+            subtype_env.tparam_constraints
+          | _ -> (p, tparam) :: subtype_env.tparam_constraints)
+        | _ -> subtype_env.tparam_constraints);
+    }
+
+  let mk_secondary_error { tparam_constraints; is_coeffect; _ } ty_sub ty_super
+      =
+    match tparam_constraints with
+    | [] ->
+      let (ty_sub, ty_sup, stripped_existential) =
+        match Pretty.strip_existential ~ity_sub:ty_sub ~ity_sup:ty_super with
+        | None -> (ty_sub, ty_super, false)
+        | Some (ty_sub, ty_super) -> (ty_sub, ty_super, true)
+      in
+      Typing_error.Secondary.Subtyping_error
+        { ty_sub; ty_sup; is_coeffect; stripped_existential }
+    | cstrs ->
+      Typing_error.Secondary.Violated_constraint
+        { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }
+
+  let fail t ~ty_sub ~ty_super =
+    let secondary_error = mk_secondary_error t ty_sub ty_super in
+    match t.tparam_constraints with
+    | [] ->
+      Option.map
+        t.on_error
+        ~f:
+          Typing_error.(
+            fun on_error ->
+              apply_reasons
+                ~on_error:(Reasons_callback.retain_code on_error)
+                secondary_error)
+    | _ ->
+      Option.map
+        t.on_error
+        ~f:
+          Typing_error.(
+            (fun on_error -> apply_reasons ~on_error secondary_error))
+
+  let fail_with_suffix t ~ty_sub ~ty_super suffix =
+    let secondary_error = mk_secondary_error t ty_sub ty_super in
+    match t.tparam_constraints with
+    | [] ->
+      Option.map
+        t.on_error
+        ~f:
+          Typing_error.(
+            fun on_error ->
+              apply_reasons
+                ~on_error:
+                  Reasons_callback.(
+                    prepend_on_apply (retain_code on_error) secondary_error)
+                suffix)
+    | _ ->
+      Option.map
+        t.on_error
+        ~f:
+          Typing_error.(
+            fun on_error ->
+              apply_reasons
+                ~on_error:
+                  Reasons_callback.(prepend_on_apply on_error secondary_error)
+                suffix)
+end
+
+module Logging = struct
+  (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
+   * and add to the accumulated constraints in `constraints` any necessary and
+   * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
+   *   ty_sub <: ty_super iff t1 ck1 u1, ..., tn ckn un
+   * where ck is `as` or `=`. Essentially we are making solution-preserving
+   * simplifications to the subtype assertion, for now, also generating equalities
+   * as well as subtype assertions, for backwards compatibility with use of
+   * unification.
+   *
+   * If `constraints = []` is returned then the subtype assertion is valid.
+   *
+   * If the subtype assertion is unsatisfiable then return `failed = Some f`
+   * where `f` is a `unit-> unit` function that records an error message.
+   * (Sometimes we don't want to call this function e.g. when just checking if
+   *  a subtype holds)
+   *
+   * Elide singleton unions, treat invariant generics as both-ways
+   * subtypes, and actually chase hierarchy for extends and implements.
+   *
+   * Annoyingly, we need to pass env back too, because Typing_phase.localize
+   * expands type constants. (TODO: work out a better way of handling this)
+   *
+   * Special cases:
+   *   If assertion is valid (e.g. string <: arraykey) then
+   *     result can be the empty list (i.e. nothing is added to the result)
+   *   If assertion is unsatisfiable (e.g. arraykey <: string) then
+   *     we record this in the failed field of the result.
+   *)
+
+  let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
+    Typing_log.(
+      log_with_level env "sub" ~level (fun () ->
+          let types =
+            [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
+          in
+          let types =
+            Option.value_map this_ty ~default:types ~f:(fun ty ->
+                Log_type ("this_ty", ty) :: types)
+          in
+          if
+            level >= 3
+            || not
+                 (TUtils.is_capability_i ty_sub
+                 || TUtils.is_capability_i ty_super)
+          then
+            log_types
+              (Reason.to_pos (reason ty_sub))
+              env
+              [Log_head (function_name, types)]
+          else
+            ()))
+
+  let log_subtype ~this_ty ~function_name env ty_sub ty_super =
+    log_subtype_i
+      ~this_ty
+      ~function_name
+      env
+      (LoclType ty_sub)
+      (LoclType ty_super)
+end
+
+module Subtype_negation = struct
+  let is_tprim_disjoint tp1 tp2 =
+    let one_side tp1 tp2 =
+      Aast_defs.(
+        match (tp1, tp2) with
+        | (Tnum, Tint)
+        | (Tnum, Tfloat)
+        | (Tarraykey, Tint)
+        | (Tarraykey, Tstring)
+        | (Tarraykey, Tnum) ->
+          false
+        | ( _,
+            ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
+            | Tresource | Tnoreturn ) ) ->
+          true)
+    in
+    (not (Aast_defs.equal_tprim tp1 tp2))
+    && one_side tp1 tp2
+    && one_side tp2 tp1
+
+  (* Two classes c1 and c2 are disjoint iff there exists no c3 such that
+     c3 <: c1 and c3 <: c2. *)
+  let is_class_disjoint env c1 c2 =
+    let is_interface_or_trait c_def =
+      Ast_defs.(
+        match Cls.kind c_def with
+        | Cinterface
+        | Ctrait ->
+          true
+        | Cclass _
+        | Cenum_class _
+        | Cenum ->
+          false)
+    in
+    if String.equal c1 c2 then
+      false
+    else
+      match (Env.get_class env c1, Env.get_class env c2) with
+      | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
+        let is_disjoint =
+          if Cls.final c1_def then
+            (* if c1 is final, then c3 would have to be equal to c1 *)
+            not (Cls.has_ancestor c1_def c2)
+          else if Cls.final c2_def then
+            (* if c2 is final, then c3 would have to be equal to c2 *)
+            not (Cls.has_ancestor c2_def c1)
+          else
+            (* Given two non-final classes, if either is an interface or trait, then
+               there could be a c3, and so we consider the classes to not be disjoint.
+               However, if they are both classes, then c3 must be either c1 or c2 since
+               we don't have multiple inheritance. *)
+            (not (is_interface_or_trait c1_def))
+            && (not (is_interface_or_trait c2_def))
+            && (not (Cls.has_ancestor c2_def c1))
+            && not (Cls.has_ancestor c1_def c2)
+        in
+        if is_disjoint then (
+          (* We've used the facts that 'c1 is not a subtype of c2'
+           * and 'c2 is not a subtype of c1' to conclude that a type is nothing
+           * and therefore a bunch of things typecheck.
+           * If these facts get invalidated by a decl change,
+           * e.g. adding c2 as a parent of c1, we'd therefore need
+           * to recheck the current def. *)
+          Typing_env.add_not_subtype_dep env c1;
+          Typing_env.add_not_subtype_dep env c2;
+          ()
+        );
+        is_disjoint
+      | _ ->
+        (* This is a decl error that should have already been caught *)
+        false
+
+  (** [negate_ak_null_type env r ty] performs type negation similar to
+  TUtils.negate_type, but restricted to arraykey and null (and their
+  negations). *)
+  let negate_ak_null_type env r ty =
+    let (env, ty) = Env.expand_type env ty in
+    let neg_ty =
+      match get_node ty with
+      | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
+      | Tneg (Neg_prim Aast.Tarraykey) ->
+        Some (MakeType.prim_type r Aast.Tarraykey)
+      | Tnonnull -> Some (MakeType.null r)
+      | _ -> None
+    in
+    (env, neg_ty)
+
+  let find_type_with_exact_negation env tyl =
+    let rec find env tyl acc_tyl =
+      match tyl with
+      | [] -> (env, None, acc_tyl)
+      | ty :: tyl' ->
+        let (env, neg_ty) = negate_ak_null_type env (get_reason ty) ty in
+        (match neg_ty with
+        | None -> find env tyl' (ty :: acc_tyl)
+        | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
+    in
+    find env tyl []
 end
 
 let get_tyvar_opt t =
@@ -988,52 +1047,12 @@ end = struct
       ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
       ~rhs:{ super_supportdyn; super_like; ty_super = lty_super }
       env : env * TL.subtype_prop =
-    let fail_snd_err =
-      let (ity_sub, ity_super, stripped_existential) =
-        match
-          Pretty.strip_existential ~ity_sub ~ity_sup:(LoclType lty_super)
-        with
-        | None -> (ity_sub, LoclType lty_super, false)
-        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
-      in
-      match subtype_env.Subtype_env.tparam_constraints with
-      | [] ->
-        Typing_error.Secondary.Subtyping_error
-          {
-            ty_sub = ity_sub;
-            ty_sup = ity_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-            stripped_existential;
-          }
-      | cstrs ->
-        Typing_error.Secondary.Violated_constraint
-          {
-            cstrs;
-            ty_sub = ity_sub;
-            ty_sup = ity_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-          }
+    let fail =
+      Subtype_env.fail
+        subtype_env
+        ~ty_sub:ity_sub
+        ~ty_super:(LoclType lty_super)
     in
-    let fail_with_suffix snd_err_opt =
-      let open Typing_error in
-      let maybe_retain_code =
-        match subtype_env.Subtype_env.tparam_constraints with
-        | [] -> Reasons_callback.retain_code
-        | _ -> Fn.id
-      in
-      match snd_err_opt with
-      | Some snd_err ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons
-              ~on_error:
-                Reasons_callback.(
-                  prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
-              snd_err)
-      | _ ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
-    in
-    let fail = fail_with_suffix None in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
     (* We don't know whether the assertion is valid or not *)
@@ -1473,51 +1492,6 @@ end = struct
         ~r_sub:(reason ty_sub)
         ~r_super:(reason ty_super)
     in
-    let fail_snd_err =
-      let (ety_sub, ety_super, stripped_existential) =
-        match Pretty.strip_existential ~ity_sub:ty_sub ~ity_sup:ty_super with
-        | None -> (ty_sub, ty_super, false)
-        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
-      in
-      match subtype_env.Subtype_env.tparam_constraints with
-      | [] ->
-        Typing_error.Secondary.Subtyping_error
-          {
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-            stripped_existential;
-          }
-      | cstrs ->
-        Typing_error.Secondary.Violated_constraint
-          {
-            cstrs;
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-          }
-    in
-    let fail_with_suffix snd_err_opt =
-      let open Typing_error in
-      let maybe_retain_code =
-        match subtype_env.Subtype_env.tparam_constraints with
-        | [] -> Reasons_callback.retain_code
-        | _ -> Fn.id
-      in
-      match snd_err_opt with
-      | Some snd_err ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons
-              ~on_error:
-                Reasons_callback.(
-                  prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
-              snd_err)
-      | _ ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
-    in
-
-    let fail = fail_with_suffix None in
     match ty_super with
     (* First deal with internal constraint types *)
     | ConstraintType cty_super ->
@@ -1525,7 +1499,7 @@ end = struct
         simplify
           ~subtype_env
           ~this_ty
-          ~fail
+          ~fail:(Subtype_env.fail subtype_env ~ty_sub ~ty_super)
           ~lhs:{ ty_sub; sub_supportdyn = lhs.sub_supportdyn }
           ~rhs:
             {
@@ -1537,11 +1511,8 @@ end = struct
       (* Next deal with all locl types *)
     | LoclType lty_super ->
       simplify_subtype_locl_super
-        ~subtype_env (* ~sub_supportdyn *)
+        ~subtype_env
         ~this_ty
-          (* ~super_like
-             ~super_supportdyn *)
-          (* ity_sub *)
         ~lhs
         ~rhs:{ rhs with ty_super = lty_super }
         env
@@ -2309,56 +2280,18 @@ end = struct
       (r_super, (dep_ty_sup, bound_sup))
       env =
     let lty_super = mk (r_super, Tdependent (dep_ty_sup, bound_sup)) in
-
-    let fail_snd_err =
-      let (ity_sub, ity_super, stripped_existential) =
-        match
-          Pretty.strip_existential
-            ~ity_sub:(LoclType lty_sub)
-            ~ity_sup:(LoclType lty_super)
-        with
-        | None -> (LoclType lty_sub, LoclType lty_super, false)
-        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
-      in
-      match subtype_env.Subtype_env.tparam_constraints with
-      | [] ->
-        Typing_error.Secondary.Subtyping_error
-          {
-            ty_sub = ity_sub;
-            ty_sup = ity_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-            stripped_existential;
-          }
-      | cstrs ->
-        Typing_error.Secondary.Violated_constraint
-          {
-            cstrs;
-            ty_sub = ity_sub;
-            ty_sup = ity_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-          }
+    let fail =
+      Subtype_env.fail
+        subtype_env
+        ~ty_sub:(LoclType lty_sub)
+        ~ty_super:(LoclType lty_super)
+    and fail_with_suffix suffix =
+      Subtype_env.fail_with_suffix
+        subtype_env
+        ~ty_sub:(LoclType lty_sub)
+        ~ty_super:(LoclType lty_super)
+        suffix
     in
-    let fail_with_suffix snd_err_opt =
-      let open Typing_error in
-      let maybe_retain_code =
-        match subtype_env.Subtype_env.tparam_constraints with
-        | [] -> Reasons_callback.retain_code
-        | _ -> Fn.id
-      in
-      match snd_err_opt with
-      | Some snd_err ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons
-              ~on_error:
-                Reasons_callback.(
-                  prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
-              snd_err)
-      | _ ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
-    in
-    let fail = fail_with_suffix None in
-    let invalid_env_with env f = invalid ~fail:f env in
 
     let default_subtype_help env =
       Subtype.(
@@ -2403,13 +2336,12 @@ end = struct
           let p = Reason.to_pos r_sub in
           let (pos_super, class_name) = id in
           fail_with_suffix
-            (Some
-               (Typing_error.Secondary.This_final
-                  { pos_super; class_name; pos_sub = p }))
+            (Typing_error.Secondary.This_final
+               { pos_super; class_name; pos_sub = p })
         else
           fail
       in
-      invalid_env_with env fail
+      invalid env ~fail
     | ((_, Tdependent (d_sub, bound_sub)), _) ->
       let this_ty = Option.first_some this_ty (Some lty_sub) in
       (* Dependent types are identical but bound might be different *)
@@ -6546,59 +6478,12 @@ end = struct
     subty_prop_val env &&& subty_prop_key
 
   let mk_fail
-      ~subtype_env
-      ~lhs:{ ty_sub = ity_sub; _ }
-      ~rhs:{ reason_super; can_traverse } =
-    let ity_sup =
+      ~subtype_env ~lhs:{ ty_sub; _ } ~rhs:{ reason_super; can_traverse } =
+    let ty_super =
       ConstraintType
         (mk_constraint_type (reason_super, Tcan_traverse can_traverse))
     in
-    let fail_snd_err =
-      let (ety_sub, ety_super, stripped_existential) =
-        match Pretty.strip_existential ~ity_sub ~ity_sup with
-        | None -> (ity_sub, ity_sup, false)
-        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
-      in
-      match subtype_env.Subtype_env.tparam_constraints with
-      | [] ->
-        Typing_error.Secondary.Subtyping_error
-          {
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-            stripped_existential;
-          }
-      | cstrs ->
-        Typing_error.Secondary.Violated_constraint
-          {
-            cstrs;
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-          }
-    in
-    let fail_with_suffix snd_err_opt =
-      let open Typing_error in
-      let maybe_retain_code =
-        match subtype_env.Subtype_env.tparam_constraints with
-        | [] -> Reasons_callback.retain_code
-        | _ -> Fn.id
-      in
-      match snd_err_opt with
-      | Some snd_err ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons
-              ~on_error:
-                Reasons_callback.(
-                  prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
-              snd_err)
-      | _ ->
-        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-            apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
-    in
-
-    let fail = fail_with_suffix None in
-    fail
+    Subtype_env.fail subtype_env ~ty_sub ~ty_super
 
   let rec simplify
       ~subtype_env

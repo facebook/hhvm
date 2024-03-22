@@ -782,7 +782,16 @@ void HTTPTransaction::onIngressTimeout() {
     if (windowUpdateTimeout) {
       HTTPException ex(
           HTTPException::Direction::INGRESS_AND_EGRESS,
-          folly::to<std::string>("ingress timeout, streamID=", id_));
+          folly::to<std::string>(
+              "ingress timeout, streamID=",
+              id_,
+              ", timeout=",
+              idleTimeout_.has_value()
+                  ? std::chrono::duration_cast<std::chrono::milliseconds>(
+                        idleTimeout_.value())
+                        .count()
+                  : -1,
+              "ms"));
       ex.setProxygenError(kErrorWriteTimeout);
       // This is a protocol error
       ex.setCodecStatusCode(ErrorCode::PROTOCOL_ERROR);
@@ -790,7 +799,16 @@ void HTTPTransaction::onIngressTimeout() {
     } else {
       HTTPException ex(
           HTTPException::Direction::INGRESS,
-          folly::to<std::string>("ingress timeout, streamID=", id_));
+          folly::to<std::string>(
+              "ingress timeout, streamID=",
+              id_,
+              ", timeout=",
+              idleTimeout_.has_value()
+                  ? std::chrono::duration_cast<std::chrono::milliseconds>(
+                        idleTimeout_.value())
+                        .count()
+                  : -1,
+              "ms"));
       ex.setProxygenError(kErrorTimeout);
       onError(ex);
     }

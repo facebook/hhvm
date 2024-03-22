@@ -2847,7 +2847,12 @@ TEST_F(HTTP2DownstreamSessionTest, H2TimeoutWin) {
   handler->expectEgressPaused();
   handler->expectError([&](const HTTPException& ex) {
     ASSERT_EQ(ex.getProxygenError(), kErrorWriteTimeout);
-    ASSERT_EQ(folly::to<std::string>("ingress timeout, streamID=", streamID),
+    ASSERT_EQ(folly::to<std::string>(
+                  "ingress timeout, streamID=",
+                  streamID,
+                  ", timeout=",
+                  transactionTimeouts_->getDefaultTimeout().count(),
+                  "ms"),
               std::string(ex.what()));
     handler->terminate();
   });
@@ -4150,7 +4155,12 @@ TEST_F(HTTP2DownstreamSessionTest, TestTransactionStallByFlowControl) {
 
   handler->expectError([&](const HTTPException& ex) {
     ASSERT_EQ(ex.getProxygenError(), kErrorWriteTimeout);
-    ASSERT_EQ(folly::to<std::string>("ingress timeout, streamID=", streamID),
+    ASSERT_EQ(folly::to<std::string>(
+                  "ingress timeout, streamID=",
+                  streamID,
+                  ", timeout=",
+                  transactionTimeouts_->getDefaultTimeout().count(),
+                  "ms"),
               std::string(ex.what()));
     handler->terminate();
   });

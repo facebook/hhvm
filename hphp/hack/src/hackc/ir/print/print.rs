@@ -297,7 +297,7 @@ fn print_call_async(
 }
 
 fn print_class(w: &mut dyn Write, class: &Class) -> Result {
-    print_top_level_loc(w, Some(&class.src_loc))?;
+    print_top_level_loc(w, Some(&SrcLoc::from_span(&class.span)))?;
     writeln!(
         w,
         "class {} {} {{",

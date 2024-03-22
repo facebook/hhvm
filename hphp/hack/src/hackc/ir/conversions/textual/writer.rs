@@ -109,7 +109,7 @@ enum Thing {
 impl Thing {
     fn line(&self) -> usize {
         match self {
-            Thing::Class(c) => c.src_loc.line_begin as usize,
+            Thing::Class(c) => c.span.line_begin as usize,
             Thing::Func(f) => f.func.span.line_begin as usize,
         }
     }

@@ -20,7 +20,7 @@ pub(crate) fn convert_class(unit: &mut ir::Unit, cls: &Class) {
         name: cls.name,
         properties: cls.properties.clone().into(),
         requirements: cls.requirements.clone().into(),
-        src_loc: ir::SrcLoc::from_span(&cls.span),
+        span: cls.span,
         type_constants: cls.type_constants.clone().into(),
         upper_bounds: cls.upper_bounds.clone().into(),
         uses: cls.uses.clone().into(),

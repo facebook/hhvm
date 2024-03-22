@@ -43,7 +43,7 @@ impl ClassParser {
 
         let name = ClassName::from_utf8(&name.0)?;
 
-        let src_loc = unit_state.get_cur_src_loc();
+        let span = unit_state.get_cur_src_loc().to_span();
 
         let mut state = ClassParser {
             class: Class {
@@ -60,7 +60,7 @@ impl ClassParser {
                 name,
                 properties: Default::default(),
                 requirements: Default::default(),
-                src_loc,
+                span,
                 type_constants: Default::default(),
                 upper_bounds: Default::default(),
                 uses: Default::default(),

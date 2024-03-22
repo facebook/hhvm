@@ -100,7 +100,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         name: a_name,
         properties: a_properties,
         requirements: a_requirements,
-        src_loc: a_src_loc,
+        span: a_span,
         type_constants: a_type_constants,
         upper_bounds: a_upper_bounds,
         uses: a_uses,
@@ -119,7 +119,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
         name: b_name,
         properties: b_properties,
         requirements: b_requirements,
-        src_loc: b_src_loc,
+        span: b_span,
         type_constants: b_type_constants,
         upper_bounds: b_upper_bounds,
         uses: b_uses,
@@ -138,7 +138,7 @@ fn cmp_class(a: &Class, b: &Class) -> Result {
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_map_t(a_properties, b_properties, cmp_property).qualified("properties")?;
     cmp_slice(a_requirements, b_requirements, cmp_requirement).qualified("requirements")?;
-    cmp_src_loc(a_src_loc, b_src_loc).qualified("src_loc")?;
+    cmp_span(a_span, b_span).qualified("span")?;
     cmp_slice(a_type_constants, b_type_constants, cmp_type_constant).qualified("type_constants")?;
     cmp_slice(a_upper_bounds, b_upper_bounds, cmp_upper_bounds).qualified("upper_bounds")?;
     cmp_slice(a_uses.iter(), b_uses.iter(), cmp_eq).qualified("uses")?;

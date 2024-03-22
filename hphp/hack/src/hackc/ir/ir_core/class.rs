@@ -12,7 +12,7 @@ use crate::Method;
 use crate::PropName;
 use crate::Property;
 use crate::Requirement;
-use crate::SrcLoc;
+use crate::Span;
 use crate::TypeConstant;
 use crate::TypeInfo;
 use crate::UpperBound;
@@ -54,7 +54,7 @@ pub struct Class {
     pub name: ClassName,
     pub properties: Vec<Property>,
     pub requirements: Vec<Requirement>,
-    pub src_loc: SrcLoc,
+    pub span: Span,
     pub type_constants: Vec<TypeConstant>,
 
     /// For class generics the upper bounds of each generic.

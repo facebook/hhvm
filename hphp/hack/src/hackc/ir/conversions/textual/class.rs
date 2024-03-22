@@ -152,7 +152,7 @@ impl ClassState<'_, '_> {
         let cname = TypeName::class(self.class.name, is_static);
         self.txf.define_type(
             &cname,
-            Some(&self.class.src_loc),
+            Some(&ir::SrcLoc::from_span(&self.class.span)),
             extends.iter(),
             fields.into_iter(),
             metadata.iter().map(|(k, v)| (*k, v)),
@@ -261,7 +261,7 @@ impl ClassState<'_, '_> {
 
         self.txf.define_function(
             &name,
-            Some(&self.class.src_loc),
+            Some(&ir::SrcLoc::from_span(&self.class.span)),
             &attributes,
             &coeffects,
             &params,

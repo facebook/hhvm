@@ -134,6 +134,14 @@ cdef api object construct__test__fixtures__python_capi__module__MyStructEnsureSt
 
 cdef api object init__test__fixtures__python_capi__module__MyStructEnsureStruct(object data)
 
+cdef api int can_extract__test__fixtures__python_capi__module__MyStructSafePatch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyStructSafePatch(object) except NULL
+
+cdef api object construct__test__fixtures__python_capi__module__MyStructSafePatch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__python_capi__module__MyStructSafePatch(object data)
+
 cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemPatch(object) except -1
 
 cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemPatch(object) except NULL
@@ -157,6 +165,14 @@ cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemEnsur
 cdef api object construct__test__fixtures__python_capi__module__MyDataItemEnsureStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__python_capi__module__MyDataItemEnsureStruct(object data)
+
+cdef api int can_extract__test__fixtures__python_capi__module__MyDataItemSafePatch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__python_capi__module__MyDataItemSafePatch(object) except NULL
+
+cdef api object construct__test__fixtures__python_capi__module__MyDataItemSafePatch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__python_capi__module__MyDataItemSafePatch(object data)
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyEnum(object) except -1
 

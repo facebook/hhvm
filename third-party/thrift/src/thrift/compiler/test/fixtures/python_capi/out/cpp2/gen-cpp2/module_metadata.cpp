@@ -617,6 +617,32 @@ StructMetadata<::test::fixtures::python_capi::MyStructEnsureStruct>::gen(ThriftM
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::MyStructSafePatch>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyStructSafePatch", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyStructSafePatch = res.first->second;
+  module_MyStructSafePatch.name() = "module.MyStructSafePatch";
+  module_MyStructSafePatch.is_union() = false;
+  static const auto* const
+  module_MyStructSafePatch_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "version", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MyStructSafePatch_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyStructSafePatch.fields()->push_back(std::move(field));
+  }
+  module_MyStructSafePatch.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MyDataItemPatchStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyDataItemPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -694,6 +720,32 @@ StructMetadata<::test::fixtures::python_capi::MyDataItemEnsureStruct>::gen(Thrif
     module_MyDataItemEnsureStruct.fields()->push_back(std::move(field));
   }
   module_MyDataItemEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::MyDataItemSafePatch>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyDataItemSafePatch", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataItemSafePatch = res.first->second;
+  module_MyDataItemSafePatch.name() = "module.MyDataItemSafePatch";
+  module_MyDataItemSafePatch.is_union() = false;
+  static const auto* const
+  module_MyDataItemSafePatch_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "version", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MyDataItemSafePatch_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyDataItemSafePatch.fields()->push_back(std::move(field));
+  }
+  module_MyDataItemSafePatch.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 

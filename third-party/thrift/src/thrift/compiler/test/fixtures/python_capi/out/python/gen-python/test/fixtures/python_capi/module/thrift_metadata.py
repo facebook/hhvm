@@ -852,6 +852,34 @@ def gen_metadata_struct_MyStructEnsureStruct() -> _fbthrift_metadata.ThriftMetad
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_MyStructSafePatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyStructSafePatch"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="version", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="data", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+     # version
+     # data
+
+    return new_struct
+def gen_metadata_struct_MyStructSafePatch() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_MyStructSafePatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_MyDataItemPatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.MyDataItemPatch"
 
@@ -942,6 +970,34 @@ def _fbthrift_gen_metadata_struct_MyDataItemEnsureStruct(metadata_struct: _fbthr
 def gen_metadata_struct_MyDataItemEnsureStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyDataItemEnsureStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_MyDataItemSafePatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyDataItemSafePatch"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="version", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="data", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+     # version
+     # data
+
+    return new_struct
+def gen_metadata_struct_MyDataItemSafePatch() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_MyDataItemSafePatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
 
 
 def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
@@ -1003,7 +1059,9 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_struct_MyStructField8Patch(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructFieldPatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyStructEnsureStruct(meta)
+    meta = _fbthrift_gen_metadata_struct_MyStructSafePatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemPatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemFieldPatch(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItemEnsureStruct(meta)
+    meta = _fbthrift_gen_metadata_struct_MyDataItemSafePatch(meta)
     return meta

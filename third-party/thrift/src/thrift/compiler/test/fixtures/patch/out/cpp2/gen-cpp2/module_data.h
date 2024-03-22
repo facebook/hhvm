@@ -257,6 +257,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruc
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::MyDataSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
   static constexpr const std::size_t fields_size = 6;
   static const std::string_view name;
@@ -305,6 +321,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyDataWithCustomD
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct> {
   static constexpr const std::size_t fields_size = 5;
   static const std::string_view name;
@@ -337,6 +369,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPa
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct> {
   static constexpr const std::size_t fields_size = 5;
   static const std::string_view name;
@@ -355,6 +403,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruc
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct> {
   static constexpr const std::size_t fields_size = 3;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -545,6 +609,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructEnsureStr
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct> {
   static constexpr const std::size_t fields_size = 6;
   static const std::string_view name;
@@ -579,6 +659,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::LateDefStructFiel
 
 template <> struct TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct> {
   static constexpr const std::size_t fields_size = 0;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -657,6 +753,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::RecursiveEnsureSt
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::BarPatchStruct> {
   static constexpr const std::size_t fields_size = 6;
   static const std::string_view name;
@@ -705,7 +817,39 @@ template <> struct TStructDataStorage<::test::fixtures::patch::BarEnsureStruct> 
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::BarSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::LoopPatchStruct> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::patch::LoopSafePatch> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -803,6 +947,22 @@ template <> struct TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPat
 
 template <> struct TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct> {
   static constexpr const std::size_t fields_size = 7;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch> {
+  static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

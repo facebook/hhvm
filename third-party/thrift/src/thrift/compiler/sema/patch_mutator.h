@@ -107,6 +107,8 @@ class patch_generator {
 
   t_struct& add_ensure_struct(const t_const& annot, t_structured& node);
 
+  t_struct& add_safe_patch(const t_const& annot, t_structured& node);
+
  private:
   friend class PatchGeneratorTest;
 

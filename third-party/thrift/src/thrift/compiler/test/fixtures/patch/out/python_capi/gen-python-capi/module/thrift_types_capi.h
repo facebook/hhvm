@@ -396,6 +396,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::MyDataSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::MyDataSafePatch> {
+  ExtractorResult<::test::fixtures::patch::MyDataSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::MyDataSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::MyDataSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::MyDataSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::MyDataSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::MyDataSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
   ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> operator()(PyObject* obj);
@@ -483,6 +512,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::MyDataWithCustomDefaultSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::InnerUnionPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::InnerUnionPatchStruct> {
   ExtractorResult<::test::fixtures::patch::InnerUnionPatchStruct> operator()(PyObject* obj);
@@ -541,6 +599,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::InnerUnionSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::InnerUnionSafePatch> {
+  ExtractorResult<::test::fixtures::patch::InnerUnionSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::InnerUnionSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::InnerUnionSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::InnerUnionSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::InnerUnionSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::InnerUnionSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::InnerUnionSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::InnerUnionSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::InnerUnionSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::InnerUnionSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::MyUnionPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::MyUnionPatchStruct> {
   ExtractorResult<::test::fixtures::patch::MyUnionPatchStruct> operator()(PyObject* obj);
@@ -596,6 +683,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyUnionFieldPatchStruct>> {
   PyObject* operator()(const ::test::fixtures::patch::MyUnionFieldPatchStruct& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::patch::MyUnionSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::MyUnionSafePatch> {
+  ExtractorResult<::test::fixtures::patch::MyUnionSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyUnionSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyUnionSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::MyUnionSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::MyUnionSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::MyUnionSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::MyUnionSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyUnionSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyUnionSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::MyUnionSafePatch& val);
 };
 
 template <>
@@ -918,6 +1034,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::MyStructSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::MyStructSafePatch> {
+  ExtractorResult<::test::fixtures::patch::MyStructSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyStructSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyStructSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::MyStructSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::MyStructSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::MyStructSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::MyStructSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyStructSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyStructSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::MyStructSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::LateDefStructPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::LateDefStructPatchStruct> {
   ExtractorResult<::test::fixtures::patch::LateDefStructPatchStruct> operator()(PyObject* obj);
@@ -1002,6 +1147,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::LateDefStructEnsureStruct>> {
   PyObject* operator()(const ::test::fixtures::patch::LateDefStructEnsureStruct& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::patch::LateDefStructSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::LateDefStructSafePatch> {
+  ExtractorResult<::test::fixtures::patch::LateDefStructSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LateDefStructSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LateDefStructSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::LateDefStructSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::LateDefStructSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::LateDefStructSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::LateDefStructSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LateDefStructSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LateDefStructSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::LateDefStructSafePatch& val);
 };
 
 template <>
@@ -1121,6 +1295,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::RecursiveSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::RecursiveSafePatch> {
+  ExtractorResult<::test::fixtures::patch::RecursiveSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RecursiveSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RecursiveSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::RecursiveSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::RecursiveSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::RecursiveSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::RecursiveSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RecursiveSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RecursiveSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::RecursiveSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::BarPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::BarPatchStruct> {
   ExtractorResult<::test::fixtures::patch::BarPatchStruct> operator()(PyObject* obj);
@@ -1208,6 +1411,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::patch::BarSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::BarSafePatch> {
+  ExtractorResult<::test::fixtures::patch::BarSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::BarSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::BarSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::BarSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::BarSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::BarSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::BarSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::BarSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::BarSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::BarSafePatch& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::patch::LoopPatchStruct>
     : public BaseExtractor<::test::fixtures::patch::LoopPatchStruct> {
   ExtractorResult<::test::fixtures::patch::LoopPatchStruct> operator()(PyObject* obj);
@@ -1234,6 +1466,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::LoopPatchStruct>> {
   PyObject* operator()(const ::test::fixtures::patch::LoopPatchStruct& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::patch::LoopSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::LoopSafePatch> {
+  ExtractorResult<::test::fixtures::patch::LoopSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LoopSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LoopSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::LoopSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::LoopSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::LoopSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::LoopSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LoopSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::LoopSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::LoopSafePatch& val);
 };
 
 template <>
@@ -1408,6 +1669,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::RefFieldsEnsureStruct>> {
   PyObject* operator()(const ::test::fixtures::patch::RefFieldsEnsureStruct& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::patch::RefFieldsSafePatch>
+    : public BaseExtractor<::test::fixtures::patch::RefFieldsSafePatch> {
+  ExtractorResult<::test::fixtures::patch::RefFieldsSafePatch> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RefFieldsSafePatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RefFieldsSafePatch>> {
+  ExtractorResult<::test::fixtures::patch::RefFieldsSafePatch> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::patch::RefFieldsSafePatch>
+    : public BaseConstructor<::test::fixtures::patch::RefFieldsSafePatch> {
+  PyObject* operator()(const ::test::fixtures::patch::RefFieldsSafePatch& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RefFieldsSafePatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::RefFieldsSafePatch>> {
+  PyObject* operator()(const ::test::fixtures::patch::RefFieldsSafePatch& val);
 };
 
 template <>

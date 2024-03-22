@@ -1778,6 +1778,60 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructEnsureStruct, self)
 
 
+class MyStructSafePatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "version",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "data",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructSafePatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/python_capi/MyStructSafePatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructSafePatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructSafePatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructSafePatch, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructSafePatch, self)
+
+
 class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -1957,6 +2011,60 @@ class MyDataItemEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItemEnsureStruct, self)
 
+
+class MyDataItemSafePatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "version",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "data",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyDataItemSafePatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/python_capi/MyDataItemSafePatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyDataItemSafePatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemSafePatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemSafePatch, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItemSafePatch, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.module.thrift_metadata
 
@@ -2056,12 +2164,16 @@ def _fbthrift_metadata__struct_MyStructFieldPatch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructFieldPatch()
 def _fbthrift_metadata__struct_MyStructEnsureStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructEnsureStruct()
+def _fbthrift_metadata__struct_MyStructSafePatch():
+    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyStructSafePatch()
 def _fbthrift_metadata__struct_MyDataItemPatch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemPatch()
 def _fbthrift_metadata__struct_MyDataItemFieldPatch():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemFieldPatch()
 def _fbthrift_metadata__struct_MyDataItemEnsureStruct():
     return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemEnsureStruct()
+def _fbthrift_metadata__struct_MyDataItemSafePatch():
+    return test.fixtures.python_capi.module.thrift_metadata.gen_metadata_struct_MyDataItemSafePatch()
 
 _fbthrift_all_structs = [
     MyStruct,
@@ -2084,9 +2196,11 @@ _fbthrift_all_structs = [
     MyStructField8Patch,
     MyStructFieldPatch,
     MyStructEnsureStruct,
+    MyStructSafePatch,
     MyDataItemPatch,
     MyDataItemFieldPatch,
     MyDataItemEnsureStruct,
+    MyDataItemSafePatch,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 

@@ -2544,6 +2544,80 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   return getThriftData(*obj);
 }
 
+ExtractorResult<::test::fixtures::python_capi::MyStructSafePatch>
+Extractor<::test::fixtures::python_capi::MyStructSafePatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::MyStructSafePatch>(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__python_capi__module__MyStructSafePatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::python_capi::MyStructSafePatch>(
+        "Thrift serialize error: MyStructSafePatch");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::python_capi::MyStructSafePatch>(std::move(val));
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::MyStructSafePatch>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::MyStructSafePatch>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::MyStructSafePatch>(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyStructSafePatch(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::fixtures::python_capi::MyStructSafePatch>(
+          "Init from fbthrift error: MyStructSafePatch");
+  }
+  return Extractor<::test::fixtures::python_capi::MyStructSafePatch>{}(*obj);
+}
+
+int Extractor<::test::fixtures::python_capi::MyStructSafePatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__module__MyStructSafePatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructSafePatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::MyStructSafePatch>::operator()(
+    const ::test::fixtures::python_capi::MyStructSafePatch& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__python_capi__module__MyStructSafePatch(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::MyStructSafePatch>>::operator()(
+    const ::test::fixtures::python_capi::MyStructSafePatch& val) {
+  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::MyStructSafePatch>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 ExtractorResult<::test::fixtures::python_capi::MyDataItemPatchStruct>
 Extractor<::test::fixtures::python_capi::MyDataItemPatchStruct>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -2764,6 +2838,80 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MyDataItemEnsureStruct>>::operator()(
     const ::test::fixtures::python_capi::MyDataItemEnsureStruct& val) {
   auto obj = StrongRef(Constructor<::test::fixtures::python_capi::MyDataItemEnsureStruct>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
+ExtractorResult<::test::fixtures::python_capi::MyDataItemSafePatch>
+Extractor<::test::fixtures::python_capi::MyDataItemSafePatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::MyDataItemSafePatch>(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__python_capi__module__MyDataItemSafePatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::python_capi::MyDataItemSafePatch>(
+        "Thrift serialize error: MyDataItemSafePatch");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::python_capi::MyDataItemSafePatch>(std::move(val));
+}
+
+
+ExtractorResult<::test::fixtures::python_capi::MyDataItemSafePatch>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::MyDataItemSafePatch>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::python_capi::MyDataItemSafePatch>(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  auto obj = StrongRef(init__test__fixtures__python_capi__module__MyDataItemSafePatch(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::fixtures::python_capi::MyDataItemSafePatch>(
+          "Init from fbthrift error: MyDataItemSafePatch");
+  }
+  return Extractor<::test::fixtures::python_capi::MyDataItemSafePatch>{}(*obj);
+}
+
+int Extractor<::test::fixtures::python_capi::MyDataItemSafePatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__module__MyDataItemSafePatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyDataItemSafePatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::MyDataItemSafePatch>::operator()(
+    const ::test::fixtures::python_capi::MyDataItemSafePatch& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__python_capi__module__MyDataItemSafePatch(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::MyDataItemSafePatch>>::operator()(
+    const ::test::fixtures::python_capi::MyDataItemSafePatch& val) {
+  auto obj = StrongRef(Constructor<::test::fixtures::python_capi::MyDataItemSafePatch>{}(val));
   if (!obj) {
     return nullptr;
   }

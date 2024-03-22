@@ -6561,6 +6561,239 @@ func (x *MyDataEnsureStruct) String() string {
     return sb.String()
 }
 
+type MyDataSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &MyDataSafePatch{}
+
+func NewMyDataSafePatch() *MyDataSafePatch {
+    return (&MyDataSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *MyDataSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *MyDataSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *MyDataSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *MyDataSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *MyDataSafePatch) SetVersionNonCompat(value int32) *MyDataSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyDataSafePatch) SetVersion(value int32) *MyDataSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyDataSafePatch) SetDataNonCompat(value []byte) *MyDataSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyDataSafePatch) SetData(value []byte) *MyDataSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyDataSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *MyDataSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *MyDataSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *MyDataSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *MyDataSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type MyDataSafePatchBuilder struct {
+    obj *MyDataSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewMyDataSafePatchBuilder() *MyDataSafePatchBuilder {
+    return &MyDataSafePatchBuilder{
+        obj: NewMyDataSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataSafePatchBuilder) Version(value int32) *MyDataSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataSafePatchBuilder) Data(value []byte) *MyDataSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataSafePatchBuilder) Emit() *MyDataSafePatch {
+    var objCopy MyDataSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *MyDataSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("MyDataSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *MyDataSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type MyDataWithCustomDefaultPatch struct {
     Assign *MyDataWithCustomDefault `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -7664,6 +7897,239 @@ func (x *MyDataWithCustomDefaultEnsureStruct) String() string {
     return sb.String()
 }
 
+type MyDataWithCustomDefaultSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &MyDataWithCustomDefaultSafePatch{}
+
+func NewMyDataWithCustomDefaultSafePatch() *MyDataWithCustomDefaultSafePatch {
+    return (&MyDataWithCustomDefaultSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) SetVersionNonCompat(value int32) *MyDataWithCustomDefaultSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) SetVersion(value int32) *MyDataWithCustomDefaultSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) SetDataNonCompat(value []byte) *MyDataWithCustomDefaultSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) SetData(value []byte) *MyDataWithCustomDefaultSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type MyDataWithCustomDefaultSafePatchBuilder struct {
+    obj *MyDataWithCustomDefaultSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewMyDataWithCustomDefaultSafePatchBuilder() *MyDataWithCustomDefaultSafePatchBuilder {
+    return &MyDataWithCustomDefaultSafePatchBuilder{
+        obj: NewMyDataWithCustomDefaultSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataWithCustomDefaultSafePatchBuilder) Version(value int32) *MyDataWithCustomDefaultSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataWithCustomDefaultSafePatchBuilder) Data(value []byte) *MyDataWithCustomDefaultSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyDataWithCustomDefaultSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyDataWithCustomDefaultSafePatchBuilder) Emit() *MyDataWithCustomDefaultSafePatch {
+    var objCopy MyDataWithCustomDefaultSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("MyDataWithCustomDefaultSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *MyDataWithCustomDefaultSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataWithCustomDefaultSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type InnerUnionPatch struct {
     Assign *InnerUnion `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -8345,6 +8811,239 @@ func (x *InnerUnionFieldPatch) String() string {
 
     sb.WriteString("InnerUnionFieldPatch({")
     sb.WriteString(fmt.Sprintf("InnerOption:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type InnerUnionSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &InnerUnionSafePatch{}
+
+func NewInnerUnionSafePatch() *InnerUnionSafePatch {
+    return (&InnerUnionSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *InnerUnionSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *InnerUnionSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *InnerUnionSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *InnerUnionSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *InnerUnionSafePatch) SetVersionNonCompat(value int32) *InnerUnionSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *InnerUnionSafePatch) SetVersion(value int32) *InnerUnionSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *InnerUnionSafePatch) SetDataNonCompat(value []byte) *InnerUnionSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *InnerUnionSafePatch) SetData(value []byte) *InnerUnionSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *InnerUnionSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *InnerUnionSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *InnerUnionSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *InnerUnionSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *InnerUnionSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *InnerUnionSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *InnerUnionSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type InnerUnionSafePatchBuilder struct {
+    obj *InnerUnionSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewInnerUnionSafePatchBuilder() *InnerUnionSafePatchBuilder {
+    return &InnerUnionSafePatchBuilder{
+        obj: NewInnerUnionSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *InnerUnionSafePatchBuilder) Version(value int32) *InnerUnionSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *InnerUnionSafePatchBuilder) Data(value []byte) *InnerUnionSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInnerUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *InnerUnionSafePatchBuilder) Emit() *InnerUnionSafePatch {
+    var objCopy InnerUnionSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *InnerUnionSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("InnerUnionSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *InnerUnionSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *InnerUnionSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("InnerUnionSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
     sb.WriteString("})")
 
     return sb.String()
@@ -9205,6 +9904,239 @@ func (x *MyUnionFieldPatch) String() string {
     sb.WriteString(fmt.Sprintf("Option1:%s ", x.toString1()))
     sb.WriteString(fmt.Sprintf("Option2:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("Option3:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type MyUnionSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &MyUnionSafePatch{}
+
+func NewMyUnionSafePatch() *MyUnionSafePatch {
+    return (&MyUnionSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *MyUnionSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *MyUnionSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *MyUnionSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *MyUnionSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *MyUnionSafePatch) SetVersionNonCompat(value int32) *MyUnionSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyUnionSafePatch) SetVersion(value int32) *MyUnionSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyUnionSafePatch) SetDataNonCompat(value []byte) *MyUnionSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyUnionSafePatch) SetData(value []byte) *MyUnionSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyUnionSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *MyUnionSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyUnionSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyUnionSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *MyUnionSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *MyUnionSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *MyUnionSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type MyUnionSafePatchBuilder struct {
+    obj *MyUnionSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewMyUnionSafePatchBuilder() *MyUnionSafePatchBuilder {
+    return &MyUnionSafePatchBuilder{
+        obj: NewMyUnionSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyUnionSafePatchBuilder) Version(value int32) *MyUnionSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyUnionSafePatchBuilder) Data(value []byte) *MyUnionSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnionSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyUnionSafePatchBuilder) Emit() *MyUnionSafePatch {
+    var objCopy MyUnionSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *MyUnionSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("MyUnionSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyUnionSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *MyUnionSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnionSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
     sb.WriteString("})")
 
     return sb.String()
@@ -20575,6 +21507,239 @@ func (x *MyStructEnsureStruct) String() string {
     return sb.String()
 }
 
+type MyStructSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &MyStructSafePatch{}
+
+func NewMyStructSafePatch() *MyStructSafePatch {
+    return (&MyStructSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *MyStructSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *MyStructSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *MyStructSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *MyStructSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *MyStructSafePatch) SetVersionNonCompat(value int32) *MyStructSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyStructSafePatch) SetVersion(value int32) *MyStructSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *MyStructSafePatch) SetDataNonCompat(value []byte) *MyStructSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyStructSafePatch) SetData(value []byte) *MyStructSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *MyStructSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *MyStructSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStructSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStructSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *MyStructSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *MyStructSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *MyStructSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type MyStructSafePatchBuilder struct {
+    obj *MyStructSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewMyStructSafePatchBuilder() *MyStructSafePatchBuilder {
+    return &MyStructSafePatchBuilder{
+        obj: NewMyStructSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyStructSafePatchBuilder) Version(value int32) *MyStructSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyStructSafePatchBuilder) Data(value []byte) *MyStructSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *MyStructSafePatchBuilder) Emit() *MyStructSafePatch {
+    var objCopy MyStructSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *MyStructSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("MyStructSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStructSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *MyStructSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type LateDefStructPatch struct {
     Assign *LateDefStruct `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -21337,6 +22502,239 @@ func (x *LateDefStructEnsureStruct) String() string {
     var sb strings.Builder
 
     sb.WriteString("LateDefStructEnsureStruct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type LateDefStructSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &LateDefStructSafePatch{}
+
+func NewLateDefStructSafePatch() *LateDefStructSafePatch {
+    return (&LateDefStructSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *LateDefStructSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *LateDefStructSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *LateDefStructSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *LateDefStructSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *LateDefStructSafePatch) SetVersionNonCompat(value int32) *LateDefStructSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *LateDefStructSafePatch) SetVersion(value int32) *LateDefStructSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *LateDefStructSafePatch) SetDataNonCompat(value []byte) *LateDefStructSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *LateDefStructSafePatch) SetData(value []byte) *LateDefStructSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *LateDefStructSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *LateDefStructSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LateDefStructSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LateDefStructSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *LateDefStructSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *LateDefStructSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *LateDefStructSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type LateDefStructSafePatchBuilder struct {
+    obj *LateDefStructSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewLateDefStructSafePatchBuilder() *LateDefStructSafePatchBuilder {
+    return &LateDefStructSafePatchBuilder{
+        obj: NewLateDefStructSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LateDefStructSafePatchBuilder) Version(value int32) *LateDefStructSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LateDefStructSafePatchBuilder) Data(value []byte) *LateDefStructSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLateDefStructSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LateDefStructSafePatchBuilder) Emit() *LateDefStructSafePatch {
+    var objCopy LateDefStructSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *LateDefStructSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("LateDefStructSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LateDefStructSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *LateDefStructSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LateDefStructSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
     sb.WriteString("})")
 
     return sb.String()
@@ -22603,6 +24001,239 @@ func (x *RecursiveEnsureStruct) String() string {
     return sb.String()
 }
 
+type RecursiveSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &RecursiveSafePatch{}
+
+func NewRecursiveSafePatch() *RecursiveSafePatch {
+    return (&RecursiveSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *RecursiveSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *RecursiveSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *RecursiveSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *RecursiveSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *RecursiveSafePatch) SetVersionNonCompat(value int32) *RecursiveSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *RecursiveSafePatch) SetVersion(value int32) *RecursiveSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *RecursiveSafePatch) SetDataNonCompat(value []byte) *RecursiveSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *RecursiveSafePatch) SetData(value []byte) *RecursiveSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *RecursiveSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *RecursiveSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RecursiveSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RecursiveSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *RecursiveSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *RecursiveSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *RecursiveSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type RecursiveSafePatchBuilder struct {
+    obj *RecursiveSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewRecursiveSafePatchBuilder() *RecursiveSafePatchBuilder {
+    return &RecursiveSafePatchBuilder{
+        obj: NewRecursiveSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RecursiveSafePatchBuilder) Version(value int32) *RecursiveSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RecursiveSafePatchBuilder) Data(value []byte) *RecursiveSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRecursiveSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RecursiveSafePatchBuilder) Emit() *RecursiveSafePatch {
+    var objCopy RecursiveSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *RecursiveSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("RecursiveSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RecursiveSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *RecursiveSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RecursiveSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type BarPatch struct {
     Assign *Bar `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -23543,6 +25174,239 @@ func (x *BarEnsureStruct) String() string {
     return sb.String()
 }
 
+type BarSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &BarSafePatch{}
+
+func NewBarSafePatch() *BarSafePatch {
+    return (&BarSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *BarSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *BarSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *BarSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *BarSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *BarSafePatch) SetVersionNonCompat(value int32) *BarSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *BarSafePatch) SetVersion(value int32) *BarSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *BarSafePatch) SetDataNonCompat(value []byte) *BarSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *BarSafePatch) SetData(value []byte) *BarSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *BarSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *BarSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *BarSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *BarSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *BarSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *BarSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *BarSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type BarSafePatchBuilder struct {
+    obj *BarSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewBarSafePatchBuilder() *BarSafePatchBuilder {
+    return &BarSafePatchBuilder{
+        obj: NewBarSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *BarSafePatchBuilder) Version(value int32) *BarSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *BarSafePatchBuilder) Data(value []byte) *BarSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBarSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *BarSafePatchBuilder) Emit() *BarSafePatch {
+    var objCopy BarSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *BarSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("BarSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *BarSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *BarSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BarSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type LoopPatch struct {
     Assign *Loop `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -23783,6 +25647,239 @@ func (x *LoopPatch) String() string {
     sb.WriteString("LoopPatch({")
     sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
     sb.WriteString(fmt.Sprintf("Clear:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type LoopSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &LoopSafePatch{}
+
+func NewLoopSafePatch() *LoopSafePatch {
+    return (&LoopSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *LoopSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *LoopSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *LoopSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *LoopSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *LoopSafePatch) SetVersionNonCompat(value int32) *LoopSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *LoopSafePatch) SetVersion(value int32) *LoopSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *LoopSafePatch) SetDataNonCompat(value []byte) *LoopSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *LoopSafePatch) SetData(value []byte) *LoopSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *LoopSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *LoopSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LoopSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LoopSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *LoopSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *LoopSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *LoopSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type LoopSafePatchBuilder struct {
+    obj *LoopSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewLoopSafePatchBuilder() *LoopSafePatchBuilder {
+    return &LoopSafePatchBuilder{
+        obj: NewLoopSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LoopSafePatchBuilder) Version(value int32) *LoopSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LoopSafePatchBuilder) Data(value []byte) *LoopSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewLoopSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *LoopSafePatchBuilder) Emit() *LoopSafePatch {
+    var objCopy LoopSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *LoopSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("LoopSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *LoopSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *LoopSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LoopSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
     sb.WriteString("})")
 
     return sb.String()
@@ -26971,6 +29068,239 @@ func (x *RefFieldsEnsureStruct) String() string {
     return sb.String()
 }
 
+type RefFieldsSafePatch struct {
+    Version int32 `thrift:"version,1" json:"version" db:"version"`
+    Data []byte `thrift:"data,2" json:"data" db:"data"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &RefFieldsSafePatch{}
+
+func NewRefFieldsSafePatch() *RefFieldsSafePatch {
+    return (&RefFieldsSafePatch{}).
+        SetVersionNonCompat(0).
+        SetDataNonCompat([]byte(""))
+}
+
+func (x *RefFieldsSafePatch) GetVersionNonCompat() int32 {
+    return x.Version
+}
+
+func (x *RefFieldsSafePatch) GetVersion() int32 {
+    return x.Version
+}
+
+func (x *RefFieldsSafePatch) GetDataNonCompat() []byte {
+    return x.Data
+}
+
+func (x *RefFieldsSafePatch) GetData() []byte {
+    if !x.IsSetData() {
+        return []byte("")
+    }
+
+    return x.Data
+}
+
+func (x *RefFieldsSafePatch) SetVersionNonCompat(value int32) *RefFieldsSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *RefFieldsSafePatch) SetVersion(value int32) *RefFieldsSafePatch {
+    x.Version = value
+    return x
+}
+
+func (x *RefFieldsSafePatch) SetDataNonCompat(value []byte) *RefFieldsSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *RefFieldsSafePatch) SetData(value []byte) *RefFieldsSafePatch {
+    x.Data = value
+    return x
+}
+
+func (x *RefFieldsSafePatch) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *RefFieldsSafePatch) writeField1(p thrift.Format) error {  // Version
+    if err := p.WriteFieldBegin("version", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetVersionNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RefFieldsSafePatch) writeField2(p thrift.Format) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDataNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RefFieldsSafePatch) readField1(p thrift.Format) error {  // Version
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetVersionNonCompat(result)
+    return nil
+}
+
+func (x *RefFieldsSafePatch) readField2(p thrift.Format) error {  // Data
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetDataNonCompat(result)
+    return nil
+}
+
+func (x *RefFieldsSafePatch) toString1() string {  // Version
+    return fmt.Sprintf("%v", x.GetVersionNonCompat())
+}
+
+func (x *RefFieldsSafePatch) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+type RefFieldsSafePatchBuilder struct {
+    obj *RefFieldsSafePatch
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewRefFieldsSafePatchBuilder() *RefFieldsSafePatchBuilder {
+    return &RefFieldsSafePatchBuilder{
+        obj: NewRefFieldsSafePatch(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RefFieldsSafePatchBuilder) Version(value int32) *RefFieldsSafePatchBuilder {
+    x.obj.Version = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RefFieldsSafePatchBuilder) Data(value []byte) *RefFieldsSafePatchBuilder {
+    x.obj.Data = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRefFieldsSafePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RefFieldsSafePatchBuilder) Emit() *RefFieldsSafePatch {
+    var objCopy RefFieldsSafePatch = *x.obj
+    return &objCopy
+}
+
+func (x *RefFieldsSafePatch) Write(p thrift.Format) error {
+    if err := p.WriteStructBegin("RefFieldsSafePatch"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RefFieldsSafePatch) Read(p thrift.Format) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // version
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *RefFieldsSafePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RefFieldsSafePatch({")
+    sb.WriteString(fmt.Sprintf("Version:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
@@ -26988,13 +29318,17 @@ func RegisterTypes(registry interface {
     registry.RegisterType("test.dev/fixtures/patch/MyDataPatch", func() any { return NewMyDataPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataFieldPatch", func() any { return NewMyDataFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataEnsureStruct", func() any { return NewMyDataEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/MyDataSafePatch", func() any { return NewMyDataSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch", func() any { return NewMyDataWithCustomDefaultPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch", func() any { return NewMyDataWithCustomDefaultFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct", func() any { return NewMyDataWithCustomDefaultEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultSafePatch", func() any { return NewMyDataWithCustomDefaultSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/InnerUnionPatch", func() any { return NewInnerUnionPatch() })
     registry.RegisterType("test.dev/fixtures/patch/InnerUnionFieldPatch", func() any { return NewInnerUnionFieldPatch() })
+    registry.RegisterType("test.dev/fixtures/patch/InnerUnionSafePatch", func() any { return NewInnerUnionSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyUnionPatch", func() any { return NewMyUnionPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyUnionFieldPatch", func() any { return NewMyUnionFieldPatch() })
+    registry.RegisterType("test.dev/fixtures/patch/MyUnionSafePatch", func() any { return NewMyUnionSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyStructPatch", func() any { return NewMyStructPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyStructField10Patch", func() any { return NewMyStructField10Patch() })
     registry.RegisterType("test.dev/fixtures/patch/MyStructField23Patch", func() any { return NewMyStructField23Patch() })
@@ -27006,23 +29340,29 @@ func RegisterTypes(registry interface {
     registry.RegisterType("test.dev/fixtures/patch/MyStructField30Patch1", func() any { return NewMyStructField30Patch1() })
     registry.RegisterType("test.dev/fixtures/patch/MyStructFieldPatch", func() any { return NewMyStructFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/MyStructEnsureStruct", func() any { return NewMyStructEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/MyStructSafePatch", func() any { return NewMyStructSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/LateDefStructPatch", func() any { return NewLateDefStructPatch() })
     registry.RegisterType("test.dev/fixtures/patch/LateDefStructFieldPatch", func() any { return NewLateDefStructFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/LateDefStructEnsureStruct", func() any { return NewLateDefStructEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/LateDefStructSafePatch", func() any { return NewLateDefStructSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/RecursivePatch", func() any { return NewRecursivePatch() })
     registry.RegisterType("test.dev/fixtures/patch/RecursiveField1Patch", func() any { return NewRecursiveField1Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RecursiveFieldPatch", func() any { return NewRecursiveFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/RecursiveEnsureStruct", func() any { return NewRecursiveEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/RecursiveSafePatch", func() any { return NewRecursiveSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/BarPatch", func() any { return NewBarPatch() })
     registry.RegisterType("test.dev/fixtures/patch/BarFieldPatch", func() any { return NewBarFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/BarEnsureStruct", func() any { return NewBarEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/BarSafePatch", func() any { return NewBarSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/LoopPatch", func() any { return NewLoopPatch() })
+    registry.RegisterType("test.dev/fixtures/patch/LoopSafePatch", func() any { return NewLoopSafePatch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsPatch", func() any { return NewRefFieldsPatch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField1Patch", func() any { return NewRefFieldsField1Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField4Patch", func() any { return NewRefFieldsField4Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField7Patch", func() any { return NewRefFieldsField7Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsFieldPatch", func() any { return NewRefFieldsFieldPatch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsEnsureStruct", func() any { return NewRefFieldsEnsureStruct() })
+    registry.RegisterType("test.dev/fixtures/patch/RefFieldsSafePatch", func() any { return NewRefFieldsSafePatch() })
 
     registry.RegisterType("test.dev/fixtures/patch/MyEnum", func() any { return MyEnum(0) })
 }

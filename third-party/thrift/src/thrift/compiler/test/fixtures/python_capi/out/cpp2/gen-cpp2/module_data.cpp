@@ -848,6 +848,28 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   6,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::name = "MyStructSafePatch";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::fields_names = {{
+  "version"sv,
+  "data"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::storage_names = {{
+  "__fbthrift_field_version"sv,
+  "__fbthrift_field_data"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>::isset_indexes = {{
+  -1,
+  -1,
+}};
+
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyDataItemPatchStruct>::name = "MyDataItemPatch";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::python_capi::MyDataItemPatchStruct>::fields_names = {{
   "assign"sv,
@@ -922,6 +944,28 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::te
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItemEnsureStruct>::isset_indexes = {{
   0,
+}};
+
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::name = "MyDataItemSafePatch";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::fields_names = {{
+  "version"sv,
+  "data"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::storage_names = {{
+  "__fbthrift_field_version"sv,
+  "__fbthrift_field_data"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>::isset_indexes = {{
+  -1,
+  -1,
 }};
 
 } // namespace thrift

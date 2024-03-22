@@ -1175,6 +1175,53 @@
         }
       }
     },
+    "MyDataSafePatch" : {
+      "lineno" : 24,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 24,
+          "column" : 5
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
     "MyDataWithCustomDefaultPatch" : {
       "lineno" : 24,
       "is_exception" : false,
@@ -1274,7 +1321,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 5
+          "column" : 6
         },
         "end" : {
           "line" : 24,
@@ -1321,7 +1368,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 6
+          "column" : 7
         },
         "end" : {
           "line" : 24,
@@ -1368,7 +1415,54 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 7
+          "column" : 8
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "MyDataWithCustomDefaultSafePatch" : {
+      "lineno" : 24,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 24,
+          "column" : 9
         },
         "end" : {
           "line" : 24,
@@ -1460,7 +1554,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 8
+          "column" : 10
         },
         "end" : {
           "line" : 24,
@@ -1492,7 +1586,54 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 9
+          "column" : 11
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "InnerUnionSafePatch" : {
+      "lineno" : 24,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 24,
+          "column" : 12
         },
         "end" : {
           "line" : 24,
@@ -1584,7 +1725,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 10
+          "column" : 13
         },
         "end" : {
           "line" : 24,
@@ -1646,7 +1787,54 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 11
+          "column" : 14
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "MyUnionSafePatch" : {
+      "lineno" : 24,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 24,
+          "column" : 15
         },
         "end" : {
           "line" : 24,
@@ -1753,7 +1941,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 12
+          "column" : 16
         },
         "end" : {
           "line" : 24,
@@ -1800,7 +1988,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 13
+          "column" : 17
         },
         "end" : {
           "line" : 24,
@@ -1847,7 +2035,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 14
+          "column" : 18
         },
         "end" : {
           "line" : 24,
@@ -1924,7 +2112,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 15
+          "column" : 19
         },
         "end" : {
           "line" : 24,
@@ -2001,7 +2189,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 16
+          "column" : 20
         },
         "end" : {
           "line" : 24,
@@ -2123,7 +2311,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 17
+          "column" : 21
         },
         "end" : {
           "line" : 24,
@@ -2132,7 +2320,7 @@
       }
     },
     "MyStructField29Patch" : {
-      "lineno" : 24,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -2199,8 +2387,8 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
-          "column" : 18
+          "line" : 25,
+          "column" : 1
         },
         "end" : {
           "line" : 24,
@@ -2209,7 +2397,7 @@
       }
     },
     "MyStructField30Patch" : {
-      "lineno" : 24,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -2321,8 +2509,8 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
-          "column" : 19
+          "line" : 25,
+          "column" : 2
         },
         "end" : {
           "line" : 24,
@@ -2331,7 +2519,7 @@
       }
     },
     "MyStructField30Patch1" : {
-      "lineno" : 24,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -2443,8 +2631,8 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
-          "column" : 20
+          "line" : 25,
+          "column" : 3
         },
         "end" : {
           "line" : 24,
@@ -2453,7 +2641,7 @@
       }
     },
     "MyStructFieldPatch" : {
-      "lineno" : 24,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -2955,8 +3143,8 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
-          "column" : 21
+          "line" : 25,
+          "column" : 4
         },
         "end" : {
           "line" : 24,
@@ -3468,7 +3656,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 1
+          "column" : 5
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "MyStructSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 6
         },
         "end" : {
           "line" : 24,
@@ -3575,7 +3810,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 2
+          "column" : 7
         },
         "end" : {
           "line" : 24,
@@ -3593,7 +3828,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 3
+          "column" : 8
         },
         "end" : {
           "line" : 24,
@@ -3611,7 +3846,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 4
+          "column" : 9
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "LateDefStructSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 10
         },
         "end" : {
           "line" : 24,
@@ -3718,7 +4000,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 5
+          "column" : 11
         },
         "end" : {
           "line" : 24,
@@ -3765,7 +4047,7 @@
       "source_range" : {
         "begin" : {
           "line" : 102,
-          "column" : 4
+          "column" : 10
         },
         "end" : {
           "line" : 101,
@@ -3797,7 +4079,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 7
+          "column" : 13
         },
         "end" : {
           "line" : 24,
@@ -3829,7 +4111,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 8
+          "column" : 14
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "RecursiveSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 15
         },
         "end" : {
           "line" : 24,
@@ -3936,7 +4265,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 9
+          "column" : 16
         },
         "end" : {
           "line" : 24,
@@ -3968,7 +4297,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 10
+          "column" : 17
         },
         "end" : {
           "line" : 24,
@@ -4000,7 +4329,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 11
+          "column" : 18
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "BarSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 19
         },
         "end" : {
           "line" : 24,
@@ -4047,7 +4423,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 12
+          "column" : 20
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "LoopSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 21
         },
         "end" : {
           "line" : 24,
@@ -4154,7 +4577,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 13
+          "column" : 22
         },
         "end" : {
           "line" : 24,
@@ -4231,7 +4654,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 14
+          "column" : 23
         },
         "end" : {
           "line" : 24,
@@ -4308,7 +4731,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 15
+          "column" : 24
         },
         "end" : {
           "line" : 24,
@@ -4385,7 +4808,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 16
+          "column" : 25
         },
         "end" : {
           "line" : 24,
@@ -4447,7 +4870,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 17
+          "column" : 26
         },
         "end" : {
           "line" : 24,
@@ -4569,7 +4992,54 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 18
+          "column" : 27
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 21
+        }
+      }
+    },
+    "RefFieldsSafePatch" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "version" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        },
+        "data" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 28
         },
         "end" : {
           "line" : 24,

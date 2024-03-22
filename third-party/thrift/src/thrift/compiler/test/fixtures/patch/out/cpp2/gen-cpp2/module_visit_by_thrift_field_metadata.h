@@ -279,6 +279,21 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataEnsureStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::MyDataSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyDataSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -332,6 +347,21 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStru
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyDataWithCustomDefaultSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::InnerUnionPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -361,6 +391,21 @@ struct VisitByFieldId<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
       return f(0, static_cast<T&&>(t).innerOption_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::InnerUnionFieldPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::InnerUnionSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::InnerUnionSafePatch");
     }
   }
 };
@@ -399,6 +444,21 @@ struct VisitByFieldId<::test::fixtures::patch::MyUnionFieldPatchStruct> {
       return f(2, static_cast<T&&>(t).option3_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyUnionFieldPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::MyUnionSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyUnionSafePatch");
     }
   }
 };
@@ -743,6 +803,21 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructEnsureStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::MyStructSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -783,6 +858,21 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructEnsureStruct> {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructEnsureStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::LateDefStructSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructSafePatch");
     }
   }
 };
@@ -852,6 +942,21 @@ struct VisitByFieldId<::test::fixtures::patch::RecursiveEnsureStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::RecursiveSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RecursiveSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::BarPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -901,6 +1006,21 @@ struct VisitByFieldId<::test::fixtures::patch::BarEnsureStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::BarSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::BarSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::LoopPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -911,6 +1031,21 @@ struct VisitByFieldId<::test::fixtures::patch::LoopPatchStruct> {
       return f(1, static_cast<T&&>(t).clear_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LoopPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::LoopSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::LoopSafePatch");
     }
   }
 };
@@ -1033,6 +1168,21 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsEnsureStruct> {
       return f(6, static_cast<T&&>(t).opt_box_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsEnsureStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::RefFieldsSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsSafePatch");
     }
   }
 };

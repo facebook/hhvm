@@ -464,6 +464,21 @@ struct VisitByFieldId<::test::fixtures::python_capi::MyStructEnsureStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::python_capi::MyStructSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::MyStructSafePatch");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::python_capi::MyDataItemPatchStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -508,6 +523,21 @@ struct VisitByFieldId<::test::fixtures::python_capi::MyDataItemEnsureStruct> {
       return f(0, static_cast<T&&>(t).s_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::MyDataItemEnsureStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::MyDataItemSafePatch> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).version_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::MyDataItemSafePatch");
     }
   }
 };

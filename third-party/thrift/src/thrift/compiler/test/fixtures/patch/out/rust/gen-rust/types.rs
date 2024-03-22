@@ -197,6 +197,18 @@ pub struct MyDataEnsureStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyDataSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct MyDataWithCustomDefaultPatch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
@@ -243,6 +255,18 @@ pub struct MyDataWithCustomDefaultEnsureStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyDataWithCustomDefaultSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct InnerUnionPatch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
@@ -266,6 +290,18 @@ pub struct InnerUnionPatch {
 #[derive(Clone, PartialEq)]
 pub struct InnerUnionFieldPatch {
     pub innerOption: patch__types::BinaryPatch,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct InnerUnionSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -299,6 +335,18 @@ pub struct MyUnionFieldPatch {
     pub option1: patch__types::StringPatch,
     pub option2: patch__types::I32Patch,
     pub option3: crate::types::InnerUnionPatch,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyUnionSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -569,6 +617,18 @@ pub struct MyStructEnsureStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyStructSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct LateDefStructPatch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
@@ -603,6 +663,18 @@ pub struct LateDefStructFieldPatch {
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct LateDefStructEnsureStruct {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct LateDefStructSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -669,6 +741,18 @@ pub struct RecursiveEnsureStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RecursiveSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct BarPatch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
@@ -713,12 +797,36 @@ pub struct BarEnsureStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct BarSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct LoopPatch {
     #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Loop>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct LoopSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -825,6 +933,18 @@ pub struct RefFieldsEnsureStruct {
     pub opt_shared_const: ::std::option::Option<::std::vec::Vec<::std::primitive::i32>>,
     pub opt_shared_mustable: ::std::option::Option<::std::vec::Vec<::std::primitive::i32>>,
     pub opt_box: ::std::option::Option<::std::vec::Vec<::std::primitive::i32>>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RefFieldsSafePatch {
+    pub version: ::std::primitive::i32,
+    pub data: ::std::vec::Vec<::std::primitive::u8>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -2904,6 +3024,94 @@ where
 
 
 #[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyDataSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyDataSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyDataSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyDataSafePatch {}
+unsafe impl ::std::marker::Sync for self::MyDataSafePatch {}
+impl ::std::marker::Unpin for self::MyDataSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::MyDataSafePatch {}
+impl ::std::panic::UnwindSafe for self::MyDataSafePatch {}
+
+impl ::fbthrift::GetTType for self::MyDataSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyDataSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/MyDataSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyDataSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyDataSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyDataSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyDataWithCustomDefaultPatch {
     fn default() -> Self {
         Self {
@@ -3210,6 +3418,94 @@ where
 
 
 #[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyDataWithCustomDefaultSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyDataWithCustomDefaultSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyDataWithCustomDefaultSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyDataWithCustomDefaultSafePatch {}
+unsafe impl ::std::marker::Sync for self::MyDataWithCustomDefaultSafePatch {}
+impl ::std::marker::Unpin for self::MyDataWithCustomDefaultSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::MyDataWithCustomDefaultSafePatch {}
+impl ::std::panic::UnwindSafe for self::MyDataWithCustomDefaultSafePatch {}
+
+impl ::fbthrift::GetTType for self::MyDataWithCustomDefaultSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyDataWithCustomDefaultSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/MyDataWithCustomDefaultSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyDataWithCustomDefaultSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyDataWithCustomDefaultSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyDataWithCustomDefaultSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataWithCustomDefaultSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::InnerUnionPatch {
     fn default() -> Self {
         Self {
@@ -3397,6 +3693,94 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             innerOption: field_innerOption.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::InnerUnionSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::InnerUnionSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("InnerUnionSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::InnerUnionSafePatch {}
+unsafe impl ::std::marker::Sync for self::InnerUnionSafePatch {}
+impl ::std::marker::Unpin for self::InnerUnionSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::InnerUnionSafePatch {}
+impl ::std::panic::UnwindSafe for self::InnerUnionSafePatch {}
+
+impl ::fbthrift::GetTType for self::InnerUnionSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::InnerUnionSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/InnerUnionSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::InnerUnionSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("InnerUnionSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::InnerUnionSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a InnerUnionSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -3611,6 +3995,94 @@ where
             option1: field_option1.unwrap_or_default(),
             option2: field_option2.unwrap_or_default(),
             option3: field_option3.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyUnionSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyUnionSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyUnionSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyUnionSafePatch {}
+unsafe impl ::std::marker::Sync for self::MyUnionSafePatch {}
+impl ::std::marker::Unpin for self::MyUnionSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::MyUnionSafePatch {}
+impl ::std::panic::UnwindSafe for self::MyUnionSafePatch {}
+
+impl ::fbthrift::GetTType for self::MyUnionSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyUnionSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/MyUnionSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyUnionSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyUnionSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyUnionSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyUnionSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -5455,6 +5927,94 @@ where
 
 
 #[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyStructSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyStructSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyStructSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyStructSafePatch {}
+unsafe impl ::std::marker::Sync for self::MyStructSafePatch {}
+impl ::std::marker::Unpin for self::MyStructSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::MyStructSafePatch {}
+impl ::std::panic::UnwindSafe for self::MyStructSafePatch {}
+
+impl ::fbthrift::GetTType for self::MyStructSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyStructSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/MyStructSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyStructSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyStructSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyStructSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LateDefStructPatch {
     fn default() -> Self {
         Self {
@@ -5712,6 +6272,94 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::LateDefStructSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::LateDefStructSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("LateDefStructSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::LateDefStructSafePatch {}
+unsafe impl ::std::marker::Sync for self::LateDefStructSafePatch {}
+impl ::std::marker::Unpin for self::LateDefStructSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::LateDefStructSafePatch {}
+impl ::std::panic::UnwindSafe for self::LateDefStructSafePatch {}
+
+impl ::fbthrift::GetTType for self::LateDefStructSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::LateDefStructSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/LateDefStructSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::LateDefStructSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("LateDefStructSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::LateDefStructSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a LateDefStructSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -6097,6 +6745,94 @@ where
 
 
 #[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::RecursiveSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::RecursiveSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("RecursiveSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::RecursiveSafePatch {}
+unsafe impl ::std::marker::Sync for self::RecursiveSafePatch {}
+impl ::std::marker::Unpin for self::RecursiveSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::RecursiveSafePatch {}
+impl ::std::panic::UnwindSafe for self::RecursiveSafePatch {}
+
+impl ::fbthrift::GetTType for self::RecursiveSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::RecursiveSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/RecursiveSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::RecursiveSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("RecursiveSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::RecursiveSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a RecursiveSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::BarPatch {
     fn default() -> Self {
         Self {
@@ -6383,6 +7119,94 @@ where
 
 
 #[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::BarSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::BarSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("BarSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::BarSafePatch {}
+unsafe impl ::std::marker::Sync for self::BarSafePatch {}
+impl ::std::marker::Unpin for self::BarSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::BarSafePatch {}
+impl ::std::panic::UnwindSafe for self::BarSafePatch {}
+
+impl ::fbthrift::GetTType for self::BarSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::BarSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/BarSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::BarSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("BarSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::BarSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a BarSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LoopPatch {
     fn default() -> Self {
         Self {
@@ -6464,6 +7288,94 @@ where
         ::std::result::Result::Ok(Self {
             assign: field_assign,
             clear: field_clear.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::LoopSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::LoopSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("LoopSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::LoopSafePatch {}
+unsafe impl ::std::marker::Sync for self::LoopSafePatch {}
+impl ::std::marker::Unpin for self::LoopSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::LoopSafePatch {}
+impl ::std::panic::UnwindSafe for self::LoopSafePatch {}
+
+impl ::fbthrift::GetTType for self::LoopSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::LoopSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/LoopSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::LoopSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("LoopSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::LoopSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a LoopSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -7158,6 +8070,94 @@ where
             opt_shared_const: field_opt_shared_const,
             opt_shared_mustable: field_opt_shared_mustable,
             opt_box: field_opt_box,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::RefFieldsSafePatch {
+    fn default() -> Self {
+        Self {
+            version: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::RefFieldsSafePatch {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("RefFieldsSafePatch")
+            .field("version", &self.version)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::RefFieldsSafePatch {}
+unsafe impl ::std::marker::Sync for self::RefFieldsSafePatch {}
+impl ::std::marker::Unpin for self::RefFieldsSafePatch {}
+impl ::std::panic::RefUnwindSafe for self::RefFieldsSafePatch {}
+impl ::std::panic::UnwindSafe for self::RefFieldsSafePatch {}
+
+impl ::fbthrift::GetTType for self::RefFieldsSafePatch {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::RefFieldsSafePatch {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/patch/RefFieldsSafePatch"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::RefFieldsSafePatch
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("RefFieldsSafePatch");
+        p.write_field_begin("version", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.version, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::RefFieldsSafePatch
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("version", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_version = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a RefFieldsSafePatch")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_version = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            version: field_version.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

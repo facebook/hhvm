@@ -133,6 +133,11 @@ class StructMetadata<::test::fixtures::python_capi::MyStructEnsureStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::python_capi::MyStructSafePatch> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::python_capi::MyDataItemPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -144,6 +149,11 @@ class StructMetadata<::test::fixtures::python_capi::MyDataItemFieldPatchStruct> 
 };
 template <>
 class StructMetadata<::test::fixtures::python_capi::MyDataItemEnsureStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::python_capi::MyDataItemSafePatch> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

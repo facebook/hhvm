@@ -3403,6 +3403,122 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::python_capi::MyStructSafePatch>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::MyStructSafePatch>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace python_capi {
+
+const char* MyStructSafePatch::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/python_capi/MyStructSafePatch";
+}
+
+std::string_view MyStructSafePatch::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructSafePatch>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view MyStructSafePatch::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructSafePatch>::name;
+}
+
+MyStructSafePatch::MyStructSafePatch(const MyStructSafePatch& srcObj) :
+    __fbthrift_field_version(srcObj.__fbthrift_field_version),
+    __fbthrift_field_data(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_data)) {
+}
+
+static void __fbthrift_swap(MyStructSafePatch& lhs, MyStructSafePatch& rhs) { swap(lhs, rhs); }
+MyStructSafePatch& MyStructSafePatch::operator=(const MyStructSafePatch& other) {
+  MyStructSafePatch tmp(other);
+  __fbthrift_swap(*this, tmp);
+  return *this;
+}
+
+MyStructSafePatch::MyStructSafePatch() :
+      __fbthrift_field_version() {
+}
+
+
+MyStructSafePatch::~MyStructSafePatch() {}
+
+MyStructSafePatch::MyStructSafePatch([[maybe_unused]] MyStructSafePatch&& other) noexcept :
+    __fbthrift_field_version(std::move(other.__fbthrift_field_version)),
+    __fbthrift_field_data(std::move(other.__fbthrift_field_data)) {
+}
+
+MyStructSafePatch& MyStructSafePatch::operator=([[maybe_unused]] MyStructSafePatch&& other) noexcept {
+    this->__fbthrift_field_version = std::move(other.__fbthrift_field_version);
+    this->__fbthrift_field_data = std::move(other.__fbthrift_field_data);
+    return *this;
+}
+
+
+MyStructSafePatch::MyStructSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
+    __fbthrift_field_version(std::move(version__arg)),
+    __fbthrift_field_data(std::move(data__arg)) {
+}
+
+
+void MyStructSafePatch::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_version = ::std::int32_t();
+  this->__fbthrift_field_data = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+}
+
+void MyStructSafePatch::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_version = ::std::int32_t();
+  this->__fbthrift_field_data = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+}
+
+bool MyStructSafePatch::__fbthrift_is_empty() const {
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_version) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_data);
+}
+
+bool MyStructSafePatch::operator==([[maybe_unused]] const MyStructSafePatch& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool MyStructSafePatch::operator<([[maybe_unused]] const MyStructSafePatch& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] MyStructSafePatch& a, [[maybe_unused]] MyStructSafePatch& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_version, b.__fbthrift_field_version);
+  swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
+}
+
+template void MyStructSafePatch::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructSafePatch::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructSafePatch::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructSafePatch::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructSafePatch::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructSafePatch::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructSafePatch::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::python_capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::python_capi::MyDataItemPatchStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
@@ -3802,6 +3918,122 @@ template void MyDataItemEnsureStruct::readNoXfer<>(apache::thrift::CompactProtoc
 template uint32_t MyDataItemEnsureStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyDataItemEnsureStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t MyDataItemEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::python_capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::python_capi::MyDataItemSafePatch>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::MyDataItemSafePatch>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace python_capi {
+
+const char* MyDataItemSafePatch::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/python_capi/MyDataItemSafePatch";
+}
+
+std::string_view MyDataItemSafePatch::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItemSafePatch>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view MyDataItemSafePatch::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyDataItemSafePatch>::name;
+}
+
+MyDataItemSafePatch::MyDataItemSafePatch(const MyDataItemSafePatch& srcObj) :
+    __fbthrift_field_version(srcObj.__fbthrift_field_version),
+    __fbthrift_field_data(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_data)) {
+}
+
+static void __fbthrift_swap(MyDataItemSafePatch& lhs, MyDataItemSafePatch& rhs) { swap(lhs, rhs); }
+MyDataItemSafePatch& MyDataItemSafePatch::operator=(const MyDataItemSafePatch& other) {
+  MyDataItemSafePatch tmp(other);
+  __fbthrift_swap(*this, tmp);
+  return *this;
+}
+
+MyDataItemSafePatch::MyDataItemSafePatch() :
+      __fbthrift_field_version() {
+}
+
+
+MyDataItemSafePatch::~MyDataItemSafePatch() {}
+
+MyDataItemSafePatch::MyDataItemSafePatch([[maybe_unused]] MyDataItemSafePatch&& other) noexcept :
+    __fbthrift_field_version(std::move(other.__fbthrift_field_version)),
+    __fbthrift_field_data(std::move(other.__fbthrift_field_data)) {
+}
+
+MyDataItemSafePatch& MyDataItemSafePatch::operator=([[maybe_unused]] MyDataItemSafePatch&& other) noexcept {
+    this->__fbthrift_field_version = std::move(other.__fbthrift_field_version);
+    this->__fbthrift_field_data = std::move(other.__fbthrift_field_data);
+    return *this;
+}
+
+
+MyDataItemSafePatch::MyDataItemSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
+    __fbthrift_field_version(std::move(version__arg)),
+    __fbthrift_field_data(std::move(data__arg)) {
+}
+
+
+void MyDataItemSafePatch::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_version = ::std::int32_t();
+  this->__fbthrift_field_data = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+}
+
+void MyDataItemSafePatch::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_version = ::std::int32_t();
+  this->__fbthrift_field_data = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+}
+
+bool MyDataItemSafePatch::__fbthrift_is_empty() const {
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_version) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_data);
+}
+
+bool MyDataItemSafePatch::operator==([[maybe_unused]] const MyDataItemSafePatch& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool MyDataItemSafePatch::operator<([[maybe_unused]] const MyDataItemSafePatch& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] MyDataItemSafePatch& a, [[maybe_unused]] MyDataItemSafePatch& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_version, b.__fbthrift_field_version);
+  swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
+}
+
+template void MyDataItemSafePatch::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItemSafePatch::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItemSafePatch::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItemSafePatch::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItemSafePatch::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItemSafePatch::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItemSafePatch::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItemSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 }}} // test::fixtures::python_capi

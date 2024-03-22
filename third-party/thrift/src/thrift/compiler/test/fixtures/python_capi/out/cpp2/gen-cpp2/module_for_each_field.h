@@ -269,6 +269,15 @@ struct ForEachField<::test::fixtures::python_capi::MyStructEnsureStruct> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::python_capi::MyStructSafePatch> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).version_ref()...);
+    f(1, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::python_capi::MyDataItemPatchStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
@@ -294,6 +303,15 @@ struct ForEachField<::test::fixtures::python_capi::MyDataItemEnsureStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::MyDataItemSafePatch> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).version_ref()...);
+    f(1, static_cast<T&&>(t).data_ref()...);
   }
 };
 } // namespace detail

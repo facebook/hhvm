@@ -327,6 +327,7 @@ void generate_struct_patch(
     // Add a 'field patch' and 'struct patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
     generator.add_struct_patch(*annot, node);
+    generator.add_safe_patch(*annot, node);
   }
 }
 
@@ -337,6 +338,7 @@ void generate_union_patch(
     // Add a 'field patch' and 'union patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
     generator.add_union_patch(*annot, node);
+    generator.add_safe_patch(*annot, node);
   }
 }
 
@@ -380,6 +382,19 @@ t_struct& patch_generator::add_ensure_struct(
     }
     gen.box(gen.field(field->id(), field->type(), field->name()));
   }
+  return gen;
+}
+
+t_struct& patch_generator::add_safe_patch(
+    const t_const& annot, t_structured& orig) {
+  StructGen gen{annot, gen_suffix_struct(annot, orig, "SafePatch"), program_};
+  gen.add_frozen_exclude();
+  gen.field(1, t_base_type::t_i32(), "version");
+  auto data = std::make_unique<t_base_type>(t_base_type::t_binary());
+  data->set_annotation("cpp.type", "std::unique_ptr<folly::IOBuf>");
+  t_type_ref data_ref = t_type_ref::from_ptr(data.get());
+  program_.add_unnamed_type(std::move(data));
+  gen.field(2, data_ref, "data");
   return gen;
 }
 

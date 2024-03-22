@@ -32,9 +32,11 @@ class MyStructField7PatchStruct;
 class MyStructField8PatchStruct;
 class MyStructFieldPatchStruct;
 class MyStructEnsureStruct;
+class MyStructSafePatch;
 class MyDataItemPatchStruct;
 class MyDataItemFieldPatchStruct;
 class MyDataItemEnsureStruct;
+class MyDataItemSafePatch;
 }}} // test::fixtures::python_capi
 // END forward_declare
 

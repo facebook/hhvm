@@ -723,6 +723,23 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("module.MyDataSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("module.MyDataWithCustomDefaultPatch").
     SetIsUnion(false).
     SetFields(
@@ -794,6 +811,23 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("module.MyDataWithCustomDefaultSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("module.InnerUnionPatch").
     SetIsUnion(false).
     SetFields(
@@ -835,6 +869,23 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("innerOption").
     SetIsOptional(false).
     SetType(premadeThriftType_patch_BinaryPatch),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("module.InnerUnionSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
         },
     ),
     metadata.NewThriftStruct().
@@ -889,6 +940,23 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("option3").
     SetIsOptional(false).
     SetType(premadeThriftType_module_InnerUnionPatch),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("module.MyUnionSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
         },
     ),
     metadata.NewThriftStruct().
@@ -1514,6 +1582,23 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("module.MyStructSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("module.LateDefStructPatch").
     SetIsUnion(false).
     SetFields(
@@ -1556,6 +1641,23 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.LateDefStructEnsureStruct").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("module.LateDefStructSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
     metadata.NewThriftStruct().
     SetName("module.RecursivePatch").
     SetIsUnion(false).
@@ -1635,6 +1737,23 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("module.RecursiveSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("module.BarPatch").
     SetIsUnion(false).
     SetFields(
@@ -1696,6 +1815,23 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("module.BarSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("module.LoopPatch").
     SetIsUnion(false).
     SetFields(
@@ -1710,6 +1846,23 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("clear").
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("module.LoopSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
         },
     ),
     metadata.NewThriftStruct().
@@ -1892,6 +2045,23 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("opt_box").
     SetIsOptional(true).
     SetType(premadeThriftType_list_i32),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("module.RefFieldsSafePatch").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("version").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i32),
+            metadata.NewThriftField().
+    SetId(2).
+    SetName("data").
+    SetIsOptional(false).
+    SetType(premadeThriftType_binary),
         },
     ),
 }

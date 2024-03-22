@@ -150,6 +150,23 @@ cdef api object construct__test__fixtures__patch__module__MyDataEnsureStruct(__u
 cdef api object init__test__fixtures__patch__module__MyDataEnsureStruct(object data):
     return __thrift_types.MyDataEnsureStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__MyDataSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyDataSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__MyDataSafePatch(object data):
+    return __thrift_types.MyDataSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefaultPatch) else 0
 
@@ -201,6 +218,23 @@ cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaul
 cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultEnsureStruct(object data):
     return __thrift_types.MyDataWithCustomDefaultEnsureStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefaultSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefaultSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefaultSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefaultSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataWithCustomDefaultSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefaultSafePatch(object data):
+    return __thrift_types.MyDataWithCustomDefaultSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__InnerUnionPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.InnerUnionPatch) else 0
 
@@ -235,6 +269,23 @@ cdef api object construct__test__fixtures__patch__module__InnerUnionFieldPatch(_
 cdef api object init__test__fixtures__patch__module__InnerUnionFieldPatch(object data):
     return __thrift_types.InnerUnionFieldPatch._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__InnerUnionSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.InnerUnionSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__InnerUnionSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__InnerUnionSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.InnerUnionSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__InnerUnionSafePatch(object data):
+    return __thrift_types.InnerUnionSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__MyUnionPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnionPatch) else 0
 
@@ -268,6 +319,23 @@ cdef api object construct__test__fixtures__patch__module__MyUnionFieldPatch(__un
 
 cdef api object init__test__fixtures__patch__module__MyUnionFieldPatch(object data):
     return __thrift_types.MyUnionFieldPatch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__MyUnionSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyUnionSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyUnionSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyUnionSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyUnionSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__MyUnionSafePatch(object data):
+    return __thrift_types.MyUnionSafePatch._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyStructPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructPatch) else 0
@@ -456,6 +524,23 @@ cdef api object construct__test__fixtures__patch__module__MyStructEnsureStruct(_
 cdef api object init__test__fixtures__patch__module__MyStructEnsureStruct(object data):
     return __thrift_types.MyStructEnsureStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__MyStructSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyStructSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyStructSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__MyStructSafePatch(object data):
+    return __thrift_types.MyStructSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__LateDefStructPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.LateDefStructPatch) else 0
 
@@ -506,6 +591,23 @@ cdef api object construct__test__fixtures__patch__module__LateDefStructEnsureStr
 
 cdef api object init__test__fixtures__patch__module__LateDefStructEnsureStruct(object data):
     return __thrift_types.LateDefStructEnsureStruct._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__LateDefStructSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.LateDefStructSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LateDefStructSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__LateDefStructSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.LateDefStructSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__LateDefStructSafePatch(object data):
+    return __thrift_types.LateDefStructSafePatch._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__RecursivePatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RecursivePatch) else 0
@@ -575,6 +677,23 @@ cdef api object construct__test__fixtures__patch__module__RecursiveEnsureStruct(
 cdef api object init__test__fixtures__patch__module__RecursiveEnsureStruct(object data):
     return __thrift_types.RecursiveEnsureStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__RecursiveSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RecursiveSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RecursiveSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RecursiveSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RecursiveSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RecursiveSafePatch(object data):
+    return __thrift_types.RecursiveSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__BarPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.BarPatch) else 0
 
@@ -626,6 +745,23 @@ cdef api object construct__test__fixtures__patch__module__BarEnsureStruct(__uniq
 cdef api object init__test__fixtures__patch__module__BarEnsureStruct(object data):
     return __thrift_types.BarEnsureStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__BarSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.BarSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__BarSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__BarSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.BarSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__BarSafePatch(object data):
+    return __thrift_types.BarSafePatch._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__LoopPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.LoopPatch) else 0
 
@@ -642,6 +778,23 @@ cdef api object construct__test__fixtures__patch__module__LoopPatch(__unique_ptr
 
 cdef api object init__test__fixtures__patch__module__LoopPatch(object data):
     return __thrift_types.LoopPatch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__LoopSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.LoopSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__LoopSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.LoopSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__LoopSafePatch(object data):
+    return __thrift_types.LoopSafePatch._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RefFieldsPatch) else 0
@@ -744,6 +897,23 @@ cdef api object construct__test__fixtures__patch__module__RefFieldsEnsureStruct(
 
 cdef api object init__test__fixtures__patch__module__RefFieldsEnsureStruct(object data):
     return __thrift_types.RefFieldsEnsureStruct._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsSafePatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsSafePatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsSafePatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsSafePatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsSafePatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsSafePatch(object data):
+    return __thrift_types.RefFieldsSafePatch._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0

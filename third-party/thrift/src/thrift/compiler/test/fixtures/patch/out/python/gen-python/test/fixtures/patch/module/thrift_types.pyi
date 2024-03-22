@@ -458,6 +458,30 @@ class MyDataEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_wit
     def _to_py_deprecated(self) -> "module.ttypes.MyDataEnsureStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_MyDataSafePatch:
+    pass
+
+
+class MyDataSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataSafePatch": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_MyDataWithCustomDefaultPatch:
     pass
 
@@ -542,6 +566,30 @@ class MyDataWithCustomDefaultEnsureStruct(_fbthrift_python_types.Struct, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultEnsureStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_MyDataWithCustomDefaultSafePatch:
+    pass
+
+
+class MyDataWithCustomDefaultSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyDataWithCustomDefaultSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultSafePatch": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_InnerUnionPatch:
     pass
 
@@ -594,6 +642,30 @@ class InnerUnionFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_w
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.InnerUnionFieldPatch": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.InnerUnionFieldPatch": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_InnerUnionSafePatch:
+    pass
+
+
+class InnerUnionSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_InnerUnionSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.InnerUnionSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.InnerUnionSafePatch": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_MyUnionPatch:
@@ -654,6 +726,30 @@ class MyUnionFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.MyUnionFieldPatch": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFieldPatch": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_MyUnionSafePatch:
+    pass
+
+
+class MyUnionSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyUnionSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyUnionSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyUnionSafePatch": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_MyStructPatch:
@@ -1181,6 +1277,30 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_w
     def _to_py_deprecated(self) -> "module.ttypes.MyStructEnsureStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_MyStructSafePatch:
+    pass
+
+
+class MyStructSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.MyStructSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.MyStructSafePatch": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_LateDefStructPatch:
     pass
 
@@ -1251,6 +1371,30 @@ class LateDefStructEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compati
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.LateDefStructEnsureStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStructEnsureStruct": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_LateDefStructSafePatch:
+    pass
+
+
+class LateDefStructSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.LateDefStructSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.LateDefStructSafePatch": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_RecursivePatch:
@@ -1355,6 +1499,30 @@ class RecursiveEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveEnsureStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_RecursiveSafePatch:
+    pass
+
+
+class RecursiveSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursiveSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.RecursiveSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.RecursiveSafePatch": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_BarPatch:
     pass
 
@@ -1433,6 +1601,30 @@ class BarEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_B
     def _to_py_deprecated(self) -> "module.ttypes.BarEnsureStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_BarSafePatch:
+    pass
+
+
+class BarSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.BarSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.BarSafePatch": ...  # type: ignore
+
+
 class _fbthrift_compatible_with_LoopPatch:
     pass
 
@@ -1455,6 +1647,30 @@ class LoopPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopPat
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.LoopPatch": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.LoopPatch": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_LoopSafePatch:
+    pass
+
+
+class LoopSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.LoopSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.LoopSafePatch": ...  # type: ignore
 
 
 class _fbthrift_compatible_with_RefFieldsPatch:
@@ -1647,3 +1863,27 @@ class RefFieldsEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.RefFieldsEnsureStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.RefFieldsEnsureStruct": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_RefFieldsSafePatch:
+    pass
+
+
+class RefFieldsSafePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RefFieldsSafePatch):
+    version: _typing.Final[int] = ...
+    data: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
+    def __init__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        version: _typing.Optional[int]=...,
+        data: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_iobuf.IOBuf]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.patch.module.types.RefFieldsSafePatch": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.RefFieldsSafePatch": ...  # type: ignore

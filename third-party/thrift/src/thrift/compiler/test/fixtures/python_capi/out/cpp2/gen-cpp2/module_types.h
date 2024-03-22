@@ -824,6 +824,7 @@ class MyDataItem final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyDataItemSafePatch;
   using __fbthrift_patch_struct = MyDataItemPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -981,6 +982,7 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyStructSafePatch;
   using __fbthrift_patch_struct = MyStructPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();

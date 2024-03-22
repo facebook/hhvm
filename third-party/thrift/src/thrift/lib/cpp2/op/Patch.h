@@ -85,6 +85,15 @@ struct PatchType<type::union_t<T>> {
 template <class T>
 struct SafePatchType {};
 
+template <class T>
+struct SafePatchType<type::struct_t<T>> {
+  using type = ::apache::thrift::detail::st::private_access::safe_patch<T>;
+};
+template <class T>
+struct SafePatchType<type::union_t<T>> {
+  using type = ::apache::thrift::detail::st::private_access::safe_patch<T>;
+};
+
 } // namespace detail
 
 /// The safe patch represenations for the base thrift types.

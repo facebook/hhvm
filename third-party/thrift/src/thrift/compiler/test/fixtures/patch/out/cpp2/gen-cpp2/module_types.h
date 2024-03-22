@@ -1536,6 +1536,7 @@ class MyData final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyDataSafePatch;
   using __fbthrift_patch_struct = MyDataPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -1745,6 +1746,7 @@ class MyDataWithCustomDefault final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyDataWithCustomDefaultSafePatch;
   using __fbthrift_patch_struct = MyDataWithCustomDefaultPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -1954,6 +1956,7 @@ class InnerUnion final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = InnerUnionSafePatch;
   using __fbthrift_patch_struct = InnerUnionPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -2167,6 +2170,7 @@ class MyUnion final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyUnionSafePatch;
   using __fbthrift_patch_struct = MyUnionPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -2518,6 +2522,7 @@ class LateDefStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = LateDefStructSafePatch;
   using __fbthrift_patch_struct = LateDefStructPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -2612,6 +2617,7 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = MyStructSafePatch;
   using __fbthrift_patch_struct = MyStructPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -4547,6 +4553,7 @@ class Recursive final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = RecursiveSafePatch;
   using __fbthrift_patch_struct = RecursivePatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -4696,6 +4703,7 @@ class Bar final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = BarSafePatch;
   using __fbthrift_patch_struct = BarPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -4834,6 +4842,7 @@ class Loop final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = LoopSafePatch;
   using __fbthrift_patch_struct = LoopPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
@@ -4980,6 +4989,7 @@ class RefFields final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_safe_patch = RefFieldsSafePatch;
   using __fbthrift_patch_struct = RefFieldsPatchStruct;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();

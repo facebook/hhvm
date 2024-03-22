@@ -160,6 +160,12 @@ struct struct_private_access {
 
   template <typename T>
   using patch_struct = decltype(__fbthrift_patch_struct<T>());
+
+  template <typename T>
+  static typename T::__fbthrift_safe_patch __fbthrift_safe_patch();
+
+  template <typename T>
+  using safe_patch = decltype(__fbthrift_safe_patch<T>());
 };
 //  TODO(dokwon): Remove all usage of struct_private_access and standardize on
 //  private_access.

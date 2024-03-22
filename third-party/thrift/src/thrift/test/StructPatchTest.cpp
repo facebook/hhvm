@@ -45,6 +45,14 @@ static_assert(test::same_type<
 static_assert(
     test::same_type<MyUnionPatch, ::apache::thrift::op::patch_type<MyUnion>>);
 
+static_assert(std::is_same_v<
+              MyStructSafePatch,
+              apache::thrift::op::safe_patch_type<MyStruct>>);
+
+static_assert(std::is_same_v<
+              MyUnionSafePatch,
+              apache::thrift::op::safe_patch_type<MyUnion>>);
+
 static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
               ::apache::thrift::op::detail::FieldPatchAdapter<
                   MyStructFieldPatchStruct>,
@@ -1665,6 +1673,29 @@ TEST(StructPatchTest, BinaryInUnion) {
   patch2.patch<ident::b>() = "456";
   patch2.apply(value);
   EXPECT_EQ(value.b_ref(), "456");
+}
+
+TEST(Basic, SafePatch) {
+  MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  MyStructSafePatch safePatch = op::toSafePatch<MyStruct>(patch);
+  EXPECT_EQ(op::fromSafePatch<MyStruct>(safePatch), patch);
+}
+
+TEST(Basic, SafePatchInvalid) {
+  MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  MyStructSafePatch safePatch = op::toSafePatch<MyStruct>(patch);
+  safePatch.version() = 0;
+  EXPECT_THROW(op::fromSafePatch<MyStruct>(safePatch), std::runtime_error);
+}
+
+TEST(Basic, SafePatchInvalidForwardConsumption) {
+  MyStructPatch patch;
+  patch.patch<ident::stringVal>() = "hello world";
+  MyStructSafePatch safePatch = op::toSafePatch<MyStruct>(patch);
+  safePatch.version() = 10000;
+  EXPECT_THROW(op::fromSafePatch<MyStruct>(safePatch), std::runtime_error);
 }
 
 } // namespace

@@ -22,8 +22,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<folly::IOBuf>,
     makeFrameworkMetadata,
     const RpcOptions&,
-    folly::dynamic&,
-    folly::F14NodeMap<std::string, std::string>&) {
+    folly::dynamic&) {
   return nullptr;
 }
 

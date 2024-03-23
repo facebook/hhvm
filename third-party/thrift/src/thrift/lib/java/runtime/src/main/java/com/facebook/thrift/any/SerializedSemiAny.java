@@ -40,7 +40,9 @@ class SerializedSemiAny<T> extends SemiAny<T> {
     this.any = Objects.requireNonNull(any);
   }
 
-  /** @return SemiAny payload. Data, protocol and type must be provided to get the value. */
+  /**
+   * @return SemiAny payload. Data, protocol and type must be provided to get the value.
+   */
   public T get() {
     if (lazyValue != null) {
       return (T) lazyValue;
@@ -64,7 +66,9 @@ class SerializedSemiAny<T> extends SemiAny<T> {
     }
   }
 
-  /** @return SemiAnyStruct */
+  /**
+   * @return SemiAnyStruct
+   */
   @Override
   public SemiAnyStruct getAny() {
     return any;

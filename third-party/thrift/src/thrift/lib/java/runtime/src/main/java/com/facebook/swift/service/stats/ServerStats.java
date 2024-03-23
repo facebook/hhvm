@@ -37,6 +37,7 @@ public class ServerStats {
 
   // Counter properties
   private final AtomicLong receivedRequests;
+
   /**
    * DecayCounters decays exponentially using a formula to calculate counts in a rolling time window
    * https://github.com/airlift/airlift/blob/master/stats/src/main/java/io/airlift/stats/DecayCounter.java

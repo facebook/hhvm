@@ -49,7 +49,8 @@ public class Utf8Util {
       createStr = lookup.unreflect(m);
     } catch (Throwable t) {
       logger.warn(
-          "Add JVM option for faster UTF-8 validation. --add-opens java.base/java.lang=ALL-UNNAMED");
+          "Add JVM option for faster UTF-8 validation. --add-opens"
+              + " java.base/java.lang=ALL-UNNAMED");
       // Ignore, validation will be done before creating the String
     }
 

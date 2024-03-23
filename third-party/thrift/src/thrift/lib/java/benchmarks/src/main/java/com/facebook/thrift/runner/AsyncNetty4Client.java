@@ -32,7 +32,8 @@ public class AsyncNetty4Client extends AbstractAsyncClient {
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
     if (args.length < 3) {
       throw new IllegalArgumentException(
-          "Incorrect number of arguments. <hostname> <port/Uds Path> <warmupSeconds> <benchmarkSeconds>");
+          "Incorrect number of arguments. <hostname> <port/Uds Path> <warmupSeconds>"
+              + " <benchmarkSeconds>");
     }
 
     SocketAddress address;

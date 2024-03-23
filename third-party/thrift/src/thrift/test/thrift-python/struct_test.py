@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import importlib
+import types
 import unittest
+
+from thrift.python.mutable_types import MutableStruct, MutableStructOrUnion
+
+from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
+    TestStruct as TestStructMutable,
+)
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
@@ -62,14 +68,42 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
-    def test_not_implemented_yet(self) -> None:
+
+    def test_creation_and_assignment(self) -> None:
+        w_mutable = TestStructMutable()
+        self.assertIsInstance(w_mutable, MutableStruct)
+        self.assertIsInstance(w_mutable, MutableStructOrUnion)
+
+        self.assertEqual(w_mutable.unqualified_string, None)
+        w_mutable.unqualified_string = "hello, world!"
+        self.assertEqual(w_mutable.unqualified_string, "hello, world!")
+
+    def test_equality_and_hashability(self) -> None:
+        # Equality
+        w_mutable = TestStructMutable(unqualified_string="hello, world!")
+        self.assertEqual(w_mutable, w_mutable)
+
+        w_mutable2 = TestStructMutable(unqualified_string="hello, world!")
+        self.assertEqual(w_mutable.unqualified_string, w_mutable2.unqualified_string)
+        self.assertEqual(w_mutable, w_mutable2)
+
+        # Instances are not hashable
+        with self.assertRaisesRegex(TypeError, "unhashable type: 'TestStruct'"):
+            hash(w_mutable)
+
+        with self.assertRaisesRegex(TypeError, "unhashable type: 'TestStruct'"):
+            {w_mutable}
+
+        # List and Tuple membership tests use equality (not hashing).
+        self.assertIn(w_mutable, [w_mutable2])
+        self.assertIn(w_mutable, (w_mutable2,))
+
+        w_mutable2.unqualified_string = "changed value"
+        self.assertNotIn(w_mutable, [w_mutable2])
+        self.assertNotIn(w_mutable, (w_mutable2,))
+
+    def test_subclass(self) -> None:
         with self.assertRaisesRegex(
-            NotImplementedError,
-            (
-                "^MutableStructMeta: thrift-python mutable types are not "
-                "implemented yet, cannot create class for Thrift Struct: "
-            ),
+            TypeError, "Inheriting from thrift-python data types is forbidden:"
         ):
-            importlib.import_module(
-                "thrift.test.thrift_python.struct_test.thrift_mutable_types"
-            )
+            types.new_class("TestSubclass2", bases=(TestStructMutable,))

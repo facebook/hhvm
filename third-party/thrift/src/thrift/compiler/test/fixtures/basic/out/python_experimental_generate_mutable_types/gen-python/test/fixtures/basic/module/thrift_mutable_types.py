@@ -11,9 +11,10 @@ from __future__ import annotations
 # EXPERIMENTAL - DO NOT USE !!!
 # See `experimental_generate_mutable_types` documentation in thrift compiler
 
+import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.types as _fbthrift_python_types
 
-class MyStruct(metaclass=_fbthrift_python_types.MutableStructMeta):
+class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         (
             1,  # id
@@ -114,7 +115,7 @@ class MyStruct(metaclass=_fbthrift_python_types.MutableStructMeta):
         raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
 
 
-class MyDataItem(metaclass=_fbthrift_python_types.MutableStructMeta):
+class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
     )
 
@@ -134,7 +135,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.MutableStructMeta):
         raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
 
 
-class ReservedKeyword(metaclass=_fbthrift_python_types.MutableStructMeta):
+class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         (
             1,  # id

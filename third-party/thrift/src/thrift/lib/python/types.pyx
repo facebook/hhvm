@@ -1187,23 +1187,6 @@ class StructMeta(type):
             yield name, None
 
 
-class MutableStructMeta(type):
-    """Metaclass for all generated (mutable) thrift-python Struct types."""
-
-    def __new__(cls, cls_name, bases, dct):
-        """
-        Returns a new mutable Thrift Struct class with the given name and
-        members.
-
-        Raises:
-            NotImplementedError: always (not implemented YET).
-        """
-        raise NotImplementedError(
-            "MutableStructMeta: thrift-python mutable types are not "
-            "implemented yet, cannot create class for Thrift Struct: "
-            f"{cls_name}")
-
-
 def gen_enum(fields):
     yield ("EMPTY", 0)
     for f in fields:

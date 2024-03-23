@@ -185,13 +185,6 @@ struct APCStats {
     m_keySize->addValue(-len);
   }
 
-  // A primed key is added. Implies a key is added as well.
-  void addPrimedKey(size_t len) {
-    assertx(len > 0);
-    m_primedEntries->increment();
-    addKey(len);
-  }
-
   // A value of a certain size was added to the primed set that is mapped
   // to file
   void addInFileValue(size_t size) {
@@ -314,8 +307,6 @@ private:
 
   // Number of entries (keys)
   ServiceData::ExportedCounter* m_entries;
-  // Number of primed entries
-  ServiceData::ExportedCounter* m_primedEntries;
   // Number of live primed entries
   ServiceData::ExportedCounter* m_livePrimedEntries;
   // Number of uncounted entries

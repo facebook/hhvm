@@ -242,7 +242,6 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_livePrimedSize(nullptr)
                      , m_pendingDeleteSize(nullptr)
                      , m_entries(nullptr)
-                     , m_primedEntries(nullptr)
                      , m_livePrimedEntries(nullptr)
                      , m_uncountedEntries(nullptr)
                      , m_uncountedBlocks(nullptr)
@@ -254,7 +253,6 @@ APCStats::APCStats() : m_valueSize(nullptr)
   m_pendingDeleteSize =
     ServiceData::createCounter("apc.pending_delete_size.sum");
   m_entries = ServiceData::createCounter("apc.entries");
-  m_primedEntries = ServiceData::createCounter("apc.primed_entries");
   m_livePrimedEntries =
       ServiceData::createCounter("apc.primed_live_entries");
   m_uncountedEntries = ServiceData::createCounter("apc.uncounted_entries");
@@ -280,8 +278,6 @@ std::string APCStats::getStatsInfo() const {
           std::to_string(m_livePrimedSize->getValue()) +
           "\nEntries count: " +
           std::to_string(m_entries->getValue()) +
-          "\nPrimed entries count: " +
-          std::to_string(m_primedEntries->getValue()) +
           "\nIn memory primed entries count: " +
           std::to_string(m_livePrimedEntries->getValue()) +
           "\nIn total uncounted entries count: " +
@@ -299,7 +295,6 @@ std::string APCStats::getStatsInfo() const {
 }
 
 const StaticString s_num_entries("num_entries");
-const StaticString s_primedEntries("primed_entries");
 const StaticString s_primedLiveEntries("primed_live_entries");
 const StaticString s_valuesSize("values_size");
 const StaticString s_keysSize("keys_size");
@@ -313,9 +308,6 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_num_entries.get(),
                                             m_entries->getValue()));
-  stats.insert(
-      std::pair<const StringData*, int64_t>(s_primedEntries.get(),
-                                            m_primedEntries->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primedLiveEntries.get(),
                                             m_livePrimedEntries->getValue()));

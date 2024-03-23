@@ -4,7 +4,7 @@ bool(false)
 bool(false)
 bool(false)
 In wakeup
-int(13)
+int(%d)
 bool(true)
 object(Foo) (0) {
 }

@@ -26,6 +26,27 @@ pub struct TypeInfo {
     pub type_constraint: Constraint,
 }
 
+// TODO: What's the deal with Param and Body::return_type using Option<TypeInfo>?
+// a None TypeInfo corresponds to source text with no type specified. Hack bans
+// this but hackc and hhvm still allow it for no good reason. Missing hints imply
+// `mixed` but implicit mixed vs explicit mixed may be subtly visible (reflection?).
+//
+// For historical reasons, none of which are compelling, we have various defaults.
+// Here is a summary of the situation.
+//
+// hackc translator translates Option<TypeInfo> => pair (StringData*, TypeConstraint)
+// by defaulting None to (null, TypeConstraint{}). This pair is passed to a FuncEmitter.
+// so the righteous path is to scrub off the Option<T> in hhbc+ir, and leave it up to
+// hackc to supply a default TypeInfo (semantically equivalent to mixed).
+//
+// The historical defaults appear as follows:
+// * Some(TypeInfo::default()) uses one bespoke mix of None and empty strings
+// * Some(TypeInfo::empty()) uses a different bespoke mix of None and empty strings
+// * IR users (textual,etc) translate None to TypeInfo::empty() via Body::return_type()
+// * hackc-translator translates None to a third, potentially different, bespoke mix
+// of nullptr and empty strings (HPHP::TypeConstraint is richer than hhbc::Constraint
+// so we need to look at how the defaults shake out).
+
 impl TypeInfo {
     pub fn new(user_type: Maybe<StringId>, type_constraint: Constraint) -> Self {
         Self {
@@ -36,17 +57,6 @@ impl TypeInfo {
 
     pub fn has_type_constraint(&self) -> bool {
         self.type_constraint.name.is_just()
-    }
-
-    /// Be careful, not the same as default()!
-    pub fn empty() -> Self {
-        Self {
-            user_type: Maybe::Nothing,
-            type_constraint: Constraint {
-                name: Maybe::Just(StringId::EMPTY),
-                flags: Default::default(),
-            },
-        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -81,6 +91,14 @@ impl TypeInfo {
                 flags: TypeConstraintFlags::NoFlags,
             },
         }
+    }
+
+    /// Be careful, not the same as default()!
+    pub fn empty() -> Self {
+        Self::new(
+            Maybe::Nothing,
+            Constraint::new(Maybe::Just(StringId::EMPTY), Default::default()),
+        )
     }
 }
 

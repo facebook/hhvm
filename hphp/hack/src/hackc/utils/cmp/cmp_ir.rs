@@ -337,7 +337,12 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
         .qualified("is_memoize_wrapper_lsb")?;
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
     cmp_slice(a_params, b_params, cmp_param).qualified("params")?;
-    cmp_type_info(a_return_type, b_return_type).qualified("return_type")?;
+    cmp_option(
+        a_return_type.as_ref(),
+        b_return_type.as_ref(),
+        cmp_type_info,
+    )
+    .qualified("return_type")?;
     cmp_slice(a_shadowed_tparams.iter(), b_shadowed_tparams.iter(), cmp_eq)
         .qualified("shadowed_tparams")?;
 

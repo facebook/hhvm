@@ -10,6 +10,5 @@ mod ex_frame;
 mod func;
 mod push_count;
 mod pusher;
-mod types;
 
 pub use convert::ir_to_bc;

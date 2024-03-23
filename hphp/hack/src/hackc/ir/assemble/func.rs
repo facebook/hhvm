@@ -193,7 +193,15 @@ impl<'b> FunctionParser<'b> {
             Default::default()
         };
 
-        parse!(tokenizer, "(" <params:parse_param(),*> ")" <shadowed_tparams:parse_shadowed_tparams> ":" <return_type:parse_type_info>);
+        parse!(
+            tokenizer,
+            "(" <params:parse_param(),*> ")" <shadowed_tparams:parse_shadowed_tparams> ":"
+        );
+
+        let return_type = match tokenizer.peek_is_identifier("<")? {
+            false => None,
+            true => Some(parse_type_info(tokenizer)?),
+        };
         let attrs = parse_attr(tokenizer)?;
 
         if let Some(class_state) = &mut class_state {
@@ -203,6 +211,8 @@ impl<'b> FunctionParser<'b> {
 
         parse!(tokenizer, "{" "\n");
 
+        // Undo the effects of Func::return_type() mapping None to EMPTY in
+        // print_function() and print_method().
         let mut builder = FuncBuilder::with_func(Func {
             return_type,
             params,

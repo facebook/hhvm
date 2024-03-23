@@ -343,7 +343,7 @@ fn write_func(
     let (tx_params, param_lids): (Vec<_>, Vec<_>) =
         compute_func_params(&params, this_ty).into_iter().unzip();
 
-    let ret_ty = compute_func_ret_ty(&func.return_type);
+    let ret_ty = compute_func_ret_ty(&func.return_type());
 
     let lids = func
         .body_instrs()
@@ -447,7 +447,7 @@ pub(crate) fn write_func_decl(
         .map(|(param, _)| textual::Ty::clone(&param.ty))
         .collect_vec();
 
-    let ret_ty = compute_func_ret_ty(&func.return_type).ty;
+    let ret_ty = compute_func_ret_ty(&func.return_type()).ty;
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {

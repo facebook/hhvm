@@ -472,7 +472,7 @@ impl LowerInstrs<'_> {
     }
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder, obj: ValueId, loc: LocId) -> Instr {
-        let return_type = ir::EnforceableType::from_type_info(&builder.func.return_type);
+        let return_type = ir::EnforceableType::from_type_info(&builder.func.return_type());
         if return_type
             .modifiers
             .contains(ir::TypeConstraintFlags::TypeVar)

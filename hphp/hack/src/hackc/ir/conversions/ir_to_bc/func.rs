@@ -51,7 +51,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let mut labeler = emitter::Labeler::new(&func);
     let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, adata);
 
-    let return_type_info = crate::types::convert(&func.return_type);
+    let return_type_info = func.return_type.into();
 
     let span = func.span;
     let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {

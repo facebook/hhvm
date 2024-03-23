@@ -618,14 +618,17 @@ fn print_top_level_span(w: &mut dyn Write, span: Option<&Span>) -> Result {
 
 fn print_function(w: &mut dyn Write, f: &Function, verbose: bool) -> Result {
     print_top_level_loc(w, Some(&SrcLoc::from_span(&f.func.span)))?;
+    let ret_type = match &f.func.return_type {
+        Some(t) => format!(" {}", FmtTypeInfo(t)),
+        None => String::new(),
+    };
     writeln!(
         w,
-        "function {name}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {{",
+        "function {name}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {{",
         name = FmtIdentifierId(f.name.as_bytes_id()),
         tparams = FmtTParams(&f.func.upper_bounds),
         shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams),
         params = FmtFuncParams(&f.func),
-        ret_type = FmtTypeInfo(&f.func.return_type),
         attr = FmtAttr(f.func.attrs, AttrContext::Function),
     )?;
     print_function_flags(w, f.flags)?;
@@ -1729,15 +1732,18 @@ fn print_member_key(
 
 fn print_method(w: &mut dyn Write, clsid: ClassName, method: &Method, verbose: bool) -> Result {
     print_top_level_loc(w, Some(&SrcLoc::from_span(&method.func.span)))?;
+    let ret_type = match &method.func.return_type {
+        Some(t) => format!(" {}", FmtTypeInfo(t)),
+        None => String::new(),
+    };
     writeln!(
         w,
-        "method {clsid}::{method}{tparams}{params}{shadowed_tparams}: {ret_type} {attr} {vis} {{",
+        "method {clsid}::{method}{tparams}{params}{shadowed_tparams}:{ret_type} {attr} {vis} {{",
         clsid = FmtIdentifierId(clsid.as_bytes_id()),
         method = FmtIdentifierId(method.name.as_bytes_id()),
         tparams = FmtTParams(&method.func.upper_bounds),
         shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams),
         params = FmtFuncParams(&method.func),
-        ret_type = FmtTypeInfo(&method.func.return_type),
         vis = FmtVisibility(method.visibility),
         attr = FmtAttr(method.func.attrs, AttrContext::Method),
     )?;

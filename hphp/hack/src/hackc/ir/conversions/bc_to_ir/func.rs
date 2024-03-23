@@ -16,7 +16,6 @@ use newtype::IdVec;
 
 use crate::context::Context;
 use crate::convert::UnitState;
-use crate::types;
 
 /// Convert a hhbc::Function to an ir::Function
 pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
@@ -97,7 +96,7 @@ fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
         locs,
         num_iters,
         params: Default::default(),
-        return_type: types::convert_maybe_type(return_type_info.as_ref()),
+        return_type: return_type_info.clone().into(),
         shadowed_tparams,
         span,
         upper_bounds: upper_bounds.clone().into(),

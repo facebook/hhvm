@@ -166,7 +166,7 @@ pub struct Func {
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
     pub params: Vec<(Param, Option<DefaultValue>)>,
-    pub return_type: TypeInfo,
+    pub return_type: Option<TypeInfo>,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassName>,
@@ -397,6 +397,10 @@ impl Func {
             Instr::Terminator(terminator) => terminator,
             _ => panic!("Non-Terminator found in terminator location {}", iid),
         }
+    }
+
+    pub fn return_type(&self) -> TypeInfo {
+        self.return_type.clone().unwrap_or_else(TypeInfo::empty)
     }
 }
 

@@ -11,6 +11,5 @@ mod convert;
 mod func;
 mod instrs;
 mod sequence;
-mod types;
 
 pub use convert::bc_to_ir;

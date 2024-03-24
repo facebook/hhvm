@@ -9,19 +9,13 @@
 
 open Hh_prelude
 
-type t = int array [@@deriving show, eq, sexp_of]
-
-let last_offset = ref 0
-
-let curr_index = ref 0
-
-let reset_global_state () =
-  last_offset := 0;
-  curr_index := 0
+type t = {
+  bolmap: int array;
+  mutable last_offset: int;
+  mutable curr_index: int;
+} [@@deriving show, eq, sexp_of]
 
 let make text =
-  reset_global_state ();
-
   (* Clever Tricks Warning
    * ---------------------
    * We prepend 0, so as to make the invariant hold that there is always a
@@ -45,17 +39,21 @@ let make text =
         result := i :: !result
     done;
     (match !result with
-    | r :: _ as rs when r <> len -> result := len :: rs
-    | _ -> ());
+     | r :: _ as rs when r <> len -> result := len :: rs
+     | _ -> ());
     0 :: List.rev !result
   in
-  Array.of_list newline_list
+  {
+    bolmap = Array.of_list newline_list;
+    last_offset = 0;
+    curr_index = 0;
+  }
 
 let offset_to_file_pos_triple bolmap offset =
-  let len = Array.length bolmap in
-  if !curr_index >= len then curr_index := len - 1;
+  let len = Array.length bolmap.bolmap in
+  if bolmap.curr_index >= len then bolmap.curr_index <- len - 1;
   let rec forward_search i =
-    let offset_at_i = Array.unsafe_get bolmap i in
+    let offset_at_i = Array.unsafe_get bolmap.bolmap i in
     if offset < offset_at_i then
       i - 1
     else if i + 1 >= len then
@@ -64,7 +62,7 @@ let offset_to_file_pos_triple bolmap offset =
       forward_search (i + 1)
   in
   let rec backward_search i =
-    let offset_at_i = Array.unsafe_get bolmap i in
+    let offset_at_i = Array.unsafe_get bolmap.bolmap i in
     if offset >= offset_at_i then
       i
     else if i = 0 then
@@ -73,16 +71,16 @@ let offset_to_file_pos_triple bolmap offset =
       backward_search (i - 1)
   in
   let index =
-    if !last_offset < offset && !curr_index <> len - 1 then
-      forward_search (!curr_index + 1)
-    else if !last_offset > offset then
-      backward_search !curr_index
+    if bolmap.last_offset < offset && bolmap.curr_index <> len - 1 then
+      forward_search (bolmap.curr_index + 1)
+    else if bolmap.last_offset > offset then
+      backward_search bolmap.curr_index
     else
-      !curr_index
+      bolmap.curr_index
   in
-  let line_start = bolmap.(index) in
-  curr_index := index;
-  last_offset := offset;
+  let line_start = bolmap.bolmap.(index) in
+  bolmap.curr_index <- index;
+  bolmap.last_offset <- offset;
   (index + 1, line_start, offset)
 
 let offset_to_position bolmap offset =
@@ -93,16 +91,16 @@ let offset_to_position bolmap offset =
 exception Position_not_found
 
 let position_to_offset ?(existing = false) bolmap (line, column) =
-  let len = Array.length bolmap in
+  let len = Array.length bolmap.bolmap in
   let file_line = line in
   (* Treat all file_line errors the same: Not_found *)
   let line_start =
-    try bolmap.(file_line - 1) with
+    try bolmap.bolmap.(file_line - 1) with
     | _ -> raise Position_not_found
   in
   let offset = line_start + column - 1 in
   if
-    (not existing) || (offset >= 0 && offset <= bolmap.(min (len - 1) file_line))
+    (not existing) || (offset >= 0 && offset <= bolmap.bolmap.(min (len - 1) file_line))
   then
     offset
   else
@@ -118,7 +116,7 @@ let offsets_to_line_lengths bolmap =
         match mnext with
         | None -> (acc, Some offset)
         | Some next -> ((next - offset) :: acc, Some offset))
-      bolmap
+      bolmap.bolmap
       ~init:([], None)
   in
   lengths

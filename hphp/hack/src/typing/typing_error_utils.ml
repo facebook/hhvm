@@ -3923,6 +3923,16 @@ end = struct
       [],
       User_error_flags.empty )
 
+  let internal_meth_caller use_pos def_pos =
+    ( Error_code.InternalMethCaller,
+      lazy
+        ( use_pos,
+          "You cannot access this method with `meth_caller` (even from the same module)"
+        ),
+      lazy [(def_pos, "It is declared as `internal` here")],
+      [],
+      User_error_flags.empty )
+
   let array_cast pos =
     ( Error_code.ArrayCast,
       lazy
@@ -5256,6 +5266,8 @@ end = struct
     | Private_meth_caller { pos; decl_pos } -> private_meth_caller pos decl_pos
     | Protected_meth_caller { pos; decl_pos } ->
       protected_meth_caller pos decl_pos
+    | Internal_meth_caller { pos; decl_pos } ->
+      internal_meth_caller pos decl_pos
     | Array_cast pos -> array_cast pos
     | String_cast { pos; ty_name } -> string_cast pos @@ Lazy.force ty_name
     | Static_outside_class pos -> static_outside_class pos

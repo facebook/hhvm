@@ -339,6 +339,10 @@ let check_meth_caller_access ~use_pos ~def_pos vis =
     Some
       (primary
       @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
+  | Vinternal _ ->
+    Some
+      (primary
+      @@ Primary.Internal_meth_caller { decl_pos = def_pos; pos = use_pos })
   | _ -> None
 
 let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =

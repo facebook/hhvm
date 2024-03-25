@@ -37,7 +37,7 @@
         "original_argsstring_html": "()"
       },
       "description": {
-        "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
+        "brief_html": "<p>Ensures the given field is set. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
@@ -99,7 +99,7 @@
   "filepath": "f/class/apache/thrift/op/detail/StructPatch/ensure",
   "minprot": "public",
   "displayname_html": "ensure",
-  "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>",
+  "brief_html": "<p>Ensures the given field is set. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensure",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensure"

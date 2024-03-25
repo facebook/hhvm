@@ -215,7 +215,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
         getRawPatch<Id>(data_.patch()).template modifies<Ids...>();
   }
 
-  /// Ensures the given field is set, and return the associated patch object.
+  /// Ensures the given field is set.
   template <typename Id>
   void ensure() {
     // Ensuring non-optional field to intrinsic default is allowed since we

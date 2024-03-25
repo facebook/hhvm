@@ -164,14 +164,13 @@ folly::Try<StreamPayload> encodeMessageVariant(
       [&](UnorderedHeader&& val) {
         StreamPayloadMetadata md;
         md.otherMetadata() = std::move(val.metadata);
-        return folly::Try<StreamPayload>(
-            folly::in_place, nullptr, std::move(md));
+        return folly::Try<StreamPayload>(std::in_place, nullptr, std::move(md));
       },
       [&](OrderedHeader&& val) {
         StreamPayloadMetadata md;
         md.otherMetadata() = std::move(val.metadata);
         return folly::Try<StreamPayload>(
-            folly::in_place,
+            std::in_place,
             nullptr,
             std::move(md),
             /* isOrderedHeader */ true);

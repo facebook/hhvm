@@ -160,7 +160,7 @@ class FakeDirHandle : public DirHandle {
 FakeFileSystem::Flags::Flags() = default;
 
 FakeFileSystem::FakeFileSystem(Flags flags)
-    : flags_{flags}, root_{folly::in_place, FakeInode{fakeDir()}} {}
+    : flags_{flags}, root_{std::in_place, FakeInode{fakeDir()}} {}
 
 std::unique_ptr<DirHandle> FakeFileSystem::openDir(
     const char* path,

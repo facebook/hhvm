@@ -412,7 +412,7 @@ void Cpp2Worker::handleServerRequestRejection(
   }
   serverRequest.request()->sendErrorWrapped(
       folly::exception_wrapper(
-          folly::in_place, std::move(reject).applicationException()),
+          std::in_place, std::move(reject).applicationException()),
       errorCode);
 }
 
@@ -581,7 +581,7 @@ void Cpp2Worker::dispatchRequest(
           // @lint-ignore CLANGTIDY bugprone-use-after-move
           serverRequest.request()->sendErrorWrapped(
               folly::exception_wrapper(
-                  folly::in_place,
+                  std::in_place,
                   std::move(std::move(result).value()).applicationException()),
               errorCode);
           return;

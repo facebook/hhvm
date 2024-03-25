@@ -318,7 +318,7 @@ bool PendingCollectionBase::checkAndResetPinged() {
 
 PendingCollection::PendingCollection()
     : folly::Synchronized<PendingCollectionBase, std::mutex>{
-          folly::in_place,
+          std::in_place,
           cond_} {}
 
 PendingCollection::LockedPtr PendingCollection::lockAndWait(

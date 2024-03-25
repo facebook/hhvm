@@ -36,7 +36,7 @@ class PerfLogThread {
   void loop() noexcept;
 
  public:
-  explicit PerfLogThread(bool start) : state_(folly::in_place, start) {
+  explicit PerfLogThread(bool start) : state_(std::in_place, start) {
     if (start) {
       thread_ = std::thread([this] { loop(); });
     }

@@ -218,7 +218,7 @@ TEST(ScopedServerInterfaceThread, joinRequestsSinkSlowFinalResponse) {
   folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
     auto serviceImpl = std::make_shared<SimpleServiceImpl>();
     folly::Optional<ScopedServerInterfaceThread> ssit(
-        folly::in_place, serviceImpl);
+        std::in_place, serviceImpl);
 
     auto cli =
         ssit->newClient<SimpleServiceAsyncClient>(nullptr, [](auto socket) {
@@ -277,7 +277,7 @@ TEST(ScopedServerInterfaceThread, faultInjection) {
   folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
     auto serviceImpl = std::make_shared<SimpleServiceImpl>();
     folly::Optional<ScopedServerInterfaceThread> ssit(
-        folly::in_place, serviceImpl);
+        std::in_place, serviceImpl);
 
     class CustomException : public std::exception {};
 
@@ -515,8 +515,7 @@ TYPED_TEST_CASE(ScopedServerInterfaceThreadTest, TestTypes);
 TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequests) {
   auto serviceImpl = this->newService();
 
-  folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl);
+  folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, serviceImpl);
   addH2RoutingHandler(ssit->getThriftServer());
 
   auto cli = this->template newClient<SimpleServiceAsyncClient>(*ssit);
@@ -550,7 +549,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsRestartServer) {
     auto serviceImpl = this->newService();
     ts->setInterface(serviceImpl);
 
-    folly::Optional<ScopedServerInterfaceThread> ssit(folly::in_place, ts);
+    folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, ts);
 
     auto cli = this->template newClient<SimpleServiceAsyncClient>(*ssit);
 
@@ -575,8 +574,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsStreamTaskTimeout) {
 
   auto serviceImpl = this->newService();
 
-  folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl);
+  folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, serviceImpl);
 
   auto cli = this->template newClient<SimpleServiceAsyncClient>(*ssit);
 
@@ -604,8 +602,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsLargeMessage) {
 
   auto serviceImpl = this->newService();
 
-  folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl);
+  folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, serviceImpl);
 
   auto cli = this->template newClient<SimpleServiceAsyncClient>(*ssit);
 
@@ -630,7 +627,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsTimeout) {
   auto serviceImpl = this->newService();
 
   folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl, "::1", 0, [](auto& thriftServer) {
+      std::in_place, serviceImpl, "::1", 0, [](auto& thriftServer) {
         thriftServer.setWorkersJoinTimeout(std::chrono::seconds{1});
       });
 
@@ -705,10 +702,9 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsStress) {
   folly::Function<void()> spamServer;
   auto serviceImpl = this->newService();
 
-  folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl);
+  folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, serviceImpl);
 
-  folly::Optional<folly::ScopedEventBaseThread> evbThread(folly::in_place);
+  folly::Optional<folly::ScopedEventBaseThread> evbThread(std::in_place);
   auto evb = evbThread->getEventBase();
   auto cli = this->template newRawClient<SimpleServiceAsyncClient>(evb, *ssit);
 
@@ -809,7 +805,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsDetachedConnection) {
   auto serviceImpl = this->newService();
 
   folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl, "::1");
+      std::in_place, serviceImpl, "::1");
 
   addH2RoutingHandler(ssit->getThriftServer());
 
@@ -852,7 +848,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, closeConnection) {
   auto serviceImpl = this->newService();
 
   folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl, "::1", 0, [](auto& thriftServer) {
+      std::in_place, serviceImpl, "::1", 0, [](auto& thriftServer) {
         thriftServer.setWorkersJoinTimeout(std::chrono::seconds{1});
       });
 
@@ -889,8 +885,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, closeConnection) {
 TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsCancel) {
   auto serviceImpl = this->newService();
 
-  folly::Optional<ScopedServerInterfaceThread> ssit(
-      folly::in_place, serviceImpl);
+  folly::Optional<ScopedServerInterfaceThread> ssit(std::in_place, serviceImpl);
 
   addH2RoutingHandler(ssit->getThriftServer());
 

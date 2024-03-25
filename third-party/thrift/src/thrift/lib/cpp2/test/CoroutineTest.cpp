@@ -157,13 +157,13 @@ class CoroutineServiceHandlerFuture
       std::unique_ptr<SumRequest> /* request */) override {
     return folly::makeFuture<std::unique_ptr<SumResponse>>(
         folly::exception_wrapper(
-            folly::in_place, std::runtime_error("Not implemented")));
+            std::in_place, std::runtime_error("Not implemented")));
   }
 
   folly::Future<int32_t> future_computeSumThrowsPrimitive(
       int32_t, int32_t) override {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-        folly::in_place, std::runtime_error("Not implemented")));
+        std::in_place, std::runtime_error("Not implemented")));
   }
 
   folly::Future<int32_t> future_noParameters() override {
@@ -195,13 +195,13 @@ class CoroutineServiceHandlerFuture
   folly::Future<std::unique_ptr<SumResponse>> future_computeSumThrowsUserEx(
       std::unique_ptr<SumRequest> /* request */) override {
     return folly::makeFuture<std::unique_ptr<SumResponse>>(
-        folly::exception_wrapper(folly::in_place, Ex()));
+        folly::exception_wrapper(std::in_place, Ex()));
   }
 
   folly::Future<int32_t> future_computeSumThrowsUserExPrimitive(
       int32_t, int32_t) override {
     return folly::makeFuture<int32_t>(
-        folly::exception_wrapper(folly::in_place, Ex()));
+        folly::exception_wrapper(std::in_place, Ex()));
   }
 
   folly::Promise<int32_t> onewayRequestPromise;

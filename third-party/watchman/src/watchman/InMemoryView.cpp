@@ -459,7 +459,7 @@ InMemoryView::InMemoryView(
     : QueryableView{root_path, /*requiresCrawl=*/true},
       fileSystem_{fileSystem},
       config_(std::move(config)),
-      view_(folly::in_place, root_path),
+      view_(std::in_place, root_path),
       rootNumber_(next_root_number++),
       rootPath_(root_path),
       watcher_(std::move(watcher)),

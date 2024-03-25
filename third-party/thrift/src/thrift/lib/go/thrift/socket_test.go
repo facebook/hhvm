@@ -29,14 +29,14 @@ func TestNewSocket(t *testing.T) {
 	if runtime.GOOS == "darwin" {
 		address = "localhost:1234"
 	}
-	socket, err := NewSocket(SocketTimeout(10), SocketAddr(address))
+	sock, err := NewSocket(SocketTimeout(10), SocketAddr(address))
 	if err != nil {
 		t.Error(err)
 	}
-	if socket.timeout != 10 {
+	if sock.(*socket).timeout != 10 {
 		t.Error("wrong timeout")
 	}
-	if socket.addr.String() != "[::1]:1234" {
-		t.Errorf("wrong address: %s", socket.addr)
+	if sock.(*socket).addr.String() != "[::1]:1234" {
+		t.Errorf("wrong address: %s", sock.(*socket).addr)
 	}
 }

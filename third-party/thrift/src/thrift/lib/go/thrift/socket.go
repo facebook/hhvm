@@ -22,6 +22,16 @@ import (
 	"time"
 )
 
+// Socket is a Transport that can be opened and reopened.
+type Socket interface {
+	Transport
+	// Opens the transport for communication
+	Open() error
+
+	// Returns true if the transport is open
+	IsOpen() bool
+}
+
 type socket struct {
 	conn    net.Conn
 	addr    net.Addr
@@ -67,7 +77,7 @@ func SocketConn(conn net.Conn) SocketOption {
 // or an existing connection.
 //
 //	trans, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
-func NewSocket(options ...SocketOption) (*socket, error) {
+func NewSocket(options ...SocketOption) (Socket, error) {
 	socket := &socket{}
 
 	for _, option := range options {

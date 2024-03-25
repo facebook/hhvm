@@ -118,6 +118,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(w_mutable.unqualified_string, w_immutable.unqualified_string)
         self.assertNotEqual(w_mutable, w_immutable)
 
+        # The newly obtained immutable object however is equal to a new
+        # TestStructImmutable instance (with the same contents)
+        self.assertEqual(w_immutable, TestStructImmutable(unqualified_string="hello"))
+
         w_mutable.unqualified_string = "hello, world!"
         self.assertNotEqual(
             w_mutable.unqualified_string, w_immutable.unqualified_string

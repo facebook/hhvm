@@ -17,7 +17,6 @@
 #include <folly/init/Init.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <wangle/acceptor/Acceptor.h>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
@@ -126,7 +125,6 @@ void initCredProcessorCallbacks(
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
-  folly::ssl::init();
 
   ServerSocketConfig cfg;
   folly::Optional<TLSTicketKeySeeds> seeds;

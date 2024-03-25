@@ -21,7 +21,6 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/SSLOptions.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <wangle/bootstrap/ClientBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
 #include <wangle/channel/EventBaseHandler.h>
@@ -122,7 +121,6 @@ std::shared_ptr<SSLContext> createSSLContext() {
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
-  folly::ssl::init();
 
   // an in memory ssl session cache used for caching sessions
   std::shared_ptr<SSLSessionPersistentCache> cache;

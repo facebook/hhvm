@@ -45,7 +45,6 @@
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/ssl-init.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
@@ -193,12 +192,10 @@ HttpServer::HttpServer() {
   }
 
   if (Cfg::Server::EnableSSL) {
-    assertx(SSLInit::IsInited());
     m_pageServer->enableSSL(Cfg::Server::SSLPort);
   }
 
   if (Cfg::Server::EnableSSLWithPlainText) {
-    assertx(SSLInit::IsInited());
     m_pageServer->enableSSLWithPlainText();
   }
 
@@ -209,7 +206,6 @@ HttpServer::HttpServer() {
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     Cfg::Server::RequestTimeoutSeconds);
   if (RuntimeOption::AdminServerEnableSSLWithPlainText) {
-    assertx(SSLInit::IsInited());
     m_adminServer->enableSSLWithPlainText();
   }
 

@@ -23,7 +23,6 @@
 #include <curl/easy.h>
 #include <vector>
 #include "hphp/util/logger.h"
-#include "hphp/util/ssl-init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +31,6 @@ namespace HPHP {
 struct StaticInitializer {
   StaticInitializer() {
     curl_global_init(CURL_GLOBAL_ALL);
-    SSLInit::Init();
   }
 };
 static StaticInitializer s_initCurl;

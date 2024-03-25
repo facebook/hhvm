@@ -21,9 +21,6 @@ from libcpp.memory cimport make_shared
 from libcpp.utility cimport move as cmove
 
 
-init()  # folly::ssl::init()
-
-
 class SSLVersion(Enum):
     TLSv1_2 = <int> (cTLSv1_2)
 

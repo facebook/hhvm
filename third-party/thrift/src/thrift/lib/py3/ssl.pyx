@@ -18,9 +18,6 @@ from enum import Enum
 import os
 
 
-init()  # folly::ssl::init()
-
-
 class SSLVersion(Enum):
     TLSv1_2 = <int> (cTLSv1_2)
 

@@ -20,10 +20,6 @@ from thrift.python.client.request_channel cimport cRequestChannel_ptr, ClientTyp
 from thrift.python.serializer cimport Protocol as cProtocol
 
 
-cdef extern from "folly/ssl/Init.h" namespace "folly::ssl" nogil:
-    void init()
-
-
 cdef extern from "folly/io/async/SSLContext.h":
     cdef cppclass cSSLVersion "folly::SSLContext::SSLVersion":
         bint operator==(cSSLVersion&)

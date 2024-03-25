@@ -21,7 +21,6 @@
 #include <folly/Random.h>
 #include <folly/String.h>
 #include <folly/init/Init.h>
-#include <folly/ssl/Init.h>
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/perf/cpp/AsyncLoadHandler2.h>

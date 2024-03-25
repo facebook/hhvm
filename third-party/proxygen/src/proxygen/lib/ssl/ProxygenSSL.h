@@ -9,24 +9,12 @@
 #pragma once
 
 #include <folly/portability/OpenSSL.h>
-#include <folly/ssl/Init.h>
 #include <glog/logging.h>
 
 namespace proxygen {
 
 class ProxygenSSL {
  public:
-  /**
-   * Initialize OpenSSL library and creates SSL app context
-   * indices.
-   */
-  static void init() {
-    // Note: this is technically not required on OpenSSL >= 1.1.0, since OpenSSL
-    // will correctly initialize itself if any public API methods (such as
-    // SSL_CTX_get_ex_new_index) are invoked
-    folly::ssl::init();
-  }
-
   static int getSSLAppContextConfigIndex() {
     static auto index = [] {
       auto idx =

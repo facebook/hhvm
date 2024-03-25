@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types.h"
 
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 
 struct module_constants {
 
@@ -23,4 +23,4 @@ struct module_constants {
 
 };
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict

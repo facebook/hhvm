@@ -9,18 +9,18 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace some { namespace ns {
+namespace some::ns {
 class ModuleA;
 class ModuleB;
 namespace detail {
 class DirectlyAdapted;
 } // namespace detail
 class CppRef;
-}} // some::ns
+} // some::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace some { namespace ns {
+namespace some::ns {
 enum class EnumB;
-}} // some::ns
+} // some::ns
 // END forward_declare_enums

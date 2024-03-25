@@ -415,7 +415,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(msg);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 
 enum class MyEnum {
   ME0 = 0,
@@ -424,7 +424,7 @@ enum class MyEnum {
 
 
 
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::terse_write::MyEnum> :
@@ -461,7 +461,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 class MyStruct;
 class MyUnion;
 class MyStructWithCustomDefault;
@@ -471,7 +471,7 @@ class TerseStructWithCustomDefault;
 class AdaptedFields;
 class WrappedFields;
 class TerseException;
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -481,7 +481,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -5854,7 +5854,7 @@ unsigned long TerseException::read(Protocol_* iprot) {
 }
 
 
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write
 
 namespace apache { namespace thrift {
 

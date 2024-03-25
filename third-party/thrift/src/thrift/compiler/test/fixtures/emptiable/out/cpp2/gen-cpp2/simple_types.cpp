@@ -49,7 +49,7 @@ void TccStructTraits<::apache::thrift::test::MyStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -97,7 +97,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -120,7 +120,7 @@ void TccStructTraits<::apache::thrift::test::EmptiableStruct>::translateFieldNam
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view EmptiableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -330,7 +330,7 @@ static_assert(
         ::apache::thrift::test::MyStruct>,
     "inconsistent use of json option");
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -353,7 +353,7 @@ void TccStructTraits<::apache::thrift::test::EmptiableTerseStruct>::translateFie
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view EmptiableTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -558,7 +558,7 @@ static_assert(
         ::apache::thrift::test::MyStruct>,
     "inconsistent use of json option");
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -581,7 +581,7 @@ void TccStructTraits<::apache::thrift::test::NotEmptiableStruct>::translateField
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view NotEmptiableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -778,11 +778,11 @@ static_assert(
         ::apache::thrift::test::MyStruct>,
     "inconsistent use of json option");
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
-namespace apache { namespace thrift { namespace test { namespace {
+namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // apache::thrift::test
+}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

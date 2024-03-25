@@ -16,9 +16,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class DbMixedStackArguments;
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 namespace apache::thrift {
 
 template <>
@@ -239,6 +239,6 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using DbMixedStackArgumentsAsyncClient [[deprecated("Use apache::thrift::Client<DbMixedStackArguments> instead")]] = ::apache::thrift::Client<DbMixedStackArguments>;
-}}} // test::fixtures::basic
+} // test::fixtures::basic

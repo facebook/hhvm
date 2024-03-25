@@ -476,7 +476,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 enum class Color {
   UNKNOWN = 0,
@@ -494,7 +494,7 @@ enum class ThriftAdaptedEnum {
 
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::Color> :
@@ -555,7 +555,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class MyAnnotation;
 class Foo;
 class Baz;
@@ -601,7 +601,7 @@ class TransitiveAdapted;
 class CountingStruct;
 class Person;
 class Person2;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -617,7 +617,7 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::CircularStruct,::apac
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 using IndependentDirectlyAdapted = ::my::Type;
 
 using ::apache::thrift::detail::operator!=;
@@ -8286,7 +8286,7 @@ unsigned long Person2::read(Protocol_* iprot) {
 }
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 
 namespace apache { namespace thrift {
 

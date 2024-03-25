@@ -53,9 +53,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(access_optional_boxed_field);
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class InterceptedFields;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -71,7 +71,7 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::InterceptedFields,::a
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -483,4 +483,4 @@ unsigned long InterceptedFields::read(Protocol_* iprot) {
 }
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

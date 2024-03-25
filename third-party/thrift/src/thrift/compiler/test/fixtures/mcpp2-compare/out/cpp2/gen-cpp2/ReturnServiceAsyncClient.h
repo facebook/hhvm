@@ -18,9 +18,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 class ReturnService;
-}}} // some::valid::ns
+} // some::valid::ns
 namespace apache::thrift {
 
 template <>
@@ -2135,6 +2135,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
 
 } // namespace apache::thrift
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 using ReturnServiceAsyncClient [[deprecated("Use apache::thrift::Client<ReturnService> instead")]] = ::apache::thrift::Client<ReturnService>;
-}}} // some::valid::ns
+} // some::valid::ns

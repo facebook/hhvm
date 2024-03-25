@@ -27,7 +27,7 @@ struct TccStructTraits<::test::fixtures::enumstrict::MyStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -186,4 +186,4 @@ extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProto
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict

@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 struct includes_constants {
 
@@ -21,4 +21,4 @@ struct includes_constants {
 
 };
 
-}}} // a::different::ns
+} // a::different::ns

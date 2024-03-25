@@ -30,7 +30,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myBigEnum);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 
 enum class EmptyEnum {
 };
@@ -69,7 +69,7 @@ enum class MyBigEnum {
 
 
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict
 
 namespace std {
 template<> struct hash<::test::fixtures::enumstrict::EmptyEnum> :
@@ -152,9 +152,9 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 class MyStruct;
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -164,7 +164,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -375,4 +375,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict

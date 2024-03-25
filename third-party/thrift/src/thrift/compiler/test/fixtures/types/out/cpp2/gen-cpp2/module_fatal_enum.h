@@ -13,7 +13,7 @@
 
 #include <type_traits>
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -224,4 +224,4 @@ FATAL_REGISTER_ENUM_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(3846919192928447240ull)
   >
 );
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

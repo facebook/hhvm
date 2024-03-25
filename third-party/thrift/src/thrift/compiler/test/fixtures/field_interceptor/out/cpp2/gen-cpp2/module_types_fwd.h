@@ -7,7 +7,7 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class InterceptedFields;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare

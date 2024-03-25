@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.h"
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 struct module_constants {
 
 };
 
-}}} // apache::thrift::test
+} // apache::thrift::test

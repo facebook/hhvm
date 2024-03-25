@@ -7,12 +7,12 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 class SerializedStruct;
 class SerializedUnion;
 class SerializedError;
 class MarshalStruct;
 class MarshalUnion;
 class MarshalError;
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi
 // END forward_declare

@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 struct module_constants {
 
@@ -46,4 +46,4 @@ struct module_constants {
 
 };
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

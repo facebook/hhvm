@@ -13,7 +13,7 @@
 #include <fatal/type/sequence.h>
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 namespace __fbthrift_refl {
 
@@ -323,4 +323,4 @@ class module_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(module_tags::module, __fbthrift_refl::module_module_traits);
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

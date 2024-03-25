@@ -83,7 +83,7 @@ struct TccStructTraits<::py3::simple::BinaryUnionStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 template <class Protocol_>
 void SimpleException::readNoXfer(Protocol_* iprot) {
@@ -1780,4 +1780,4 @@ extern template uint32_t BinaryUnionStruct::serializedSize<>(apache::thrift::Com
 extern template uint32_t BinaryUnionStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple

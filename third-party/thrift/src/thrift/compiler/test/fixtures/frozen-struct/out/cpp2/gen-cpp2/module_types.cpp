@@ -49,7 +49,7 @@ void TccStructTraits<::some::ns::ModuleA>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 std::string_view ModuleA::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -198,7 +198,7 @@ static_assert(
         ::some::ns::IncludedB>,
     "inconsistent use of json option");
 
-}} // some::ns
+} // some::ns
 
 namespace apache {
 namespace thrift {
@@ -221,7 +221,7 @@ void TccStructTraits<::some::ns::ModuleB>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 std::string_view ModuleB::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -280,7 +280,7 @@ template uint32_t ModuleB::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t ModuleB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // some::ns
+} // some::ns
 
 namespace apache {
 namespace thrift {
@@ -303,7 +303,7 @@ void TccStructTraits<::some::ns::detail::DirectlyAdapted>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {namespace detail {
+namespace some::ns {namespace detail {
 
 
 std::string_view DirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -360,7 +360,7 @@ template uint32_t DirectlyAdapted::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 } // namespace detail
-}} // some::ns
+} // some::ns
 
 namespace apache {
 namespace thrift {
@@ -383,7 +383,7 @@ void TccStructTraits<::some::ns::CppRef>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 std::string_view CppRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -474,11 +474,11 @@ template uint32_t CppRef::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t CppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // some::ns
+} // some::ns
 
-namespace some { namespace ns { namespace {
+namespace some::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}} // some::ns
+}} // some::ns
 namespace apache::thrift::detail::annotation {
 }

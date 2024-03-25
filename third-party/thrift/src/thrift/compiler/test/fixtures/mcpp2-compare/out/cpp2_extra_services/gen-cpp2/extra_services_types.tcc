@@ -27,7 +27,7 @@ struct TccStructTraits<::extra::svc::containerStruct2> {
 } // namespace thrift
 } // namespace apache
 
-namespace extra { namespace svc {
+namespace extra::svc {
 
 template <class Protocol_>
 void containerStruct2::readNoXfer(Protocol_* iprot) {
@@ -619,4 +619,4 @@ extern template uint32_t containerStruct2::serializedSize<>(apache::thrift::Simp
 extern template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}} // extra::svc
+} // extra::svc

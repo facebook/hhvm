@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 class Empty;
 class ASimpleStruct;
 class ASimpleStructNoexcept;
@@ -25,14 +25,14 @@ class ComplexContainerStruct;
 class FloatStruct;
 class FloatUnion;
 class AllRequiredNoExceptMoveCtrStruct;
-}}} // some::valid::ns
+} // some::valid::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 enum class MyEnumA;
 enum class AnnotatedEnum : ::std::uint32_t;
 enum class AnnotatedEnum2 : ::std::int16_t;
 enum class MyEnumB;
-}}} // some::valid::ns
+} // some::valid::ns
 // END forward_declare_enums

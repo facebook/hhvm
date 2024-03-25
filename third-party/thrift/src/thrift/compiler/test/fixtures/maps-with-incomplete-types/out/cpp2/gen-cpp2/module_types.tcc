@@ -34,7 +34,7 @@ struct TccStructTraits<::apache::thrift::test::B> {
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 template <class Protocol_>
 void A::readNoXfer(Protocol_* iprot) {
@@ -283,4 +283,4 @@ extern template uint32_t B::serializedSize<>(apache::thrift::CompactProtocolWrit
 extern template uint32_t B::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

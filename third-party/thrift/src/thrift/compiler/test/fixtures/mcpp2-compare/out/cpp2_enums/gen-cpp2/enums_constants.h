@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 struct enums_constants {
 
@@ -24,4 +24,4 @@ struct enums_constants {
 
 };
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

@@ -9,13 +9,13 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class StructWithDefaultStruct;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 enum class MyEnum;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare_enums

@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 
 
@@ -72,4 +72,4 @@ namespace py3 { namespace simple {
   return *instance;
 }
 
-}} // py3::simple
+} // py3::simple

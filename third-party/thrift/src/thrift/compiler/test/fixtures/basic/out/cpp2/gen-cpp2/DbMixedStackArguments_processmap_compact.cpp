@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/DbMixedStackArguments.h"
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/DbMixedStackArguments.tcc"
 
-namespace test { namespace fixtures { namespace basic {
-}}} // test::fixtures::basic
+namespace test::fixtures::basic {
+} // test::fixtures::basic

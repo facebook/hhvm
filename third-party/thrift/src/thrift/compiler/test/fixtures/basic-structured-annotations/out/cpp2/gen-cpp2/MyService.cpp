@@ -247,7 +247,7 @@ determineInvocationType:
 }
 
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 
 void MyServiceSvNull::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {}
 
@@ -314,4 +314,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 
   return requestInfoMap;
 }
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

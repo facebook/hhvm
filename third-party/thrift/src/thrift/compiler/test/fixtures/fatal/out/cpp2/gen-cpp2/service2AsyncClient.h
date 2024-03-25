@@ -19,9 +19,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 class service2;
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 namespace apache::thrift {
 
 template <>
@@ -634,6 +634,6 @@ class Client<::test_cpp2::cpp_reflection::service2> : public apache::thrift::Gen
 
 } // namespace apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 using service2AsyncClient [[deprecated("Use apache::thrift::Client<service2> instead")]] = ::apache::thrift::Client<service2>;
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

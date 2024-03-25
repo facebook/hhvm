@@ -83,7 +83,7 @@ struct TccStructTraits<::test::fixtures::basic-structured-annotations::MyUnion> 
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 
 template <class Protocol_>
 void runtime_annotation::readNoXfer(Protocol_* iprot) {
@@ -1410,4 +1410,4 @@ extern template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtoc
 extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

@@ -12,7 +12,7 @@
 
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_data.h"
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 // Static-init time registration for dynamically-linked libraries.
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
@@ -41,7 +41,7 @@ void __fbthrift_static_init_MyException() {
         apache::thrift::conformance::StandardProtocol::Binary>(),
     false);
 }
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -64,7 +64,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {namespace detail {
+namespace facebook::thrift::compiler::test::fixtures::any {namespace detail {
 
 
 const char* MyStruct::__fbthrift_thrift_uri() {
@@ -144,7 +144,7 @@ template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWr
 
 
 } // namespace detail
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -180,7 +180,7 @@ bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Typ
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 
 const char* MyUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyUnion";
@@ -273,7 +273,7 @@ template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -296,7 +296,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyExcept
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 
 const char* MyException::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyException";
@@ -374,11 +374,11 @@ template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any { namespace {
+namespace facebook::thrift::compiler::test::fixtures::any { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}}}}} // facebook::thrift::compiler::test::fixtures::any
+}} // facebook::thrift::compiler::test::fixtures::any
 namespace apache::thrift::detail::annotation {
 }

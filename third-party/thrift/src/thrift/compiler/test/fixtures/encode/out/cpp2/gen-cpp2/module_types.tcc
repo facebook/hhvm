@@ -48,7 +48,7 @@ struct TccStructTraits<::facebook::thrift::test::OpEncodeStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 template <class Protocol_>
 void Foo::readNoXfer(Protocol_* iprot) {
@@ -1003,4 +1003,4 @@ extern template uint32_t OpEncodeStruct::serializedSize<>(apache::thrift::Compac
 extern template uint32_t OpEncodeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

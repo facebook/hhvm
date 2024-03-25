@@ -9,14 +9,14 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 class AStruct;
 class AStructB;
-}}} // a::different::ns
+} // a::different::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 enum class AnEnum;
-}}} // a::different::ns
+} // a::different::ns
 // END forward_declare_enums

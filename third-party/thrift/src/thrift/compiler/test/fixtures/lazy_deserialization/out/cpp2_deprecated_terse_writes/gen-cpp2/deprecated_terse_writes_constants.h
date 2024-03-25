@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h"
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 struct deprecated_terse_writes_constants {
 
 };
 
-}}} // apache::thrift::test
+} // apache::thrift::test

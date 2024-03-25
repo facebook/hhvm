@@ -17,7 +17,7 @@
 
 #include <type_traits>
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -2237,4 +2237,4 @@ FATAL_REGISTER_VARIANT_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(10841541077214060908ull)
   >
 );
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

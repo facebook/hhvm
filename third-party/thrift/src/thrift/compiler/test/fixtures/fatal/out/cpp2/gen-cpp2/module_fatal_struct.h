@@ -16,7 +16,7 @@
 #include <fatal/type/traits.h>
 #include <fatal/type/list.h>
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -2345,4 +2345,4 @@ THRIFT_REGISTER_STRUCT_TRAITS(annotated, __fbthrift_refl::annotated_struct_trait
 THRIFT_REGISTER_STRUCT_TRAITS(struct_with_special_names, __fbthrift_refl::struct_with_special_names_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(struct_with_indirections, __fbthrift_refl::struct_with_indirections_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(StructWithFieldAdapter, __fbthrift_refl::StructWithFieldAdapter_struct_traits);
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

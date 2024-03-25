@@ -15,10 +15,10 @@
 
 #include <type_traits>
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 } // __fbthrift_refl
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

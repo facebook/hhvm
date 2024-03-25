@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class MyAnnotation;
 class Foo;
 class Baz;
@@ -55,12 +55,12 @@ class TransitiveAdapted;
 class CountingStruct;
 class Person;
 class Person2;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 enum class Color;
 enum class ThriftAdaptedEnum;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare_enums

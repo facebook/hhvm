@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.h"
 
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 
 struct serialized_dep_constants {
 
 };
 
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi

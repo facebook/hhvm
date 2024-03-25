@@ -24,7 +24,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 class ParamService;
 class ParamServiceAsyncProcessor;
 
@@ -33,7 +33,7 @@ class ParamServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache::thrift {
 template <>
@@ -308,10 +308,10 @@ class ServiceHandler<::some::valid::ns::ParamService> : public apache::thrift::S
 
 } // namespace apache::thrift
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 using ParamServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ParamService> instead")]] = ::apache::thrift::ServiceHandler<ParamService>;
-}}} // some::valid::ns
-namespace some { namespace valid { namespace ns {
+} // some::valid::ns
+namespace some::valid::ns {
 class ParamServiceSvNull : public ::apache::thrift::ServiceHandler<ParamService> {
  public:
   void void_ret_byte_i16_param(::std::int8_t /*param1*/, ::std::int16_t /*param2*/) override;
@@ -596,4 +596,4 @@ class ParamServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   ~ParamServiceAsyncProcessor() override {}
 };
 
-}}} // some::valid::ns
+} // some::valid::ns

@@ -95,7 +95,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldB);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 
 enum class ExampleEnum {
   ZERO = 0,
@@ -104,7 +104,7 @@ enum class ExampleEnum {
 
 
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 
 namespace std {
 template<> struct hash<::test::fixtures::tablebased::ExampleEnum> :
@@ -141,11 +141,11 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 class TrivialTypesStruct;
 class ContainerStruct;
 class ExampleUnion;
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -155,7 +155,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -1363,7 +1363,7 @@ unsigned long ExampleUnion::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 
 namespace apache { namespace thrift {
 

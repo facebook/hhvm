@@ -16,9 +16,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class FB303Service;
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 namespace apache::thrift {
 
 template <>
@@ -139,6 +139,6 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using FB303ServiceAsyncClient [[deprecated("Use apache::thrift::Client<FB303Service> instead")]] = ::apache::thrift::Client<FB303Service>;
-}}} // test::fixtures::basic
+} // test::fixtures::basic

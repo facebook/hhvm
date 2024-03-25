@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 typedef apache::thrift::ThriftPresult<false> AdapterService_count_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::facebook::thrift::test::CountingStruct*>> AdapterService_count_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::HeapAllocated*, ::apache::thrift::type::adapted<::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::HeapAllocated>>>> AdapterService_adaptedTypes_pargs;
@@ -162,4 +162,4 @@ void AdapterServiceAsyncProcessor::throw_wrapped_adaptedTypes(apache::thrift::Re
 }
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

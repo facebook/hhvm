@@ -27,7 +27,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 
 
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 
 const char* EmptyServiceAsyncProcessor::getServiceName() {
@@ -63,4 +63,4 @@ apache::thrift::ServiceRequestInfoMap EmptyServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-}}} // some::valid::ns
+} // some::valid::ns

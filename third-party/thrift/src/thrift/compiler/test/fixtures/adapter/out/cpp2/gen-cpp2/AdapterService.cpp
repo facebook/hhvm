@@ -251,7 +251,7 @@ determineInvocationType:
 }
 
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 void AdapterServiceSvNull::count(::facebook::thrift::test::CountingStruct& /*_return*/) {}
 
@@ -316,4 +316,4 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
 
   return requestInfoMap;
 }
-}}} // facebook::thrift::test
+} // facebook::thrift::test

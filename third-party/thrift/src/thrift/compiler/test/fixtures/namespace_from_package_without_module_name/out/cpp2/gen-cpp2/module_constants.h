@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h"
 
-namespace test { namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 
 struct module_constants {
 
 };
 
-}} // test::namespace_from_package_without_module_name
+} // test::namespace_from_package_without_module_name

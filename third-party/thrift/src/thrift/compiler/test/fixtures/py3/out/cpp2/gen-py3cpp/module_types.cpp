@@ -81,7 +81,7 @@ void TccStructTraits<::py3::simple::SimpleException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view SimpleException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -156,7 +156,7 @@ template uint32_t SimpleException::serializedSize<>(apache::thrift::CompactProto
 template uint32_t SimpleException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -179,7 +179,7 @@ void TccStructTraits<::py3::simple::OptionalRefStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view OptionalRefStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -264,7 +264,7 @@ template uint32_t OptionalRefStruct::serializedSize<>(apache::thrift::CompactPro
 template uint32_t OptionalRefStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -287,7 +287,7 @@ void TccStructTraits<::py3::simple::SimpleStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view SimpleStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -397,7 +397,7 @@ template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -420,7 +420,7 @@ void TccStructTraits<::py3::simple::HiddenTypeFieldsStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view HiddenTypeFieldsStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -540,7 +540,7 @@ static_assert(
         ::py3::simple::AdaptedTypeDef>,
     "inconsistent use of json option");
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -576,7 +576,7 @@ bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace py3 { namespace simple {namespace detail {
+namespace py3::simple {namespace detail {
 
 
 std::string_view AdaptedUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -664,7 +664,7 @@ template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 } // namespace detail
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -687,7 +687,7 @@ void TccStructTraits<::py3::simple::HiddenException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view HiddenException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -762,7 +762,7 @@ template uint32_t HiddenException::serializedSize<>(apache::thrift::CompactProto
 template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -785,7 +785,7 @@ void TccStructTraits<::py3::simple::ComplexStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view ComplexStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -937,7 +937,7 @@ static_assert(
         ::py3::simple::SimpleStruct>,
     "inconsistent use of json option");
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -973,7 +973,7 @@ bool TEnumTraits<::py3::simple::BinaryUnion::Type>::findValue(std::string_view n
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view BinaryUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1055,7 +1055,7 @@ template uint32_t BinaryUnion::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t BinaryUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache {
 namespace thrift {
@@ -1078,7 +1078,7 @@ void TccStructTraits<::py3::simple::BinaryUnionStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 std::string_view BinaryUnionStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1154,13 +1154,13 @@ static_assert(
         ::py3::simple::BinaryUnion>,
     "inconsistent use of json option");
 
-}} // py3::simple
+} // py3::simple
 
-namespace py3 { namespace simple { namespace {
+namespace py3::simple { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<Adapter, 1, ::py3::simple::SimpleStruct, ::py3::simple::HiddenTypeFieldsStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }
-}}} // py3::simple
+}} // py3::simple
 namespace apache::thrift::detail::annotation {
 }

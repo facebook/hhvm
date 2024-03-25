@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 typedef apache::thrift::ThriftPresult<false> FooService_simple_rpc_pargs;
 typedef apache::thrift::ThriftPresult<true> FooService_simple_rpc_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -84,4 +84,4 @@ void FooServiceAsyncProcessor::throw_wrapped_simple_rpc(apache::thrift::Response
 }
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

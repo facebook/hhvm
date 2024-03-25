@@ -799,7 +799,7 @@ determineInvocationType:
 }
 
 
-namespace extra { namespace svc {
+namespace extra::svc {
 
 bool ExtraServiceSvNull::simple_function() {
   return 0;
@@ -972,4 +972,4 @@ apache::thrift::ServiceRequestInfoMap ExtraServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-}} // extra::svc
+} // extra::svc

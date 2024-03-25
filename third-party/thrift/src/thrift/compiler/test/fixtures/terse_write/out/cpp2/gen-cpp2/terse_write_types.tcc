@@ -83,7 +83,7 @@ struct TccStructTraits<::facebook::thrift::test::terse_write::TerseException> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -3770,4 +3770,4 @@ extern template uint32_t TerseException::serializedSize<>(apache::thrift::Compac
 extern template uint32_t TerseException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write

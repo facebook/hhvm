@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 typedef apache::thrift::ThriftPresult<false> service_with_special_names_get_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> service_with_special_names_get_presult;
 typedef apache::thrift::ThriftPresult<false> service_with_special_names_getter_pargs;
@@ -2084,4 +2084,4 @@ void service_with_special_namesAsyncProcessor::throw_wrapped_fields(apache::thri
 }
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

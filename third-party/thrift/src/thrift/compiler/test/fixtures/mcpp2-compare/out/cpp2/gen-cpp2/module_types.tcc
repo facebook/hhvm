@@ -125,7 +125,7 @@ struct TccStructTraits<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 template <class Protocol_>
 void Empty::readNoXfer(Protocol_* iprot) {
@@ -7830,4 +7830,4 @@ extern template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSize<>(apac
 extern template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns

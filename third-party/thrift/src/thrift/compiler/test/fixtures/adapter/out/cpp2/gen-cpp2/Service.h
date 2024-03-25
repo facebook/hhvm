@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class Service;
 class ServiceAsyncProcessor;
 
@@ -31,7 +31,7 @@ class ServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 
 namespace apache::thrift {
 template <>
@@ -66,10 +66,10 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
 
 } // namespace apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 using ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<Service> instead")]] = ::apache::thrift::ServiceHandler<Service>;
-}}} // facebook::thrift::test
-namespace facebook { namespace thrift { namespace test {
+} // facebook::thrift::test
+namespace facebook::thrift::test {
 class ServiceSvNull : public ::apache::thrift::ServiceHandler<Service> {
  public:
   ::facebook::thrift::test::MyI32_4873 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) override;
@@ -106,4 +106,4 @@ class ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBa
   ~ServiceAsyncProcessor() override {}
 };
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

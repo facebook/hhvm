@@ -10,8 +10,8 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

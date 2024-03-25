@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 ::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB> const& enums_constants::MapStringEnum() {
   static folly::Indestructible<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>> const instance{std::initializer_list<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("0"),  ::facebook::ns::qwerty::AnEnumB::FIELDB}}};
@@ -34,4 +34,4 @@ namespace facebook { namespace ns { namespace qwerty {
   return *instance;
 }
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

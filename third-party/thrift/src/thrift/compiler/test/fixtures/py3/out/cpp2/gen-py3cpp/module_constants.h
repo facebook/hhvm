@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 struct module_constants {
 
@@ -75,4 +75,4 @@ struct module_constants {
 
 };
 
-}} // py3::simple
+} // py3::simple

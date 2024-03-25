@@ -38,13 +38,13 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 namespace detail {
 class MyStruct;
 } // namespace detail
 class MyUnion;
 class MyException;
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -54,7 +54,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -599,7 +599,7 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache { namespace thrift {
 

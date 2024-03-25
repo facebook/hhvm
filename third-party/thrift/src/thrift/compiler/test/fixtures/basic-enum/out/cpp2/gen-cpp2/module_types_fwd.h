@@ -9,15 +9,15 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 class MyStruct;
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 enum class EmptyEnum;
 enum class MyEnum;
 enum class MyBigEnum;
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict
 // END forward_declare_enums

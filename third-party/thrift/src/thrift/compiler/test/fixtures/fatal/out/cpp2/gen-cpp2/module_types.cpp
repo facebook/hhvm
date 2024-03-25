@@ -110,7 +110,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::union1::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view union1::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -226,7 +226,7 @@ template uint32_t union1::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -262,7 +262,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::union2::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view union2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -378,7 +378,7 @@ template uint32_t union2::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -414,7 +414,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::union3::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view union3::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -530,7 +530,7 @@ template uint32_t union3::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union3::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -553,7 +553,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::structA>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view structA::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -634,7 +634,7 @@ template uint32_t structA::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t structA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -670,7 +670,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::unionA::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view unionA::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -801,7 +801,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structA>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -824,7 +824,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::structB>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view structB::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -883,7 +883,7 @@ template uint32_t structB::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t structB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -906,7 +906,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::structC>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view structC::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1417,7 +1417,7 @@ static_assert(
         ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1440,7 +1440,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct1>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct1::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1573,7 +1573,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::union2>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1596,7 +1596,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct2>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1751,7 +1751,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::struct1>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1774,7 +1774,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct3>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct3::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2113,7 +2113,7 @@ static_assert(
         ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2136,7 +2136,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct4>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct4::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2249,7 +2249,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structA>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2272,7 +2272,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct5>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct5::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2399,7 +2399,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structB>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2422,7 +2422,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct_binary>::translateField
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct_binary::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2496,7 +2496,7 @@ template uint32_t struct_binary::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t struct_binary::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2519,7 +2519,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::dep_A_struct>::translateFieldN
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view dep_A_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2610,7 +2610,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::dep_C_struct>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2633,7 +2633,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::dep_B_struct>::translateFieldN
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view dep_B_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2724,7 +2724,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::dep_C_struct>,
     "inconsistent use of json option");
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2747,7 +2747,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::annotated>::translateFieldName
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view annotated::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2802,7 +2802,7 @@ template uint32_t annotated::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t annotated::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2838,7 +2838,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_names::Type>::f
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view union_with_special_names::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3167,7 +3167,7 @@ template uint32_t union_with_special_names::serializedSize<>(apache::thrift::Com
 template uint32_t union_with_special_names::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3190,7 +3190,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct_with_special_names>::tr
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view struct_with_special_names::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3353,7 +3353,7 @@ template uint32_t struct_with_special_names::serializedSize<>(apache::thrift::Co
 template uint32_t struct_with_special_names::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3376,7 +3376,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct_with_indirections>::tra
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 const char* struct_with_indirections::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/fixtures";
@@ -3482,7 +3482,7 @@ template uint32_t struct_with_indirections::serializedSize<>(apache::thrift::Com
 template uint32_t struct_with_indirections::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3505,7 +3505,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::StructWithFieldAdapter>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view StructWithFieldAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3574,7 +3574,7 @@ template uint32_t StructWithFieldAdapter::serializedSize<>(apache::thrift::Compa
 template uint32_t StructWithFieldAdapter::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3610,7 +3610,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter::Type
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 std::string_view UnionWithTypedefFieldAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3699,13 +3699,13 @@ template uint32_t UnionWithTypedefFieldAdapter::serializedSize<>(apache::thrift:
 template uint32_t UnionWithTypedefFieldAdapter::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
-namespace test_cpp2 { namespace cpp_reflection { namespace {
+namespace test_cpp2::cpp_reflection { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::StructWithFieldAdapter>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter>();
 }
-}}} // test_cpp2::cpp_reflection
+}} // test_cpp2::cpp_reflection
 namespace apache::thrift::detail::annotation {
 }

@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ExtraService.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ExtraService.tcc"
 
-namespace extra { namespace svc {
-}} // extra::svc
+namespace extra::svc {
+} // extra::svc

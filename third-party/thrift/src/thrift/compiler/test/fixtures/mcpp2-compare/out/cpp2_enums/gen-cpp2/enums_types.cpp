@@ -113,7 +113,7 @@ void TccStructTraits<::facebook::ns::qwerty::SomeStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 std::string_view SomeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -172,11 +172,11 @@ template uint32_t SomeStruct::serializedSize<>(apache::thrift::SimpleJSONProtoco
 template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty
 
-namespace facebook { namespace ns { namespace qwerty { namespace {
+namespace facebook::ns::qwerty { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // facebook::ns::qwerty
+}} // facebook::ns::qwerty
 namespace apache::thrift::detail::annotation {
 }

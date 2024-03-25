@@ -9,10 +9,10 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> TestService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> TestService_init_presult;
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test::namespace_from_package::module::TestService>::initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_int1) {
 

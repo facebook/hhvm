@@ -97,7 +97,7 @@ void TccStructTraits<::some::valid::ns::Empty>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view Empty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -149,7 +149,7 @@ template uint32_t Empty::serializedSize<>(apache::thrift::SimpleJSONProtocolWrit
 template uint32_t Empty::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -172,7 +172,7 @@ void TccStructTraits<::some::valid::ns::ASimpleStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view ASimpleStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -227,7 +227,7 @@ template uint32_t ASimpleStruct::serializedSize<>(apache::thrift::SimpleJSONProt
 template uint32_t ASimpleStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -250,7 +250,7 @@ void TccStructTraits<::some::valid::ns::ASimpleStructNoexcept>::translateFieldNa
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view ASimpleStructNoexcept::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -309,7 +309,7 @@ template uint32_t ASimpleStructNoexcept::serializedSize<>(apache::thrift::Simple
 template uint32_t ASimpleStructNoexcept::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -332,7 +332,7 @@ void TccStructTraits<::some::valid::ns::MyStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -519,7 +519,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolW
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -555,7 +555,7 @@ bool TEnumTraits<::some::valid::ns::SimpleUnion::Type>::findValue(std::string_vi
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view SimpleUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -657,7 +657,7 @@ template uint32_t SimpleUnion::serializedSize<>(apache::thrift::SimpleJSONProtoc
 template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -693,7 +693,7 @@ bool TEnumTraits<::some::valid::ns::ComplexUnion::Type>::findValue(std::string_v
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view ComplexUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1109,7 +1109,7 @@ static_assert(
         ::some::valid::ns::MyStruct>,
     "inconsistent use of json option");
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1132,7 +1132,7 @@ void TccStructTraits<::some::valid::ns::AnException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view AnException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1451,7 +1451,7 @@ static_assert(
         ::some::valid::ns::unionTypeDef>,
     "inconsistent use of json option");
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1474,7 +1474,7 @@ void TccStructTraits<::some::valid::ns::AnotherException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view AnotherException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1565,7 +1565,7 @@ template uint32_t AnotherException::serializedSize<>(apache::thrift::SimpleJSONP
 template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1588,7 +1588,7 @@ void TccStructTraits<::some::valid::ns::containerStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view containerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2166,7 +2166,7 @@ static_assert(
         ::some::valid::ns::unionTypeDef>,
     "inconsistent use of json option");
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2189,7 +2189,7 @@ void TccStructTraits<::some::valid::ns::MyIncludedStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view MyIncludedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2333,7 +2333,7 @@ static_assert(
         ::some::valid::ns::AStruct>,
     "inconsistent use of json option");
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2356,7 +2356,7 @@ void TccStructTraits<::some::valid::ns::AnnotatedStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view AnnotatedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2790,7 +2790,7 @@ static_assert(
         ::some::valid::ns::containerStruct>,
     "inconsistent use of json option");
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2813,7 +2813,7 @@ void TccStructTraits<::some::valid::ns::ComplexContainerStruct>::translateFieldN
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view ComplexContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2926,7 +2926,7 @@ template uint32_t ComplexContainerStruct::serializedSize<>(apache::thrift::Simpl
 template uint32_t ComplexContainerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2949,7 +2949,7 @@ void TccStructTraits<::some::valid::ns::FloatStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view FloatStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3013,7 +3013,7 @@ template uint32_t FloatStruct::serializedSize<>(apache::thrift::SimpleJSONProtoc
 template uint32_t FloatStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -3049,7 +3049,7 @@ bool TEnumTraits<::some::valid::ns::FloatUnion::Type>::findValue(std::string_vie
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view FloatUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3148,7 +3148,7 @@ template uint32_t FloatUnion::serializedSize<>(apache::thrift::SimpleJSONProtoco
 template uint32_t FloatUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -3171,7 +3171,7 @@ void TccStructTraits<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 std::string_view AllRequiredNoExceptMoveCtrStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3227,9 +3227,9 @@ template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSize<>(apache::thr
 template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
-namespace some { namespace valid { namespace ns { namespace {
+namespace some::valid::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 10, ::some::valid::ns::IOBuf, ::some::valid::ns::MyStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 11, ::some::valid::ns::IOBuf, ::some::valid::ns::MyStruct>();
@@ -3237,6 +3237,6 @@ namespace some { namespace valid { namespace ns { namespace {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 20, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
 }
-}}}} // some::valid::ns
+}} // some::valid::ns
 namespace apache::thrift::detail::annotation {
 }

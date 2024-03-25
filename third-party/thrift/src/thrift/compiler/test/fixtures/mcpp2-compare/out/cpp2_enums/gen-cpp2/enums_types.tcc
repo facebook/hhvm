@@ -27,7 +27,7 @@ struct TccStructTraits<::facebook::ns::qwerty::SomeStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 template <class Protocol_>
 void SomeStruct::readNoXfer(Protocol_* iprot) {
@@ -153,4 +153,4 @@ extern template uint32_t SomeStruct::serializedSize<>(apache::thrift::SimpleJSON
 extern template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

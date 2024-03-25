@@ -24,7 +24,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 class ReturnService;
 class ReturnServiceAsyncProcessor;
 
@@ -33,7 +33,7 @@ class ReturnServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache::thrift {
 template <>
@@ -210,10 +210,10 @@ class ServiceHandler<::some::valid::ns::ReturnService> : public apache::thrift::
 
 } // namespace apache::thrift
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 using ReturnServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ReturnService> instead")]] = ::apache::thrift::ServiceHandler<ReturnService>;
-}}} // some::valid::ns
-namespace some { namespace valid { namespace ns {
+} // some::valid::ns
+namespace some::valid::ns {
 class ReturnServiceSvNull : public ::apache::thrift::ServiceHandler<ReturnService> {
  public:
   bool boolReturn() override;
@@ -424,4 +424,4 @@ class ReturnServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProce
   ~ReturnServiceAsyncProcessor() override {}
 };
 
-}}} // some::valid::ns
+} // some::valid::ns

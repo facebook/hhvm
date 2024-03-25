@@ -27,7 +27,7 @@ struct TccStructTraits<::some::ns::IncludedA> {
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 template <class Protocol_>
 void IncludedA::readNoXfer(Protocol_* iprot) {
@@ -186,4 +186,4 @@ extern template uint32_t IncludedA::serializedSize<>(apache::thrift::CompactProt
 extern template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // some::ns
+} // some::ns

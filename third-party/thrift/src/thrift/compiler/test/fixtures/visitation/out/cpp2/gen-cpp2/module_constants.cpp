@@ -10,10 +10,10 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 
 
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

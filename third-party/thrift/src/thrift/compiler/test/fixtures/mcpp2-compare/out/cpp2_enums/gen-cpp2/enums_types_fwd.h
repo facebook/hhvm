@@ -9,17 +9,17 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 class SomeStruct;
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 enum class AnEnumA;
 enum class AnEnumB;
 enum class AnEnumC;
 enum class AnEnumD;
 enum class AnEnumE;
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty
 // END forward_declare_enums

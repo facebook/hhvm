@@ -31,7 +31,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(FieldA);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 enum class AnEnum {
   FIELDA = 2,
@@ -40,7 +40,7 @@ enum class AnEnum {
 
 
 
-}}} // a::different::ns
+} // a::different::ns
 
 namespace std {
 template<> struct hash<::a::different::ns::AnEnum> :
@@ -77,10 +77,10 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 class AStruct;
 class AStructB;
-}}} // a::different::ns
+} // a::different::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -90,7 +90,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -384,4 +384,4 @@ unsigned long AStructB::read(Protocol_* iprot) {
 }
 
 
-}}} // a::different::ns
+} // a::different::ns

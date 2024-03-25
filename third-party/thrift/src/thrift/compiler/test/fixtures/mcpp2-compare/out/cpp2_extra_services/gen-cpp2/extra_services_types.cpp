@@ -33,7 +33,7 @@ void TccStructTraits<::extra::svc::containerStruct2>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace extra { namespace svc {
+namespace extra::svc {
 
 std::string_view containerStruct2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -245,11 +245,11 @@ template uint32_t containerStruct2::serializedSize<>(apache::thrift::SimpleJSONP
 template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}} // extra::svc
+} // extra::svc
 
-namespace extra { namespace svc { namespace {
+namespace extra::svc { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}} // extra::svc
+}} // extra::svc
 namespace apache::thrift::detail::annotation {
 }

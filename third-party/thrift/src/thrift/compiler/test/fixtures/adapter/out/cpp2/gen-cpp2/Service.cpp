@@ -135,7 +135,7 @@ determineInvocationType:
 }
 
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 ::facebook::thrift::test::MyI32_4873 ServiceSvNull::func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) {
   return 0;
@@ -188,4 +188,4 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
 
   return requestInfoMap;
 }
-}}} // facebook::thrift::test
+} // facebook::thrift::test

@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class FB303Service;
 class FB303ServiceAsyncProcessor;
 
@@ -31,7 +31,7 @@ class FB303ServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache::thrift {
 template <>
@@ -66,10 +66,10 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using FB303ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<FB303Service> instead")]] = ::apache::thrift::ServiceHandler<FB303Service>;
-}}} // test::fixtures::basic
-namespace test { namespace fixtures { namespace basic {
+} // test::fixtures::basic
+namespace test::fixtures::basic {
 class FB303ServiceSvNull : public ::apache::thrift::ServiceHandler<FB303Service> {
  public:
   void simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) override;
@@ -106,4 +106,4 @@ class FB303ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   ~FB303ServiceAsyncProcessor() override {}
 };
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

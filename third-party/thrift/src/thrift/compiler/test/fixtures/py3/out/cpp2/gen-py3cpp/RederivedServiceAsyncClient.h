@@ -21,9 +21,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 class RederivedService;
-}} // py3::simple
+} // py3::simple
 namespace apache::thrift {
 
 template <>
@@ -140,6 +140,6 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
 
 } // namespace apache::thrift
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 using RederivedServiceAsyncClient [[deprecated("Use apache::thrift::Client<RederivedService> instead")]] = ::apache::thrift::Client<RederivedService>;
-}} // py3::simple
+} // py3::simple

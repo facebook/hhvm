@@ -65,7 +65,7 @@ void TccStructTraits<::test::fixtures::basic::MyStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 const char* MyStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyStruct";
@@ -217,7 +217,7 @@ static_assert(
         ::test::fixtures::basic::MyDataItem>,
     "inconsistent use of json option");
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -240,7 +240,7 @@ void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 const char* MyDataItem::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyDataItem";
@@ -292,7 +292,7 @@ template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -328,7 +328,7 @@ bool TEnumTraits<::test::fixtures::basic::MyUnion::Type>::findValue(std::string_
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 const char* MyUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/MyUnion";
@@ -460,7 +460,7 @@ static_assert(
         ::test::fixtures::basic::MyDataItem>,
     "inconsistent use of json option");
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -483,7 +483,7 @@ void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldNa
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 const char* ReservedKeyword::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/ReservedKeyword";
@@ -542,7 +542,7 @@ template uint32_t ReservedKeyword::serializedSize<>(apache::thrift::CompactProto
 template uint32_t ReservedKeyword::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -578,7 +578,7 @@ bool TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type>::findValue(std
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 const char* UnionToBeRenamed::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic/UnionToBeRenamed";
@@ -668,11 +668,11 @@ template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::CompactProt
 template uint32_t UnionToBeRenamed::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
-namespace test { namespace fixtures { namespace basic { namespace {
+namespace test::fixtures::basic { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // test::fixtures::basic
+}} // test::fixtures::basic
 namespace apache::thrift::detail::annotation {
 }

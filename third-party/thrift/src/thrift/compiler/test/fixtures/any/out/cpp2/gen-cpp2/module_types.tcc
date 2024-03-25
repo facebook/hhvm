@@ -41,7 +41,7 @@ struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyExce
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 namespace detail {
 
 template <class Protocol_>
@@ -390,4 +390,4 @@ extern template uint32_t MyException::serializedSize<>(apache::thrift::CompactPr
 extern template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any

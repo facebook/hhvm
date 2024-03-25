@@ -11,7 +11,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h"
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 
 
@@ -83,4 +83,4 @@ namespace some { namespace valid { namespace ns {
 
 
 
-}}} // some::valid::ns
+} // some::valid::ns

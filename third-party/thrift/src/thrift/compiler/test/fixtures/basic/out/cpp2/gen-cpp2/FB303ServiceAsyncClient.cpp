@@ -9,10 +9,10 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int32_t*>> FB303Service_simple_rpc_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::test::fixtures::basic::ReservedKeyword*>> FB303Service_simple_rpc_presult;
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test::fixtures::basic::FB303Service>::simple_rpcT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_int_parameter) {
 

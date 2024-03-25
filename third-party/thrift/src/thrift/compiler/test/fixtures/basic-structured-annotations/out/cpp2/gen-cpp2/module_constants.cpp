@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 
 ::std::map<::std::string, ::std::string> const& module_constants::MyConst() {
   static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("ENUMERATOR"), apache::thrift::StringTraits<std::string>::fromStringLiteral("enum")},
@@ -18,4 +18,4 @@ namespace test { namespace fixtures { namespace basic-structured-annotations {
   return *instance;
 }
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

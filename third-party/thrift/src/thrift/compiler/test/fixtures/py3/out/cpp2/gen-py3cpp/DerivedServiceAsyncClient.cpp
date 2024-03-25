@@ -9,10 +9,10 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 typedef apache::thrift::ThriftPresult<false> DerivedService_get_six_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> DerivedService_get_six_presult;
-}} // py3::simple
+} // py3::simple
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::py3::simple::DerivedService>::get_sixT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

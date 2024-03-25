@@ -60,7 +60,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(me1_t2);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace enums {
+namespace test::fixtures::enums {
 
 enum class Metasyntactic {
   FOO = 1,
@@ -157,7 +157,7 @@ inline constexpr MyBitmaskEnum2 operator~(MyBitmaskEnum2 a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
-}}} // test::fixtures::enums
+} // test::fixtures::enums
 
 namespace std {
 template<> struct hash<::test::fixtures::enums::Metasyntactic> :
@@ -338,10 +338,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace enums {
+namespace test::fixtures::enums {
 class SomeStruct;
 class MyStruct;
-}}} // test::fixtures::enums
+} // test::fixtures::enums
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -351,7 +351,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace enums {
+namespace test::fixtures::enums {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -985,4 +985,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::enums
+} // test::fixtures::enums

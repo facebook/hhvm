@@ -41,7 +41,7 @@ struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldL
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
+namespace facebook::thrift::test::terse_write::deprecated {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -1931,4 +1931,4 @@ extern template uint32_t FieldLevelTerseStruct::serializedSize<>(apache::thrift:
 extern template uint32_t FieldLevelTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}}} // facebook::thrift::test::terse_write::deprecated
+} // facebook::thrift::test::terse_write::deprecated

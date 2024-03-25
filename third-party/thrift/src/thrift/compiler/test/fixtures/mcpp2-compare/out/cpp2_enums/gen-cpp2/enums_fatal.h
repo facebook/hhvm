@@ -13,7 +13,7 @@
 #include <fatal/type/sequence.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 namespace __fbthrift_refl {
 
@@ -118,4 +118,4 @@ class enums_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(enums_tags::module, __fbthrift_refl::enums_module_traits);
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

@@ -49,7 +49,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyStruct
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
+namespace facebook::thrift::test::terse_write::deprecated {
 
 const char* MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/MyStruct";
@@ -101,7 +101,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}}} // facebook::thrift::test::terse_write::deprecated
+} // facebook::thrift::test::terse_write::deprecated
 
 namespace apache {
 namespace thrift {
@@ -124,7 +124,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::StructLe
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
+namespace facebook::thrift::test::terse_write::deprecated {
 
 const char* StructLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/StructLevelTerseStruct";
@@ -333,7 +333,7 @@ static_assert(
         ::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     "inconsistent use of json option");
 
-}}}}} // facebook::thrift::test::terse_write::deprecated
+} // facebook::thrift::test::terse_write::deprecated
 
 namespace apache {
 namespace thrift {
@@ -356,7 +356,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldLev
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
+namespace facebook::thrift::test::terse_write::deprecated {
 
 const char* FieldLevelTerseStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/terse_write/deprecated/FieldLevelTerseStruct";
@@ -685,11 +685,11 @@ static_assert(
         ::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     "inconsistent use of json option");
 
-}}}}} // facebook::thrift::test::terse_write::deprecated
+} // facebook::thrift::test::terse_write::deprecated
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated { namespace {
+namespace facebook::thrift::test::terse_write::deprecated { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}}}} // facebook::thrift::test::terse_write::deprecated
+}} // facebook::thrift::test::terse_write::deprecated
 namespace apache::thrift::detail::annotation {
 }

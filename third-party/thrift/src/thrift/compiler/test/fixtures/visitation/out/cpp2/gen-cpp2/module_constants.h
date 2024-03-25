@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_types.h"
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 struct module_constants {
 
@@ -36,4 +36,4 @@ struct module_constants {
 
 };
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

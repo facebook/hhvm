@@ -55,7 +55,7 @@ struct TccStructTraits<::test::fixtures::basic::UnionToBeRenamed> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -989,4 +989,4 @@ extern template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::Comp
 extern template uint32_t UnionToBeRenamed::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

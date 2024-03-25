@@ -137,7 +137,7 @@ determineInvocationType:
 }
 
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 void FooServiceSvNull::simple_rpc() {
   return;
@@ -190,4 +190,4 @@ apache::thrift::ServiceRequestInfoMap FooServiceServiceInfoHolder::staticRequest
 
   return requestInfoMap;
 }
-}}} // test::fixtures::basic
+} // test::fixtures::basic

@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/SomeService.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/SomeService.tcc"
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-}}}} // apache::thrift::fixtures::types
+namespace apache::thrift::fixtures::types {
+} // apache::thrift::fixtures::types

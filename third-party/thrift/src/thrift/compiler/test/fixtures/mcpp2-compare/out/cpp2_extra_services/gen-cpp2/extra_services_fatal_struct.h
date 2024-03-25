@@ -15,7 +15,7 @@
 #include <fatal/type/traits.h>
 #include <fatal/type/list.h>
 
-namespace extra { namespace svc {
+namespace extra::svc {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -245,4 +245,4 @@ class containerStruct2_struct_traits {
 } // __fbthrift_refl
 
 THRIFT_REGISTER_STRUCT_TRAITS(containerStruct2, __fbthrift_refl::containerStruct2_struct_traits);
-}} // extra::svc
+} // extra::svc

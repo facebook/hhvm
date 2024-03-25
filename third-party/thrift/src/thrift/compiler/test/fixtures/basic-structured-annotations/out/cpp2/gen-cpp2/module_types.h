@@ -102,7 +102,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(second);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 
 enum class MyEnum {
   UNKNOWN = 0,
@@ -111,7 +111,7 @@ enum class MyEnum {
 
 
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations
 
 namespace std {
 template<> struct hash<::test::fixtures::basic-structured-annotations::MyEnum> :
@@ -148,7 +148,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 class runtime_annotation;
 class structured_annotation_inline;
 class structured_annotation_with_default;
@@ -158,7 +158,7 @@ class structured_annotation_nested;
 class MyStruct;
 class MyException;
 class MyUnion;
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 template<>
@@ -172,7 +172,7 @@ struct is_cpp_ref_field_optional<::test::fixtures::basic-structured-annotations:
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -2013,7 +2013,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations
 
 namespace apache { namespace thrift {
 

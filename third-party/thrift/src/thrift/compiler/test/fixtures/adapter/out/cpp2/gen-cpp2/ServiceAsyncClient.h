@@ -16,9 +16,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class Service;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 namespace apache::thrift {
 
 template <>
@@ -139,6 +139,6 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
 
 } // namespace apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 using ServiceAsyncClient [[deprecated("Use apache::thrift::Client<Service> instead")]] = ::apache::thrift::Client<Service>;
-}}} // facebook::thrift::test
+} // facebook::thrift::test

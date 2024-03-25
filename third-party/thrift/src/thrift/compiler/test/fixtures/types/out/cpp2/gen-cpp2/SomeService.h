@@ -23,7 +23,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 class SomeService;
 class SomeServiceAsyncProcessor;
 
@@ -32,7 +32,7 @@ class SomeServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache::thrift {
 template <>
@@ -77,10 +77,10 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
 
 } // namespace apache::thrift
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 using SomeServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<SomeService> instead")]] = ::apache::thrift::ServiceHandler<SomeService>;
-}}}} // apache::thrift::fixtures::types
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+} // apache::thrift::fixtures::types
+namespace apache::thrift::fixtures::types {
 class SomeServiceSvNull : public ::apache::thrift::ServiceHandler<SomeService> {
  public:
   void bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) override;
@@ -126,4 +126,4 @@ class SomeServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~SomeServiceAsyncProcessor() override {}
 };
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

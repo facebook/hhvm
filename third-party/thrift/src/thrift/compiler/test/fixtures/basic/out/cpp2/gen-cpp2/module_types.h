@@ -95,7 +95,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(reserved_field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 enum class MyEnum {
   MyValue1 = 0,
@@ -111,7 +111,7 @@ enum class HackEnum {
 
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace std {
 template<> struct hash<::test::fixtures::basic::MyEnum> :
@@ -172,13 +172,13 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class MyStruct;
 class MyDataItem;
 class MyUnion;
 class ReservedKeyword;
 class UnionToBeRenamed;
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -188,7 +188,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -1647,7 +1647,7 @@ unsigned long UnionToBeRenamed::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache { namespace thrift {
 

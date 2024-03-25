@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& module_constants::var1() {
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t>> const instance{
@@ -121,4 +121,4 @@ namespace facebook { namespace thrift { namespace test {
   return *instance;
 }
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

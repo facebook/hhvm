@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class DbMixedStackArguments;
 class DbMixedStackArgumentsAsyncProcessor;
 
@@ -31,7 +31,7 @@ class DbMixedStackArgumentsServiceInfoHolder : public apache::thrift::ServiceInf
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache::thrift {
 template <>
@@ -76,10 +76,10 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using DbMixedStackArgumentsSvIf [[deprecated("Use apache::thrift::ServiceHandler<DbMixedStackArguments> instead")]] = ::apache::thrift::ServiceHandler<DbMixedStackArguments>;
-}}} // test::fixtures::basic
-namespace test { namespace fixtures { namespace basic {
+} // test::fixtures::basic
+namespace test::fixtures::basic {
 class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMixedStackArguments> {
  public:
   void getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) override;
@@ -125,4 +125,4 @@ class DbMixedStackArgumentsAsyncProcessor : public ::apache::thrift::GeneratedAs
   ~DbMixedStackArgumentsAsyncProcessor() override {}
 };
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

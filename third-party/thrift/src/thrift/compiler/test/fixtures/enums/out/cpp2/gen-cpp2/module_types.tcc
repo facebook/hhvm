@@ -34,7 +34,7 @@ struct TccStructTraits<::test::fixtures::enums::MyStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace enums {
+namespace test::fixtures::enums {
 
 template <class Protocol_>
 void SomeStruct::readNoXfer(Protocol_* iprot) {
@@ -501,4 +501,4 @@ extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProto
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::enums
+} // test::fixtures::enums

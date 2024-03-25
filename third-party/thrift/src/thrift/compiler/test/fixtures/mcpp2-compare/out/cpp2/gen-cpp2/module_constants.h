@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 struct module_constants {
 
@@ -87,4 +87,4 @@ struct module_constants {
 
 };
 
-}}} // some::valid::ns
+} // some::valid::ns

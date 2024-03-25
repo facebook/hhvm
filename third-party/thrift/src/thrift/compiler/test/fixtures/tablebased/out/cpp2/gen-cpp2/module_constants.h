@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_types.h"
 
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 
 struct module_constants {
 
 };
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased

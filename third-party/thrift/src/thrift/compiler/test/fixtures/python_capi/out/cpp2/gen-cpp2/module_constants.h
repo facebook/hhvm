@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h"
 
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 
 struct module_constants {
 
 };
 
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi

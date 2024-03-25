@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 class TestService;
 class TestServiceAsyncProcessor;
 
@@ -31,7 +31,7 @@ class TestServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module
 
 namespace apache::thrift {
 template <>
@@ -66,10 +66,10 @@ class ServiceHandler<::test::namespace_from_package::module::TestService> : publ
 
 } // namespace apache::thrift
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 using TestServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<TestService> instead")]] = ::apache::thrift::ServiceHandler<TestService>;
-}}} // test::namespace_from_package::module
-namespace test { namespace namespace_from_package { namespace module {
+} // test::namespace_from_package::module
+namespace test::namespace_from_package::module {
 class TestServiceSvNull : public ::apache::thrift::ServiceHandler<TestService> {
  public:
   ::std::int64_t init(::std::int64_t /*int1*/) override;
@@ -106,4 +106,4 @@ class TestServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~TestServiceAsyncProcessor() override {}
 };
 
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module

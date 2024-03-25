@@ -687,7 +687,7 @@ determineInvocationType:
 }
 
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 void service3SvNull::methodA() {
   return;
@@ -816,4 +816,4 @@ apache::thrift::ServiceRequestInfoMap service3ServiceInfoHolder::staticRequestIn
 
   return requestInfoMap;
 }
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

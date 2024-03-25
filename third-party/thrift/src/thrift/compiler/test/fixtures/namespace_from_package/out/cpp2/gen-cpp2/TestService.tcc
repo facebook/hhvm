@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> TestService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> TestService_init_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -88,4 +88,4 @@ void TestServiceAsyncProcessor::throw_wrapped_init(apache::thrift::ResponseChann
 }
 
 
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module

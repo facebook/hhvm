@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h"
 
-namespace test { namespace fixtures { namespace enums {
+namespace test::fixtures::enums {
 
 struct module_constants {
 
 };
 
-}}} // test::fixtures::enums
+} // test::fixtures::enums

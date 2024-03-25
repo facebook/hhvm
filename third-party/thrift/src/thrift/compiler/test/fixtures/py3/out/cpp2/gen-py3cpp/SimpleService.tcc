@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 typedef apache::thrift::ThriftPresult<false> SimpleService_get_five_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> SimpleService_get_five_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int32_t*>> SimpleService_add_five_pargs;
@@ -3213,4 +3213,4 @@ void SimpleServiceAsyncProcessor::throw_wrapped_get_struct_hidden(apache::thrift
 }
 
 
-}} // py3::simple
+} // py3::simple

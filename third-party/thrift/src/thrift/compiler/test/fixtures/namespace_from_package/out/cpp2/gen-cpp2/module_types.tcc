@@ -27,7 +27,7 @@ struct TccStructTraits<::test::namespace_from_package::module::Foo> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 
 template <class Protocol_>
 void Foo::readNoXfer(Protocol_* iprot) {
@@ -149,4 +149,4 @@ extern template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWr
 extern template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module

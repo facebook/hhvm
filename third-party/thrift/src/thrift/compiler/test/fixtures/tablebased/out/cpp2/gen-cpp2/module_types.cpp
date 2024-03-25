@@ -90,7 +90,7 @@ constexpr ptrdiff_t unionTypeOffset<::test::fixtures::tablebased::ExampleUnion>(
 FOLLY_POP_WARNING
 }}} // apache::thrift::detail
 
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 
 std::string_view TrivialTypesStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -258,9 +258,9 @@ constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_Trivia
   }}
 };
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 
 std::string_view ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -519,7 +519,7 @@ static_assert(
         ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>>,
     "inconsistent use of json option");
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 
 namespace apache { namespace thrift {
 
@@ -534,7 +534,7 @@ bool TEnumTraits<::test::fixtures::tablebased::ExampleUnion::Type>::findValue(st
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 
 std::string_view ExampleUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -678,12 +678,12 @@ static_assert(
         ::test::fixtures::tablebased::TrivialTypesStruct>,
     "inconsistent use of json option");
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased
 
-namespace test { namespace fixtures { namespace tablebased { namespace {
+namespace test::fixtures::tablebased { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // test::fixtures::tablebased
+}} // test::fixtures::tablebased
 
 namespace apache {
 namespace thrift {

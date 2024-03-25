@@ -203,7 +203,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field_id_to_size);
 
 // END declare_enums
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class Foo;
 class LazyFoo;
 class OptionalFoo;
@@ -213,7 +213,7 @@ class LazyCppRef;
 class IndexedFoo;
 class OptionalIndexedFoo;
 class Empty;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -237,7 +237,7 @@ struct is_cpp_ref_field_optional<::apache::thrift::test::LazyCppRef,::apache::th
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -3008,4 +3008,4 @@ unsigned long Empty::read(Protocol_* iprot) {
 }
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

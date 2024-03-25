@@ -139,7 +139,7 @@ determineInvocationType:
 }
 
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 void FB303ServiceSvNull::simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {}
 
@@ -190,4 +190,4 @@ apache::thrift::ServiceRequestInfoMap FB303ServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-}}} // test::fixtures::basic
+} // test::fixtures::basic

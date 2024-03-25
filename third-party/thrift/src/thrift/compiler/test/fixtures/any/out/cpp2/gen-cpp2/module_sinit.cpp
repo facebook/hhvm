@@ -5,7 +5,7 @@
  *  @generated @nocommit
  */
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
@@ -25,4 +25,4 @@ struct StaticInit {
 StaticInit staticInit;
 }
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any

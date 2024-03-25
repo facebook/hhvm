@@ -100,7 +100,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(adapted_list_field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 enum class Enum {
   first = 1,
@@ -109,7 +109,7 @@ enum class Enum {
 
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::Enum> :
@@ -146,12 +146,12 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 class Foo;
 class Bar;
 class Baz;
 class OpEncodeStruct;
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -163,7 +163,7 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::OpEncodeStruct,::apac
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -1380,4 +1380,4 @@ unsigned long OpEncodeStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

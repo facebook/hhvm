@@ -150,7 +150,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(u);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 enum class AnEnum {
   None = 0,
@@ -179,7 +179,7 @@ enum class Flags {
 
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace std {
 template<> struct hash<::py3::simple::AnEnum> :
@@ -264,7 +264,7 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace py3 { namespace simple {
+namespace py3::simple {
 class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
@@ -276,7 +276,7 @@ class HiddenException;
 class ComplexStruct;
 class BinaryUnion;
 class BinaryUnionStruct;
-}} // py3::simple
+} // py3::simple
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -286,7 +286,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace py3 { namespace simple {
+namespace py3::simple {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -2703,7 +2703,7 @@ unsigned long BinaryUnionStruct::read(Protocol_* iprot) {
 }
 
 
-}} // py3::simple
+} // py3::simple
 
 namespace apache { namespace thrift {
 

@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 
-}}} // a::different::ns
+} // a::different::ns

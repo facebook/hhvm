@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 class MyStruct;
 class MyUnion;
 class MyStructWithCustomDefault;
@@ -19,11 +19,11 @@ class TerseStructWithCustomDefault;
 class AdaptedFields;
 class WrappedFields;
 class TerseException;
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
+namespace facebook::thrift::test::terse_write {
 enum class MyEnum;
-}}}} // facebook::thrift::test::terse_write
+} // facebook::thrift::test::terse_write
 // END forward_declare_enums

@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace extra { namespace svc {
+namespace extra::svc {
 typedef apache::thrift::ThriftPresult<false> ExtraService_simple_function_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> ExtraService_simple_function_presult;
 typedef apache::thrift::ThriftPresult<false> ExtraService_throws_function_pargs;
@@ -638,4 +638,4 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
 }
 
 
-}} // extra::svc
+} // extra::svc

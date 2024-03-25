@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 typedef apache::thrift::ThriftPresult<false> MyService_first_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string*>> MyService_first_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> MyService_second_pargs;
@@ -162,4 +162,4 @@ void MyServiceAsyncProcessor::throw_wrapped_second(apache::thrift::ResponseChann
 }
 
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

@@ -135,7 +135,7 @@ determineInvocationType:
 }
 
 
-namespace test { namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 
 ::std::int64_t TestServiceSvNull::init(::std::int64_t /*int1*/) {
   return 0;
@@ -188,4 +188,4 @@ apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticReques
 
   return requestInfoMap;
 }
-}} // test::namespace_from_package_without_module_name
+} // test::namespace_from_package_without_module_name

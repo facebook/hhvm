@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 class MyService;
 class MyServiceAsyncProcessor;
 
@@ -31,7 +31,7 @@ class MyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // test::fixtures::basic
+} // test::fixtures::basic
 
 namespace apache::thrift {
 template <>
@@ -156,10 +156,10 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
-}}} // test::fixtures::basic
-namespace test { namespace fixtures { namespace basic {
+} // test::fixtures::basic
+namespace test::fixtures::basic {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:
   void ping() override;
@@ -273,4 +273,4 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   ~MyServiceAsyncProcessor() override {}
 };
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

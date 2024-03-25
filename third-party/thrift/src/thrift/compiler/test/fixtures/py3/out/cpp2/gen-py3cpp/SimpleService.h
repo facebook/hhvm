@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 class SimpleService;
 class SimpleServiceAsyncProcessor;
 
@@ -31,7 +31,7 @@ class SimpleServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}} // py3::simple
+} // py3::simple
 
 namespace apache::thrift {
 template <>
@@ -472,10 +472,10 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 
 } // namespace apache::thrift
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 using SimpleServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<SimpleService> instead")]] = ::apache::thrift::ServiceHandler<SimpleService>;
-}} // py3::simple
-namespace py3 { namespace simple {
+} // py3::simple
+namespace py3::simple {
 class SimpleServiceSvNull : public ::apache::thrift::ServiceHandler<SimpleService> {
  public:
   ::std::int32_t get_five() override;
@@ -881,4 +881,4 @@ class SimpleServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProce
   ~SimpleServiceAsyncProcessor() override {}
 };
 
-}} // py3::simple
+} // py3::simple

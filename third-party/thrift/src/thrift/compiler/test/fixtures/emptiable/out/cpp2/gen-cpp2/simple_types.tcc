@@ -48,7 +48,7 @@ struct TccStructTraits<::apache::thrift::test::NotEmptiableStruct> {
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -2035,4 +2035,4 @@ extern template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::Co
 extern template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

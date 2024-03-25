@@ -13,7 +13,7 @@
 #include <fatal/type/sequence.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
-namespace extra { namespace svc {
+namespace extra::svc {
 
 namespace __fbthrift_refl {
 
@@ -119,4 +119,4 @@ class extra_services_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(extra_services_tags::module, __fbthrift_refl::extra_services_module_traits);
 
-}} // extra::svc
+} // extra::svc

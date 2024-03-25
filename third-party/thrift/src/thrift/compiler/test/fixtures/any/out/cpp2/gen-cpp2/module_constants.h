@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.h"
 
-namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace facebook::thrift::compiler::test::fixtures::any {
 
 struct module_constants {
 
 };
 
-}}}}}} // facebook::thrift::compiler::test::fixtures::any
+} // facebook::thrift::compiler::test::fixtures::any

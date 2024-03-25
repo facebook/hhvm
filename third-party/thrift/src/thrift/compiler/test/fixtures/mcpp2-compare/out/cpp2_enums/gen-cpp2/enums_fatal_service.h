@@ -8,5 +8,5 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
 
-namespace facebook { namespace ns { namespace qwerty {
-}}} // facebook::ns::qwerty
+namespace facebook::ns::qwerty {
+} // facebook::ns::qwerty

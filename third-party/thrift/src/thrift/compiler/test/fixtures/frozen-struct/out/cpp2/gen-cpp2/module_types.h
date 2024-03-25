@@ -92,7 +92,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(boxed_field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace some { namespace ns {
+namespace some::ns {
 
 enum class EnumB {
   EMPTY = 1,
@@ -100,7 +100,7 @@ enum class EnumB {
 
 
 
-}} // some::ns
+} // some::ns
 
 namespace std {
 template<> struct hash<::some::ns::EnumB> :
@@ -137,14 +137,14 @@ template <> struct TEnumTraits<::some::ns::EnumB> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace some { namespace ns {
+namespace some::ns {
 class ModuleA;
 class ModuleB;
 namespace detail {
 class DirectlyAdapted;
 } // namespace detail
 class CppRef;
-}} // some::ns
+} // some::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -160,7 +160,7 @@ struct is_cpp_ref_field_optional<::some::ns::CppRef,::apache::thrift::type::fiel
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace some { namespace ns {
+namespace some::ns {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -1255,4 +1255,4 @@ unsigned long CppRef::read(Protocol_* iprot) {
 }
 
 
-}} // some::ns
+} // some::ns

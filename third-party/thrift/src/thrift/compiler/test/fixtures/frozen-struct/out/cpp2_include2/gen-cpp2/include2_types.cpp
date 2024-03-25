@@ -33,7 +33,7 @@ void TccStructTraits<::some::ns::IncludedB>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 std::string_view IncludedB::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -114,11 +114,11 @@ template uint32_t IncludedB::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t IncludedB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // some::ns
+} // some::ns
 
-namespace some { namespace ns { namespace {
+namespace some::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}} // some::ns
+}} // some::ns
 namespace apache::thrift::detail::annotation {
 }

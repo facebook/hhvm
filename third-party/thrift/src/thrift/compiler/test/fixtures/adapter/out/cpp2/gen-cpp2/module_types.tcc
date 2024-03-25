@@ -251,7 +251,7 @@ struct TccStructTraits<::facebook::thrift::test::Person2> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 template <class Protocol_>
 void MyAnnotation::readNoXfer(Protocol_* iprot) {
@@ -6417,4 +6417,4 @@ extern template uint32_t Person2::serializedSize<>(apache::thrift::CompactProtoc
 extern template uint32_t Person2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/RederivedService.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/RederivedService.tcc"
 
-namespace py3 { namespace simple {
-}} // py3::simple
+namespace py3::simple {
+} // py3::simple

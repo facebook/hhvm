@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/service_with_special_names.h"
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/service_with_special_names.tcc"
 
-namespace test_cpp2 { namespace cpp_reflection {
-}} // test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+} // test_cpp2::cpp_reflection

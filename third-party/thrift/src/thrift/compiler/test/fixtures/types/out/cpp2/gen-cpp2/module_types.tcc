@@ -265,7 +265,7 @@ struct TccStructTraits<::apache::thrift::fixtures::types::StructWithDoubleUnders
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 template <class Protocol_>
 void empty_struct::readNoXfer(Protocol_* iprot) {
@@ -5612,4 +5612,4 @@ extern template uint32_t StructWithDoubleUnderscores::serializedSize<>(apache::t
 extern template uint32_t StructWithDoubleUnderscores::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

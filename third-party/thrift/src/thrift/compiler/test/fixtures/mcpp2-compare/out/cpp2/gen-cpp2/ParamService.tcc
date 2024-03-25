@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int16_t*>> ParamService_void_ret_i16_param_pargs;
 typedef apache::thrift::ThriftPresult<true> ParamService_void_ret_i16_param_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int8_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int16_t*>> ParamService_void_ret_byte_i16_param_pargs;
@@ -2236,4 +2236,4 @@ void ParamServiceAsyncProcessor::throw_wrapped_listunion_string_param(apache::th
 }
 
 
-}}} // some::valid::ns
+} // some::valid::ns

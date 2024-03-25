@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 typedef apache::thrift::ThriftPresult<false> MyService_ping_pargs;
 typedef apache::thrift::ThriftPresult<true> MyService_ping_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_getRandomData_pargs;
@@ -729,4 +729,4 @@ void MyServiceAsyncProcessor::throw_wrapped_rpc_skipped_codegen(apache::thrift::
 }
 
 
-}}} // test::fixtures::basic
+} // test::fixtures::basic

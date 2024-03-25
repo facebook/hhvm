@@ -135,7 +135,7 @@ determineInvocationType:
 }
 
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 ::std::int32_t DerivedServiceSvNull::get_six() {
   return 0;
@@ -190,4 +190,4 @@ apache::thrift::ServiceRequestInfoMap DerivedServiceServiceInfoHolder::staticReq
 
   return requestInfoMap;
 }
-}} // py3::simple
+} // py3::simple

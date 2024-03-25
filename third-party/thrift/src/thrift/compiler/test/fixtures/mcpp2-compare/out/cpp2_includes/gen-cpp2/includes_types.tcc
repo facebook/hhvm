@@ -34,7 +34,7 @@ struct TccStructTraits<::a::different::ns::AStructB> {
 } // namespace thrift
 } // namespace apache
 
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 template <class Protocol_>
 void AStruct::readNoXfer(Protocol_* iprot) {
@@ -303,4 +303,4 @@ extern template uint32_t AStructB::serializedSize<>(apache::thrift::SimpleJSONPr
 extern template uint32_t AStructB::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // a::different::ns
+} // a::different::ns

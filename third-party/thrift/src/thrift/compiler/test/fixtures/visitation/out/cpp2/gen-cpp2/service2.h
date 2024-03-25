@@ -25,7 +25,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 class service2;
 class service2AsyncProcessor;
 
@@ -34,7 +34,7 @@ class service2ServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache::thrift {
 template <>
@@ -115,10 +115,10 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service2> : public apache::thr
 
 } // namespace apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 using service2SvIf [[deprecated("Use apache::thrift::ServiceHandler<service2> instead")]] = ::apache::thrift::ServiceHandler<service2>;
-}} // test_cpp2::cpp_reflection
-namespace test_cpp2 { namespace cpp_reflection {
+} // test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
 class service2SvNull : public ::apache::thrift::ServiceHandler<service2> {
  public:
   void methodA() override;
@@ -200,4 +200,4 @@ class service2AsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorB
   ~service2AsyncProcessor() override {}
 };
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

@@ -48,7 +48,7 @@ struct TccStructTraits<::some::ns::CppRef> {
 } // namespace thrift
 } // namespace apache
 
-namespace some { namespace ns {
+namespace some::ns {
 
 template <class Protocol_>
 void ModuleA::readNoXfer(Protocol_* iprot) {
@@ -935,4 +935,4 @@ extern template uint32_t CppRef::serializedSize<>(apache::thrift::CompactProtoco
 extern template uint32_t CppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}} // some::ns
+} // some::ns

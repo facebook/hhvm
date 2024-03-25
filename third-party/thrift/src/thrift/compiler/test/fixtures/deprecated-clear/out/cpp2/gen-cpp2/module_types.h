@@ -85,7 +85,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 enum class MyEnum {
   ME0 = 0,
@@ -94,7 +94,7 @@ enum class MyEnum {
 
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace std {
 template<> struct hash<::apache::thrift::test::MyEnum> :
@@ -131,9 +131,9 @@ template <> struct TEnumTraits<::apache::thrift::test::MyEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class StructWithDefaultStruct;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -143,7 +143,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -955,4 +955,4 @@ unsigned long StructWithDefaultStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

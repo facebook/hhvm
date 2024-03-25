@@ -48,7 +48,7 @@ struct TccStructTraits<::apache::thrift::test::TerseOptionalLazyFoo> {
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 template <class Protocol_>
 void TerseFoo::readNoXfer(Protocol_* iprot) {
@@ -1294,4 +1294,4 @@ extern template uint32_t TerseOptionalLazyFoo::serializedSize<>(apache::thrift::
 extern template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test

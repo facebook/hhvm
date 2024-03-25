@@ -8,6 +8,6 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_fatal_types.h"
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

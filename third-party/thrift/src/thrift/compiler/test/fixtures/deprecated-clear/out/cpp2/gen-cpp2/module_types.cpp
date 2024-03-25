@@ -49,7 +49,7 @@ void TccStructTraits<::apache::thrift::test::StructWithDefaultStruct>::translate
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view StructWithDefaultStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -232,11 +232,11 @@ template uint32_t StructWithDefaultStruct::serializedSize<>(apache::thrift::Comp
 template uint32_t StructWithDefaultStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
-namespace apache { namespace thrift { namespace test { namespace {
+namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // apache::thrift::test
+}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

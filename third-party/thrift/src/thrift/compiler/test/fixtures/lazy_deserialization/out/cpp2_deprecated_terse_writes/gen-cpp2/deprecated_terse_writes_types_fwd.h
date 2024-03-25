@@ -7,10 +7,10 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class TerseFoo;
 class TerseLazyFoo;
 class TerseOptionalFoo;
 class TerseOptionalLazyFoo;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare

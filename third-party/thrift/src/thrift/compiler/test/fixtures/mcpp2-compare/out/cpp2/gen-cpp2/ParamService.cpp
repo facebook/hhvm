@@ -2793,7 +2793,7 @@ determineInvocationType:
 }
 
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 void ParamServiceSvNull::void_ret_byte_i16_param(::std::int8_t /*param1*/, ::std::int16_t /*param2*/) {
   return;
@@ -3260,4 +3260,4 @@ apache::thrift::ServiceRequestInfoMap ParamServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-}}} // some::valid::ns
+} // some::valid::ns

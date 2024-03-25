@@ -33,7 +33,7 @@ void TccStructTraits<::apache::thrift::test::Foo>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -157,7 +157,7 @@ template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter co
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -180,7 +180,7 @@ void TccStructTraits<::apache::thrift::test::LazyFoo>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view LazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -424,7 +424,7 @@ template uint32_t LazyFoo::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t LazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -447,7 +447,7 @@ void TccStructTraits<::apache::thrift::test::OptionalFoo>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view OptionalFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -574,7 +574,7 @@ template uint32_t OptionalFoo::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t OptionalFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -597,7 +597,7 @@ void TccStructTraits<::apache::thrift::test::OptionalLazyFoo>::translateFieldNam
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view OptionalLazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -842,7 +842,7 @@ template uint32_t OptionalLazyFoo::serializedSize<>(apache::thrift::CompactProto
 template uint32_t OptionalLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -865,7 +865,7 @@ void TccStructTraits<::apache::thrift::test::OptionalBoxedLazyFoo>::translateFie
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view OptionalBoxedLazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1087,7 +1087,7 @@ template uint32_t OptionalBoxedLazyFoo::serializedSize<>(apache::thrift::Compact
 template uint32_t OptionalBoxedLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -1110,7 +1110,7 @@ void TccStructTraits<::apache::thrift::test::LazyCppRef>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view LazyCppRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1436,7 +1436,7 @@ template uint32_t LazyCppRef::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t LazyCppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -1459,7 +1459,7 @@ void TccStructTraits<::apache::thrift::test::IndexedFoo>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view IndexedFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1604,7 +1604,7 @@ template uint32_t IndexedFoo::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t IndexedFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -1627,7 +1627,7 @@ void TccStructTraits<::apache::thrift::test::OptionalIndexedFoo>::translateField
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view OptionalIndexedFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1772,7 +1772,7 @@ template uint32_t OptionalIndexedFoo::serializedSize<>(apache::thrift::CompactPr
 template uint32_t OptionalIndexedFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -1795,7 +1795,7 @@ void TccStructTraits<::apache::thrift::test::Empty>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 std::string_view Empty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1843,11 +1843,11 @@ template uint32_t Empty::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Empty::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // apache::thrift::test
+} // apache::thrift::test
 
-namespace apache { namespace thrift { namespace test { namespace {
+namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // apache::thrift::test
+}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

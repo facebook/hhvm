@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 typedef apache::thrift::ThriftPresult<false> service3_methodA_pargs;
 typedef apache::thrift::ThriftPresult<true> service3_methodA_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int32_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::struct1*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::floating_point, double*>> service3_methodB_pargs;
@@ -470,4 +470,4 @@ void service3AsyncProcessor::throw_wrapped_methodF(apache::thrift::ResponseChann
 }
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection

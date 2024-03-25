@@ -669,7 +669,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(data);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 
 enum class MyEnum {
   MyValue1 = 0,
@@ -685,7 +685,7 @@ enum class NormalDecentEnum {
 
 
 
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi
 
 namespace std {
 template<> struct hash<::test::fixtures::python_capi::MyEnum> :
@@ -746,7 +746,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 class MyStruct;
 class MyDataItem;
 class TransitiveDoubler;
@@ -774,7 +774,7 @@ class MyDataItemPatchStruct;
 class MyDataItemFieldPatchStruct;
 class MyDataItemEnsureStruct;
 class MyDataItemSafePatch;
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -802,7 +802,7 @@ struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyDataItemPatchS
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -10011,7 +10011,7 @@ unsigned long MyDataItemSafePatch::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi
 
 namespace apache { namespace thrift {
 

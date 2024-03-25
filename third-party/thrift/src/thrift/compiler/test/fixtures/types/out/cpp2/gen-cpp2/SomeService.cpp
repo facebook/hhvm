@@ -251,7 +251,7 @@ determineInvocationType:
 }
 
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 void SomeServiceSvNull::bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) {}
 
@@ -316,4 +316,4 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
 
   return requestInfoMap;
 }
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

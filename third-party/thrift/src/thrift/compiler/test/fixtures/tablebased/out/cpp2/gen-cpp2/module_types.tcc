@@ -11,7 +11,7 @@
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
 
 
-namespace test { namespace fixtures { namespace tablebased {
+namespace test::fixtures::tablebased {
 extern const ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_TrivialTypesStruct;
 
 template <class Protocol_>
@@ -300,4 +300,4 @@ extern template uint32_t ExampleUnion::serializedSize<>(apache::thrift::SimpleJS
 extern template uint32_t ExampleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // test::fixtures::tablebased
+} // test::fixtures::tablebased

@@ -33,7 +33,7 @@ void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFiel
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 const char* InterceptedFields::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/InterceptedFields";
@@ -139,11 +139,11 @@ template uint32_t InterceptedFields::serializedSize<>(apache::thrift::CompactPro
 template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test
 
-namespace facebook { namespace thrift { namespace test { namespace {
+namespace facebook::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // facebook::thrift::test
+}} // facebook::thrift::test
 namespace apache::thrift::detail::annotation {
 }

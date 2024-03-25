@@ -4643,7 +4643,7 @@ determineInvocationType:
 }
 
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 
 ::std::int32_t SimpleServiceSvNull::get_five() {
   return 0;
@@ -5314,4 +5314,4 @@ apache::thrift::ServiceRequestInfoMap SimpleServiceServiceInfoHolder::staticRequ
 
   return requestInfoMap;
 }
-}} // py3::simple
+} // py3::simple

@@ -7,7 +7,7 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class Foo;
 class LazyFoo;
 class OptionalFoo;
@@ -17,5 +17,5 @@ class LazyCppRef;
 class IndexedFoo;
 class OptionalIndexedFoo;
 class Empty;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare

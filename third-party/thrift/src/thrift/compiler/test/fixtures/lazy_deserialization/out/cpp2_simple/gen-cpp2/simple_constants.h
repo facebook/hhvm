@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types.h"
 
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 
 struct simple_constants {
 
@@ -26,4 +26,4 @@ struct simple_constants {
 
 };
 
-}}} // apache::thrift::test
+} // apache::thrift::test

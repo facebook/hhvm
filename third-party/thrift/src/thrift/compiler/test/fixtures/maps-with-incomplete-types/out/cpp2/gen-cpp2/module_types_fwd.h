@@ -7,8 +7,8 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace test {
+namespace apache::thrift::test {
 class A;
 class B;
-}}} // apache::thrift::test
+} // apache::thrift::test
 // END forward_declare

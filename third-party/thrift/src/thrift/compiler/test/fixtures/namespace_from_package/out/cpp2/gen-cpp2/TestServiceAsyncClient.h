@@ -16,9 +16,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 class TestService;
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module
 namespace apache::thrift {
 
 template <>
@@ -139,6 +139,6 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
 
 } // namespace apache::thrift
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 using TestServiceAsyncClient [[deprecated("Use apache::thrift::Client<TestService> instead")]] = ::apache::thrift::Client<TestService>;
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module

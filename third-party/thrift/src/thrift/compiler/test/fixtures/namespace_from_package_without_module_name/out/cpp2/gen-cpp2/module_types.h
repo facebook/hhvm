@@ -28,9 +28,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(MyInt);
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 class Foo;
-}} // test::namespace_from_package_without_module_name
+} // test::namespace_from_package_without_module_name
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -40,7 +40,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -197,4 +197,4 @@ unsigned long Foo::read(Protocol_* iprot) {
 }
 
 
-}} // test::namespace_from_package_without_module_name
+} // test::namespace_from_package_without_module_name

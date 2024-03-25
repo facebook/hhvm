@@ -833,7 +833,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 enum class enum1 {
   field0 = 0,
@@ -891,7 +891,7 @@ enum class enum_with_special_names {
 
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace std {
 template<> struct hash<::test_cpp2::cpp_reflection::enum1> :
@@ -1000,7 +1000,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 class union1;
 class union2;
 class union3;
@@ -1022,7 +1022,7 @@ class struct_with_special_names;
 class struct_with_indirections;
 class StructWithFieldAdapter;
 class UnionWithTypedefFieldAdapter;
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1032,7 +1032,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test_cpp2 { namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -12435,7 +12435,7 @@ unsigned long UnionWithTypedefFieldAdapter::read(Protocol_* iprot) {
 }
 
 
-}} // test_cpp2::cpp_reflection
+} // test_cpp2::cpp_reflection
 
 namespace apache { namespace thrift {
 

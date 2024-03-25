@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 
 struct module_constants {
 
@@ -18,4 +18,4 @@ struct module_constants {
 
 };
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

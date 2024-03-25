@@ -822,7 +822,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(intField);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 enum class MyEnumA {
   fieldA = 1,
@@ -916,7 +916,7 @@ enum class MyEnumB {
 
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace std {
 template<> struct hash<::some::valid::ns::MyEnumA> :
@@ -1025,7 +1025,7 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 class Empty;
 class ASimpleStruct;
 class ASimpleStructNoexcept;
@@ -1041,7 +1041,7 @@ class ComplexContainerStruct;
 class FloatStruct;
 class FloatUnion;
 class AllRequiredNoExceptMoveCtrStruct;
-}}} // some::valid::ns
+} // some::valid::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1079,7 +1079,7 @@ template<> struct equal_to<typename ::some::valid::ns::AnnotatedStruct> {
 };
 } // std
 // END hash_and_equal_to
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -9928,7 +9928,7 @@ unsigned long AllRequiredNoExceptMoveCtrStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // some::valid::ns
+} // some::valid::ns
 
 namespace apache { namespace thrift {
 

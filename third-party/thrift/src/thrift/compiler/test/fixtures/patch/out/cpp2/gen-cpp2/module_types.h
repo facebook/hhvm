@@ -1362,7 +1362,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(data);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 
 enum class MyEnum {
   MyValue0 = 0,
@@ -1370,7 +1370,7 @@ enum class MyEnum {
 
 
 
-}}} // test::fixtures::patch
+} // test::fixtures::patch
 
 namespace std {
 template<> struct hash<::test::fixtures::patch::MyEnum> :
@@ -1407,7 +1407,7 @@ template <> struct TEnumTraits<::test::fixtures::patch::MyEnum> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 class MyData;
 class MyDataWithCustomDefault;
 class InnerUnion;
@@ -1466,7 +1466,7 @@ class RefFieldsField7PatchStruct;
 class RefFieldsFieldPatchStruct;
 class RefFieldsEnsureStruct;
 class RefFieldsSafePatch;
-}}} // test::fixtures::patch
+} // test::fixtures::patch
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1520,7 +1520,7 @@ struct is_cpp_ref_field_optional<::test::fixtures::patch::RefFieldsPatchStruct,:
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -20968,7 +20968,7 @@ unsigned long RefFieldsSafePatch::read(Protocol_* iprot) {
 }
 
 
-}}} // test::fixtures::patch
+} // test::fixtures::patch
 
 namespace apache { namespace thrift {
 

@@ -24,7 +24,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 class MyService;
 class MyServiceAsyncProcessor;
 
@@ -33,7 +33,7 @@ class MyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations
 
 namespace apache::thrift {
 template <>
@@ -78,10 +78,10 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
-}}} // test::fixtures::basic-structured-annotations
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+} // test::fixtures::basic-structured-annotations
+namespace test::fixtures::basic-structured-annotations {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:
   void first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) override;
@@ -127,4 +127,4 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   ~MyServiceAsyncProcessor() override {}
 };
 
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

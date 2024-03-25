@@ -81,7 +81,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::empty_struct>::translate
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* empty_struct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/empty_struct";
@@ -133,7 +133,7 @@ template uint32_t empty_struct::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t empty_struct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -156,7 +156,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::decorated_struct>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* decorated_struct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/decorated_struct";
@@ -234,7 +234,7 @@ template uint32_t decorated_struct::serializedSize<>(apache::thrift::CompactProt
 template uint32_t decorated_struct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -257,7 +257,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ContainerStruct>::transl
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ContainerStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ContainerStruct";
@@ -441,7 +441,7 @@ template uint32_t ContainerStruct::serializedSize<>(apache::thrift::CompactProto
 template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -464,7 +464,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CppTypeStruct>::translat
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* CppTypeStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CppTypeStruct";
@@ -550,7 +550,7 @@ template uint32_t CppTypeStruct::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t CppTypeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -573,7 +573,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::VirtualStruct>::translat
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* VirtualStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/VirtualStruct";
@@ -645,7 +645,7 @@ template uint32_t VirtualStruct::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t VirtualStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -668,7 +668,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStructWithForwardRefEn
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* MyStructWithForwardRefEnum::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum";
@@ -731,7 +731,7 @@ template uint32_t MyStructWithForwardRefEnum::serializedSize<>(apache::thrift::C
 template uint32_t MyStructWithForwardRefEnum::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -754,7 +754,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNumeric>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* TrivialNumeric::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TrivialNumeric";
@@ -817,7 +817,7 @@ template uint32_t TrivialNumeric::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t TrivialNumeric::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -840,7 +840,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNestedWithDefault
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* TrivialNestedWithDefault::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault";
@@ -917,7 +917,7 @@ static_assert(
         ::apache::thrift::fixtures::types::TrivialNumeric>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -940,7 +940,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexString>::translat
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ComplexString::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ComplexString";
@@ -1032,7 +1032,7 @@ template uint32_t ComplexString::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t ComplexString::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1055,7 +1055,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexNestedWithDefault
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ComplexNestedWithDefault::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault";
@@ -1155,7 +1155,7 @@ static_assert(
         ::apache::thrift::fixtures::types::ComplexString>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1178,7 +1178,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPadding>::translateFi
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* MinPadding::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MinPadding";
@@ -1265,7 +1265,7 @@ template uint32_t MinPadding::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MinPadding::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1288,7 +1288,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPaddingWithCustomType
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* MinPaddingWithCustomType::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType";
@@ -1400,7 +1400,7 @@ template uint32_t MinPaddingWithCustomType::serializedSize<>(apache::thrift::Com
 template uint32_t MinPaddingWithCustomType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1423,7 +1423,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStruct>::translateFiel
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* MyStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyStruct";
@@ -1528,7 +1528,7 @@ static_assert(
         ::apache::thrift::fixtures::types::MyDataItem>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1551,7 +1551,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFi
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* MyDataItem::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/MyDataItem";
@@ -1597,7 +1597,7 @@ template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1620,7 +1620,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::Renamed>::translateField
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* Renamed::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/Renaming";
@@ -1679,7 +1679,7 @@ template uint32_t Renamed::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t Renamed::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1702,7 +1702,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AnnotatedTypes>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* AnnotatedTypes::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AnnotatedTypes";
@@ -1794,7 +1794,7 @@ template uint32_t AnnotatedTypes::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t AnnotatedTypes::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1817,7 +1817,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageRoot>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ForwardUsageRoot::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageRoot";
@@ -1933,7 +1933,7 @@ static_assert(
         ::apache::thrift::fixtures::types::ForwardUsageByRef>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -1956,7 +1956,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageStruct>::tra
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ForwardUsageStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageStruct";
@@ -2045,7 +2045,7 @@ static_assert(
         ::apache::thrift::fixtures::types::ForwardUsageRoot>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2068,7 +2068,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageByRef>::tran
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* ForwardUsageByRef::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/ForwardUsageByRef";
@@ -2157,7 +2157,7 @@ static_assert(
         ::apache::thrift::fixtures::types::ForwardUsageRoot>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2180,7 +2180,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMap>::translat
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* IncompleteMap::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteMap";
@@ -2272,7 +2272,7 @@ static_assert(
         ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2295,7 +2295,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMapDep>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* IncompleteMapDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteMapDep";
@@ -2347,7 +2347,7 @@ template uint32_t IncompleteMapDep::serializedSize<>(apache::thrift::CompactProt
 template uint32_t IncompleteMapDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2370,7 +2370,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMap>::translateF
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* CompleteMap::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteMap";
@@ -2462,7 +2462,7 @@ static_assert(
         std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2485,7 +2485,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMapDep>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* CompleteMapDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteMapDep";
@@ -2537,7 +2537,7 @@ template uint32_t CompleteMapDep::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t CompleteMapDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2560,7 +2560,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteList>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* IncompleteList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteList";
@@ -2652,7 +2652,7 @@ static_assert(
         ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2675,7 +2675,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteListDep>::tran
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* IncompleteListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/IncompleteListDep";
@@ -2727,7 +2727,7 @@ template uint32_t IncompleteListDep::serializedSize<>(apache::thrift::CompactPro
 template uint32_t IncompleteListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2750,7 +2750,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteList>::translate
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* CompleteList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteList";
@@ -2842,7 +2842,7 @@ static_assert(
         folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2865,7 +2865,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteListDep>::transl
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* CompleteListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/CompleteListDep";
@@ -2917,7 +2917,7 @@ template uint32_t CompleteListDep::serializedSize<>(apache::thrift::CompactProto
 template uint32_t CompleteListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -2940,7 +2940,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AdaptedList>::translateF
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* AdaptedList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AdaptedList";
@@ -3032,7 +3032,7 @@ static_assert(
         ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3055,7 +3055,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::AdaptedListDep>:
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
+namespace apache::thrift::fixtures::types {namespace detail {
 
 
 const char* AdaptedListDep::__fbthrift_thrift_uri() {
@@ -3143,7 +3143,7 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace detail
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3166,7 +3166,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::DependentAdaptedList>::t
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* DependentAdaptedList::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/DependentAdaptedList";
@@ -3258,7 +3258,7 @@ static_assert(
         ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>>,
     "inconsistent use of json option");
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3281,7 +3281,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::DependentAdapted
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
+namespace apache::thrift::fixtures::types {namespace detail {
 
 
 const char* DependentAdaptedListDep::__fbthrift_thrift_uri() {
@@ -3356,7 +3356,7 @@ template uint32_t DependentAdaptedListDep::serializedSizeZC<>(apache::thrift::Co
 
 
 } // namespace detail
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3379,7 +3379,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* AllocatorAware::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AllocatorAware";
@@ -3545,7 +3545,7 @@ template uint32_t AllocatorAware::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t AllocatorAware::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3568,7 +3568,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware2>::transl
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* AllocatorAware2::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AllocatorAware2";
@@ -3670,7 +3670,7 @@ template uint32_t AllocatorAware2::serializedSize<>(apache::thrift::CompactProto
 template uint32_t AllocatorAware2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3693,7 +3693,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::TypedefStruct>::translat
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* TypedefStruct::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/TypedefStruct";
@@ -3777,7 +3777,7 @@ template uint32_t TypedefStruct::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t TypedefStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {
@@ -3800,7 +3800,7 @@ void TccStructTraits<::apache::thrift::fixtures::types::StructWithDoubleUndersco
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 const char* StructWithDoubleUnderscores::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores";
@@ -3859,12 +3859,12 @@ template uint32_t StructWithDoubleUnderscores::serializedSize<>(apache::thrift::
 template uint32_t StructWithDoubleUnderscores::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
-namespace apache { namespace thrift { namespace fixtures { namespace types { namespace {
+namespace apache::thrift::fixtures::types { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int16_t, ::apache::thrift::fixtures::types::MinPaddingWithCustomType>();
 }
-}}}}} // apache::thrift::fixtures::types
+}} // apache::thrift::fixtures::types
 namespace apache::thrift::detail::annotation {
 }

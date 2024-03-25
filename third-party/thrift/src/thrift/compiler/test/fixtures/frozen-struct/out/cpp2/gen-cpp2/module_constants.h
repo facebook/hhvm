@@ -10,10 +10,10 @@
 
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_types.h"
 
-namespace some { namespace ns {
+namespace some::ns {
 
 struct module_constants {
 
 };
 
-}} // some::ns
+} // some::ns

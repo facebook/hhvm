@@ -7,7 +7,7 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace extra { namespace svc {
+namespace extra::svc {
 class containerStruct2;
-}} // extra::svc
+} // extra::svc
 // END forward_declare

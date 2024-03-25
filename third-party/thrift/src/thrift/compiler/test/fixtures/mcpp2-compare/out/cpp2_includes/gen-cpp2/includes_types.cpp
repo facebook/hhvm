@@ -49,7 +49,7 @@ void TccStructTraits<::a::different::ns::AStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 std::string_view AStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -108,7 +108,7 @@ template uint32_t AStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWr
 template uint32_t AStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-}}} // a::different::ns
+} // a::different::ns
 
 namespace apache {
 namespace thrift {
@@ -131,7 +131,7 @@ void TccStructTraits<::a::different::ns::AStructB>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace a { namespace different { namespace ns {
+namespace a::different::ns {
 
 std::string_view AStructB::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -211,11 +211,11 @@ static_assert(
         ::a::different::ns::AStruct>,
     "inconsistent use of json option");
 
-}}} // a::different::ns
+} // a::different::ns
 
-namespace a { namespace different { namespace ns { namespace {
+namespace a::different::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // a::different::ns
+}} // a::different::ns
 namespace apache::thrift::detail::annotation {
 }

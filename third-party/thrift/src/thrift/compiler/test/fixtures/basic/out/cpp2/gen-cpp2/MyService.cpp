@@ -1130,7 +1130,7 @@ determineInvocationType:
 }
 
 
-namespace test { namespace fixtures { namespace basic {
+namespace test::fixtures::basic {
 
 void MyServiceSvNull::ping() {
   return;
@@ -1321,4 +1321,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 
   return requestInfoMap;
 }
-}}} // test::fixtures::basic
+} // test::fixtures::basic

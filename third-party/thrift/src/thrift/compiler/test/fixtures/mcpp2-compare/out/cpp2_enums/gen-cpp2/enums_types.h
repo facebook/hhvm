@@ -25,7 +25,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 enum class AnEnumA {
   FIELDA = 0,
@@ -58,7 +58,7 @@ enum class AnEnumE {
 
 
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty
 
 namespace std {
 template<> struct hash<::facebook::ns::qwerty::AnEnumA> :
@@ -191,9 +191,9 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
 
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 class SomeStruct;
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -203,7 +203,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -359,4 +359,4 @@ unsigned long SomeStruct::read(Protocol_* iprot) {
 }
 
 
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

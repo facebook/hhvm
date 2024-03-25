@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ReturnService.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ReturnService.tcc"
 
-namespace some { namespace valid { namespace ns {
-}}} // some::valid::ns
+namespace some::valid::ns {
+} // some::valid::ns

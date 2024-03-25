@@ -336,7 +336,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(__field);
 } // namespace apache
 
 // BEGIN declare_enums
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 enum class has_bitwise_ops {
   none = 0,
@@ -393,7 +393,7 @@ enum class MyForwardRefEnum {
 
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 
 namespace std {
 template<> struct hash<::apache::thrift::fixtures::types::has_bitwise_ops> :
@@ -478,7 +478,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
 
 // END declare_enums
 // BEGIN forward_declare
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 class empty_struct;
 class decorated_struct;
 class ContainerStruct;
@@ -518,7 +518,7 @@ class AllocatorAware;
 class AllocatorAware2;
 class TypedefStruct;
 class StructWithDoubleUnderscores;
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -547,7 +547,7 @@ template<> struct equal_to<typename ::apache::thrift::fixtures::types::decorated
 };
 } // std
 // END hash_and_equal_to
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 using AdaptedListDep = detail::AdaptedListDep;
 
 using ::apache::thrift::detail::operator!=;
@@ -7314,4 +7314,4 @@ unsigned long StructWithDoubleUnderscores::read(Protocol_* iprot) {
 }
 
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

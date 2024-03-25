@@ -33,7 +33,7 @@ void TccStructTraits<::test::namespace_from_package::module::Foo>::translateFiel
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace namespace_from_package { namespace module {
+namespace test::namespace_from_package::module {
 
 const char* Foo::__fbthrift_thrift_uri() {
   return "test.dev/namespace_from_package/module/Foo";
@@ -92,11 +92,11 @@ template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter co
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::namespace_from_package::module
+} // test::namespace_from_package::module
 
-namespace test { namespace namespace_from_package { namespace module { namespace {
+namespace test::namespace_from_package::module { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // test::namespace_from_package::module
+}} // test::namespace_from_package::module
 namespace apache::thrift::detail::annotation {
 }

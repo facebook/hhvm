@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 class MyData;
 class MyDataWithCustomDefault;
 class InnerUnion;
@@ -68,11 +68,11 @@ class RefFieldsField7PatchStruct;
 class RefFieldsFieldPatchStruct;
 class RefFieldsEnsureStruct;
 class RefFieldsSafePatch;
-}}} // test::fixtures::patch
+} // test::fixtures::patch
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 enum class MyEnum;
-}}} // test::fixtures::patch
+} // test::fixtures::patch
 // END forward_declare_enums

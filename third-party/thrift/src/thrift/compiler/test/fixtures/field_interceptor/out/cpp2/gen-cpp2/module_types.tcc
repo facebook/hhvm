@@ -27,7 +27,7 @@ struct TccStructTraits<::facebook::thrift::test::InterceptedFields> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook { namespace thrift { namespace test {
+namespace facebook::thrift::test {
 
 template <class Protocol_>
 void InterceptedFields::readNoXfer(Protocol_* iprot) {
@@ -357,4 +357,4 @@ extern template uint32_t InterceptedFields::serializedSize<>(apache::thrift::Com
 extern template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // facebook::thrift::test
+} // facebook::thrift::test

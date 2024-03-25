@@ -81,7 +81,7 @@ void TccStructTraits<::test::fixtures::enumstrict::MyStruct>::translateFieldName
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -140,11 +140,11 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict
 
-namespace test { namespace fixtures { namespace enumstrict { namespace {
+namespace test::fixtures::enumstrict { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}}}} // test::fixtures::enumstrict
+}} // test::fixtures::enumstrict
 namespace apache::thrift::detail::annotation {
 }

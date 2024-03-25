@@ -10,6 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
-}}} // some::valid::ns
+} // some::valid::ns

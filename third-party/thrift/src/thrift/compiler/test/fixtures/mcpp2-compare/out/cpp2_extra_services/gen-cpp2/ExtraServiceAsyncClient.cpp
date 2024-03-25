@@ -9,7 +9,7 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace extra { namespace svc {
+namespace extra::svc {
 typedef apache::thrift::ThriftPresult<false> ExtraService_simple_function_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> ExtraService_simple_function_presult;
 typedef apache::thrift::ThriftPresult<false> ExtraService_throws_function_pargs;
@@ -23,7 +23,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int64_t>*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::string>>, ::std::set<::std::vector<::std::string>>*>> ExtraService_oneway_void_ret_map_setlist_param_pargs;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::some::valid::ns::MyStruct*>> ExtraService_oneway_void_ret_struct_param_pargs;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>*>> ExtraService_oneway_void_ret_listunion_param_pargs;
-}} // extra::svc
+} // extra::svc
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::extra::svc::ExtraService>::simple_functionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

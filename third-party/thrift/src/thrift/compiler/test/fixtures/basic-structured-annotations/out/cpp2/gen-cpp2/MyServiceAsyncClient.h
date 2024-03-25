@@ -18,9 +18,9 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 class MyService;
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations
 namespace apache::thrift {
 
 template <>
@@ -241,6 +241,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
 
 } // namespace apache::thrift
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 using MyServiceAsyncClient [[deprecated("Use apache::thrift::Client<MyService> instead")]] = ::apache::thrift::Client<MyService>;
-}}} // test::fixtures::basic-structured-annotations
+} // test::fixtures::basic-structured-annotations

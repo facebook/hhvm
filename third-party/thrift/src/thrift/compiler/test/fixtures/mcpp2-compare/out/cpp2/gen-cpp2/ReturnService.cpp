@@ -1703,7 +1703,7 @@ determineInvocationType:
 }
 
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 
 bool ReturnServiceSvNull::boolReturn() {
   return 0;
@@ -2036,4 +2036,4 @@ apache::thrift::ServiceRequestInfoMap ReturnServiceServiceInfoHolder::staticRequ
 
   return requestInfoMap;
 }
-}}} // some::valid::ns
+} // some::valid::ns

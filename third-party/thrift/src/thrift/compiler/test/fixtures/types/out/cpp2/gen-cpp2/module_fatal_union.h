@@ -16,10 +16,10 @@
 
 #include <type_traits>
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
+namespace apache::thrift::fixtures::types {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 } // __fbthrift_refl
 
-}}}} // apache::thrift::fixtures::types
+} // apache::thrift::fixtures::types

@@ -426,7 +426,7 @@ struct TccStructTraits<::test::fixtures::patch::RefFieldsSafePatch> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace patch {
+namespace test::fixtures::patch {
 
 template <class Protocol_>
 void MyData::readNoXfer(Protocol_* iprot) {
@@ -16808,4 +16808,4 @@ extern template uint32_t RefFieldsSafePatch::serializedSize<>(apache::thrift::Co
 extern template uint32_t RefFieldsSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::patch
+} // test::fixtures::patch

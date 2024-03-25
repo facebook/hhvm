@@ -195,7 +195,7 @@ struct TccStructTraits<::test::fixtures::python_capi::MyDataItemSafePatch> {
 } // namespace thrift
 } // namespace apache
 
-namespace test { namespace fixtures { namespace python_capi {
+namespace test::fixtures::python_capi {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -7397,4 +7397,4 @@ extern template uint32_t MyDataItemSafePatch::serializedSize<>(apache::thrift::C
 extern template uint32_t MyDataItemSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}}} // test::fixtures::python_capi
+} // test::fixtures::python_capi

@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace test { namespace fixtures { namespace enumstrict {
+namespace test::fixtures::enumstrict {
 
 
 ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& module_constants::enumNames() {
@@ -19,4 +19,4 @@ namespace test { namespace fixtures { namespace enumstrict {
   return *instance;
 }
 
-}}} // test::fixtures::enumstrict
+} // test::fixtures::enumstrict

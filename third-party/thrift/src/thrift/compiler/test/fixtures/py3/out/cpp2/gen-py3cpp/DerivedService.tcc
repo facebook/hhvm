@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace py3 { namespace simple {
+namespace py3::simple {
 typedef apache::thrift::ThriftPresult<false> DerivedService_get_six_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> DerivedService_get_six_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -86,4 +86,4 @@ void DerivedServiceAsyncProcessor::throw_wrapped_get_six(apache::thrift::Respons
 }
 
 
-}} // py3::simple
+} // py3::simple

@@ -13,7 +13,7 @@
 
 #include <type_traits>
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -229,4 +229,4 @@ FATAL_REGISTER_ENUM_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(2060347478177142664ull)
   >
 );
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

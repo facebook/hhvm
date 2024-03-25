@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace some { namespace valid { namespace ns {
+namespace some::valid::ns {
 typedef apache::thrift::ThriftPresult<false> ReturnService_noReturn_pargs;
 typedef apache::thrift::ThriftPresult<true> ReturnService_noReturn_presult;
 typedef apache::thrift::ThriftPresult<false> ReturnService_boolReturn_pargs;
@@ -1586,4 +1586,4 @@ void ReturnServiceAsyncProcessor::throw_wrapped_readData(apache::thrift::Respons
 }
 
 
-}}} // some::valid::ns
+} // some::valid::ns

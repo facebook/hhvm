@@ -14,7 +14,7 @@
 #include <fatal/type/traits.h>
 #include <fatal/type/list.h>
 
-namespace facebook { namespace ns { namespace qwerty {
+namespace facebook::ns::qwerty {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -64,4 +64,4 @@ class SomeStruct_struct_traits {
 } // __fbthrift_refl
 
 THRIFT_REGISTER_STRUCT_TRAITS(SomeStruct, __fbthrift_refl::SomeStruct_struct_traits);
-}}} // facebook::ns::qwerty
+} // facebook::ns::qwerty

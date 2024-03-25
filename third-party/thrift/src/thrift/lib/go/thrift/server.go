@@ -20,7 +20,6 @@ import "context"
 
 // Server is a thrift server
 type Server interface {
-	ProcessorFactoryContext() ProcessorFactoryContext
 	ServerTransport() ServerTransport
 	// Serve starts the server
 	Serve() error

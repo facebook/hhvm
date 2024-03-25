@@ -36,7 +36,7 @@ var ErrServerClosed = errors.New("thrift: Server closed")
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type SimpleServer struct {
-	processorFactoryContext      ProcessorFactoryContext
+	processorContext             ProcessorContext
 	serverTransport              ServerTransport
 	newProtocol                  func(Transport) Protocol
 	configurableRequestProcessor func(ctx context.Context, client Transport) error
@@ -49,10 +49,10 @@ func NewSimpleServer(processor ProcessorContext, serverTransport ServerTransport
 		panic(fmt.Sprintf("SimpleServer only supports Header Transport and not %s", transportType))
 	}
 	return &SimpleServer{
-		processorFactoryContext: NewProcessorFactoryContext(processor),
-		serverTransport:         serverTransport,
-		newProtocol:             NewHeaderProtocol,
-		ServerOptions:           simpleServerOptions(options...),
+		processorContext: processor,
+		serverTransport:  serverTransport,
+		newProtocol:      NewHeaderProtocol,
+		ServerOptions:    simpleServerOptions(options...),
 	}
 }
 
@@ -62,11 +62,6 @@ func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
 		option(opts)
 	}
 	return opts
-}
-
-// ProcessorFactoryContext returns the processor factory that supports contexts
-func (p *SimpleServer) ProcessorFactoryContext() ProcessorFactoryContext {
-	return p.processorFactoryContext
 }
 
 // ServerTransport returns the server transport
@@ -110,7 +105,7 @@ func (p *SimpleServer) AcceptLoopContext(ctx context.Context) error {
 }
 
 func (p *SimpleServer) addConnInfo(ctx context.Context, client Transport) context.Context {
-	if p.processorFactoryContext == nil {
+	if p.processorContext == nil {
 		return ctx
 	}
 	return WithConnInfo(ctx, client)
@@ -153,7 +148,7 @@ func (p *SimpleServer) processRequests(ctx context.Context, client Transport) er
 		return p.configurableRequestProcessor(ctx, client)
 	}
 
-	processor := p.processorFactoryContext.GetProcessorContext(client)
+	processor := p.processorContext
 
 	protocol := p.newProtocol(client)
 

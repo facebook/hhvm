@@ -23,7 +23,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
         "line": "58",
-        "column": "1",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
         "bodystart": "58",
         "bodyend": "82"

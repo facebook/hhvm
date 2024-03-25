@@ -4,31 +4,31 @@
   "compoundname_html": "apache::thrift::op::detail::CreateDefault::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1a7e5f2ccd54f49909dbca9ab9f9ba456d",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
       "prot": "public",
       "static": "no",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "const auto &amp;",
-      "definition_html": "const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+      "type_html": "FOLLY_EXPORT const auto &amp;",
+      "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
       "argsstring_html": "() const",
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "159",
-        "column": "1",
+        "line": "156",
+        "column": "27",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "159",
-        "bodyend": "162"
+        "bodystart": "156",
+        "bodyend": "166"
       },
       "definition": {
-        "simple_html": "const auto&amp; operator()() const",
-        "simple_raw": "const auto& operator()() const",
-        "detailed_html": "inline const auto&amp; operator()() const",
-        "detailed_raw": "inline const auto& operator()() const",
-        "original_definition_html": "const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+        "simple_html": "FOLLY_EXPORT const auto&amp; operator()() const",
+        "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
+        "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
+        "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
+        "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",

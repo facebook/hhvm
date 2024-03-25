@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "430",
-        "column": "1",
+        "line": "472",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "430",
-        "bodyend": "443"
+        "bodystart": "472",
+        "bodyend": "485"
       },
       "definition": {
         "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",

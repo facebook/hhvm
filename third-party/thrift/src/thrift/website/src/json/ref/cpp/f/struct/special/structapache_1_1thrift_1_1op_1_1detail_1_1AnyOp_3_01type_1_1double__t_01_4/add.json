@@ -28,7 +28,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "50",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "50",
         "bodyend": "50"
@@ -71,7 +71,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "51",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "51",
         "bodyend": "51"

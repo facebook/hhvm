@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4_1aafe27774cabe98cbcf168a2082756bf0",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "275",
-        "column": "1",
+        "line": "270",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "275",
-        "bodyend": "277"
+        "bodystart": "270",
+        "bodyend": "272"
       },
       "definition": {
         "simple_html": "constexpr void operator()(type::native_type&lt;Tag&gt;&amp; value) const",

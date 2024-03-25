@@ -4,6 +4,44 @@
   "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
   "functions": [
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1a5b3a193e25bd155fd486582b36fedd44",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
+      "argsstring_html": "()",
+      "name_html": "ensure",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "126",
+        "column": "10",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "126",
+        "bodyend": "128"
+      },
+      "definition": {
+        "simple_html": "template &lt;class&gt;\nvoid ensure()",
+        "simple_raw": "template <class>\nvoid ensure()",
+        "detailed_html": "template &lt;class&gt;\ninline void ensure()",
+        "detailed_raw": "template <class>\ninline void ensure()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier/ensure",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure"
+    },
+    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier_1ae1706d3f926f9fbb8cd386d9925eb363",
       "prot": "public",
       "static": "no",
@@ -31,11 +69,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "116",
-        "column": "1",
+        "line": "131",
+        "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "116",
-        "bodyend": "120"
+        "bodystart": "131",
+        "bodyend": "135"
       },
       "definition": {
         "simple_html": "template &lt;class Id, class Field&gt;\nvoid ensure(const Field&amp; def)",

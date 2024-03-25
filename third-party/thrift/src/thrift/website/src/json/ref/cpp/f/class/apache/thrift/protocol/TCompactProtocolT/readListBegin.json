@@ -32,7 +32,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "219",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol-inl.h",
         "bodystart": "546",
         "bodyend": "570"

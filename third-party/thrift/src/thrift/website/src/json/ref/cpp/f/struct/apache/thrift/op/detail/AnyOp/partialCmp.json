@@ -33,7 +33,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -44,54 +44,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -129,7 +81,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -140,54 +92,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -225,7 +129,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -236,54 +140,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -321,7 +177,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -332,54 +188,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -417,7 +225,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -428,54 +236,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -513,7 +273,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -524,54 +284,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -609,7 +321,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -620,54 +332,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -705,7 +369,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -716,54 +380,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -801,7 +417,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -812,54 +428,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -897,7 +465,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -908,54 +476,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -993,7 +513,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1004,54 +524,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1089,7 +561,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1100,54 +572,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1185,7 +609,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1196,54 +620,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1281,7 +657,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1292,54 +668,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1377,7 +705,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1388,54 +716,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1473,7 +753,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1484,54 +764,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1569,7 +801,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1580,54 +812,6 @@
         "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
         "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
         "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
-      "prot": "private",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename UTag"
-        }
-      ],
-      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
-      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
-      "name_html": "partialCmp",
-      "param": [
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "line": "102",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-        "bodystart": "102",
-        "bodyend": "105"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
-        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
-        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1665,7 +849,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -1713,7 +897,823 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "102",
-        "column": "1",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "bodystart": "102",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename UTag&gt;\nstatic if_not_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
+        "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
+        "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
+        "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
+        "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::partialCmp"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename UTag"
+        }
+      ],
+      "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
+      "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
+      "name_html": "partialCmp",
+      "param": [
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+        "line": "102",
+        "column": "28",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "102",
         "bodyend": "105"

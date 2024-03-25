@@ -55,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "317",
-        "column": "1",
+        "line": "339",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "317",
-        "bodyend": "329"
+        "bodystart": "339",
+        "bodyend": "351"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nuint32_t operator()(Protocol&amp; prot, const MapType&amp; map) const",
@@ -75,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "315",
+    "line": "337",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "315",
-    "bodyend": "330"
+    "bodystart": "337",
+    "bodyend": "352"
   },
   "namespacednames_html": [
     "apache",
@@ -96,7 +96,6 @@
   "declaration_html": "template &lt;\n  bool ZeroCopy,\n  typename Key,\n  typename Value\n&gt; struct SerializedSize&lt; ZeroCopy, type::map&lt; Key, Value &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1map_3_01Key_00_01Value_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1map_3_01Key_00_01Value_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -138,11 +137,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "317",
-                "column": "1",
+                "line": "339",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "317",
-                "bodyend": "329"
+                "bodystart": "339",
+                "bodyend": "351"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nuint32_t operator()(Protocol&amp; prot, const MapType&amp; map) const",

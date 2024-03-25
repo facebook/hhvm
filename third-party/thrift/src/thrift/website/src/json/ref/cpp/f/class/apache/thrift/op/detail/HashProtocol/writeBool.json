@@ -24,7 +24,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "143",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "143",
         "bodyend": "143"

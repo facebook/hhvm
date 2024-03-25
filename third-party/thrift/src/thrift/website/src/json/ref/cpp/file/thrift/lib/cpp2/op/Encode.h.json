@@ -5,6 +5,10 @@
   "compoundname_html": "Encode.h",
   "includes": [
     {
+      "local": "no",
+      "text_html": "thrift/lib/cpp/protocol/TType.h"
+    },
+    {
       "refid": "detail_2Encode_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Encode.h"
@@ -31,9 +35,10 @@
   "href": "/ref/cpp/thrift/lib/cpp2/op/Encode.h",
   "free_vars": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a01fba272953f4ccc2d11fb514a828e75",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a002aeae5d4530e0865935e7e2f6d1f16",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "mutable": "no",
       "tparams": [
         {
@@ -45,15 +50,15 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/SerializedSize\">detail::SerializedSize</a>&lt; ZeroCopy, Tag &gt;",
-      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::SerializedSize&lt;ZeroCopy, Tag&gt; apache::thrift::op::serialized_size",
+      "type_html": "constexpr <code>detail::SerializedSize</code>&lt; ZeroCopy, Tag &gt;",
+      "definition_html": "constexpr detail::SerializedSize&lt;ZeroCopy, Tag&gt; apache::thrift::op::serialized_size",
       "argsstring_html": "",
       "name_html": "serialized_size",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "line": "29",
-        "column": "1",
+        "column": "41",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "29",
         "bodyend": "-1"
@@ -63,24 +68,25 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1ac1b6da48afc94c116c49f14a1001cde5",
+      "refid": "namespaceapache_1_1thrift_1_1op_1ac25df06ef544948240579888a88821fb",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "mutable": "no",
       "tparams": [
         {
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Encode\">detail::Encode</a>&lt; Tag &gt;",
-      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Encode&lt;Tag&gt; apache::thrift::op::encode",
+      "type_html": "constexpr <code>detail::Encode</code>&lt; Tag &gt;",
+      "definition_html": "constexpr detail::Encode&lt;Tag&gt; apache::thrift::op::encode",
       "argsstring_html": "",
       "name_html": "encode",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "line": "35",
-        "column": "1",
+        "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "35",
         "bodyend": "-1"
@@ -90,30 +96,56 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a9ab07eb6040609293bde58bcaeafa1a0",
+      "refid": "namespaceapache_1_1thrift_1_1op_1af940719fbfa005cd4a5a968ac450063c",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "mutable": "no",
       "tparams": [
         {
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Decode\">detail::Decode</a>&lt; Tag &gt;",
-      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Decode&lt;Tag&gt; apache::thrift::op::decode",
+      "type_html": "constexpr <code>detail::Decode</code>&lt; Tag &gt;",
+      "definition_html": "constexpr detail::Decode&lt;Tag&gt; apache::thrift::op::decode",
       "argsstring_html": "",
       "name_html": "decode",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "line": "41",
-        "column": "1",
+        "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "41",
         "bodyend": "-1"
       },
       "description": {
         "detailed_html": "<p>Decodes the value from the given protocol using the type tag. This handles adapted type. For example: decode&lt;type::int16_t&gt;(prot, i); // decode to variable i </p>"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ae6713759a4415b755cb4cb2f2a395b8d",
+      "prot": "public",
+      "static": "no",
+      "constexpr": "yes",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename Tag"
+        }
+      ],
+      "type_html": "constexpr apache::thrift::protocol::TType",
+      "definition_html": "constexpr apache::thrift::protocol::TType apache::thrift::op::typeTagToTType",
+      "argsstring_html": "",
+      "name_html": "typeTagToTType",
+      "initializer_html": "=\n    detail::typeTagToTType&lt;Tag&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
+        "line": "45",
+        "column": "50",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
+        "bodystart": "45",
+        "bodyend": "-1"
       }
     }
   ],

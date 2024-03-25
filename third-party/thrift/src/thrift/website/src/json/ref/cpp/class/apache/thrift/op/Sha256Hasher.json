@@ -25,7 +25,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "34",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "34",
         "bodyend": "34"
@@ -56,7 +56,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "35",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "35",
         "bodyend": "39"
@@ -76,6 +76,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1ac9cc35b39c2275f266dde945b68c2263",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
@@ -98,7 +99,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "42",
-        "column": "1",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "42",
         "bodyend": "46"
@@ -135,7 +136,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "47",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "47",
         "bodyend": "51"
@@ -172,7 +173,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "52",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "52",
         "bodyend": "52"
@@ -209,7 +210,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "53",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "53",
         "bodyend": "57"
@@ -240,7 +241,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "59",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "59",
         "bodyend": "63"
@@ -277,7 +278,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "65",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "65",
         "bodyend": "71"
@@ -308,7 +309,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "74",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "74",
         "bodyend": "74"
@@ -354,7 +355,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "76",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "76",
         "bodyend": "-1"
@@ -372,7 +373,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "77",
-        "column": "1",
+        "column": "35",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "77",
         "bodyend": "-1"
@@ -408,7 +409,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "34",
-                "column": "1",
+                "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "34",
                 "bodyend": "34"
@@ -456,7 +457,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "35",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "35",
                 "bodyend": "39"
@@ -492,6 +493,7 @@
               "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1ac9cc35b39c2275f266dde945b68c2263",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "no",
               "explicit": "no",
               "inline": "yes",
@@ -514,7 +516,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "42",
-                "column": "1",
+                "column": "30",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "42",
                 "bodyend": "46"
@@ -553,7 +555,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "47",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "47",
                 "bodyend": "51"
@@ -592,7 +594,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "52",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "52",
                 "bodyend": "52"
@@ -631,7 +633,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "53",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "53",
                 "bodyend": "57"
@@ -678,7 +680,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "59",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "59",
                 "bodyend": "63"
@@ -731,7 +733,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "65",
-                "column": "1",
+                "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "65",
                 "bodyend": "71"
@@ -778,7 +780,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "line": "74",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
                 "bodystart": "74",
                 "bodyend": "74"

@@ -23,7 +23,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "line": "54",
-        "column": "1",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "bodystart": "54",
         "bodyend": "54"
@@ -62,7 +62,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "44",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -101,7 +101,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "44",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -140,7 +140,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "44",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -179,7 +179,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "44",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -218,7 +218,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "44",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -256,7 +256,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "line": "177",
-        "column": "1",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "bodystart": "177",
         "bodyend": "177"

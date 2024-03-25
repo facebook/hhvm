@@ -22,11 +22,11 @@
       "name_html": "IsEmpty",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "89",
-        "column": "1",
+        "line": "88",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "89",
-        "bodyend": "91"
+        "bodystart": "88",
+        "bodyend": "90"
       },
       "definition": {
         "simple_html": "template &lt;typename Tag&gt;\nauto IsEmpty()",

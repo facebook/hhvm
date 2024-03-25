@@ -4,6 +4,14 @@
   "language": "C++",
   "prot": "public",
   "compoundname_html": "apache::thrift::op::detail::ListIdenticalTo",
+  "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1list_3_01VTag_01_4_01_4",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::IdenticalTo&lt; type::list&lt; VTag &gt; &gt;"
+    }
+  ],
   "includes": {
     "refid": "detail_2Compare_8h",
     "local": "no",
@@ -11,20 +19,14 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "VTag",
-      "defname_html": "VTag"
+      "type_html": "typename VTag"
     },
     {
-      "type_html": "typename",
-      "declname_html": "Tag",
-      "defname_html": "Tag",
+      "type_html": "typename Tag",
       "defval_html": "type::list&lt;VTag&gt;"
     },
     {
-      "type_html": "typename",
-      "declname_html": "T",
-      "defname_html": "T",
+      "type_html": "typename T",
       "defval_html": "type::native_type&lt;Tag&gt;"
     }
   ],
@@ -53,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "408",
-        "column": "1",
+        "line": "438",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "408",
-        "bodyend": "413"
+        "bodystart": "438",
+        "bodyend": "443"
       },
       "definition": {
         "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",
@@ -73,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "407",
+    "line": "437",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "407",
-    "bodyend": "417"
+    "bodystart": "437",
+    "bodyend": "447"
   },
   "namespacednames_html": [
     "apache",
@@ -100,10 +102,10 @@
       "name_html": "cmp",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "416",
-        "column": "1",
+        "line": "446",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "416",
+        "bodystart": "446",
         "bodyend": "-1"
       }
     }
@@ -146,11 +148,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "408",
-                "column": "1",
+                "line": "438",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "408",
-                "bodyend": "413"
+                "bodystart": "438",
+                "bodyend": "443"
               },
               "definition": {
                 "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",

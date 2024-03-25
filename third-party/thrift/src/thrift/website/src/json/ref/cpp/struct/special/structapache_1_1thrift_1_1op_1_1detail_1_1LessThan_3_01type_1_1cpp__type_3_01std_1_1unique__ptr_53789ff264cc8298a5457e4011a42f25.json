@@ -16,7 +16,7 @@
     {
       "prot": "public",
       "virtual": "non-virtual",
-      "text_html": "IOBufLess"
+      "text_html": "folly::IOBufLess"
     }
   ],
   "includes": {
@@ -34,11 +34,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "308",
+    "line": "310",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "305",
-    "bodyend": "308"
+    "bodystart": "313",
+    "bodyend": "313"
   },
   "namespacednames_html": [
     "apache",

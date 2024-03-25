@@ -23,11 +23,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2065",
-        "column": "1",
+        "line": "2050",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2065",
-        "bodyend": "2068"
+        "bodystart": "2050",
+        "bodyend": "2053"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
@@ -62,11 +62,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2071",
-        "column": "1",
+        "line": "2056",
+        "column": "37",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2071",
-        "bodyend": "2074"
+        "bodystart": "2056",
+        "bodyend": "2059"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
@@ -95,11 +95,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2076",
-        "column": "1",
+        "line": "2061",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2076",
-        "bodyend": "2079"
+        "bodystart": "2061",
+        "bodyend": "2064"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",

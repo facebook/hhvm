@@ -52,11 +52,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "99",
-        "column": "1",
+        "line": "98",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "99",
-        "bodyend": "124"
+        "bodystart": "98",
+        "bodyend": "123"
       },
       "definition": {
         "simple_html": "template &lt;\n    typename P,\n    typename T1 = typename P::value_type,\n    typename T2 = T1,\n    typename T3 = T2&gt;\nvoid expectPatch(\n    P patch, const T1&amp; actual, const T2&amp; expected1, const T3&amp; expected2)",
@@ -106,11 +106,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "127",
-        "column": "1",
+        "line": "126",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "127",
-        "bodyend": "166"
+        "bodystart": "126",
+        "bodyend": "165"
       },
       "definition": {
         "simple_html": "template &lt;typename P&gt;\nvoid expectPatch(\n    P patch,\n    const folly::IOBuf&amp; actual,\n    const folly::IOBuf&amp; expected1,\n    const folly::IOBuf&amp; expected2)",
@@ -164,11 +164,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "169",
-        "column": "1",
+        "line": "168",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "169",
-        "bodyend": "171"
+        "bodystart": "168",
+        "bodyend": "170"
       },
       "definition": {
         "simple_html": "template &lt;typename P, typename T1 = typename P::value_type, typename T2 = T1&gt;\nvoid expectPatch(P patch, const T1&amp; actual, const T2&amp; expected)",

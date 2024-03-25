@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE bool",
       "definition_html": "FOLLY_ERASE bool apache::thrift::field_ref&lt; T &gt;::is_set",
@@ -17,11 +18,11 @@
       "name_html": "is_set",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "335",
-        "column": "1",
+        "line": "328",
+        "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "335",
-        "bodyend": "335"
+        "bodystart": "328",
+        "bodyend": "328"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool is_set() const",

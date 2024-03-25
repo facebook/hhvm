@@ -18,6 +18,11 @@
       "text_html": "thrift/lib/cpp2/op/Clear.h"
     },
     {
+      "refid": "Create_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Create.h"
+    },
+    {
       "refid": "Get_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/Get.h"
@@ -26,6 +31,10 @@
       "refid": "BasePatch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/BasePatch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Field.h"
     },
     {
       "local": "no",
@@ -38,29 +47,46 @@
   ],
   "innerclass": [
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1FieldIdListToSetAdapter",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::FieldIdListToSetAdapter",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/FieldIdListToSetAdapter",
+      "is_transitive_innerclass": false
+    },
+    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::FieldPatch"
+      "text_html": "apache::thrift::op::detail::FieldPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::BaseEnsurePatch"
+      "text_html": "apache::thrift::op::detail::BaseEnsurePatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseEnsurePatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1_1Applier",
       "prot": "private",
-      "text_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier"
+      "text_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/BaseEnsurePatch/Applier",
+      "is_transitive_innerclass": true
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::StructPatch"
+      "text_html": "apache::thrift::op::detail::StructPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/StructPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::UnionPatch"
+      "text_html": "apache::thrift::op::detail::UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

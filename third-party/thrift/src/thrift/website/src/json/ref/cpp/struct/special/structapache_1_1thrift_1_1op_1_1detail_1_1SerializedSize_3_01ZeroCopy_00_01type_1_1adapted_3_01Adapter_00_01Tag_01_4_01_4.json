@@ -55,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "348",
-        "column": "1",
+        "line": "371",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "348",
-        "bodyend": "350"
+        "bodystart": "371",
+        "bodyend": "382"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
@@ -75,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "346",
+    "line": "369",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "346",
-    "bodyend": "351"
+    "bodystart": "369",
+    "bodyend": "383"
   },
   "namespacednames_html": [
     "apache",
@@ -96,7 +96,6 @@
   "declaration_html": "template &lt;\n  bool ZeroCopy,\n  typename Adapter,\n  typename Tag\n&gt; struct SerializedSize&lt; ZeroCopy, type::adapted&lt; Adapter, Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -138,11 +137,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "348",
-                "column": "1",
+                "line": "371",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "348",
-                "bodyend": "350"
+                "bodystart": "371",
+                "bodyend": "382"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",

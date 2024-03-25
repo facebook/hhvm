@@ -4,6 +4,14 @@
   "language": "C++",
   "prot": "public",
   "compoundname_html": "apache::thrift::op::detail::MapEncode",
+  "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::Encode&lt; type::map&lt; Key, Value &gt; &gt;"
+    }
+  ],
   "includes": {
     "refid": "detail_2Encode_8h",
     "local": "no",
@@ -11,25 +19,15 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "Key",
-      "defname_html": "Key"
+      "type_html": "typename Key"
     },
     {
-      "type_html": "typename",
-      "declname_html": "Value",
-      "defname_html": "Value"
-    },
-    {
-      "type_html": "template&lt; class... &gt; class",
-      "declname_html": "EncodeImpl",
-      "defname_html": "EncodeImpl",
-      "defval_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Encode\">Encode</a>"
+      "type_html": "typename Value"
     }
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a6320fb7f407373ee1279dcd216f97a51",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -45,7 +43,7 @@
         }
       ],
       "type_html": "uint32_t",
-      "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+      "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
       "name_html": "operator()",
       "param": [
@@ -60,18 +58,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "507",
-        "column": "1",
+        "line": "630",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "507",
-        "bodyend": "519"
+        "bodystart": "630",
+        "bodyend": "642"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
         "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
         "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
         "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
-        "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+        "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
@@ -80,11 +78,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "505",
+    "line": "628",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "505",
-    "bodyend": "520"
+    "bodystart": "628",
+    "bodyend": "643"
   },
   "namespacednames_html": [
     "apache",
@@ -97,8 +95,8 @@
   "types": [],
   "members": [],
   "friends": [],
-  "declaration_raw": "template <\n  typename Key,\n  typename Value,\n  template< class... > class EncodeImpl = Encode\n> struct MapEncode;",
-  "declaration_html": "template &lt;\n  typename Key,\n  typename Value,\n  template&lt; class... &gt; class EncodeImpl = Encode\n&gt; struct MapEncode;",
+  "declaration_raw": "template <\n  typename Key,\n  typename Value\n> struct MapEncode;",
+  "declaration_html": "template &lt;\n  typename Key,\n  typename Value\n&gt; struct MapEncode;",
   "filepath": "struct/apache/thrift/op/detail/MapEncode",
   "href": "/ref/cpp/struct/apache/thrift/op/detail/MapEncode",
   "overloadgroups": [
@@ -111,7 +109,7 @@
           "compoundname_html": "apache::thrift::op::detail::MapEncode::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a6320fb7f407373ee1279dcd216f97a51",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -127,7 +125,7 @@
                 }
               ],
               "type_html": "uint32_t",
-              "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+              "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
               "name_html": "operator()",
               "param": [
@@ -142,18 +140,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "507",
-                "column": "1",
+                "line": "630",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "507",
-                "bodyend": "519"
+                "bodystart": "630",
+                "bodyend": "642"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
                 "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
                 "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
                 "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
-                "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
                 "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",

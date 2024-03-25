@@ -57,4 +57,4 @@ Dynamic Patch
   cpp/file/thrift/lib/cpp2/protocol/Patch.h
 EOTOC
 )
-python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/cpp_api_toc.json
+python3 ../../fbcref/docgen/tocgen.py "$toc" > src/json/cpp_api_toc.json

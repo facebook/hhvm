@@ -19,10 +19,10 @@
   "tparams": [],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
-    "line": "47",
+    "line": "46",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
-    "bodystart": "46",
+    "bodystart": "47",
     "bodyend": "47"
   },
   "namespacednames_html": [
@@ -41,7 +41,6 @@
   "declaration_html": "template &lt;&gt; struct ProtocolSelector&lt; type::StandardProtocol::Json &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Json_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Json_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector",
   "overloadgroups": [],
   "free_overloadgroups": []
 }

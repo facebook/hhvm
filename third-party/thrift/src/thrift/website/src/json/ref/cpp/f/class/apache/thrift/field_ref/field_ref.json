@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE",
       "definition_html": "FOLLY_ERASE apache::thrift::field_ref&lt; T &gt;::field_ref",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "281",
-        "column": "1",
+        "line": "274",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "281",
-        "bodyend": "285"
+        "bodystart": "274",
+        "bodyend": "278"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE field_ref(\n    reference_type value,\n    typename BitRef::Isset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -62,6 +63,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE",
       "definition_html": "FOLLY_ERASE apache::thrift::field_ref&lt; T &gt;::field_ref",
@@ -84,11 +86,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "288",
-        "column": "1",
+        "line": "281",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "288",
-        "bodyend": "292"
+        "bodystart": "281",
+        "bodyend": "285"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE field_ref(\n    reference_type value,\n    typename BitRef::AtomicIsset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -114,6 +116,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -136,11 +139,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "295",
-        "column": "1",
+        "line": "288",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "295",
-        "bodyend": "296"
+        "bodystart": "288",
+        "bodyend": "289"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE field_ref(const field_ref&lt;U&gt;&amp; other)",

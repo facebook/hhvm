@@ -34,8 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "80",
-        "column": "1"
+        "line": "90",
+        "column": "17",
+        "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "declline": "90",
+        "declcolumn": "17"
       },
       "definition": {
         "simple_html": "template &lt;type::StandardProtocol Protocol&gt;\nstd::unique_ptr&lt;folly::IOBuf&gt; applyPatchToSerializedData(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",

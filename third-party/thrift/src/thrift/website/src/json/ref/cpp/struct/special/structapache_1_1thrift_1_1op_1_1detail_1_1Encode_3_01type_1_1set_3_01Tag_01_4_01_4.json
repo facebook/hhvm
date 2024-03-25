@@ -26,11 +26,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "499",
+    "line": "625",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "499",
-    "bodyend": "499"
+    "bodystart": "625",
+    "bodyend": "625"
   },
   "namespacednames_html": [
     "apache",
@@ -48,7 +48,6 @@
   "declaration_html": "template &lt; typename Tag &gt;\nstruct Encode&lt; type::set&lt; Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1set_3_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1set_3_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -59,7 +58,7 @@
           "compoundname_html": "apache::thrift::op::detail::Encode&lt; type::set&lt; Tag &gt; &gt;::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode_1a4f99dcf686bd75650b06ac8ce13a0f54",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode_1abf893d5e8ebc5951a07037b6eabe3332",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -75,7 +74,7 @@
                 }
               ],
               "type_html": "uint32_t",
-              "definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;set) const",
               "name_html": "operator()",
               "param": [
@@ -90,18 +89,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "486",
-                "column": "1",
+                "line": "612",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "486",
-                "bodyend": "495"
+                "bodystart": "612",
+                "bodyend": "621"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
                 "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& set) const",
                 "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
                 "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& set) const",
-                "original_definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "(Protocol &amp;prot, const T &amp;set) const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/SetEncode/operator.call",

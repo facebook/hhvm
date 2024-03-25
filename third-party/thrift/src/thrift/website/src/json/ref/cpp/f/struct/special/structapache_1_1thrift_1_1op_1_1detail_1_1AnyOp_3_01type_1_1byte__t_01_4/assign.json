@@ -4,49 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;::assign",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a088e5f67ba0887d66f288c5f3fcff09d",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "void",
-      "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
-      "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
-      "name_html": "assign",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "lhs"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "rhs"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "75",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "75",
-        "bodyend": "101"
-      },
-      "definition": {
-        "simple_html": "static void assign(void* lhs, const Dyn&amp; rhs)",
-        "simple_raw": "static void assign(void* lhs, const Dyn& rhs)",
-        "detailed_html": "inline static void assign(void* lhs, const Dyn&amp; rhs)",
-        "detailed_raw": "inline static void assign(void* lhs, const Dyn& rhs)",
-        "original_definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
-        "original_argsstring_html": "(void *lhs, const Dyn &amp;rhs)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/assign",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/assign",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;::assign"
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1afa1d257919d226c53a502d7c3cd969d3",
       "prot": "public",
       "static": "yes",
@@ -71,7 +28,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "80",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "80",
         "bodyend": "80"
@@ -87,6 +44,49 @@
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/assign",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/assign",
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;::assign"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a088e5f67ba0887d66f288c5f3fcff09d",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
+      "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
+      "name_html": "assign",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "lhs"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "rhs"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "75",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "75",
+        "bodyend": "101"
+      },
+      "definition": {
+        "simple_html": "static void assign(void* lhs, const Dyn&amp; rhs)",
+        "simple_raw": "static void assign(void* lhs, const Dyn& rhs)",
+        "detailed_html": "inline static void assign(void* lhs, const Dyn&amp; rhs)",
+        "detailed_raw": "inline static void assign(void* lhs, const Dyn& rhs)",
+        "original_definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
+        "original_argsstring_html": "(void *lhs, const Dyn &amp;rhs)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/assign",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/assign",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
       "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;::assign"
     }
   ],

@@ -32,7 +32,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "line": "113",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "bodystart": "113",
         "bodyend": "135"
@@ -79,7 +79,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "line": "137",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "bodystart": "137",
         "bodyend": "142"

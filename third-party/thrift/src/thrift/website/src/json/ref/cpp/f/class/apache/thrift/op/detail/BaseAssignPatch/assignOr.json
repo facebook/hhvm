@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_NODISCARD <code>value_type</code> &amp;",
       "definition_html": "FOLLY_NODISCARD value_type&amp; apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::assignOr",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "184",
-        "column": "1",
+        "line": "213",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "184",
-        "bodyend": "186"
+        "bodystart": "213",
+        "bodyend": "215"
       },
       "definition": {
         "simple_html": "FOLLY_NODISCARD value_type&amp; assignOr(value_type&amp; value)",

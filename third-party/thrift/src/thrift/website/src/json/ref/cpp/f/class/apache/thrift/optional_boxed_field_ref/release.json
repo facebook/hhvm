@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE std::unique_ptr&lt; element_type &gt;",
       "definition_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::release",
@@ -17,11 +18,11 @@
       "name_html": "release",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1028",
-        "column": "1",
+        "line": "1014",
+        "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1028",
-        "bodyend": "1030"
+        "bodystart": "1014",
+        "bodyend": "1016"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; release()",

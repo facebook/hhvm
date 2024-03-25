@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE void",
       "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reset",
@@ -17,11 +18,11 @@
       "name_html": "reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1456",
-        "column": "1",
+        "line": "1440",
+        "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1456",
-        "bodyend": "1459"
+        "bodystart": "1440",
+        "bodyend": "1443"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void reset()",

@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1631",
-        "column": "1",
+        "line": "1615",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1631",
-        "bodyend": "1633"
+        "bodystart": "1615",
+        "bodyend": "1617"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE T&amp;&amp; operator()(T&amp;&amp; value) const",

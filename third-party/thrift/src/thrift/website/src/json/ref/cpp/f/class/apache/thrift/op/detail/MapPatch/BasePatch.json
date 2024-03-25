@@ -22,8 +22,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "52",
-        "column": "1"
+        "line": "57",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BasePatch(const BasePatch&amp;)",
@@ -46,6 +46,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "no",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "",
       "definition_html": "apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::BasePatch",
@@ -58,8 +59,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "53",
-        "column": "1"
+        "line": "58",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BasePatch(BasePatch&amp;&amp;)",

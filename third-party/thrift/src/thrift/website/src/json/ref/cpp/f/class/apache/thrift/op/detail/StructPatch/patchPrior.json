@@ -22,11 +22,11 @@
       "name_html": "patchPrior",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "277",
-        "column": "1",
+        "line": "393",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "277",
-        "bodyend": "279"
+        "bodystart": "393",
+        "bodyend": "395"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",

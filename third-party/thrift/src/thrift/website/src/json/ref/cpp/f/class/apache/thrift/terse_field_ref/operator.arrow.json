@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -23,11 +24,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2316",
-        "column": "1",
+        "line": "2311",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2316",
-        "bodyend": "2318"
+        "bodystart": "2311",
+        "bodyend": "2313"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
@@ -49,6 +50,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -62,11 +64,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2321",
-        "column": "1",
+        "line": "2316",
+        "column": "37",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2321",
-        "bodyend": "2323"
+        "bodystart": "2316",
+        "bodyend": "2318"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
@@ -88,6 +90,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> *",
       "definition_html": "FOLLY_ERASE value_type* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
@@ -95,11 +98,11 @@
       "name_html": "operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2325",
-        "column": "1",
+        "line": "2320",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2325",
-        "bodyend": "2325"
+        "bodystart": "2320",
+        "bodyend": "2320"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",

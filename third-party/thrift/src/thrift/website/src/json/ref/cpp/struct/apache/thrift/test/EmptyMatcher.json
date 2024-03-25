@@ -43,11 +43,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "81",
-        "column": "1",
+        "line": "80",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "81",
-        "bodyend": "83"
+        "bodystart": "80",
+        "bodyend": "82"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nbool MatchAndExplain(const U&amp; actual, ::testing::MatchResultListener*) const",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "84",
-        "column": "1",
+        "line": "83",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "84",
-        "bodyend": "84"
+        "bodystart": "83",
+        "bodyend": "83"
       },
       "definition": {
         "simple_html": "void DescribeTo(std::ostream* os) const",
@@ -117,11 +117,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "85",
-        "column": "1",
+        "line": "84",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "85",
-        "bodyend": "85"
+        "bodystart": "84",
+        "bodyend": "84"
       },
       "definition": {
         "simple_html": "void DescribeNegationTo(std::ostream* os) const",
@@ -137,11 +137,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-    "line": "79",
+    "line": "78",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-    "bodystart": "79",
-    "bodyend": "86"
+    "bodystart": "78",
+    "bodyend": "85"
   },
   "namespacednames_html": [
     "apache",
@@ -194,11 +194,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "line": "81",
-                "column": "1",
+                "line": "80",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "bodystart": "81",
-                "bodyend": "83"
+                "bodystart": "80",
+                "bodyend": "82"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nbool MatchAndExplain(const U&amp; actual, ::testing::MatchResultListener*) const",
@@ -247,11 +247,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "line": "84",
-                "column": "1",
+                "line": "83",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "bodystart": "84",
-                "bodyend": "84"
+                "bodystart": "83",
+                "bodyend": "83"
               },
               "definition": {
                 "simple_html": "void DescribeTo(std::ostream* os) const",
@@ -300,11 +300,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "line": "85",
-                "column": "1",
+                "line": "84",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-                "bodystart": "85",
-                "bodyend": "85"
+                "bodystart": "84",
+                "bodyend": "84"
               },
               "definition": {
                 "simple_html": "void DescribeNegationTo(std::ostream* os) const",

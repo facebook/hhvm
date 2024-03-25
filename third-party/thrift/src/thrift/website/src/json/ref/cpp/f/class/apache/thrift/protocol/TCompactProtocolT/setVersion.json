@@ -24,7 +24,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "135",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "bodystart": "135",
         "bodyend": "135"

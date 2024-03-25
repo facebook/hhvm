@@ -26,7 +26,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "line": "44",
-        "column": "1",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "bodystart": "44",
         "bodyend": "44"
@@ -45,261 +45,50 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp_1ad2819ae906a7362be266e6f87c0646df",
       "prot": "public",
       "static": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename V",
+          "defval_html": "type::native_type&lt;VTag&gt;"
+        }
+      ],
       "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;val)",
+      "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
+      "argsstring_html": "(T &amp;, V &amp;&amp;)",
       "name_html": "add",
       "param": [
         {
-          "type_html": "void *",
-          "declname_html": "s"
+          "type_html": "<code>T</code> &amp;"
         },
         {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "val"
+          "type_html": "V &amp;&amp;"
         }
       ],
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "303",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "303",
-        "bodyend": "303"
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+        "line": "95",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+        "bodystart": "95",
+        "bodyend": "97"
       },
       "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
-        "simple_raw": "static bool add(void* s, const Dyn& val)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
+        "simple_html": "template &lt;typename V = type::native_type&lt;VTag&gt;&gt;\nstatic bool add(T&amp;, V&amp;&amp;)",
+        "simple_raw": "template <typename V = type::native_type<VTag>>\nstatic bool add(T&, V&&)",
+        "detailed_html": "template &lt;typename V = type::native_type&lt;VTag&gt;&gt;\ninline static bool add(T&amp;, V&amp;&amp;)",
+        "detailed_raw": "template <typename V = type::native_type<VTag>>\ninline static bool add(T&, V&&)",
+        "original_definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;, V &amp;&amp;)"
       },
-      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "303",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "303",
-        "bodyend": "303"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
-        "simple_raw": "static bool add(void* s, const Dyn& val)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "filepath": "fns/struct/apache/thrift/op/detail/ListOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ListOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp",
       "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
     },
     {
@@ -331,7 +120,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "95",
-        "column": "1",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "95",
         "bodyend": "97"
@@ -374,7 +163,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "98",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "98",
         "bodyend": "98"
@@ -393,526 +182,6 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "303",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "303",
-        "bodyend": "303"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
-        "simple_raw": "static bool add(void* s, const Dyn& val)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(T &amp;self, const T &amp;val)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;",
-          "declname_html": "self"
-        },
-        {
-          "type_html": "const <code>T</code> &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "50",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "50",
-        "bodyend": "50"
-      },
-      "definition": {
-        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
-        "simple_raw": "static bool add(T& self, const T& val)",
-        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
-        "detailed_raw": "inline static bool add(T& self, const T& val)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-      "argsstring_html": "(void *s, const Dyn &amp;v)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "51",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "51",
-        "bodyend": "51"
-      },
-      "definition": {
-        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
-        "simple_raw": "static bool add(void* s, const Dyn& v)",
-        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
-        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
-        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
-        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp_1ad2819ae906a7362be266e6f87c0646df",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename V",
-          "defval_html": "type::native_type&lt;VTag&gt;"
-        }
-      ],
-      "type_html": "bool",
-      "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
-      "argsstring_html": "(T &amp;, V &amp;&amp;)",
-      "name_html": "add",
-      "param": [
-        {
-          "type_html": "<code>T</code> &amp;"
-        },
-        {
-          "type_html": "V &amp;&amp;"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-        "line": "95",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-        "bodystart": "95",
-        "bodyend": "97"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename V = type::native_type&lt;VTag&gt;&gt;\nstatic bool add(T&amp;, V&amp;&amp;)",
-        "simple_raw": "template <typename V = type::native_type<VTag>>\nstatic bool add(T&, V&&)",
-        "detailed_html": "template &lt;typename V = type::native_type&lt;VTag&gt;&gt;\ninline static bool add(T&amp;, V&amp;&amp;)",
-        "detailed_raw": "template <typename V = type::native_type<VTag>>\ninline static bool add(T&, V&&)",
-        "original_definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
-        "original_argsstring_html": "(T &amp;, V &amp;&amp;)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/ListOp/add",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ListOp/add",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp_1a31394ba191458a2415e6ff065046de4c",
       "prot": "public",
       "static": "yes",
@@ -937,7 +206,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "98",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "98",
         "bodyend": "98"
@@ -986,7 +255,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "147",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "147",
         "bodyend": "149"
@@ -1029,7 +298,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "150",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "150",
         "bodyend": "150"
@@ -1045,6 +314,608 @@
       "filepath": "fns/struct/apache/thrift/op/detail/SetOp/add",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/SetOp/add",
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a8b35d2db286f8b80f15ecc8a88402092",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(T &amp;self, const T &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>T</code> &amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "const <code>T</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "50",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "50",
+        "bodyend": "50"
+      },
+      "definition": {
+        "simple_html": "static bool add(T&amp; self, const T&amp; val)",
+        "simple_raw": "static bool add(T& self, const T& val)",
+        "detailed_html": "inline static bool add(T&amp; self, const T&amp; val)",
+        "detailed_raw": "inline static bool add(T& self, const T& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(T &amp;self, const T &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp_1a4eee696b33a0ff832c1a0b9745b5faba",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "51",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "51",
+        "bodyend": "51"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; v)",
+        "simple_raw": "static bool add(void* s, const Dyn& v)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; v)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/NumberOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
       "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
     },
     {
@@ -1071,11 +942,140 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "line": "303",
-        "column": "1",
+        "line": "290",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
-        "bodystart": "303",
-        "bodyend": "303"
+        "bodystart": "290",
+        "bodyend": "290"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
+        "simple_raw": "static bool add(void* s, const Dyn& val)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "290",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "290",
+        "bodyend": "290"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
+        "simple_raw": "static bool add(void* s, const Dyn& val)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "290",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "290",
+        "bodyend": "290"
+      },
+      "definition": {
+        "simple_html": "static bool add(void* s, const Dyn&amp; val)",
+        "simple_raw": "static bool add(void* s, const Dyn& val)",
+        "detailed_html": "inline static bool add(void* s, const Dyn&amp; val)",
+        "detailed_raw": "inline static bool add(void* s, const Dyn& val)",
+        "original_definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+        "original_argsstring_html": "(void *s, const Dyn &amp;val)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/StringOp/add",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/StringOp/add",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::add"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a0510658323decf7e52e08f8809b5f308",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
+      "argsstring_html": "(void *s, const Dyn &amp;val)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "line": "290",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+        "bodystart": "290",
+        "bodyend": "290"
       },
       "definition": {
         "simple_html": "static bool add(void* s, const Dyn&amp; val)",

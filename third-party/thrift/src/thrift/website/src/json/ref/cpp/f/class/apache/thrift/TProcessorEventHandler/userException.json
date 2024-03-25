@@ -37,11 +37,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "145",
-        "column": "1",
+        "line": "160",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "145",
-        "bodyend": "149"
+        "bodystart": "160",
+        "bodyend": "164"
       },
       "definition": {
         "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;)",
@@ -52,7 +52,7 @@
         "original_argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;)"
       },
       "description": {
-        "detailed_html": "<p>Called if the handler throws an exception.</p><p>Only called for Cpp2 </p>"
+        "detailed_html": "<p>Called if the handler throws an exception.</p>\n<p>Only called for Cpp2 </p>"
       },
       "filepath": "fns/class/apache/thrift/TProcessorEventHandler/userException",
       "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/userException",
@@ -63,7 +63,7 @@
   "filepath": "f/class/apache/thrift/TProcessorEventHandler/userException",
   "minprot": "public",
   "displayname_html": "userException",
-  "brief_html": "<p>Called if the handler throws an exception.</p>",
+  "brief_html": "<p>Called if the handler throws an exception.</p>\n",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userException",
   "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/userException"

@@ -4,6 +4,14 @@
   "language": "C++",
   "prot": "public",
   "compoundname_html": "apache::thrift::op::detail::ListEncode",
+  "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1list_3_01Tag_01_4_01_4",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::Encode&lt; type::list&lt; Tag &gt; &gt;"
+    }
+  ],
   "includes": {
     "refid": "detail_2Encode_8h",
     "local": "no",
@@ -11,20 +19,12 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "Tag",
-      "defname_html": "Tag"
-    },
-    {
-      "type_html": "template&lt; class... &gt; class",
-      "declname_html": "EncodeImpl",
-      "defname_html": "EncodeImpl",
-      "defval_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Encode\">Encode</a>"
+      "type_html": "typename Tag"
     }
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1ab5c68ada2086415e73f4b60cfc74b409",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1afa67fea2b0b46aec17df67881e10b657",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -40,7 +40,7 @@
         }
       ],
       "type_html": "uint32_t",
-      "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+      "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;list) const",
       "name_html": "operator()",
       "param": [
@@ -55,18 +55,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "468",
-        "column": "1",
+        "line": "594",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "468",
-        "bodyend": "477"
+        "bodystart": "594",
+        "bodyend": "603"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
         "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& list) const",
         "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
         "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& list) const",
-        "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+        "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, const T &amp;list) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/ListEncode/operator.call",
@@ -75,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "466",
+    "line": "592",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "466",
-    "bodyend": "478"
+    "bodystart": "592",
+    "bodyend": "604"
   },
   "namespacednames_html": [
     "apache",
@@ -92,8 +92,8 @@
   "types": [],
   "members": [],
   "friends": [],
-  "declaration_raw": "template <\n  typename Tag,\n  template< class... > class EncodeImpl = Encode\n> struct ListEncode;",
-  "declaration_html": "template &lt;\n  typename Tag,\n  template&lt; class... &gt; class EncodeImpl = Encode\n&gt; struct ListEncode;",
+  "declaration_raw": "template < typename Tag >\nstruct ListEncode;",
+  "declaration_html": "template &lt; typename Tag &gt;\nstruct ListEncode;",
   "filepath": "struct/apache/thrift/op/detail/ListEncode",
   "href": "/ref/cpp/struct/apache/thrift/op/detail/ListEncode",
   "overloadgroups": [
@@ -106,7 +106,7 @@
           "compoundname_html": "apache::thrift::op::detail::ListEncode::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1ab5c68ada2086415e73f4b60cfc74b409",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1afa67fea2b0b46aec17df67881e10b657",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -122,7 +122,7 @@
                 }
               ],
               "type_html": "uint32_t",
-              "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;list) const",
               "name_html": "operator()",
               "param": [
@@ -137,18 +137,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "468",
-                "column": "1",
+                "line": "594",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "468",
-                "bodyend": "477"
+                "bodystart": "594",
+                "bodyend": "603"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
                 "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& list) const",
                 "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
                 "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& list) const",
-                "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "(Protocol &amp;prot, const T &amp;list) const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/ListEncode/operator.call",

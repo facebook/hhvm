@@ -18,7 +18,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "105",
-        "column": "1"
+        "column": "3"
       },
       "definition": {
         "simple_html": "DeterministicAccumulator()",
@@ -55,7 +55,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "106",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "106",
         "bodyend": "107"

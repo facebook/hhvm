@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "60",
-        "column": "1",
+        "line": "65",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "60",
-        "bodyend": "62"
+        "bodystart": "65",
+        "bodyend": "67"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid apply(field_ref&lt;U&gt; field) const",
@@ -75,11 +75,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "65",
-        "column": "1",
+        "line": "70",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "65",
-        "bodyend": "67"
+        "bodystart": "70",
+        "bodyend": "72"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid apply(terse_field_ref&lt;U&gt; field) const",
@@ -122,11 +122,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "70",
-        "column": "1",
+        "line": "75",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "70",
-        "bodyend": "72"
+        "bodystart": "75",
+        "bodyend": "77"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid apply(required_field_ref&lt;U&gt; field) const",

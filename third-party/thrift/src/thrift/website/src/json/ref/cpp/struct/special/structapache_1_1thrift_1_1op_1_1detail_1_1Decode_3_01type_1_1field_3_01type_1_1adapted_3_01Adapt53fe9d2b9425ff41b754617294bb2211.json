@@ -35,10 +35,10 @@
       "name_html": "field_adapted_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "835",
-        "column": "1",
+        "line": "1091",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "836",
+        "bodystart": "1092",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211"
@@ -49,6 +49,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1aec92499906d51ab482528d9f48d97ad5",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -84,11 +85,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "842",
-        "column": "1",
+        "line": "1098",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "842",
-        "bodyend": "844"
+        "bodystart": "1098",
+        "bodyend": "1100"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
@@ -105,6 +106,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1af5fd5e4da2bff1c385d8501994dc0025",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -141,11 +143,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "849",
-        "column": "1",
+        "line": "1105",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "849",
-        "bodyend": "854"
+        "bodystart": "1105",
+        "bodyend": "1119"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
@@ -161,11 +163,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "834",
+    "line": "1089",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "833",
-    "bodyend": "855"
+    "bodystart": "1090",
+    "bodyend": "1120"
   },
   "namespacednames_html": [
     "apache",
@@ -181,7 +183,6 @@
   "declaration_html": "template &lt;\n  typename Adapter,\n  typename Tag,\n  typename Struct,\n  int16_t FieldId\n&gt; struct Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -195,6 +196,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1aec92499906d51ab482528d9f48d97ad5",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -230,11 +232,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "842",
-                "column": "1",
+                "line": "1098",
+                "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "842",
-                "bodyend": "844"
+                "bodystart": "1098",
+                "bodyend": "1100"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
@@ -253,6 +255,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1af5fd5e4da2bff1c385d8501994dc0025",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -289,11 +292,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "849",
-                "column": "1",
+                "line": "1105",
+                "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "849",
-                "bodyend": "854"
+                "bodystart": "1105",
+                "bodyend": "1119"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",

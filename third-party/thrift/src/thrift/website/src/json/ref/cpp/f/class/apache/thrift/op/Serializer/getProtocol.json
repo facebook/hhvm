@@ -36,7 +36,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "52",
-        "column": "1"
+        "column": "32"
       },
       "definition": {
         "simple_html": "const type::Protocol&amp; getProtocol() const = 0",

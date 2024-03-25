@@ -47,11 +47,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "676",
-        "column": "1",
+        "line": "824",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "676",
-        "bodyend": "704"
+        "bodystart": "824",
+        "bodyend": "851"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename ListType&gt;\nvoid operator()(Protocol&amp; prot, ListType&amp; list) const",
@@ -67,11 +67,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "674",
+    "line": "822",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "674",
-    "bodyend": "705"
+    "bodystart": "822",
+    "bodyend": "852"
   },
   "namespacednames_html": [
     "apache",
@@ -88,7 +88,6 @@
   "declaration_html": "template &lt; typename Tag &gt;\nstruct Decode&lt; type::list&lt; Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1list_3_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1list_3_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -130,11 +129,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "676",
-                "column": "1",
+                "line": "824",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "676",
-                "bodyend": "704"
+                "bodystart": "824",
+                "bodyend": "851"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename ListType&gt;\nvoid operator()(Protocol&amp; prot, ListType&amp; list) const",

@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "93",
-        "column": "1",
+        "line": "90",
+        "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "93",
-        "bodyend": "96"
+        "bodystart": "90",
+        "bodyend": "93"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\ndecltype(auto) find_by_field_id(F&amp;&amp; f)",
@@ -46,7 +46,7 @@
         "original_argsstring_html": "(F &amp;&amp;f)"
       },
       "description": {
-        "detailed_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returing the first 'true' result produced. </p>"
+        "detailed_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returning the first 'true' result produced. </p>"
       },
       "compoundname_html": "apache::thrift::op::find_by_field_id",
       "namespace_html": "apache::thrift::op"
@@ -56,7 +56,7 @@
   "namespace_html": "apache::thrift::op",
   "minprot": "public",
   "displayname_html": "find_by_field_id",
-  "brief_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returing the first 'true' result produced. </p>",
+  "brief_html": "<p>Calls the given function with with each field_id&lt;{id}&gt;, returning the first 'true' result produced. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Get.h/find_by_field_id",
   "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Get.h/find_by_field_id"

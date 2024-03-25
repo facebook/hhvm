@@ -28,7 +28,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -71,7 +71,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -114,7 +114,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -157,7 +157,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -200,7 +200,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -243,7 +243,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -286,7 +286,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -329,7 +329,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -372,7 +372,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -415,7 +415,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -458,7 +458,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -501,7 +501,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -544,7 +544,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -587,7 +587,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -630,7 +630,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -673,7 +673,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -716,7 +716,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -759,7 +759,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"

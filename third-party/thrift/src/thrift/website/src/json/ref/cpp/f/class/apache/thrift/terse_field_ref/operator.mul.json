@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>reference_type</code>",
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_field_ref&lt; T &gt;::operator*",
@@ -17,11 +18,11 @@
       "name_html": "operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2307",
-        "column": "1",
+        "line": "2302",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2307",
-        "bodyend": "2309"
+        "bodystart": "2302",
+        "bodyend": "2304"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*() const",

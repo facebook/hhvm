@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "75",
-        "column": "1",
+        "line": "80",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "75",
-        "bodyend": "77"
+        "bodystart": "80",
+        "bodyend": "82"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\ntype::if_not_id&lt;U&gt; assign(field_ref&lt;U&gt; val)",
@@ -75,11 +75,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "80",
-        "column": "1",
+        "line": "85",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "80",
-        "bodyend": "82"
+        "bodystart": "85",
+        "bodyend": "87"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\ntype::if_not_id&lt;U&gt; assign(terse_field_ref&lt;U&gt; val)",

@@ -27,10 +27,10 @@
       "name_html": "adapted_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "538",
-        "column": "1",
+        "line": "616",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "538",
+        "bodystart": "616",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4"
@@ -38,51 +38,48 @@
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1ad9d8f8d19d831f0ebb72eacd008f5a6d",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1a083738c6d33cae4aba880a5f12433262",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
-          "type_html": "typename T1"
-        },
-        {
-          "type_html": "typename T2",
-          "defval_html": "T1"
+          "type_html": "typename T"
         }
       ],
       "type_html": "constexpr bool",
       "definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-      "argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const",
+      "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const T1 &amp;",
+          "type_html": "const T &amp;",
           "declname_html": "lhs"
         },
         {
-          "type_html": "const T2 &amp;",
+          "type_html": "const T &amp;",
           "declname_html": "rhs"
         }
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "541",
-        "column": "1",
+        "line": "619",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "541",
-        "bodyend": "543"
+        "bodystart": "619",
+        "bodyend": "630"
       },
       "definition": {
-        "simple_html": "template &lt;typename T1, typename T2 = T1&gt;\nconstexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
-        "simple_raw": "template <typename T1, typename T2 = T1>\nconstexpr bool operator()(const T1& lhs, const T2& rhs) const",
-        "detailed_html": "template &lt;typename T1, typename T2 = T1&gt;\ninline constexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
-        "detailed_raw": "template <typename T1, typename T2 = T1>\ninline constexpr bool operator()(const T1& lhs, const T2& rhs) const",
+        "simple_html": "template &lt;typename T&gt;\nconstexpr bool operator()(const T&amp; lhs, const T&amp; rhs) const",
+        "simple_raw": "template <typename T>\nconstexpr bool operator()(const T& lhs, const T& rhs) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline constexpr bool operator()(const T&amp; lhs, const T&amp; rhs) const",
+        "detailed_raw": "template <typename T>\ninline constexpr bool operator()(const T& lhs, const T& rhs) const",
         "original_definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-        "original_argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const"
+        "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
       "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call"
@@ -90,11 +87,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "537",
+    "line": "615",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "537",
-    "bodyend": "544"
+    "bodystart": "615",
+    "bodyend": "631"
   },
   "namespacednames_html": [
     "apache",
@@ -121,51 +118,48 @@
           "compoundname_html": "apache::thrift::op::detail::LessThan&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1ad9d8f8d19d831f0ebb72eacd008f5a6d",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1a083738c6d33cae4aba880a5f12433262",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
               "tparams": [
                 {
-                  "type_html": "typename T1"
-                },
-                {
-                  "type_html": "typename T2",
-                  "defval_html": "T1"
+                  "type_html": "typename T"
                 }
               ],
               "type_html": "constexpr bool",
               "definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-              "argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const",
+              "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
               "name_html": "operator()",
               "param": [
                 {
-                  "type_html": "const T1 &amp;",
+                  "type_html": "const T &amp;",
                   "declname_html": "lhs"
                 },
                 {
-                  "type_html": "const T2 &amp;",
+                  "type_html": "const T &amp;",
                   "declname_html": "rhs"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "541",
-                "column": "1",
+                "line": "619",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "541",
-                "bodyend": "543"
+                "bodystart": "619",
+                "bodyend": "630"
               },
               "definition": {
-                "simple_html": "template &lt;typename T1, typename T2 = T1&gt;\nconstexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
-                "simple_raw": "template <typename T1, typename T2 = T1>\nconstexpr bool operator()(const T1& lhs, const T2& rhs) const",
-                "detailed_html": "template &lt;typename T1, typename T2 = T1&gt;\ninline constexpr bool operator()(const T1&amp; lhs, const T2&amp; rhs) const",
-                "detailed_raw": "template <typename T1, typename T2 = T1>\ninline constexpr bool operator()(const T1& lhs, const T2& rhs) const",
+                "simple_html": "template &lt;typename T&gt;\nconstexpr bool operator()(const T&amp; lhs, const T&amp; rhs) const",
+                "simple_raw": "template <typename T>\nconstexpr bool operator()(const T& lhs, const T& rhs) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline constexpr bool operator()(const T&amp; lhs, const T&amp; rhs) const",
+                "detailed_raw": "template <typename T>\ninline constexpr bool operator()(const T& lhs, const T& rhs) const",
                 "original_definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-                "original_argsstring_html": "(const T1 &amp;lhs, const T2 &amp;rhs) const"
+                "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
               "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",

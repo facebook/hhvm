@@ -4,6 +4,14 @@
   "language": "C++",
   "prot": "public",
   "compoundname_html": "apache::thrift::op::detail::SetIdenticalTo",
+  "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IdenticalTo_3_01type_1_1set_3_01KTag_01_4_01_4",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::IdenticalTo&lt; type::set&lt; KTag &gt; &gt;"
+    }
+  ],
   "includes": {
     "refid": "detail_2Compare_8h",
     "local": "no",
@@ -11,20 +19,14 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "KTag",
-      "defname_html": "KTag"
+      "type_html": "typename KTag"
     },
     {
-      "type_html": "typename",
-      "declname_html": "Tag",
-      "defname_html": "Tag",
+      "type_html": "typename Tag",
       "defval_html": "type::set&lt;KTag&gt;"
     },
     {
-      "type_html": "typename",
-      "declname_html": "T",
-      "defname_html": "T",
+      "type_html": "typename T",
       "defval_html": "type::native_type&lt;Tag&gt;"
     }
   ],
@@ -53,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "430",
-        "column": "1",
+        "line": "472",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "430",
-        "bodyend": "443"
+        "bodystart": "472",
+        "bodyend": "485"
       },
       "definition": {
         "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",
@@ -90,11 +92,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "447",
-        "column": "1",
+        "line": "489",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "447",
-        "bodyend": "453"
+        "bodystart": "489",
+        "bodyend": "495"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; set)",
@@ -139,11 +141,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "457",
-        "column": "1",
+        "line": "499",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "457",
-        "bodyend": "464"
+        "bodystart": "499",
+        "bodyend": "506"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",
@@ -159,11 +161,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "429",
+    "line": "471",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "429",
-    "bodyend": "465"
+    "bodystart": "471",
+    "bodyend": "507"
   },
   "namespacednames_html": [
     "apache",
@@ -213,11 +215,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "430",
-                "column": "1",
+                "line": "472",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "430",
-                "bodyend": "443"
+                "bodystart": "472",
+                "bodyend": "485"
               },
               "definition": {
                 "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",
@@ -266,11 +268,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "447",
-                "column": "1",
+                "line": "489",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "447",
-                "bodyend": "453"
+                "bodystart": "489",
+                "bodyend": "495"
               },
               "definition": {
                 "simple_html": "static auto createHashMap(const T&amp; set)",
@@ -331,11 +333,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "457",
-                "column": "1",
+                "line": "499",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "457",
-                "bodyend": "464"
+                "bodystart": "499",
+                "bodyend": "506"
               },
               "definition": {
                 "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",

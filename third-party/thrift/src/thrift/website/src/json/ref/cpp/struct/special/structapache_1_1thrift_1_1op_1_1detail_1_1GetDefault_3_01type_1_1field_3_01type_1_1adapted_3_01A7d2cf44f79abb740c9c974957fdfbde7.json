@@ -35,10 +35,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "196",
-        "column": "1",
+        "line": "200",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "197",
+        "bodystart": "201",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7"
@@ -65,11 +65,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "201",
-        "column": "1",
+        "line": "205",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "201",
-        "bodyend": "203"
+        "bodystart": "205",
+        "bodyend": "207"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -102,10 +102,10 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "208",
-        "column": "1",
+        "line": "212",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "208",
+        "bodystart": "212",
         "bodyend": "222"
       },
       "definition": {
@@ -122,10 +122,10 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "195",
+    "line": "198",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "194",
+    "bodystart": "199",
     "bodyend": "223"
   },
   "namespacednames_html": [
@@ -172,11 +172,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "201",
-                "column": "1",
+                "line": "205",
+                "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "201",
-                "bodyend": "203"
+                "bodystart": "205",
+                "bodyend": "207"
               },
               "definition": {
                 "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -211,10 +211,10 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "208",
-                "column": "1",
+                "line": "212",
+                "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "208",
+                "bodystart": "212",
                 "bodyend": "222"
               },
               "definition": {

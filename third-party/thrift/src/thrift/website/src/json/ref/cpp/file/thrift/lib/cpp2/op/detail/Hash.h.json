@@ -40,7 +40,9 @@
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Hash",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Hash"
+      "text_html": "apache::thrift::op::detail::Hash",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Hash",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

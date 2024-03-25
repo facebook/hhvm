@@ -30,7 +30,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
         "line": "83",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
         "bodystart": "83",
         "bodyend": "86"

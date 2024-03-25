@@ -11,14 +11,10 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "Id",
-      "defname_html": "Id"
+      "type_html": "typename Id"
     },
     {
-      "type_html": "typename",
-      "declname_html": "Tag",
-      "defname_html": "Tag"
+      "type_html": "typename Tag"
     }
   ],
   "types": [
@@ -31,10 +27,10 @@
       "name_html": "type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "175",
-        "column": "1",
+        "line": "182",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "175",
+        "bodystart": "182",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl"
@@ -42,11 +38,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "171",
+    "line": "178",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "171",
-    "bodyend": "176"
+    "bodystart": "178",
+    "bodyend": "183"
   },
   "namespacednames_html": [
     "apache",

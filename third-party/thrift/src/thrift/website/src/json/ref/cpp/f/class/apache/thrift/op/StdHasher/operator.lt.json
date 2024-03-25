@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
-        "line": "56",
-        "column": "1",
+        "line": "55",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
-        "bodystart": "56",
-        "bodyend": "58"
+        "bodystart": "55",
+        "bodyend": "57"
       },
       "definition": {
         "simple_html": "bool operator&lt;(const StdHasher&amp; other) const",

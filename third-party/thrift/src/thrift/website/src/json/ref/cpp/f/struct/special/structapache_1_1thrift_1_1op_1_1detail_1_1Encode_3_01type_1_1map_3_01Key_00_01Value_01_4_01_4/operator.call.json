@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::Encode&lt; type::map&lt; Key, Value &gt; &gt;::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a6320fb7f407373ee1279dcd216f97a51",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -20,7 +20,7 @@
         }
       ],
       "type_html": "uint32_t",
-      "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+      "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
       "name_html": "operator()",
       "param": [
@@ -35,18 +35,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "507",
-        "column": "1",
+        "line": "630",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "507",
-        "bodyend": "519"
+        "bodystart": "630",
+        "bodyend": "642"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
         "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
         "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
         "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
-        "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+        "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",

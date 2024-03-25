@@ -37,7 +37,9 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher",
       "prot": "public",
-      "text_html": "apache::thrift::op::Xxh64Hasher"
+      "text_html": "apache::thrift::op::Xxh64Hasher",
+      "href": "/ref/cpp/class/apache/thrift/op/Xxh64Hasher",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

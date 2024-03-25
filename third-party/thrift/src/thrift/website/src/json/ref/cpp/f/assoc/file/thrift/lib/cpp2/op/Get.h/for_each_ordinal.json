@@ -4,9 +4,10 @@
   "compoundname_html": "apache::thrift::op::for_each_ordinal",
   "functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1acc1c3bc96fdb0ec7aed92197fdef83b5",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a86dfbaeff19f910adeae6b2753c2a25c",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "no",
@@ -19,8 +20,8 @@
           "type_html": "typename F"
         }
       ],
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::for_each_ordinal",
+      "type_html": "constexpr void",
+      "definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_ordinal",
       "param": [
@@ -31,18 +32,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "52",
-        "column": "1",
+        "line": "50",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "52",
-        "bodyend": "55"
+        "bodystart": "50",
+        "bodyend": "53"
       },
       "definition": {
-        "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
-        "simple_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
-        "detailed_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
-        "detailed_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
-        "original_definition_html": "void apache::thrift::op::for_each_ordinal",
+        "simple_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
+        "simple_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
+        "detailed_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
+        "detailed_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
+        "original_definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
         "original_argsstring_html": "(F &amp;&amp;f)"
       },
       "description": {

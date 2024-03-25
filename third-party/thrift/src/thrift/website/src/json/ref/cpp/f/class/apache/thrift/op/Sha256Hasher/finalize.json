@@ -18,7 +18,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "59",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "bodystart": "59",
         "bodyend": "63"

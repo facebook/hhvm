@@ -53,11 +53,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "185",
-        "column": "1",
+        "line": "200",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "185",
-        "bodyend": "189"
+        "bodystart": "200",
+        "bodyend": "204"
       },
       "definition": {
         "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final",
@@ -68,7 +68,7 @@
         "original_argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final"
       },
       "description": {
-        "detailed_html": "<p>Called if the handler throws an exception.</p><p>Only called for Cpp2 </p>"
+        "detailed_html": "<p>Called if the handler throws an exception.</p>\n<p>Only called for Cpp2 </p>"
       },
       "filepath": "fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
       "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException"
@@ -106,11 +106,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "191",
-        "column": "1",
+        "line": "206",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "191",
-        "bodyend": "195"
+        "bodystart": "206",
+        "bodyend": "210"
       },
       "definition": {
         "simple_html": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final",
@@ -126,11 +126,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-    "line": "183",
+    "line": "198",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-    "bodystart": "183",
-    "bodyend": "196"
+    "bodystart": "198",
+    "bodyend": "211"
   },
   "namespacednames_html": [
     "apache",
@@ -144,7 +144,7 @@
   "declaration_raw": "class TProcessorEventHandlerNoUserExnCallbacks;",
   "declaration_html": "class TProcessorEventHandlerNoUserExnCallbacks;",
   "description": {
-    "detailed_html": "<p>Derive from this interface if the ProcessorEventHandler is uninterested in user exceptions.</p><p>The ProcessorEventHandler user exception interface performs symbol demangling which is relatively expensive. Many ProcessorEventHandlers are uninterested in user exceptions which results in that work being discarded. </p>"
+    "detailed_html": "<p>Derive from this interface if the ProcessorEventHandler is uninterested in user exceptions.</p>\n<p>The ProcessorEventHandler user exception interface performs symbol demangling which is relatively expensive. Many ProcessorEventHandlers are uninterested in user exceptions which results in that work being discarded. </p>"
   },
   "filepath": "class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks",
   "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks",
@@ -171,11 +171,11 @@
               "name_html": "TProcessorEventHandler",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "172",
-                "column": "1",
+                "line": "187",
+                "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "172",
-                "bodyend": "172"
+                "bodystart": "187",
+                "bodyend": "187"
               },
               "definition": {
                 "simple_html": "TProcessorEventHandler()",
@@ -220,7 +220,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "42",
-                "column": "1",
+                "column": "11",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "42",
                 "bodyend": "42"
@@ -252,61 +252,6 @@
           "name_html": "userException",
           "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
           "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a2a9c1e5c29f2713fd475e87f402abcb6",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "final": "yes",
-              "virtual": "virtual",
-              "type_html": "void",
-              "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
-              "argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final",
-              "name_html": "userException",
-              "reimplements": {
-                "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aa0a970d8a14ac6744a5f6de74f20bd09",
-                "text_html": "userException"
-              },
-              "param": [
-                {
-                  "type_html": "void *"
-                },
-                {
-                  "type_html": "const char *"
-                },
-                {
-                  "type_html": "const std::string &amp;"
-                },
-                {
-                  "type_html": "const std::string &amp;"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "185",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "185",
-                "bodyend": "189"
-              },
-              "definition": {
-                "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final",
-                "simple_raw": "virtual void userException(\n    void*, const char*, const std::string&, const std::string&) final",
-                "detailed_html": "inline virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final final",
-                "detailed_raw": "inline virtual void userException(\n    void*, const char*, const std::string&, const std::string&) final final",
-                "original_definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
-                "original_argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final"
-              },
-              "description": {
-                "detailed_html": "<p>Called if the handler throws an exception.</p><p>Only called for Cpp2 </p>"
-              },
-              "filepath": "fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
-              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
-              "parentid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks",
-              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException"
-            },
             {
               "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aa0a970d8a14ac6744a5f6de74f20bd09",
               "prot": "public",
@@ -341,11 +286,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "145",
-                "column": "1",
+                "line": "160",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "145",
-                "bodyend": "149"
+                "bodystart": "160",
+                "bodyend": "164"
               },
               "definition": {
                 "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;)",
@@ -356,29 +301,15 @@
                 "original_argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;)"
               },
               "description": {
-                "detailed_html": "<p>Called if the handler throws an exception.</p><p>Only called for Cpp2 </p>"
+                "detailed_html": "<p>Called if the handler throws an exception.</p>\n<p>Only called for Cpp2 </p>"
               },
               "filepath": "fns/class/apache/thrift/TProcessorEventHandler/userException",
               "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/userException",
               "parentid": "classapache_1_1thrift_1_1TProcessorEventHandler",
               "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
-          "minprot": "public",
-          "displayname_html": "userException",
-          "brief_html": "<p>Called if the handler throws an exception.</p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
-          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "userExceptionWrapped",
-          "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
-          "functions": [
+            },
             {
-              "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a4aa8738c9f9c2913ce6b205274a71513",
+              "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a2a9c1e5c29f2713fd475e87f402abcb6",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -387,12 +318,12 @@
               "final": "yes",
               "virtual": "virtual",
               "type_html": "void",
-              "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
-              "argsstring_html": "(void *, const char *, bool, const folly::exception_wrapper &amp;) final",
-              "name_html": "userExceptionWrapped",
+              "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
+              "argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final",
+              "name_html": "userException",
               "reimplements": {
-                "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1a1126d3bcf114c4b5fe457fb583d0c784",
-                "text_html": "userExceptionWrapped"
+                "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aa0a970d8a14ac6744a5f6de74f20bd09",
+                "text_html": "userException"
               },
               "param": [
                 {
@@ -402,33 +333,50 @@
                   "type_html": "const char *"
                 },
                 {
-                  "type_html": "bool"
+                  "type_html": "const std::string &amp;"
                 },
                 {
-                  "type_html": "const folly::exception_wrapper &amp;"
+                  "type_html": "const std::string &amp;"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "191",
-                "column": "1",
+                "line": "200",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "191",
-                "bodyend": "195"
+                "bodystart": "200",
+                "bodyend": "204"
               },
               "definition": {
-                "simple_html": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final",
-                "simple_raw": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&) final",
-                "detailed_html": "inline virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final final",
-                "detailed_raw": "inline virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&) final final",
-                "original_definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
-                "original_argsstring_html": "(void *, const char *, bool, const folly::exception_wrapper &amp;) final"
+                "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final",
+                "simple_raw": "virtual void userException(\n    void*, const char*, const std::string&, const std::string&) final",
+                "detailed_html": "inline virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final final",
+                "detailed_raw": "inline virtual void userException(\n    void*, const char*, const std::string&, const std::string&) final final",
+                "original_definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
+                "original_argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final"
               },
-              "filepath": "fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
-              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
+              "description": {
+                "detailed_html": "<p>Called if the handler throws an exception.</p>\n<p>Only called for Cpp2 </p>"
+              },
+              "filepath": "fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
+              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
               "parentid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks",
-              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped"
-            },
+              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
+          "minprot": "public",
+          "displayname_html": "userException",
+          "brief_html": "<p>Called if the handler throws an exception.</p>\n",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException",
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userException"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "userExceptionWrapped",
+          "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
+          "functions": [
             {
               "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1a1126d3bcf114c4b5fe457fb583d0c784",
               "prot": "public",
@@ -467,11 +415,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "150",
-                "column": "1",
+                "line": "165",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "150",
-                "bodyend": "169"
+                "bodystart": "165",
+                "bodyend": "184"
               },
               "definition": {
                 "simple_html": "virtual void userExceptionWrapped(\n    void* ctx,\n    const char* fn_name,\n    bool declared,\n    const folly::exception_wrapper&amp; ew_)",
@@ -484,6 +432,58 @@
               "filepath": "fns/class/apache/thrift/TProcessorEventHandler/userExceptionWrapped",
               "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/userExceptionWrapped",
               "parentid": "classapache_1_1thrift_1_1TProcessorEventHandler",
+              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a4aa8738c9f9c2913ce6b205274a71513",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "final": "yes",
+              "virtual": "virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
+              "argsstring_html": "(void *, const char *, bool, const folly::exception_wrapper &amp;) final",
+              "name_html": "userExceptionWrapped",
+              "reimplements": {
+                "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1a1126d3bcf114c4b5fe457fb583d0c784",
+                "text_html": "userExceptionWrapped"
+              },
+              "param": [
+                {
+                  "type_html": "void *"
+                },
+                {
+                  "type_html": "const char *"
+                },
+                {
+                  "type_html": "bool"
+                },
+                {
+                  "type_html": "const folly::exception_wrapper &amp;"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "line": "206",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "bodystart": "206",
+                "bodyend": "210"
+              },
+              "definition": {
+                "simple_html": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final",
+                "simple_raw": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&) final",
+                "detailed_html": "inline virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final final",
+                "detailed_raw": "inline virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&) final final",
+                "original_definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
+                "original_argsstring_html": "(void *, const char *, bool, const folly::exception_wrapper &amp;) final"
+              },
+              "filepath": "fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
+              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/userExceptionWrapped",
+              "parentid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks",
               "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped"
             }
           ],
@@ -515,7 +515,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "47",
-                "column": "1",
+                "column": "23",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "47",
                 "bodyend": "49"
@@ -578,7 +578,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "57",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "57",
                 "bodyend": "62"
@@ -636,7 +636,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "63",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "63",
                 "bodyend": "66"
@@ -691,7 +691,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "71",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "71",
                 "bodyend": "71"
@@ -749,7 +749,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "76",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "76",
                 "bodyend": "76"
@@ -810,7 +810,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "87",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "87",
                 "bodyend": "90"
@@ -824,7 +824,7 @@
                 "original_argsstring_html": "(void *, const char *, const SerializedMessage &amp;)"
               },
               "description": {
-                "detailed_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p><p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p><p>Only called for Cpp2. </p>"
+                "detailed_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>\n<p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p>\n<p>Only called for Cpp2. </p>"
               },
               "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onReadData",
               "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onReadData",
@@ -835,7 +835,7 @@
           "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
           "minprot": "public",
           "displayname_html": "onReadData",
-          "brief_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>",
+          "brief_html": "<p>Called before postRead, after reading arguments (server) / after reading reply (client), with the actual (unparsed, serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData",
           "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onReadData"
@@ -874,7 +874,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "95",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "95",
                 "bodyend": "99"
@@ -932,7 +932,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "104",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "104",
                 "bodyend": "104"
@@ -993,7 +993,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "115",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "115",
                 "bodyend": "118"
@@ -1007,7 +1007,7 @@
                 "original_argsstring_html": "(void *, const char *, const SerializedMessage &amp;)"
               },
               "description": {
-                "detailed_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p><p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p><p>Only called for Cpp2. </p>"
+                "detailed_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n<p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p>\n<p>Only called for Cpp2. </p>"
               },
               "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onWriteData",
               "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onWriteData",
@@ -1018,7 +1018,7 @@
           "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
           "minprot": "public",
           "displayname_html": "onWriteData",
-          "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>",
+          "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData",
           "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onWriteData"
@@ -1054,7 +1054,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "line": "123",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
                 "bodystart": "123",
                 "bodyend": "124"
@@ -1111,11 +1111,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "129",
-                "column": "1",
+                "line": "131",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "129",
-                "bodyend": "129"
+                "bodystart": "131",
+                "bodyend": "131"
               },
               "definition": {
                 "simple_html": "virtual void onInteractionTerminate(void*, int64_t)",
@@ -1126,7 +1126,7 @@
                 "original_argsstring_html": "(void *, int64_t)"
               },
               "description": {
-                "detailed_html": "<p>Called when an interaction is terminated. </p>"
+                "detailed_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>"
               },
               "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
               "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
@@ -1137,10 +1137,60 @@
           "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
           "minprot": "public",
           "displayname_html": "onInteractionTerminate",
-          "brief_html": "<p>Called when an interaction is terminated. </p>",
+          "brief_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
           "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "wantNonPerRequestCallbacks",
+          "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::wantNonPerRequestCallbacks",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1a9f045a031188190dd6720bf9d12bc451",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "virtual",
+              "type_html": "bool",
+              "definition_html": "virtual bool apache::thrift::TProcessorEventHandler::wantNonPerRequestCallbacks",
+              "argsstring_html": "() const",
+              "name_html": "wantNonPerRequestCallbacks",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "line": "144",
+                "column": "16",
+                "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "bodystart": "144",
+                "bodyend": "144"
+              },
+              "definition": {
+                "simple_html": "virtual bool wantNonPerRequestCallbacks() const",
+                "simple_raw": "virtual bool wantNonPerRequestCallbacks() const",
+                "detailed_html": "inline virtual bool wantNonPerRequestCallbacks() const",
+                "detailed_raw": "inline virtual bool wantNonPerRequestCallbacks() const",
+                "original_definition_html": "virtual bool apache::thrift::TProcessorEventHandler::wantNonPerRequestCallbacks",
+                "original_argsstring_html": "() const"
+              },
+              "description": {
+                "detailed_html": "<p>defaults to false.</p>\n<p>When false, <code>getContext</code> is only called as part of a thrift request (meaning typically has a connection + header + folly::RequestContext available etc). When true, <code>getContext</code> is also called as part of a non-thrift request, such as interaction terminate. Impl must init/free contexts without assuming the existence of per-request objects like header / folly::RequestContext. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/TProcessorEventHandler/wantNonPerRequestCallbacks",
+              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/wantNonPerRequestCallbacks",
+              "parentid": "classapache_1_1thrift_1_1TProcessorEventHandler",
+              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::wantNonPerRequestCallbacks"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks",
+          "minprot": "public",
+          "displayname_html": "wantNonPerRequestCallbacks",
+          "brief_html": "<p>defaults to false.</p>\n",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks",
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/wantNonPerRequestCallbacks"
         },
         {
           "kind": "overloadset",
@@ -1169,11 +1219,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "134",
-                "column": "1",
+                "line": "149",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "134",
-                "bodyend": "134"
+                "bodystart": "149",
+                "bodyend": "149"
               },
               "definition": {
                 "simple_html": "virtual void handlerError(void*, const char*)",
@@ -1232,11 +1282,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "135",
-                "column": "1",
+                "line": "150",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "135",
-                "bodyend": "138"
+                "bodystart": "150",
+                "bodyend": "153"
               },
               "definition": {
                 "simple_html": "virtual void handlerErrorWrapped(\n    void* ctx, const char* fn_name, const folly::exception_wrapper&amp;)",

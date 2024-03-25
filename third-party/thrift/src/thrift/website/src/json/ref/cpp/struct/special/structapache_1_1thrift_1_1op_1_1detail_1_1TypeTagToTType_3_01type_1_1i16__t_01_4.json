@@ -12,11 +12,11 @@
   "tparams": [],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "60",
+    "line": "66",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "60",
-    "bodyend": "62"
+    "bodystart": "66",
+    "bodyend": "68"
   },
   "namespacednames_html": [
     "apache",
@@ -33,6 +33,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1i16__t_01_4_1ab6e910eefb3b015676a98e08fd2dacde",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
       "type_html": "constexpr TType",
       "definition_html": "constexpr TType apache::thrift::op::detail::TypeTagToTType&lt; type::i16_t &gt;::value",
@@ -41,10 +42,10 @@
       "initializer_html": "= TType::T_I16",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "61",
-        "column": "1",
+        "line": "67",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "61",
+        "bodystart": "67",
         "bodyend": "-1"
       }
     }
@@ -54,7 +55,6 @@
   "declaration_html": "template &lt;&gt; struct TypeTagToTType&lt; type::i16_t &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1i16__t_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1i16__t_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType",
   "overloadgroups": [],
   "free_overloadgroups": []
 }

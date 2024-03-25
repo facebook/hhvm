@@ -15,6 +15,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4_1a2a5b15d307f3ab47ac42d4c9ecd802ab",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -43,11 +44,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "80",
-        "column": "1",
+        "line": "85",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "80",
-        "bodyend": "82"
+        "bodystart": "85",
+        "bodyend": "87"
       },
       "definition": {
         "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
@@ -63,11 +64,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "78",
+    "line": "83",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "78",
-    "bodyend": "83"
+    "bodystart": "83",
+    "bodyend": "88"
   },
   "namespacednames_html": [
     "apache",
@@ -98,6 +99,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1EqualTo_3_01type_1_1void__t_01_4_1a2a5b15d307f3ab47ac42d4c9ecd802ab",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -126,11 +128,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "80",
-                "column": "1",
+                "line": "85",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "80",
-                "bodyend": "82"
+                "bodystart": "85",
+                "bodyend": "87"
               },
               "definition": {
                 "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",

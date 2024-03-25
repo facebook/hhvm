@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a30774b530abe861586498bc7be9e01a1",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "233",
-        "column": "1",
+        "line": "178",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "233",
-        "bodyend": "235"
+        "bodystart": "178",
+        "bodyend": "180"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp;) const",
@@ -51,6 +52,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a65f19878ee4876b8c08693bf3f4b4cff",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -73,11 +75,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "240",
-        "column": "1",
+        "line": "185",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "240",
-        "bodyend": "245"
+        "bodystart": "185",
+        "bodyend": "190"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",

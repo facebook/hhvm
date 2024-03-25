@@ -17,11 +17,11 @@
       "name_html": "operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "972",
-        "column": "1",
+        "line": "958",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "972",
-        "bodyend": "972"
+        "bodystart": "958",
+        "bodyend": "958"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*() const",

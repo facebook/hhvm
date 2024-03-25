@@ -50,11 +50,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "810",
-        "column": "1",
+        "line": "1066",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "810",
-        "bodyend": "829"
+        "bodystart": "1066",
+        "bodyend": "1085"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U&gt;\nvoid operator()(Protocol&amp; prot, U&amp; m) const",
@@ -70,11 +70,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "808",
+    "line": "1064",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "808",
-    "bodyend": "830"
+    "bodystart": "1064",
+    "bodyend": "1086"
   },
   "namespacednames_html": [
     "apache",
@@ -91,7 +91,6 @@
   "declaration_html": "template &lt;\n  typename Adapter,\n  typename Tag\n&gt; struct Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -133,11 +132,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "810",
-                "column": "1",
+                "line": "1066",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "810",
-                "bodyend": "829"
+                "bodystart": "1066",
+                "bodyend": "1085"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename U&gt;\nvoid operator()(Protocol&amp; prot, U&amp; m) const",

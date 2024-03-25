@@ -33,12 +33,16 @@
     {
       "refid": "classapache_1_1thrift_1_1TProcessorEventHandler",
       "prot": "public",
-      "text_html": "apache::thrift::TProcessorEventHandler"
+      "text_html": "apache::thrift::TProcessorEventHandler",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandler",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks",
       "prot": "public",
-      "text_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks"
+      "text_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks",
+      "href": "/ref/cpp/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

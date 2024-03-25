@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "encode",
+  "compoundname_html": "apache::thrift::op::detail::AssignPatch::encode",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a1db3d7ca021877140540d264b6c63b32",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Protocol"
+        }
+      ],
+      "type_html": "uint32_t",
+      "definition_html": "uint32_t apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::encode",
+      "argsstring_html": "(Protocol &amp;prot) const",
+      "name_html": "encode",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "115",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "115",
+        "bodyend": "121"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Protocol&gt;\nuint32_t encode(Protocol&amp; prot) const",
+        "simple_raw": "template <class Protocol>\nuint32_t encode(Protocol& prot) const",
+        "detailed_html": "template &lt;class Protocol&gt;\ninline uint32_t encode(Protocol&amp; prot) const",
+        "detailed_raw": "template <class Protocol>\ninline uint32_t encode(Protocol& prot) const",
+        "original_definition_html": "uint32_t apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::encode",
+        "original_argsstring_html": "(Protocol &amp;prot) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/encode",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/encode",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
+      "compoundname_html": "apache::thrift::op::detail::AssignPatch::encode"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AssignPatch/encode",
+  "minprot": "public",
+  "displayname_html": "encode",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/encode",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/encode"
+}

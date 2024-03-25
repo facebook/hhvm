@@ -34,8 +34,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "31",
-        "column": "1"
+        "line": "41",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
@@ -72,8 +72,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "32",
-        "column": "1"
+        "line": "42",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
@@ -110,8 +110,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "33",
-        "column": "1"
+        "line": "43",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
@@ -148,8 +148,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "34",
-        "column": "1"
+        "line": "44",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
@@ -186,8 +186,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "35",
-        "column": "1"
+        "line": "45",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "36",
-        "column": "1"
+        "line": "46",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
@@ -262,8 +262,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "37",
-        "column": "1"
+        "line": "47",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, float&amp; value) const",
@@ -300,8 +300,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "38",
-        "column": "1"
+        "line": "48",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, double&amp; value) const",
@@ -338,8 +338,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "39",
-        "column": "1"
+        "line": "49",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
@@ -376,8 +376,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "40",
-        "column": "1"
+        "line": "50",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
@@ -414,8 +414,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "41",
-        "column": "1"
+        "line": "51",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, folly::F14FastSet&lt;Value&gt;&amp; value) const",
@@ -452,8 +452,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "42",
-        "column": "1"
+        "line": "52",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(\n    const Object&amp; patch, folly::F14FastMap&lt;Value, Value&gt;&amp; value) const",
@@ -490,8 +490,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "44",
-        "column": "1"
+        "line": "54",
+        "column": "8"
       },
       "definition": {
         "simple_html": "void operator()(const Object&amp; patch, Object&amp; value) const",
@@ -507,11 +507,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-    "line": "29",
+    "line": "39",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-    "bodystart": "29",
-    "bodyend": "45"
+    "bodystart": "39",
+    "bodyend": "55"
   },
   "namespacednames_html": [
     "apache",
@@ -561,8 +561,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "31",
-                "column": "1"
+                "line": "41",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, Value&amp; value) const",
@@ -601,8 +601,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "32",
-                "column": "1"
+                "line": "42",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, bool&amp; value) const",
@@ -641,8 +641,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "33",
-                "column": "1"
+                "line": "43",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, int8_t&amp; value) const",
@@ -681,8 +681,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "34",
-                "column": "1"
+                "line": "44",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, int16_t&amp; value) const",
@@ -721,8 +721,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "35",
-                "column": "1"
+                "line": "45",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, int32_t&amp; value) const",
@@ -761,8 +761,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "36",
-                "column": "1"
+                "line": "46",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, int64_t&amp; value) const",
@@ -801,8 +801,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "37",
-                "column": "1"
+                "line": "47",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, float&amp; value) const",
@@ -841,8 +841,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "38",
-                "column": "1"
+                "line": "48",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, double&amp; value) const",
@@ -881,8 +881,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "39",
-                "column": "1"
+                "line": "49",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, folly::IOBuf&amp; value) const",
@@ -921,8 +921,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "40",
-                "column": "1"
+                "line": "50",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, std::vector&lt;Value&gt;&amp; value) const",
@@ -961,8 +961,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "41",
-                "column": "1"
+                "line": "51",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, folly::F14FastSet&lt;Value&gt;&amp; value) const",
@@ -1001,8 +1001,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "42",
-                "column": "1"
+                "line": "52",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(\n    const Object&amp; patch, folly::F14FastMap&lt;Value, Value&gt;&amp; value) const",
@@ -1041,8 +1041,8 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "44",
-                "column": "1"
+                "line": "54",
+                "column": "8"
               },
               "definition": {
                 "simple_html": "void operator()(const Object&amp; patch, Object&amp; value) const",

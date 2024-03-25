@@ -59,7 +59,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "264",
-        "column": "1",
+        "column": "27",
         "bodyfile": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "bodystart": "264",
         "bodyend": "-1"
@@ -75,7 +75,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "307",
-        "column": "1",
+        "column": "34",
         "bodyfile": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "bodystart": "307",
         "bodyend": "-1"

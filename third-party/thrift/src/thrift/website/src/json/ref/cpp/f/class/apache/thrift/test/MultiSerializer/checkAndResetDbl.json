@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "258",
-        "column": "1",
+        "line": "257",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
         "bodystart": "127",
         "bodyend": "132"

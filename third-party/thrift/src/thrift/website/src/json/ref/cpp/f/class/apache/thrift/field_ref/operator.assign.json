@@ -4,12 +4,13 @@
   "compoundname_html": "apache::thrift::field_ref::operator=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1field__ref_1a00b08566db255e7cbb7923dd859ddf6d",
+      "refid": "classapache_1_1thrift_1_1field__ref_1a271cf586530f4b751d41e6e069b9f78c",
       "prot": "public",
       "static": "no",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -19,7 +20,7 @@
       ],
       "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; <code>value_type</code> &amp;, U &amp;&amp; &gt;::<code>value</code>, <code>field_ref</code> &amp; &gt;",
       "definition_html": "FOLLY_ERASE std::enable_if_t&lt;std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, field_ref&amp;&gt; apache::thrift::field_ref&lt; T &gt;::operator=",
-      "argsstring_html": "(U &amp;&amp;value) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &amp;&amp;&gt;::value)",
+      "argsstring_html": "(U &amp;&amp;value) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &amp;&amp; &gt;::value)",
       "name_html": "operator=",
       "param": [
         {
@@ -29,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "301",
-        "column": "1",
+        "line": "294",
+        "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "301",
-        "bodyend": "306"
+        "bodystart": "294",
+        "bodyend": "299"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE\n    std::enable_if_t&lt;std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, field_ref&amp;&gt;\n    operator=(U&amp;&amp; value)",
@@ -41,7 +42,7 @@
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE\n    std::enable_if_t&lt;std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, field_ref&amp;&gt;\n    operator=(U&amp;&amp; value) noexcept(\n        (std::is_nothrow_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value))",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE\n    std::enable_if_t<std::is_assignable<value_type&, U&&>::value, field_ref&>\n    operator=(U&& value) noexcept(\n        (std::is_nothrow_assignable<value_type&, U&&>::value))",
         "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt;std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, field_ref&amp;&gt; apache::thrift::field_ref&lt; T &gt;::operator=",
-        "original_argsstring_html": "(U &amp;&amp;value) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &amp;&amp;&gt;::value)"
+        "original_argsstring_html": "(U &amp;&amp;value) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &amp;&amp; &gt;::value)"
       },
       "filepath": "fns/class/apache/thrift/field_ref/operator.assign",
       "href": "/ref/cpp/fns/class/apache/thrift/field_ref/operator.assign",
@@ -55,6 +56,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>field_ref</code> &amp;",
       "definition_html": "FOLLY_ERASE field_ref&amp; apache::thrift::field_ref&lt; T &gt;::operator=",
@@ -68,11 +70,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "309",
-        "column": "1",
+        "line": "302",
+        "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "309",
-        "bodyend": "315"
+        "bodystart": "302",
+        "bodyend": "308"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE field_ref&amp; operator=(value_type&amp;&amp; value)",

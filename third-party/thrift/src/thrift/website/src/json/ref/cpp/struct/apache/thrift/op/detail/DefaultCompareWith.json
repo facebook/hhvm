@@ -11,38 +11,26 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "LTag",
-      "defname_html": "LTag"
+      "type_html": "typename LTag"
     },
     {
-      "type_html": "typename",
-      "declname_html": "RTag",
-      "defname_html": "RTag",
+      "type_html": "typename RTag",
       "defval_html": "LTag"
     },
     {
-      "type_html": "typename",
-      "declname_html": "EqualTo",
-      "defname_html": "EqualTo",
+      "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/EqualTo\">EqualTo</a>",
       "defval_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/EqualTo\">EqualTo</a>&lt;LTag, RTag&gt;"
     },
     {
-      "type_html": "typename",
-      "declname_html": "LessThan",
-      "defname_html": "LessThan",
+      "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/LessThan\">LessThan</a>",
       "defval_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/LessThan\">LessThan</a>&lt;LTag, RTag&gt;"
     },
     {
-      "type_html": "typename",
-      "declname_html": "L",
-      "defname_html": "L",
+      "type_html": "typename L",
       "defval_html": "type::native_type&lt;LTag&gt;"
     },
     {
-      "type_html": "typename",
-      "declname_html": "R",
-      "defname_html": "R",
+      "type_html": "typename R",
       "defval_html": "type::native_type&lt;RTag&gt;"
     },
     {
@@ -55,6 +43,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultCompareWith_1a733c90deea5e7b764863c00d4bb1e73e",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -75,11 +64,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "167",
-        "column": "1",
+        "line": "172",
+        "column": "29",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "167",
-        "bodyend": "174"
+        "bodystart": "172",
+        "bodyend": "179"
       },
       "definition": {
         "simple_html": "constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
@@ -95,11 +84,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "166",
+    "line": "171",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "166",
-    "bodyend": "179"
+    "bodystart": "171",
+    "bodyend": "184"
   },
   "namespacednames_html": [
     "apache",
@@ -122,10 +111,10 @@
       "name_html": "equalTo",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "177",
-        "column": "1",
+        "line": "182",
+        "column": "11",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "177",
+        "bodystart": "182",
         "bodyend": "-1"
       }
     },
@@ -140,10 +129,10 @@
       "name_html": "lessThan",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "178",
-        "column": "1",
+        "line": "183",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "178",
+        "bodystart": "183",
         "bodyend": "-1"
       }
     }
@@ -166,6 +155,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultCompareWith_1a733c90deea5e7b764863c00d4bb1e73e",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -186,11 +176,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "167",
-                "column": "1",
+                "line": "172",
+                "column": "29",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "167",
-                "bodyend": "174"
+                "bodystart": "172",
+                "bodyend": "179"
               },
               "definition": {
                 "simple_html": "constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",

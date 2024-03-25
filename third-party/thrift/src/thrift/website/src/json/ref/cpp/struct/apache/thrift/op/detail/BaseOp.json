@@ -8,10 +8,94 @@
     {
       "prot": "public",
       "virtual": "non-virtual",
-      "text_html": "BaseErasedOp"
+      "text_html": "type::detail::BaseErasedOp"
     }
   ],
   "derivedcompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::ContainerOp&lt; type::map&lt; KTag, VTag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::ContainerOp&lt; type::list&lt; VTag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::ContainerOp&lt; type::set&lt; KTag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::float_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::bool_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::i64_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::i16_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::double_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::i32_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::NumberOp&lt; type::byte_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::StringOp&lt; type::cpp_type&lt; T, type::binary_t &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::StringOp&lt; type::string_t &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::StringOp&lt; type::cpp_type&lt; T, type::string_t &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::StringOp&lt; type::binary_t &gt;"
+    },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp",
       "prot": "public",
@@ -35,12 +119,6 @@
       "prot": "public",
       "virtual": "non-virtual",
       "text_html": "apache::thrift::op::detail::StringOp&lt; Tag &gt;"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp",
-      "prot": "public",
-      "virtual": "non-virtual",
-      "text_html": "apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;"
     }
   ],
   "includes": {
@@ -50,9 +128,7 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "Tag",
-      "defname_html": "Tag"
+      "type_html": "typename Tag"
     }
   ],
   "types": [
@@ -66,7 +142,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "55",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "55",
         "bodyend": "-1"
@@ -96,7 +172,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "56",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "56",
         "bodyend": "56"
@@ -133,7 +209,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "57",
-        "column": "1",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "57",
         "bodyend": "57"
@@ -170,7 +246,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "58",
-        "column": "1",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "58",
         "bodyend": "58"
@@ -215,7 +291,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "60",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "60",
         "bodyend": "62"
@@ -263,7 +339,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "64",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "64",
         "bodyend": "66"
@@ -300,7 +376,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "68",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "68",
         "bodyend": "68"
@@ -341,7 +417,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "69",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "69",
         "bodyend": "77"
@@ -378,7 +454,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "78",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "78",
         "bodyend": "78"
@@ -415,7 +491,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "79",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "79",
         "bodyend": "79"
@@ -456,7 +532,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "80",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "80",
         "bodyend": "80"
@@ -497,7 +573,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "81",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "81",
         "bodyend": "85"
@@ -538,7 +614,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "87",
-        "column": "1",
+        "column": "34",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "87",
         "bodyend": "94"
@@ -584,7 +660,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "98",
-        "column": "1",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "98",
         "bodyend": "100"
@@ -630,7 +706,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "line": "102",
-        "column": "1",
+        "column": "28",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
         "bodystart": "102",
         "bodyend": "105"
@@ -699,7 +775,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "56",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "56",
                 "bodyend": "56"
@@ -738,7 +814,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "57",
-                "column": "1",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "57",
                 "bodyend": "57"
@@ -791,7 +867,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "58",
-                "column": "1",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "58",
                 "bodyend": "58"
@@ -852,7 +928,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "60",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "60",
                 "bodyend": "62"
@@ -902,7 +978,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "64",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "64",
                 "bodyend": "66"
@@ -955,7 +1031,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "68",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "68",
                 "bodyend": "68"
@@ -1012,7 +1088,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "69",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "69",
                 "bodyend": "77"
@@ -1065,7 +1141,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "78",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "78",
                 "bodyend": "78"
@@ -1118,7 +1194,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "79",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "79",
                 "bodyend": "79"
@@ -1175,7 +1251,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "80",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "80",
                 "bodyend": "80"
@@ -1232,7 +1308,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "81",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "81",
                 "bodyend": "85"
@@ -1289,7 +1365,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "87",
-                "column": "1",
+                "column": "34",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "87",
                 "bodyend": "94"
@@ -1351,7 +1427,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "98",
-                "column": "1",
+                "column": "24",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "98",
                 "bodyend": "100"
@@ -1399,7 +1475,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "102",
-                "column": "1",
+                "column": "28",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "102",
                 "bodyend": "105"

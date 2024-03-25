@@ -17,8 +17,8 @@
       "name_html": "checkIntEnc",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "262",
-        "column": "1",
+        "line": "261",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
         "bodystart": "146",
         "bodyend": "149"

@@ -35,6 +35,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultEqualTo_1ac07dfd66e54859aa08c33c7411dc9525",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -55,11 +56,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "242",
-        "column": "1",
+        "line": "247",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "242",
-        "bodyend": "244"
+        "bodystart": "247",
+        "bodyend": "249"
       },
       "definition": {
         "simple_html": "constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
@@ -75,11 +76,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "241",
+    "line": "246",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "241",
-    "bodyend": "248"
+    "bodystart": "246",
+    "bodyend": "253"
   },
   "namespacednames_html": [
     "apache",
@@ -102,10 +103,10 @@
       "name_html": "compareWith",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "247",
-        "column": "1",
+        "line": "252",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "247",
+        "bodystart": "252",
         "bodyend": "-1"
       }
     }
@@ -128,6 +129,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultEqualTo_1ac07dfd66e54859aa08c33c7411dc9525",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -148,11 +150,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "242",
-                "column": "1",
+                "line": "247",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "242",
-                "bodyend": "244"
+                "bodystart": "247",
+                "bodyend": "249"
               },
               "definition": {
                 "simple_html": "constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",

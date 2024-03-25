@@ -5,7 +5,7 @@
   "functions": [
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1aedf6598acafad1827d8c17e4e78c7bbc",
-      "prot": "public",
+      "prot": "private",
       "static": "no",
       "const": "no",
       "explicit": "no",
@@ -29,17 +29,17 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "100",
-        "column": "1",
+        "line": "156",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "100",
-        "bodyend": "103"
+        "bodystart": "156",
+        "bodyend": "159"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid prepend(C&amp;&amp; lhs)",
         "simple_raw": "template <typename C = T>\nvoid prepend(C&& lhs)",
-        "detailed_html": "template &lt;typename C = T&gt;\ninline void prepend(C&amp;&amp; lhs)",
-        "detailed_raw": "template <typename C = T>\ninline void prepend(C&& lhs)",
+        "detailed_html": "template &lt;typename C = T&gt; private inline void prepend(C&amp;&amp; lhs)",
+        "detailed_raw": "template <typename C = T> private inline void prepend(C&& lhs)",
         "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::prepend",
         "original_argsstring_html": "(C &amp;&amp;lhs)"
       },
@@ -53,7 +53,7 @@
     }
   ],
   "filepath": "f/class/apache/thrift/op/detail/ListPatch/prepend",
-  "minprot": "public",
+  "minprot": "private",
   "displayname_html": "prepend",
   "brief_html": "<p>Prepends a list. </p>",
   "groupname_html": "",

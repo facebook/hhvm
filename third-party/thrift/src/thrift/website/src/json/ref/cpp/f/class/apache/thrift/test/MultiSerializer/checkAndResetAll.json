@@ -17,8 +17,8 @@
       "name_html": "checkAndResetAll",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "260",
-        "column": "1",
+        "line": "259",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
         "bodystart": "137",
         "bodyend": "141"

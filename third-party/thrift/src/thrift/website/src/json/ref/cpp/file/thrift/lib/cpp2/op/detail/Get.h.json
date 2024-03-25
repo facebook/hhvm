@@ -5,6 +5,10 @@
   "compoundname_html": "Get.h",
   "includes": [
     {
+      "local": "no",
+      "text_html": "optional"
+    },
+    {
       "refid": "FieldRef_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/FieldRef.h"
@@ -24,19 +28,11 @@
   ],
   "innerclass": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Get",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::Get"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::GetOrdinalImpl"
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::GetValueOrNull"
+      "text_html": "apache::thrift::op::detail::GetValueOrNull",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/GetValueOrNull",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

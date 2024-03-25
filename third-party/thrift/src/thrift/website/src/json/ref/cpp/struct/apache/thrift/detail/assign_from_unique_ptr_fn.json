@@ -17,6 +17,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -39,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1688",
-        "column": "1",
+        "line": "1672",
+        "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1688",
-        "bodyend": "1693"
+        "bodystart": "1672",
+        "bodyend": "1677"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE void operator()(\n    optional_boxed_field_ref&lt;T&gt; ref,\n    std::unique_ptr&lt;typename folly::remove_cvref_t&lt;T&gt;::element_type&gt; ptr) const",
@@ -59,11 +60,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1686",
+    "line": "1670",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1686",
-    "bodyend": "1694"
+    "bodystart": "1670",
+    "bodyend": "1678"
   },
   "namespacednames_html": [
     "apache",
@@ -95,6 +96,7 @@
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
+              "noexcept": "yes",
               "virtual": "non-virtual",
               "tparams": [
                 {
@@ -117,11 +119,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1688",
-                "column": "1",
+                "line": "1672",
+                "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1688",
-                "bodyend": "1693"
+                "bodystart": "1672",
+                "bodyend": "1677"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE void operator()(\n    optional_boxed_field_ref&lt;T&gt; ref,\n    std::unique_ptr&lt;typename folly::remove_cvref_t&lt;T&gt;::element_type&gt; ptr) const",

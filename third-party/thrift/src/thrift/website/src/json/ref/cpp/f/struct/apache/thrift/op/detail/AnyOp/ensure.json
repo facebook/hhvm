@@ -32,7 +32,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "line": "48",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/AnyOp.h",
         "bodystart": "48",
         "bodyend": "50"
@@ -89,7 +89,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "201",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "201",
         "bodyend": "207"
@@ -101,56 +101,6 @@
         "detailed_raw": "template <typename J = K, typename U = V>\ninline static V& ensure(T& self, J&& key, U&& val)",
         "original_definition_html": "static V&amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
         "original_argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)"
-      },
-      "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ensure",
-      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ensure",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
-      "compoundname_html": "apache::thrift::op::detail::AnyOp::ensure"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1aed3641d64eef56ddd42f99114ed13682",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "<code>Ptr</code>",
-      "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
-      "argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)",
-      "name_html": "ensure",
-      "param": [
-        {
-          "type_html": "void *",
-          "declname_html": "s"
-        },
-        {
-          "type_html": "<code>FieldId</code>"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "k"
-        },
-        {
-          "type_html": "const <code>Dyn</code> &amp;",
-          "declname_html": "v"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-        "line": "217",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-        "bodystart": "217",
-        "bodyend": "224"
-      },
-      "definition": {
-        "simple_html": "static Ptr ensure(void* s, FieldId, const Dyn&amp; k, const Dyn&amp; v)",
-        "simple_raw": "static Ptr ensure(void* s, FieldId, const Dyn& k, const Dyn& v)",
-        "detailed_html": "inline static Ptr ensure(void* s, FieldId, const Dyn&amp; k, const Dyn&amp; v)",
-        "detailed_raw": "inline static Ptr ensure(void* s, FieldId, const Dyn& k, const Dyn& v)",
-        "original_definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
-        "original_argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ensure",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ensure",
@@ -196,7 +146,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "201",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "201",
         "bodyend": "207"
@@ -246,7 +196,57 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "217",
-        "column": "1",
+        "column": "14",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+        "bodystart": "217",
+        "bodyend": "224"
+      },
+      "definition": {
+        "simple_html": "static Ptr ensure(void* s, FieldId, const Dyn&amp; k, const Dyn&amp; v)",
+        "simple_raw": "static Ptr ensure(void* s, FieldId, const Dyn& k, const Dyn& v)",
+        "detailed_html": "inline static Ptr ensure(void* s, FieldId, const Dyn&amp; k, const Dyn&amp; v)",
+        "detailed_raw": "inline static Ptr ensure(void* s, FieldId, const Dyn& k, const Dyn& v)",
+        "original_definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+        "original_argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ensure",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ensure",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
+      "compoundname_html": "apache::thrift::op::detail::AnyOp::ensure"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1aed3641d64eef56ddd42f99114ed13682",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<code>Ptr</code>",
+      "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+      "argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)",
+      "name_html": "ensure",
+      "param": [
+        {
+          "type_html": "void *",
+          "declname_html": "s"
+        },
+        {
+          "type_html": "<code>FieldId</code>"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "const <code>Dyn</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+        "line": "217",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "217",
         "bodyend": "224"
@@ -297,7 +297,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "line": "160",
-        "column": "1",
+        "column": "14",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructOp.h",
         "bodystart": "160",
         "bodyend": "175"

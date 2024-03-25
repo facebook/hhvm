@@ -25,11 +25,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "129",
-        "column": "1",
+        "line": "131",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "129",
-        "bodyend": "129"
+        "bodystart": "131",
+        "bodyend": "131"
       },
       "definition": {
         "simple_html": "virtual void onInteractionTerminate(void*, int64_t)",
@@ -40,7 +40,7 @@
         "original_argsstring_html": "(void *, int64_t)"
       },
       "description": {
-        "detailed_html": "<p>Called when an interaction is terminated. </p>"
+        "detailed_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>"
       },
       "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
       "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
@@ -51,7 +51,7 @@
   "filepath": "f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
   "minprot": "public",
   "displayname_html": "onInteractionTerminate",
-  "brief_html": "<p>Called when an interaction is terminated. </p>",
+  "brief_html": "<p>Called when an interaction is terminated (not necessarily part of a thrift request, unlike the other callbacks). Must override <code>wantNonPerRequestCallbacks</code> to true to receive callbacks. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
   "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate"

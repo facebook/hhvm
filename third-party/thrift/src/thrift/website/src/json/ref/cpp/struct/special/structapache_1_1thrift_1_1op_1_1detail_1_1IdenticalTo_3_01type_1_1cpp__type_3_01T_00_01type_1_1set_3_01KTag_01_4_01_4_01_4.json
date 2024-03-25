@@ -29,11 +29,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "470",
+    "line": "511",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "469",
-    "bodyend": "470"
+    "bodystart": "512",
+    "bodyend": "512"
   },
   "namespacednames_html": [
     "apache",
@@ -85,11 +85,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "430",
-                "column": "1",
+                "line": "472",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "430",
-                "bodyend": "443"
+                "bodystart": "472",
+                "bodyend": "485"
               },
               "definition": {
                 "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",
@@ -138,11 +138,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "447",
-                "column": "1",
+                "line": "489",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "447",
-                "bodyend": "453"
+                "bodystart": "489",
+                "bodyend": "495"
               },
               "definition": {
                 "simple_html": "static auto createHashMap(const T&amp; set)",
@@ -203,11 +203,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "457",
-                "column": "1",
+                "line": "499",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "457",
-                "bodyend": "464"
+                "bodystart": "499",
+                "bodyend": "506"
               },
               "definition": {
                 "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",

@@ -29,11 +29,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "422",
+    "line": "451",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "421",
-    "bodyend": "422"
+    "bodystart": "452",
+    "bodyend": "452"
   },
   "namespacednames_html": [
     "apache",
@@ -85,11 +85,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "408",
-                "column": "1",
+                "line": "438",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "408",
-                "bodyend": "413"
+                "bodystart": "438",
+                "bodyend": "443"
               },
               "definition": {
                 "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",

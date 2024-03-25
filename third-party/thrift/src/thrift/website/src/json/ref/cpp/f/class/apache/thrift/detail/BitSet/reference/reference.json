@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "110",
-        "column": "1",
+        "line": "103",
+        "column": "5",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "110",
-        "bodyend": "110"
+        "bodystart": "103",
+        "bodyend": "103"
       },
       "definition": {
         "simple_html": "reference(BitSet&amp; bitSet, const uint8_t bit)",

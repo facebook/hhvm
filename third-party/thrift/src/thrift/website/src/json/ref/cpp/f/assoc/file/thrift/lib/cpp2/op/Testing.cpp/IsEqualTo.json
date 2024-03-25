@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "73",
-        "column": "1",
+        "line": "72",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "73",
-        "bodyend": "76"
+        "bodystart": "72",
+        "bodyend": "75"
       },
       "definition": {
         "simple_html": "template &lt;typename Tag, typename T = type::native_type&lt;Tag&gt;&gt;\nauto IsEqualTo(T expected)",

@@ -36,6 +36,10 @@
     },
     {
       "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Field.h"
+    },
+    {
+      "local": "no",
       "text_html": "thrift/lib/cpp2/type/Id.h"
     },
     {
@@ -47,27 +51,37 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1bad__patch__access",
       "prot": "public",
-      "text_html": "apache::thrift::op::bad_patch_access"
+      "text_html": "apache::thrift::op::bad_patch_access",
+      "href": "/ref/cpp/class/apache/thrift/op/bad_patch_access",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::BasePatch"
+      "text_html": "apache::thrift::op::detail::BasePatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BasePatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseAssignPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::BaseAssignPatch"
+      "text_html": "apache::thrift::op::detail::BaseAssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::BaseClearPatch"
+      "text_html": "apache::thrift::op::detail::BaseClearPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseClearPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseContainerPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::BaseContainerPatch"
+      "text_html": "apache::thrift::op::detail::BaseContainerPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseContainerPatch",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [
@@ -78,6 +92,10 @@
     {
       "refid": "namespaceapache_1_1thrift",
       "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1ident",
+      "text_html": "apache::thrift::ident"
     },
     {
       "refid": "namespaceapache_1_1thrift_1_1op",

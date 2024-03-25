@@ -40,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "407",
-        "column": "1",
+        "line": "455",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "407",
-        "bodyend": "409"
+        "bodystart": "455",
+        "bodyend": "457"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, double i) const",
@@ -60,11 +60,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "405",
+    "line": "453",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "405",
-    "bodyend": "410"
+    "bodystart": "453",
+    "bodyend": "458"
   },
   "namespacednames_html": [
     "apache",
@@ -81,7 +81,6 @@
   "declaration_html": "template &lt;&gt; struct Encode&lt; type::double_t &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -120,11 +119,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "407",
-                "column": "1",
+                "line": "455",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "407",
-                "bodyend": "409"
+                "bodystart": "455",
+                "bodyend": "457"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, double i) const",

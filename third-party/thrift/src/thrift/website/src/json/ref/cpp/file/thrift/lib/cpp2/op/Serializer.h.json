@@ -54,17 +54,23 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1Serializer",
       "prot": "public",
-      "text_html": "apache::thrift::op::Serializer"
+      "text_html": "apache::thrift::op::Serializer",
+      "href": "/ref/cpp/class/apache/thrift/op/Serializer",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer",
       "prot": "public",
-      "text_html": "apache::thrift::op::TagSerializer"
+      "text_html": "apache::thrift::op::TagSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/TagSerializer",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1ProtocolSerializer",
       "prot": "public",
-      "text_html": "apache::thrift::op::ProtocolSerializer"
+      "text_html": "apache::thrift::op::ProtocolSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/ProtocolSerializer",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

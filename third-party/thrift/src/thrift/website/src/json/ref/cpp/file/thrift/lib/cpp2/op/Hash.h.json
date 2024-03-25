@@ -35,24 +35,25 @@
   "href": "/ref/cpp/thrift/lib/cpp2/op/Hash.h",
   "free_vars": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a4e75eda93efb6b9d67fe1a1e2232e80a",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a1c8a7acb64724d5c2b00a809b2fc1f07",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "mutable": "no",
       "tparams": [
         {
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr <code>Hash</code>&lt; Tag &gt;",
-      "definition_html": "FOLLY_INLINE_VARIABLE constexpr Hash&lt;Tag&gt; apache::thrift::op::hash",
+      "type_html": "constexpr <code>Hash</code>&lt; Tag &gt;",
+      "definition_html": "constexpr Hash&lt;Tag&gt; apache::thrift::op::hash",
       "argsstring_html": "",
       "name_html": "hash",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
         "line": "37",
-        "column": "1",
+        "column": "23",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Hash.h",
         "bodystart": "37",
         "bodyend": "-1"

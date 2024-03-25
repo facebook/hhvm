@@ -28,7 +28,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "126",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "126",
         "bodyend": "128"
@@ -71,7 +71,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "129",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "129",
         "bodyend": "133"
@@ -114,7 +114,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "134",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "134",
         "bodyend": "137"
@@ -157,7 +157,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "138",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "138",
         "bodyend": "142"
@@ -200,7 +200,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "143",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "143",
         "bodyend": "146"
@@ -243,7 +243,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "147",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "147",
         "bodyend": "150"
@@ -286,7 +286,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "151",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "151",
         "bodyend": "154"

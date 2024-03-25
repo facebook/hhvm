@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe_1abd69f9ee520db7a7e5c2e90560776098",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "83",
-        "column": "1",
+        "line": "84",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "83",
-        "bodyend": "85"
+        "bodystart": "84",
+        "bodyend": "86"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",

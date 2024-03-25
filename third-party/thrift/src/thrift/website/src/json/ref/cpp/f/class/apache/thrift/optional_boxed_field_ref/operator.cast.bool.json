@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "yes",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE",
       "definition_html": "FOLLY_ERASE apache::thrift::optional_boxed_field_ref&lt; T &gt;::operator bool",
@@ -17,11 +18,11 @@
       "name_html": "operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "953",
-        "column": "1",
+        "line": "939",
+        "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "953",
-        "bodyend": "953"
+        "bodystart": "939",
+        "bodyend": "939"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE operator bool() const",

@@ -17,6 +17,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1645",
-        "column": "1",
+        "line": "1629",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1645",
-        "bodyend": "1647"
+        "bodystart": "1629",
+        "bodyend": "1631"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; ref) const",
@@ -59,6 +60,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -77,11 +79,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1650",
-        "column": "1",
+        "line": "1634",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1650",
-        "bodyend": "1652"
+        "bodystart": "1634",
+        "bodyend": "1636"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(optional_field_ref&lt;T&gt; ref) const",
@@ -97,11 +99,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1643",
+    "line": "1627",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1643",
-    "bodyend": "1653"
+    "bodystart": "1627",
+    "bodyend": "1637"
   },
   "namespacednames_html": [
     "apache",
@@ -133,6 +135,7 @@
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
+              "noexcept": "yes",
               "virtual": "non-virtual",
               "tparams": [
                 {
@@ -151,11 +154,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1645",
-                "column": "1",
+                "line": "1629",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1645",
-                "bodyend": "1647"
+                "bodystart": "1629",
+                "bodyend": "1631"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; ref) const",
@@ -177,6 +180,7 @@
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
+              "noexcept": "yes",
               "virtual": "non-virtual",
               "tparams": [
                 {
@@ -195,11 +199,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1650",
-                "column": "1",
+                "line": "1634",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1650",
-                "bodyend": "1652"
+                "bodystart": "1634",
+                "bodyend": "1636"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nvoid operator()(optional_field_ref&lt;T&gt; ref) const",

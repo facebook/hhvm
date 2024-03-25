@@ -46,47 +46,65 @@
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ContainerOp"
+      "text_html": "apache::thrift::op::detail::ContainerOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ContainerOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ListOp"
+      "text_html": "apache::thrift::op::detail::ListOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/ListOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1list_3_01VTag_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::list&lt; VTag &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::list&lt; VTag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1list_3_01VTag_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1list_3_01VTag_01_4_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::list&lt; VTag &gt; &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::list&lt; VTag &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1list_3_01VTag_01_4_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::SetOp"
+      "text_html": "apache::thrift::op::detail::SetOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/SetOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::set&lt; KTag &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::set&lt; KTag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1set_3_01KTag_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::MapOp"
+      "text_html": "apache::thrift::op::detail::MapOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/MapOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::map&lt; KTag, VTag &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::map&lt; KTag, VTag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

@@ -17,11 +17,11 @@
       "name_html": "ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "286",
-        "column": "1",
+        "line": "402",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "286",
-        "bodyend": "304"
+        "bodystart": "402",
+        "bodyend": "423"
       },
       "definition": {
         "simple_html": "void ensurePatchable()",

@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE bool",
       "definition_html": "FOLLY_ERASE bool apache::thrift::optional_field_ref&lt; T &gt;::has_value",
@@ -17,11 +18,11 @@
       "name_html": "has_value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "622",
-        "column": "1",
+        "line": "613",
+        "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "622",
-        "bodyend": "622"
+        "bodystart": "613",
+        "bodyend": "613"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool has_value() const",

@@ -17,8 +17,8 @@
       "name_html": "checkAnyDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "261",
-        "column": "1",
+        "line": "260",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
         "bodystart": "142",
         "bodyend": "145"

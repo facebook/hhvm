@@ -45,10 +45,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "381",
-        "column": "1",
+        "line": "388",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "381",
+        "bodystart": "388",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8"
@@ -84,11 +84,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "386",
-        "column": "1",
+        "line": "393",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "386",
-        "bodyend": "388"
+        "bodystart": "393",
+        "bodyend": "395"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(required_field_ref&lt;T&gt; field, Struct&amp; s) const",
@@ -130,11 +130,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "391",
-        "column": "1",
+        "line": "398",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "391",
-        "bodyend": "393"
+        "bodystart": "398",
+        "bodyend": "400"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(terse_field_ref&lt;T&gt; field, Struct&amp; s) const",
@@ -176,11 +176,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "396",
-        "column": "1",
+        "line": "403",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "396",
-        "bodyend": "398"
+        "bodystart": "403",
+        "bodyend": "405"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; field, Struct&amp; s) const",
@@ -192,15 +192,107 @@
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
       "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a0ec9d9b39d8a9248d6a153f093822efc",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+      "argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "std::shared_ptr&lt; T &gt; &amp;",
+          "declname_html": "field"
+        },
+        {
+          "type_html": "Struct &amp;",
+          "declname_html": "s"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "407",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "407",
+        "bodyend": "415"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+        "simple_raw": "template <typename T>\nvoid operator()(std::shared_ptr<T>& field, Struct& s) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline void operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+        "detailed_raw": "template <typename T>\ninline void operator()(std::shared_ptr<T>& field, Struct& s) const",
+        "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+        "original_argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1afd9c0d8f3366659421e7ffcca0a5e3d6",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+      "argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "std::unique_ptr&lt; T &gt; &amp;",
+          "declname_html": "field"
+        },
+        {
+          "type_html": "Struct &amp;",
+          "declname_html": "s"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "417",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "417",
+        "bodyend": "425"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+        "simple_raw": "template <typename T>\nvoid operator()(std::unique_ptr<T>& field, Struct& s) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline void operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+        "detailed_raw": "template <typename T>\ninline void operator()(std::unique_ptr<T>& field, Struct& s) const",
+        "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+        "original_argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call"
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "380",
+    "line": "386",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "379",
-    "bodyend": "399"
+    "bodystart": "387",
+    "bodyend": "426"
   },
   "namespacednames_html": [
     "apache",
@@ -226,150 +318,6 @@
           "name_html": "operator()",
           "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
           "functions": [
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a2cada3fbb15e0908be31a98e74a80be1",
-              "prot": "public",
-              "static": "no",
-              "const": "yes",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename T"
-                }
-              ],
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-              "argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const",
-              "name_html": "operator()",
-              "param": [
-                {
-                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; T &gt;",
-                  "declname_html": "field"
-                },
-                {
-                  "type_html": "Struct &amp;",
-                  "declname_html": "s"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "386",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "386",
-                "bodyend": "388"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename T&gt;\nvoid operator()(required_field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "simple_raw": "template <typename T>\nvoid operator()(required_field_ref<T> field, Struct& s) const",
-                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(required_field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "detailed_raw": "template <typename T>\ninline void operator()(required_field_ref<T> field, Struct& s) const",
-                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-                "original_argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const"
-              },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
-              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a31cc1fbb5a637b8696745b98d6d5ffc1",
-              "prot": "public",
-              "static": "no",
-              "const": "yes",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename T"
-                }
-              ],
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-              "argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const",
-              "name_html": "operator()",
-              "param": [
-                {
-                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; T &gt;",
-                  "declname_html": "field"
-                },
-                {
-                  "type_html": "Struct &amp;",
-                  "declname_html": "s"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "391",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "391",
-                "bodyend": "393"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename T&gt;\nvoid operator()(terse_field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "simple_raw": "template <typename T>\nvoid operator()(terse_field_ref<T> field, Struct& s) const",
-                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(terse_field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "detailed_raw": "template <typename T>\ninline void operator()(terse_field_ref<T> field, Struct& s) const",
-                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-                "original_argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const"
-              },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
-              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a2523b8916cda9465a2d164b9fb3fc4df",
-              "prot": "public",
-              "static": "no",
-              "const": "yes",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename T"
-                }
-              ],
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-              "argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const",
-              "name_html": "operator()",
-              "param": [
-                {
-                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; T &gt;",
-                  "declname_html": "field"
-                },
-                {
-                  "type_html": "Struct &amp;",
-                  "declname_html": "s"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "396",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "396",
-                "bodyend": "398"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "simple_raw": "template <typename T>\nvoid operator()(field_ref<T> field, Struct& s) const",
-                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(field_ref&lt;T&gt; field, Struct&amp; s) const",
-                "detailed_raw": "template <typename T>\ninline void operator()(field_ref<T> field, Struct& s) const",
-                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
-                "original_argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const"
-              },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
-              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
-            },
             {
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearOptionalField_1ac169c2bb54e88eda1260c5c9d61ad4ae",
               "prot": "public",
@@ -401,11 +349,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "327",
-                "column": "1",
+                "line": "322",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "327",
-                "bodyend": "329"
+                "bodystart": "322",
+                "bodyend": "324"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(optional_boxed_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -451,11 +399,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "331",
-                "column": "1",
+                "line": "326",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "331",
-                "bodyend": "333"
+                "bodystart": "326",
+                "bodyend": "328"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(optional_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -502,11 +450,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "335",
-                "column": "1",
+                "line": "330",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "335",
-                "bodyend": "340"
+                "bodystart": "330",
+                "bodyend": "335"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Union&gt;\nvoid operator()(union_field_ref&lt;T&gt; field, Union&amp; u) const",
@@ -552,11 +500,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "342",
-                "column": "1",
+                "line": "337",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "342",
-                "bodyend": "344"
+                "bodystart": "337",
+                "bodyend": "339"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(terse_intern_boxed_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -572,7 +520,7 @@
               "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearOptionalField_1adf7cdfefb18fcf318fe8b9695c5c8a78",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a2cada3fbb15e0908be31a98e74a80be1",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -582,14 +530,155 @@
               "tparams": [
                 {
                   "type_html": "typename T"
-                },
-                {
-                  "type_html": "typename Struct"
                 }
               ],
               "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
-              "argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;) const",
+              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; T &gt;",
+                  "declname_html": "field"
+                },
+                {
+                  "type_html": "Struct &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "393",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "393",
+                "bodyend": "395"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(required_field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "simple_raw": "template <typename T>\nvoid operator()(required_field_ref<T> field, Struct& s) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(required_field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(required_field_ref<T> field, Struct& s) const",
+                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
+              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a31cc1fbb5a637b8696745b98d6d5ffc1",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; T &gt;",
+                  "declname_html": "field"
+                },
+                {
+                  "type_html": "Struct &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "398",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "398",
+                "bodyend": "400"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(terse_field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "simple_raw": "template <typename T>\nvoid operator()(terse_field_ref<T> field, Struct& s) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(terse_field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(terse_field_ref<T> field, Struct& s) const",
+                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
+              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a2523b8916cda9465a2d164b9fb3fc4df",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; T &gt;",
+                  "declname_html": "field"
+                },
+                {
+                  "type_html": "Struct &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "403",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "403",
+                "bodyend": "405"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "simple_raw": "template <typename T>\nvoid operator()(field_ref<T> field, Struct& s) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(field_ref&lt;T&gt; field, Struct&amp; s) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(field_ref<T> field, Struct& s) const",
+                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
+              "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1a0ec9d9b39d8a9248d6a153f093822efc",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
               "name_html": "operator()",
               "param": [
                 {
@@ -597,32 +686,33 @@
                   "declname_html": "field"
                 },
                 {
-                  "type_html": "Struct &amp;"
+                  "type_html": "Struct &amp;",
+                  "declname_html": "s"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "346",
-                "column": "1",
+                "line": "407",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "346",
-                "bodyend": "348"
+                "bodystart": "407",
+                "bodyend": "415"
               },
               "definition": {
-                "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp;) const",
-                "simple_raw": "template <typename T, typename Struct>\nvoid operator()(std::shared_ptr<T>& field, Struct&) const",
-                "detailed_html": "template &lt;typename T, typename Struct&gt;\ninline void operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp;) const",
-                "detailed_raw": "template <typename T, typename Struct>\ninline void operator()(std::shared_ptr<T>& field, Struct&) const",
-                "original_definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
-                "original_argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;) const"
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+                "simple_raw": "template <typename T>\nvoid operator()(std::shared_ptr<T>& field, Struct& s) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(std::shared_ptr<T>& field, Struct& s) const",
+                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const"
               },
-              "filepath": "fns/struct/apache/thrift/op/detail/ClearOptionalField/operator.call",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ClearOptionalField/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearOptionalField",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
               "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearOptionalField_1a199090d8862bf40c229b6b61ff70ddf1",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8_1afd9c0d8f3366659421e7ffcca0a5e3d6",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -632,14 +722,11 @@
               "tparams": [
                 {
                   "type_html": "typename T"
-                },
-                {
-                  "type_html": "typename Struct"
                 }
               ],
               "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
-              "argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;) const",
+              "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+              "argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
               "name_html": "operator()",
               "param": [
                 {
@@ -647,28 +734,29 @@
                   "declname_html": "field"
                 },
                 {
-                  "type_html": "Struct &amp;"
+                  "type_html": "Struct &amp;",
+                  "declname_html": "s"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "350",
-                "column": "1",
+                "line": "417",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "350",
-                "bodyend": "352"
+                "bodystart": "417",
+                "bodyend": "425"
               },
               "definition": {
-                "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp;) const",
-                "simple_raw": "template <typename T, typename Struct>\nvoid operator()(std::unique_ptr<T>& field, Struct&) const",
-                "detailed_html": "template &lt;typename T, typename Struct&gt;\ninline void operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp;) const",
-                "detailed_raw": "template <typename T, typename Struct>\ninline void operator()(std::unique_ptr<T>& field, Struct&) const",
-                "original_definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
-                "original_argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;) const"
+                "simple_html": "template &lt;typename T&gt;\nvoid operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+                "simple_raw": "template <typename T>\nvoid operator()(std::unique_ptr<T>& field, Struct& s) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline void operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp; s) const",
+                "detailed_raw": "template <typename T>\ninline void operator()(std::unique_ptr<T>& field, Struct& s) const",
+                "original_definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
+                "original_argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const"
               },
-              "filepath": "fns/struct/apache/thrift/op/detail/ClearOptionalField/operator.call",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ClearOptionalField/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearOptionalField",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
               "compoundname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()"
             }
           ],

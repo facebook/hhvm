@@ -22,8 +22,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "130",
-        "column": "1"
+        "line": "166",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BaseEnsurePatch(const BaseEnsurePatch&amp;)",
@@ -46,6 +46,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "no",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "",
       "definition_html": "apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::BaseEnsurePatch",
@@ -58,8 +59,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "131",
-        "column": "1"
+        "line": "167",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BaseEnsurePatch(BaseEnsurePatch&amp;&amp;)",

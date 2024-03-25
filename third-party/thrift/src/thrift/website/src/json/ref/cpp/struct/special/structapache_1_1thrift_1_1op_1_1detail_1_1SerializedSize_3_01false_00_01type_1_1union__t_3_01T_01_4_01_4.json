@@ -44,11 +44,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "239",
-        "column": "1",
+        "line": "261",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "239",
-        "bodyend": "241"
+        "bodystart": "261",
+        "bodyend": "263"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
@@ -64,11 +64,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "237",
+    "line": "259",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "237",
-    "bodyend": "242"
+    "bodystart": "259",
+    "bodyend": "264"
   },
   "namespacednames_html": [
     "apache",
@@ -85,7 +85,6 @@
   "declaration_html": "template &lt; typename T &gt;\nstruct SerializedSize&lt; false, type::union_t&lt; T &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1union__t_3_01T_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01false_00_01type_1_1union__t_3_01T_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -124,11 +123,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "239",
-                "column": "1",
+                "line": "261",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "239",
-                "bodyend": "241"
+                "bodystart": "261",
+                "bodyend": "263"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",

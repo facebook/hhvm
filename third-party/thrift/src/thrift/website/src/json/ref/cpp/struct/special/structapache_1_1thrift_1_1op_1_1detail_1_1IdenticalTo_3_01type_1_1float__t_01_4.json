@@ -22,11 +22,11 @@
   "tparams": [],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "277",
+    "line": "282",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "277",
-    "bodyend": "277"
+    "bodystart": "282",
+    "bodyend": "282"
   },
   "namespacednames_html": [
     "apache",
@@ -78,11 +78,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "269",
-                "column": "1",
+                "line": "274",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "269",
-                "bodyend": "274"
+                "bodystart": "274",
+                "bodyend": "279"
               },
               "definition": {
                 "simple_html": "bool operator()(F lhs, F rhs) const",

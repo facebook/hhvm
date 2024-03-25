@@ -32,6 +32,10 @@
     },
     {
       "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Field.h"
+    },
+    {
+      "local": "no",
       "text_html": "thrift/lib/cpp2/type/NativeType.h"
     },
     {
@@ -45,59 +49,60 @@
   ],
   "innerclass": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1is__optional__type",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::is_optional_type"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1is__optional__type_3_01optional__field__ref_3_01T_01_4_01_4",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::is_optional_type&lt; optional_field_ref&lt; T &gt; &gt;"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1is__optional__type_3_01optional__boxed__field__ref_3_01T_01_4_01_4",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::is_optional_type&lt; optional_boxed_field_ref&lt; T &gt; &gt;"
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Create"
+      "text_html": "apache::thrift::op::detail::Create",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Create",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Ensure",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Ensure"
+      "text_html": "apache::thrift::op::detail::Ensure",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Ensure",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01Id_00_01void_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Ensure&lt; Id, void &gt;"
+      "text_html": "apache::thrift::op::detail::Ensure&lt; Id, void &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01Id_00_01void_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Ensure&lt; void, void &gt;"
+      "text_html": "apache::thrift::op::detail::Ensure&lt; void, void &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Create&lt; type::adapted&lt; Adapter, Tag &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::Create&lt; type::adapted&lt; Adapter, Tag &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

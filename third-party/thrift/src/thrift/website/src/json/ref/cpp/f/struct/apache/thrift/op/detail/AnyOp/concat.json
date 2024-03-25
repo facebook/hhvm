@@ -36,7 +36,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "189",
-        "column": "1",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "189",
         "bodyend": "194"
@@ -87,7 +87,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "189",
-        "column": "1",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "189",
         "bodyend": "194"
@@ -138,7 +138,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "189",
-        "column": "1",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "189",
         "bodyend": "194"
@@ -189,7 +189,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "189",
-        "column": "1",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "bodystart": "189",
         "bodyend": "194"

@@ -7,6 +7,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1HashProtocol_1abe56abbe2ef758c7eaee945d4816a495",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
@@ -18,7 +19,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "120",
-        "column": "1",
+        "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "120",
         "bodyend": "120"

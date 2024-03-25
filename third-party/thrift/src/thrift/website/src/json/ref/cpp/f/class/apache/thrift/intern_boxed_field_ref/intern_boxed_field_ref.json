@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE",
       "definition_html": "FOLLY_ERASE apache::thrift::intern_boxed_field_ref&lt; T &gt;::intern_boxed_field_ref",
@@ -36,11 +37,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1183",
-        "column": "1",
+        "line": "1167",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1183",
-        "bodyend": "1188"
+        "bodystart": "1167",
+        "bodyend": "1172"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE intern_boxed_field_ref(\n    T value,\n    get_default_t get_default,\n    typename BitRef::Isset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -63,6 +64,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE",
       "definition_html": "FOLLY_ERASE apache::thrift::intern_boxed_field_ref&lt; T &gt;::intern_boxed_field_ref",
@@ -89,11 +91,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1190",
-        "column": "1",
+        "line": "1174",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1190",
-        "bodyend": "1195"
+        "bodystart": "1174",
+        "bodyend": "1179"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE intern_boxed_field_ref(\n    T value,\n    get_default_t get_default,\n    typename BitRef::AtomicIsset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -116,6 +118,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -138,11 +141,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1198",
-        "column": "1",
+        "line": "1182",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1198",
-        "bodyend": "1200"
+        "bodystart": "1182",
+        "bodyend": "1184"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE intern_boxed_field_ref(const intern_boxed_field_ref&lt;U&gt;&amp; other)",

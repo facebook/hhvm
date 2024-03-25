@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "67",
-        "column": "1",
+        "line": "66",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "67",
-        "bodyend": "69"
+        "bodystart": "66",
+        "bodyend": "68"
       },
       "definition": {
         "simple_html": "void DescribeNegationTo(std::ostream* os) const",

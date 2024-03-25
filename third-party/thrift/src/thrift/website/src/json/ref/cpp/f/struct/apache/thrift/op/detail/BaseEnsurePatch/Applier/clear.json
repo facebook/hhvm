@@ -17,11 +17,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "108",
-        "column": "1",
+        "line": "118",
+        "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "108",
-        "bodyend": "108"
+        "bodystart": "118",
+        "bodyend": "118"
       },
       "definition": {
         "simple_html": "void clear()",

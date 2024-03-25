@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4_1aa74b8cf6592d711dfac91c220769817a",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -34,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "90",
-        "column": "1",
+        "line": "91",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "90",
-        "bodyend": "92"
+        "bodystart": "91",
+        "bodyend": "93"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr void operator()(Id, T&amp; val) const",
@@ -57,6 +58,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4_1a39a0b6d1dd549540678b38d4231792f5",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -78,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "94",
-        "column": "1",
+        "line": "95",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "94",
-        "bodyend": "96"
+        "bodystart": "95",
+        "bodyend": "97"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",

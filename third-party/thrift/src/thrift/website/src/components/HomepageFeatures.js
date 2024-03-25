@@ -9,7 +9,7 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Extensive',
-    imageUrl: 'img/book.jpg',
+    imageUrl: '/img/book.jpg',
     imageWidth: '300px',
     description: (
       <>
@@ -19,7 +19,7 @@ const FeatureList = [
   },
   {
     title: 'Open Source',
-    imageUrl: 'img/meta_oss.svg',
+    imageUrl: '/img/meta_oss.svg',
     imageWidth: '400px',
     description: (
       <>
@@ -29,7 +29,7 @@ const FeatureList = [
   },
   {
     title: 'Performant',
-    imageUrl: 'img/row.jpg',
+    imageUrl: '/img/row.jpg',
     imageWidth: '300px',
     description: (
       <>

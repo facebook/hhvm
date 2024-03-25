@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "457",
-        "column": "1",
+        "line": "499",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "457",
-        "bodyend": "464"
+        "bodystart": "499",
+        "bodyend": "506"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",

@@ -29,7 +29,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "line": "115",
-        "column": "1",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "bodystart": "115",
         "bodyend": "118"
@@ -43,7 +43,7 @@
         "original_argsstring_html": "(void *, const char *, const SerializedMessage &amp;)"
       },
       "description": {
-        "detailed_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p><p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p><p>Only called for Cpp2. </p>"
+        "detailed_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n<p>The data is framed by message begin / end entries, call readMessageBegin / readMessageEnd on the protocol.</p>\n<p>Only called for Cpp2. </p>"
       },
       "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onWriteData",
       "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onWriteData",
@@ -54,7 +54,7 @@
   "filepath": "f/class/apache/thrift/TProcessorEventHandler/onWriteData",
   "minprot": "public",
   "displayname_html": "onWriteData",
-  "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>",
+  "brief_html": "<p>Called before postWrite, after serializing response (server) / after serializing request (client), with the actual (serialized) data.</p>\n",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onWriteData",
   "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandler/onWriteData"

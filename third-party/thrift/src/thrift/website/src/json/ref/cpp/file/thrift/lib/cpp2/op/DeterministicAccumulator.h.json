@@ -41,12 +41,16 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator",
       "prot": "public",
-      "text_html": "apache::thrift::op::DeterministicAccumulator"
+      "text_html": "apache::thrift::op::DeterministicAccumulator",
+      "href": "/ref/cpp/class/apache/thrift/op/DeterministicAccumulator",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1_1Context",
       "prot": "private",
-      "text_html": "apache::thrift::op::DeterministicAccumulator::Context"
+      "text_html": "apache::thrift::op::DeterministicAccumulator::Context",
+      "href": "/ref/cpp/struct/apache/thrift/op/DeterministicAccumulator/Context",
+      "is_transitive_innerclass": true
     }
   ],
   "innernamespace": [
@@ -89,7 +93,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "162",
-        "column": "1",
+        "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "162",
         "bodyend": "166"
@@ -131,7 +135,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "169",
-        "column": "1",
+        "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "169",
         "bodyend": "172"
@@ -173,7 +177,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "175",
-        "column": "1",
+        "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "175",
         "bodyend": "178"
@@ -219,7 +223,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "line": "162",
-                "column": "1",
+                "column": "22",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "bodystart": "162",
                 "bodyend": "166"
@@ -276,7 +280,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "line": "169",
-                "column": "1",
+                "column": "22",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "bodystart": "169",
                 "bodyend": "172"
@@ -333,7 +337,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "line": "175",
-                "column": "1",
+                "column": "22",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "bodystart": "175",
                 "bodyend": "178"

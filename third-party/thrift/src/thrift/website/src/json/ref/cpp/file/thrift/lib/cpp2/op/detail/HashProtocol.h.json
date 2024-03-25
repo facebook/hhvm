@@ -45,7 +45,9 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1HashProtocol",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::HashProtocol"
+      "text_html": "apache::thrift::op::detail::HashProtocol",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

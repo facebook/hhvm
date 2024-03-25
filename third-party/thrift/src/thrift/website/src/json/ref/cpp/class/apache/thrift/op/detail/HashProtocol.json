@@ -11,9 +11,7 @@
   },
   "tparams": [
     {
-      "type_html": "typename",
-      "declname_html": "Accumulator",
-      "defname_html": "Accumulator"
+      "type_html": "typename Accumulator"
     }
   ],
   "functions": [
@@ -38,7 +36,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "118",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "118",
         "bodyend": "118"
@@ -74,7 +72,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "122",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "122",
         "bodyend": "122"
@@ -105,7 +103,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "123",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "123",
         "bodyend": "123"
@@ -148,7 +146,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "124",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "124",
         "bodyend": "126"
@@ -179,7 +177,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "127",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "127",
         "bodyend": "127"
@@ -210,7 +208,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "128",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "128",
         "bodyend": "128"
@@ -253,7 +251,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "129",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "129",
         "bodyend": "131"
@@ -284,7 +282,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "132",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "132",
         "bodyend": "132"
@@ -315,7 +313,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "133",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "133",
         "bodyend": "133"
@@ -346,7 +344,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "134",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "134",
         "bodyend": "134"
@@ -386,7 +384,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "135",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "135",
         "bodyend": "137"
@@ -417,7 +415,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "138",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "138",
         "bodyend": "138"
@@ -457,7 +455,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "139",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "139",
         "bodyend": "141"
@@ -488,7 +486,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "142",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "142",
         "bodyend": "142"
@@ -525,7 +523,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "143",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "143",
         "bodyend": "143"
@@ -562,7 +560,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "144",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "144",
         "bodyend": "144"
@@ -599,7 +597,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "145",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "145",
         "bodyend": "145"
@@ -636,7 +634,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "146",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "146",
         "bodyend": "146"
@@ -673,7 +671,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "147",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "147",
         "bodyend": "147"
@@ -710,7 +708,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "148",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "148",
         "bodyend": "148"
@@ -747,7 +745,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "149",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "149",
         "bodyend": "149"
@@ -784,7 +782,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "150",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "150",
         "bodyend": "150"
@@ -821,7 +819,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "151",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "151",
         "bodyend": "151"
@@ -858,7 +856,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "152",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "152",
         "bodyend": "152"
@@ -895,7 +893,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "153",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "153",
         "bodyend": "155"
@@ -932,7 +930,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "156",
-        "column": "1",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "156",
         "bodyend": "158"
@@ -952,6 +950,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1HashProtocol_1abe56abbe2ef758c7eaee945d4816a495",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
@@ -963,7 +962,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "120",
-        "column": "1",
+        "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "120",
         "bodyend": "120"
@@ -1010,7 +1009,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "161",
-        "column": "1",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "bodystart": "161",
         "bodyend": "-1"
@@ -1021,7 +1020,7 @@
   "declaration_raw": "template < typename Accumulator >\nclass HashProtocol;",
   "declaration_html": "template &lt; typename Accumulator &gt;\nclass HashProtocol;",
   "description": {
-    "detailed_html": "<p>A deterministic one-way/write-only custom protocol that guarantees the accumulated results to be stable and consistent across different languages and implementations. Protocol wraps an accumulator and allows users to provide custom implementations for it.</p><p>Names: To enable better development experience we do not include struct names, field names and paths into the hash computation, but we do include field id. This way refactoring to rename or move a struct around will not change the computed hash values. One thing to note here if the hashes are used for signatures or keyed mac computations you might want to use a different key per struct to avoid collisions in case struct layouts match.</p><p>Ordering: Fields, Maps and Sets are treated as unordered collections. Lists, Prefixes and Map Values are treated as ordered collections. Re-arranging fields in a struct will not change the hash if you preserve field ids. The specifics of order handling is delegated to Accumulator implementation.</p><p>Prefixing: To have a better collision protection all fields are prefixed with a type tag that goes into the hash computation. All dynamic sized (non-scalar) types also get a size prefix. </p>"
+    "detailed_html": "<p>A deterministic one-way/write-only custom protocol that guarantees the accumulated results to be stable and consistent across different languages and implementations. Protocol wraps an accumulator and allows users to provide custom implementations for it.</p>\n<p>Names: To enable better development experience we do not include struct names, field names and paths into the hash computation, but we do include field id. This way refactoring to rename or move a struct around will not change the computed hash values. One thing to note here if the hashes are used for signatures or keyed mac computations you might want to use a different key per struct to avoid collisions in case struct layouts match.</p>\n<p>Ordering: Fields, Maps and Sets are treated as unordered collections. Lists, Prefixes and Map Values are treated as ordered collections. Re-arranging fields in a struct will not change the hash if you preserve field ids. The specifics of order handling is delegated to Accumulator implementation.</p>\n<p>Prefixing: To have a better collision protection all fields are prefixed with a type tag that goes into the hash computation. All dynamic sized (non-scalar) types also get a size prefix. </p>"
   },
   "filepath": "class/apache/thrift/op/detail/HashProtocol",
   "href": "/ref/cpp/class/apache/thrift/op/detail/HashProtocol",
@@ -1055,7 +1054,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "118",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "118",
                 "bodyend": "118"
@@ -1108,7 +1107,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "122",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "122",
                 "bodyend": "122"
@@ -1155,7 +1154,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "123",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "123",
                 "bodyend": "123"
@@ -1214,7 +1213,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "124",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "124",
                 "bodyend": "126"
@@ -1261,7 +1260,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "127",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "127",
                 "bodyend": "127"
@@ -1308,7 +1307,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "128",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "128",
                 "bodyend": "128"
@@ -1367,7 +1366,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "129",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "129",
                 "bodyend": "131"
@@ -1414,7 +1413,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "132",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "132",
                 "bodyend": "132"
@@ -1461,7 +1460,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "133",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "133",
                 "bodyend": "133"
@@ -1508,7 +1507,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "134",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "134",
                 "bodyend": "134"
@@ -1564,7 +1563,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "135",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "135",
                 "bodyend": "137"
@@ -1611,7 +1610,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "138",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "138",
                 "bodyend": "138"
@@ -1667,7 +1666,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "139",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "139",
                 "bodyend": "141"
@@ -1714,7 +1713,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "142",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "142",
                 "bodyend": "142"
@@ -1767,7 +1766,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "143",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "143",
                 "bodyend": "143"
@@ -1820,7 +1819,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "144",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "144",
                 "bodyend": "144"
@@ -1873,7 +1872,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "145",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "145",
                 "bodyend": "145"
@@ -1926,7 +1925,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "146",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "146",
                 "bodyend": "146"
@@ -1979,7 +1978,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "147",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "147",
                 "bodyend": "147"
@@ -2032,7 +2031,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "148",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "148",
                 "bodyend": "148"
@@ -2085,7 +2084,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "149",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "149",
                 "bodyend": "149"
@@ -2138,7 +2137,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "150",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "150",
                 "bodyend": "150"
@@ -2191,7 +2190,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "151",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "151",
                 "bodyend": "151"
@@ -2230,7 +2229,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "152",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "152",
                 "bodyend": "152"
@@ -2269,7 +2268,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "153",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "153",
                 "bodyend": "155"
@@ -2308,7 +2307,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "156",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "156",
                 "bodyend": "158"
@@ -2344,6 +2343,7 @@
               "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1HashProtocol_1abe56abbe2ef758c7eaee945d4816a495",
               "prot": "public",
               "static": "yes",
+              "constexpr": "yes",
               "const": "no",
               "explicit": "no",
               "inline": "yes",
@@ -2355,7 +2355,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "120",
-                "column": "1",
+                "column": "25",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "bodystart": "120",
                 "bodyend": "120"

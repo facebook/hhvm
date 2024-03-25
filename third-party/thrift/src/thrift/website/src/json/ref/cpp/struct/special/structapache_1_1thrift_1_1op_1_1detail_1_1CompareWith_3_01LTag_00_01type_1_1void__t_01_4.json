@@ -19,6 +19,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01LTag_00_01type_1_1void__t_01_4_1a5e69807bda47870ae6e860ed5939506d",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -47,11 +48,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "197",
-        "column": "1",
+        "line": "202",
+        "column": "29",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "197",
-        "bodyend": "199"
+        "bodystart": "202",
+        "bodyend": "204"
       },
       "definition": {
         "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
@@ -67,11 +68,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "195",
+    "line": "200",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "195",
-    "bodyend": "200"
+    "bodystart": "200",
+    "bodyend": "205"
   },
   "namespacednames_html": [
     "apache",
@@ -102,6 +103,7 @@
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01LTag_00_01type_1_1void__t_01_4_1a5e69807bda47870ae6e860ed5939506d",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "yes",
               "explicit": "no",
               "inline": "yes",
@@ -130,11 +132,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "197",
-                "column": "1",
+                "line": "202",
+                "column": "29",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "197",
-                "bodyend": "199"
+                "bodystart": "202",
+                "bodyend": "204"
               },
               "definition": {
                 "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",

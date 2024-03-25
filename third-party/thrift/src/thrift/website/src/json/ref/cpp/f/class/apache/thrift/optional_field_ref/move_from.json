@@ -4,12 +4,13 @@
   "compoundname_html": "apache::thrift::optional_field_ref::move_from",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1optional__field__ref_1ab0faf34335b5706126d9e28a81fc9c16",
+      "refid": "classapache_1_1thrift_1_1optional__field__ref_1a26b4bc8206f5d2b4fe7f02a5f693a458",
       "prot": "public",
       "static": "no",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "tparams": [
         {
@@ -18,7 +19,7 @@
       ],
       "type_html": "FOLLY_ERASE void",
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::move_from",
-      "argsstring_html": "(optional_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)",
+      "argsstring_html": "(optional_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp; &gt;::value)",
       "name_html": "move_from",
       "param": [
         {
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "579",
-        "column": "1",
+        "line": "572",
+        "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "579",
-        "bodyend": "584"
+        "bodystart": "572",
+        "bodyend": "577"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void move_from(optional_field_ref&lt;U&gt; other)",
@@ -40,7 +41,7 @@
         "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void move_from(optional_field_ref&lt;U&gt; other) noexcept(\n    (std::is_nothrow_assignable&lt;value_type&amp;, std::remove_reference_t&lt;U&gt;&amp;&amp;&gt;::\n         value))",
         "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void move_from(optional_field_ref<U> other) noexcept(\n    (std::is_nothrow_assignable<value_type&, std::remove_reference_t<U>&&>::\n         value))",
         "original_definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::move_from",
-        "original_argsstring_html": "(optional_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)"
+        "original_argsstring_html": "(optional_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp; &gt;::value)"
       },
       "filepath": "fns/class/apache/thrift/optional_field_ref/move_from",
       "href": "/ref/cpp/fns/class/apache/thrift/optional_field_ref/move_from",

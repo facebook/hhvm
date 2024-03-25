@@ -29,6 +29,14 @@
   ],
   "innernamespace": [
     {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
       "refid": "namespaceapache_1_1thrift_1_1op",
       "text_html": "apache::thrift::op"
     }
@@ -47,7 +55,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "line": "44",
-        "column": "1",
+        "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "44",
         "bodyend": "-1"
@@ -57,8 +65,9 @@
       "refid": "ThriftOpTest_8cpp_1af886680e9845a583468c62f7fbbfed65",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr T",
+      "type_html": "constexpr static T",
       "definition_html": "const T one",
       "argsstring_html": "",
       "name_html": "one",
@@ -66,7 +75,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "line": "48",
-        "column": "1",
+        "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "48",
         "bodyend": "-1"
@@ -76,8 +85,9 @@
       "refid": "ThriftOpTest_8cpp_1a04fa7b8a2cbfa224452408e08e7ff7be",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr T",
+      "type_html": "constexpr static T",
       "definition_html": "const T otherOne",
       "argsstring_html": "",
       "name_html": "otherOne",
@@ -85,7 +95,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "line": "49",
-        "column": "1",
+        "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "49",
         "bodyend": "-1"
@@ -95,8 +105,9 @@
       "refid": "ThriftOpTest_8cpp_1a2cc17547048fb0ea296d82dcf44a99f6",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr std::array&lt; T, 2 &gt;",
+      "type_html": "constexpr static std::array&lt; T, 2 &gt;",
       "definition_html": "const std::array&lt;T, 3&gt; many",
       "argsstring_html": "",
       "name_html": "many",
@@ -104,7 +115,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "line": "50",
-        "column": "1",
+        "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "50",
         "bodyend": "-1"

@@ -19,11 +19,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "96",
+    "line": "102",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "96",
-    "bodyend": "98"
+    "bodystart": "102",
+    "bodyend": "104"
   },
   "namespacednames_html": [
     "apache",
@@ -40,6 +40,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1map_3_01KTag_00_01ValueTag_01_4_01_4_1aabf254252a826fc0d3213b3996afffad",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
       "type_html": "constexpr TType",
       "definition_html": "constexpr TType apache::thrift::op::detail::TypeTagToTType&lt; type::map&lt; KTag, ValueTag &gt; &gt;::value",
@@ -48,10 +49,10 @@
       "initializer_html": "= TType::T_MAP",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "97",
-        "column": "1",
+        "line": "103",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "97",
+        "bodystart": "103",
         "bodyend": "-1"
       }
     }
@@ -61,7 +62,6 @@
   "declaration_html": "template &lt;\n  typename KTag,\n  typename ValueTag\n&gt; struct TypeTagToTType&lt; type::map&lt; KTag, ValueTag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1map_3_01KTag_00_01ValueTag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1map_3_01KTag_00_01ValueTag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType",
   "overloadgroups": [],
   "free_overloadgroups": []
 }

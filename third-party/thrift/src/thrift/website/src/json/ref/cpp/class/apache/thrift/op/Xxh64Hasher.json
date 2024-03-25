@@ -25,7 +25,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "35",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "35",
         "bodyend": "37"
@@ -56,7 +56,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "38",
-        "column": "1",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "38",
         "bodyend": "42"
@@ -76,6 +76,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1ab72c2a24702c5e47d067a70e4b785c0a",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
@@ -98,7 +99,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "45",
-        "column": "1",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "45",
         "bodyend": "47"
@@ -135,7 +136,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "48",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "48",
         "bodyend": "52"
@@ -172,7 +173,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "53",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "53",
         "bodyend": "55"
@@ -209,7 +210,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "56",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "56",
         "bodyend": "60"
@@ -240,7 +241,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "62",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "62",
         "bodyend": "62"
@@ -277,7 +278,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "64",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "64",
         "bodyend": "70"
@@ -308,7 +309,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "73",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "73",
         "bodyend": "73"
@@ -354,7 +355,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "75",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "75",
         "bodyend": "-1"
@@ -372,7 +373,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "76",
-        "column": "1",
+        "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "76",
         "bodyend": "-1"
@@ -408,7 +409,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "35",
-                "column": "1",
+                "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "35",
                 "bodyend": "37"
@@ -456,7 +457,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "38",
-                "column": "1",
+                "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "38",
                 "bodyend": "42"
@@ -492,6 +493,7 @@
               "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1ab72c2a24702c5e47d067a70e4b785c0a",
               "prot": "public",
               "static": "no",
+              "constexpr": "yes",
               "const": "no",
               "explicit": "no",
               "inline": "yes",
@@ -514,7 +516,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "45",
-                "column": "1",
+                "column": "30",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "45",
                 "bodyend": "47"
@@ -553,7 +555,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "48",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "48",
                 "bodyend": "52"
@@ -592,7 +594,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "53",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "53",
                 "bodyend": "55"
@@ -631,7 +633,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "56",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "56",
                 "bodyend": "60"
@@ -678,7 +680,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "62",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "62",
                 "bodyend": "62"
@@ -731,7 +733,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "64",
-                "column": "1",
+                "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "64",
                 "bodyend": "70"
@@ -778,7 +780,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "73",
-                "column": "1",
+                "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "bodystart": "73",
                 "bodyend": "73"

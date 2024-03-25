@@ -10,6 +10,7 @@
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>reference_type</code>",
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::required_field_ref&lt; T &gt;::value",
@@ -17,11 +18,11 @@
       "name_html": "value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1806",
-        "column": "1",
+        "line": "1790",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1806",
-        "bodyend": "1808"
+        "bodystart": "1790",
+        "bodyend": "1792"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type value() const",

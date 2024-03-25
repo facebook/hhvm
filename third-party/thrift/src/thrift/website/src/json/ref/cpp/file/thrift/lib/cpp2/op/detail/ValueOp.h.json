@@ -42,72 +42,100 @@
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1NumberOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::NumberOp"
+      "text_html": "apache::thrift::op::detail::NumberOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/NumberOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1bool__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::bool_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::bool_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1bool__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1byte__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::byte_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1byte__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i16__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i16_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i16_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i16__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i32_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i32_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i32__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i64__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i64_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::i64_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1i64__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1float__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::float_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::float_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1float__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1double__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::double_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::double_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1double__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringCompare",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::StringCompare"
+      "text_html": "apache::thrift::op::detail::StringCompare",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringCompare",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::StringOp"
+      "text_html": "apache::thrift::op::detail::StringOp",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/StringOp",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1string__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::string_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::string_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1string__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1string__t_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::string_t &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::string_t &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1string__t_01_4_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1binary__t_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1binary__t_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1binary__t_01_4_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::binary_t &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::binary_t &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1binary__t_01_4_01_4",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [
@@ -128,6 +156,37 @@
       "text_html": "apache::thrift::op::detail"
     }
   ],
+  "defines": {
+    "macros": [
+      {
+        "refid": "ValueOp_8h_1a7ce993bdd93dcbed10ac5cc4149bb486",
+        "name_html": "TRY_OP",
+        "param": [
+          {
+            "defname_html": "ACCUM_TO"
+          },
+          {
+            "defname_html": "TRY_ON"
+          },
+          {
+            "defname_html": "TAG"
+          },
+          {
+            "defname_html": "OP"
+          }
+        ],
+        "initializer_html": "do {                                                \\\n    if (const auto* ptr##TAG = TRY_ON.tryAs&lt;TAG&gt;()) { \\\n      return OP(ref(ACCUM_TO), *ptr##TAG);            \\\n    }                                                 \\\n  } while (false)",
+        "location": {
+          "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+          "line": "242",
+          "column": "9",
+          "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
+          "bodystart": "242",
+          "bodyend": "-1"
+        }
+      }
+    ]
+  },
   "file_location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h"
   },

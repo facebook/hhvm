@@ -30,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "135",
-        "column": "1",
+        "line": "150",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "135",
-        "bodyend": "138"
+        "bodystart": "150",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "virtual void handlerErrorWrapped(\n    void* ctx, const char* fn_name, const folly::exception_wrapper&amp;)",

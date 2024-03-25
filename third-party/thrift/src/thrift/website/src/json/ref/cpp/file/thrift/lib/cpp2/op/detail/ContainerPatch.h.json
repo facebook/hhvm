@@ -50,17 +50,23 @@
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ListPatch"
+      "text_html": "apache::thrift::op::detail::ListPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/ListPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1SetPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::SetPatch"
+      "text_html": "apache::thrift::op::detail::SetPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/SetPatch",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::MapPatch"
+      "text_html": "apache::thrift::op::detail::MapPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MapPatch",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

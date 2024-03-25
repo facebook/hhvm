@@ -17,8 +17,8 @@
       "name_html": "IntWrapper",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "77",
-        "column": "1"
+        "line": "69",
+        "column": "3"
       },
       "definition": {
         "simple_html": "IntWrapper()",
@@ -40,6 +40,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "",
       "definition_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
@@ -53,11 +54,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "79",
-        "column": "1",
+        "line": "71",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "79",
-        "bodyend": "80"
+        "bodystart": "71",
+        "bodyend": "72"
       },
       "definition": {
         "simple_html": "IntWrapper(const IntWrapper&amp; other)",
@@ -79,6 +80,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "",
       "definition_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
@@ -92,11 +94,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "81",
-        "column": "1",
+        "line": "73",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "81",
-        "bodyend": "82"
+        "bodystart": "73",
+        "bodyend": "74"
       },
       "definition": {
         "simple_html": "IntWrapper(IntWrapper&amp;&amp; other)",

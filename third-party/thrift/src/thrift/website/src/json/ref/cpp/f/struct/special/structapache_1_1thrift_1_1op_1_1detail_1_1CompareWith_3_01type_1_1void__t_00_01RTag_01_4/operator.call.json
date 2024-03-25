@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01type_1_1void__t_00_01RTag_01_4_1a74a347179d80a3e449cc1d3dadde3fc6",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "204",
-        "column": "1",
+        "line": "209",
+        "column": "29",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "204",
-        "bodyend": "206"
+        "bodystart": "209",
+        "bodyend": "211"
       },
       "definition": {
         "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",

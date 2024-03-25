@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "147",
-        "column": "1",
+        "line": "169",
+        "column": "34",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "147",
-        "bodyend": "151"
+        "bodystart": "169",
+        "bodyend": "173"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nstatic FOLLY_NODISCARD Derived createAssign(U&amp;&amp; val)",

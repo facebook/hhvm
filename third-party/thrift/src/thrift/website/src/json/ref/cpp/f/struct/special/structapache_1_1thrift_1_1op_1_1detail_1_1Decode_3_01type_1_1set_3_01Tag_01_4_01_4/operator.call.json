@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "724",
-        "column": "1",
+        "line": "932",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "724",
-        "bodyend": "751"
+        "bodystart": "932",
+        "bodyend": "955"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nvoid operator()(Protocol&amp; prot, SetType&amp; set) const",

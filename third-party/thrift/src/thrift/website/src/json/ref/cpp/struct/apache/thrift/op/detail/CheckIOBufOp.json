@@ -57,11 +57,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "283",
+    "line": "288",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "283",
-    "bodyend": "288"
+    "bodystart": "288",
+    "bodyend": "293"
   },
   "namespacednames_html": [
     "apache",

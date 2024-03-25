@@ -19,11 +19,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "120",
+    "line": "126",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "120",
-    "bodyend": "122"
+    "bodystart": "126",
+    "bodyend": "128"
   },
   "namespacednames_html": [
     "apache",
@@ -40,18 +40,19 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4_1a498c40fd43d12ce2f14048d4b6c420ba",
       "prot": "public",
       "static": "yes",
+      "constexpr": "yes",
       "mutable": "no",
       "type_html": "constexpr TType",
       "definition_html": "constexpr TType apache::thrift::op::detail::TypeTagToTType&lt; type::cpp_type&lt; T, Tag &gt; &gt;::value",
       "argsstring_html": "",
       "name_html": "value",
-      "initializer_html": "= <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/TypeTagToTType\">TypeTagToTType</a>&lt;Tag&gt;::value",
+      "initializer_html": "= <code>TypeTagToTType</code>&lt;Tag&gt;::value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "121",
-        "column": "1",
+        "line": "127",
+        "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "121",
+        "bodystart": "127",
         "bodyend": "-1"
       }
     }
@@ -61,7 +62,6 @@
   "declaration_html": "template &lt;\n  typename T,\n  typename Tag\n&gt; struct TypeTagToTType&lt; type::cpp_type&lt; T, Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType",
   "overloadgroups": [],
   "free_overloadgroups": []
 }

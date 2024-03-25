@@ -32,7 +32,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "line": "95",
-        "column": "1",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "bodystart": "95",
         "bodyend": "99"

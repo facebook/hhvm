@@ -5,6 +5,10 @@
   "compoundname_html": "Copy.h",
   "includes": [
     {
+      "local": "no",
+      "text_html": "optional"
+    },
+    {
       "refid": "FieldRef_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/FieldRef.h"
@@ -27,7 +31,9 @@
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Copy",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::Copy"
+      "text_html": "apache::thrift::op::detail::Copy",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Copy",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [

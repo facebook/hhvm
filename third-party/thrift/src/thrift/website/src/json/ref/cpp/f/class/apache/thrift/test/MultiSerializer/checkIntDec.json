@@ -17,8 +17,8 @@
       "name_html": "checkIntDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "263",
-        "column": "1",
+        "line": "262",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
         "bodystart": "150",
         "bodyend": "153"

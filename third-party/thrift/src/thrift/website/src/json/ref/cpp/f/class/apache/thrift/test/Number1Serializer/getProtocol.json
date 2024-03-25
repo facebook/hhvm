@@ -4,43 +4,6 @@
   "compoundname_html": "apache::thrift::test::Number1Serializer::getProtocol",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1test_1_1Number1Serializer_1ad455636db6232684bf1cf165dc923d14",
-      "prot": "public",
-      "static": "no",
-      "const": "yes",
-      "explicit": "no",
-      "inline": "no",
-      "virtual": "virtual",
-      "type_html": "const type::Protocol &amp;",
-      "definition_html": "const type::Protocol &amp; apache::thrift::test::Number1Serializer::getProtocol",
-      "argsstring_html": "() const override",
-      "name_html": "getProtocol",
-      "reimplements": {
-        "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1aac740edce23d26118eafe9b9882e0f84",
-        "text_html": "getProtocol"
-      },
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "189",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "34",
-        "bodyend": "37"
-      },
-      "definition": {
-        "simple_html": "virtual const type::Protocol&amp; getProtocol() const",
-        "simple_raw": "virtual const type::Protocol& getProtocol() const",
-        "detailed_html": "virtual const type::Protocol&amp; getProtocol() const override",
-        "detailed_raw": "virtual const type::Protocol& getProtocol() const override",
-        "original_definition_html": "const type::Protocol &amp; apache::thrift::test::Number1Serializer::getProtocol",
-        "original_argsstring_html": "() const override"
-      },
-      "filepath": "fns/class/apache/thrift/test/Number1Serializer/getProtocol",
-      "href": "/ref/cpp/fns/class/apache/thrift/test/Number1Serializer/getProtocol",
-      "parentid": "classapache_1_1thrift_1_1test_1_1Number1Serializer",
-      "compoundname_html": "apache::thrift::test::Number1Serializer::getProtocol"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1aac740edce23d26118eafe9b9882e0f84",
       "prot": "public",
       "static": "no",
@@ -73,7 +36,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "52",
-        "column": "1"
+        "column": "32"
       },
       "definition": {
         "simple_html": "const type::Protocol&amp; getProtocol() const = 0",
@@ -86,6 +49,43 @@
       "filepath": "fns/class/apache/thrift/op/Serializer/getProtocol",
       "href": "/ref/cpp/fns/class/apache/thrift/op/Serializer/getProtocol",
       "parentid": "classapache_1_1thrift_1_1op_1_1Serializer",
+      "compoundname_html": "apache::thrift::test::Number1Serializer::getProtocol"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1test_1_1Number1Serializer_1ad455636db6232684bf1cf165dc923d14",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "virtual",
+      "type_html": "const type::Protocol &amp;",
+      "definition_html": "const type::Protocol &amp; apache::thrift::test::Number1Serializer::getProtocol",
+      "argsstring_html": "() const override",
+      "name_html": "getProtocol",
+      "reimplements": {
+        "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1aac740edce23d26118eafe9b9882e0f84",
+        "text_html": "getProtocol"
+      },
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
+        "line": "188",
+        "column": "24",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
+        "bodystart": "34",
+        "bodyend": "37"
+      },
+      "definition": {
+        "simple_html": "virtual const type::Protocol&amp; getProtocol() const",
+        "simple_raw": "virtual const type::Protocol& getProtocol() const",
+        "detailed_html": "virtual const type::Protocol&amp; getProtocol() const override",
+        "detailed_raw": "virtual const type::Protocol& getProtocol() const override",
+        "original_definition_html": "const type::Protocol &amp; apache::thrift::test::Number1Serializer::getProtocol",
+        "original_argsstring_html": "() const override"
+      },
+      "filepath": "fns/class/apache/thrift/test/Number1Serializer/getProtocol",
+      "href": "/ref/cpp/fns/class/apache/thrift/test/Number1Serializer/getProtocol",
+      "parentid": "classapache_1_1thrift_1_1test_1_1Number1Serializer",
       "compoundname_html": "apache::thrift::test::Number1Serializer::getProtocol"
     }
   ],

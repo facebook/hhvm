@@ -33,10 +33,6 @@
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a936bdd16280346c3f02570b6818bc8f3",
-          "text_html": "encode"
-        },
-        {
           "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1ab7e9bae488ed22a8d1ae10392cbc4986",
           "text_html": "encode"
         }
@@ -54,7 +50,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "59",
-        "column": "1"
+        "column": "16"
       },
       "definition": {
         "simple_html": "void encode(type::ConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
@@ -99,10 +95,6 @@
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
-          "text_html": "encode"
-        },
-        {
           "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1aa8d950721c75da04a276ac67c14b0e03",
           "text_html": "encode"
         }
@@ -120,7 +112,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "61",
-        "column": "1"
+        "column": "16"
       },
       "definition": {
         "simple_html": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",

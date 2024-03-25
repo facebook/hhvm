@@ -212,6 +212,64 @@ export function MemberFunctions({data}) {
   );
 }
 
+export function FreeClasses({data}) {
+  const freeClasses = data.innerclass || []
+  const unDetail = freeClasses.filter(c => !c.text_html.includes("detail::") && c.href && !c.is_transitive_innerclass);
+  if (unDetail.length == 0) {
+    return null;
+  }
+  return (
+    <div>
+      <h3>
+        Classes
+      </h3>
+      <table class={styles.refTable}>
+        <tbody>
+          {unDetail.map(cr => {
+            return (
+              <tr>
+                <td>
+                  <Link to={cr.href}>
+                    <code dangerouslySetInnerHTML={{__html: cr.text_html}} />
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export function FreeTypedefs({data}) {
+  const freeTypedefs = data.free_typedefs || []
+  const toShow = freeTypedefs.filter(t => t.prot == "public")
+  if (toShow.length == 0) {
+    return null;
+  }
+  return (
+    <div>
+      <h3>
+        Typedefs
+      </h3>
+      <table class={styles.refTable}>
+        <tbody>
+          {toShow.map(t => {
+            return (
+              <tr>
+                <td>
+                  <code dangerouslySetInnerHTML={{__html: t.definition_html}} />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function FreeFunctions({data}) {
   const freeGroups = data.free_overloadgroups || [];
   if (freeGroups.length == 0) {
@@ -500,6 +558,8 @@ export function File({data}) {
       <Include data={data} />
       <Desc data={data} />
       <Macros data={data} />
+      <FreeClasses data={data} />
+      <FreeTypedefs data={data} />
       <FreeFunctions data={data} />
       <FreeVariables data={data} />
       <Example refcode={(data.description || {}).refcode} />

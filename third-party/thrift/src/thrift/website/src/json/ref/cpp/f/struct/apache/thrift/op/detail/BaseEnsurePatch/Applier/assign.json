@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "107",
-        "column": "1",
+        "line": "117",
+        "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "107",
-        "bodyend": "107"
+        "bodystart": "117",
+        "bodyend": "117"
       },
       "definition": {
         "simple_html": "void assign(const T&amp; t)",

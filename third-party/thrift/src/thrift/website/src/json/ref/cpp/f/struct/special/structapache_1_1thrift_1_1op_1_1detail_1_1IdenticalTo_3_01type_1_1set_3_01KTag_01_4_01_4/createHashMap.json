@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "447",
-        "column": "1",
+        "line": "489",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "447",
-        "bodyend": "453"
+        "bodystart": "489",
+        "bodyend": "495"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; set)",

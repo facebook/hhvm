@@ -7,6 +7,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1DefaultLessThan_1a8c93c91056fd4fe446460a3dd3ff03d4",
       "prot": "public",
       "static": "no",
+      "constexpr": "yes",
       "const": "yes",
       "explicit": "no",
       "inline": "yes",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "258",
-        "column": "1",
+        "line": "263",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "258",
-        "bodyend": "260"
+        "bodystart": "263",
+        "bodyend": "265"
       },
       "definition": {
         "simple_html": "constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",

@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "61",
-        "column": "1",
+        "line": "60",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "bodystart": "61",
-        "bodyend": "63"
+        "bodystart": "60",
+        "bodyend": "62"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nbool MatchAndExplain(const U&amp; actual, ::testing::MatchResultListener*) const",

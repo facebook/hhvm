@@ -44,34 +44,39 @@
   ],
   "innerclass": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::ProtocolSelector"
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Binary_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Binary &gt;"
+      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Binary &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Binary_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Compact_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Compact &gt;"
+      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Compact &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Compact_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Json_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Json &gt;"
+      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::Json &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1Json_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1SimpleJson_01_4",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::SimpleJson &gt;"
+      "text_html": "apache::thrift::op::detail::ProtocolSelector&lt; type::StandardProtocol::SimpleJson &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1ProtocolSelector_3_01type_1_1StandardProtocol_1_1SimpleJson_01_4",
+      "is_transitive_innerclass": false
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1StdSerializer",
       "prot": "public",
-      "text_html": "apache::thrift::op::StdSerializer"
+      "text_html": "apache::thrift::op::StdSerializer",
+      "href": "/ref/cpp/class/apache/thrift/op/StdSerializer",
+      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [
@@ -129,7 +134,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
         "line": "67",
-        "column": "1",
+        "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
         "bodystart": "67",
         "bodyend": "76"
@@ -186,7 +191,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
                 "line": "67",
-                "column": "1",
+                "column": "6",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
                 "bodystart": "67",
                 "bodyend": "76"

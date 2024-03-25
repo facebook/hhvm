@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "216",
-        "column": "1",
+        "line": "209",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "216",
-        "bodyend": "222"
+        "bodystart": "209",
+        "bodyend": "215"
       },
       "definition": {
         "simple_html": "void operator=(bool flag)",

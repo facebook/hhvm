@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "156",
-        "column": "1",
+        "line": "149",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "156",
-        "bodyend": "158"
+        "bodystart": "149",
+        "bodyend": "151"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void reset(U&amp; u, std::size_t bit)",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "174",
-        "column": "1",
+        "line": "167",
+        "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "174",
-        "bodyend": "176"
+        "bodystart": "167",
+        "bodyend": "169"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void reset(std::atomic&lt;U&gt;&amp; u, std::size_t bit)",
@@ -119,11 +119,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "180",
-        "column": "1",
+        "line": "173",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "180",
-        "bodyend": "180"
+        "bodystart": "173",
+        "bodyend": "173"
       },
       "definition": {
         "simple_html": "void reset(std::size_t bit)",

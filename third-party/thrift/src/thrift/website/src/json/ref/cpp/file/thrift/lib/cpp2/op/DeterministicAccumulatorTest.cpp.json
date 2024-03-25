@@ -71,6 +71,14 @@
   ],
   "innernamespace": [
     {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
       "refid": "namespaceapache_1_1thrift_1_1op",
       "text_html": "apache::thrift::op"
     }

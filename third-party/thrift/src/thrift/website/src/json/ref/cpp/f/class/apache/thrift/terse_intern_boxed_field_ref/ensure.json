@@ -10,6 +10,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "yes",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>reference_type</code>",
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::ensure",
@@ -17,11 +18,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1470",
-        "column": "1",
+        "line": "1454",
+        "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1470",
-        "bodyend": "1472"
+        "bodystart": "1454",
+        "bodyend": "1456"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",

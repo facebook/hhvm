@@ -8,7 +8,7 @@
     {
       "prot": "public",
       "virtual": "non-virtual",
-      "text_html": "std::conditional_t&lt; folly::is_invocable_v&lt; std::less&lt;&gt;, const T &amp;, const T &amp;&gt;, std::less&lt;&gt;, MapLessThan&lt; T, K, V &gt; &gt;"
+      "text_html": "std::conditional_t&lt; folly::is_invocable_v&lt; std::less&lt;&gt;, const T &amp;, const T &amp; &gt;, std::less&lt;&gt;, MapLessThan&lt; T, K, V &gt; &gt;"
     }
   ],
   "includes": {
@@ -29,11 +29,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "400",
+    "line": "424",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "394",
-    "bodyend": "400"
+    "bodystart": "430",
+    "bodyend": "430"
   },
   "namespacednames_html": [
     "apache",

@@ -52,11 +52,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "287",
-        "column": "1",
+        "line": "309",
+        "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "287",
-        "bodyend": "296"
+        "bodystart": "309",
+        "bodyend": "318"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename ListType&gt;\nuint32_t operator()(Protocol&amp; prot, const ListType&amp; list) const",
@@ -72,11 +72,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "285",
+    "line": "307",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "285",
-    "bodyend": "297"
+    "bodystart": "307",
+    "bodyend": "319"
   },
   "namespacednames_html": [
     "apache",
@@ -93,7 +93,6 @@
   "declaration_html": "template &lt;\n  bool ZeroCopy,\n  typename Tag\n&gt; struct SerializedSize&lt; ZeroCopy, type::list&lt; Tag &gt; &gt;;",
   "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1list_3_01Tag_01_4_01_4",
   "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize_3_01ZeroCopy_00_01type_1_1list_3_01Tag_01_4_01_4",
-  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1SerializedSize",
   "overloadgroups": [
     {
       "groupname_html": "",
@@ -135,11 +134,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "287",
-                "column": "1",
+                "line": "309",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "287",
-                "bodyend": "296"
+                "bodystart": "309",
+                "bodyend": "318"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename ListType&gt;\nuint32_t operator()(Protocol&amp; prot, const ListType&amp; list) const",

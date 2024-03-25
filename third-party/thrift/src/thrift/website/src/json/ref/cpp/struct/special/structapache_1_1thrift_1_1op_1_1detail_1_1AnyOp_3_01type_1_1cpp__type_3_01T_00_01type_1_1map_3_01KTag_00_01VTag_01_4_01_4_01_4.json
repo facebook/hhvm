@@ -32,10 +32,10 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-    "line": "262",
+    "line": "261",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-    "bodystart": "261",
+    "bodystart": "262",
     "bodyend": "262"
   },
   "namespacednames_html": [
@@ -57,7 +57,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "178",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "178",
         "bodyend": "-1"
@@ -74,7 +74,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "179",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "179",
         "bodyend": "-1"
@@ -91,7 +91,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "180",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "180",
         "bodyend": "-1"
@@ -108,7 +108,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "181",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "181",
         "bodyend": "-1"
@@ -125,7 +125,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "38",
-        "column": "1",
+        "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "bodystart": "38",
         "bodyend": "-1"
@@ -189,7 +189,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "190",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "190",
                 "bodyend": "198"
@@ -242,7 +242,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "209",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "209",
                 "bodyend": "215"
@@ -313,7 +313,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "201",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "201",
                 "bodyend": "207"
@@ -363,7 +363,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "217",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "217",
                 "bodyend": "224"
@@ -426,7 +426,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "226",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "226",
                 "bodyend": "233"
@@ -459,6 +459,58 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::next",
           "functions": [
             {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a8d4eec3d43c516aa07601fdbafee7fc2",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename ITag"
+                }
+              ],
+              "type_html": "<code>Ptr</code>",
+              "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
+              "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
+              "name_html": "next",
+              "param": [
+                {
+                  "type_html": "ITag",
+                  "declname_html": "tag"
+                },
+                {
+                  "type_html": "<code>T</code> &amp;",
+                  "declname_html": "self"
+                },
+                {
+                  "type_html": "std::any &amp;",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "62",
+                "column": "14",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "bodystart": "62",
+                "bodyend": "68"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename ITag&gt;\nstatic Ptr next(ITag tag, T&amp; self, std::any&amp; i)",
+                "simple_raw": "template <typename ITag>\nstatic Ptr next(ITag tag, T& self, std::any& i)",
+                "detailed_html": "template &lt;typename ITag&gt;\ninline static Ptr next(ITag tag, T&amp; self, std::any&amp; i)",
+                "detailed_raw": "template <typename ITag>\ninline static Ptr next(ITag tag, T& self, std::any& i)",
+                "original_definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
+                "original_argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/next",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/next",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::next"
+            },
+            {
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a306ff524c6fd1f47a3d4e3e39874ea75",
               "prot": "public",
               "static": "yes",
@@ -487,7 +539,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "235",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "235",
                 "bodyend": "248"
@@ -534,7 +586,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "250",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "250",
                 "bodyend": "255"
@@ -551,58 +603,6 @@
               "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/next",
               "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::next"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a8d4eec3d43c516aa07601fdbafee7fc2",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename ITag"
-                }
-              ],
-              "type_html": "<code>Ptr</code>",
-              "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
-              "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
-              "name_html": "next",
-              "param": [
-                {
-                  "type_html": "ITag",
-                  "declname_html": "tag"
-                },
-                {
-                  "type_html": "<code>T</code> &amp;",
-                  "declname_html": "self"
-                },
-                {
-                  "type_html": "std::any &amp;",
-                  "declname_html": "i"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "62",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "bodystart": "62",
-                "bodyend": "68"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename ITag&gt;\nstatic Ptr next(ITag tag, T&amp; self, std::any&amp; i)",
-                "simple_raw": "template <typename ITag>\nstatic Ptr next(ITag tag, T& self, std::any& i)",
-                "detailed_html": "template &lt;typename ITag&gt;\ninline static Ptr next(ITag tag, T&amp; self, std::any&amp; i)",
-                "detailed_raw": "template <typename ITag>\ninline static Ptr next(ITag tag, T& self, std::any& i)",
-                "original_definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
-                "original_argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/next",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/next",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::next"
             }
           ],
           "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/next",
@@ -615,141 +615,109 @@
         },
         {
           "kind": "overloadset",
+          "name_html": "iter",
+          "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a666ad554bc4fc33af3f334e3964a8f70",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>I</code> &amp;",
+              "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+              "argsstring_html": "(T &amp;self, std::any &amp;i)",
+              "name_html": "iter",
+              "param": [
+                {
+                  "type_html": "<code>T</code> &amp;",
+                  "declname_html": "self"
+                },
+                {
+                  "type_html": "std::any &amp;",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "54",
+                "column": "12",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "bodystart": "54",
+                "bodyend": "59"
+              },
+              "definition": {
+                "simple_html": "static I&amp; iter(T&amp; self, std::any&amp; i)",
+                "simple_raw": "static I& iter(T& self, std::any& i)",
+                "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
+                "detailed_raw": "inline static I& iter(T& self, std::any& i)",
+                "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+                "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/iter",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/iter",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a666ad554bc4fc33af3f334e3964a8f70",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>I</code> &amp;",
+              "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+              "argsstring_html": "(T &amp;self, std::any &amp;i)",
+              "name_html": "iter",
+              "param": [
+                {
+                  "type_html": "<code>T</code> &amp;",
+                  "declname_html": "self"
+                },
+                {
+                  "type_html": "std::any &amp;",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "184",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "bodystart": "54",
+                "bodyend": "59"
+              },
+              "definition": {
+                "simple_html": "static I&amp; iter(T&amp; self, std::any&amp; i)",
+                "simple_raw": "static I& iter(T& self, std::any& i)",
+                "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
+                "detailed_raw": "inline static I& iter(T& self, std::any& i)",
+                "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+                "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/iter",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/iter",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter"
+            }
+          ],
+          "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter",
+          "minprot": "public",
+          "displayname_html": "iter",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter",
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter"
+        },
+        {
+          "kind": "overloadset",
           "name_html": "ref",
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref",
           "functions": [
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a05f0296516ba5055dfcea05bda4dfb3f",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-              "argsstring_html": "(void *ptr)",
-              "name_html": "ref",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "185",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "56",
-                "bodyend": "56"
-              },
-              "definition": {
-                "simple_html": "static T&amp; ref(void* ptr)",
-                "simple_raw": "static T& ref(void* ptr)",
-                "detailed_html": "inline static T&amp; ref(void* ptr)",
-                "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-                "original_argsstring_html": "(void *ptr)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ref",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-              "argsstring_html": "(const void *ptr)",
-              "name_html": "ref",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "185",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "57",
-                "bodyend": "57"
-              },
-              "definition": {
-                "simple_html": "static const T&amp; ref(const void* ptr)",
-                "simple_raw": "static const T& ref(const void* ptr)",
-                "detailed_html": "inline static const T&amp; ref(const void* ptr)",
-                "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-                "original_argsstring_html": "(const void *ptr)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ref",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a05f0296516ba5055dfcea05bda4dfb3f",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-              "argsstring_html": "(void *ptr)",
-              "name_html": "ref",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "41",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "56",
-                "bodyend": "56"
-              },
-              "definition": {
-                "simple_html": "static T&amp; ref(void* ptr)",
-                "simple_raw": "static T& ref(void* ptr)",
-                "detailed_html": "inline static T&amp; ref(void* ptr)",
-                "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-                "original_argsstring_html": "(void *ptr)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ref",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-              "argsstring_html": "(const void *ptr)",
-              "name_html": "ref",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "41",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "57",
-                "bodyend": "57"
-              },
-              "definition": {
-                "simple_html": "static const T&amp; ref(const void* ptr)",
-                "simple_raw": "static const T& ref(const void* ptr)",
-                "detailed_html": "inline static const T&amp; ref(const void* ptr)",
-                "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
-                "original_argsstring_html": "(const void *ptr)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ref",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
-            },
             {
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a05f0296516ba5055dfcea05bda4dfb3f",
               "prot": "public",
@@ -771,7 +739,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "56",
-                "column": "1",
+                "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "56",
                 "bodyend": "56"
@@ -810,7 +778,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "57",
-                "column": "1",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "57",
                 "bodyend": "57"
@@ -827,6 +795,162 @@
               "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/ref",
               "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>T</code> &amp;",
+              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "argsstring_html": "(void *ptr)",
+              "name_html": "ref",
+              "param": [
+                {
+                  "type_html": "void *",
+                  "declname_html": "ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "41",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "56",
+                "bodyend": "56"
+              },
+              "definition": {
+                "simple_html": "static T&amp; ref(void* ptr)",
+                "simple_raw": "static T& ref(void* ptr)",
+                "detailed_html": "inline static T&amp; ref(void* ptr)",
+                "detailed_raw": "inline static T& ref(void* ptr)",
+                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_argsstring_html": "(void *ptr)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ref",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "const <code>T</code> &amp;",
+              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "argsstring_html": "(const void *ptr)",
+              "name_html": "ref",
+              "param": [
+                {
+                  "type_html": "const void *",
+                  "declname_html": "ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "41",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "57",
+                "bodyend": "57"
+              },
+              "definition": {
+                "simple_html": "static const T&amp; ref(const void* ptr)",
+                "simple_raw": "static const T& ref(const void* ptr)",
+                "detailed_html": "inline static const T&amp; ref(const void* ptr)",
+                "detailed_raw": "inline static const T& ref(const void* ptr)",
+                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_argsstring_html": "(const void *ptr)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ref",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>T</code> &amp;",
+              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "argsstring_html": "(void *ptr)",
+              "name_html": "ref",
+              "param": [
+                {
+                  "type_html": "void *",
+                  "declname_html": "ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "185",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "56",
+                "bodyend": "56"
+              },
+              "definition": {
+                "simple_html": "static T&amp; ref(void* ptr)",
+                "simple_raw": "static T& ref(void* ptr)",
+                "detailed_html": "inline static T&amp; ref(void* ptr)",
+                "detailed_raw": "inline static T& ref(void* ptr)",
+                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_argsstring_html": "(void *ptr)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ref",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "const <code>T</code> &amp;",
+              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "argsstring_html": "(const void *ptr)",
+              "name_html": "ref",
+              "param": [
+                {
+                  "type_html": "const void *",
+                  "declname_html": "ptr"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "185",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "57",
+                "bodyend": "57"
+              },
+              "definition": {
+                "simple_html": "static const T&amp; ref(const void* ptr)",
+                "simple_raw": "static const T& ref(const void* ptr)",
+                "detailed_html": "inline static const T&amp; ref(const void* ptr)",
+                "detailed_raw": "inline static const T& ref(const void* ptr)",
+                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_argsstring_html": "(const void *ptr)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ref",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             }
           ],
           "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/ref",
@@ -842,200 +966,6 @@
           "name_html": "ret",
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret",
           "functions": [
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1adcec9cc57be4adeb141d10f7d287ab42",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename RTag"
-                },
-                {
-                  "type_html": "typename <code>T</code>"
-                }
-              ],
-              "type_html": "<code>Ptr</code>",
-              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-              "argsstring_html": "(T &amp;&amp;val)",
-              "name_html": "ret",
-              "param": [
-                {
-                  "type_html": "<code>T</code> &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "186",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "60",
-                "bodyend": "62"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(T&amp;&amp; val)",
-                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(T&& val)",
-                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(T&amp;&amp; val)",
-                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(T&& val)",
-                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-                "original_argsstring_html": "(T &amp;&amp;val)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ret",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ret",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a68f5607e82b0e993c35ead5491b2d721",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename RTag"
-                },
-                {
-                  "type_html": "typename <code>T</code>"
-                }
-              ],
-              "type_html": "<code>Ptr</code>",
-              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-              "argsstring_html": "(RTag, T &amp;&amp;val)",
-              "name_html": "ret",
-              "param": [
-                {
-                  "type_html": "RTag"
-                },
-                {
-                  "type_html": "<code>T</code> &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "186",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "64",
-                "bodyend": "66"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(RTag, T&amp;&amp; val)",
-                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(RTag, T&& val)",
-                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(RTag, T&amp;&amp; val)",
-                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(RTag, T&& val)",
-                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-                "original_argsstring_html": "(RTag, T &amp;&amp;val)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ret",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ret",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1adcec9cc57be4adeb141d10f7d287ab42",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename RTag"
-                },
-                {
-                  "type_html": "typename <code>T</code>"
-                }
-              ],
-              "type_html": "<code>Ptr</code>",
-              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-              "argsstring_html": "(T &amp;&amp;val)",
-              "name_html": "ret",
-              "param": [
-                {
-                  "type_html": "<code>T</code> &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "42",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "60",
-                "bodyend": "62"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(T&amp;&amp; val)",
-                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(T&& val)",
-                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(T&amp;&amp; val)",
-                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(T&& val)",
-                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-                "original_argsstring_html": "(T &amp;&amp;val)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ret",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ret",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
-            },
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a68f5607e82b0e993c35ead5491b2d721",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename RTag"
-                },
-                {
-                  "type_html": "typename <code>T</code>"
-                }
-              ],
-              "type_html": "<code>Ptr</code>",
-              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-              "argsstring_html": "(RTag, T &amp;&amp;val)",
-              "name_html": "ret",
-              "param": [
-                {
-                  "type_html": "RTag"
-                },
-                {
-                  "type_html": "<code>T</code> &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "42",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
-                "bodystart": "64",
-                "bodyend": "66"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(RTag, T&amp;&amp; val)",
-                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(RTag, T&& val)",
-                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(RTag, T&amp;&amp; val)",
-                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(RTag, T&& val)",
-                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
-                "original_argsstring_html": "(RTag, T &amp;&amp;val)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ret",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ret",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
-            },
             {
               "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adcec9cc57be4adeb141d10f7d287ab42",
               "prot": "public",
@@ -1065,7 +995,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "60",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "60",
                 "bodyend": "62"
@@ -1115,7 +1045,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "64",
-                "column": "1",
+                "column": "14",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "64",
                 "bodyend": "66"
@@ -1131,6 +1061,200 @@
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ret",
               "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/BaseOp/ret",
               "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1adcec9cc57be4adeb141d10f7d287ab42",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename RTag"
+                },
+                {
+                  "type_html": "typename <code>T</code>"
+                }
+              ],
+              "type_html": "<code>Ptr</code>",
+              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+              "argsstring_html": "(T &amp;&amp;val)",
+              "name_html": "ret",
+              "param": [
+                {
+                  "type_html": "<code>T</code> &amp;&amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "42",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "60",
+                "bodyend": "62"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(T&amp;&amp; val)",
+                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(T&& val)",
+                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(T&amp;&amp; val)",
+                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(T&& val)",
+                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+                "original_argsstring_html": "(T &amp;&amp;val)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ret",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ret",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a68f5607e82b0e993c35ead5491b2d721",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename RTag"
+                },
+                {
+                  "type_html": "typename <code>T</code>"
+                }
+              ],
+              "type_html": "<code>Ptr</code>",
+              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+              "argsstring_html": "(RTag, T &amp;&amp;val)",
+              "name_html": "ret",
+              "param": [
+                {
+                  "type_html": "RTag"
+                },
+                {
+                  "type_html": "<code>T</code> &amp;&amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "42",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "64",
+                "bodyend": "66"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(RTag, T&amp;&amp; val)",
+                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(RTag, T&& val)",
+                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(RTag, T&amp;&amp; val)",
+                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(RTag, T&& val)",
+                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+                "original_argsstring_html": "(RTag, T &amp;&amp;val)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ret",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/ret",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1adcec9cc57be4adeb141d10f7d287ab42",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename RTag"
+                },
+                {
+                  "type_html": "typename <code>T</code>"
+                }
+              ],
+              "type_html": "<code>Ptr</code>",
+              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+              "argsstring_html": "(T &amp;&amp;val)",
+              "name_html": "ret",
+              "param": [
+                {
+                  "type_html": "<code>T</code> &amp;&amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "186",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "60",
+                "bodyend": "62"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(T&amp;&amp; val)",
+                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(T&& val)",
+                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(T&amp;&amp; val)",
+                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(T&& val)",
+                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+                "original_argsstring_html": "(T &amp;&amp;val)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ret",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ret",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
+              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a68f5607e82b0e993c35ead5491b2d721",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename RTag"
+                },
+                {
+                  "type_html": "typename <code>T</code>"
+                }
+              ],
+              "type_html": "<code>Ptr</code>",
+              "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+              "argsstring_html": "(RTag, T &amp;&amp;val)",
+              "name_html": "ret",
+              "param": [
+                {
+                  "type_html": "RTag"
+                },
+                {
+                  "type_html": "<code>T</code> &amp;&amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
+                "line": "186",
+                "column": "3",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
+                "bodystart": "64",
+                "bodyend": "66"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename RTag, typename T&gt;\nstatic Ptr ret(RTag, T&amp;&amp; val)",
+                "simple_raw": "template <typename RTag, typename T>\nstatic Ptr ret(RTag, T&& val)",
+                "detailed_html": "template &lt;typename RTag, typename T&gt;\ninline static Ptr ret(RTag, T&amp;&amp; val)",
+                "detailed_raw": "template <typename RTag, typename T>\ninline static Ptr ret(RTag, T&& val)",
+                "original_definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
+                "original_argsstring_html": "(RTag, T &amp;&amp;val)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ret",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapOp/ret",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp",
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ret"
             }
           ],
@@ -1168,7 +1292,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "44",
-                "column": "1",
+                "column": "17",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "44",
                 "bodyend": "44"
@@ -1225,7 +1349,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "line": "46",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
                 "bodystart": "46",
                 "bodyend": "51"
@@ -1254,63 +1378,6 @@
         },
         {
           "kind": "overloadset",
-          "name_html": "iter",
-          "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter",
-          "functions": [
-            {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a666ad554bc4fc33af3f334e3964a8f70",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "<code>I</code> &amp;",
-              "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
-              "argsstring_html": "(T &amp;self, std::any &amp;i)",
-              "name_html": "iter",
-              "param": [
-                {
-                  "type_html": "<code>T</code> &amp;",
-                  "declname_html": "self"
-                },
-                {
-                  "type_html": "std::any &amp;",
-                  "declname_html": "i"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "line": "54",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
-                "bodystart": "54",
-                "bodyend": "59"
-              },
-              "definition": {
-                "simple_html": "static I&amp; iter(T&amp; self, std::any&amp; i)",
-                "simple_raw": "static I& iter(T& self, std::any& i)",
-                "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
-                "detailed_raw": "inline static I& iter(T& self, std::any& i)",
-                "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
-                "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
-              },
-              "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/iter",
-              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ContainerOp/iter",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp",
-              "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter"
-            }
-          ],
-          "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter",
-          "minprot": "public",
-          "displayname_html": "iter",
-          "brief_html": "",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter",
-          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1AnyOp_3_01type_1_1cpp__type_3_01T_00_01type_1_1map_3_01KTag_00_01VTag_01_4_01_4_01_4/iter"
-        },
-        {
-          "kind": "overloadset",
           "name_html": "cref",
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::cref",
           "functions": [
@@ -1335,7 +1402,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "58",
-                "column": "1",
+                "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "58",
                 "bodyend": "58"
@@ -1388,7 +1455,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "68",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "68",
                 "bodyend": "68"
@@ -1445,7 +1512,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "69",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "69",
                 "bodyend": "77"
@@ -1498,7 +1565,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "78",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "78",
                 "bodyend": "78"
@@ -1551,7 +1618,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "79",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "79",
                 "bodyend": "79"
@@ -1608,7 +1675,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "80",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "80",
                 "bodyend": "80"
@@ -1665,7 +1732,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "81",
-                "column": "1",
+                "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "81",
                 "bodyend": "85"
@@ -1722,7 +1789,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "87",
-                "column": "1",
+                "column": "34",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "87",
                 "bodyend": "94"
@@ -1784,7 +1851,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "98",
-                "column": "1",
+                "column": "24",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "98",
                 "bodyend": "100"
@@ -1832,7 +1899,7 @@
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "line": "102",
-                "column": "1",
+                "column": "28",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BaseOp.h",
                 "bodystart": "102",
                 "bodyend": "105"

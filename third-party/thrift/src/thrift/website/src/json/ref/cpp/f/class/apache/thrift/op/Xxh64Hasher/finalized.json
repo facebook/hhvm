@@ -18,7 +18,7 @@
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "73",
-        "column": "1",
+        "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "bodystart": "73",
         "bodyend": "73"

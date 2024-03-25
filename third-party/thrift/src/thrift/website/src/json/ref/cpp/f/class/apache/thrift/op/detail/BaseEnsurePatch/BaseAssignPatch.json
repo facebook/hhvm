@@ -22,8 +22,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "140",
-        "column": "1"
+        "line": "162",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BaseAssignPatch(const BaseAssignPatch&amp;)",
@@ -46,6 +46,7 @@
       "const": "no",
       "explicit": "no",
       "inline": "no",
+      "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "",
       "definition_html": "apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::BaseAssignPatch",
@@ -58,8 +59,8 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "141",
-        "column": "1"
+        "line": "163",
+        "column": "3"
       },
       "definition": {
         "simple_html": "BaseAssignPatch(BaseAssignPatch&amp;&amp;)",

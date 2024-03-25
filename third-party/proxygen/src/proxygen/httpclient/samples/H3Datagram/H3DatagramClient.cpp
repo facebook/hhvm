@@ -10,7 +10,6 @@
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <proxygen/httpserver/samples/hq/InsecureVerifierDangerousDoNotUseInProduction.h>
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
@@ -152,7 +151,6 @@ int main(int argc, char* argv[]) {
       "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
 #endif
   folly::init(&argc, &argv, false);
-  folly::ssl::init();
 
   EventBase evb;
 

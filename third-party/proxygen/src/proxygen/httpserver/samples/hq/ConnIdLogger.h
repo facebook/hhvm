@@ -15,6 +15,7 @@
 #include <folly/File.h>
 #include <folly/String.h>
 #include <folly/Synchronized.h>
+#include <map>
 #include <memory>
 #include <string>
 

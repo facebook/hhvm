@@ -26,7 +26,6 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <folly/ssl/SSLSession.h>
 #include <proxygen/httpclient/samples/httperf2/Client.h>
 #include <proxygen/httpclient/samples/httperf2/HTTPerf2.h>

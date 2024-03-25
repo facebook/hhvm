@@ -14,7 +14,6 @@
 #include <fizz/record/Types.h>
 #include <folly/Conv.h>
 #include <folly/String.h>
-#include <folly/ssl/Init.h>
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -61,7 +60,6 @@ TEST(SecondaryAuthManagerTest, AuthenticatorRequest) {
 }
 
 TEST(SecondaryAuthManagerTest, Authenticator) {
-  folly::ssl::init();
   // Instantiate a SecondaryAuthManager.
   auto cert = fizz::test::getCert(kP256Certificate);
   auto key = fizz::test::getPrivateKey(kP256Key);

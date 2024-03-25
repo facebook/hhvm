@@ -12,7 +12,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/lib/http/HTTPConnector.h>
 
@@ -57,7 +56,6 @@ int main(int argc, char* argv[]) {
       "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
 #endif
   auto _ = folly::Init(&argc, &argv, false);
-  folly::ssl::init();
 
   EventBase evb;
   URL url(FLAGS_url);

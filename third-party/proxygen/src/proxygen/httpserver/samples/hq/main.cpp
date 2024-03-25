@@ -9,7 +9,6 @@
 #include <folly/portability/GFlags.h>
 
 #include <folly/init/Init.h>
-#include <folly/ssl/Init.h>
 
 #include <proxygen/httpserver/samples/hq/ConnIdLogger.h>
 #include <proxygen/httpserver/samples/hq/HQClient.h>
@@ -30,7 +29,6 @@ int main(int argc, char* argv[]) {
       "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
 #endif
   folly::init(&argc, &argv, false);
-  folly::ssl::init();
   int err = 0;
 
   auto expectedParams = initializeParamsFromCmdline();

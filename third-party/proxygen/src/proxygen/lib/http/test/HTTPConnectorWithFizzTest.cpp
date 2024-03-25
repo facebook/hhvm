@@ -13,7 +13,6 @@
 #include <fizz/server/test/Mocks.h>
 #include <fizz/server/test/Utils.h>
 #include <folly/io/async/AsyncServerSocket.h>
-#include <folly/ssl/Init.h>
 #include <proxygen/lib/http/HTTPConnectorWithFizz.h>
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 
@@ -36,8 +35,6 @@ class HTTPConnectorWithFizzTest : public testing::Test {
   }
 
   void SetUp() override {
-    folly::ssl::init();
-
     timer_ = folly::HHWheelTimer::newTimer(
         &evb_,
         std::chrono::milliseconds(folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),

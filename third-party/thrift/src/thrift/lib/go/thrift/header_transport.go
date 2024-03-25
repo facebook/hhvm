@@ -303,16 +303,6 @@ func (t *headerTransport) ResetProtocol() error {
 	return nil
 }
 
-// Open opens the internal transport
-func (t *headerTransport) Open() error {
-	return t.transport.Open()
-}
-
-// IsOpen returns whether the current transport is open
-func (t *headerTransport) IsOpen() bool {
-	return t.transport.IsOpen()
-}
-
 // Close closes the internal transport
 func (t *headerTransport) Close() error {
 	return t.transport.Close()

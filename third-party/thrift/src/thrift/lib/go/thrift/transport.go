@@ -52,12 +52,6 @@ type Transport interface {
 	io.ReadWriteCloser
 	Flusher
 	ReadSizeProvider
-
-	// Opens the transport for communication
-	Open() error
-
-	// Returns true if the transport is open
-	IsOpen() bool
 }
 
 type stringWriter interface {

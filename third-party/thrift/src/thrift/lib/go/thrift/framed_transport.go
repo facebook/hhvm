@@ -46,14 +46,6 @@ func NewFramedTransportMaxLength(transport Transport, maxLength uint32) *FramedT
 	return &FramedTransport{transport: transport, reader: bufio.NewReader(transport), maxLength: maxLength}
 }
 
-func (p *FramedTransport) Open() error {
-	return p.transport.Open()
-}
-
-func (p *FramedTransport) IsOpen() bool {
-	return p.transport.IsOpen()
-}
-
 func (p *FramedTransport) Close() error {
 	return p.transport.Close()
 }

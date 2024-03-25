@@ -35,14 +35,6 @@ func NewBufferedTransport(trans Transport, bufferSize int) *BufferedTransport {
 	}
 }
 
-func (p *BufferedTransport) IsOpen() bool {
-	return p.tp.IsOpen()
-}
-
-func (p *BufferedTransport) Open() (err error) {
-	return p.tp.Open()
-}
-
 func (p *BufferedTransport) Close() (err error) {
 	return p.tp.Close()
 }

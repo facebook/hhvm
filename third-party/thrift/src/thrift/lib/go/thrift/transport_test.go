@@ -39,12 +39,6 @@ func init() {
 
 func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
-	if !writeTrans.IsOpen() {
-		t.Fatalf("Transport %T not open: %s", writeTrans, writeTrans)
-	}
-	if !readTrans.IsOpen() {
-		t.Fatalf("Transport %T not open: %s", readTrans, readTrans)
-	}
 
 	// Special case for header transport -- need to reset protocol on read
 	var headerTrans *headerTransport
@@ -115,12 +109,7 @@ func TransportTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 
 func TransportHeaderTest(t *testing.T, writeTrans Transport, readTrans Transport) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
-	if !writeTrans.IsOpen() {
-		t.Fatalf("Transport %T not open: %s", writeTrans, writeTrans)
-	}
-	if !readTrans.IsOpen() {
-		t.Fatalf("Transport %T not open: %s", readTrans, readTrans)
-	}
+
 	// Need to assert type of Transport to HTTPClient to expose the Setter
 	httpWPostTrans := writeTrans.(*HTTPClient)
 	httpWPostTrans.SetHeader(transport_header["key"], transport_header["value"])

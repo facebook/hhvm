@@ -65,16 +65,6 @@ func (z *ZlibTransport) Flush() error {
 	return z.transport.Flush()
 }
 
-// IsOpen returns true if the transport is open
-func (z *ZlibTransport) IsOpen() bool {
-	return z.transport.IsOpen()
-}
-
-// Open opens the transport for communication
-func (z *ZlibTransport) Open() error {
-	return z.transport.Open()
-}
-
 func (z *ZlibTransport) Read(p []byte) (int, error) {
 	if z.reader == nil {
 		r, err := zlib.NewReader(z.transport)

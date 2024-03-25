@@ -22,20 +22,16 @@ import socket
 import cython
 import folly.executor
 
+from cython.operator cimport dereference as deref
 from folly.futures cimport bridgeFutureWith
 from libc.stdint cimport uint32_t
+from libcpp.memory cimport make_shared, static_pointer_cast
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
-from thrift.python.client cimport ssl as thrift_ssl
 from thrift.python.client.async_client cimport AsyncClient
 from thrift.python.client.client_wrapper import Client
-from thrift.python.client.request_channel cimport (
-    createThriftChannelTCP,
-    createThriftChannelUnix,
-    ClientType as cClientType,
-)
+from thrift.python.client.request_channel cimport DefaultChannelFactory
 from thrift.python.client.request_channel import ClientType
-from thrift.python.serializer cimport Protocol as cProtocol
 
 
 cdef object proxy_factory = None
@@ -53,6 +49,34 @@ def install_proxy_factory(factory):
 def get_client(
     clientKlass,
     *,
+    host=None,
+    port=None,
+    path=None,
+    double timeout=1,
+    cClientType client_type = ClientType.THRIFT_HEADER_CLIENT_TYPE,
+    cProtocol protocol = cProtocol.COMPACT,
+    thrift_ssl.SSLContext ssl_context=None,
+    double ssl_timeout=1,
+):
+    return get_client_with_channel_factory(
+        clientKlass,
+        static_pointer_cast[ChannelFactory, DefaultChannelFactory](
+            make_shared[DefaultChannelFactory]()
+        ),
+        host=host,
+        port=port,
+        path=path,
+        timeout=timeout,
+        client_type=client_type,
+        protocol=protocol,
+        ssl_context=ssl_context,
+        ssl_timeout=ssl_timeout,
+    )
+
+
+cdef object get_client_with_channel_factory(
+    clientKlass,
+    shared_ptr[ChannelFactory] channel_factory,
     host=None,
     port=None,
     path=None,
@@ -87,8 +111,9 @@ def get_client(
             try:
                 ipaddress.ip_address(host)
             except ValueError:
-                return _AsyncResolveCtxManager(
+                return _AsyncResolveCtxManager.create(
                     clientKlass,
+                    channel_factory,
                     host=host,
                     port=port,
                     path=endpoint,
@@ -106,7 +131,7 @@ def get_client(
         if ssl_context:
             bridgeFutureWith[cRequestChannel_ptr](
                 (<AsyncClient>client)._executor,
-                thrift_ssl.createThriftChannelTCP(
+                deref(channel_factory).createThriftChannelSSL(
                     ssl_context._cpp_obj,
                     host,
                     port,
@@ -122,7 +147,7 @@ def get_client(
         else:
             bridgeFutureWith[cRequestChannel_ptr](
                 (<AsyncClient>client)._executor,
-                createThriftChannelTCP(
+                deref(channel_factory).createThriftChannelTCP(
                     host, port, _timeout_ms, client_type, protocol, endpoint
                 ),
                 requestchannel_callback,
@@ -132,7 +157,7 @@ def get_client(
         fspath = os.fsencode(path)
         bridgeFutureWith[cRequestChannel_ptr](
             (<AsyncClient>client)._executor,
-            createThriftChannelUnix(
+            deref(channel_factory).createThriftChannelUnix(
                 cmove[string](fspath), _timeout_ms, client_type, protocol
             ),
             requestchannel_callback,
@@ -154,22 +179,63 @@ cdef class _AsyncResolveCtxManager:
     """This class just handles resolving of hostnames passed to get_client
        by creating a wrapping async context manager"""
     cdef object clientKlass
-    cdef object kws
+    cdef shared_ptr[ChannelFactory] channel_factory
     cdef object ctx
+    cdef object host
+    cdef object port
+    cdef object path
+    cdef double timeout
+    cdef cClientType client_type
+    cdef cProtocol protocol
+    cdef thrift_ssl.SSLContext ssl_context
+    cdef double ssl_timeout
 
-    def __init__(self, clientKlass, *, **kws):
-        self.clientKlass = clientKlass
-        self.kws = kws
+    @staticmethod
+    cdef _AsyncResolveCtxManager create(
+        clientKlass,
+        shared_ptr[ChannelFactory] channel_factory,
+        host=None,
+        port=None,
+        path=None,
+        double timeout=1,
+        cClientType client_type = ClientType.THRIFT_HEADER_CLIENT_TYPE,
+        cProtocol protocol = cProtocol.COMPACT,
+        thrift_ssl.SSLContext ssl_context=None,
+        double ssl_timeout=1,
+    ):
+        cdef _AsyncResolveCtxManager ctx_manager = _AsyncResolveCtxManager.__new__(_AsyncResolveCtxManager)
+        ctx_manager.clientKlass = clientKlass
+        ctx_manager.channel_factory = channel_factory
+        ctx_manager.host = host
+        ctx_manager.port = port
+        ctx_manager.path = path
+        ctx_manager.timeout = timeout
+        ctx_manager.client_type = client_type
+        ctx_manager.protocol = protocol
+        ctx_manager.ssl_context = ssl_context
+        ctx_manager.ssl_timeout = ssl_timeout
+        return ctx_manager
 
     async def __aenter__(self):
         loop = asyncio.get_event_loop()
         result = await loop.getaddrinfo(
-            self.kws['host'],
-            self.kws['port'],
+            self.host,
+            self.port,
             type=socket.SOCK_STREAM
         )
-        self.kws['host'] = result[0][4][0]
-        self.ctx = get_client(self.clientKlass, **self.kws)
+        self.host = result[0][4][0]
+        self.ctx = get_client_with_channel_factory(
+            self.clientKlass,
+            self.channel_factory,
+            host=self.host,
+            port=self.port,
+            path=self.path,
+            timeout=self.timeout,
+            client_type=self.client_type,
+            protocol=self.protocol,
+            ssl_context=self.ssl_context,
+            ssl_timeout=self.ssl_timeout,
+        )
         return await self.ctx.__aenter__()
 
     def __aexit__(self, *exc_info):

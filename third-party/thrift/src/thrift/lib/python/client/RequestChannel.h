@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/io/async/DelayedDestruction.h>
+#include <folly/io/async/SSLContext.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
@@ -24,46 +25,98 @@ namespace thrift {
 namespace python {
 namespace client {
 
-/**
- * Create a thrift channel by connecting to a host:port over TCP.
- */
-folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
-    const std::string& host,
-    uint16_t port,
-    uint32_t connect_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint);
+class ChannelFactory {
+ public:
+  virtual ~ChannelFactory() {}
+  /**
+   * Create a thrift channel by connecting to a host:port over TCP.
+   */
+  virtual folly::Future<apache::thrift::RequestChannel::Ptr>
+  createThriftChannelTCP(
+      const std::string& host,
+      uint16_t port,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint) = 0;
 
-apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
-    const std::string& host,
-    uint16_t port,
-    uint32_t connect_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint);
+  apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
+      const std::string& host,
+      uint16_t port,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint);
 
-/**
- * Create a thrift channel by connecting to a Unix domain socket.
- */
-folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelUnix(
-    const std::string& path,
-    uint32_t connect_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto);
+  /**
+   * Create a thrift channel by connecting to a Unix domain socket.
+   */
+  virtual folly::Future<apache::thrift::RequestChannel::Ptr>
+  createThriftChannelUnix(
+      const std::string& path,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto) = 0;
 
-apache::thrift::RequestChannel::Ptr sync_createThriftChannelUnix(
-    const std::string& path,
-    uint32_t connect_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto);
+  apache::thrift::RequestChannel::Ptr sync_createThriftChannelUnix(
+      const std::string& path,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto);
 
-apache::thrift::RequestChannel::Ptr createHeaderChannel(
-    folly::AsyncTransport::UniquePtr sock,
-    CLIENT_TYPE client,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    folly::Optional<std::string> host = folly::none,
-    folly::Optional<std::string> endpoint = folly::none);
+  /**
+   * Create a thrift channel by connecting to a host:port over TCP then SSL.
+   */
+  virtual folly::Future<apache::thrift::RequestChannel::Ptr>
+  createThriftChannelSSL(
+      const std::shared_ptr<folly::SSLContext>& ctx,
+      const std::string& host,
+      const uint16_t port,
+      const uint32_t connect_timeout,
+      const uint32_t ssl_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint) = 0;
+
+  apache::thrift::RequestChannel::Ptr sync_createThriftChannelSSL(
+      const std::shared_ptr<folly::SSLContext>& ctx,
+      const std::string& host,
+      const uint16_t port,
+      const uint32_t connect_timeout,
+      const uint32_t ssl_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint);
+};
+
+class DefaultChannelFactory : public ChannelFactory {
+ public:
+  folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
+      const std::string& host,
+      uint16_t port,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint) override;
+
+  folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelUnix(
+      const std::string& path,
+      uint32_t connect_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto) override;
+
+  folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelSSL(
+      const std::shared_ptr<folly::SSLContext>& ctx,
+      const std::string& host,
+      const uint16_t port,
+      const uint32_t connect_timeout,
+      const uint32_t ssl_timeout,
+      CLIENT_TYPE client_t,
+      apache::thrift::protocol::PROTOCOL_TYPES proto,
+      const std::string& endpoint) override;
+
+  ~DefaultChannelFactory() override = default;
+};
 
 } // namespace client
 } // namespace python

@@ -64,28 +64,12 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
   std::string endpoint_;
 };
 
-/**
- * Create a thrift channel by connecting to a host:port over TCP then SSL.
- */
-folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
-    const std::shared_ptr<folly::SSLContext>& ctx,
-    const std::string& host,
-    const uint16_t port,
-    const uint32_t connect_timeout,
-    const uint32_t ssl_timeout,
-    CLIENT_TYPE client_t,
+apache::thrift::RequestChannel::Ptr createHeaderChannel(
+    folly::AsyncTransport::UniquePtr sock,
+    CLIENT_TYPE client,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint);
-
-apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
-    const std::shared_ptr<folly::SSLContext>& ctx,
-    const std::string& host,
-    const uint16_t port,
-    const uint32_t connect_timeout,
-    const uint32_t ssl_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint);
+    folly::Optional<std::string> host = folly::none,
+    folly::Optional<std::string> endpoint = folly::none);
 
 } // namespace client
 } // namespace python

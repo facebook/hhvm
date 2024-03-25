@@ -16,12 +16,29 @@
 
 #include <thrift/lib/python/client/ssl.h>
 
+#include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/python/client/RequestChannel.h>
 
 namespace thrift {
 namespace python {
 namespace client {
+
+apache::thrift::RequestChannel::Ptr createHeaderChannel(
+    folly::AsyncTransport::UniquePtr sock,
+    CLIENT_TYPE client,
+    apache::thrift::protocol::PROTOCOL_TYPES proto,
+    folly::Optional<std::string> host,
+    folly::Optional<std::string> endpoint) {
+  apache::thrift::HeaderClientChannel::Options options;
+  if (client == THRIFT_HTTP_CLIENT_TYPE) {
+    options.useAsHttpClient(*host, *endpoint);
+  } else {
+    options.setClientType(client);
+  }
+  options.setProtocolId(proto);
+  return apache::thrift::HeaderClientChannel::newChannel(
+      std::move(sock), std::move(options));
+}
 
 ConnectHandler::ConnectHandler(
     const std::shared_ptr<folly::SSLContext>& ctx,
@@ -76,64 +93,6 @@ void ConnectHandler::connectErr(
   using apache::thrift::transport::TTransportException;
   UniquePtr p(this);
   promise_.setException(TTransportException(ex));
-}
-
-/**
- * Create a thrift channel by connecting to a host:port over TCP then SSL.
- */
-folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
-    const std::shared_ptr<folly::SSLContext>& ctx,
-    const std::string& host,
-    const uint16_t port,
-    const uint32_t connect_timeout,
-    const uint32_t ssl_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
-  auto eb = folly::getGlobalIOExecutor()->getEventBase();
-  return folly::via(
-      eb,
-      [=,
-       ctx = ctx,
-       host = host,
-       port = port,
-       connect_timeout = connect_timeout,
-       ssl_timeout = ssl_timeout,
-       endpoint = endpoint]() mutable {
-        ConnectHandler::UniquePtr handler{new ConnectHandler(
-            ctx,
-            eb,
-            host,
-            port,
-            connect_timeout,
-            ssl_timeout,
-            client_t,
-            proto,
-            endpoint)};
-
-        if (client_t == CLIENT_TYPE::THRIFT_ROCKET_CLIENT_TYPE) {
-          handler->setSupportedApplicationProtocols({"rs"});
-        } else if (client_t == CLIENT_TYPE::THRIFT_HEADER_CLIENT_TYPE) {
-          handler->setSupportedApplicationProtocols({"thrift"});
-        }
-        auto future = handler->connect();
-        handler.release();
-        return future;
-      });
-}
-
-apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
-    const std::shared_ptr<folly::SSLContext>& ctx,
-    const std::string& host,
-    const uint16_t port,
-    const uint32_t connect_timeout,
-    const uint32_t ssl_timeout,
-    CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
-  auto future = createThriftChannelTCP(
-      ctx, host, port, connect_timeout, ssl_timeout, client_t, proto, endpoint);
-  return std::move(future.wait().value());
 }
 
 } // namespace client

@@ -14,7 +14,9 @@
 
 from folly cimport cFollyFuture
 from libc.stdint cimport uint16_t, uint32_t
+from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
+from thrift.python.client.ssl cimport cSSLContext
 from thrift.python.serializer cimport Protocol as cProtocol
 
 
@@ -34,37 +36,63 @@ cdef extern from "thrift/lib/cpp2/async/RequestChannel.h" namespace "::apache::t
 
 
 cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::thrift::python::client":
-    cdef cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(
-        const string& host,
-        const uint16_t port,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-        const string& endpoint,
-    )
+    cdef cppclass ChannelFactory "::thrift::python::client::ChannelFactory":
+        cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(
+            const string& host,
+            const uint16_t port,
+            const uint32_t connect_timeout,
+            ClientType,
+            cProtocol,
+            const string& endpoint,
+        )
 
-    cdef cRequestChannel_ptr sync_createThriftChannelTCP(
-        const string& host,
-        const uint16_t port,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-        const string& endpoint,
-    )
+        cRequestChannel_ptr sync_createThriftChannelTCP(
+            const string& host,
+            const uint16_t port,
+            const uint32_t connect_timeout,
+            ClientType,
+            cProtocol,
+            const string& endpoint,
+        )
 
-    cdef cFollyFuture[cRequestChannel_ptr] createThriftChannelUnix(
-        const string& path,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-    )
+        cFollyFuture[cRequestChannel_ptr] createThriftChannelUnix(
+            const string& path,
+            const uint32_t connect_timeout,
+            ClientType,
+            cProtocol,
+        )
 
-    cdef cRequestChannel_ptr sync_createThriftChannelUnix(
-        const string& path,
-        const uint32_t connect_timeout,
-        ClientType,
-        cProtocol,
-    )
+        cRequestChannel_ptr sync_createThriftChannelUnix(
+            const string& path,
+            const uint32_t connect_timeout,
+            ClientType,
+            cProtocol,
+        )
+
+        cFollyFuture[cRequestChannel_ptr] createThriftChannelSSL(
+            shared_ptr[cSSLContext]& ctx,
+            const string& host,
+            const uint16_t port,
+            const uint32_t connect_timeout,
+            const uint32_t ssl_timeout,
+            ClientType,
+            cProtocol,
+            const string& endpoint,
+        )
+
+        cRequestChannel_ptr sync_createThriftChannelSSL(
+            shared_ptr[cSSLContext]& ctx,
+            const string& host,
+            const uint16_t port,
+            const uint32_t connect_timeout,
+            const uint32_t ssl_timeout,
+            ClientType,
+            cProtocol,
+            const string& endpoint,
+        ) except +
+
+    cdef cppclass DefaultChannelFactory "::thrift::python::client::DefaultChannelFactory" (ChannelFactory):
+        pass
 
 cdef class RequestChannel:
     cdef cRequestChannel_ptr _cpp_obj

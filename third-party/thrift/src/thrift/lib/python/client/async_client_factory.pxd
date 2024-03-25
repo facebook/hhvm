@@ -13,8 +13,15 @@
 # limitations under the License.
 
 from cpython.ref cimport PyObject
+from libcpp.memory cimport shared_ptr
 from folly cimport cFollyTry
-from thrift.python.client.request_channel cimport cRequestChannel_ptr
+from thrift.python.client cimport ssl as thrift_ssl
+from thrift.python.client.request_channel cimport (
+    cRequestChannel_ptr,
+    ClientType as cClientType,
+    ChannelFactory,
+)
+from thrift.python.serializer cimport Protocol as cProtocol
 
 
 cdef void requestchannel_callback(
@@ -23,3 +30,16 @@ cdef void requestchannel_callback(
 )
 
 cpdef object get_proxy_factory()
+
+cdef object get_client_with_channel_factory(
+    clientKlass,
+    shared_ptr[ChannelFactory] channel_factory,
+    host = ?,
+    port = ?,
+    path = ?,
+    double timeout = ?,
+    cClientType client_type = ?,
+    cProtocol protocol = ?,
+    thrift_ssl.SSLContext ssl_context = ?,
+    double ssl_timeout = ?,
+)

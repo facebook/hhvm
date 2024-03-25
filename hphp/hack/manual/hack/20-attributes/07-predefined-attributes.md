@@ -296,7 +296,7 @@ You can clear the cache with `HH\clear_static_memoization`. This should only be 
 NOTE: Putting the `__Memoize` attribute on a static method will cause it to bind
 to the declaring class. When you do this, any uses of `static::` constructs to
 retrieve definitions from subclasses can cause unexpected results (they will
-actuually access the declaring class, similar to equivalent `self::` constructs).
+actually access the declaring class, similar to equivalent `self::` constructs).
 Consider using `__MemoizeLSB` instead on static methods.
 
 ### Exceptions

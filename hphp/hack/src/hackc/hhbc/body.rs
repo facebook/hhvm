@@ -9,6 +9,7 @@ pub use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::Attribute;
+use crate::ClassName;
 use crate::Coeffects;
 use crate::DefaultValue;
 use crate::Instruct;
@@ -31,7 +32,9 @@ pub struct Body {
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vector<UpperBound>,
-    pub shadowed_tparams: Vector<StringId>,
+    /// shadowed_tparams are the set of tparams on a method which shadow a
+    /// tparam on the containing class.
+    pub shadowed_tparams: Vector<ClassName>,
     pub params: Vector<ParamEntry>,
     pub return_type_info: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,

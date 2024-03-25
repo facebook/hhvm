@@ -493,7 +493,7 @@ fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName]) -> Result
     write_bytes!(w, " enum_includes ({})", fmt_separated(" ", enum_includes))
 }
 
-fn print_shadowed_tparams(w: &mut dyn Write, shadowed_tparams: &[StringId]) -> Result<()> {
+fn print_shadowed_tparams(w: &mut dyn Write, shadowed_tparams: &[ClassName]) -> Result<()> {
     write_bytes!(
         w,
         "{{{}}}",

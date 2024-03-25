@@ -1257,10 +1257,10 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   checkNative(ts);
 }
 
-void translateShadowedTParams(TParamNameVec& vec, const Vector<StringId>& tpms) {
+void translateShadowedTParams(TParamNameVec& vec, const Vector<ClassName>& tpms) {
   auto tparams = range(tpms);
   for (auto const& t : tparams) {
-    vec.push_back(toStaticString(t));
+    vec.push_back(toStaticString(t._0));
   }
 }
 

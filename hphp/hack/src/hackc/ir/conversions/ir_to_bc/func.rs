@@ -69,9 +69,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let doc_comment = func.doc_comment.map(|c| c.into()).into();
     let upper_bounds = func.upper_bounds.into();
 
-    let shadowed_tparams =
-        Vec::from_iter(func.shadowed_tparams.iter().map(|name| name.as_string_id()));
-
+    let shadowed_tparams = func.shadowed_tparams;
     let body_instrs = body_instrs.to_vec();
     let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs).unwrap();
 

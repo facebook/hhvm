@@ -478,11 +478,11 @@ fn assemble_method(token_iter: &mut Lexer<'_>) -> Result<hhbc::Method> {
     })
 }
 
-fn assemble_shadowed_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<StringId>> {
+fn assemble_shadowed_tparams(token_iter: &mut Lexer<'_>) -> Result<Vec<ClassName>> {
     token_iter.expect(Token::is_open_curly)?;
     let mut stp = Vec::new();
     while token_iter.peek_is(Token::is_identifier) {
-        stp.push(hhbc::intern(
+        stp.push(ClassName::intern(
             token_iter.expect(Token::is_identifier)?.as_str()?,
         ));
         if !token_iter.peek_is(Token::is_close_curly) {
@@ -1331,7 +1331,7 @@ fn assemble_body(
     attrs: hhbc::Attr,
     params: Vec<ParamEntry>,
     return_type_info: Maybe<hhbc::TypeInfo>,
-    shadowed_tparams: Vec<StringId>,
+    shadowed_tparams: Vec<ClassName>,
     upper_bounds: Vec<hhbc::UpperBound>,
     span: hhbc::Span,
 ) -> Result<hhbc::Body> {

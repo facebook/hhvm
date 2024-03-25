@@ -434,7 +434,10 @@ pub fn make_body<'a, 'd>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         upper_bounds: upper_bounds.into(),
-        shadowed_tparams: shadowed_tparams.into_iter().map(hhbc::intern).collect(),
+        shadowed_tparams: shadowed_tparams
+            .into_iter()
+            .map(|s| ClassName::intern(&s))
+            .collect(),
         params: params.into(),
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment

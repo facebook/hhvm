@@ -165,7 +165,8 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 void WarnIfNotOK(Transport* transport) {
   auto code = static_cast<Transport::StatusCode>(transport->getResponseCode());
   if (code != Transport::StatusCode::OK) {
-    Logger::Warning("Non-OK response from admin server: %d %s",
+    Logger::Warning("Non-OK response from admin server for command %s: %d %s",
+                    transport->getCommand().c_str(),
                     static_cast<int>(code),
                     transport->getResponseInfo().c_str());
   }

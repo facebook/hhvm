@@ -95,13 +95,12 @@ class MutableStructMeta(type):
             )
             dataclass_fields.append((name, field_type, dataclass_field))
 
+        dct["__init_subclass__"] = classmethod(_gen_subclass_forbidden(cls_name))
         return dataclasses.make_dataclass(
             cls_name,
             dataclass_fields,
             bases=(MutableStruct,),
-            namespace={
-                "__init_subclass__": classmethod(_gen_subclass_forbidden(cls_name)),
-            },
+            namespace=dct,
             match_args=False,
             kw_only=True,
             slots=True,

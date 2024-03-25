@@ -11,8 +11,11 @@ from __future__ import annotations
 # EXPERIMENTAL - DO NOT USE !!!
 # See `experimental_generate_mutable_types` documentation in thrift compiler
 
+import dataclasses
+
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.types as _fbthrift_python_types
+
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -111,8 +114,10 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def to_immutable(self):
-        raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.MyStruct(**dataclasses.asdict(self))
 
 
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -131,8 +136,10 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def to_immutable(self):
-        raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.MyDataItem(**dataclasses.asdict(self))
 
 
 class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -160,6 +167,8 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    def to_immutable(self):
-        raise NotImplementedError(f"to_immutable() is not yet implemented for mutable thrift-python structs: {type(self)}.")
+    def _to_immutable(self):
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic.module.thrift_types")
+        return immutable_types.ReservedKeyword(**dataclasses.asdict(self))
 

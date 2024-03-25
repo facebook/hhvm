@@ -107,3 +107,29 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             TypeError, "Inheriting from thrift-python data types is forbidden:"
         ):
             types.new_class("TestSubclass2", bases=(TestStructMutable,))
+
+    def test_to_immutable(self) -> None:
+        w_mutable = TestStructMutable(unqualified_string="hello")
+        w_immutable = w_mutable._to_immutable()
+        self.assertIsNot(w_mutable, w_immutable)
+
+        # Even though their contents are the same, the mutable and immutable
+        # instance are not "equal":
+        self.assertEqual(w_mutable.unqualified_string, w_immutable.unqualified_string)
+        self.assertNotEqual(w_mutable, w_immutable)
+
+        w_mutable.unqualified_string = "hello, world!"
+        self.assertNotEqual(
+            w_mutable.unqualified_string, w_immutable.unqualified_string
+        )
+
+        # Check that converting to immutable validates field types
+        w_mutable.unqualified_string = 42
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "TypeError: Cannot create internal string data representation. "
+                "Expected type <class 'str'>, got: <class 'int'>."
+            ),
+        ):
+            w_mutable._to_immutable()

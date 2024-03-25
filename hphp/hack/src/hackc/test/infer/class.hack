@@ -234,6 +234,8 @@ class C {
 
 }
 
+// TEST-CHECK-BAL: type AbstractClass
+// CHECK: type AbstractClass = .kind="class" .abstract
 abstract class AbstractClass {
   // TEST-CHECK-BAL: declare .abstract AbstractClass$static.abs_static_func
   // CHECK: declare .abstract AbstractClass$static.abs_static_func(*AbstractClass$static, *HackInt, *HackFloat): *HackString

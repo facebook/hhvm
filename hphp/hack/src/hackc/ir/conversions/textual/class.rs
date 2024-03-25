@@ -127,6 +127,10 @@ impl ClassState<'_, '_> {
             metadata.insert("final", self.class.flags.is_final().into());
         }
 
+        if self.class.flags.is_abstract() {
+            metadata.insert("abstract", self.class.flags.is_abstract().into());
+        }
+
         let mut fields: Vec<textual::Field<'_>> = Vec::new();
         let properties = std::mem::take(&mut self.class.properties);
         for prop in &properties {

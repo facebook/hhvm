@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --hide-static-coeffects --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
-// CHECK: type C$static = .kind="class" .static {
+// CHECK: type C$static = .kind="class" .static .abstract {
 // CHECK:   TMyShape: .public .type_constant *HackMixed
 // CHECK: }
 

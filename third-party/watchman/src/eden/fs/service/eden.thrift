@@ -1562,6 +1562,17 @@ struct ResetParentCommitsParams {
   3: optional RootIdOptions rootIdOptions;
 }
 
+struct GetCurrentSnapshotInfoRequest {
+  // Mount for which you want information.
+  1: MountId mountId;
+  // Pass unique identifier of this request's caller.
+  2: optional ClientRequestInfo cri;
+}
+
+struct GetCurrentSnapshotInfoResponse {
+  1: optional string filterId;
+}
+
 struct RemoveRecursivelyParams {
   1: PathString mountPoint;
   2: PathString path;
@@ -1649,6 +1660,15 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: WorkingDirectoryParents parents,
     3: ResetParentCommitsParams params,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Gets information about the current snapshot (i.e. last checked out commit)
+   * Currently, we only expose thethe current filter for the working copy. If
+   * the working copy is not filtered then the returned filter will be none.
+   */
+  GetCurrentSnapshotInfoResponse getCurrentSnapshotInfo(
+    1: GetCurrentSnapshotInfoRequest params,
   ) throws (1: EdenError ex);
 
   /**

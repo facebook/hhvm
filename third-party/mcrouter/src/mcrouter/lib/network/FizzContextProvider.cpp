@@ -24,11 +24,6 @@ namespace facebook {
 namespace memcache {
 
 namespace {
-void initSSL() {
-  static folly::once_flag flag;
-  folly::call_once(flag, [&]() { folly::ssl::init(); });
-}
-
 /* Sessions are valid for upto 24 hours */
 constexpr size_t kSessionLifeTime = 86400;
 /* Handshakes are valid for up to 1 week */
@@ -43,7 +38,6 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   // global session cache
   static auto SESSION_CACHE =
       std::make_shared<fizz::client::SynchronizedLruPskCache>(100);
-  initSSL();
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
   ctx->setSupportedVersions({fizz::ProtocolVersion::tls_1_3});
   ctx->setPskCache(SESSION_CACHE);
@@ -82,7 +76,6 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     bool requireClientVerification,
     bool preferOcbCipher,
     wangle::TLSTicketKeySeeds* ticketKeySeeds) {
-  initSSL();
   auto certMgr = std::make_shared<fizz::server::CertManager>();
   try {
     auto selfCert =

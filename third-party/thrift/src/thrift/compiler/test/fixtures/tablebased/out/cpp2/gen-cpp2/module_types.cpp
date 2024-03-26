@@ -150,7 +150,7 @@ TrivialTypesStruct::TrivialTypesStruct(apache::thrift::FragileConstructor, ::std
     __fbthrift_field_fieldB(std::move(fieldB__arg)),
     __fbthrift_field_fieldC(std::move(fieldC__arg)),
     __fbthrift_field_fieldD(std::move(fieldD__arg)),
-    __fbthrift_field_fieldE(std::move(fieldE__arg)) {
+    __fbthrift_field_fieldE(std::move(fieldE__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -312,7 +312,7 @@ ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vect
     __fbthrift_field_fieldE(std::move(fieldE__arg)),
     __fbthrift_field_fieldF(std::move(fieldF__arg)),
     __fbthrift_field_fieldG(std::move(fieldG__arg)),
-    __fbthrift_field_fieldH(std::move(fieldH__arg)) {
+    __fbthrift_field_fieldH(std::move(fieldH__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

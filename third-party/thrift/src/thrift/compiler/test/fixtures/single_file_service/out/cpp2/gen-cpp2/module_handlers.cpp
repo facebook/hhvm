@@ -244,7 +244,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void ASvNull::foo(::cpp2::Foo& /*_return*/) {}
+void ASvNull::foo(::cpp2::Foo& /*_return*/) {  }
 
 
 const char* AAsyncProcessor::getServiceName() {
@@ -288,14 +288,14 @@ apache::thrift::ServiceRequestInfoMap const& AServiceInfoHolder::requestInfoMap(
 apache::thrift::ServiceRequestInfoMap AServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"foo",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "A.foo",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"I.interact",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "A.I.interact",
      "I",
@@ -663,11 +663,11 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void BSvNull::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
+void BSvNull::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) { 
   return;
 }
 
-::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> BSvNull::sink_stuff() {
+::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> BSvNull::sink_stuff() { 
   return {};
 }
 
@@ -718,21 +718,21 @@ apache::thrift::ServiceRequestInfoMap const& BServiceInfoHolder::requestInfoMap(
 apache::thrift::ServiceRequestInfoMap BServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"bar",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "B.bar",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"stream_stuff",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
      "B.stream_stuff",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sink_stuff",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "B.sink_stuff",
      std::nullopt,
@@ -904,7 +904,7 @@ apache::thrift::ServiceRequestInfoMap const& CServiceInfoHolder::requestInfoMap(
 apache::thrift::ServiceRequestInfoMap CServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"I.interact",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "C.I.interact",
      "I",

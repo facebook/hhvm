@@ -48,9 +48,8 @@ StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
   module_A.name() = "module.A";
   module_A.is_union() = false;
   static const auto* const
-  module_A_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "useless_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_A_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "useless_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_A_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -72,10 +71,8 @@ StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
   module_U.name() = "module.U";
   module_U.is_union() = true;
   static const auto* const
-  module_U_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_U_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_U_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -97,9 +94,8 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   module_Bang.name() = "module.Bang";
   module_Bang.is_union() = false;
   static const auto* const
-  module_Bang_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Bang_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Bang_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -120,9 +116,8 @@ void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftException& module_Bang = res.first->second;
   module_Bang.name() = "module.Bang";
   static const auto* const
-  module_Bang_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Bang_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Bang_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -143,7 +138,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "numbers";
-  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Typedef>("module.number", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}));
+  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Typedef>("module.number", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));

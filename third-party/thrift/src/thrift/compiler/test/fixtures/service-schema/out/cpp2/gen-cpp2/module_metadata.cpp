@@ -48,9 +48,8 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
   module_CustomException.name() = "module.CustomException";
   module_CustomException.is_union() = false;
   static const auto* const
-  module_CustomException_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_CustomException_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_CustomException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -71,9 +70,8 @@ void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftException& module_CustomException = res.first->second;
   module_CustomException.name() = "module.CustomException";
   static const auto* const
-  module_CustomException_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_CustomException_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_CustomException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -161,7 +159,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_PrimitivesService.structured_annotations()->push_back(*cvStruct("thrift.GenerateRuntimeSchema", {}).cv_struct_ref());
+  module_PrimitivesService.structured_annotations()->push_back(*cvStruct("thrift.GenerateRuntimeSchema", {  }).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.PrimitivesService", std::move(module_PrimitivesService));
   context.service_name() = "module.PrimitivesService";

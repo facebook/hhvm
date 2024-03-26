@@ -86,7 +86,7 @@ MyData& MyData::operator=([[maybe_unused]] MyData&& other) noexcept {
 
 MyData::MyData(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
 }
 
 
@@ -192,7 +192,7 @@ MyDataWithCustomDefault& MyDataWithCustomDefault::operator=([[maybe_unused]] MyD
 
 MyDataWithCustomDefault::MyDataWithCustomDefault(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
 }
 
 
@@ -691,7 +691,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, bool boolVal__arg, ::std:
     __fbthrift_field_mapMap(std::move(mapMap__arg)),
     __fbthrift_field_i32WithCustomDefault(std::move(i32WithCustomDefault__arg)),
     __fbthrift_field_structWithCustomDefault(std::move(structWithCustomDefault__arg)),
-    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) {
+    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1128,7 +1128,7 @@ Recursive& Recursive::operator=([[maybe_unused]] Recursive&& other) noexcept {
 
 
 Recursive::Recursive(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> nodes__arg) :
-    __fbthrift_field_nodes(std::move(nodes__arg)) {
+    __fbthrift_field_nodes(std::move(nodes__arg)) { 
 }
 
 
@@ -1250,7 +1250,7 @@ Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
 
 
 Bar::Bar(apache::thrift::FragileConstructor, ::std::unique_ptr<::test::fixtures::patch::Loop> loop__arg) :
-    __fbthrift_field_loop(std::move(loop__arg)) {
+    __fbthrift_field_loop(std::move(loop__arg)) { 
 }
 
 
@@ -1347,7 +1347,7 @@ Loop& Loop::operator=([[maybe_unused]] Loop&& other) noexcept {
 
 
 Loop::Loop(apache::thrift::FragileConstructor, ::test::fixtures::patch::Bar bar__arg) :
-    __fbthrift_field_bar(std::move(bar__arg)) {
+    __fbthrift_field_bar(std::move(bar__arg)) { 
 }
 
 
@@ -1496,7 +1496,7 @@ RefFields::RefFields(apache::thrift::FragileConstructor, ::std::unique_ptr<::std
     __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
     __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
     __fbthrift_field_opt_shared_mustable(std::move(opt_shared_mustable__arg)),
-    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) { 
 }
 
 
@@ -1652,7 +1652,7 @@ MyDataPatchStruct::MyDataPatchStruct(apache::thrift::FragileConstructor, ::apach
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -1822,7 +1822,7 @@ MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=([[maybe_unused]] MyDat
 
 MyDataFieldPatchStruct::MyDataFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> data1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
@@ -1943,7 +1943,7 @@ MyDataEnsureStruct& MyDataEnsureStruct::operator=([[maybe_unused]] MyDataEnsureS
 
 MyDataEnsureStruct::MyDataEnsureStruct(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -2061,7 +2061,7 @@ MyDataSafePatch& MyDataSafePatch::operator=([[maybe_unused]] MyDataSafePatch&& o
 
 MyDataSafePatch::MyDataSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -2201,7 +2201,7 @@ MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(apache::t
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -2371,7 +2371,7 @@ MyDataWithCustomDefaultFieldPatchStruct& MyDataWithCustomDefaultFieldPatchStruct
 
 MyDataWithCustomDefaultFieldPatchStruct::MyDataWithCustomDefaultFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> data1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
@@ -2492,7 +2492,7 @@ MyDataWithCustomDefaultEnsureStruct& MyDataWithCustomDefaultEnsureStruct::operat
 
 MyDataWithCustomDefaultEnsureStruct::MyDataWithCustomDefaultEnsureStruct(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg) :
     __fbthrift_field_data1(std::move(data1__arg)),
-    __fbthrift_field_data2(std::move(data2__arg)) {
+    __fbthrift_field_data2(std::move(data2__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -2610,7 +2610,7 @@ MyDataWithCustomDefaultSafePatch& MyDataWithCustomDefaultSafePatch::operator=([[
 
 MyDataWithCustomDefaultSafePatch::MyDataWithCustomDefaultSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -2744,7 +2744,7 @@ InnerUnionPatchStruct::InnerUnionPatchStruct(apache::thrift::FragileConstructor,
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
-    __fbthrift_field_patch(std::move(patch__arg)) {
+    __fbthrift_field_patch(std::move(patch__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
@@ -2894,7 +2894,7 @@ InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=([[maybe_unused
 
 
 InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch> innerOption__arg) :
-    __fbthrift_field_innerOption(std::move(innerOption__arg)) {
+    __fbthrift_field_innerOption(std::move(innerOption__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, 1>(*__fbthrift_field_innerOption, *this);
 }
 
@@ -3013,7 +3013,7 @@ InnerUnionSafePatch& InnerUnionSafePatch::operator=([[maybe_unused]] InnerUnionS
 
 InnerUnionSafePatch::InnerUnionSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -3147,7 +3147,7 @@ MyUnionPatchStruct::MyUnionPatchStruct(apache::thrift::FragileConstructor, ::apa
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
-    __fbthrift_field_patch(std::move(patch__arg)) {
+    __fbthrift_field_patch(std::move(patch__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
@@ -3311,7 +3311,7 @@ MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=([[maybe_unused]] MyU
 MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> option1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> option2__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::InnerUnionPatch> option3__arg) :
     __fbthrift_field_option1(std::move(option1__arg)),
     __fbthrift_field_option2(std::move(option2__arg)),
-    __fbthrift_field_option3(std::move(option3__arg)) {
+    __fbthrift_field_option3(std::move(option3__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_option1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_option2, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, 3>(*__fbthrift_field_option3, *this);
@@ -3452,7 +3452,7 @@ MyUnionSafePatch& MyUnionSafePatch::operator=([[maybe_unused]] MyUnionSafePatch&
 
 MyUnionSafePatch::MyUnionSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -3592,7 +3592,7 @@ MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::a
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -3727,7 +3727,7 @@ std::string_view MyStructField10PatchStruct::__fbthrift_get_class_name() {
 
 MyStructField10PatchStruct::MyStructField10PatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::MyEnum assign__arg, bool clear__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
-    __fbthrift_field_clear(std::move(clear__arg)) {
+    __fbthrift_field_clear(std::move(clear__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -3814,7 +3814,7 @@ std::string_view MyStructField23PatchStruct::__fbthrift_get_class_name() {
 
 MyStructField23PatchStruct::MyStructField23PatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::MyEnum assign__arg, bool clear__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
-    __fbthrift_field_clear(std::move(clear__arg)) {
+    __fbthrift_field_clear(std::move(clear__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -3929,7 +3929,7 @@ MyStructField26PatchStruct::MyStructField26PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
-    __fbthrift_field_append(std::move(append__arg)) {
+    __fbthrift_field_append(std::move(append__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4076,7 +4076,7 @@ MyStructField27PatchStruct::MyStructField27PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_remove(std::move(remove__arg)),
-    __fbthrift_field_add(std::move(add__arg)) {
+    __fbthrift_field_add(std::move(add__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4232,7 +4232,7 @@ MyStructField28PatchStruct::MyStructField28PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_add(std::move(add__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
     __fbthrift_field_remove(std::move(remove__arg)),
-    __fbthrift_field_put(std::move(put__arg)) {
+    __fbthrift_field_put(std::move(put__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4427,7 +4427,7 @@ MyStructField29PatchStruct::MyStructField29PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
-    __fbthrift_field_append(std::move(append__arg)) {
+    __fbthrift_field_append(std::move(append__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4583,7 +4583,7 @@ MyStructField30PatchStruct::MyStructField30PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_add(std::move(add__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
     __fbthrift_field_remove(std::move(remove__arg)),
-    __fbthrift_field_put(std::move(put__arg)) {
+    __fbthrift_field_put(std::move(put__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4787,7 +4787,7 @@ MyStructField30Patch1Struct::MyStructField30Patch1Struct(apache::thrift::Fragile
     __fbthrift_field_add(std::move(add__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
     __fbthrift_field_remove(std::move(remove__arg)),
-    __fbthrift_field_put(std::move(put__arg)) {
+    __fbthrift_field_put(std::move(put__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -5206,7 +5206,7 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(apache::thrift::FragileConstr
     __fbthrift_field_i16Val(std::move(i16Val__arg)),
     __fbthrift_field_byteVal(std::move(byteVal__arg)),
     __fbthrift_field_boolVal(std::move(boolVal__arg)),
-    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) {
+    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>, -32>(*__fbthrift_field_structWithCustomDefault, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, -31>(*__fbthrift_field_i32WithCustomDefault, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>, -30>(*__fbthrift_field_mapMap, *this);
@@ -5777,7 +5777,7 @@ MyStructEnsureStruct::MyStructEnsureStruct(apache::thrift::FragileConstructor, :
     __fbthrift_field_i16Val(std::move(i16Val__arg)),
     __fbthrift_field_byteVal(std::move(byteVal__arg)),
     __fbthrift_field_boolVal(std::move(boolVal__arg)),
-    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) {
+    __fbthrift_field_structWithFieldCustomDefault(std::move(structWithFieldCustomDefault__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -6092,7 +6092,7 @@ MyStructSafePatch& MyStructSafePatch::operator=([[maybe_unused]] MyStructSafePat
 
 MyStructSafePatch::MyStructSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -6232,7 +6232,7 @@ LateDefStructPatchStruct::LateDefStructPatchStruct(apache::thrift::FragileConstr
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -6541,7 +6541,7 @@ LateDefStructSafePatch& LateDefStructSafePatch::operator=([[maybe_unused]] LateD
 
 LateDefStructSafePatch::LateDefStructSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -6681,7 +6681,7 @@ RecursivePatchStruct::RecursivePatchStruct(apache::thrift::FragileConstructor, :
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -6838,7 +6838,7 @@ RecursiveField1PatchStruct& RecursiveField1PatchStruct::operator=([[maybe_unused
 
 RecursiveField1PatchStruct::RecursiveField1PatchStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> assign__arg, bool clear__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
-    __fbthrift_field_clear(std::move(clear__arg)) {
+    __fbthrift_field_clear(std::move(clear__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -6967,7 +6967,7 @@ RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=([[maybe_unused]]
 
 
 RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveField1Patch> nodes__arg) :
-    __fbthrift_field_nodes(std::move(nodes__arg)) {
+    __fbthrift_field_nodes(std::move(nodes__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, -1>(*__fbthrift_field_nodes, *this);
 }
 
@@ -7073,7 +7073,7 @@ RecursiveEnsureStruct& RecursiveEnsureStruct::operator=([[maybe_unused]] Recursi
 
 
 RecursiveEnsureStruct::RecursiveEnsureStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> nodes__arg) :
-    __fbthrift_field_nodes(std::move(nodes__arg)) {
+    __fbthrift_field_nodes(std::move(nodes__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -7201,7 +7201,7 @@ RecursiveSafePatch& RecursiveSafePatch::operator=([[maybe_unused]] RecursiveSafe
 
 RecursiveSafePatch::RecursiveSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -7341,7 +7341,7 @@ BarPatchStruct::BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thr
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -7504,7 +7504,7 @@ BarFieldPatchStruct& BarFieldPatchStruct::operator=([[maybe_unused]] BarFieldPat
 
 
 BarFieldPatchStruct::BarFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LoopPatch> loop__arg) :
-    __fbthrift_field_loop(std::move(loop__arg)) {
+    __fbthrift_field_loop(std::move(loop__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, -1>(*__fbthrift_field_loop, *this);
 }
 
@@ -7608,7 +7608,7 @@ BarEnsureStruct& BarEnsureStruct::operator=([[maybe_unused]] BarEnsureStruct&& o
 
 
 BarEnsureStruct::BarEnsureStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> loop__arg) :
-    __fbthrift_field_loop(std::move(loop__arg)) {
+    __fbthrift_field_loop(std::move(loop__arg)) { 
 }
 
 
@@ -7725,7 +7725,7 @@ BarSafePatch& BarSafePatch::operator=([[maybe_unused]] BarSafePatch&& other) noe
 
 BarSafePatch::BarSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -7830,7 +7830,7 @@ LoopPatchStruct& LoopPatchStruct::operator=([[maybe_unused]] LoopPatchStruct&& o
 
 LoopPatchStruct::LoopPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> assign__arg, bool clear__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
-    __fbthrift_field_clear(std::move(clear__arg)) {
+    __fbthrift_field_clear(std::move(clear__arg)) { 
 }
 
 
@@ -7951,7 +7951,7 @@ LoopSafePatch& LoopSafePatch::operator=([[maybe_unused]] LoopSafePatch&& other) 
 
 LoopSafePatch::LoopSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 
@@ -8091,7 +8091,7 @@ RefFieldsPatchStruct::RefFieldsPatchStruct(apache::thrift::FragileConstructor, :
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
     __fbthrift_field_ensure(std::move(ensure__arg)),
     __fbthrift_field_patch(std::move(patch__arg)),
-    __fbthrift_field_remove(std::move(remove__arg)) {
+    __fbthrift_field_remove(std::move(remove__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
@@ -8254,7 +8254,7 @@ RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
-    __fbthrift_field_append(std::move(append__arg)) {
+    __fbthrift_field_append(std::move(append__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -8401,7 +8401,7 @@ RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
-    __fbthrift_field_append(std::move(append__arg)) {
+    __fbthrift_field_append(std::move(append__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -8548,7 +8548,7 @@ RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(apache::thrift::FragileCo
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
-    __fbthrift_field_append(std::move(append__arg)) {
+    __fbthrift_field_append(std::move(append__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -8709,7 +8709,7 @@ RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=([[maybe_unused]]
 RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch> unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch> opt_unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch> opt_box__arg) :
     __fbthrift_field_unique(std::move(unique__arg)),
     __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
-    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, 1>(*__fbthrift_field_unique, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4>(*__fbthrift_field_opt_unique, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
@@ -8855,7 +8855,7 @@ RefFieldsEnsureStruct::RefFieldsEnsureStruct(apache::thrift::FragileConstructor,
     __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
     __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
     __fbthrift_field_opt_shared_mustable(std::move(opt_shared_mustable__arg)),
-    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -9049,7 +9049,7 @@ RefFieldsSafePatch& RefFieldsSafePatch::operator=([[maybe_unused]] RefFieldsSafe
 
 RefFieldsSafePatch::RefFieldsSafePatch(apache::thrift::FragileConstructor, ::std::int32_t version__arg, std::unique_ptr<folly::IOBuf> data__arg) :
     __fbthrift_field_version(std::move(version__arg)),
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
 }
 
 

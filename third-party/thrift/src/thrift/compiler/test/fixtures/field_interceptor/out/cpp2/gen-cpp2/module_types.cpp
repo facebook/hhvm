@@ -86,7 +86,7 @@ InterceptedFields::InterceptedFields(apache::thrift::FragileConstructor, ::std::
     __fbthrift_field_access_optional_shared_field(std::move(access_optional_shared_field__arg)),
     __fbthrift_field_access_shared_const_field(std::move(access_shared_const_field__arg)),
     __fbthrift_field_access_optional_shared_const_field(std::move(access_optional_shared_const_field__arg)),
-    __fbthrift_field_access_optional_boxed_field(std::move(access_optional_boxed_field__arg)) {
+    __fbthrift_field_access_optional_boxed_field(std::move(access_optional_boxed_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

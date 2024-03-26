@@ -49,18 +49,18 @@ containerStruct2::containerStruct2() :
       __fbthrift_field_fieldA(),
       __fbthrift_field_req_fieldA(),
       __fbthrift_field_opt_fieldA(),
-      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
-      __fbthrift_field_req_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+  static_cast<::std::int32_t>(4) }),
+      __fbthrift_field_req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
-      __fbthrift_field_opt_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+  static_cast<::std::int32_t>(4) }),
+      __fbthrift_field_opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
+  static_cast<::std::int32_t>(4) }),
       __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
       __fbthrift_field_req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
       __fbthrift_field_opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")) {
@@ -118,7 +118,7 @@ containerStruct2::containerStruct2(apache::thrift::FragileConstructor, bool fiel
     __fbthrift_field_fieldD(std::move(fieldD__arg)),
     __fbthrift_field_fieldE(std::move(fieldE__arg)),
     __fbthrift_field_req_fieldE(std::move(req_fieldE__arg)),
-    __fbthrift_field_opt_fieldE(std::move(opt_fieldE__arg)) {
+    __fbthrift_field_opt_fieldE(std::move(opt_fieldE__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

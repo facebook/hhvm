@@ -137,7 +137,7 @@ determineInvocationType:
 
 namespace py3::simple {
 
-::std::int32_t DerivedServiceSvNull::get_six() {
+::std::int32_t DerivedServiceSvNull::get_six() { 
   return 0;
 }
 
@@ -178,7 +178,7 @@ apache::thrift::ServiceRequestInfoMap const& DerivedServiceServiceInfoHolder::re
 apache::thrift::ServiceRequestInfoMap DerivedServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"get_six",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "DerivedService.get_six",
      std::nullopt,

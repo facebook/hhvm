@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,34 +14,34 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#program:frozen?%>
+}}{{#program:frozen?}}
 
 namespace apache { namespace thrift {
 
-<%#program:frozen_packed?%>#pragma pack(push, 1)<%/program:frozen_packed?%>
+{{#program:frozen_packed?}}#pragma pack(push, 1){{/program:frozen_packed?}}
 template<>
-struct Frozen<<%struct:cpp_fullname%>, void> {
-<%#struct:fields%>
-<%#field:type%>
-<%#type:bool?%>
-  bool <%field:cpp_name%> : 1;
-<%/type:bool?%>
-<%^type:bool?%>
-  typename Freezer<<%type:cpp_type%>>::FrozenType <%field:cpp_name%>;
-<%/type:bool?%>
-<%/field:type%>
-<%/struct:fields%>
+struct Frozen<{{struct:cpp_fullname}}, void> {
+{{#struct:fields}}
+{{#field:type}}
+{{#type:bool?}}
+  bool {{field:cpp_name}} : 1;
+{{/type:bool?}}
+{{^type:bool?}}
+  typename Freezer<{{type:cpp_type}}>::FrozenType {{field:cpp_name}};
+{{/type:bool?}}
+{{/field:type}}
+{{/struct:fields}}
 
-<%#struct:isset_fields?%>
+{{#struct:isset_fields?}}
   struct __isset {
-<%#struct:isset_fields%>
-    bool <%field:cpp_name%> : 1;
-<%/struct:isset_fields%>
+{{#struct:isset_fields}}
+    bool {{field:cpp_name}} : 1;
+{{/struct:isset_fields}}
   } __isset = {};
-<%/struct:isset_fields?%>
+{{/struct:isset_fields?}}
 };
 
-<%#program:frozen_packed?%>#pragma pack(pop)<%/program:frozen_packed?%>
+{{#program:frozen_packed?}}#pragma pack(pop){{/program:frozen_packed?}}
 
 }} // apache::thrift
-<%/program:frozen?%>
+{{/program:frozen?}}

@@ -249,9 +249,9 @@ determineInvocationType:
 
 namespace test::fixtures::basic-structured-annotations {
 
-void MyServiceSvNull::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {}
+void MyServiceSvNull::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {  }
 
-bool MyServiceSvNull::second(::std::int64_t /*count*/) {
+bool MyServiceSvNull::second(::std::int64_t /*count*/) { 
   return 0;
 }
 
@@ -297,14 +297,14 @@ apache::thrift::ServiceRequestInfoMap const& MyServiceServiceInfoHolder::request
 apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"first",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.first",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"second",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.second",
      std::nullopt,

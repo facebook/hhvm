@@ -359,11 +359,11 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void CSvNull::f() {
+void CSvNull::f() { 
   return;
 }
 
-void CSvNull::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {}
+void CSvNull::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {  }
 
 
 const char* CAsyncProcessor::getServiceName() {
@@ -412,21 +412,21 @@ apache::thrift::ServiceRequestInfoMap const& CServiceInfoHolder::requestInfoMap(
 apache::thrift::ServiceRequestInfoMap CServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"f",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "C.f",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"numbers",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
      "C.numbers",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"thing",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "C.thing",
      std::nullopt,

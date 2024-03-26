@@ -15,11 +15,11 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::SerializedUnion::Type> {
   using type = ::test::fixtures::python_capi::SerializedUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::s,
       type::i,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "s"sv,
       "i"sv,
   }};
@@ -28,11 +28,11 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::SerializedUni
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::MarshalUnion::Type> {
   using type = ::test::fixtures::python_capi::MarshalUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::s,
       type::i,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "s"sv,
       "i"sv,
   }};

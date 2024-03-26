@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright 2019 Meta Platforms, Inc.
 
@@ -14,30 +14,30 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
+}}
 #if FOLLY_HAS_COROUTINES
-<%#function:sink?%>
-folly::coro::Task<<% > types/return_type_client%>> <% > service_common/client_class_name%>::co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>) {
+{{#function:sink?}}
+folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_class_name}}::co_{{function:cpp_name}}({{ > service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
-  co_return co_await co_<%function:cpp_name%>(rpcOptions<%function:comma%><% > service_common/param_list%>);
+  co_return co_await co_{{function:cpp_name}}(rpcOptions{{function:comma}}{{ > service_common/param_list}});
 }
-folly::coro::Task<<% > types/return_type_client%>> <% > service_common/client_class_name%>::co_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
+folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_class_name}}::co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{ > service_common/function_param_list_client}}) {
   const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
   const bool cancellable = cancelToken.canBeCancelled();
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto [ctx, header] = <%function:cpp_name%>Ctx(&rpcOptions);
+  auto [ctx, header] = {{function:cpp_name}}Ctx(&rpcOptions);
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
-<%#function:creates_interaction?%>
-  <%function:created_interaction%> handle(channel_, "<%function:created_interaction%>");
-<%/function:creates_interaction?%>
+{{#function:creates_interaction?}}
+  {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
+{{/function:creates_interaction?}}
 
-  <%function:cpp_name%>Impl(rpcOptions, std::move(header), ctx.get(), wrappedCallback<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+  {{function:cpp_name}}Impl(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -50,17 +50,17 @@ folly::coro::Task<<% > types/return_type_client%>> <% > service_common/client_cl
   }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctx));
-<%^function:creates_interaction?%>
-  co_return recv_<%function:cpp_name%>(returnState);
-<%/function:creates_interaction?%>
-<%#function:creates_interaction?%>
+{{^function:creates_interaction?}}
+  co_return recv_{{function:cpp_name}}(returnState);
+{{/function:creates_interaction?}}
+{{#function:creates_interaction?}}
   co_return std::make_pair(
     std::move(handle),
-    recv_<%function:cpp_name%>(returnState)
+    recv_{{function:cpp_name}}(returnState)
   );
-<%/function:creates_interaction?%>
+{{/function:creates_interaction?}}
 }
-<%/function:sink?%><%!
+{{/function:sink?}}{{!
 Other coroutine functions are inline templates to prevent binary size regression
-%>
+}}
 #endif // FOLLY_HAS_COROUTINES

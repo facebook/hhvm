@@ -15,22 +15,22 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::EmptyEnum> {
   using type = ::cpp2::EmptyEnum;
   static constexpr const std::size_t size = 0;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
   }};
 };
 
 template <> struct TEnumDataStorage<::cpp2::City> {
   using type = ::cpp2::City;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::NYC,
       type::MPK,
       type::SEA,
       type::LON,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "NYC"sv,
       "MPK"sv,
       "SEA"sv,
@@ -41,13 +41,13 @@ template <> struct TEnumDataStorage<::cpp2::City> {
 template <> struct TEnumDataStorage<::cpp2::Company> {
   using type = ::cpp2::Company;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::FACEBOOK,
       type::WHATSAPP,
       type::OCULUS,
       type::INSTAGRAM,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "FACEBOOK"sv,
       "WHATSAPP"sv,
       "OCULUS"sv,
@@ -58,11 +58,11 @@ template <> struct TEnumDataStorage<::cpp2::Company> {
 template <> struct TEnumDataStorage<::cpp2::union1::Type> {
   using type = ::cpp2::union1::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::i,
       type::d,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "i"sv,
       "d"sv,
   }};
@@ -71,13 +71,13 @@ template <> struct TEnumDataStorage<::cpp2::union1::Type> {
 template <> struct TEnumDataStorage<::cpp2::union2::Type> {
   using type = ::cpp2::union2::Type;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::i,
       type::d,
       type::s,
       type::u,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "i"sv,
       "d"sv,
       "s"sv,

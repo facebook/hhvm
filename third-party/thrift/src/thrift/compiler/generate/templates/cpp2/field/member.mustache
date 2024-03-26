@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,4 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^struct:union?%>this-><%/struct:union?%><%#struct:union?%>value_.<%/struct:union?%><%field:cpp_storage_name%>
+}}{{^struct:union?}}this->{{/struct:union?}}{{#struct:union?}}value_.{{/struct:union?}}{{field:cpp_storage_name}}

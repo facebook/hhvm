@@ -239,7 +239,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-::std::int32_t GoodServiceSvNull::bar() {
+::std::int32_t GoodServiceSvNull::bar() { 
   return 0;
 }
 
@@ -285,14 +285,14 @@ apache::thrift::ServiceRequestInfoMap const& GoodServiceServiceInfoHolder::reque
 apache::thrift::ServiceRequestInfoMap GoodServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"bar",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BadService.bar",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"BadInteraction.foo",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BadService.BadInteraction.foo",
      "BadInteraction",

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,40 +14,40 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/gen/client_h.h>
 
-<%#program%>
-#include "<%program:include_prefix%><%program:name%>_types.h"
-<%#program:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_clients.h"
-<%/program:thrift_includes%>
+{{#program}}
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+{{#program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_clients.h"
+{{/program:thrift_includes}}
 
-<%#program:cpp_includes%>
+{{#program:cpp_includes}}
 // cpp_include's
-#include <%cpp_include%>
-<%/program:cpp_includes%>
-<%/program%>
+#include {{cpp_include}}
+{{/program:cpp_includes}}
+{{/program}}
 
-<%#any_sinks?%>
+{{#any_sinks?}}
 // for sinks
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-<%/any_sinks?%>
+{{/any_sinks?}}
 
-<%#any_streams?%>
+{{#any_streams?}}
 // for streams
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
-<%/any_streams?%>
+{{/any_streams?}}
 
-<%#any_interactions?%>
+{{#any_interactions?}}
 // for interactions
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-<%/any_interactions?%>
+{{/any_interactions?}}
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -55,8 +55,8 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-<%#services%>
-<% > service_h/async_client%>
+{{#services}}
+{{ > service_h/async_client}}
 
 
-<%/services%>
+{{/services}}

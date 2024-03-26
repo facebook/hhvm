@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,37 +14,37 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/gen/client_h.h>
 
-#include "<%service:include_prefix%><%service:program_name%>_types.h"
-<%#service:extends%>
-#if __has_include("<%service:include_prefix%><%service:name%>AsyncClient.h")
-#include "<%service:include_prefix%><%service:name%>AsyncClient.h"
+#include "{{service:include_prefix}}{{service:program_name}}_types.h"
+{{#service:extends}}
+#if __has_include("{{service:include_prefix}}{{service:name}}AsyncClient.h")
+#include "{{service:include_prefix}}{{service:name}}AsyncClient.h"
 #else
-#include "<%service:include_prefix%><%service:program_name%>_clients.h"
+#include "{{service:include_prefix}}{{service:program_name}}_clients.h"
 #endif
-<%/service:extends%>
-<%#service:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_types.h"
-<%/service:thrift_includes%>
-<%#service:cpp_includes%>
-#include <%cpp_include%>
-<%/service:cpp_includes%>
-<%#service:sinks?%>
+{{/service:extends}}
+{{#service:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+{{/service:thrift_includes}}
+{{#service:cpp_includes}}
+#include {{cpp_include}}
+{{/service:cpp_includes}}
+{{#service:sinks?}}
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-<%/service:sinks?%>
-<%#service:streams?%>
+{{/service:sinks?}}
+{{#service:streams?}}
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
-<%/service:streams?%>
-<%#service:interactions?%>
+{{/service:streams?}}
+{{#service:interactions?}}
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-<%/service:interactions?%>
+{{/service:interactions?}}
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -52,4 +52,4 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-<% > service_h/async_client%>
+{{ > service_h/async_client}}

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,23 +14,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#struct:fields%><%#field:type%>
-<%^struct:legacy_api?%>
+}}{{#struct:fields}}{{#field:type}}
+{{^struct:legacy_api?}}
  private:
-<%/struct:legacy_api?%>
-  <%!deprecated%><%^field:boxed_ref?%><%field:cpp_storage_type%><%/field:boxed_ref?%><%#field:boxed_ref?%><%type:cpp_type%><%/field:boxed_ref?%> const& get_<%field:cpp_name%>() const {
-    if (getType() != Type::<%field:cpp_name%>) {
+{{/struct:legacy_api?}}
+  {{!deprecated}}{{^field:boxed_ref?}}{{field:cpp_storage_type}}{{/field:boxed_ref?}}{{#field:boxed_ref?}}{{type:cpp_type}}{{/field:boxed_ref?}} const& get_{{field:cpp_name}}() const {
+    if (getType() != Type::{{field:cpp_name}}) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
-<%^field:boxed_ref?%>
-    return value_.<%field:cpp_name%>;
-<%/field:boxed_ref?%>
-<%#field:boxed_ref?%>
-    return *value_.<%field:cpp_name%>;
-<%/field:boxed_ref?%>
+{{^field:boxed_ref?}}
+    return value_.{{field:cpp_name}};
+{{/field:boxed_ref?}}
+{{#field:boxed_ref?}}
+    return *value_.{{field:cpp_name}};
+{{/field:boxed_ref?}}
   }
-<%^struct:legacy_api?%>
+{{^struct:legacy_api?}}
  public:
-<%/struct:legacy_api?%>
+{{/struct:legacy_api?}}
 
-<%/field:type%><%/struct:fields%>
+{{/field:type}}{{/struct:fields}}

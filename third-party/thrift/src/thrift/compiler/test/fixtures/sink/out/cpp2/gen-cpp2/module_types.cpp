@@ -64,7 +64,7 @@ InitialResponse& InitialResponse::operator=([[maybe_unused]] InitialResponse&& o
 
 
 InitialResponse::InitialResponse(apache::thrift::FragileConstructor, ::std::string content__arg) :
-    __fbthrift_field_content(std::move(content__arg)) {
+    __fbthrift_field_content(std::move(content__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -161,7 +161,7 @@ FinalResponse& FinalResponse::operator=([[maybe_unused]] FinalResponse&& other) 
 
 
 FinalResponse::FinalResponse(apache::thrift::FragileConstructor, ::std::string content__arg) :
-    __fbthrift_field_content(std::move(content__arg)) {
+    __fbthrift_field_content(std::move(content__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -258,7 +258,7 @@ SinkPayload& SinkPayload::operator=([[maybe_unused]] SinkPayload&& other) noexce
 
 
 SinkPayload::SinkPayload(apache::thrift::FragileConstructor, ::std::string content__arg) :
-    __fbthrift_field_content(std::move(content__arg)) {
+    __fbthrift_field_content(std::move(content__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -355,7 +355,7 @@ CompatibleWithKeywordSink& CompatibleWithKeywordSink::operator=([[maybe_unused]]
 
 
 CompatibleWithKeywordSink::CompatibleWithKeywordSink(apache::thrift::FragileConstructor, ::std::string sink__arg) :
-    __fbthrift_field_sink(std::move(sink__arg)) {
+    __fbthrift_field_sink(std::move(sink__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -452,7 +452,7 @@ InitialException& InitialException::operator=([[maybe_unused]] InitialException&
 
 
 InitialException::InitialException(apache::thrift::FragileConstructor, ::std::string reason__arg) :
-    __fbthrift_field_reason(std::move(reason__arg)) {
+    __fbthrift_field_reason(std::move(reason__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -549,7 +549,7 @@ SinkException1& SinkException1::operator=([[maybe_unused]] SinkException1&& othe
 
 
 SinkException1::SinkException1(apache::thrift::FragileConstructor, ::std::string reason__arg) :
-    __fbthrift_field_reason(std::move(reason__arg)) {
+    __fbthrift_field_reason(std::move(reason__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -647,7 +647,7 @@ SinkException2& SinkException2::operator=([[maybe_unused]] SinkException2&& othe
 
 
 SinkException2::SinkException2(apache::thrift::FragileConstructor, ::std::int64_t reason__arg) :
-    __fbthrift_field_reason(std::move(reason__arg)) {
+    __fbthrift_field_reason(std::move(reason__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

@@ -34,7 +34,7 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::name = "StructWithDefaultStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_names = { {
   "bool_field"sv,
   "byte_field"sv,
   "short_field"sv,
@@ -49,7 +49,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::a
   "set_field"sv,
   "map_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -64,7 +64,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::apache::th
   12,
   13,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -79,7 +79,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::ap
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::storage_names = { {
   "__fbthrift_field_bool_field"sv,
   "__fbthrift_field_byte_field"sv,
   "__fbthrift_field_short_field"sv,
@@ -94,7 +94,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::a
   "__fbthrift_field_set_field"sv,
   "__fbthrift_field_map_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::isset_indexes = { {
   0,
   1,
   2,

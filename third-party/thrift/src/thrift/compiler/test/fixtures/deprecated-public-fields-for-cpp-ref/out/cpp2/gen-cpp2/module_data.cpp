@@ -34,23 +34,23 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Foo>::name = "Foo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::fields_names = { {
   "foo"sv,
   "bar"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Foo>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Foo>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::Foo>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::Foo>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Foo>::storage_names = { {
   "__fbthrift_field_foo"sv,
   "__fbthrift_field_bar"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Foo>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Foo>::isset_indexes = { {
   -1,
   -1,
 }};

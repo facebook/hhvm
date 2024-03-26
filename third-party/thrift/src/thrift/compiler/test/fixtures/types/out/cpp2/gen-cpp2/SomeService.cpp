@@ -253,9 +253,9 @@ determineInvocationType:
 
 namespace apache::thrift::fixtures::types {
 
-void SomeServiceSvNull::bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) {}
+void SomeServiceSvNull::bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) {  }
 
-void SomeServiceSvNull::binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/) {}
+void SomeServiceSvNull::binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/) {  }
 
 
 const char* SomeServiceAsyncProcessor::getServiceName() {
@@ -299,14 +299,14 @@ apache::thrift::ServiceRequestInfoMap const& SomeServiceServiceInfoHolder::reque
 apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"bounce_map",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SomeService.bounce_map",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"binary_keyed_map",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SomeService.binary_keyed_map",
      std::nullopt,

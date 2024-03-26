@@ -15,10 +15,10 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type> {
   using type = ::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::myString,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "myString"sv,
   }};
 };

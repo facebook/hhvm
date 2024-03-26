@@ -15,10 +15,10 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::patch::MyEnum> {
   using type = ::test::fixtures::patch::MyEnum;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::MyValue0,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "MyValue0"sv,
   }};
 };
@@ -26,10 +26,10 @@ template <> struct TEnumDataStorage<::test::fixtures::patch::MyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type> {
   using type = ::test::fixtures::patch::InnerUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::innerOption,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "innerOption"sv,
   }};
 };
@@ -37,12 +37,12 @@ template <> struct TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type> {
 template <> struct TEnumDataStorage<::test::fixtures::patch::MyUnion::Type> {
   using type = ::test::fixtures::patch::MyUnion::Type;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::option1,
       type::option2,
       type::option3,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "option1"sv,
       "option2"sv,
       "option3"sv,

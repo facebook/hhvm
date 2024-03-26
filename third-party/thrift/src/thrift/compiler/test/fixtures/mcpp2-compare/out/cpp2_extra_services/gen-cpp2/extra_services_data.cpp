@@ -34,7 +34,7 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::extra::svc::containerStruct2>::name = "containerStruct2";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = { {
   "fieldA"sv,
   "req_fieldA"sv,
   "opt_fieldA"sv,
@@ -49,7 +49,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::e
   "req_fieldE"sv,
   "opt_fieldE"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_ids = { {
   1,
   101,
   201,
@@ -64,7 +64,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::extra::svc
   105,
   205,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_types = { {
   TType::T_BOOL,
   TType::T_BOOL,
   TType::T_BOOL,
@@ -79,7 +79,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::ex
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = { {
   "__fbthrift_field_fieldA"sv,
   "__fbthrift_field_req_fieldA"sv,
   "__fbthrift_field_opt_fieldA"sv,
@@ -94,7 +94,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::e
   "__fbthrift_field_req_fieldE"sv,
   "__fbthrift_field_opt_fieldE"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = { {
   0,
   -1,
   1,

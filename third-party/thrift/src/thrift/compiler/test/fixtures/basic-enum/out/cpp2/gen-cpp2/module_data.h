@@ -15,20 +15,20 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum> {
   using type = ::test::fixtures::enumstrict::EmptyEnum;
   static constexpr const std::size_t size = 0;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
   }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
   using type = ::test::fixtures::enumstrict::MyEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ONE,
       type::TWO,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ONE"sv,
       "TWO"sv,
   }};
@@ -37,7 +37,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;
   static constexpr const std::size_t size = 20;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
       type::ONE,
       type::TWO,
@@ -59,7 +59,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum> {
       type::EIGHTEEN,
       type::NINETEEN,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "UNKNOWN"sv,
       "ONE"sv,
       "TWO"sv,

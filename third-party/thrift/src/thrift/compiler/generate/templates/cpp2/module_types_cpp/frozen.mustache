@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,64 +14,64 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#program:frozen?%>
+}}{{#program:frozen?}}
 namespace apache { namespace thrift {
 template<>
-size_t Freezer<<%struct:cpp_fullname%>, void>::extraSizeImpl(
-    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src) {
-  return 0<%!
-%><%#struct:fields%><%!
-%><%#field:type%><%!
-%><%^type:bool?%>
-    + extraSize(src.<% > module_types_cpp/field_value_ref%>)<%!
-%><%/type:bool?%><%!
-%><%/field:type%><%!
-%><%/struct:fields%>;
+size_t Freezer<{{struct:cpp_fullname}}, void>::extraSizeImpl(
+    [[maybe_unused]] const Freezer<{{struct:cpp_fullname}}, void>::ThawedType& src) {
+  return 0{{!
+}}{{#struct:fields}}{{!
+}}{{#field:type}}{{!
+}}{{^type:bool?}}
+    + extraSize(src.{{ > module_types_cpp/field_value_ref}}){{!
+}}{{/type:bool?}}{{!
+}}{{/field:type}}{{!
+}}{{/struct:fields}};
 }
 
 template<>
-void Freezer<<%struct:cpp_fullname%>, void>::freezeImpl(
-    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src,
-    [[maybe_unused]] Freezer<<%struct:cpp_fullname%>, void>::FrozenType& dst,
+void Freezer<{{struct:cpp_fullname}}, void>::freezeImpl(
+    [[maybe_unused]] const Freezer<{{struct:cpp_fullname}}, void>::ThawedType& src,
+    [[maybe_unused]] Freezer<{{struct:cpp_fullname}}, void>::FrozenType& dst,
     [[maybe_unused]] byte*& buffer) {
-<%#struct:fields%>
-<%#field:type%>
-<%#type:bool?%>
-  dst.<%field:cpp_name%> = src.<% > module_types_cpp/field_value_ref%>;
-<%/type:bool?%>
-<%^type:bool?%>
-  freeze(src.<% > module_types_cpp/field_value_ref%>, dst.<%field:cpp_name%>, buffer);
-<%/type:bool?%>
-<%^field:required?%>
-<%^field:cpp_ref?%>
-  dst.__isset.<%field:cpp_name%> = src.<%field:cpp_name%>_ref().has_value();
-<%/field:cpp_ref?%>
-<%/field:required?%>
-<%/field:type%>
-<%/struct:fields%>
+{{#struct:fields}}
+{{#field:type}}
+{{#type:bool?}}
+  dst.{{field:cpp_name}} = src.{{ > module_types_cpp/field_value_ref}};
+{{/type:bool?}}
+{{^type:bool?}}
+  freeze(src.{{ > module_types_cpp/field_value_ref}}, dst.{{field:cpp_name}}, buffer);
+{{/type:bool?}}
+{{^field:required?}}
+{{^field:cpp_ref?}}
+  dst.__isset.{{field:cpp_name}} = src.{{field:cpp_name}}_ref().has_value();
+{{/field:cpp_ref?}}
+{{/field:required?}}
+{{/field:type}}
+{{/struct:fields}}
 }
 
 template<>
-void Freezer<<%struct:cpp_fullname%>, void>::thawImpl(
-    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::FrozenType& src,
-    [[maybe_unused]] Freezer<<%struct:cpp_fullname%>, void>::ThawedType& dst) {
-<%#struct:fields%>
-<%#field:type%>
-<%#type:bool?%>
-  dst.<%field:cpp_name%>_ref() = src.<%field:cpp_name%>;
-<%/type:bool?%>
-<%^type:bool?%>
-  thaw(src.<%field:cpp_name%>, dst.<%field:cpp_name%>_ref()<%^field:cpp_ref?%>.ensure()<%/field:cpp_ref?%>);
-<%/type:bool?%>
-<%^field:required?%>
-<%^field:cpp_ref?%>
-  if (!src.__isset.<%field:cpp_name%>) {
-    ::apache::thrift::unset_unsafe_deprecated(dst.<%field:cpp_name%>_ref());
+void Freezer<{{struct:cpp_fullname}}, void>::thawImpl(
+    [[maybe_unused]] const Freezer<{{struct:cpp_fullname}}, void>::FrozenType& src,
+    [[maybe_unused]] Freezer<{{struct:cpp_fullname}}, void>::ThawedType& dst) {
+{{#struct:fields}}
+{{#field:type}}
+{{#type:bool?}}
+  dst.{{field:cpp_name}}_ref() = src.{{field:cpp_name}};
+{{/type:bool?}}
+{{^type:bool?}}
+  thaw(src.{{field:cpp_name}}, dst.{{field:cpp_name}}_ref(){{^field:cpp_ref?}}.ensure(){{/field:cpp_ref?}});
+{{/type:bool?}}
+{{^field:required?}}
+{{^field:cpp_ref?}}
+  if (!src.__isset.{{field:cpp_name}}) {
+    ::apache::thrift::unset_unsafe_deprecated(dst.{{field:cpp_name}}_ref());
   }
-<%/field:cpp_ref?%>
-<%/field:required?%>
-<%/field:type%>
-<%/struct:fields%>
+{{/field:cpp_ref?}}
+{{/field:required?}}
+{{/field:type}}
+{{/struct:fields}}
 }
 }} // apache::thrift
-<%/program:frozen?%>
+{{/program:frozen?}}

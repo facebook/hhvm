@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
-<%#program:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_fatal_types.h"
-<%/program:thrift_includes%>
+{{#program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_fatal_types.h"
+{{/program:thrift_includes}}
 
-#include "<%program:include_prefix%><%program:name%>_fatal.h"
-#include "<%program:include_prefix%><%program:name%>_fatal_enum.h"
-#include "<%program:include_prefix%><%program:name%>_fatal_union.h"
-#include "<%program:include_prefix%><%program:name%>_fatal_struct.h"
+#include "{{program:include_prefix}}{{program:name}}_fatal.h"
+#include "{{program:include_prefix}}{{program:name}}_fatal_enum.h"
+#include "{{program:include_prefix}}{{program:name}}_fatal_union.h"
+#include "{{program:include_prefix}}{{program:name}}_fatal_struct.h"

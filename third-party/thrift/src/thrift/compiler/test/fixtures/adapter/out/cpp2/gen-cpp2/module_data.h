@@ -15,13 +15,13 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::test::Color> {
   using type = ::facebook::thrift::test::Color;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
       type::RED,
       type::GREEN,
       type::BLUE,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "UNKNOWN"sv,
       "RED"sv,
       "GREEN"sv,
@@ -32,11 +32,11 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Color> {
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum> {
   using type = ::facebook::thrift::test::ThriftAdaptedEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::Zero,
       type::One,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "Zero"sv,
       "One"sv,
   }};
@@ -45,14 +45,14 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>
 template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type> {
   using type = ::facebook::thrift::test::Baz::Type;
   static constexpr const std::size_t size = 5;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::intField,
       type::setField,
       type::mapField,
       type::binaryField,
       type::longField,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "intField"sv,
       "setField"sv,
       "mapField"sv,
@@ -64,11 +64,11 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type> {
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type> {
   using type = ::facebook::thrift::test::ThriftAdaptTestUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::delay,
       type::custom,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "delay"sv,
       "custom"sv,
   }};

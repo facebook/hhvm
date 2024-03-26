@@ -15,14 +15,14 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::MyEnum> {
   using type = ::cpp2::MyEnum;
   static constexpr const std::size_t size = 5;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::MyValue1,
       type::MyValue2,
       type::MyValue3,
       type::MyValue4,
       type::MyValue5,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "MyValue1"sv,
       "MyValue2"sv,
       "MyValue3"sv,
@@ -34,7 +34,7 @@ template <> struct TEnumDataStorage<::cpp2::MyEnum> {
 template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
   using type = ::cpp2::MyUnion::Type;
   static constexpr const std::size_t size = 6;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::myEnum,
       type::myStruct,
       type::myDataItem,
@@ -42,7 +42,7 @@ template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
       type::longValue,
       type::intValue,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "myEnum"sv,
       "myStruct"sv,
       "myDataItem"sv,
@@ -55,13 +55,13 @@ template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type> {
   using type = ::cpp2::MyUnionFloatFieldThrowExp::Type;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::myEnum,
       type::setFloat,
       type::myDataItem,
       type::complexNestedStruct,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "myEnum"sv,
       "setFloat"sv,
       "myDataItem"sv,

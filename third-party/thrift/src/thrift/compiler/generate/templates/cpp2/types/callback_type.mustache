@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#function:return_type%><%#function:sink?%><%!
-%>apache::thrift::SinkClientCallback*<%!
-%><%/function:sink?%><%!
+}}{{#function:return_type}}{{#function:sink?}}{{!
+}}apache::thrift::SinkClientCallback*{{!
+}}{{/function:sink?}}{{!
 
-%><%#function:stream?%><%!
-%>apache::thrift::StreamClientCallback*<%!
-%><%/function:stream?%><%!
+}}{{#function:stream?}}{{!
+}}apache::thrift::StreamClientCallback*{{!
+}}{{/function:stream?}}{{!
 
-%><%^function:sink?%><%^function:stream?%><%!
-%>apache::thrift::RequestClientCallback::Ptr<%!
-%><%/function:stream?%><%/function:sink?%><%/function:return_type%>
+}}{{^function:sink?}}{{^function:stream?}}{{!
+}}apache::thrift::RequestClientCallback::Ptr{{!
+}}{{/function:stream?}}{{/function:sink?}}{{/function:return_type}}

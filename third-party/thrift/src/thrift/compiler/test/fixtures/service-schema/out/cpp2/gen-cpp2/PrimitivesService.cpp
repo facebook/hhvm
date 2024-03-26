@@ -361,15 +361,15 @@ determineInvocationType:
 
 namespace cpp2 {
 
-::std::int64_t PrimitivesServiceSvNull::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) {
+::std::int64_t PrimitivesServiceSvNull::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) { 
   return 0;
 }
 
-::cpp2::Result PrimitivesServiceSvNull::method_that_throws() {
+::cpp2::Result PrimitivesServiceSvNull::method_that_throws() { 
   return (::cpp2::Result)0;
 }
 
-void PrimitivesServiceSvNull::return_void_method(::std::int64_t /*id*/) {
+void PrimitivesServiceSvNull::return_void_method(::std::int64_t /*id*/) { 
   return;
 }
 
@@ -420,21 +420,21 @@ apache::thrift::ServiceRequestInfoMap const& PrimitivesServiceServiceInfoHolder:
 apache::thrift::ServiceRequestInfoMap PrimitivesServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"init",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "PrimitivesService.init",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method_that_throws",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "PrimitivesService.method_that_throws",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"return_void_method",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "PrimitivesService.return_void_method",
      std::nullopt,

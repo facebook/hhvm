@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<%#fatal_strings:items%>
-    using <%fatal_string:name%> = __fbthrift_strings::<%fatal_string:name%>;
-<%/fatal_strings:items%>
+}}
+{{#fatal_strings:items}}
+    using {{fatal_string:name}} = __fbthrift_strings::{{fatal_string:name}};
+{{/fatal_strings:items}}

@@ -96,9 +96,8 @@ StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata
   enums_SomeStruct.name() = "enums.SomeStruct";
   enums_SomeStruct.is_union() = false;
   static const auto* const
-  enums_SomeStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  enums_SomeStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *enums_SomeStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

@@ -359,15 +359,15 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void FooBarBazServiceSvNull::foo() {
+void FooBarBazServiceSvNull::foo() { 
   return;
 }
 
-void FooBarBazServiceSvNull::bar() {
+void FooBarBazServiceSvNull::bar() { 
   return;
 }
 
-void FooBarBazServiceSvNull::baz() {
+void FooBarBazServiceSvNull::baz() { 
   return;
 }
 
@@ -418,21 +418,21 @@ apache::thrift::ServiceRequestInfoMap const& FooBarBazServiceServiceInfoHolder::
 apache::thrift::ServiceRequestInfoMap FooBarBazServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"foo",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FooBarBazService.foo",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"bar",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FooBarBazService.bar",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"baz",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FooBarBazService.baz",
      std::nullopt,

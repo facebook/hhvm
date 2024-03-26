@@ -61,7 +61,7 @@ std::string_view A::__fbthrift_get_class_name() {
 
 
 A::A(apache::thrift::FragileConstructor, ::std::int32_t useless_field__arg) :
-    __fbthrift_field_useless_field(std::move(useless_field__arg)) {
+    __fbthrift_field_useless_field(std::move(useless_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -292,7 +292,7 @@ Bang& Bang::operator=([[maybe_unused]] Bang&& other) noexcept {
 
 
 Bang::Bang(apache::thrift::FragileConstructor, ::std::string message__arg) :
-    __fbthrift_field_message(std::move(message__arg)) {
+    __fbthrift_field_message(std::move(message__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

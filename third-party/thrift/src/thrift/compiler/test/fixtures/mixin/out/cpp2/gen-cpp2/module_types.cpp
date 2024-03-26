@@ -64,7 +64,7 @@ Mixin1& Mixin1::operator=([[maybe_unused]] Mixin1&& other) noexcept {
 
 
 Mixin1::Mixin1(apache::thrift::FragileConstructor, ::std::string field1__arg) :
-    __fbthrift_field_field1(std::move(field1__arg)) {
+    __fbthrift_field_field1(std::move(field1__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -164,7 +164,7 @@ Mixin2& Mixin2::operator=([[maybe_unused]] Mixin2&& other) noexcept {
 
 Mixin2::Mixin2(apache::thrift::FragileConstructor, ::cpp2::Mixin1 m1__arg, ::std::string field2__arg) :
     __fbthrift_field_m1(std::move(m1__arg)),
-    __fbthrift_field_field2(std::move(field2__arg)) {
+    __fbthrift_field_field2(std::move(field2__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -278,7 +278,7 @@ Mixin3Base& Mixin3Base::operator=([[maybe_unused]] Mixin3Base&& other) noexcept 
 
 
 Mixin3Base::Mixin3Base(apache::thrift::FragileConstructor, ::std::string field3__arg) :
-    __fbthrift_field_field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -381,7 +381,7 @@ Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
 Foo::Foo(apache::thrift::FragileConstructor, ::std::string field4__arg, ::cpp2::Mixin2 m2__arg, ::cpp2::Mixin3 m3__arg) :
     __fbthrift_field_field4(std::move(field4__arg)),
     __fbthrift_field_m2(std::move(m2__arg)),
-    __fbthrift_field_m3(std::move(m3__arg)) {
+    __fbthrift_field_m3(std::move(m3__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

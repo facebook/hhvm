@@ -15,14 +15,14 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops> {
   using type = ::apache::thrift::fixtures::types::has_bitwise_ops;
   static constexpr const std::size_t size = 5;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::none,
       type::zero,
       type::one,
       type::two,
       type::three,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "none"sv,
       "zero"sv,
       "one"sv,
@@ -34,11 +34,11 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwi
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped> {
   using type = ::apache::thrift::fixtures::types::is_unscoped;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::hello,
       type::world,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "hello"sv,
       "world"sv,
   }};
@@ -47,11 +47,11 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::is_unscop
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum> {
   using type = ::apache::thrift::fixtures::types::MyForwardRefEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ZERO,
       type::NONZERO,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ZERO"sv,
       "NONZERO"sv,
   }};

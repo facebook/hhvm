@@ -36,9 +36,8 @@ StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
   module_Fields.name() = "module.Fields";
   module_Fields.is_union() = false;
   static const auto* const
-  module_Fields_fields = new std::array<EncodedThriftField, 1>{{
-    {100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Fields_fields = new std::array<EncodedThriftField, 1>{ {
+    { 100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Fields_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -60,9 +59,8 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
   module_FieldsInjectedToEmptyStruct.name() = "module.FieldsInjectedToEmptyStruct";
   module_FieldsInjectedToEmptyStruct.is_union() = false;
   static const auto* const
-  module_FieldsInjectedToEmptyStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {-1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_FieldsInjectedToEmptyStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_FieldsInjectedToEmptyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -72,7 +70,7 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedToEmptyStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedToEmptyStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("Fields")}}).cv_struct_ref());
+  module_FieldsInjectedToEmptyStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("Fields") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -85,10 +83,8 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
   module_FieldsInjectedToStruct.name() = "module.FieldsInjectedToStruct";
   module_FieldsInjectedToStruct.is_union() = false;
   static const auto* const
-  module_FieldsInjectedToStruct_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {-1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_FieldsInjectedToStruct_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_FieldsInjectedToStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -98,7 +94,7 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedToStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedToStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("Fields")}}).cv_struct_ref());
+  module_FieldsInjectedToStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("Fields") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -111,12 +107,8 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
   module_FieldsInjectedWithIncludedStruct.name() = "module.FieldsInjectedWithIncludedStruct";
   module_FieldsInjectedWithIncludedStruct.is_union() = false;
   static const auto* const
-  module_FieldsInjectedWithIncludedStruct_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {-1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {-1101, "injected_structured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
-    {-1102, "injected_unstructured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
-  }};
+  module_FieldsInjectedWithIncludedStruct_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1101, "injected_structured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct_ref(), }},    { -1102, "injected_unstructured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_FieldsInjectedWithIncludedStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -126,7 +118,7 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedWithIncludedStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("foo.Fields")}}).cv_struct_ref());
+  module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("foo.Fields") } }).cv_struct_ref());
   return res.first->second;
 }
 

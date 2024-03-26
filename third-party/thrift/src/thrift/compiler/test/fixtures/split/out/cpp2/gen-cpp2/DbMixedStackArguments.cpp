@@ -253,9 +253,9 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void DbMixedStackArgumentsSvNull::getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {}
+void DbMixedStackArgumentsSvNull::getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {  }
 
-void DbMixedStackArgumentsSvNull::getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {}
+void DbMixedStackArgumentsSvNull::getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {  }
 
 
 const char* DbMixedStackArgumentsAsyncProcessor::getServiceName() {
@@ -299,14 +299,14 @@ apache::thrift::ServiceRequestInfoMap const& DbMixedStackArgumentsServiceInfoHol
 apache::thrift::ServiceRequestInfoMap DbMixedStackArgumentsServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"getDataByKey0",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "DbMixedStackArguments.getDataByKey0",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"getDataByKey1",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "DbMixedStackArguments.getDataByKey1",
      std::nullopt,

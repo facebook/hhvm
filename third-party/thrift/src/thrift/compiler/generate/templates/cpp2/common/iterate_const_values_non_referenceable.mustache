@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,63 +14,63 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
+}}{{!
 
 Containers:
 
 List:
-%><%^type:struct?%><%!
-%><%#value:list?%><%#type:list?%><%#type:list_elem_type%><%!
-  %>std::initializer_list<<%!
-    %><%type:cpp_type%><%!
-  %>>{<%!
-  %><%#value:list_elements%><%!
-    %><% > common/iterate_const_values_adapted%><%!
-    %><%^last?%>,
-  <%/last?%><%!
-  %><%/value:list_elements%><%!
-  %>}<%!
-%><%/type:list_elem_type%><%/type:list?%><%/value:list?%><%!
+}}{{^type:struct?}}{{!
+}}{{#value:list?}}{{#type:list?}}{{#type:list_elem_type}}{{!
+  }}std::initializer_list<{{!
+    }}{{type:cpp_type}}{{!
+  }}>{ {{!
+  }}{{#value:list_elements}}{{!
+    }}{{ > common/iterate_const_values_adapted}}{{!
+    }}{{^last?}},
+  {{/last?}}{{!
+  }}{{/value:list_elements}}{{!
+  }} }{{!
+}}{{/type:list_elem_type}}{{/type:list?}}{{/value:list?}}{{!
 
 Set:
-%><%#value:list?%><%#type:set?%><%#type:set_elem_type%><%!
-  %>std::initializer_list<<%!
-    %><%type:cpp_type%><%!
-  %>>{<%!
-  %><%#value:list_elements%><%!
-    %><% > common/iterate_const_values_adapted%><%!
-    %><%^last?%>,
-  <%/last?%><%!
-  %><%/value:list_elements%><%!
-  %>}<%!
-%><%/type:set_elem_type%><%/type:set?%><%/value:list?%><%!
+}}{{#value:list?}}{{#type:set?}}{{#type:set_elem_type}}{{!
+  }}std::initializer_list<{{!
+    }}{{type:cpp_type}}{{!
+  }}>{ {{!
+  }}{{#value:list_elements}}{{!
+    }}{{ > common/iterate_const_values_adapted}}{{!
+    }}{{^last?}},
+  {{/last?}}{{!
+  }}{{/value:list_elements}}{{!
+  }} }{{!
+}}{{/type:set_elem_type}}{{/type:set?}}{{/value:list?}}{{!
 
 Map:
-%><%#value:map?%><%#type:map?%><%!
-  %>std::initializer_list<<%type:cpp_type%>::value_type>{<%!
-  %><%#value:map_elements%><%!
-    %>{<%!
-      %><%#element:key%><%#type:key_type%><%!
-        %><% > common/iterate_const_values_adapted%><%!
-      %><%/type:key_type%><%/element:key%><%!
-      %>, <%!
-      %><%#element:value%><%#type:value_type%><%!
-        %><% > common/iterate_const_values_adapted%><%!
-      %><%/type:value_type%><%/element:value%><%!
-    %>}<%!
-    %><%^last?%>,
-  <%/last?%><%!
-  %><%/value:map_elements%><%!
-  %>}<%!
-%><%/type:map?%><%/value:map?%><%!
-%><%/type:struct?%><%!
+}}{{#value:map?}}{{#type:map?}}{{!
+  }}std::initializer_list<{{type:cpp_type}}::value_type>{ {{!
+  }}{{#value:map_elements}}{{!
+    }}{ {{!
+      }}{{#element:key}}{{#type:key_type}}{{!
+        }}{{ > common/iterate_const_values_adapted}}{{!
+      }}{{/type:key_type}}{{/element:key}}{{!
+      }}, {{!
+      }}{{#element:value}}{{#type:value_type}}{{!
+        }}{{ > common/iterate_const_values_adapted}}{{!
+      }}{{/type:value_type}}{{/element:value}}{{!
+    }} }{{!
+    }}{{^last?}},
+  {{/last?}}{{!
+  }}{{/value:map_elements}}{{!
+  }} }{{!
+}}{{/type:map?}}{{/value:map?}}{{!
+}}{{/type:struct?}}{{!
 
 Struct:
-%><%#type:struct?%><%!
-    %>::apache::thrift::detail::make_structured_constant<<%type:cpp_standard_type%>>(<%!
-        %><%#value:const_struct%><%#constant:type%><%#constant:value%><%#constant:field%><%!
-        %>::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::<%constant:cpp_name%><%!
-          %><%#field:cpp_first_adapter%>, <%field:cpp_first_adapter%>, ::apache::thrift::FieldId{<%field:key%>}<%/field:cpp_first_adapter%>>(<%!
-            %><% > common/iterate_const_values%>)<%^last?%>, <%/last?%><%!
-        %><%/constant:field%><%/constant:value%><%/constant:type%><%/value:const_struct%>)<%!
-%><%/type:struct?%>
+}}{{#type:struct?}}{{!
+    }}::apache::thrift::detail::make_structured_constant<{{type:cpp_standard_type}}>({{!
+        }}{{#value:const_struct}}{{#constant:type}}{{#constant:value}}{{#constant:field}}{{!
+        }}::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::{{constant:cpp_name}}{{!
+          }}{{#field:cpp_first_adapter}}, {{field:cpp_first_adapter}}, ::apache::thrift::FieldId{ {{field:key}} }{{/field:cpp_first_adapter}}>({{!
+            }}{{ > common/iterate_const_values}}){{^last?}}, {{/last?}}{{!
+        }}{{/constant:field}}{{/constant:value}}{{/constant:type}}{{/value:const_struct}}){{!
+}}{{/type:struct?}}

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -15,16 +15,16 @@
   limitations under the License.
 
   // If an optional field is set.
-%><%#field:optional?%><%!
-%><%#field:cpp_ref?%><%!
+}}{{#field:optional?}}{{!
+}}{{#field:cpp_ref?}}{{!
 // For references, check if the field is not null and whether there is lazily deserialized data
-%><%#field:lazy?%>!(__fbthrift_isDeserialized_.<%field:cpp_name%> & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-    <%/field:lazy?%><% > field/member%><%!
-%><%/field:cpp_ref?%><%!
-%><%^field:cpp_ref?%><%!
+}}{{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
+    {{/field:lazy?}}{{ > field/member}}{{!
+}}{{/field:cpp_ref?}}{{!
+}}{{^field:cpp_ref?}}{{!
 // For other values, check __isset status. We don't use field access API
 // since if field is lazy field, we don't want to deserialize it
-%>this->__isset.get(<%field:isset_index%>)<%!
-%><%/field:cpp_ref?%><%!
-%><%/field:optional?%><%!
-%>
+}}this->__isset.get({{field:isset_index}}){{!
+}}{{/field:cpp_ref?}}{{!
+}}{{/field:optional?}}{{!
+}}

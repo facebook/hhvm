@@ -36,10 +36,8 @@ StructMetadata<::module2::Struct>::gen(ThriftMetadata& metadata) {
   module2_Struct.name() = "module2.Struct";
   module2_Struct.is_union() = false;
   static const auto* const
-  module2_Struct_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "first", false, std::make_unique<Struct<::module0::Struct>>("module0.Struct"), std::vector<ThriftConstStruct>{}},
-    {2, "second", false, std::make_unique<Struct<::module1::Struct>>("module1.Struct"), std::vector<ThriftConstStruct>{}},
-  }};
+  module2_Struct_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "first", false, std::make_unique<Struct<::module0::Struct>>("module0.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "second", false, std::make_unique<Struct<::module1::Struct>>("module1.Struct"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module2_Struct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -61,10 +59,8 @@ StructMetadata<::module2::BigStruct>::gen(ThriftMetadata& metadata) {
   module2_BigStruct.name() = "module2.BigStruct";
   module2_BigStruct.is_union() = false;
   static const auto* const
-  module2_BigStruct_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "s", false, std::make_unique<Struct<::module2::Struct>>("module2.Struct"), std::vector<ThriftConstStruct>{}},
-    {2, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module2_BigStruct_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "s", false, std::make_unique<Struct<::module2::Struct>>("module2.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module2_BigStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

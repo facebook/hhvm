@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,37 +14,37 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_constants_h.h>
-<%#program:interning?%>
+{{#program:interning?}}
 #include <thrift/lib/cpp2/gen/intern_list.h>
-<%/program:interning?%>
+{{/program:interning?}}
 
-#include "<%program:include_prefix%><%program:name%>_types.h"
+#include "{{program:include_prefix}}{{program:name}}_types.h"
 
-<% > common/namespace_cpp2_begin%>
+{{ > common/namespace_cpp2_begin}}
 
 
-struct <%program:name%>_constants {
+struct {{program:name}}_constants {
 
-<%#program:constants%><%#constant:type%><%#constant:value%>
-<%^constant:outline_init?%>
-  static constexpr <% > types/const_value_type%> const <%constant:name%>_ = <% > common/const_value%>;
-  static constexpr <% > types/const_value_type%> <%constant:name%>() {
-    return <%constant:name%>_;
+{{#program:constants}}{{#constant:type}}{{#constant:value}}
+{{^constant:outline_init?}}
+  static constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
+  static constexpr {{ > types/const_value_type}} {{constant:name}}() {
+    return {{constant:name}}_;
   }
-<%/constant:outline_init?%>
-<%#constant:outline_init?%>
-  static <%constant:cpp_type%> const& <%constant:name%>();
-<%/constant:outline_init?%>
+{{/constant:outline_init?}}
+{{#constant:outline_init?}}
+  static {{constant:cpp_type}} const& {{constant:name}}();
+{{/constant:outline_init?}}
 
-<%/constant:value%><%/constant:type%><%/program:constants%>
-<%#program:interning?%>
+{{/constant:value}}{{/constant:type}}{{/program:constants}}
+{{#program:interning?}}
 
   static const ::apache::thrift::type::AnyValue& getValue(::apache::thrift::type::ValueId id);
-<%/program:interning?%>
+{{/program:interning?}}
 };
 
-<% > common/namespace_cpp2_end%>
+{{ > common/namespace_cpp2_end}}

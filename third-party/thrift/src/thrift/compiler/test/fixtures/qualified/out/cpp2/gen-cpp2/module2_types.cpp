@@ -61,7 +61,7 @@ Struct& Struct::operator=([[maybe_unused]] Struct&& other) noexcept {
 
 Struct::Struct(apache::thrift::FragileConstructor, ::module0::Struct first__arg, ::module1::Struct second__arg) :
     __fbthrift_field_first(std::move(first__arg)),
-    __fbthrift_field_second(std::move(second__arg)) {
+    __fbthrift_field_second(std::move(second__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -186,7 +186,7 @@ BigStruct& BigStruct::operator=([[maybe_unused]] BigStruct&& other) noexcept {
 
 BigStruct::BigStruct(apache::thrift::FragileConstructor, ::module2::Struct s__arg, ::std::int32_t id__arg) :
     __fbthrift_field_s(std::move(s__arg)),
-    __fbthrift_field_id(std::move(id__arg)) {
+    __fbthrift_field_id(std::move(id__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

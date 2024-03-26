@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,24 +14,24 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
-<%#program:enums?%>
+{{#program:enums?}}
 
 #include <cstdint>
-<%/program:enums?%>
+{{/program:enums?}}
 
-<% > module_types_h/forward_declare%>
+{{ > module_types_h/forward_declare}}
 
-<%#program:enums?%>
+{{#program:enums?}}
 
 // BEGIN forward_declare_enums
-<% > common/namespace_cpp2_begin%>
+{{ > common/namespace_cpp2_begin}}
 
-<%#program:enums%>
-enum <%^enum:cpp_is_unscoped%>class <%/enum:cpp_is_unscoped%><%enum:cpp_name%><%#enum:cpp_enum_type%> : <%enum:cpp_enum_type%><%/enum:cpp_enum_type%>;
-<%/program:enums%>
-<% > common/namespace_cpp2_end%>
+{{#program:enums}}
+enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}};
+{{/program:enums}}
+{{ > common/namespace_cpp2_end}}
 
 // END forward_declare_enums
-<%/program:enums?%>
+{{/program:enums?}}

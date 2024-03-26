@@ -73,7 +73,7 @@ TerseFoo::TerseFoo(apache::thrift::FragileConstructor, ::std::vector<double> fie
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -275,7 +275,7 @@ TerseLazyFoo::TerseLazyFoo(apache::thrift::FragileConstructor, ::std::vector<dou
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -491,7 +491,7 @@ TerseOptionalFoo::TerseOptionalFoo(apache::thrift::FragileConstructor, ::std::ve
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -693,7 +693,7 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo(apache::thrift::FragileConstructor, :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

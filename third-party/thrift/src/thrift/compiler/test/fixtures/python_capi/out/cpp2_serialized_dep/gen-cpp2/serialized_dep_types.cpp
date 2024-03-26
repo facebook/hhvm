@@ -78,7 +78,7 @@ SerializedStruct::SerializedStruct(apache::thrift::FragileConstructor, ::std::st
     __fbthrift_field_s(std::move(s__arg)),
     __fbthrift_field_i(std::move(i__arg)),
     __fbthrift_field_os(std::move(os__arg)),
-    __fbthrift_field_rs(std::move(rs__arg)) {
+    __fbthrift_field_rs(std::move(rs__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -331,7 +331,7 @@ SerializedError& SerializedError::operator=([[maybe_unused]] SerializedError&& o
 SerializedError::SerializedError(apache::thrift::FragileConstructor, ::std::string msg__arg, ::std::string os__arg, ::std::string rs__arg) :
     __fbthrift_field_msg(std::move(msg__arg)),
     __fbthrift_field_os(std::move(os__arg)),
-    __fbthrift_field_rs(std::move(rs__arg)) {
+    __fbthrift_field_rs(std::move(rs__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -447,7 +447,7 @@ MarshalStruct::MarshalStruct(apache::thrift::FragileConstructor, ::std::string s
     __fbthrift_field_s(std::move(s__arg)),
     __fbthrift_field_i(std::move(i__arg)),
     __fbthrift_field_os(std::move(os__arg)),
-    __fbthrift_field_rs(std::move(rs__arg)) {
+    __fbthrift_field_rs(std::move(rs__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -700,7 +700,7 @@ MarshalError& MarshalError::operator=([[maybe_unused]] MarshalError&& other) noe
 MarshalError::MarshalError(apache::thrift::FragileConstructor, ::std::string msg__arg, ::std::string os__arg, ::std::string rs__arg) :
     __fbthrift_field_msg(std::move(msg__arg)),
     __fbthrift_field_os(std::move(os__arg)),
-    __fbthrift_field_rs(std::move(rs__arg)) {
+    __fbthrift_field_rs(std::move(rs__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

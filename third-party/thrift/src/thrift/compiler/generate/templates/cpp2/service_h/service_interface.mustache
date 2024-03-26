@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,50 +14,50 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<% > common/namespace_cpp2_begin%>
+}}
+{{ > common/namespace_cpp2_begin}}
 
-class <%service:cpp_name%>;
-class <%service:cpp_name%>AsyncProcessor;
+class {{service:cpp_name}};
+class {{service:cpp_name}}AsyncProcessor;
 
-<% > service_h/service_info_holder%>
+{{ > service_h/service_info_holder}}
 
-<% > common/namespace_cpp2_end%>
+{{ > common/namespace_cpp2_end}}
 
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<<%service:qualified_name%>> : <%#service:extends%>virtual public <% > common/namespace_cpp2%><%service:cpp_name%>SvIf<%/service:extends%><%^service:extends%>public apache::thrift::ServerInterface<%/service:extends%> {
+class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public {{ > common/namespace_cpp2}}{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
  public:
-  std::string_view getGeneratedName() const override { return "<%service:name%>"; }
-<%#service:thrift_uri%>
+  std::string_view getGeneratedName() const override { return "{{service:name}}"; }
+{{#service:thrift_uri}}
 
   static const char* __fbthrift_thrift_uri() {
-    return "<%service:thrift_uri%>";
+    return "{{service:thrift_uri}}";
   }
-<%/service:thrift_uri%>
+{{/service:thrift_uri}}
 
-  typedef <%service:qualified_name%>AsyncProcessor ProcessorType;
+  typedef {{service:qualified_name}}AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
-  <%#service:has_service_schema%>
+  {{#service:has_service_schema}}
   #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
-  <%/service:has_service_schema%>
+  {{/service:has_service_schema}}
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
-<%#service:interactions%>
-<% > service_h/interaction_service_interface%>
-<%/service:interactions%>
+{{#service:interactions}}
+{{ > service_h/interaction_service_interface}}
+{{/service:interactions}}
 
-<% > service_h/service_interface_functions%>
+{{ > service_h/service_interface_functions}}
 };
 
 } // namespace apache::thrift
 
-<% > common/namespace_cpp2_begin%>
+{{ > common/namespace_cpp2_begin}}
 
-using <%service:cpp_name%>SvIf [[deprecated("Use apache::thrift::ServiceHandler<<%service:cpp_name%>> instead")]] = ::apache::thrift::ServiceHandler<<%service:cpp_name%>>;
-<% > common/namespace_cpp2_end%>
+using {{service:cpp_name}}SvIf [[deprecated("Use apache::thrift::ServiceHandler<{{service:cpp_name}}> instead")]] = ::apache::thrift::ServiceHandler<{{service:cpp_name}}>;
+{{ > common/namespace_cpp2_end}}

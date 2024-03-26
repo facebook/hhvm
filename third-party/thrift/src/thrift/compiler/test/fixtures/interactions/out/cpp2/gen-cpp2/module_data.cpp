@@ -34,19 +34,19 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::CustomException>::name = "CustomException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::fields_names = { {
   "message"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::CustomException>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::CustomException>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CustomException>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CustomException>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CustomException>::storage_names = { {
   "__fbthrift_field_message"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::CustomException>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::CustomException>::isset_indexes = { {
   0,
 }};
 

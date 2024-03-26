@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,66 +14,66 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<% > Autogen%>
+}}
+{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/frozen/Frozen.h>
-#include "<%program:include_prefix%><%program:name%>_types.h"
-<%#program:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_layouts.h"
-<%/program:thrift_includes%>
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+{{#program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_layouts.h"
+{{/program:thrift_includes}}
 namespace apache { namespace thrift { namespace frozen {
 
-<%#program:structs_and_typedefs%><%#is_struct?%>
-<%#struct:cpp_frozen2_exclude?%>
-FROZEN_EXCLUDE_TYPE(<%struct:cpp_fullname%>)
-<%/struct:cpp_frozen2_exclude?%>
-<%/is_struct?%><%/program:structs_and_typedefs%>
+{{#program:structs_and_typedefs}}{{#is_struct?}}
+{{#struct:cpp_frozen2_exclude?}}
+FROZEN_EXCLUDE_TYPE({{struct:cpp_fullname}})
+{{/struct:cpp_frozen2_exclude?}}
+{{/is_struct?}}{{/program:structs_and_typedefs}}
 
-<%#program:structs_and_typedefs%><%#is_struct?%>
-<%^struct:cpp_frozen2_exclude?%>
-<%^struct:union?%>
-FROZEN_TYPE(<%struct:cpp_fullname%>,<%!
-%><%#struct:fields%>
-  FROZEN_FIELD<% > common/field_suffix%>(<%field:cpp_name%>, <%field:key%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
-%><%/struct:fields%>
-  FROZEN_VIEW(<%!
-%><%#struct:fields%>
-    FROZEN_VIEW_FIELD<% > common/field_suffix%>(<%field:cpp_name%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
-%><%/struct:fields%>)
-  FROZEN_SAVE_INLINE(<%!
-%><%#struct:fields%>
-    FROZEN_SAVE_FIELD(<%field:cpp_name%>)<%!
-%><%/struct:fields%>)
-  FROZEN_LOAD_INLINE(<%!
-%><%#struct:fields%>
-    FROZEN_LOAD_FIELD(<%field:cpp_name%>, <%field:key%>)<%!
-%><%/struct:fields%>));
-<%/struct:union?%>
-<%#struct:union?%>
-FROZEN_TYPE(<%struct:cpp_fullname%>,<%!
-%>
-  FROZEN_FIELD(type_, 0, <%struct:cpp_fullname%>::Type)<%!
-%><%#struct:fields%>
-  FROZEN_FIELD<% > common/frozen2_union_field_suffix%>(<%field:cpp_name%>, <%field:key%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
-%><%/struct:fields%>
-<% > module_layouts_h/frozen_view_union%>
-  FROZEN_SAVE_INLINE(<%!
-%>
-    FROZEN_SAVE_FIELD(type_)<%!
-%><%#struct:fields%>
-    FROZEN_SAVE_FIELD(<%field:cpp_name%>)<%!
-%><%/struct:fields%>)
-  FROZEN_LOAD_INLINE(<%!
-%>
-    FROZEN_LOAD_FIELD(type_, 0)<%!
-%><%#struct:fields%>
-    FROZEN_LOAD_FIELD(<%field:cpp_name%>, <%field:key%>)<%!
-%><%/struct:fields%>));
-<%/struct:union?%>
+{{#program:structs_and_typedefs}}{{#is_struct?}}
+{{^struct:cpp_frozen2_exclude?}}
+{{^struct:union?}}
+FROZEN_TYPE({{struct:cpp_fullname}},{{!
+}}{{#struct:fields}}
+  FROZEN_FIELD{{ > common/field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+}}{{/struct:fields}}
+  FROZEN_VIEW({{!
+}}{{#struct:fields}}
+    FROZEN_VIEW_FIELD{{ > common/field_suffix}}({{field:cpp_name}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+}}{{/struct:fields}})
+  FROZEN_SAVE_INLINE({{!
+}}{{#struct:fields}}
+    FROZEN_SAVE_FIELD({{field:cpp_name}}){{!
+}}{{/struct:fields}})
+  FROZEN_LOAD_INLINE({{!
+}}{{#struct:fields}}
+    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:key}}){{!
+}}{{/struct:fields}}));
+{{/struct:union?}}
+{{#struct:union?}}
+FROZEN_TYPE({{struct:cpp_fullname}},{{!
+}}
+  FROZEN_FIELD(type_, 0, {{struct:cpp_fullname}}::Type){{!
+}}{{#struct:fields}}
+  FROZEN_FIELD{{ > common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+}}{{/struct:fields}}
+{{ > module_layouts_h/frozen_view_union}}
+  FROZEN_SAVE_INLINE({{!
+}}
+    FROZEN_SAVE_FIELD(type_){{!
+}}{{#struct:fields}}
+    FROZEN_SAVE_FIELD({{field:cpp_name}}){{!
+}}{{/struct:fields}})
+  FROZEN_LOAD_INLINE({{!
+}}
+    FROZEN_LOAD_FIELD(type_, 0){{!
+}}{{#struct:fields}}
+    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:key}}){{!
+}}{{/struct:fields}}));
+{{/struct:union?}}
 
-<%/struct:cpp_frozen2_exclude?%>
-<%/is_struct?%><%/program:structs_and_typedefs%>
+{{/struct:cpp_frozen2_exclude?}}
+{{/is_struct?}}{{/program:structs_and_typedefs}}
 }}} // apache::thrift::frozen
-<%!%>
+{{!}}

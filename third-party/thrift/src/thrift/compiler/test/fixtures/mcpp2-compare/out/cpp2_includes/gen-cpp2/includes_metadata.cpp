@@ -48,9 +48,8 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
   includes_AStruct.name() = "includes.AStruct";
   includes_AStruct.is_union() = false;
   static const auto* const
-  includes_AStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "FieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  includes_AStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "FieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *includes_AStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -72,9 +71,8 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
   includes_AStructB.name() = "includes.AStructB";
   includes_AStructB.is_union() = false;
   static const auto* const
-  includes_AStructB_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
-  }};
+  includes_AStructB_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *includes_AStructB_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

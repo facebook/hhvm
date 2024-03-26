@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,60 +14,60 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::serializedSize(Protocol_ const* prot_) const {
+}}template <class Protocol_>
+uint32_t {{struct:cpp_underlying_name}}::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->serializedStructSize("<%struct:name%>");
-<%#struct:fields_in_serialization_order%>
-<% > module_types_tcc/serialize_field_size%>
-<%/struct:fields_in_serialization_order%>
+  xfer += prot_->serializedStructSize("{{struct:name}}");
+{{#struct:fields_in_serialization_order}}
+{{ > module_types_tcc/serialize_field_size}}
+{{/struct:fields_in_serialization_order}}
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::serializedSizeZC(Protocol_ const* prot_) const {
+uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->serializedStructSize("<%struct:name%>");
-<%#struct:fields_in_serialization_order%>
-<% > module_types_tcc/serialize_field_size_zc%>
-<%/struct:fields_in_serialization_order%>
+  xfer += prot_->serializedStructSize("{{struct:name}}");
+{{#struct:fields_in_serialization_order}}
+{{ > module_types_tcc/serialize_field_size_zc}}
+{{/struct:fields_in_serialization_order}}
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
-<%^program:tablebased?%>
+{{^program:tablebased?}}
 template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::write(Protocol_* prot_) const {
+uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->writeStructBegin("<%struct:name%>");
-<%#struct:indexing?%>
-  ::apache::thrift::detail::IndexWriter<Protocol_> indexWriter(prot_, xfer, <%struct:write_lazy_field_checksum%>);
-<%/struct:indexing?%>
-<%#struct:fields?%>
+  xfer += prot_->writeStructBegin("{{struct:name}}");
+{{#struct:indexing?}}
+  ::apache::thrift::detail::IndexWriter<Protocol_> indexWriter(prot_, xfer, {{struct:write_lazy_field_checksum}});
+{{/struct:indexing?}}
+{{#struct:fields?}}
   bool previousFieldHasValue = true;
-<%/struct:fields?%>
-<%#struct:fields_in_serialization_order%>
-<% > module_types_tcc/serialize_field%>
-<%/struct:fields_in_serialization_order%>
-<%#struct:indexing?%>
+{{/struct:fields?}}
+{{#struct:fields_in_serialization_order}}
+{{ > module_types_tcc/serialize_field}}
+{{/struct:fields_in_serialization_order}}
+{{#struct:indexing?}}
   indexWriter.finalize();
-<%/struct:indexing?%>
+{{/struct:indexing?}}
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
 }
-<%/program:tablebased?%>
-<%#program:tablebased?%>
+{{/program:tablebased?}}
+{{#program:tablebased?}}
 template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::write(Protocol_* iprot) const {
+uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* iprot) const {
   return ::apache::thrift::detail::write(
     iprot,
     ::apache::thrift::detail::toStructInfo(
-      <% > common/namespace_cpp2%>__fbthrift_struct_info_<%struct:cpp_underlying_name%>
+      {{ > common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
     ),
     this);
 }
-<%/program:tablebased?%>
-<%!
-%>
+{{/program:tablebased?}}
+{{!
+}}

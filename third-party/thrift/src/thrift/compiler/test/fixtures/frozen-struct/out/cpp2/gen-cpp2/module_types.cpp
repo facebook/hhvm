@@ -96,7 +96,7 @@ ModuleA::ModuleA(apache::thrift::FragileConstructor, ::std::int32_t i32Field__ar
     __fbthrift_field_listField(std::move(listField__arg)),
     __fbthrift_field_mapField(std::move(mapField__arg)),
     __fbthrift_field_inclAField(std::move(inclAField__arg)),
-    __fbthrift_field_inclBField(std::move(inclBField__arg)) {
+    __fbthrift_field_inclBField(std::move(inclBField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -234,7 +234,7 @@ std::string_view ModuleB::__fbthrift_get_class_name() {
 
 ModuleB::ModuleB(apache::thrift::FragileConstructor, ::std::int32_t i32Field__arg, ::some::ns::EnumB inclEnumB__arg) :
     __fbthrift_field_i32Field(std::move(i32Field__arg)),
-    __fbthrift_field_inclEnumB(std::move(inclEnumB__arg)) {
+    __fbthrift_field_inclEnumB(std::move(inclEnumB__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -316,7 +316,7 @@ std::string_view DirectlyAdapted::__fbthrift_get_class_name() {
 
 
 DirectlyAdapted::DirectlyAdapted(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -426,7 +426,7 @@ CppRef::CppRef(apache::thrift::FragileConstructor, ::std::shared_ptr<::std::int3
     __fbthrift_field_shared_const_field(std::move(shared_const_field__arg)),
     __fbthrift_field_opt_shared_field(std::move(opt_shared_field__arg)),
     __fbthrift_field_opt_shared_const_field(std::move(opt_shared_const_field__arg)),
-    __fbthrift_field_boxed_field(std::move(boxed_field__arg)) {
+    __fbthrift_field_boxed_field(std::move(boxed_field__arg)) { 
 }
 
 

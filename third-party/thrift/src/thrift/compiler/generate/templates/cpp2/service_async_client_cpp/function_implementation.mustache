@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,46 +14,46 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<%^function:sink?%><%^service:reduced_client?%><%^function:creates_interaction?%>
-void <% > service_common/client_class_name%>::<%function:cpp_name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_client%>) {
+}}
+{{^function:sink?}}{{^service:reduced_client?}}{{^function:creates_interaction?}}
+void {{ > service_common/client_class_name}}::{{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function:comma}}{{ > service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
-  <%function:cpp_name%>(rpcOptions, std::move(callback)<%function:comma%><% > service_common/param_list%>);
+  {{function:cpp_name}}(rpcOptions, std::move(callback){{function:comma}}{{ > service_common/param_list}});
 }
-<%/function:creates_interaction?%><%/service:reduced_client?%>
+{{/function:creates_interaction?}}{{/service:reduced_client?}}
 
-void <% > service_common/client_class_name%>::<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>) {
-  auto [ctx, header] = <%function:cpp_name%>Ctx(&rpcOptions);
+void {{ > service_common/client_class_name}}::{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}) {
+  auto [ctx, header] = {{function:cpp_name}}Ctx(&rpcOptions);
   apache::thrift::RequestCallback::Context callbackContext;
-  <%#function:oneway?%>
+  {{#function:oneway?}}
   callbackContext.oneWay = true;
-  <%/function:oneway?%>
+  {{/function:oneway?}}
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   auto* contextStack = ctx.get();
   if (callback) {
     callbackContext.ctx = std::move(ctx);
   }
-<%^function:stream?%>
+{{^function:stream?}}
   auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
-<%/function:stream?%><%#function:stream?%>
+{{/function:stream?}}{{#function:stream?}}
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)),
     rpcOptions.getBufferOptions());
-<%/function:stream?%>
-  <%function:cpp_name%>Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+{{/function:stream?}}
+  {{function:cpp_name}}Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 }
 
-<%/function:sink?%>
-void <% > service_common/client_class_name%>::<%function:cpp_name%>Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>, bool stealRpcOptions) {
+{{/function:sink?}}
+void {{ > service_common/client_class_name}}::{{function:cpp_name}}Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}, bool stealRpcOptions) {
   switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolWriter writer;
       if (stealRpcOptions) {
-        <%function:cpp_name%>T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+        {{function:cpp_name}}T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
       } else {
-        <%function:cpp_name%>T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+        {{function:cpp_name}}T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
       }
       break;
     }
@@ -61,9 +61,9 @@ void <% > service_common/client_class_name%>::<%function:cpp_name%>Impl(apache::
     {
       apache::thrift::CompactProtocolWriter writer;
       if (stealRpcOptions) {
-        <%function:cpp_name%>T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+        {{function:cpp_name}}T(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
       } else {
-        <%function:cpp_name%>T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+        {{function:cpp_name}}T(&writer, rpcOptions, std::move(header), contextStack, std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
       }
       break;
     }
@@ -74,7 +74,7 @@ void <% > service_common/client_class_name%>::<%function:cpp_name%>Impl(apache::
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> <% > service_common/client_class_name%>::<%function:cpp_name%>Ctx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> {{ > service_common/client_class_name}}::{{function:cpp_name}}Ctx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -85,7 +85,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto ctx = apache::thrift::ContextStack::createWithClientContext(
       handlers_,
       getServiceName(),
-      "<%service:parent_service_name%>.<% > common/function_name%>",
+      "{{service:parent_service_name}}.{{ > common/function_name}}",
       *header);
 
   return {std::move(ctx), std::move(header)};

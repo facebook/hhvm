@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,80 +14,80 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
+}}{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
 template <typename ProtocolIn_, typename ProtocolOut_>
-void <%service:parent_service_cpp_name%>AsyncProcessor::setUpAndProcess_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, <%^function:eb%>tm<%/function:eb%><%#function:eb%>nullptr<%/function:eb%>, <% > types/function_kind%>, iface_<%#service:interaction?%>, "<%service:name%>"<%/service:interaction?%><%#function:creates_interaction?%>, "<%function:created_interaction%>", true<%/function:creates_interaction?%>)) {
+void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(req, ctx, eb, {{^function:eb}}tm{{/function:eb}}{{#function:eb}}nullptr{{/function:eb}}, {{ > types/function_kind}}, iface_{{#service:interaction?}}, "{{service:name}}"{{/service:interaction?}}{{#function:creates_interaction?}}, "{{function:created_interaction}}", true{{/function:creates_interaction?}})) {
     return;
   }
-<%^function:eb%>
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::<%function:priority%>);
+{{^function:eb}}
+  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::{{function:priority}});
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, <% > types/function_kind%>, &<%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%function:prefixed_name%><ProtocolIn_, ProtocolOut_>, this);
-<%/function:eb%><%#function:eb%>
-  <%#function:in_or_creates_interaction?%>
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, nullptr, <% > types/function_kind%>, &<%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%function:prefixed_name%><ProtocolIn_, ProtocolOut_>, this);
-  <%/function:in_or_creates_interaction?%>
-  <%^function:in_or_creates_interaction?%>
-  <%^function:oneway?%>
+  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, {{ > types/function_kind}}, &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>, this);
+{{/function:eb}}{{#function:eb}}
+  {{#function:in_or_creates_interaction?}}
+  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, nullptr, {{ > types/function_kind}}, &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>, this);
+  {{/function:in_or_creates_interaction?}}
+  {{^function:in_or_creates_interaction?}}
+  {{^function:oneway?}}
   if (!req->getShouldStartProcessing()) {
-    <%#function:in_or_creates_interaction?%>
+    {{#function:in_or_creates_interaction?}}
     auto tile = serverRequest.requestContext()->releaseTile();
-    <%/function:in_or_creates_interaction?%>
-    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb<%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
+    {{/function:in_or_creates_interaction?}}
+    apache::thrift::HandlerCallbackBase::releaseRequest(std::move(req), eb{{#function:in_or_creates_interaction?}}, std::move(tile){{/function:in_or_creates_interaction?}});
     return;
   }
-  <%/function:oneway?%>
+  {{/function:oneway?}}
   apache::thrift::ServerRequest serverRequest{std::move(req), std::move(serializedRequest), ctx, {}, {}, {}, {}};
-  executeRequest_<%function:prefixed_name%><ProtocolIn_, ProtocolOut_>(std::move(serverRequest));
-  <%/function:in_or_creates_interaction?%>
-<%/function:eb%>
+  executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>(std::move(serverRequest));
+  {{/function:in_or_creates_interaction?}}
+{{/function:eb}}
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#service:interaction?%><%service:name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ServerRequest&& serverRequest) {
-<%#function:in_or_creates_interaction?%>
+void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}(apache::thrift::ServerRequest&& serverRequest) {
+{{#function:in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();
-<%/function:in_or_creates_interaction?%>
+{{/function:in_or_creates_interaction?}}
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:name%>_<%/service:interaction?%><%function:cpp_name%>_pargs args;
-<%#function:args%><%#field:type%>
-<%^type:resolves_to_complex_return?%>
-<%^type:enum?%>
-  <%type:cpp_type%> uarg_<%field:cpp_name%>{0};
-<%/type:enum?%>
-<%#type:enum?%>
-  <%type:cpp_type%> uarg_<%field:cpp_name%>{static_cast<<%type:cpp_type%>>(0)};
-<%/type:enum?%>
-  args.get<<%field:index%>>().value = &uarg_<%field:cpp_name%>;
-<%/type:resolves_to_complex_return?%>
-<%#type:resolves_to_complex_return?%>
-  <%#function:stack_arguments?%>
-  <%type:cpp_type%> uarg_<%field:cpp_name%>;
-  args.get<<%field:index%>>().value = &uarg_<%field:cpp_name%>;
-  <%/function:stack_arguments?%>
-  <%^function:stack_arguments?%>
-  auto uarg_<%field:cpp_name%> = std::make_unique<<%type:cpp_type%>>();
-  args.get<<%field:index%>>().value = uarg_<%field:cpp_name%>.get();
-  <%/function:stack_arguments?%>
-<%/type:resolves_to_complex_return?%>
-<%/field:type%><%/function:args%>
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
+{{#function:args}}{{#field:type}}
+{{^type:resolves_to_complex_return?}}
+{{^type:enum?}}
+  {{type:cpp_type}} uarg_{{field:cpp_name}}{0};
+{{/type:enum?}}
+{{#type:enum?}}
+  {{type:cpp_type}} uarg_{{field:cpp_name}}{static_cast<{{type:cpp_type}}>(0)};
+{{/type:enum?}}
+  args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
+{{/type:resolves_to_complex_return?}}
+{{#type:resolves_to_complex_return?}}
+  {{#function:stack_arguments?}}
+  {{type:cpp_type}} uarg_{{field:cpp_name}};
+  args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
+  {{/function:stack_arguments?}}
+  {{^function:stack_arguments?}}
+  auto uarg_{{field:cpp_name}} = std::make_unique<{{type:cpp_type}}>();
+  args.get<{{field:index}}>().value = uarg_{{field:cpp_name}}.get();
+  {{/function:stack_arguments?}}
+{{/type:resolves_to_complex_return?}}
+{{/field:type}}{{/function:args}}
   auto ctxStack = apache::thrift::ContextStack::create(
     this->getEventHandlersSharedPtr(),
     this->getServiceName(),
-    "<%service:parent_service_name%>.<% > common/function_name%>",
+    "{{service:parent_service_name}}.{{ > common/function_name}}",
     serverRequest.requestContext());
-<%#service:interaction?%>
-  auto& iface = static_cast<apache::thrift::ServiceHandler<<%service:parent_service_cpp_name%>>::<%service:name%>If&>(*tile);
-<%/service:interaction?%>
+{{#service:interaction?}}
+  auto& iface = static_cast<apache::thrift::ServiceHandler<{{service:parent_service_cpp_name}}>::{{service:name}}If&>(*tile);
+{{/service:interaction?}}
   try {
-    deserializeRequest<ProtocolIn_>(args, "<% > common/function_name%>", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+    deserializeRequest<ProtocolIn_>(args, "{{ > common/function_name}}", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
   catch (...) {
-<%#function:oneway?%>
-    LOG(ERROR) << "exception in function <% > common/function_name%>: " << folly::exceptionStr(std::current_exception());
+{{#function:oneway?}}
+    LOG(ERROR) << "exception in function {{ > common/function_name}}: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -102,113 +102,113 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
     , serverRequest.requestContext()
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    <%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
-<%/function:oneway?%>
-<%^function:oneway?%>
+    {{#function:in_or_creates_interaction?}}, std::move(tile){{/function:in_or_creates_interaction?}});
+{{/function:oneway?}}
+{{^function:oneway?}}
     folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
         , serverRequest.requestContext()
         , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "<% > common/function_name%>");
+        , "{{ > common/function_name}}");
     return;
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<<% > types/return_type_server%>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<{{ > types/return_type_server}}>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
-    , return_<%function:prefixed_name%><ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_<%#service:interaction?%><%service:name%>_<%/service:interaction?%><%function:cpp_name%><ProtocolIn_, ProtocolOut_>
+    , return_{{function:prefixed_name}}<ProtocolIn_,ProtocolOut_>
+    , throw_wrapped_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}<ProtocolIn_, ProtocolOut_>
     , serverRequest.requestContext()->getProtoSeqId()
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , <%^function:eb%>apache::thrift::detail::ServerRequestHelper::executor(serverRequest)<%/function:eb%><%#function:eb%>nullptr<%/function:eb%>
+    , {{^function:eb}}apache::thrift::detail::ServerRequestHelper::executor(serverRequest){{/function:eb}}{{#function:eb}}nullptr{{/function:eb}}
     , serverRequest.requestContext()
     , requestPileNotification
     , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    <%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
-<%/function:oneway?%>
-  <%^service:interaction?%>iface_-><%/service:interaction?%><%#service:interaction?%>iface.<%/service:interaction?%><%#function:eb%>async_eb<%/function:eb%><%^function:eb%>async_tm<%/function:eb%>_<%function:cpp_name%>(std::move(callback)<% > service_tcc/get_args_ref%>);
+    {{#function:in_or_creates_interaction?}}, std::move(tile){{/function:in_or_creates_interaction?}});
+{{/function:oneway?}}
+  {{^service:interaction?}}iface_->{{/service:interaction?}}{{#service:interaction?}}iface.{{/service:interaction?}}{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:cpp_name}}(std::move(callback){{ > service_tcc/get_args_ref}});
 }
 
-<%^function:oneway?%>
+{{^function:oneway?}}
 template <class ProtocolIn_, class ProtocolOut_>
-<%#function:cpp_void?%>
-apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%function:prefixed_name%>(apache::thrift::ContextStack* ctx) {
-<%/function:cpp_void?%>
-<%^function:cpp_void?%>
-    <%^function:stream?%><%^function:sink?%>
-apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%function:prefixed_name%>(apache::thrift::ContextStack* ctx, <%function:cpp_return_type%> const& _return) {
-    <%/function:sink?%><%/function:stream?%>
-    <%#function:stream?%>
-apache::thrift::ResponseAndServerStreamFactory <%service:parent_service_cpp_name%>AsyncProcessor::return_<%function:prefixed_name%>(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, <%function:cpp_return_type%>&& _return) {
-    <%/function:stream?%>
-    <%#function:sink?%>
-std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> <%service:parent_service_cpp_name%>AsyncProcessor::return_<%function:prefixed_name%>(apache::thrift::ContextStack* ctx, <%function:cpp_return_type%>&& _return, folly::Executor::KeepAlive<> executor) {
-    <%/function:sink?%>
-<%/function:cpp_void?%>
+{{#function:cpp_void?}}
+apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx) {
+{{/function:cpp_void?}}
+{{^function:cpp_void?}}
+    {{^function:stream?}}{{^function:sink?}}
+apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}} const& _return) {
+    {{/function:sink?}}{{/function:stream?}}
+    {{#function:stream?}}
+apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:cpp_return_type}}&& _return) {
+    {{/function:stream?}}
+    {{#function:sink?}}
+std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor) {
+    {{/function:sink?}}
+{{/function:cpp_void?}}
   ProtocolOut_ prot;
-<%#function:stream?%>
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult::FieldsType result;
-  using StreamPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult::StreamPResultType;
-      <%#function:stream_has_first_response?%>
-  result.get<0>().value = const_cast<<%function:cpp_return_type%>::ResponseType*>(&_return.response);
+{{#function:stream?}}
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  using StreamPResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
+      {{#function:stream_has_first_response?}}
+  result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-      <%/function:stream_has_first_response?%>
-      <%^function:stream_has_first_response?%>
+      {{/function:stream_has_first_response?}}
+      {{^function:stream_has_first_response?}}
   auto& returnStream = _return;
-      <%/function:stream_has_first_response?%>
+      {{/function:stream_has_first_response?}}
 
-      <%^function:stream_exceptions?%>
+      {{^function:stream_exceptions?}}
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-      <%/function:stream_exceptions?%>
-      <%#function:stream_exceptions?%>
+      {{/function:stream_exceptions?}}
+      {{#function:stream_exceptions?}}
   struct ExMapType {
     bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-      <%#function:stream_exceptions%>
-      if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
-            res.get<<%field:index_plus_one%>>().ref() = e;
-            res.setIsSet(<%field:index_plus_one%>, true);
+      {{#function:stream_exceptions}}
+      if (ew.with_exception([&]({{#field:type}}{{ > common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+            res.get<{{field:index_plus_one}}>().ref() = e;
+            res.setIsSet({{field:index_plus_one}}, true);
           })) {
         return true;
       }
-      <%/function:stream_exceptions%>
+      {{/function:stream_exceptions}}
       return false;
     }
   };
-      <%/function:stream_exceptions?%>
+      {{/function:stream_exceptions?}}
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(std::move(returnStream), std::move(executor));
-  return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(encodedStream)};
-<%/function:stream?%>
-<%#function:sink?%>
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult::FieldsType result;
-  using SinkPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult::SinkPResultType;
-  using FinalResponsePResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult::FinalResponsePResultType;
-  <%#function:sink_has_first_response?%>
+  return {serializeResponse("{{ > common/function_name}}", &prot, ctx, result), std::move(encodedStream)};
+{{/function:stream?}}
+{{#function:sink?}}
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  using SinkPResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
+  using FinalResponsePResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FinalResponsePResultType;
+  {{#function:sink_has_first_response?}}
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-  <%/function:sink_has_first_response?%>
+  {{/function:sink_has_first_response?}}
 
-  <%^function:sink_final_response_exceptions?%>
+  {{^function:sink_final_response_exceptions?}}
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  <%/function:sink_final_response_exceptions?%>
-  <%#function:sink_final_response_exceptions?%>
+  {{/function:sink_final_response_exceptions?}}
+  {{#function:sink_final_response_exceptions?}}
   struct ExMapType {
     bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
-      <%#function:sink_final_response_exceptions%>
-      if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
-            res.get<<%field:index_plus_one%>>().ref() = e;
-            res.setIsSet(<%field:index_plus_one%>, true);
+      {{#function:sink_final_response_exceptions}}
+      if (ew.with_exception([&]({{#field:type}}{{ > common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+            res.get<{{field:index_plus_one}}>().ref() = e;
+            res.setIsSet({{field:index_plus_one}}, true);
           })) {
         return true;
       }
-      <%/function:sink_final_response_exceptions%>
+      {{/function:sink_final_response_exceptions}}
       return false;
     }
   };
-  <%/function:sink_final_response_exceptions?%>
+  {{/function:sink_final_response_exceptions?}}
 
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
@@ -216,104 +216,104 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       SinkPResultType,
       FinalResponsePResultType,
       ExMapType>(
-  <%#function:sink_has_first_response?%>
+  {{#function:sink_has_first_response?}}
       std::move(_return.sinkConsumer),
-  <%/function:sink_has_first_response?%>
-  <%^function:sink_has_first_response?%>
+  {{/function:sink_has_first_response?}}
+  {{^function:sink_has_first_response?}}
       std::move(_return),
-  <%/function:sink_has_first_response?%>
+  {{/function:sink_has_first_response?}}
       std::move(executor));
 
-  return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(sinkConsumerImpl)};
-<%/function:sink?%>
-<%^function:stream?%><%^function:sink?%>
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult result;
-<%^type:void?%>
-  result.get<0>().value = const_cast<<%function:cpp_return_type%>*>(&_return);
+  return {serializeResponse("{{ > common/function_name}}", &prot, ctx, result), std::move(sinkConsumerImpl)};
+{{/function:sink?}}
+{{^function:stream?}}{{^function:sink?}}
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
+{{^type:void?}}
+  result.get<0>().value = const_cast<{{function:cpp_return_type}}*>(&_return);
   result.setIsSet(0, true);
-<%/type:void?%>
-  return serializeResponse("<% > common/function_name%>", &prot, ctx, result);
-<%/function:sink?%><%/function:stream?%>
+{{/type:void?}}
+  return serializeResponse("{{ > common/function_name}}", &prot, ctx, result);
+{{/function:sink?}}{{/function:stream?}}
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
-<%#function:exceptions?%>
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult result;
-<%/function:exceptions?%>
-<%#function:exceptions%>
-  if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
+{{#function:exceptions?}}
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
+{{/function:exceptions?}}
+{{#function:exceptions}}
+  if (ew.with_exception([&]({{#field:type}}{{ > common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
     if (ctx) {
       ctx->userExceptionWrapped(true, ew);
     }
     ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-    ::apache::thrift::util::appendErrorClassificationToHeader<<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>>(ew, *reqCtx);
-<%#function:cpp_void?%>
-    result.get<<%field:index%>>().ref() = e;
-    result.setIsSet(<%field:index%>, true);
-<%/function:cpp_void?%>
-<%^function:cpp_void?%>
-  <%^function:stream?%><%^function:sink?%>
-    result.get<<%field:index_plus_one%>>().ref() = e;
-    result.setIsSet(<%field:index_plus_one%>, true);
-  <%/function:sink?%><%/function:stream?%>
-  <%#function:stream?%>
-  <%#function:stream_has_first_response?%>
-    result.fields.get<<%field:index_plus_one%>>().ref() = e;
-    result.fields.setIsSet(<%field:index_plus_one%>, true);
-  <%/function:stream_has_first_response?%>
-  <%^function:stream_has_first_response?%>
-    result.fields.get<<%field:index%>>().ref() = e;
-    result.fields.setIsSet(<%field:index%>, true);
-  <%/function:stream_has_first_response?%>
-  <%/function:stream?%>
-  <%#function:sink?%>
-  <%#function:sink_has_first_response?%>
-    result.fields.get<<%field:index_plus_one%>>().ref() = e;
-    result.fields.setIsSet(<%field:index_plus_one%>, true);
-  <%/function:sink_has_first_response?%>
-  <%^function:sink_has_first_response?%>
-    result.fields.get<<%field:index%>>().ref() = e;
-    result.fields.setIsSet(<%field:index%>, true);
-  <%/function:sink_has_first_response?%>
-  <%/function:sink?%>
-<%/function:cpp_void?%>
+    ::apache::thrift::util::appendErrorClassificationToHeader<{{#field:type}}{{ > common/type_namespace_cpp2}}{{type:name}}{{/field:type}}>(ew, *reqCtx);
+{{#function:cpp_void?}}
+    result.get<{{field:index}}>().ref() = e;
+    result.setIsSet({{field:index}}, true);
+{{/function:cpp_void?}}
+{{^function:cpp_void?}}
+  {{^function:stream?}}{{^function:sink?}}
+    result.get<{{field:index_plus_one}}>().ref() = e;
+    result.setIsSet({{field:index_plus_one}}, true);
+  {{/function:sink?}}{{/function:stream?}}
+  {{#function:stream?}}
+  {{#function:stream_has_first_response?}}
+    result.fields.get<{{field:index_plus_one}}>().ref() = e;
+    result.fields.setIsSet({{field:index_plus_one}}, true);
+  {{/function:stream_has_first_response?}}
+  {{^function:stream_has_first_response?}}
+    result.fields.get<{{field:index}}>().ref() = e;
+    result.fields.setIsSet({{field:index}}, true);
+  {{/function:stream_has_first_response?}}
+  {{/function:stream?}}
+  {{#function:sink?}}
+  {{#function:sink_has_first_response?}}
+    result.fields.get<{{field:index_plus_one}}>().ref() = e;
+    result.fields.setIsSet({{field:index_plus_one}}, true);
+  {{/function:sink_has_first_response?}}
+  {{^function:sink_has_first_response?}}
+    result.fields.get<{{field:index}}>().ref() = e;
+    result.fields.setIsSet({{field:index}}, true);
+  {{/function:sink_has_first_response?}}
+  {{/function:sink?}}
+{{/function:cpp_void?}}
   }
   )) {} else
-<%/function:exceptions%>
+{{/function:exceptions}}
   {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "<% > common/function_name%>");
+        ew, std::move(req), reqCtx, ctx, "{{ > common/function_name}}");
     return;
   }
-<%#function:exceptions?%>
+{{#function:exceptions?}}
   ProtocolOut_ prot;
-  <%^function:stream?%><%^function:sink?%>
-  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result);
+  {{^function:stream?}}{{^function:sink?}}
+  auto response = serializeResponse("{{ > common/function_name}}", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "{{ > common/function_name}}");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   return req->sendReply(std::move(payload));
-  <%/function:sink?%><%/function:stream?%>
-  <%#function:stream?%>
-  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
+  {{/function:sink?}}{{/function:stream?}}
+  {{#function:stream?}}
+  auto response = serializeResponse("{{ > common/function_name}}", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "{{ > common/function_name}}");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
-  <%/function:stream?%>
-  <%#function:sink?%>
-  auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
+  {{/function:stream?}}
+  {{#function:sink?}}
+  auto response = serializeResponse("{{ > common/function_name}}", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
+      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "{{ > common/function_name}}");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
-  <%/function:sink?%>
-<%/function:exceptions?%>
+  {{/function:sink?}}
+{{/function:exceptions?}}
 }
 
-<%/function:oneway?%>
-<%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
+{{/function:oneway?}}
+{{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}

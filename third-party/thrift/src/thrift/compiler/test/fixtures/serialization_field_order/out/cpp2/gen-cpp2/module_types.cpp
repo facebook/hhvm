@@ -47,7 +47,7 @@ std::string_view Foo::__fbthrift_get_class_name() {
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::int32_t field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
-    __fbthrift_field_field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -133,7 +133,7 @@ std::string_view Foo2::__fbthrift_get_class_name() {
 Foo2::Foo2(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::int32_t field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
-    __fbthrift_field_field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

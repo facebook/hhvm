@@ -48,12 +48,8 @@ StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
   module_Color.name() = "module.Color";
   module_Color.is_union() = false;
   static const auto* const
-  module_Color_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "red", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "green", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "blue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "alpha", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Color_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "red", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "green", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "blue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "alpha", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Color_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -75,13 +71,8 @@ StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
   module_Vehicle.name() = "module.Vehicle";
   module_Vehicle.is_union() = false;
   static const auto* const
-  module_Vehicle_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "color", false, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{}},
-    {2, "licensePlate", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "description", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "name", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {5, "hasAC", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Vehicle_fields = new std::array<EncodedThriftField, 5>{ {
+    { 1, "color", false, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{ }},    { 2, "licensePlate", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "description", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "name", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "hasAC", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Vehicle_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -103,18 +94,8 @@ StructMetadata<::cpp2::Person>::gen(ThriftMetadata& metadata) {
   module_Person.name() = "module.Person";
   module_Person.is_union() = false;
   static const auto* const
-  module_Person_fields = new std::array<EncodedThriftField, 10>{{
-    {1, "id", false, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "age", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "address", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {5, "favoriteColor", true, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{}},
-    {6, "friends", true, std::make_unique<Set>(std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
-    {7, "bestFriend", true, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {8, "petNames", true, std::make_unique<Map>(std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
-    {9, "afraidOfAnimal", true, std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::vector<ThriftConstStruct>{}},
-    {10, "vehicles", true, std::make_unique<List>(std::make_unique<Struct<::cpp2::Vehicle>>("module.Vehicle")), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Person_fields = new std::array<EncodedThriftField, 10>{ {
+    { 1, "id", false, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "age", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "address", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "favoriteColor", true, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{ }},    { 6, "friends", true, std::make_unique<Set>(std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  })), std::vector<ThriftConstStruct>{ }},    { 7, "bestFriend", true, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 8, "petNames", true, std::make_unique<Map>(std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 9, "afraidOfAnimal", true, std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::vector<ThriftConstStruct>{ }},    { 10, "vehicles", true, std::make_unique<List>(std::make_unique<Struct<::cpp2::Vehicle>>("module.Vehicle")), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Person_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

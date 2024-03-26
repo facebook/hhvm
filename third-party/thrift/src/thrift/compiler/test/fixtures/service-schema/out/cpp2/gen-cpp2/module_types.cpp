@@ -80,7 +80,7 @@ CustomException& CustomException::operator=([[maybe_unused]] CustomException&& o
 
 
 CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

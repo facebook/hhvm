@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,9 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^function:sync_returns_by_outparam?%><%!
-%><% > types/return_type_server%><%!
-%><%/function:sync_returns_by_outparam?%><%!
-%><%#function:sync_returns_by_outparam?%><%!
-%>void<%!
-%><%/function:sync_returns_by_outparam?%>
+}}{{^function:sync_returns_by_outparam?}}{{!
+}}{{ > types/return_type_server}}{{!
+}}{{/function:sync_returns_by_outparam?}}{{!
+}}{{#function:sync_returns_by_outparam?}}{{!
+}}void{{!
+}}{{/function:sync_returns_by_outparam?}}

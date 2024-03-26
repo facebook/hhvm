@@ -34,95 +34,95 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyData>::name = "MyData";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyData>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyData>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyData>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyData>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::name = "MyDataWithCustomDefault";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefault>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::InnerUnion>::name = "InnerUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_names = { {
   "innerOption"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::storage_names = { {
   "innerOption"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::InnerUnion>::isset_indexes = { {
   0,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_names = { {
   "option1"sv,
   "option2"sv,
   "option3"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::storage_names = { {
   "option1"sv,
   "option2"sv,
   "option3"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::MyUnion>::isset_indexes = { {
   0,
   1,
   2,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_names = { {
   "boolVal"sv,
   "byteVal"sv,
   "i16Val"sv,
@@ -157,7 +157,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "structWithCustomDefault"sv,
   "structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_ids = { {
   -1,
   -2,
   -3,
@@ -192,7 +192,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixt
   -32,
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -227,7 +227,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::te
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::storage_names = { {
   "__fbthrift_field_boolVal"sv,
   "__fbthrift_field_byteVal"sv,
   "__fbthrift_field_i16Val"sv,
@@ -262,7 +262,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "__fbthrift_field_structWithCustomDefault"sv,
   "__fbthrift_field_structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -299,70 +299,70 @@ THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LateDefStruct>::name = "LateDefStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStruct>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::Recursive>::name = "Recursive";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_names = { {
   "nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::fields_types = { {
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::storage_names = { {
   "__fbthrift_field_nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Recursive>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::Bar>::name = "Bar";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_names = { {
   "loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Bar>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Bar>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Bar>::storage_names = { {
   "__fbthrift_field_loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Bar>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Bar>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::Loop>::name = "Loop";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_names = { {
   "bar"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::Loop>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Loop>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::Loop>::storage_names = { {
   "__fbthrift_field_bar"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Loop>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::Loop>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFields>::name = "RefFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_names = { {
   "unique"sv,
   "shared_const"sv,
   "shared_mustable"sv,
@@ -371,7 +371,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "opt_shared_mustable"sv,
   "opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_ids = { {
   1,
   2,
   3,
@@ -380,7 +380,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -389,7 +389,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::storage_names = { {
   "__fbthrift_field_unique"sv,
   "__fbthrift_field_shared_const"sv,
   "__fbthrift_field_shared_mustable"sv,
@@ -398,7 +398,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "__fbthrift_field_opt_shared_mustable"sv,
   "__fbthrift_field_opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::RefFields>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -409,7 +409,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::name = "MyDataPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -417,7 +417,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -425,7 +425,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -433,7 +433,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -441,7 +441,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -451,73 +451,73 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::name = "MyDataFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::name = "MyDataEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataEnsureStruct>::isset_indexes = { {
   0,
   1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::name = "MyDataSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::name = "MyDataWithCustomDefaultPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -525,7 +525,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -533,7 +533,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -541,7 +541,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -549,7 +549,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -559,101 +559,101 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::name = "MyDataWithCustomDefaultFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::name = "MyDataWithCustomDefaultEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_names = { {
   "data1"sv,
   "data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::storage_names = { {
   "__fbthrift_field_data1"sv,
   "__fbthrift_field_data2"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::isset_indexes = { {
   0,
   1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::name = "MyDataWithCustomDefaultSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::name = "InnerUnionPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
   "ensure"sv,
   "patch"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_ids = { {
   1,
   2,
   3,
   4,
   6,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
   "__fbthrift_field_ensure"sv,
   "__fbthrift_field_patch"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -662,74 +662,74 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::name = "InnerUnionFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_names = { {
   "innerOption"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_innerOption"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::name = "InnerUnionSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::InnerUnionSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::name = "MyUnionPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
   "ensure"sv,
   "patch"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_ids = { {
   1,
   2,
   3,
   4,
   6,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
   "__fbthrift_field_ensure"sv,
   "__fbthrift_field_patch"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -738,56 +738,56 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::name = "MyUnionFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_names = { {
   "option1"sv,
   "option2"sv,
   "option3"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_option1"sv,
   "__fbthrift_field_option2"sv,
   "__fbthrift_field_option3"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::name = "MyUnionSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyUnionSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::name = "MyStructPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -795,7 +795,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -803,7 +803,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -811,7 +811,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -819,7 +819,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -829,75 +829,75 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::name = "MyStructField10Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::fields_types = { {
   TType::T_I32,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructField10PatchStruct>::isset_indexes = { {
   0,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::name = "MyStructField23Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::fields_types = { {
   TType::T_I32,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct>::isset_indexes = { {
   0,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::name = "MyStructField26Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "prepend"sv,
   "append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_ids = { {
   1,
   2,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_prepend"sv,
   "__fbthrift_field_append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -905,31 +905,31 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::name = "MyStructField27Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "remove"sv,
   "add"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_ids = { {
   1,
   2,
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::fields_types = { {
   TType::T_SET,
   TType::T_BOOL,
   TType::T_SET,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_remove"sv,
   "__fbthrift_field_add"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -937,7 +937,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::name = "MyStructField28Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -946,7 +946,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "remove"sv,
   "put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -955,7 +955,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   7,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::fields_types = { {
   TType::T_MAP,
   TType::T_BOOL,
   TType::T_MAP,
@@ -964,7 +964,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -973,7 +973,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "__fbthrift_field_remove"sv,
   "__fbthrift_field_put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -984,31 +984,31 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::name = "MyStructField29Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "prepend"sv,
   "append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_ids = { {
   1,
   2,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_prepend"sv,
   "__fbthrift_field_append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1016,7 +1016,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::name = "MyStructField30Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1025,7 +1025,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "remove"sv,
   "put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -1034,7 +1034,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   7,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::fields_types = { {
   TType::T_MAP,
   TType::T_BOOL,
   TType::T_MAP,
@@ -1043,7 +1043,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1052,7 +1052,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "__fbthrift_field_remove"sv,
   "__fbthrift_field_put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1063,7 +1063,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::name = "MyStructField30Patch1";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1072,7 +1072,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "remove"sv,
   "put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_ids = { {
   1,
   2,
   3,
@@ -1081,7 +1081,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   7,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::fields_types = { {
   TType::T_MAP,
   TType::T_BOOL,
   TType::T_MAP,
@@ -1090,7 +1090,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1099,7 +1099,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "__fbthrift_field_remove"sv,
   "__fbthrift_field_put"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::MyStructField30Patch1Struct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1110,7 +1110,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::name = "MyStructFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_names = { {
   "structWithCustomDefault"sv,
   "i32WithCustomDefault"sv,
   "mapMap"sv,
@@ -1145,7 +1145,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "boolVal"sv,
   "structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_ids = { {
   -32,
   -31,
   -30,
@@ -1180,7 +1180,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixt
   -1,
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
@@ -1215,7 +1215,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::te
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_structWithCustomDefault"sv,
   "__fbthrift_field_i32WithCustomDefault"sv,
   "__fbthrift_field_mapMap"sv,
@@ -1250,7 +1250,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "__fbthrift_field_boolVal"sv,
   "__fbthrift_field_structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -1287,7 +1287,7 @@ THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::name = "MyStructEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_names = { {
   "structWithCustomDefault"sv,
   "i32WithCustomDefault"sv,
   "mapMap"sv,
@@ -1322,7 +1322,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "boolVal"sv,
   "structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_ids = { {
   -32,
   -31,
   -30,
@@ -1357,7 +1357,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 33> TStructDataStorage<::test::fixt
   -1,
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_I32,
   TType::T_MAP,
@@ -1392,7 +1392,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 33> TStructDataStorage<::te
   TType::T_BOOL,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::storage_names = { {
   "__fbthrift_field_structWithCustomDefault"sv,
   "__fbthrift_field_i32WithCustomDefault"sv,
   "__fbthrift_field_mapMap"sv,
@@ -1427,7 +1427,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 33> TStructDataStorage<::t
   "__fbthrift_field_boolVal"sv,
   "__fbthrift_field_structWithFieldCustomDefault"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures::patch::MyStructEnsureStruct>::isset_indexes = { {
   -1,
   0,
   1,
@@ -1464,29 +1464,29 @@ THRIFT_DATA_MEMBER const std::array<int, 33> TStructDataStorage<::test::fixtures
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::name = "MyStructSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::MyStructSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::name = "LateDefStructPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1494,7 +1494,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -1502,7 +1502,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -1510,7 +1510,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1518,7 +1518,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -1528,53 +1528,53 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::name = "LateDefStructFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructFieldPatchStruct>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::name = "LateDefStructEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::patch::LateDefStructEnsureStruct>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::name = "LateDefStructSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LateDefStructSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::name = "RecursivePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1582,7 +1582,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -1590,7 +1590,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -1598,7 +1598,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1606,7 +1606,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -1616,85 +1616,85 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::name = "RecursiveField1Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::fields_types = { {
   TType::T_MAP,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RecursiveField1PatchStruct>::isset_indexes = { {
   0,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::name = "RecursiveFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_names = { {
   "nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::RecursiveFieldPatchStruct>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::name = "RecursiveEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_names = { {
   "nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::fields_types = { {
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::storage_names = { {
   "__fbthrift_field_nodes"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::RecursiveEnsureStruct>::isset_indexes = { {
   0,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::name = "RecursiveSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RecursiveSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::name = "BarPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1702,7 +1702,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -1710,7 +1710,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -1718,7 +1718,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1726,7 +1726,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -1736,107 +1736,107 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::name = "BarFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_names = { {
   "loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::BarFieldPatchStruct>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::name = "BarEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_names = { {
   "loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_ids = { {
   -1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::storage_names = { {
   "__fbthrift_field_loop"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::patch::BarEnsureStruct>::isset_indexes = { {
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::BarSafePatch>::name = "BarSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::BarSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::name = "LoopPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LoopPatchStruct>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::name = "LoopSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::LoopSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::name = "RefFieldsPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "patchPrior"sv,
@@ -1844,7 +1844,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "patch"sv,
   "remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -1852,7 +1852,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_STRUCT,
@@ -1860,7 +1860,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_patchPrior"sv,
@@ -1868,7 +1868,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::te
   "__fbthrift_field_patch"sv,
   "__fbthrift_field_remove"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -1878,31 +1878,31 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::name = "RefFieldsField1Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "prepend"sv,
   "append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_ids = { {
   1,
   2,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_prepend"sv,
   "__fbthrift_field_append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1910,31 +1910,31 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::name = "RefFieldsField4Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "prepend"sv,
   "append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_ids = { {
   1,
   2,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_prepend"sv,
   "__fbthrift_field_append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1942,31 +1942,31 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::name = "RefFieldsField7Patch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_names = { {
   "assign"sv,
   "clear"sv,
   "prepend"sv,
   "append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_ids = { {
   1,
   2,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::storage_names = { {
   "__fbthrift_field_assign"sv,
   "__fbthrift_field_clear"sv,
   "__fbthrift_field_prepend"sv,
   "__fbthrift_field_append"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -1974,34 +1974,34 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::name = "RefFieldsFieldPatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_names = { {
   "unique"sv,
   "opt_unique"sv,
   "opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_ids = { {
   1,
   4,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::storage_names = { {
   "__fbthrift_field_unique"sv,
   "__fbthrift_field_opt_unique"sv,
   "__fbthrift_field_opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::name = "RefFieldsEnsureStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_names = { {
   "unique"sv,
   "shared_const"sv,
   "shared_mustable"sv,
@@ -2010,7 +2010,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "opt_shared_mustable"sv,
   "opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -2019,7 +2019,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -2028,7 +2028,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::storage_names = { {
   "__fbthrift_field_unique"sv,
   "__fbthrift_field_shared_const"sv,
   "__fbthrift_field_shared_mustable"sv,
@@ -2037,7 +2037,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "__fbthrift_field_opt_shared_mustable"sv,
   "__fbthrift_field_opt_box"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -2048,23 +2048,23 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::name = "RefFieldsSafePatch";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_names = { {
   "version"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::storage_names = { {
   "__fbthrift_field_version"sv,
   "__fbthrift_field_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::patch::RefFieldsSafePatch>::isset_indexes = { {
   -1,
   -1,
 }};

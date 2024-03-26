@@ -100,7 +100,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::string myString__arg) :
-    __fbthrift_field_myString(std::move(myString__arg)) {
+    __fbthrift_field_myString(std::move(myString__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -331,7 +331,7 @@ MyException& MyException::operator=([[maybe_unused]] MyException&& other) noexce
 
 
 MyException::MyException(apache::thrift::FragileConstructor, ::std::string myString__arg) :
-    __fbthrift_field_myString(std::move(myString__arg)) {
+    __fbthrift_field_myString(std::move(myString__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

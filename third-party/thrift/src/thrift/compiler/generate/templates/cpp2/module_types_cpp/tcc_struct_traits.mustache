@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,17 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
+}}
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<<%struct:cpp_fullname%>>::translateFieldName(
+void TccStructTraits<{{struct:cpp_fullname}}>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<<%struct:cpp_fullname%>>;
+  using data = apache::thrift::TStructDataStorage<{{struct:cpp_fullname}}>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -36,5 +36,5 @@ void TccStructTraits<<%struct:cpp_fullname%>>::translateFieldName(
 } // namespace detail
 } // namespace thrift
 } // namespace apache
-<%!
-%>
+{{!
+}}

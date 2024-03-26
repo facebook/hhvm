@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,8 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<% > Autogen%>
+}}
+{{ > Autogen}}
 #pragma once
 
 /**
@@ -25,11 +25,11 @@
  * VirtualProtocol) to read/write thrift structs.
  */
 
-#include "<%service:include_prefix%><%service:name%>.tcc"
-#include "<%service:include_prefix%><%service:program_name%>_types_custom_protocol.h"
-<%#service:extends%>
-#include "<%service:include_prefix%><%service:name%>_custom_protocol.h"
-<%/service:extends%>
-<%#service:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_types_custom_protocol.h"
-<%/service:thrift_includes%>
+#include "{{service:include_prefix}}{{service:name}}.tcc"
+#include "{{service:include_prefix}}{{service:program_name}}_types_custom_protocol.h"
+{{#service:extends}}
+#include "{{service:include_prefix}}{{service:name}}_custom_protocol.h"
+{{/service:extends}}
+{{#service:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
+{{/service:thrift_includes}}

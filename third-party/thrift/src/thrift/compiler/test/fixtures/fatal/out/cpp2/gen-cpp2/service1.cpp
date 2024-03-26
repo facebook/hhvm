@@ -689,25 +689,25 @@ determineInvocationType:
 
 namespace test_cpp2::cpp_reflection {
 
-void service1SvNull::method1() {
+void service1SvNull::method1() { 
   return;
 }
 
-void service1SvNull::method2(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) {
+void service1SvNull::method2(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) { 
   return;
 }
 
-::std::int32_t service1SvNull::method3() {
+::std::int32_t service1SvNull::method3() { 
   return 0;
 }
 
-::std::int32_t service1SvNull::method4(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) {
+::std::int32_t service1SvNull::method4(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) { 
   return 0;
 }
 
-void service1SvNull::method5(::test_cpp2::cpp_reflection::struct2& /*_return*/) {}
+void service1SvNull::method5(::test_cpp2::cpp_reflection::struct2& /*_return*/) {  }
 
-void service1SvNull::method6(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {}
+void service1SvNull::method6(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {  }
 
 
 const char* service1AsyncProcessor::getServiceName() {
@@ -771,42 +771,42 @@ apache::thrift::ServiceRequestInfoMap const& service1ServiceInfoHolder::requestI
 apache::thrift::ServiceRequestInfoMap service1ServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"method1",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method1",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method2",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method2",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method3",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method3",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method4",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method4",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method5",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method5",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"method6",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "service1.method6",
      std::nullopt,

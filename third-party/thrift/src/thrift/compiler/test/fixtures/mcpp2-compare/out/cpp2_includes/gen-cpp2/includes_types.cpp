@@ -61,7 +61,7 @@ std::string_view AStruct::__fbthrift_get_class_name() {
 
 
 AStruct::AStruct(apache::thrift::FragileConstructor, ::std::int32_t FieldA__arg) :
-    __fbthrift_field_FieldA(std::move(FieldA__arg)) {
+    __fbthrift_field_FieldA(std::move(FieldA__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -161,7 +161,7 @@ AStructB& AStructB::operator=([[maybe_unused]] AStructB&& other) noexcept {
 
 
 AStructB::AStructB(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::a::different::ns::AStruct> FieldA__arg) :
-    __fbthrift_field_FieldA(std::move(FieldA__arg)) {
+    __fbthrift_field_FieldA(std::move(FieldA__arg)) { 
 }
 
 

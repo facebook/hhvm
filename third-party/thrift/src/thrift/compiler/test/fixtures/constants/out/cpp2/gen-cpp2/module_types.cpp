@@ -127,7 +127,7 @@ Internship::Internship(apache::thrift::FragileConstructor, ::std::int32_t weeks_
     __fbthrift_field_title(std::move(title__arg)),
     __fbthrift_field_employer(std::move(employer__arg)),
     __fbthrift_field_compensation(std::move(compensation__arg)),
-    __fbthrift_field_school(std::move(school__arg)) {
+    __fbthrift_field_school(std::move(school__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -217,7 +217,7 @@ std::string_view Range::__fbthrift_get_class_name() {
 
 Range::Range(apache::thrift::FragileConstructor, ::std::int32_t min__arg, ::std::int32_t max__arg) :
     __fbthrift_field_min(std::move(min__arg)),
-    __fbthrift_field_max(std::move(max__arg)) {
+    __fbthrift_field_max(std::move(max__arg)) { 
 }
 
 
@@ -318,7 +318,7 @@ struct1& struct1::operator=([[maybe_unused]] struct1&& other) noexcept {
 
 struct1::struct1(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::std::string b__arg) :
     __fbthrift_field_a(std::move(a__arg)),
-    __fbthrift_field_b(std::move(b__arg)) {
+    __fbthrift_field_b(std::move(b__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -428,7 +428,7 @@ struct2::struct2(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::st
     __fbthrift_field_a(std::move(a__arg)),
     __fbthrift_field_b(std::move(b__arg)),
     __fbthrift_field_c(std::move(c__arg)),
-    __fbthrift_field_d(std::move(d__arg)) {
+    __fbthrift_field_d(std::move(d__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -563,7 +563,7 @@ struct3& struct3::operator=([[maybe_unused]] struct3&& other) noexcept {
 struct3::struct3(apache::thrift::FragileConstructor, ::std::string a__arg, ::std::int32_t b__arg, ::cpp2::struct2 c__arg) :
     __fbthrift_field_a(std::move(a__arg)),
     __fbthrift_field_b(std::move(b__arg)),
-    __fbthrift_field_c(std::move(c__arg)) {
+    __fbthrift_field_c(std::move(c__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -680,7 +680,7 @@ struct4& struct4::operator=([[maybe_unused]] struct4&& other) noexcept {
 struct4::struct4(apache::thrift::FragileConstructor, ::std::int32_t a__arg, double b__arg, ::std::int8_t c__arg) :
     __fbthrift_field_a(std::move(a__arg)),
     __fbthrift_field_b(std::move(b__arg)),
-    __fbthrift_field_c(std::move(c__arg)) {
+    __fbthrift_field_c(std::move(c__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

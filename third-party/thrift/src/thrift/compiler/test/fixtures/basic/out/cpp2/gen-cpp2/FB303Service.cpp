@@ -141,7 +141,7 @@ determineInvocationType:
 
 namespace test::fixtures::basic {
 
-void FB303ServiceSvNull::simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {}
+void FB303ServiceSvNull::simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {  }
 
 
 const char* FB303ServiceAsyncProcessor::getServiceName() {
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& FB303ServiceServiceInfoHolder::requ
 apache::thrift::ServiceRequestInfoMap FB303ServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"simple_rpc",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FB303Service.simple_rpc",
      std::nullopt,

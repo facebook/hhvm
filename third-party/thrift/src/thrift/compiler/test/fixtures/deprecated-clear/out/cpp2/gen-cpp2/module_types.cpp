@@ -72,9 +72,9 @@ StructWithDefaultStruct::StructWithDefaultStruct() :
       __fbthrift_field_string_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
       __fbthrift_field_binary_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
       __fbthrift_field_enum_field( ::apache::thrift::test::MyEnum::ME1),
-      __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
-      __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
-      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{{static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1)}}) {
+      __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+      __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{ { static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1) } }) {
 }
 
 
@@ -129,7 +129,7 @@ StructWithDefaultStruct::StructWithDefaultStruct(apache::thrift::FragileConstruc
     __fbthrift_field_enum_field(std::move(enum_field__arg)),
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
-    __fbthrift_field_map_field(std::move(map_field__arg)) {
+    __fbthrift_field_map_field(std::move(map_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

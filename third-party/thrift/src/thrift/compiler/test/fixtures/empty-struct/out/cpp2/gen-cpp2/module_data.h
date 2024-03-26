@@ -15,9 +15,9 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::Nada::Type> {
   using type = ::cpp2::Nada::Type;
   static constexpr const std::size_t size = 0;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
   }};
 };
 

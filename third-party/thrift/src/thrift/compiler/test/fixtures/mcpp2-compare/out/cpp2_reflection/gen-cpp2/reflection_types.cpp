@@ -45,7 +45,7 @@ std::string_view ReflectionStruct::__fbthrift_get_class_name() {
 
 
 ReflectionStruct::ReflectionStruct(apache::thrift::FragileConstructor, ::std::int32_t fieldA__arg) :
-    __fbthrift_field_fieldA(std::move(fieldA__arg)) {
+    __fbthrift_field_fieldA(std::move(fieldA__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

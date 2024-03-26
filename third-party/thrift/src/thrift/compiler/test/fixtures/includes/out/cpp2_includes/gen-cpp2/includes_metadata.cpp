@@ -36,10 +36,8 @@ StructMetadata<::cpp2::Included>::gen(ThriftMetadata& metadata) {
   includes_Included.name() = "includes.Included";
   includes_Included.is_union() = false;
   static const auto* const
-  includes_Included_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "MyTransitiveField", false, std::make_unique<Struct<::cpp2::Foo>>("transitive.Foo"), std::vector<ThriftConstStruct>{}},
-  }};
+  includes_Included_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyTransitiveField", false, std::make_unique<Struct<::cpp2::Foo>>("transitive.Foo"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *includes_Included_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

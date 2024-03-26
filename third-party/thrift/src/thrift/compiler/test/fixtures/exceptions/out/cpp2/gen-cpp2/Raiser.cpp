@@ -473,17 +473,17 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void RaiserSvNull::doBland() {
+void RaiserSvNull::doBland() { 
   return;
 }
 
-void RaiserSvNull::doRaise() {
+void RaiserSvNull::doRaise() { 
   return;
 }
 
-void RaiserSvNull::get200(::std::string& /*_return*/) {}
+void RaiserSvNull::get200(::std::string& /*_return*/) {  }
 
-void RaiserSvNull::get500(::std::string& /*_return*/) {}
+void RaiserSvNull::get500(::std::string& /*_return*/) {  }
 
 
 const char* RaiserAsyncProcessor::getServiceName() {
@@ -537,28 +537,28 @@ apache::thrift::ServiceRequestInfoMap const& RaiserServiceInfoHolder::requestInf
 apache::thrift::ServiceRequestInfoMap RaiserServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"doBland",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Raiser.doBland",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"doRaise",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Raiser.doRaise",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get200",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Raiser.get200",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get500",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Raiser.get500",
      std::nullopt,

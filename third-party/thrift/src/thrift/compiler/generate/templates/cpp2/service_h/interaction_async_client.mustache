@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,16 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>class <%service:cpp_name%> final : public apache::thrift::InteractionHandle {
+}}class {{service:cpp_name}} final : public apache::thrift::InteractionHandle {
   using apache::thrift::InteractionHandle::InteractionHandle;
-  friend class ::apache::thrift::Client<<%service:parent_service_qualified_name%>>;
+  friend class ::apache::thrift::Client<{{service:parent_service_qualified_name}}>;
  public:
 
 
   char const* getServiceName() const noexcept override {
-    return "<%service:parent_service_name%>";
+    return "{{service:parent_service_name}}";
   }
 
 
-<% > service_h/async_client_functions%>
+{{ > service_h/async_client_functions}}
 };

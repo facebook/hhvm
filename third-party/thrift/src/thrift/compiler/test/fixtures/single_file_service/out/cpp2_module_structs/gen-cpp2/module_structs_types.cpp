@@ -45,7 +45,7 @@ std::string_view Foo::__fbthrift_get_class_name() {
 
 
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int32_t value__arg) :
-    __fbthrift_field_value(std::move(value__arg)) {
+    __fbthrift_field_value(std::move(value__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

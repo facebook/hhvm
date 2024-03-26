@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,9 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^program:tablebased?%>
+}}{{^program:tablebased?}}
 template <class Protocol_>
-void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
+void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
   _readState.fieldId = 0;
 
@@ -27,22 +27,22 @@ void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
     apache::thrift::clear(*this);
   } else {
     if (iprot->kUsesFieldNames()) {
-      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<<%struct:cpp_underlying_name%>>>();
+      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<{{struct:cpp_underlying_name}}>>();
     }
     switch (_readState.fieldId) {
-  <%#struct:fields%><%#field:type%>
-      case <%field:key%>:
+  {{#struct:fields}}{{#field:type}}
+      case {{field:key}}:
       {
-        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::<% > module_types_tcc/struct_type%>)) {
-          this-><%field:cpp_name%>_ref().emplace();
-          <% > module_types_tcc/deserialize_field %>
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{ > module_types_tcc/struct_type}})) {
+          this->{{field:cpp_name}}_ref().emplace();
+          {{ > module_types_tcc/deserialize_field }}
 
         } else {
           _readState.skip(iprot);
         }
         break;
       }
-  <%/field:type%><%/struct:fields%>
+  {{/field:type}}{{/struct:fields}}
       default:
       {
         _readState.skip(iprot);
@@ -57,16 +57,16 @@ void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
     }
   }
   _readState.readStructEnd(iprot);
-}<%!
-%><%/program:tablebased?%><%!
-%><%#program:tablebased?%>
+}{{!
+}}{{/program:tablebased?}}{{!
+}}{{#program:tablebased?}}
 template <class Protocol_>
-void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
+void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   ::apache::thrift::detail::read(
     iprot,
     ::apache::thrift::detail::toStructInfo(
-      <% > common/namespace_cpp2%>__fbthrift_struct_info_<%struct:cpp_underlying_name%>
+      {{ > common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
     ),
     this);
-}<%!
-%><%/program:tablebased?%>
+}{{!
+}}{{/program:tablebased?}}

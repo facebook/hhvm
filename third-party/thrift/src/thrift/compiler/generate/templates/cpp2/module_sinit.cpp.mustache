@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,33 +14,33 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 
-<% > common/namespace_cpp2_begin%>
+{{ > common/namespace_cpp2_begin}}
 
-<%#program:any?%>
+{{#program:any?}}
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
 // static linking to include the intialization logic.
-<%#program:structs%>
-<%#struct:any?%>
-void __fbthrift_static_init_<%struct:cpp_underlying_name%>();
-<%/struct:any?%>
-<%/program:structs%>
+{{#program:structs}}
+{{#struct:any?}}
+void __fbthrift_static_init_{{struct:cpp_underlying_name}}();
+{{/struct:any?}}
+{{/program:structs}}
 namespace {
 struct StaticInit {
   StaticInit() {
-    <%#program:structs%>
-    <%#struct:any?%>
-    __fbthrift_static_init_<%struct:cpp_underlying_name%>();
-    <%/struct:any?%>
-    <%/program:structs%>
+    {{#program:structs}}
+    {{#struct:any?}}
+    __fbthrift_static_init_{{struct:cpp_underlying_name}}();
+    {{/struct:any?}}
+    {{/program:structs}}
   }
 };
 
 StaticInit staticInit;
 }
-<%/program:any?%>
+{{/program:any?}}
 
-<% > common/namespace_cpp2_end%>
+{{ > common/namespace_cpp2_end}}

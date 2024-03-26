@@ -94,7 +94,7 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::test::fixtures::enumstrict::MyEnum myEnum__arg, ::test::fixtures::enumstrict::MyBigEnum myBigEnum__arg) :
     __fbthrift_field_myEnum(std::move(myEnum__arg)),
-    __fbthrift_field_myBigEnum(std::move(myBigEnum__arg)) {
+    __fbthrift_field_myBigEnum(std::move(myBigEnum__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

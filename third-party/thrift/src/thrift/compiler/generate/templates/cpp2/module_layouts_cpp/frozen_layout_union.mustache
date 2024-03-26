@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,19 +14,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-  FieldPosition Layout<<%struct:cpp_fullname%>>::layout(
+}}
+  FieldPosition Layout<{{struct:cpp_fullname}}>::layout(
       LayoutRoot& root, const T& x, LayoutPosition self) {
     auto type = x.getType();
     FieldPosition pos = startFieldPosition();
     pos = root.layoutField(self, pos, this->type_Field, type);
     switch (type) {
-<%#struct:fields%>
-      case <%struct:cpp_fullname%>::Type::<%field:cpp_name%>: {
-        pos = root.layoutField(self, pos, this-><%field:cpp_name%>Field, x.get_<%field:cpp_name%>());
+{{#struct:fields}}
+      case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {
+        pos = root.layoutField(self, pos, this->{{field:cpp_name}}Field, x.get_{{field:cpp_name}}());
         break;
       }
-<%/struct:fields%>
+{{/struct:fields}}
       default: {
         assert(false);
         break;

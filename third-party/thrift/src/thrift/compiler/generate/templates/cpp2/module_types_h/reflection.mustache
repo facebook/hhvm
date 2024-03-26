@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,17 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-  using __fbthrift_reflection_ident_list = folly::tag_t<<%#struct:fields%>
-    ::apache::thrift::ident::<%field:cpp_name%><%^last?%>,<%/last?%><%/struct:fields%>
+}}
+  using __fbthrift_reflection_ident_list = folly::tag_t<{{#struct:fields}}
+    ::apache::thrift::ident::{{field:cpp_name}}{{^last?}},{{/last?}}{{/struct:fields}}
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0<%#struct:fields%>,<%field:key%><%/struct:fields%>};
-  using __fbthrift_reflection_type_tags = folly::tag_t<<%#struct:fields%>
-    <%field:type_tag%><%^last?%>,<%/last?%><%/struct:fields%>
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0{{#struct:fields}},{{field:key}}{{/struct:fields}}};
+  using __fbthrift_reflection_type_tags = folly::tag_t<{{#struct:fields}}
+    {{field:type_tag}}{{^last?}},{{/last?}}{{/struct:fields}}
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = <%struct:fields_size%>;
+  static constexpr std::size_t __fbthrift_field_size_v = {{struct:fields_size}};
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;

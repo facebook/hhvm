@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,8 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#field:cpp_field_interceptor%>
-    <%field:cpp_field_interceptor%>::interceptThriftFieldAccess(<%!
-  %>this-><% > common/field_value%>, <%!
-  %>::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, <%field:key%>>{*this});
-<%/field:cpp_field_interceptor%>
+}}{{#field:cpp_field_interceptor}}
+    {{field:cpp_field_interceptor}}::interceptThriftFieldAccess({{!
+  }}this->{{ > common/field_value}}, {{!
+  }}::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, {{field:key}}>{*this});
+{{/field:cpp_field_interceptor}}

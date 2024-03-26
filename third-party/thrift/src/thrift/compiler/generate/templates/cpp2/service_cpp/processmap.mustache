@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,62 +14,62 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>const <%service:cpp_name%>AsyncProcessor::ProcessMap& <%service:cpp_name%>AsyncProcessor::getOwnProcessMap() {
+}}const {{service:cpp_name}}AsyncProcessor::ProcessMap& {{service:cpp_name}}AsyncProcessor::getOwnProcessMap() {
   return kOwnProcessMap_;
 }
 
-<%^service:functions?%>
-const <%service:cpp_name%>AsyncProcessor::ProcessMap <%service:cpp_name%>AsyncProcessor::kOwnProcessMap_ {};
-<%/service:functions?%>
-<%#service:functions?%>
-const <%service:cpp_name%>AsyncProcessor::ProcessMap <%service:cpp_name%>AsyncProcessor::kOwnProcessMap_ {
-<%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
-  {"<%function:name%>",
-    {&<%service:cpp_name%>AsyncProcessor::setUpAndProcess_<%function:cpp_name%><apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &<%service:cpp_name%>AsyncProcessor::setUpAndProcess_<%function:cpp_name%><apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &<%service:cpp_name%>AsyncProcessor::executeRequest_<%function:cpp_name%><apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &<%service:cpp_name%>AsyncProcessor::executeRequest_<%function:cpp_name%><apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
-<%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
-<%#service:interactions%><%#service:functions%><%#function:return_type%>
-  {"<%service:name%>.<%function:name%>",
-    {&<%service:parent_service_cpp_name%>AsyncProcessor::setUpAndProcess_<%service:cpp_name%>_<%function:cpp_name%><apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &<%service:parent_service_cpp_name%>AsyncProcessor::setUpAndProcess_<%service:cpp_name%>_<%function:cpp_name%><apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &<%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%service:cpp_name%>_<%function:cpp_name%><apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &<%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%service:cpp_name%>_<%function:cpp_name%><apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
-<%/function:return_type%><%/service:functions%><%/service:interactions%>
+{{^service:functions?}}
+const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncProcessor::kOwnProcessMap_ {};
+{{/service:functions?}}
+{{#service:functions?}}
+const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncProcessor::kOwnProcessMap_ {
+{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+  {"{{function:name}}",
+    {&{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+{{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
+{{#service:interactions}}{{#service:functions}}{{#function:return_type}}
+  {"{{service:name}}.{{function:name}}",
+    {&{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{service:cpp_name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+{{/function:return_type}}{{/service:functions}}{{/service:interactions}}
 };
-<%/service:functions?%>
+{{/service:functions?}}
 
-apache::thrift::ServiceRequestInfoMap const& <%service:cpp_name%>ServiceInfoHolder::requestInfoMap() const {
+apache::thrift::ServiceRequestInfoMap const& {{service:cpp_name}}ServiceInfoHolder::requestInfoMap() const {
   static folly::Indestructible<apache::thrift::ServiceRequestInfoMap> requestInfoMap{staticRequestInfoMap()};
   return *requestInfoMap;
 }
 
-apache::thrift::ServiceRequestInfoMap <%service:cpp_name%>ServiceInfoHolder::staticRequestInfoMap() {
+apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
-    <%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
-  {"<%function:name%>",
-    {<%#function:eb%>true<%/function:eb%><%^function:eb%>false<%/function:eb%>,
-     <% > types/function_kind%>,
-     "<%service:parent_service_name%>.<% > common/function_name%>",
+    {{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+  {"{{function:name}}",
+    { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
+     {{ > types/function_kind}},
+     "{{service:parent_service_name}}.{{ > common/function_name}}",
      std::nullopt,
-     apache::thrift::concurrency::<%function:priority%>,
-     <%#function:creates_interaction?%>"<%function:created_interaction%>"<%/function:creates_interaction?%><%^function:creates_interaction?%>std::nullopt<%/function:creates_interaction?%>}},
-<%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
-<%#service:interactions%><%#service:functions%><%#function:return_type%>
-  {"<%service:name%>.<%function:name%>",
-    {<%#function:eb%>true<%/function:eb%><%^function:eb%>false<%/function:eb%>,
-     <% > types/function_kind%>,
-     "<%service:parent_service_name%>.<% > common/function_name%>",
-     "<%service:name%>",
-     apache::thrift::concurrency::<%function:priority%>,
+     apache::thrift::concurrency::{{function:priority}},
+     {{#function:creates_interaction?}}"{{function:created_interaction}}"{{/function:creates_interaction?}}{{^function:creates_interaction?}}std::nullopt{{/function:creates_interaction?}}}},
+{{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
+{{#service:interactions}}{{#service:functions}}{{#function:return_type}}
+  {"{{service:name}}.{{function:name}}",
+    { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
+     {{ > types/function_kind}},
+     "{{service:parent_service_name}}.{{ > common/function_name}}",
+     "{{service:name}}",
+     apache::thrift::concurrency::{{function:priority}},
      std::nullopt}},
-<%/function:return_type%><%/service:functions%><%/service:interactions%>
+{{/function:return_type}}{{/service:functions}}{{/service:interactions}}
   };
-<%#service:extends%>
-  apache::thrift::ServiceRequestInfoMap parentMap = <% > common/namespace_cpp2%><%service:cpp_name%>ServiceInfoHolder::staticRequestInfoMap();
+{{#service:extends}}
+  apache::thrift::ServiceRequestInfoMap parentMap = {{ > common/namespace_cpp2}}{{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));
-<%/service:extends%>
+{{/service:extends}}
 
   return requestInfoMap;
 }

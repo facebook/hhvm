@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,61 +14,61 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-std::unique_ptr<apache::thrift::AsyncProcessor> <% > service_common/service_class_name%>::getProcessor() {
-  return std::make_unique<<%service:qualified_name%>AsyncProcessor>(this);
+}}
+std::unique_ptr<apache::thrift::AsyncProcessor> {{ > service_common/service_class_name}}::getProcessor() {
+  return std::make_unique<{{service:qualified_name}}AsyncProcessor>(this);
 }
 
-<% > service_common/service_class_name%>::CreateMethodMetadataResult <% > service_common/service_class_name%>::createMethodMetadata() {
-  return ::apache::thrift::detail::ap::createMethodMetadataMap<<%service:qualified_name%>AsyncProcessor>(getServiceRequestInfoMap().value().get());
+{{ > service_common/service_class_name}}::CreateMethodMetadataResult {{ > service_common/service_class_name}}::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<{{service:qualified_name}}AsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
-<%#service:has_service_schema%>
+{{#service:has_service_schema}}
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<std::vector<apache::thrift::type::Schema>> <% > service_common/service_class_name%>::getServiceMetadataV1() {
-  return apache::thrift::detail::si::schemaAsOptionalVector(<%service:program_qualified_name%>_constants::<%service:service_schema_name%>());
+std::optional<std::vector<apache::thrift::type::Schema>> {{ > service_common/service_class_name}}::getServiceMetadataV1() {
+  return apache::thrift::detail::si::schemaAsOptionalVector({{service:program_qualified_name}}_constants::{{service:service_schema_name}}());
 }
 #endif
-<%/service:has_service_schema%>
+{{/service:has_service_schema}}
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> <% > service_common/service_class_name%>::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{ > service_common/service_class_name}}::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-<%^service:interaction?%>
-<%service:qualified_name%>ServiceInfoHolder <% > service_common/service_class_name%>::__fbthrift_serviceInfoHolder;
-<%/service:interaction?%>
+{{^service:interaction?}}
+{{service:qualified_name}}ServiceInfoHolder {{ > service_common/service_class_name}}::__fbthrift_serviceInfoHolder;
+{{/service:interaction?}}
 
-<% > service_cpp/service_interface_impl%>
+{{ > service_cpp/service_interface_impl}}
 
-<%#service:interactions%>
-<% > service_cpp/service_interface_impl%>
-<%/service:interactions%>
+{{#service:interactions}}
+{{ > service_cpp/service_interface_impl}}
+{{/service:interactions}}
 
-<% > common/namespace_cpp2_begin%>
+{{ > common/namespace_cpp2_begin}}
 
 
-<% > service_cpp/service_null_impl%>
+{{ > service_cpp/service_null_impl}}
 
-const char* <%service:cpp_name%>AsyncProcessor::getServiceName() {
-  return "<%service:name%>";
+const char* {{service:cpp_name}}AsyncProcessor::getServiceName() {
+  return "{{service:name}}";
 }
 
-void <%service:cpp_name%>AsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<<%service:qualified_name%>>>::gen(response);
+void {{service:cpp_name}}AsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{service:qualified_name}}>>::gen(response);
 }
 
-void <%service:cpp_name%>AsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void {{service:cpp_name}}AsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   apache::thrift::detail::ap::process(this, iface_, std::move(req), std::move(serializedRequest), methodMetadata, protType, context, eb, tm);
 }
 
-void <%service:cpp_name%>AsyncProcessor::executeRequest(apache::thrift::ServerRequest&& request, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) {
+void {{service:cpp_name}}AsyncProcessor::executeRequest(apache::thrift::ServerRequest&& request, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) {
   apache::thrift::detail::ap::execute(this, std::move(request), apache::thrift::detail::ServerRequestHelper::protocol(request), methodMetadata);
 }
 
-<% > service_cpp/processmap%>
+{{ > service_cpp/processmap}}
 
-<%#service:interactions?%>
-<% > service_cpp/interaction_constructor_map%>
-<%/service:interactions?%>
-<% > common/namespace_cpp2_end%>
+{{#service:interactions?}}
+{{ > service_cpp/interaction_constructor_map}}
+{{/service:interactions?}}
+{{ > common/namespace_cpp2_end}}

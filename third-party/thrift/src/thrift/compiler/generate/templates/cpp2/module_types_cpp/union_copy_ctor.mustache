@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,61 +14,61 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-<%^struct:cpp_noncopyable%>
-  <%struct:cpp_underlying_name%>::<%struct:cpp_underlying_name%>(const <%struct:cpp_underlying_name%>& rhs)
+}}
+{{^struct:cpp_noncopyable}}
+  {{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(const {{struct:cpp_underlying_name}}& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         return;
-<%#struct:fields%>
-      case Type::<%field:cpp_name%>:
-<%^field:transitively_refers_to_unique?%>
-  <%#field:cpp_ref?%>
-        set_<%field:cpp_name%>(*rhs.value_.<%field:cpp_name%>);
-  <%/field:cpp_ref?%>
-  <%^field:cpp_ref?%>
-        set_<%field:cpp_name%>(rhs.value_.<%field:cpp_name%>);
-  <%/field:cpp_ref?%>
-<%/field:transitively_refers_to_unique?%>
-<%#field:transitively_refers_to_unique?%>
-        set_<%field:cpp_name%>(::apache::thrift::detail::st::copy_field<
-          <%#field:type%><%type:type_class%><%/field:type%>>(rhs.value_.<%field:cpp_name%>));
-<%/field:transitively_refers_to_unique?%>
+{{#struct:fields}}
+      case Type::{{field:cpp_name}}:
+{{^field:transitively_refers_to_unique?}}
+  {{#field:cpp_ref?}}
+        set_{{field:cpp_name}}(*rhs.value_.{{field:cpp_name}});
+  {{/field:cpp_ref?}}
+  {{^field:cpp_ref?}}
+        set_{{field:cpp_name}}(rhs.value_.{{field:cpp_name}});
+  {{/field:cpp_ref?}}
+{{/field:transitively_refers_to_unique?}}
+{{#field:transitively_refers_to_unique?}}
+        set_{{field:cpp_name}}(::apache::thrift::detail::st::copy_field<
+          {{#field:type}}{{type:type_class}}{{/field:type}}>(rhs.value_.{{field:cpp_name}}));
+{{/field:transitively_refers_to_unique?}}
         break;
-<%/struct:fields%>
+{{/struct:fields}}
       default:
         assert(false);
     }
   }
 
-    <%struct:cpp_underlying_name%>&<%struct:cpp_underlying_name%>::operator=(const <%struct:cpp_underlying_name%>& rhs) {
-    <%! a bunch of code relies on the self-assignment check even though it should not be needed %>
+    {{struct:cpp_underlying_name}}&{{struct:cpp_underlying_name}}::operator=(const {{struct:cpp_underlying_name}}& rhs) {
+    {{! a bunch of code relies on the self-assignment check even though it should not be needed }}
     if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
         return *this;
-<%#struct:fields%>
-      case Type::<%field:cpp_name%>:
-<%^field:transitively_refers_to_unique?%>
-  <%#field:cpp_ref?%>
-        set_<%field:cpp_name%>(*rhs.value_.<%field:cpp_name%>);
-  <%/field:cpp_ref?%>
-  <%^field:cpp_ref?%>
-        set_<%field:cpp_name%>(rhs.value_.<%field:cpp_name%>);
-  <%/field:cpp_ref?%>
-<%/field:transitively_refers_to_unique?%>
-<%#field:transitively_refers_to_unique?%>
-        set_<%field:cpp_name%>(::apache::thrift::detail::st::copy_field<
-          <%#field:type%><%type:type_class%><%/field:type%>>(rhs.value_.<%field:cpp_name%>));
-<%/field:transitively_refers_to_unique?%>
+{{#struct:fields}}
+      case Type::{{field:cpp_name}}:
+{{^field:transitively_refers_to_unique?}}
+  {{#field:cpp_ref?}}
+        set_{{field:cpp_name}}(*rhs.value_.{{field:cpp_name}});
+  {{/field:cpp_ref?}}
+  {{^field:cpp_ref?}}
+        set_{{field:cpp_name}}(rhs.value_.{{field:cpp_name}});
+  {{/field:cpp_ref?}}
+{{/field:transitively_refers_to_unique?}}
+{{#field:transitively_refers_to_unique?}}
+        set_{{field:cpp_name}}(::apache::thrift::detail::st::copy_field<
+          {{#field:type}}{{type:type_class}}{{/field:type}}>(rhs.value_.{{field:cpp_name}}));
+{{/field:transitively_refers_to_unique?}}
         break;
-<%/struct:fields%>
+{{/struct:fields}}
       default:
         __fbthrift_clear();
         assert(false);
     }
     return *this;
   }
-<%/struct:cpp_noncopyable%>
+{{/struct:cpp_noncopyable}}

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,18 +14,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-  void Layout<<%struct:cpp_fullname%>>::freeze(
+}}
+  void Layout<{{struct:cpp_fullname}}>::freeze(
       FreezeRoot& root, const T& x, FreezePosition self) const {
     auto type = x.getType();
     root.freezeField(self, this->type_Field, type);
     switch (type) {
-<%#struct:fields%>
-      case <%struct:cpp_fullname%>::Type::<%field:cpp_name%>: {
-        root.freezeField(self, this-><%field:cpp_name%>Field, x.get_<%field:cpp_name%>());
+{{#struct:fields}}
+      case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {
+        root.freezeField(self, this->{{field:cpp_name}}Field, x.get_{{field:cpp_name}}());
         break;
       }
-<%/struct:fields%>
+{{/struct:fields}}
       default: {
         assert(false);
         break;

@@ -15,12 +15,12 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::Result> {
   using type = ::cpp2::Result;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::OK,
       type::SO_SO,
       type::GOOD,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "OK"sv,
       "SO_SO"sv,
       "GOOD"sv,

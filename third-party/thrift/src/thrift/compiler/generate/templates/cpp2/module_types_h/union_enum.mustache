@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,9 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>  enum <%#struct:scoped_enum_as_union_type?%>class <%/struct:scoped_enum_as_union_type?%>Type : int {
+}}  enum {{#struct:scoped_enum_as_union_type?}}class {{/struct:scoped_enum_as_union_type?}}Type : int {
     __EMPTY__ = 0,
-<%#struct:fields%>
-    <%field:cpp_name%> = <%field:key%>,
-<%/struct:fields%>
+{{#struct:fields}}
+    {{field:cpp_name}} = {{field:key}},
+{{/struct:fields}}
   } ;

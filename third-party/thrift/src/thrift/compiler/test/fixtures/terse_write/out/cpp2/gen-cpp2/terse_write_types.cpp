@@ -392,7 +392,7 @@ std::string_view MyStructWithCustomDefault::__fbthrift_get_class_name() {
 
 
 MyStructWithCustomDefault::MyStructWithCustomDefault(apache::thrift::FragileConstructor, ::std::int64_t field1__arg) :
-    __fbthrift_field_field1(std::move(field1__arg)) {
+    __fbthrift_field_field1(std::move(field1__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -541,7 +541,7 @@ StructLevelTerseStruct::StructLevelTerseStruct(apache::thrift::FragileConstructo
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
     __fbthrift_field_struct_field(std::move(struct_field__arg)),
-    __fbthrift_field_union_field(std::move(union_field__arg)) {
+    __fbthrift_field_union_field(std::move(union_field__arg)) { 
 }
 
 
@@ -849,7 +849,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor,
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
     __fbthrift_field_struct_field(std::move(struct_field__arg)),
-    __fbthrift_field_union_field(std::move(union_field__arg)) {
+    __fbthrift_field_union_field(std::move(union_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1130,9 +1130,9 @@ TerseStructWithCustomDefault::TerseStructWithCustomDefault() :
       __fbthrift_field_string_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("7")),
       __fbthrift_field_binary_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("8")),
       __fbthrift_field_enum_field( ::facebook::thrift::test::terse_write::MyEnum::ME1),
-      __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
-      __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
-      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{{static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1)}}) {
+      __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+      __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{ { static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1) } }) {
 }
 
 
@@ -1188,7 +1188,7 @@ TerseStructWithCustomDefault::TerseStructWithCustomDefault(apache::thrift::Fragi
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
-    __fbthrift_field_struct_field(std::move(struct_field__arg)) {
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
 }
 
 
@@ -1392,7 +1392,7 @@ AdaptedFields& AdaptedFields::operator=([[maybe_unused]] AdaptedFields&& other) 
 AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thrift::test::terse_write::MyInteger field1__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields> field2__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields> field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
-    __fbthrift_field_field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_field1, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 2>(__fbthrift_field_field2, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
@@ -1483,7 +1483,7 @@ std::string_view WrappedFields::__fbthrift_get_class_name() {
 
 
 WrappedFields::WrappedFields(apache::thrift::FragileConstructor, ::std::int32_t field1__arg) :
-    __fbthrift_field_field1(std::move(field1__arg)) {
+    __fbthrift_field_field1(std::move(field1__arg)) { 
 }
 
 
@@ -1584,7 +1584,7 @@ TerseException& TerseException::operator=([[maybe_unused]] TerseException&& othe
 
 
 TerseException::TerseException(apache::thrift::FragileConstructor, ::std::string msg__arg) :
-    __fbthrift_field_msg(std::move(msg__arg)) {
+    __fbthrift_field_msg(std::move(msg__arg)) { 
 }
 
 

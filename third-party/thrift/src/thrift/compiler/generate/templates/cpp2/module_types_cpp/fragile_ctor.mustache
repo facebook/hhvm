@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,21 +14,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^struct:fields?%>
-<%struct:cpp_underlying_name%>::<%struct:cpp_underlying_name%>(apache::thrift::FragileConstructor) {}
-<%/struct:fields?%>
-<%#struct:fields?%>
-<%struct:cpp_underlying_name%>::<%struct:cpp_underlying_name%>(apache::thrift::FragileConstructor<% > module_types_h/fragile_ctor_param_list%>) :
-<%#struct:fields_in_layout_order%>
-    <%field:cpp_storage_name%>(std::move(<%field:cpp_name%>__arg))<%#last?%> {<%/last?%><%^last?%>,<%/last?%>
-<%/struct:fields_in_layout_order%>
-<%#struct:fields%>
-<%#field:cpp_first_adapter%>
-  <%#field:opt_cpp_ref?%>if (<%field:cpp_storage_name%>) <%/field:opt_cpp_ref?%>::apache::thrift::adapt_detail::construct<<%field:cpp_first_adapter%>, <%field:key%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><%field:cpp_storage_name%>, *this);
-<%/field:cpp_first_adapter%>
-<%/struct:fields%>
-<%#struct:isset_fields%>
-  __isset.set(folly::index_constant<<%field:index%>>(), true);
-<%/struct:isset_fields%>
+}}{{^struct:fields?}}
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(apache::thrift::FragileConstructor) {}
+{{/struct:fields?}}
+{{#struct:fields?}}
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(apache::thrift::FragileConstructor{{ > module_types_h/fragile_ctor_param_list}}) :
+{{#struct:fields_in_layout_order}}
+    {{field:cpp_storage_name}}(std::move({{field:cpp_name}}__arg)){{#last?}} { {{/last?}}{{^last?}},{{/last?}}
+{{/struct:fields_in_layout_order}}
+{{#struct:fields}}
+{{#field:cpp_first_adapter}}
+  {{#field:opt_cpp_ref?}}if ({{field:cpp_storage_name}}) {{/field:opt_cpp_ref?}}::apache::thrift::adapt_detail::construct<{{field:cpp_first_adapter}}, {{field:key}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{field:cpp_storage_name}}, *this);
+{{/field:cpp_first_adapter}}
+{{/struct:fields}}
+{{#struct:isset_fields}}
+  __isset.set(folly::index_constant<{{field:index}}>(), true);
+{{/struct:isset_fields}}
 }
-<%/struct:fields?%>
+{{/struct:fields?}}

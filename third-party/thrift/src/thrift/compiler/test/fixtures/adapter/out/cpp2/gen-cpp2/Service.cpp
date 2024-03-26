@@ -137,7 +137,7 @@ determineInvocationType:
 
 namespace facebook::thrift::test {
 
-::facebook::thrift::test::MyI32_4873 ServiceSvNull::func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) {
+::facebook::thrift::test::MyI32_4873 ServiceSvNull::func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) { 
   return 0;
 }
 
@@ -178,7 +178,7 @@ apache::thrift::ServiceRequestInfoMap const& ServiceServiceInfoHolder::requestIn
 apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"func",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Service.func",
      std::nullopt,

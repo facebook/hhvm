@@ -34,19 +34,19 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::name = "StructLevelTerseStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_names = { {
   "bool_field"sv,
   "byte_field"sv,
   "short_field"sv,
@@ -62,7 +62,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::f
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -78,7 +78,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::
   13,
   14,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -94,7 +94,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::fa
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::storage_names = { {
   "__fbthrift_field_bool_field"sv,
   "__fbthrift_field_byte_field"sv,
   "__fbthrift_field_short_field"sv,
@@ -110,7 +110,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::f
   "__fbthrift_field_map_field"sv,
   "__fbthrift_field_struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -128,7 +128,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::name = "FieldLevelTerseStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_names = { {
   "terse_bool_field"sv,
   "terse_byte_field"sv,
   "terse_short_field"sv,
@@ -158,7 +158,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::f
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -188,7 +188,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::
   27,
   28,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -218,7 +218,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::fa
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::storage_names = { {
   "__fbthrift_field_terse_bool_field"sv,
   "__fbthrift_field_terse_byte_field"sv,
   "__fbthrift_field_terse_short_field"sv,
@@ -248,7 +248,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::f
   "__fbthrift_field_map_field"sv,
   "__fbthrift_field_struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::isset_indexes = { {
   -1,
   -1,
   -1,

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,17 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#program:unions?%>
+}}{{#program:unions?}}
 
 namespace apache { namespace thrift {
-<%#program:structs%><%#struct:union?%>
+{{#program:structs}}{{#struct:union?}}
 
-template <> struct TEnumDataStorage<<%struct:cpp_fullname%>::Type>;
+template <> struct TEnumDataStorage<{{struct:cpp_fullname}}::Type>;
 
-template <> struct TEnumTraits<<%struct:cpp_fullname%>::Type> {
-  using type = <%struct:cpp_fullname%>::Type;
+template <> struct TEnumTraits<{{struct:cpp_fullname}}::Type> {
+  using type = {{struct:cpp_fullname}}::Type;
 
-  static constexpr std::size_t const size = <%struct:num_union_members%>;
+  static constexpr std::size_t const size = {{struct:num_union_members}};
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -37,6 +37,6 @@ template <> struct TEnumTraits<<%struct:cpp_fullname%>::Type> {
     return ret.data();
   }
 };
-<%/struct:union?%><%/program:structs%>
+{{/struct:union?}}{{/program:structs}}
 }} // apache::thrift
-<%/program:unions?%>
+{{/program:unions?}}

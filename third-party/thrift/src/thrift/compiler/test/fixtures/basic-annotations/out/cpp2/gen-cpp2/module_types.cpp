@@ -80,7 +80,7 @@ MyStructNestedAnnotation& MyStructNestedAnnotation::operator=([[maybe_unused]] M
 
 
 MyStructNestedAnnotation::MyStructNestedAnnotation(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -430,7 +430,7 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
     __fbthrift_field_empty_annotations(std::move(empty_annotations__arg)),
     __fbthrift_field_my_enum(std::move(my_enum__arg)),
     __fbthrift_field_cpp_type_annotation(std::move(cpp_type_annotation__arg)),
-    __fbthrift_field_my_union(std::move(my_union__arg)) {
+    __fbthrift_field_my_union(std::move(my_union__arg)) { 
   ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -570,7 +570,7 @@ SecretStruct& SecretStruct::operator=([[maybe_unused]] SecretStruct&& other) noe
 
 SecretStruct::SecretStruct(apache::thrift::FragileConstructor, ::std::int64_t id__arg, ::std::string password__arg) :
     __fbthrift_field_id(std::move(id__arg)),
-    __fbthrift_field_password(std::move(password__arg)) {
+    __fbthrift_field_password(std::move(password__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

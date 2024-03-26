@@ -249,11 +249,11 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyServiceSvNull::query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
+void MyServiceSvNull::query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) { 
   return;
 }
 
-void MyServiceSvNull::has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
+void MyServiceSvNull::has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) { 
   return;
 }
 
@@ -299,14 +299,14 @@ apache::thrift::ServiceRequestInfoMap const& MyServiceServiceInfoHolder::request
 apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"query",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.query",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"has_arg_docs",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.has_arg_docs",
      std::nullopt,

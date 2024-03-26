@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,13 +14,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > common/namespace_cpp2_begin%>
+}}{{ > common/namespace_cpp2_begin}}
 
-<% > service_common/typedefs%>
-<% > service_tcc/process_and_return%>
+{{ > service_common/typedefs}}
+{{ > service_tcc/process_and_return}}
 
-<%#service:interactions%>
-<% > service_common/typedefs%>
-<% > service_tcc/process_and_return%>
-<%/service:interactions%>
-<% > common/namespace_cpp2_end%>
+{{#service:interactions}}
+{{ > service_common/typedefs}}
+{{ > service_tcc/process_and_return}}
+{{/service:interactions}}
+{{ > common/namespace_cpp2_end}}

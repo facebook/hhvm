@@ -36,9 +36,8 @@ StructMetadata<::cpp2::RefUnion>::gen(ThriftMetadata& metadata) {
   module_no_uri_RefUnion.name() = "module_no_uri.RefUnion";
   module_no_uri_RefUnion.is_union() = true;
   static const auto* const
-  module_no_uri_RefUnion_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("cpp.Ref", {{"type", cvInteger(2)}}).cv_struct_ref(), }},
-  }};
+  module_no_uri_RefUnion_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct_ref(), *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_no_uri_RefUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

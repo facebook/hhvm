@@ -129,7 +129,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
     __fbthrift_field_readonly(std::move(readonly__arg)),
     __fbthrift_field_idempotent(std::move(idempotent__arg)),
     __fbthrift_field_floatSet(std::move(floatSet__arg)),
-    __fbthrift_field_no_hack_codegen_field(std::move(no_hack_codegen_field__arg)) {
+    __fbthrift_field_no_hack_codegen_field(std::move(no_hack_codegen_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -499,7 +499,7 @@ std::string_view ReservedKeyword::__fbthrift_get_class_name() {
 
 
 ReservedKeyword::ReservedKeyword(apache::thrift::FragileConstructor, ::std::int32_t reserved_field__arg) :
-    __fbthrift_field_reserved_field(std::move(reserved_field__arg)) {
+    __fbthrift_field_reserved_field(std::move(reserved_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

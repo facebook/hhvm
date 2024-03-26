@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,11 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
-#include "<%service:include_prefix%><%service:name%>.h"
+#include "{{service:include_prefix}}{{service:name}}.h"
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-<% > service_cpp/service_inl%>
+{{ > service_cpp/service_inl}}

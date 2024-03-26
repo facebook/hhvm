@@ -1132,37 +1132,37 @@ determineInvocationType:
 
 namespace test::fixtures::basic {
 
-void MyServiceSvNull::ping() {
+void MyServiceSvNull::ping() { 
   return;
 }
 
-void MyServiceSvNull::getRandomData(::std::string& /*_return*/) {}
+void MyServiceSvNull::getRandomData(::std::string& /*_return*/) {  }
 
-void MyServiceSvNull::sink(::std::int64_t /*sink*/) {
+void MyServiceSvNull::sink(::std::int64_t /*sink*/) { 
   return;
 }
 
-void MyServiceSvNull::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) {
+void MyServiceSvNull::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
   return;
 }
 
-bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) {
+bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) { 
   return 0;
 }
 
-void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {}
+void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {  }
 
-void MyServiceSvNull::deleteDataById(::std::int64_t /*id*/) {
+void MyServiceSvNull::deleteDataById(::std::int64_t /*id*/) { 
   return;
 }
 
-void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) {
+void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) { 
   return;
 }
 
-void MyServiceSvNull::invalid_return_for_hack(::std::set<float>& /*_return*/) {}
+void MyServiceSvNull::invalid_return_for_hack(::std::set<float>& /*_return*/) {  }
 
-void MyServiceSvNull::rpc_skipped_codegen() {
+void MyServiceSvNull::rpc_skipped_codegen() { 
   return;
 }
 
@@ -1248,70 +1248,70 @@ apache::thrift::ServiceRequestInfoMap const& MyServiceServiceInfoHolder::request
 apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"ping",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.ping",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"getRandomData",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.getRandomData",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sink",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.sink",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"putDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.putDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"hasDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.hasDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"getDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.getDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"deleteDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.deleteDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"lobDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "MyService.lobDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"invalid_return_for_hack",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.invalid_return_for_hack",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"rpc_skipped_codegen",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.rpc_skipped_codegen",
      std::nullopt,

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,18 +14,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
+}}{{!
 
 Deduces the underlying string type after indirection
 
-%><%#type:resolved_cpp_type%><%!
-  %><%#type:cpp_indirection?%><%!
-    %>::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, <%type:resolved_cpp_type%> const&>><%!
-  %><%/type:cpp_indirection?%><%!
-  %><%^type:cpp_indirection?%><%!
-    %><%type:resolved_cpp_type%><%!
-  %><%/type:cpp_indirection?%><%!
-%><%/type:resolved_cpp_type%><%!
-%><%^type:resolved_cpp_type%><%!
-  %>std::string<%!
-%><%/type:resolved_cpp_type%>
+}}{{#type:resolved_cpp_type}}{{!
+  }}{{#type:cpp_indirection?}}{{!
+    }}::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, {{type:resolved_cpp_type}} const&>>{{!
+  }}{{/type:cpp_indirection?}}{{!
+  }}{{^type:cpp_indirection?}}{{!
+    }}{{type:resolved_cpp_type}}{{!
+  }}{{/type:cpp_indirection?}}{{!
+}}{{/type:resolved_cpp_type}}{{!
+}}{{^type:resolved_cpp_type}}{{!
+  }}std::string{{!
+}}{{/type:resolved_cpp_type}}

@@ -137,7 +137,7 @@ determineInvocationType:
 
 namespace test::namespace_from_package_without_module_name {
 
-::std::int64_t TestServiceSvNull::init(::std::int64_t /*int1*/) {
+::std::int64_t TestServiceSvNull::init(::std::int64_t /*int1*/) { 
   return 0;
 }
 
@@ -178,7 +178,7 @@ apache::thrift::ServiceRequestInfoMap const& TestServiceServiceInfoHolder::reque
 apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"init",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "TestService.init",
      std::nullopt,

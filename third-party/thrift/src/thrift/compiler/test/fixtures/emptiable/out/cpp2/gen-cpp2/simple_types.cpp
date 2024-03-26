@@ -198,7 +198,7 @@ EmptiableStruct::EmptiableStruct(apache::thrift::FragileConstructor, bool bool_f
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
-    __fbthrift_field_struct_field(std::move(struct_field__arg)) {
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -429,7 +429,7 @@ EmptiableTerseStruct::EmptiableTerseStruct(apache::thrift::FragileConstructor, b
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
-    __fbthrift_field_struct_field(std::move(struct_field__arg)) {
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
 }
 
 
@@ -659,7 +659,7 @@ NotEmptiableStruct::NotEmptiableStruct(apache::thrift::FragileConstructor, bool 
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
-    __fbthrift_field_struct_field(std::move(struct_field__arg)) {
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

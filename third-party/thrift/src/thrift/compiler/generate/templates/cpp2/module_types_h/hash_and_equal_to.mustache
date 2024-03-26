@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,22 +14,22 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>// BEGIN hash_and_equal_to
-<%#program:cpp_declare_hash?%>
+}}// BEGIN hash_and_equal_to
+{{#program:cpp_declare_hash?}}
 namespace std {
-<%#program:structs%>
-<%#struct:cpp_declare_hash%>
+{{#program:structs}}
+{{#struct:cpp_declare_hash}}
 
-template<> struct hash<typename <%struct:cpp_fullname%>> {
-  size_t operator()(const <%struct:cpp_fullname%>&) const;
+template<> struct hash<typename {{struct:cpp_fullname}}> {
+  size_t operator()(const {{struct:cpp_fullname}}&) const;
 };
-<%#struct:cpp_declare_equal_to%>
-template<> struct equal_to<typename <%struct:cpp_fullname%>> {
-  bool operator()(const <%struct:cpp_fullname%>&,const <%struct:cpp_fullname%>&) const;
+{{#struct:cpp_declare_equal_to}}
+template<> struct equal_to<typename {{struct:cpp_fullname}}> {
+  bool operator()(const {{struct:cpp_fullname}}&,const {{struct:cpp_fullname}}&) const;
 };
-<%/struct:cpp_declare_equal_to%>
-<%/struct:cpp_declare_hash%>
-<%/program:structs%>
+{{/struct:cpp_declare_equal_to}}
+{{/struct:cpp_declare_hash}}
+{{/program:structs}}
 } // std
-<%/program:cpp_declare_hash?%>
+{{/program:cpp_declare_hash?}}
 // END hash_and_equal_to

@@ -45,7 +45,7 @@ std::string_view Foo::__fbthrift_get_class_name() {
 
 
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int32_t bar__arg) :
-    __fbthrift_field_bar(std::move(bar__arg)) {
+    __fbthrift_field_bar(std::move(bar__arg)) { 
 }
 
 

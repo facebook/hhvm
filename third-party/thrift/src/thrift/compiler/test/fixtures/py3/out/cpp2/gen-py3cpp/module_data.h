@@ -15,14 +15,14 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::py3::simple::AnEnum> {
   using type = ::py3::simple::AnEnum;
   static constexpr const std::size_t size = 5;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::None,
       type::ONE,
       type::TWO,
       type::THREE,
       type::FOUR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "None"sv,
       "ONE"sv,
       "TWO"sv,
@@ -34,12 +34,12 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnum> {
 template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed> {
   using type = ::py3::simple::AnEnumRenamed;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::name,
       type::value,
       type::normal,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "name"sv,
       "value"sv,
       "normal"sv,
@@ -49,13 +49,13 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed> {
 template <> struct TEnumDataStorage<::py3::simple::Flags> {
   using type = ::py3::simple::Flags;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::flag_A,
       type::flag_B,
       type::flag_C,
       type::flag_D,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "flag_A"sv,
       "flag_B"sv,
       "flag_C"sv,
@@ -66,10 +66,10 @@ template <> struct TEnumDataStorage<::py3::simple::Flags> {
 template <> struct TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type> {
   using type = ::py3::simple::detail::AdaptedUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::best,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "best"sv,
   }};
 };
@@ -77,10 +77,10 @@ template <> struct TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type> {
 template <> struct TEnumDataStorage<::py3::simple::BinaryUnion::Type> {
   using type = ::py3::simple::BinaryUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::iobuf_val,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "iobuf_val"sv,
   }};
 };

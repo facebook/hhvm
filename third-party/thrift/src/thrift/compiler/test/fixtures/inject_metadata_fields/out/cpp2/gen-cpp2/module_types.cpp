@@ -64,7 +64,7 @@ Fields& Fields::operator=([[maybe_unused]] Fields&& other) noexcept {
 
 
 Fields::Fields(apache::thrift::FragileConstructor, ::std::string injected_field__arg) :
-    __fbthrift_field_injected_field(std::move(injected_field__arg)) {
+    __fbthrift_field_injected_field(std::move(injected_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -161,7 +161,7 @@ FieldsInjectedToEmptyStruct& FieldsInjectedToEmptyStruct::operator=([[maybe_unus
 
 
 FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(apache::thrift::FragileConstructor, ::std::string injected_field__arg) :
-    __fbthrift_field_injected_field(std::move(injected_field__arg)) {
+    __fbthrift_field_injected_field(std::move(injected_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -261,7 +261,7 @@ FieldsInjectedToStruct& FieldsInjectedToStruct::operator=([[maybe_unused]] Field
 
 FieldsInjectedToStruct::FieldsInjectedToStruct(apache::thrift::FragileConstructor, ::std::string string_field__arg, ::std::string injected_field__arg) :
     __fbthrift_field_string_field(std::move(string_field__arg)),
-    __fbthrift_field_injected_field(std::move(injected_field__arg)) {
+    __fbthrift_field_injected_field(std::move(injected_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -370,7 +370,7 @@ FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(apache::thrif
     __fbthrift_field_string_field(std::move(string_field__arg)),
     __fbthrift_field_injected_field(std::move(injected_field__arg)),
     __fbthrift_field_injected_structured_annotation_field(std::move(injected_structured_annotation_field__arg)),
-    __fbthrift_field_injected_unstructured_annotation_field(std::move(injected_unstructured_annotation_field__arg)) {
+    __fbthrift_field_injected_unstructured_annotation_field(std::move(injected_unstructured_annotation_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

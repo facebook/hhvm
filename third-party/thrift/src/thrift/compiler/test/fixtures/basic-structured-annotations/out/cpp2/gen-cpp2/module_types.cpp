@@ -164,7 +164,7 @@ structured_annotation_inline& structured_annotation_inline::operator=([[maybe_un
 
 structured_annotation_inline::structured_annotation_inline(apache::thrift::FragileConstructor, ::std::int64_t count__arg, ::std::string name__arg) :
     __fbthrift_field_count(std::move(count__arg)),
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -269,7 +269,7 @@ structured_annotation_with_default& structured_annotation_with_default::operator
 
 
 structured_annotation_with_default::structured_annotation_with_default(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -389,7 +389,7 @@ structured_annotation_recursive& structured_annotation_recursive::operator=([[ma
 structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_recurse(std::move(recurse__arg)),
-    __fbthrift_field_forward(std::move(forward__arg)) {
+    __fbthrift_field_forward(std::move(forward__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -496,7 +496,7 @@ std::string_view structured_annotation_forward::__fbthrift_get_class_name() {
 
 
 structured_annotation_forward::structured_annotation_forward(apache::thrift::FragileConstructor, ::std::int64_t count__arg) :
-    __fbthrift_field_count(std::move(count__arg)) {
+    __fbthrift_field_count(std::move(count__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -600,7 +600,7 @@ structured_annotation_nested& structured_annotation_nested::operator=([[maybe_un
 
 structured_annotation_nested::structured_annotation_nested(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_with_default nest__arg) :
     __fbthrift_field_name(std::move(name__arg)),
-    __fbthrift_field_nest(std::move(nest__arg)) {
+    __fbthrift_field_nest(std::move(nest__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -729,7 +729,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_
     __fbthrift_field_annotated_field(std::move(annotated_field__arg)),
     __fbthrift_field_annotated_type(std::move(annotated_type__arg)),
     __fbthrift_field_annotated_recursive(std::move(annotated_recursive__arg)),
-    __fbthrift_field_annotated_nested(std::move(annotated_nested__arg)) {
+    __fbthrift_field_annotated_nested(std::move(annotated_nested__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -839,7 +839,7 @@ MyException& MyException::operator=([[maybe_unused]] MyException&& other) noexce
 
 
 MyException::MyException(apache::thrift::FragileConstructor, ::std::string context__arg) :
-    __fbthrift_field_context(std::move(context__arg)) {
+    __fbthrift_field_context(std::move(context__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

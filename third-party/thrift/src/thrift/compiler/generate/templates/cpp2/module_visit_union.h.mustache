@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,41 +14,41 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
-#include "<%program:include_prefix%><%program:name%>_metadata.h"
+#include "{{program:include_prefix}}{{program:name}}_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-<%#program:structs%>
-<%#struct:union?%>
+{{#program:structs}}
+{{#struct:union?}}
 template <>
-struct VisitUnion<<%struct:cpp_fullname%>> {
+struct VisitUnion<{{struct:cpp_fullname}}> {
 
   template <typename F, typename T>
   decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
-    <%#struct:fields%>
-    case Union::Type::<%field:cpp_name%>:
-      return f(<%field:index%>, *static_cast<T&&>(t).<%field:cpp_name%>_ref());
-    <%/struct:fields%>
+    {{#struct:fields}}
+    case Union::Type::{{field:cpp_name}}:
+      return f({{field:index}}, *static_cast<T&&>(t).{{field:cpp_name}}_ref());
+    {{/struct:fields}}
     case Union::Type::__EMPTY__:
-      <%#struct:fields%><%#first?%>
-      return decltype(f(<%field:index%>, *static_cast<T&&>(t).<%field:cpp_name%>_ref()))();
-      <%/first?%><%/struct:fields%>
-      <%^struct:fields%>
+      {{#struct:fields}}{{#first?}}
+      return decltype(f({{field:index}}, *static_cast<T&&>(t).{{field:cpp_name}}_ref()))();
+      {{/first?}}{{/struct:fields}}
+      {{^struct:fields}}
       (void)0;
-      <%/struct:fields%>
+      {{/struct:fields}}
     }
   }
 };
-<%/struct:union?%>
-<%/program:structs%>
+{{/struct:union?}}
+{{/program:structs}}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

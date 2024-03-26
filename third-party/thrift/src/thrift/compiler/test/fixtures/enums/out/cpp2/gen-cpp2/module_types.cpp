@@ -192,7 +192,7 @@ SomeStruct::SomeStruct(apache::thrift::FragileConstructor, ::test::fixtures::enu
     __fbthrift_field_reasonable(std::move(reasonable__arg)),
     __fbthrift_field_fine(std::move(fine__arg)),
     __fbthrift_field_questionable(std::move(questionable__arg)),
-    __fbthrift_field_tags(std::move(tags__arg)) {
+    __fbthrift_field_tags(std::move(tags__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -294,7 +294,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::test::fixtures::enums::
     __fbthrift_field_me2_3(std::move(me2_3__arg)),
     __fbthrift_field_me3_n3(std::move(me3_n3__arg)),
     __fbthrift_field_me1_t1(std::move(me1_t1__arg)),
-    __fbthrift_field_me1_t2(std::move(me1_t2__arg)) {
+    __fbthrift_field_me1_t2(std::move(me1_t2__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

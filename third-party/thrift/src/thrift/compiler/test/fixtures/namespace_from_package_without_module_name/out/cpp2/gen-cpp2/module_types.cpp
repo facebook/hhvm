@@ -49,7 +49,7 @@ std::string_view Foo::__fbthrift_get_class_name() {
 
 
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int64_t MyInt__arg) :
-    __fbthrift_field_MyInt(std::move(MyInt__arg)) {
+    __fbthrift_field_MyInt(std::move(MyInt__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

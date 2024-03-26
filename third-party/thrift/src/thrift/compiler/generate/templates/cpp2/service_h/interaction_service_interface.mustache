@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,19 +14,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > service_h/service_info_holder%>
+}}{{ > service_h/service_info_holder}}
 
 
-class <%service:cpp_name%>If : public apache::thrift::<%#interaction:serial?%>SerialInteraction<%/interaction:serial?%><%#interaction:eb?%>EventBase<%/interaction:eb?%>Tile, public apache::thrift::ServerInterface {
+class {{service:cpp_name}}If : public apache::thrift::{{#interaction:serial?}}SerialInteraction{{/interaction:serial?}}{{#interaction:eb?}}EventBase{{/interaction:eb?}}Tile, public apache::thrift::ServerInterface {
  public:
-  std::string_view getGeneratedName() const override { return "<%service:name%>"; }
+  std::string_view getGeneratedName() const override { return "{{service:name}}"; }
 
-  typedef <%service:parent_service_qualified_name%>AsyncProcessor ProcessorType;
+  typedef {{service:parent_service_qualified_name}}AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
-<% > service_h/service_interface_functions%>
+{{ > service_h/service_interface_functions}}
 };

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
-%><%#field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>folly::allocate_unique<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_unique<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
-%><%^field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>std::allocate_shared<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_shared<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
-%><<%field:cpp_type%>>(<%#type:cpp_use_allocator?%>__fbthrift_alloc<%/type:cpp_use_allocator?%><%#field:value%><% > field/default%><%/field:value%>)
+}}{{!
+}}{{#field:cpp_ref_unique?}}{{#type:cpp_use_allocator?}}folly::allocate_unique{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_unique{{/type:cpp_use_allocator?}}{{/field:cpp_ref_unique?}}{{!
+}}{{^field:cpp_ref_unique?}}{{#type:cpp_use_allocator?}}std::allocate_shared{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_shared{{/type:cpp_use_allocator?}}{{/field:cpp_ref_unique?}}{{!
+}}<{{field:cpp_type}}>({{#type:cpp_use_allocator?}}__fbthrift_alloc{{/type:cpp_use_allocator?}}{{#field:value}}{{ > field/default}}{{/field:value}})

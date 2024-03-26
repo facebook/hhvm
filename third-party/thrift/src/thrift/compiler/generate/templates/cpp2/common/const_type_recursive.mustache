@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,21 +14,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
+}}{{!
 
 Base types:
 
-%><%^type:container?%><%type:cpp_type%><%/type:container?%><%!
+}}{{^type:container?}}{{type:cpp_type}}{{/type:container?}}{{!
 
 Containers:
 
-%><%#type:list?%><%#type:list_elem_type%><%!
-  %><% > common/const_type_recursive%><%!
-%><%/type:list_elem_type%><%/type:list?%><%!
+}}{{#type:list?}}{{#type:list_elem_type}}{{!
+  }}{{ > common/const_type_recursive}}{{!
+}}{{/type:list_elem_type}}{{/type:list?}}{{!
 
-%><%#type:set?%><%#type:set_elem_type%><%!
-  %><% > common/const_type_recursive%><%!
-%><%/type:set_elem_type%><%/type:set?%><%!
+}}{{#type:set?}}{{#type:set_elem_type}}{{!
+  }}{{ > common/const_type_recursive}}{{!
+}}{{/type:set_elem_type}}{{/type:set?}}{{!
 
 Map
-%><%#type:map?%><#type:cpp_type%>::value_type<%/type:map?%>
+}}{{#type:map?}}<#type:cpp_type}}::value_type{{/type:map?}}

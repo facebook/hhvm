@@ -22,62 +22,62 @@ namespace some::valid::ns {
 
 
 ::std::vector<bool> const& module_constants::aList() {
-  static folly::Indestructible<::std::vector<bool>> const instance{std::initializer_list<bool>{true,
-  false}};
+  static folly::Indestructible<::std::vector<bool>> const instance{ std::initializer_list<bool>{ true,
+  false } };
   return *instance;
 }
 
 ::std::map<::std::string, ::std::int32_t> const& module_constants::anEmptyMap() {
-  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{}};
+  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{  } };
   return *instance;
 }
 
 ::std::map<::std::int32_t, ::std::string> const& module_constants::aMap() {
-  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{{static_cast<::std::int32_t>(1), apache::thrift::StringTraits<std::string>::fromStringLiteral("foo")},
-  {static_cast<::std::int32_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("bar")}}};
+  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{ std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(1), apache::thrift::StringTraits<std::string>::fromStringLiteral("foo") },
+  { static_cast<::std::int32_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } } };
   return *instance;
 }
 
 ::std::set<::std::string> const& module_constants::aSet() {
-  static folly::Indestructible<::std::set<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("bar")}};
+  static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } };
   return *instance;
 }
 
 ::std::vector<::std::vector<::std::int32_t>> const& module_constants::aListOfLists() {
-  static folly::Indestructible<::std::vector<::std::vector<::std::int32_t>>> const instance{std::initializer_list<::std::vector<::std::int32_t>>{std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+  static folly::Indestructible<::std::vector<::std::vector<::std::int32_t>>> const instance{ std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(7),
-  static_cast<::std::int32_t>(9)},
-  std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
+  static_cast<::std::int32_t>(9) },
+  std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(10),
-  static_cast<::std::int32_t>(12)}}};
+  static_cast<::std::int32_t>(12) } } };
   return *instance;
 }
 
 ::std::vector<::std::map<::std::string, ::std::int32_t>> const& module_constants::states() {
-  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>>{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000)},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600)},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400)}},
-  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000)},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400)}}}};
+  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
+  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000) },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400) } } } };
   return *instance;
 }
 
 ::std::vector<::some::valid::ns::MyEnumA> const& module_constants::AConstList() {
-  static folly::Indestructible<::std::vector<::some::valid::ns::MyEnumA>> const instance{std::initializer_list<::some::valid::ns::MyEnumA>{ ::some::valid::ns::MyEnumA::fieldA,
+  static folly::Indestructible<::std::vector<::some::valid::ns::MyEnumA>> const instance{ std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldA,
    ::some::valid::ns::MyEnumA::fieldB,
-  static_cast< ::some::valid::ns::MyEnumA>(3)}};
+  static_cast< ::some::valid::ns::MyEnumA>(3) } };
   return *instance;
 }
 
 
 ::std::vector<::std::int32_t> const& module_constants::ListOfIntsFromEnums() {
-  static folly::Indestructible<::std::vector<::std::int32_t>> const instance{std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
-  static_cast<::std::int32_t>(1)}};
+  static folly::Indestructible<::std::vector<::std::int32_t>> const instance{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
+  static_cast<::std::int32_t>(1) } };
   return *instance;
 }
 

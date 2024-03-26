@@ -36,11 +36,8 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   module_Foo.name() = "module.Foo";
   module_Foo.is_union() = false;
   static const auto* const
-  module_Foo_fields = new std::array<EncodedThriftField, 3>{{
-    {3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Foo_fields = new std::array<EncodedThriftField, 3>{ {
+    { 3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Foo_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -50,7 +47,7 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Foo.fields()->push_back(std::move(field));
   }
-  module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {}).cv_struct_ref());
+  module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -63,11 +60,8 @@ StructMetadata<::cpp2::Foo2>::gen(ThriftMetadata& metadata) {
   module_Foo2.name() = "module.Foo2";
   module_Foo2.is_union() = false;
   static const auto* const
-  module_Foo2_fields = new std::array<EncodedThriftField, 3>{{
-    {3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Foo2_fields = new std::array<EncodedThriftField, 3>{ {
+    { 3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Foo2_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

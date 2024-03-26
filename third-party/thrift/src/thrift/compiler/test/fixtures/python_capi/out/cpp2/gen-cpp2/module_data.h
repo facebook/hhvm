@@ -15,11 +15,11 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum> {
   using type = ::test::fixtures::python_capi::MyEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::MyValue1,
       type::MyValue2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "MyValue1"sv,
       "MyValue2"sv,
   }};
@@ -28,11 +28,11 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum> {
   using type = ::test::fixtures::python_capi::NormalDecentEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::l0O1,
       type::FuBaR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "FOO"sv,
       "BAR"sv,
   }};
@@ -41,7 +41,7 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::NormalDecentE
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type> {
   using type = ::test::fixtures::python_capi::Shallot::Type;
   static constexpr const std::size_t size = 7;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::myEnum,
       type::myStruct,
       type::intSet,
@@ -50,7 +50,7 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
       type::strMap,
       type::adaptedInt,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "myEnum"sv,
       "myStruct"sv,
       "intSet"sv,

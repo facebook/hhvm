@@ -801,29 +801,29 @@ determineInvocationType:
 
 namespace extra::svc {
 
-bool ExtraServiceSvNull::simple_function() {
+bool ExtraServiceSvNull::simple_function() { 
   return 0;
 }
 
-bool ExtraServiceSvNull::throws_function2(bool /*param1*/) {
+bool ExtraServiceSvNull::throws_function2(bool /*param1*/) { 
   return 0;
 }
 
-void ExtraServiceSvNull::throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/) {}
+void ExtraServiceSvNull::throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/) {  }
 
-void ExtraServiceSvNull::oneway_void_ret() {
+void ExtraServiceSvNull::oneway_void_ret() { 
   return;
 }
 
-void ExtraServiceSvNull::oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) {
+void ExtraServiceSvNull::oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) { 
   return;
 }
 
-void ExtraServiceSvNull::oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/) {
+void ExtraServiceSvNull::oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/) { 
   return;
 }
 
-void ExtraServiceSvNull::oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/) {
+void ExtraServiceSvNull::oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/) { 
   return;
 }
 
@@ -904,63 +904,63 @@ apache::thrift::ServiceRequestInfoMap const& ExtraServiceServiceInfoHolder::requ
 apache::thrift::ServiceRequestInfoMap ExtraServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"simple_function",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ExtraService.simple_function",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"throws_function",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ExtraService.throws_function",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"throws_function2",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ExtraService.throws_function2",
      std::nullopt,
      apache::thrift::concurrency::HIGH,
      std::nullopt}},
   {"throws_function3",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ExtraService.throws_function3",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"oneway_void_ret",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "ExtraService.oneway_void_ret",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"oneway_void_ret_i32_i32_i32_i32_i32_param",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "ExtraService.oneway_void_ret_i32_i32_i32_i32_i32_param",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"oneway_void_ret_map_setlist_param",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "ExtraService.oneway_void_ret_map_setlist_param",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"oneway_void_ret_struct_param",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "ExtraService.oneway_void_ret_struct_param",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"oneway_void_ret_listunion_param",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "ExtraService.oneway_void_ret_listunion_param",
      std::nullopt,

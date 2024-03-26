@@ -15,13 +15,13 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic> {
   using type = ::test::fixtures::enums::Metasyntactic;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::FOO,
       type::BAR,
       type::BAZ,
       type::BAX,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "FOO"sv,
       "BAR"sv,
       "BAZ"sv,
@@ -32,7 +32,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1> {
   using type = ::test::fixtures::enums::MyEnum1;
   static constexpr const std::size_t size = 6;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ME1_0,
       type::ME1_1,
       type::ME1_2,
@@ -40,7 +40,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1> {
       type::ME1_5,
       type::ME1_6,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ME1_0"sv,
       "ME1_1"sv,
       "ME1_2"sv,
@@ -53,12 +53,12 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum2> {
   using type = ::test::fixtures::enums::MyEnum2;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ME2_0,
       type::ME2_1,
       type::ME2_2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ME2_0"sv,
       "ME2_1"sv,
       "ME2_2"sv,
@@ -68,7 +68,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum2> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3> {
   using type = ::test::fixtures::enums::MyEnum3;
   static constexpr const std::size_t size = 6;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ME3_0,
       type::ME3_1,
       type::ME3_N2,
@@ -76,7 +76,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3> {
       type::ME3_9,
       type::ME3_10,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ME3_0"sv,
       "ME3_1"sv,
       "ME3_N2"sv,
@@ -89,13 +89,13 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4> {
   using type = ::test::fixtures::enums::MyEnum4;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ME4_A,
       type::ME4_B,
       type::ME4_C,
       type::ME4_D,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ME4_A"sv,
       "ME4_B"sv,
       "ME4_C"sv,
@@ -106,12 +106,12 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1> {
   using type = ::test::fixtures::enums::MyBitmaskEnum1;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ONE,
       type::TWO,
       type::FOUR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ONE"sv,
       "TWO"sv,
       "FOUR"sv,
@@ -121,12 +121,12 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1> {
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2> {
   using type = ::test::fixtures::enums::MyBitmaskEnum2;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ONE,
       type::TWO,
       type::FOUR,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ONE"sv,
       "TWO"sv,
       "FOUR"sv,

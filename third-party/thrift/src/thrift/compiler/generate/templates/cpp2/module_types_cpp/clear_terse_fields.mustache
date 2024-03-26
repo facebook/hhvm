@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,45 +14,45 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
+}}{{!
 
 For all terse fields except for a terse struct field, they are cleared to their
 intrinsic default values. For a terse struct fields, only nested terse fields
 are cleared to their instrinic default values.
 
-%><%#field:type%>
-<%#type:resolves_to_base_or_enum?%>
-<% > module_types_cpp/clear_fields%>
-<%/type:resolves_to_base_or_enum?%>
-<%#type:resolves_to_container?%>
-<% > module_types_cpp/clear_fields%>
-<%/type:resolves_to_container?%>
-<%#type:non_empty_struct?%>
-<%^field:cpp_ref?%>
-<%#field:cpp_first_adapter%>
-  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(<%field:cpp_storage_name%>, *this);
-<%/field:cpp_first_adapter%>
-<%^field:cpp_first_adapter%>
-<%#type:union?%>
-<% > module_types_cpp/clear_fields%>
-<%/type:union?%>
-<%^type:union?%>
-  ::apache::thrift::detail::st::clear_terse_fields(<% > field/member%>);
-<%/type:union?%>
-<%/field:cpp_first_adapter%>
-<%/field:cpp_ref?%>
-<%#field:cpp_ref?%>
-<%#field:cpp_ref_unique?%>
-  if (<% > field/member%>) ::apache::thrift::detail::st::clear_terse_fields(*<% > field/member%>);
-<%/field:cpp_ref_unique?%>
-<%^field:cpp_ref_unique?%>
-<%#field:cpp_ref_not_boxed?%>
-  if (<% > field/member%>) <% > field/member%> = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
-<%/field:cpp_ref_not_boxed?%>
-<%^field:cpp_ref_not_boxed?%>
-<% > module_types_cpp/clear_fields%>
-<%/field:cpp_ref_not_boxed?%>
-<%/field:cpp_ref_unique?%>
-<%/field:cpp_ref?%>
-<%/type:non_empty_struct?%>
-<%/field:type%>
+}}{{#field:type}}
+{{#type:resolves_to_base_or_enum?}}
+{{ > module_types_cpp/clear_fields}}
+{{/type:resolves_to_base_or_enum?}}
+{{#type:resolves_to_container?}}
+{{ > module_types_cpp/clear_fields}}
+{{/type:resolves_to_container?}}
+{{#type:non_empty_struct?}}
+{{^field:cpp_ref?}}
+{{#field:cpp_first_adapter}}
+  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>({{field:cpp_storage_name}}, *this);
+{{/field:cpp_first_adapter}}
+{{^field:cpp_first_adapter}}
+{{#type:union?}}
+{{ > module_types_cpp/clear_fields}}
+{{/type:union?}}
+{{^type:union?}}
+  ::apache::thrift::detail::st::clear_terse_fields({{ > field/member}});
+{{/type:union?}}
+{{/field:cpp_first_adapter}}
+{{/field:cpp_ref?}}
+{{#field:cpp_ref?}}
+{{#field:cpp_ref_unique?}}
+  if ({{ > field/member}}) ::apache::thrift::detail::st::clear_terse_fields(*{{ > field/member}});
+{{/field:cpp_ref_unique?}}
+{{^field:cpp_ref_unique?}}
+{{#field:cpp_ref_not_boxed?}}
+  if ({{ > field/member}}) {{ > field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
+{{/field:cpp_ref_not_boxed?}}
+{{^field:cpp_ref_not_boxed?}}
+{{ > module_types_cpp/clear_fields}}
+{{/field:cpp_ref_not_boxed?}}
+{{/field:cpp_ref_unique?}}
+{{/field:cpp_ref?}}
+{{/type:non_empty_struct?}}
+{{/field:type}}

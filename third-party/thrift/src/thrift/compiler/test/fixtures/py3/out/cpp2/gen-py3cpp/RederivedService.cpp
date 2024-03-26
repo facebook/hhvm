@@ -137,7 +137,7 @@ determineInvocationType:
 
 namespace py3::simple {
 
-::std::int32_t RederivedServiceSvNull::get_seven() {
+::std::int32_t RederivedServiceSvNull::get_seven() { 
   return 0;
 }
 
@@ -178,7 +178,7 @@ apache::thrift::ServiceRequestInfoMap const& RederivedServiceServiceInfoHolder::
 apache::thrift::ServiceRequestInfoMap RederivedServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"get_seven",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "RederivedService.get_seven",
      std::nullopt,

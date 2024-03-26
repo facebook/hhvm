@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-bool <%struct:cpp_underlying_name%>::operator<([[maybe_unused]] const <%struct:cpp_underlying_name%>& rhs) const {
+}}
+bool {{struct:cpp_underlying_name}}::operator<([[maybe_unused]] const {{struct:cpp_underlying_name}}& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }

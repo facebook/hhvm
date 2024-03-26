@@ -4645,135 +4645,135 @@ determineInvocationType:
 
 namespace py3::simple {
 
-::std::int32_t SimpleServiceSvNull::get_five() {
+::std::int32_t SimpleServiceSvNull::get_five() { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::add_five(::std::int32_t /*num*/) {
+::std::int32_t SimpleServiceSvNull::add_five(::std::int32_t /*num*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::do_nothing() {
+void SimpleServiceSvNull::do_nothing() { 
   return;
 }
 
-void SimpleServiceSvNull::concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/) {}
+void SimpleServiceSvNull::concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/) {  }
 
-::std::int32_t SimpleServiceSvNull::get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/) {
+::std::int32_t SimpleServiceSvNull::get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/) { 
   return 0;
 }
 
-bool SimpleServiceSvNull::negate(bool /*input*/) {
+bool SimpleServiceSvNull::negate(bool /*input*/) { 
   return 0;
 }
 
-::std::int8_t SimpleServiceSvNull::tiny(::std::int8_t /*input*/) {
+::std::int8_t SimpleServiceSvNull::tiny(::std::int8_t /*input*/) { 
   return 0;
 }
 
-::std::int16_t SimpleServiceSvNull::small(::std::int16_t /*input*/) {
+::std::int16_t SimpleServiceSvNull::small(::std::int16_t /*input*/) { 
   return 0;
 }
 
-::std::int64_t SimpleServiceSvNull::big(::std::int64_t /*input*/) {
+::std::int64_t SimpleServiceSvNull::big(::std::int64_t /*input*/) { 
   return 0;
 }
 
-double SimpleServiceSvNull::two(double /*input*/) {
+double SimpleServiceSvNull::two(double /*input*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::expected_exception() {
+void SimpleServiceSvNull::expected_exception() { 
   return;
 }
 
-::std::int32_t SimpleServiceSvNull::unexpected_exception() {
+::std::int32_t SimpleServiceSvNull::unexpected_exception() { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/) {
+::std::int32_t SimpleServiceSvNull::sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/) { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/) {
+::std::int32_t SimpleServiceSvNull::sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/) { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/) {
+::std::int32_t SimpleServiceSvNull::sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {}
+void SimpleServiceSvNull::concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {  }
 
-::std::int32_t SimpleServiceSvNull::count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/) {
+::std::int32_t SimpleServiceSvNull::count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/) { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/) {
+::std::int32_t SimpleServiceSvNull::sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/) { 
   return 0;
 }
 
-bool SimpleServiceSvNull::contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/) {
+bool SimpleServiceSvNull::contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/) {}
+void SimpleServiceSvNull::get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/) {  }
 
-::std::int16_t SimpleServiceSvNull::map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/) {
+::std::int16_t SimpleServiceSvNull::map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/) { 
   return 0;
 }
 
-::std::int16_t SimpleServiceSvNull::sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/) {
+::std::int16_t SimpleServiceSvNull::sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/) { 
   return 0;
 }
 
-::std::int32_t SimpleServiceSvNull::complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {
+::std::int32_t SimpleServiceSvNull::complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {}
+void SimpleServiceSvNull::repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {  }
 
-void SimpleServiceSvNull::get_struct(::py3::simple::SimpleStruct& /*_return*/) {}
+void SimpleServiceSvNull::get_struct(::py3::simple::SimpleStruct& /*_return*/) {  }
 
-void SimpleServiceSvNull::fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/) {}
+void SimpleServiceSvNull::fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/) {  }
 
-void SimpleServiceSvNull::unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {}
+void SimpleServiceSvNull::unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {  }
 
-void SimpleServiceSvNull::words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {}
+void SimpleServiceSvNull::words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {  }
 
-::py3::simple::AnEnum SimpleServiceSvNull::set_enum(::py3::simple::AnEnum /*in_enum*/) {
+::py3::simple::AnEnum SimpleServiceSvNull::set_enum(::py3::simple::AnEnum /*in_enum*/) { 
   return (::py3::simple::AnEnum)0;
 }
 
-void SimpleServiceSvNull::list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/) {}
+void SimpleServiceSvNull::list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/) {  }
 
-void SimpleServiceSvNull::word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/) {}
+void SimpleServiceSvNull::word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/) {  }
 
-void SimpleServiceSvNull::list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/) {}
+void SimpleServiceSvNull::list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/) {  }
 
-::std::int32_t SimpleServiceSvNull::nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/) {
+::std::int32_t SimpleServiceSvNull::nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/) {}
+void SimpleServiceSvNull::make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/) {  }
 
-void SimpleServiceSvNull::get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/) {}
+void SimpleServiceSvNull::get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/) {  }
 
-void SimpleServiceSvNull::get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/) {}
+void SimpleServiceSvNull::get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/) {  }
 
-double SimpleServiceSvNull::lookup_double(::std::int32_t /*key*/) {
+double SimpleServiceSvNull::lookup_double(::std::int32_t /*key*/) { 
   return 0;
 }
 
-void SimpleServiceSvNull::retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/) {}
+void SimpleServiceSvNull::retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/) {  }
 
-void SimpleServiceSvNull::contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/) {}
+void SimpleServiceSvNull::contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/) {  }
 
-void SimpleServiceSvNull::contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) {}
+void SimpleServiceSvNull::contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) {  }
 
-void SimpleServiceSvNull::get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) {}
+void SimpleServiceSvNull::get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) {  }
 
-void SimpleServiceSvNull::get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) {}
+void SimpleServiceSvNull::get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) {  }
 
 
 const char* SimpleServiceAsyncProcessor::getServiceName() {
@@ -5017,294 +5017,294 @@ apache::thrift::ServiceRequestInfoMap const& SimpleServiceServiceInfoHolder::req
 apache::thrift::ServiceRequestInfoMap SimpleServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"get_five",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_five",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"add_five",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.add_five",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"do_nothing",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.do_nothing",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"concat",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.concat",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_value",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_value",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"negate",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.negate",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"tiny",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.tiny",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"small",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.small",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"big",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.big",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"two",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.two",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"expected_exception",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.expected_exception",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"unexpected_exception",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.unexpected_exception",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sum_i16_list",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.sum_i16_list",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sum_i32_list",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.sum_i32_list",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sum_i64_list",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.sum_i64_list",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"concat_many",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.concat_many",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"count_structs",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.count_structs",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sum_set",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.sum_set",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"contains_word",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.contains_word",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_map_value",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_map_value",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"map_length",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.map_length",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"sum_map_values",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.sum_map_values",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"complex_sum_i32",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.complex_sum_i32",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"repeat_name",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.repeat_name",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_struct",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_struct",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"fib",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.fib",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"unique_words",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.unique_words",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"words_count",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.words_count",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"set_enum",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.set_enum",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"list_of_lists",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.list_of_lists",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"word_character_frequency",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.word_character_frequency",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"list_of_sets",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.list_of_sets",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"nested_map_argument",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.nested_map_argument",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"make_sentence",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.make_sentence",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_union",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_union",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_keys",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_keys",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"lookup_double",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.lookup_double",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"retrieve_binary",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.retrieve_binary",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"contain_binary",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.contain_binary",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"contain_enum",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.contain_enum",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_binary_union_struct",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_binary_union_struct",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"get_struct_hidden",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_struct_hidden",
      std::nullopt,

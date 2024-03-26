@@ -113,7 +113,7 @@ SimpleException& SimpleException::operator=([[maybe_unused]] SimpleException&& o
 
 
 SimpleException::SimpleException(apache::thrift::FragileConstructor, ::std::int16_t err_code__arg) :
-    __fbthrift_field_err_code(std::move(err_code__arg)) {
+    __fbthrift_field_err_code(std::move(err_code__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -221,7 +221,7 @@ OptionalRefStruct& OptionalRefStruct::operator=([[maybe_unused]] OptionalRefStru
 
 
 OptionalRefStruct::OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::simple::IOBufPtr optional_blob__arg) :
-    __fbthrift_field_optional_blob(std::move(optional_blob__arg)) {
+    __fbthrift_field_optional_blob(std::move(optional_blob__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -333,7 +333,7 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
     __fbthrift_field_big_int(std::move(big_int__arg)),
     __fbthrift_field_real(std::move(real__arg)),
     __fbthrift_field_smaller_real(std::move(smaller_real__arg)),
-    __fbthrift_field_hidden_field(std::move(hidden_field__arg)) {
+    __fbthrift_field_hidden_field(std::move(hidden_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -472,7 +472,7 @@ HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=([[maybe_unused]] Hidde
 HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(apache::thrift::FragileConstructor, ::py3::simple::AdaptedTypeDef field1__arg, ::std::vector<::py3::simple::AdaptedTypeDef> field2__arg, ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
-    __fbthrift_field_field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) { 
   ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -719,7 +719,7 @@ HiddenException& HiddenException::operator=([[maybe_unused]] HiddenException&& o
 
 
 HiddenException::HiddenException(apache::thrift::FragileConstructor, ::std::int16_t test__arg) :
-    __fbthrift_field_test(std::move(test__arg)) {
+    __fbthrift_field_test(std::move(test__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -842,7 +842,7 @@ ComplexStruct::ComplexStruct(apache::thrift::FragileConstructor, ::py3::simple::
     __fbthrift_field_some_bytes(std::move(some_bytes__arg)),
     __fbthrift_field_from(std::move(from__arg)),
     __fbthrift_field_cdef(std::move(cdef__arg)),
-    __fbthrift_field_bytes_with_cpp_type(std::move(bytes_with_cpp_type__arg)) {
+    __fbthrift_field_bytes_with_cpp_type(std::move(bytes_with_cpp_type__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1103,7 +1103,7 @@ BinaryUnionStruct& BinaryUnionStruct::operator=([[maybe_unused]] BinaryUnionStru
 
 
 BinaryUnionStruct::BinaryUnionStruct(apache::thrift::FragileConstructor, ::py3::simple::BinaryUnion u__arg) :
-    __fbthrift_field_u(std::move(u__arg)) {
+    __fbthrift_field_u(std::move(u__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

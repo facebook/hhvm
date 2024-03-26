@@ -254,7 +254,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   using t_mstch_generator::t_mstch_generator;
 
   std::string template_prefix() const override { return "cpp2"; }
-  bool convert_delimiter() const override { return true; }
 
   void process_options(
       const std::map<std::string, std::string>& options) override {

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,78 +14,78 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#struct:fields%><%#field:type%><%#field:has_deprecated_accessors?%>
-<%#type:resolves_to_base_or_enum?%>
+}}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
+{{#type:resolves_to_base_or_enum?}}
 
-<%^type:string_or_binary?%>
-<%#field:optional?%>
-  const <%type:cpp_type%>* get_<%field:cpp_name%>() const& {
-    return <%field:cpp_name%>_ref() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
-  }
-
-  <%type:cpp_type%>* get_<%field:cpp_name%>() & {
-    return <%field:cpp_name%>_ref() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
-  }
-  <%type:cpp_type%>* get_<%field:cpp_name%>() && = delete;
-
-<%/field:optional?%>
-<%^field:optional?%>
-  <%type:cpp_type%> get_<%field:cpp_name%>() const {
-    return <%field:cpp_storage_name%>;
+{{^type:string_or_binary?}}
+{{#field:optional?}}
+  const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
+    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
 
-<%/field:optional?%>
-  [[deprecated("Use `FOO.<%field:cpp_name%>_ref() = BAR;` instead of `FOO.set_<%field:cpp_name%>(BAR);`")]]
-  <%type:cpp_type%>& set_<%field:cpp_name%>(<%type:cpp_type%> <%field:cpp_name%>_) {
-    <%field:cpp_name%>_ref() = <%field:cpp_name%>_;
-    return <%field:cpp_storage_name%>;
+  {{type:cpp_type}}* get_{{field:cpp_name}}() & {
+    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
-<%/type:string_or_binary?%>
-<%#type:string_or_binary?%>
-<%#field:optional?%>
-  const <%type:cpp_type%>* get_<%field:cpp_name%>() const& {
-    return <%field:cpp_name%>_ref() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
+  {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
+
+{{/field:optional?}}
+{{^field:optional?}}
+  {{type:cpp_type}} get_{{field:cpp_name}}() const {
+    return {{field:cpp_storage_name}};
   }
 
-  <%type:cpp_type%>* get_<%field:cpp_name%>() & {
-    return <%field:cpp_name%>_ref() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
+{{/field:optional?}}
+  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  {{type:cpp_type}}& set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_) {
+    {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
+    return {{field:cpp_storage_name}};
   }
-  <%type:cpp_type%>* get_<%field:cpp_name%>() && = delete;
-<%/field:optional?%>
-<%^field:optional?%>
-  const <%type:cpp_type%>& get_<%field:cpp_name%>() const& {
-    return <%field:cpp_storage_name%>;
+{{/type:string_or_binary?}}
+{{#type:string_or_binary?}}
+{{#field:optional?}}
+  const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
+    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
 
-  <%type:cpp_type%> get_<%field:cpp_name%>() && {
-    return std::move(<%field:cpp_storage_name%>);
+  {{type:cpp_type}}* get_{{field:cpp_name}}() & {
+    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
-<%/field:optional?%>
+  {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
+{{/field:optional?}}
+{{^field:optional?}}
+  const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
+    return {{field:cpp_storage_name}};
+  }
 
-  template <typename T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter = <%type:cpp_type%>>
-  [[deprecated("Use `FOO.<%field:cpp_name%>_ref() = BAR;` instead of `FOO.set_<%field:cpp_name%>(BAR);`")]]
-  <%type:cpp_type%>& set_<%field:cpp_name%>(T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter&& <%field:cpp_name%>_) {
-    <%field:cpp_name%>_ref() = std::forward<T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter>(<%field:cpp_name%>_);
-    return <%field:cpp_storage_name%>;
+  {{type:cpp_type}} get_{{field:cpp_name}}() && {
+    return std::move({{field:cpp_storage_name}});
   }
-<%/type:string_or_binary?%>
-<%/type:resolves_to_base_or_enum?%>
-<%#type:resolves_to_container_or_struct?%>
-<%#field:optional?%>
-  const <%type:cpp_type%>* get_<%field:cpp_name%>() const&;
-  <%type:cpp_type%>* get_<%field:cpp_name%>() &;
-  <%type:cpp_type%>* get_<%field:cpp_name%>() && = delete;
-<%/field:optional?%>
-<%^field:optional?%>
-  const <%type:cpp_type%>& get_<%field:cpp_name%>() const&;
-  <%type:cpp_type%> get_<%field:cpp_name%>() &&;
-<%/field:optional?%>
+{{/field:optional?}}
 
-  template <typename T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter = <%type:cpp_type%>>
-  [[deprecated("Use `FOO.<%field:cpp_name%>_ref() = BAR;` instead of `FOO.set_<%field:cpp_name%>(BAR);`")]]
-  <%type:cpp_type%>& set_<%field:cpp_name%>(T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter&& <%field:cpp_name%>_) {
-    <%field:cpp_name%>_ref() = std::forward<T_<%struct:cpp_underlying_name%>_<%field:cpp_name%>_struct_setter>(<%field:cpp_name%>_);
-    return <%field:cpp_storage_name%>;
+  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
+  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  {{type:cpp_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
+    {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
+    return {{field:cpp_storage_name}};
   }
-<%/type:resolves_to_container_or_struct?%>
-<%/field:has_deprecated_accessors?%><%/field:type%><%/struct:fields%>
+{{/type:string_or_binary?}}
+{{/type:resolves_to_base_or_enum?}}
+{{#type:resolves_to_container_or_struct?}}
+{{#field:optional?}}
+  const {{type:cpp_type}}* get_{{field:cpp_name}}() const&;
+  {{type:cpp_type}}* get_{{field:cpp_name}}() &;
+  {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
+{{/field:optional?}}
+{{^field:optional?}}
+  const {{type:cpp_type}}& get_{{field:cpp_name}}() const&;
+  {{type:cpp_type}} get_{{field:cpp_name}}() &&;
+{{/field:optional?}}
+
+  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
+  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  {{type:cpp_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
+    {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
+    return {{field:cpp_storage_name}};
+  }
+{{/type:resolves_to_container_or_struct?}}
+{{/field:has_deprecated_accessors?}}{{/field:type}}{{/struct:fields}}

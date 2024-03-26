@@ -73,7 +73,7 @@ Foo::Foo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, 
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -274,7 +274,7 @@ LazyFoo::LazyFoo(apache::thrift::FragileConstructor, ::std::vector<double> field
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -487,7 +487,7 @@ OptionalFoo::OptionalFoo(apache::thrift::FragileConstructor, ::std::vector<doubl
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -689,7 +689,7 @@ OptionalLazyFoo::OptionalLazyFoo(apache::thrift::FragileConstructor, ::std::vect
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -954,7 +954,7 @@ OptionalBoxedLazyFoo::OptionalBoxedLazyFoo(apache::thrift::FragileConstructor, :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
 }
 
 const ::apache::thrift::detail::boxed_value_ptr<::std::vector<double>>& OptionalBoxedLazyFoo::__fbthrift_read_field_field3() const {
@@ -1232,7 +1232,7 @@ LazyCppRef::LazyCppRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::s
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
-    __fbthrift_field_field4(std::move(field4__arg)) {
+    __fbthrift_field_field4(std::move(field4__arg)) { 
 }
 
 const ::std::unique_ptr<::std::vector<::std::int32_t>>& LazyCppRef::__fbthrift_read_field_field1() const {
@@ -1506,7 +1506,7 @@ IndexedFoo::IndexedFoo(apache::thrift::FragileConstructor, double serialized_dat
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
     __fbthrift_field_field4(std::move(field4__arg)),
-    __fbthrift_field_field_id_to_size(std::move(field_id_to_size__arg)) {
+    __fbthrift_field_field_id_to_size(std::move(field_id_to_size__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1674,7 +1674,7 @@ OptionalIndexedFoo::OptionalIndexedFoo(apache::thrift::FragileConstructor, doubl
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)),
     __fbthrift_field_field4(std::move(field4__arg)),
-    __fbthrift_field_field_id_to_size(std::move(field_id_to_size__arg)) {
+    __fbthrift_field_field_id_to_size(std::move(field_id_to_size__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,34 +14,34 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
-  struct View : public ViewBase<View, LayoutSelf, <%struct:cpp_fullname%>> {
-    <%struct:cpp_fullname%>::Type type_;
-    View() : type_(<%struct:cpp_fullname%>::Type::__EMPTY__) {}
+}}
+  struct View : public ViewBase<View, LayoutSelf, {{struct:cpp_fullname}}> {
+    {{struct:cpp_fullname}}::Type type_;
+    View() : type_({{struct:cpp_fullname}}::Type::__EMPTY__) {}
     View(const LayoutSelf* layout, ViewPosition position)
-        : ViewBase<View, LayoutSelf, <%struct:cpp_fullname%>>(layout, position) {
+        : ViewBase<View, LayoutSelf, {{struct:cpp_fullname}}>(layout, position) {
       type_ = this->layout_->type_Field.layout.view(this->position_(this->layout_->type_Field.pos));
       switch (type_) {
-<%#struct:fields%>
-        case <%struct:cpp_fullname%>::Type::<%field:cpp_name%>: {
+{{#struct:fields}}
+        case {{struct:cpp_fullname}}::Type::{{field:cpp_name}}: {
           break;
         }
-<%/struct:fields%>
+{{/struct:fields}}
         default: {
-          type_ = <%struct:cpp_fullname%>::Type::__EMPTY__;
+          type_ = {{struct:cpp_fullname}}::Type::__EMPTY__;
         }
       }
     }
 
-    <%struct:cpp_fullname%>::Type getType() {return type_;}
+    {{struct:cpp_fullname}}::Type getType() {return type_;}
 
-<%#struct:fields%><%#field:type%>
-    auto get_<%field:cpp_name%>() const {
-      assert(type_ == <%struct:cpp_fullname%>::Type::<%field:cpp_name%>);
-      return this->layout_-><%field:cpp_name%>Field.layout.view(
-          this->position_(this->layout_-><%field:cpp_name%>Field.pos));
+{{#struct:fields}}{{#field:type}}
+    auto get_{{field:cpp_name}}() const {
+      assert(type_ == {{struct:cpp_fullname}}::Type::{{field:cpp_name}});
+      return this->layout_->{{field:cpp_name}}Field.layout.view(
+          this->position_(this->layout_->{{field:cpp_name}}Field.pos));
     }
-<%/field:type%><%/struct:fields%>
+{{/field:type}}{{/struct:fields}}
   };
 
   View view(ViewPosition self) const {

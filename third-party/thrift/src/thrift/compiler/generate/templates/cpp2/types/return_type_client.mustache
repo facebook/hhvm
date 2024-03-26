@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^function:creates_interaction?%><%!
-  %><% > types/return_type_client_no_handle%><%!
-%><%/function:creates_interaction?%><%!
-%><%#function:creates_interaction?%><%!
-  %><%#type:void?%><%!
-    %>apache::thrift::Client<<%service:parent_service_qualified_name%>>::<%function:created_interaction%><%!
-  %><%/type:void?%><%!
-  %><%^type:void?%><%!
-    %>std::pair<apache::thrift::Client<<%service:parent_service_qualified_name%>>::<%function:created_interaction%>, <% > types/return_type_client_no_handle%>><%!
-  %><%/type:void?%><%!
-%><%/function:creates_interaction?%>
+}}{{^function:creates_interaction?}}{{!
+  }}{{ > types/return_type_client_no_handle}}{{!
+}}{{/function:creates_interaction?}}{{!
+}}{{#function:creates_interaction?}}{{!
+  }}{{#type:void?}}{{!
+    }}apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}{{!
+  }}{{/type:void?}}{{!
+  }}{{^type:void?}}{{!
+    }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
+  }}{{/type:void?}}{{!
+}}{{/function:creates_interaction?}}

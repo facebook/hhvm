@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,9 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
-<%#services%>
-#include "<%service:include_prefix%><%service:name%>.h"
-<%/services%>
+{{#services}}
+#include "{{service:include_prefix}}{{service:name}}.h"
+{{/services}}

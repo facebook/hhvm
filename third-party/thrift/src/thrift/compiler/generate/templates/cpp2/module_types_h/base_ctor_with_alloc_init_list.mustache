@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -15,20 +15,20 @@
   limitations under the License.
 
 
-%><%! --------------- Empty constructor, with 1 allocator,
+}}{{! --------------- Empty constructor, with 1 allocator,
     copied from alloc_extended_ctors.mustache ctor(const allocator_type& alloc)
-%><%struct:cpp_underlying_name%>() :
+}}{{struct:cpp_underlying_name}}() :
     __fbthrift_alloc(allocator_type()),
-<%#struct:fields_in_layout_order%>
-    <%field:cpp_storage_name%>(<%!
-    %><%#field:type%><%!
-      %><%#field:cpp_ref_not_boxed?%><%!
-        %><% > module_types_h/smart_ptr_constructor%><%!
-      %><%/field:cpp_ref_not_boxed?%><%!
-      %><%#field:boxed_ref?%><% > field/default%><%/field:boxed_ref?%><%!
-      %><%#field:intern_boxed_ref?%><%field:cpp_storage_type%>::fromStaticConstant(&::apache::thrift::op::getDefault<<% > field/tag%>>())<%/field:intern_boxed_ref?%><%!
-      %><%^field:cpp_ref?%><%!
-        %><%#type:cpp_use_allocator?%>__fbthrift_alloc<%/type:cpp_use_allocator?%><%!
-      %><%/field:cpp_ref?%><%!
-    %>)<%/field:type%><% > common/comma_newline%><%!
-%><%/struct:fields_in_layout_order%>
+{{#struct:fields_in_layout_order}}
+    {{field:cpp_storage_name}}({{!
+    }}{{#field:type}}{{!
+      }}{{#field:cpp_ref_not_boxed?}}{{!
+        }}{{ > module_types_h/smart_ptr_constructor}}{{!
+      }}{{/field:cpp_ref_not_boxed?}}{{!
+      }}{{#field:boxed_ref?}}{{ > field/default}}{{/field:boxed_ref?}}{{!
+      }}{{#field:intern_boxed_ref?}}{{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getDefault<{{ > field/tag}}>()){{/field:intern_boxed_ref?}}{{!
+      }}{{^field:cpp_ref?}}{{!
+        }}{{#type:cpp_use_allocator?}}__fbthrift_alloc{{/type:cpp_use_allocator?}}{{!
+      }}{{/field:cpp_ref?}}{{!
+    }}){{/field:type}}{{ > common/comma_newline}}{{!
+}}{{/struct:fields_in_layout_order}}

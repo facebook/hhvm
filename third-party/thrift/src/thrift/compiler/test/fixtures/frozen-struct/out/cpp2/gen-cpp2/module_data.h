@@ -15,10 +15,10 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::some::ns::EnumB> {
   using type = ::some::ns::EnumB;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::EMPTY,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "EMPTY"sv,
   }};
 };

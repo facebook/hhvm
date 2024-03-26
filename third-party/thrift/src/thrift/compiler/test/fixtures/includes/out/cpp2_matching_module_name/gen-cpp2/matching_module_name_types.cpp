@@ -45,7 +45,7 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::matching_module_name::OtherStruct OtherStructField__arg) :
-    __fbthrift_field_OtherStructField(std::move(OtherStructField__arg)) {
+    __fbthrift_field_OtherStructField(std::move(OtherStructField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

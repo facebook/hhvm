@@ -30,8 +30,8 @@ namespace facebook::thrift::test {
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& module_constants::var3() {
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct>> const instance{
-      folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(30)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{2}>(std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("10"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("20")}))),
+      folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(30)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{ 2 }>(std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("10"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("20") }))),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<std::string>::fromStringLiteral("baz"))),
                                             "facebook.com/thrift/test/var3"); }};
   return *instance;
@@ -55,8 +55,8 @@ namespace facebook::thrift::test {
 
 ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& module_constants::var6() {
   static folly::Indestructible<::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct>> const instance{
-      folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(60)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{2}>(std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("30"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("40")}))),
+      folly::factory_constructor, [](){ return MyVarAdapter::fromThrift(::facebook::thrift::test::MyStruct(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::field>(static_cast<::std::int32_t>(60)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::set_string, ::my::Adapter2, ::apache::thrift::FieldId{ 2 }>(std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("30"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("40") }))),
                                             ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::Config>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::path>(apache::thrift::StringTraits<std::string>::fromStringLiteral("baz2"))),
                                             "facebook.com/thrift/test/var6"); }};
   return *instance;
@@ -105,19 +105,19 @@ namespace facebook::thrift::test {
 }
 
 ::facebook::thrift::test::AdaptedBool const& module_constants::type_adapted() {
-  static folly::Indestructible<::facebook::thrift::test::AdaptedBool> const instance{::apache::thrift::test::TemplatedTestAdapter::fromThrift(bool(true))};
+  static folly::Indestructible<::facebook::thrift::test::AdaptedBool> const instance{ ::apache::thrift::test::TemplatedTestAdapter::fromThrift(bool(true)) };
   return *instance;
 }
 
 ::facebook::thrift::test::MoveOnly const& module_constants::nested_adapted() {
-  static folly::Indestructible<::facebook::thrift::test::MoveOnly> const instance{::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MoveOnly>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::ptr, ::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::FieldId{1}>(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::detail::HeapAllocated>()))};
+  static folly::Indestructible<::facebook::thrift::test::MoveOnly> const instance{ ::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MoveOnly>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::ptr, ::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::FieldId{ 1 }>(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::detail::HeapAllocated>())) };
   return *instance;
 }
 
 ::std::vector<::facebook::thrift::test::AdaptedByte> const& module_constants::container_of_adapted() {
-  static folly::Indestructible<::std::vector<::facebook::thrift::test::AdaptedByte>> const instance{std::initializer_list<::facebook::thrift::test::AdaptedByte>{::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(1))),
+  static folly::Indestructible<::std::vector<::facebook::thrift::test::AdaptedByte>> const instance{ std::initializer_list<::facebook::thrift::test::AdaptedByte>{ ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(1))),
   ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(2))),
-  ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(3)))}};
+  ::apache::thrift::test::TemplatedTestAdapter::fromThrift(::std::int8_t(static_cast<::std::int8_t>(3))) } };
   return *instance;
 }
 

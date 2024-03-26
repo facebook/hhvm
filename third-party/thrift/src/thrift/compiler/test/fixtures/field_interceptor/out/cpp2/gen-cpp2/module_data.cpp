@@ -34,7 +34,7 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::InterceptedFields>::name = "InterceptedFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = { {
   "access_field"sv,
   "access_shared_field"sv,
   "access_optional_shared_field"sv,
@@ -42,7 +42,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::fa
   "access_optional_shared_const_field"sv,
   "access_optional_boxed_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_ids = { {
   1,
   2,
   3,
@@ -50,7 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::facebook::t
   5,
   6,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -58,7 +58,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::fac
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = { {
   "__fbthrift_field_access_field"sv,
   "__fbthrift_field_access_shared_field"sv,
   "__fbthrift_field_access_optional_shared_field"sv,
@@ -66,7 +66,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::fa
   "__fbthrift_field_access_optional_shared_const_field"sv,
   "__fbthrift_field_access_optional_boxed_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = { {
   0,
   -1,
   -1,

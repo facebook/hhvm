@@ -1705,49 +1705,49 @@ determineInvocationType:
 
 namespace some::valid::ns {
 
-bool ReturnServiceSvNull::boolReturn() {
+bool ReturnServiceSvNull::boolReturn() { 
   return 0;
 }
 
-::std::int16_t ReturnServiceSvNull::i16Return() {
+::std::int16_t ReturnServiceSvNull::i16Return() { 
   return 0;
 }
 
-::std::int32_t ReturnServiceSvNull::i32Return() {
+::std::int32_t ReturnServiceSvNull::i32Return() { 
   return 0;
 }
 
-::std::int64_t ReturnServiceSvNull::i64Return() {
+::std::int64_t ReturnServiceSvNull::i64Return() { 
   return 0;
 }
 
-float ReturnServiceSvNull::floatReturn() {
+float ReturnServiceSvNull::floatReturn() { 
   return 0;
 }
 
-double ReturnServiceSvNull::doubleReturn() {
+double ReturnServiceSvNull::doubleReturn() { 
   return 0;
 }
 
-void ReturnServiceSvNull::binaryReturn(::std::string& /*_return*/) {}
+void ReturnServiceSvNull::binaryReturn(::std::string& /*_return*/) {  }
 
-void ReturnServiceSvNull::mapReturn(::std::map<::std::string, ::std::int64_t>& /*_return*/) {}
+void ReturnServiceSvNull::mapReturn(::std::map<::std::string, ::std::int64_t>& /*_return*/) {  }
 
-::some::valid::ns::simpleTypeDef ReturnServiceSvNull::simpleTypedefReturn() {
+::some::valid::ns::simpleTypeDef ReturnServiceSvNull::simpleTypedefReturn() { 
   return 0;
 }
 
-void ReturnServiceSvNull::complexTypedefReturn(::some::valid::ns::complexStructTypeDef& /*_return*/) {}
+void ReturnServiceSvNull::complexTypedefReturn(::some::valid::ns::complexStructTypeDef& /*_return*/) {  }
 
-void ReturnServiceSvNull::list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& /*_return*/) {}
+void ReturnServiceSvNull::list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& /*_return*/) {  }
 
-void ReturnServiceSvNull::structReturn(::some::valid::ns::MyStruct& /*_return*/) {}
+void ReturnServiceSvNull::structReturn(::some::valid::ns::MyStruct& /*_return*/) {  }
 
-void ReturnServiceSvNull::set_StructReturn(::std::set<::some::valid::ns::MyStruct>& /*_return*/) {}
+void ReturnServiceSvNull::set_StructReturn(::std::set<::some::valid::ns::MyStruct>& /*_return*/) {  }
 
-void ReturnServiceSvNull::list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/) {}
+void ReturnServiceSvNull::list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/) {  }
 
-void ReturnServiceSvNull::readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/) {}
+void ReturnServiceSvNull::readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/) {  }
 
 
 const char* ReturnServiceAsyncProcessor::getServiceName() {
@@ -1886,147 +1886,147 @@ apache::thrift::ServiceRequestInfoMap const& ReturnServiceServiceInfoHolder::req
 apache::thrift::ServiceRequestInfoMap ReturnServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"noReturn",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.noReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"boolReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.boolReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"i16Return",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.i16Return",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"i32Return",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.i32Return",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"i64Return",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.i64Return",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"floatReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.floatReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"doubleReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.doubleReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"stringReturn",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.stringReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"binaryReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.binaryReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"mapReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.mapReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"simpleTypedefReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.simpleTypedefReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"complexTypedefReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.complexTypedefReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"list_mostComplexTypedefReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.list_mostComplexTypedefReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"enumReturn",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.enumReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"list_EnumReturn",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.list_EnumReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"structReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.structReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"set_StructReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.set_StructReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"unionReturn",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.unionReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"list_UnionReturn",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.list_UnionReturn",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"readDataEb",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.readDataEb",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"readData",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "ReturnService.readData",
      std::nullopt,

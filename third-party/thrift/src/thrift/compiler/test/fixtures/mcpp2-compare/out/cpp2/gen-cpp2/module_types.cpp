@@ -184,7 +184,7 @@ std::string_view ASimpleStruct::__fbthrift_get_class_name() {
 
 
 ASimpleStruct::ASimpleStruct(apache::thrift::FragileConstructor, ::std::int64_t boolField__arg) :
-    __fbthrift_field_boolField(std::move(boolField__arg)) {
+    __fbthrift_field_boolField(std::move(boolField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -262,7 +262,7 @@ std::string_view ASimpleStructNoexcept::__fbthrift_get_class_name() {
 
 
 ASimpleStructNoexcept::ASimpleStructNoexcept(apache::thrift::FragileConstructor, ::std::int64_t boolField__arg) :
-    __fbthrift_field_boolField(std::move(boolField__arg)) {
+    __fbthrift_field_boolField(std::move(boolField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -370,9 +370,9 @@ MyStruct::MyStruct() :
       __fbthrift_field_MyBoolField(),
       __fbthrift_field_MyIntField(static_cast<::std::int64_t>(12)),
       __fbthrift_field_MyStringField(apache::thrift::StringTraits<std::string>::fromStringLiteral("test")),
-      __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{{ ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA")},
-  { ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC")},
-  {static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<std::string>::fromStringLiteral("nothing")}}) {
+      __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{ {  ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA") },
+  {  ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC") },
+  { static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<std::string>::fromStringLiteral("nothing") } }) {
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
@@ -425,7 +425,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, ::
     __fbthrift_field_MyBinaryListField4(std::move(MyBinaryListField4__arg)),
     __fbthrift_field_MyMapEnumAndInt(std::move(MyMapEnumAndInt__arg)),
     __fbthrift_field_MyCustomField(std::move(MyCustomField__arg)),
-    __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) {
+    __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) { 
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
   __isset.set(folly::index_constant<0>(), true);
@@ -1175,9 +1175,9 @@ AnException& AnException::operator=(const AnException& other) {
 AnException::AnException() :
       __fbthrift_field_code(),
       __fbthrift_field_req_code(),
-      __fbthrift_field_exception_list(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      __fbthrift_field_exception_list(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
-  static_cast<::std::int32_t>(3)}),
+  static_cast<::std::int32_t>(3) }),
       __fbthrift_field_enum_field() {
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
@@ -1253,7 +1253,7 @@ AnException::AnException(apache::thrift::FragileConstructor, ::std::int32_t code
     __fbthrift_field_union_typedef(std::move(union_typedef__arg)),
     __fbthrift_field_a_union_typedef_list(std::move(a_union_typedef_list__arg)),
     __fbthrift_field_MyCustomField(std::move(MyCustomField__arg)),
-    __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) {
+    __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) { 
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
   __isset.set(folly::index_constant<0>(), true);
@@ -1513,7 +1513,7 @@ AnotherException& AnotherException::operator=([[maybe_unused]] AnotherException&
 AnotherException::AnotherException(apache::thrift::FragileConstructor, ::std::int32_t code__arg, ::std::int32_t req_code__arg, ::std::string message__arg) :
     __fbthrift_field_code(std::move(code__arg)),
     __fbthrift_field_req_code(std::move(req_code__arg)),
-    __fbthrift_field_message(std::move(message__arg)) {
+    __fbthrift_field_message(std::move(message__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -1602,49 +1602,49 @@ containerStruct::containerStruct() :
       fieldA(),
       req_fieldA(),
       opt_fieldA(),
-      fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
-      req_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+  static_cast<::std::int32_t>(4) }),
+      req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
-      opt_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+  static_cast<::std::int32_t>(4) }),
+      opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
+  static_cast<::std::int32_t>(4) }),
       fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
       req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
       opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      fieldF(std::initializer_list<::std::vector<::std::int32_t>>{std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      fieldF(std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(7),
-  static_cast<::std::int32_t>(9)},
-  std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
+  static_cast<::std::int32_t>(9) },
+  std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(10),
-  static_cast<::std::int32_t>(12)}}),
+  static_cast<::std::int32_t>(12) } }),
       fieldI(true),
-      fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
-  static_cast<::std::int32_t>(12)}},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
+  static_cast<::std::int32_t>(12) } },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
-  static_cast<::std::int32_t>(13)}}}),
+  static_cast<::std::int32_t>(13) } } }),
       fieldN(),
       fieldQ(),
       fieldR( ::some::valid::ns::MyEnumA::fieldB),
       req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
       opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
       fieldS( ::some::valid::ns::MyEnumA::fieldB),
-      fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{ ::some::valid::ns::MyEnumA::fieldC,
+      fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldC,
    ::some::valid::ns::MyEnumA::fieldB,
-   ::some::valid::ns::MyEnumA::fieldA}),
+   ::some::valid::ns::MyEnumA::fieldA }),
       fieldAC(),
       fieldAD() {
 }
@@ -1699,7 +1699,7 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
     fieldAC(std::move(fieldAC__arg)),
     fieldAD(std::move(fieldAD__arg)),
     fieldAE(std::move(fieldAE__arg)),
-    fieldSD(std::move(fieldSD__arg)) {
+    fieldSD(std::move(fieldSD__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -2245,7 +2245,7 @@ MyIncludedStruct::MyIncludedStruct(apache::thrift::FragileConstructor, ::a::diff
     __fbthrift_field_MyIncludedInt(std::move(MyIncludedInt__arg)),
     __fbthrift_field_MyIncludedStruct(std::move(MyIncludedStruct__arg)),
     __fbthrift_field_ARefField(std::move(ARefField__arg)),
-    __fbthrift_field_ARequiredField(std::move(ARequiredField__arg)) {
+    __fbthrift_field_ARequiredField(std::move(ARequiredField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -2430,7 +2430,7 @@ AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::val
     indirection_c(std::move(indirection_c__arg)),
     iobuf_type_val(std::move(iobuf_type_val__arg)),
     iobuf_ptr_val(std::move(iobuf_ptr_val__arg)),
-    struct_struct(std::move(struct_struct__arg)) {
+    struct_struct(std::move(struct_struct__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -2859,7 +2859,7 @@ ComplexContainerStruct& ComplexContainerStruct::operator=([[maybe_unused]] Compl
 
 ComplexContainerStruct::ComplexContainerStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::some::valid::ns::IOBuf> map_of_iobufs__arg, ::std::map<::std::string, ::some::valid::ns::IOBufPtr> map_of_iobuf_ptrs__arg) :
     __fbthrift_field_map_of_iobufs(std::move(map_of_iobufs__arg)),
-    __fbthrift_field_map_of_iobuf_ptrs(std::move(map_of_iobuf_ptrs__arg)) {
+    __fbthrift_field_map_of_iobuf_ptrs(std::move(map_of_iobuf_ptrs__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -2962,7 +2962,7 @@ std::string_view FloatStruct::__fbthrift_get_class_name() {
 
 FloatStruct::FloatStruct(apache::thrift::FragileConstructor, float floatField__arg, double doubleField__arg) :
     __fbthrift_field_floatField(std::move(floatField__arg)),
-    __fbthrift_field_doubleField(std::move(doubleField__arg)) {
+    __fbthrift_field_doubleField(std::move(doubleField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -3183,7 +3183,7 @@ std::string_view AllRequiredNoExceptMoveCtrStruct::__fbthrift_get_class_name() {
 
 
 AllRequiredNoExceptMoveCtrStruct::AllRequiredNoExceptMoveCtrStruct(apache::thrift::FragileConstructor, ::std::int64_t intField__arg) :
-    __fbthrift_field_intField(std::move(intField__arg)) {
+    __fbthrift_field_intField(std::move(intField__arg)) { 
 }
 
 

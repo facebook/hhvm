@@ -66,7 +66,7 @@ Fiery& Fiery::operator=([[maybe_unused]] Fiery&& other) noexcept {
 
 
 Fiery::Fiery(apache::thrift::FragileConstructor, ::std::string message__arg) :
-    __fbthrift_field_message(std::move(message__arg)) {
+    __fbthrift_field_message(std::move(message__arg)) { 
 }
 
 
@@ -164,7 +164,7 @@ Serious& Serious::operator=([[maybe_unused]] Serious&& other) noexcept {
 
 
 Serious::Serious(apache::thrift::FragileConstructor, ::std::string sonnet__arg) :
-    __fbthrift_field_sonnet(std::move(sonnet__arg)) {
+    __fbthrift_field_sonnet(std::move(sonnet__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -268,7 +268,7 @@ ComplexFieldNames& ComplexFieldNames::operator=([[maybe_unused]] ComplexFieldNam
 
 ComplexFieldNames::ComplexFieldNames(apache::thrift::FragileConstructor, ::std::string error_message__arg, ::std::string internal_error_message__arg) :
     __fbthrift_field_error_message(std::move(error_message__arg)),
-    __fbthrift_field_internal_error_message(std::move(internal_error_message__arg)) {
+    __fbthrift_field_internal_error_message(std::move(internal_error_message__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -375,7 +375,7 @@ CustomFieldNames& CustomFieldNames::operator=([[maybe_unused]] CustomFieldNames&
 
 CustomFieldNames::CustomFieldNames(apache::thrift::FragileConstructor, ::std::string error_message__arg, ::std::string internal_error_message__arg) :
     __fbthrift_field_error_message(std::move(error_message__arg)),
-    __fbthrift_field_internal_error_message(std::move(internal_error_message__arg)) {
+    __fbthrift_field_internal_error_message(std::move(internal_error_message__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -483,7 +483,7 @@ ExceptionWithPrimitiveField& ExceptionWithPrimitiveField::operator=([[maybe_unus
 
 ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(apache::thrift::FragileConstructor, ::std::string message__arg, ::std::int32_t error_code__arg) :
     __fbthrift_field_message(std::move(message__arg)),
-    __fbthrift_field_error_code(std::move(error_code__arg)) {
+    __fbthrift_field_error_code(std::move(error_code__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -591,7 +591,7 @@ ExceptionWithStructuredAnnotation& ExceptionWithStructuredAnnotation::operator=(
 
 ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(apache::thrift::FragileConstructor, ::std::string message_field__arg, ::std::int32_t error_code__arg) :
     __fbthrift_field_message_field(std::move(message_field__arg)),
-    __fbthrift_field_error_code(std::move(error_code__arg)) {
+    __fbthrift_field_error_code(std::move(error_code__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }

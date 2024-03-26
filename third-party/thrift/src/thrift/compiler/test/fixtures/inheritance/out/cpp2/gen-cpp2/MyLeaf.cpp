@@ -139,7 +139,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyLeafSvNull::do_leaf() {
+void MyLeafSvNull::do_leaf() { 
   return;
 }
 
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& MyLeafServiceInfoHolder::requestInf
 apache::thrift::ServiceRequestInfoMap MyLeafServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"do_leaf",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyLeaf.do_leaf",
      std::nullopt,

@@ -15,11 +15,11 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::MyEnum> {
   using type = ::cpp2::MyEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::Zero,
       type::One,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "Zero"sv,
       "One"sv,
   }};
@@ -28,11 +28,11 @@ template <> struct TEnumDataStorage<::cpp2::MyEnum> {
 template <> struct TEnumDataStorage<::cpp2::TypedEnum> {
   using type = ::cpp2::TypedEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::VAL1,
       type::VAL2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "VAL1"sv,
       "VAL2"sv,
   }};
@@ -41,11 +41,11 @@ template <> struct TEnumDataStorage<::cpp2::TypedEnum> {
 template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
   using type = ::cpp2::MyUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::anInteger,
       type::aString,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "anInteger"sv,
       "aString"sv,
   }};
@@ -54,10 +54,10 @@ template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::NonTriviallyDestructibleUnion::Type> {
   using type = ::cpp2::NonTriviallyDestructibleUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::int_field,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "int_field"sv,
   }};
 };

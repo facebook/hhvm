@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,13 +14,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>  union storage_type {
-<%#struct:fields%>
-    <%field:cpp_storage_type%> <%field:cpp_name%>;
-<%/struct:fields%>
+}}  union storage_type {
+{{#struct:fields}}
+    {{field:cpp_storage_type}} {{field:cpp_name}};
+{{/struct:fields}}
 
-<%^struct:is_trivially_destructible?%>
+{{^struct:is_trivially_destructible?}}
     storage_type() {}
     ~storage_type() {}
-<%/struct:is_trivially_destructible?%>
+{{/struct:is_trivially_destructible?}}
   } ;

@@ -15,12 +15,12 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA> {
   using type = ::some::valid::ns::MyEnumA;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::fieldA,
       type::fieldB,
       type::fieldC,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "fieldA"sv,
       "fieldB"sv,
       "fieldC"sv,
@@ -30,12 +30,12 @@ template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA> {
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum> {
   using type = ::some::valid::ns::AnnotatedEnum;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,
       type::FIELDC,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "FIELDA"sv,
       "FIELDB"sv,
       "FIELDC"sv,
@@ -45,12 +45,12 @@ template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum> {
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2> {
   using type = ::some::valid::ns::AnnotatedEnum2;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,
       type::FIELDC,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "FIELDA"sv,
       "FIELDB"sv,
       "FIELDC"sv,
@@ -60,10 +60,10 @@ template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2> {
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumB> {
   using type = ::some::valid::ns::MyEnumB;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::AField,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "AField"sv,
   }};
 };
@@ -71,11 +71,11 @@ template <> struct TEnumDataStorage<::some::valid::ns::MyEnumB> {
 template <> struct TEnumDataStorage<::some::valid::ns::SimpleUnion::Type> {
   using type = ::some::valid::ns::SimpleUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::intValue,
       type::stringValue,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "intValue"sv,
       "stringValue"sv,
   }};
@@ -84,7 +84,7 @@ template <> struct TEnumDataStorage<::some::valid::ns::SimpleUnion::Type> {
 template <> struct TEnumDataStorage<::some::valid::ns::ComplexUnion::Type> {
   using type = ::some::valid::ns::ComplexUnion::Type;
   static constexpr const std::size_t size = 28;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::intValue,
       type::opt_intValue,
       type::stringValue,
@@ -114,7 +114,7 @@ template <> struct TEnumDataStorage<::some::valid::ns::ComplexUnion::Type> {
       type::excp_field,
       type::MyCustomField,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "intValue"sv,
       "opt_intValue"sv,
       "stringValue"sv,
@@ -149,11 +149,11 @@ template <> struct TEnumDataStorage<::some::valid::ns::ComplexUnion::Type> {
 template <> struct TEnumDataStorage<::some::valid::ns::FloatUnion::Type> {
   using type = ::some::valid::ns::FloatUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::floatSide,
       type::doubleSide,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "floatSide"sv,
       "doubleSide"sv,
   }};

@@ -681,27 +681,27 @@ void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_eb_methodFast(st
 
 namespace cpp2 {
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::method() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::method() { 
   return {};
 }
 
-::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodAndReponse() {
+::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodAndReponse() { 
   return {};
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodThrow() { 
   return {};
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodSinkThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodSinkThrow() { 
   return {};
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodFinalThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodFinalThrow() { 
   return {};
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodBothThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> SinkServiceSvNull::methodBothThrow() { 
   return {};
 }
 
@@ -772,49 +772,49 @@ apache::thrift::ServiceRequestInfoMap const& SinkServiceServiceInfoHolder::reque
 apache::thrift::ServiceRequestInfoMap SinkServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"method",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.method",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodAndReponse",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodAndReponse",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodThrow",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodThrow",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodSinkThrow",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodSinkThrow",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodFinalThrow",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodFinalThrow",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodBothThrow",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodBothThrow",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"methodFast",
-    {true,
+    { true,
      apache::thrift::RpcKind::SINK,
      "SinkService.methodFast",
      std::nullopt,

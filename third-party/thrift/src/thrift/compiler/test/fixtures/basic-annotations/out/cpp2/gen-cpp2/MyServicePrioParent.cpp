@@ -249,11 +249,11 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyServicePrioParentSvNull::ping() {
+void MyServicePrioParentSvNull::ping() { 
   return;
 }
 
-void MyServicePrioParentSvNull::pong() {
+void MyServicePrioParentSvNull::pong() { 
   return;
 }
 
@@ -299,14 +299,14 @@ apache::thrift::ServiceRequestInfoMap const& MyServicePrioParentServiceInfoHolde
 apache::thrift::ServiceRequestInfoMap MyServicePrioParentServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"ping",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioParent.ping",
      std::nullopt,
      apache::thrift::concurrency::IMPORTANT,
      std::nullopt}},
   {"pong",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioParent.pong",
      std::nullopt,

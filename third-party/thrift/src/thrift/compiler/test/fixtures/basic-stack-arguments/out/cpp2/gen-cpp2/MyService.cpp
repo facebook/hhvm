@@ -468,17 +468,17 @@ determineInvocationType:
 
 namespace cpp2 {
 
-bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) {
+bool MyServiceSvNull::hasDataById(::std::int64_t /*id*/) { 
   return 0;
 }
 
-void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {}
+void MyServiceSvNull::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {  }
 
-void MyServiceSvNull::putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void MyServiceSvNull::putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) { 
   return;
 }
 
-void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void MyServiceSvNull::lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) { 
   return;
 }
 
@@ -534,28 +534,28 @@ apache::thrift::ServiceRequestInfoMap const& MyServiceServiceInfoHolder::request
 apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"hasDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.hasDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"getDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.getDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"putDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.putDataById",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"lobDataById",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
      "MyService.lobDataById",
      std::nullopt,

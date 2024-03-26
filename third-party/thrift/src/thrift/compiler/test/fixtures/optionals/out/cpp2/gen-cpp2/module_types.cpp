@@ -64,7 +64,7 @@ Color::Color(apache::thrift::FragileConstructor, double red__arg, double green__
     __fbthrift_field_red(std::move(red__arg)),
     __fbthrift_field_green(std::move(green__arg)),
     __fbthrift_field_blue(std::move(blue__arg)),
-    __fbthrift_field_alpha(std::move(alpha__arg)) {
+    __fbthrift_field_alpha(std::move(alpha__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -183,7 +183,7 @@ Vehicle::Vehicle(apache::thrift::FragileConstructor, ::cpp2::Color color__arg, :
     __fbthrift_field_licensePlate(std::move(licensePlate__arg)),
     __fbthrift_field_description(std::move(description__arg)),
     __fbthrift_field_name(std::move(name__arg)),
-    __fbthrift_field_hasAC(std::move(hasAC__arg)) {
+    __fbthrift_field_hasAC(std::move(hasAC__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -337,7 +337,7 @@ Person::Person(apache::thrift::FragileConstructor, ::cpp2::PersonID id__arg, ::s
     __fbthrift_field_bestFriend(std::move(bestFriend__arg)),
     __fbthrift_field_petNames(std::move(petNames__arg)),
     __fbthrift_field_afraidOfAnimal(std::move(afraidOfAnimal__arg)),
-    __fbthrift_field_vehicles(std::move(vehicles__arg)) {
+    __fbthrift_field_vehicles(std::move(vehicles__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

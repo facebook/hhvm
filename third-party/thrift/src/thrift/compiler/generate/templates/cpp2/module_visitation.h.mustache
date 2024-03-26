@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,11 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
-<%#program:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_visitation.h"
-<%/program:thrift_includes%>
-#include "<%program:include_prefix%><%program:name%>_for_each_field.h"
-#include "<%program:include_prefix%><%program:name%>_visit_union.h"
-#include "<%program:include_prefix%><%program:name%>_visit_by_thrift_field_metadata.h"
+{{#program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_visitation.h"
+{{/program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_for_each_field.h"
+#include "{{program:include_prefix}}{{program:name}}_visit_union.h"
+#include "{{program:include_prefix}}{{program:name}}_visit_by_thrift_field_metadata.h"

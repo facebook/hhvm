@@ -15,12 +15,12 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1> {
   using type = ::test_cpp2::cpp_reflection::enum1;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::field0,
       type::field1,
       type::field2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "field0"sv,
       "field1"sv,
       "field2"sv,
@@ -30,12 +30,12 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2> {
   using type = ::test_cpp2::cpp_reflection::enum2;
   static constexpr const std::size_t size = 3;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::field0_2,
       type::field1_2,
       type::field2_2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "field0_2"sv,
       "field1_2"sv,
       "field2_2"sv,
@@ -45,11 +45,11 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3> {
   using type = ::test_cpp2::cpp_reflection::enum3;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::field0_3,
       type::field1_3,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "field0_3"sv,
       "field1_3"sv,
   }};
@@ -58,7 +58,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names> {
   using type = ::test_cpp2::cpp_reflection::enum_with_special_names;
   static constexpr const std::size_t size = 28;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::get,
       type::getter,
       type::lists,
@@ -88,7 +88,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_speci
       type::field,
       type::fields,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "get"sv,
       "getter"sv,
       "lists"sv,
@@ -123,13 +123,13 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_speci
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type> {
   using type = ::test_cpp2::cpp_reflection::union1::Type;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ui,
       type::ud,
       type::us,
       type::ue,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ui"sv,
       "ud"sv,
       "us"sv,
@@ -140,13 +140,13 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type> {
   using type = ::test_cpp2::cpp_reflection::union2::Type;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ui_2,
       type::ud_2,
       type::us_2,
       type::ue_2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ui_2"sv,
       "ud_2"sv,
       "us_2"sv,
@@ -157,13 +157,13 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type> {
   using type = ::test_cpp2::cpp_reflection::union3::Type;
   static constexpr const std::size_t size = 4;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ui_3,
       type::ud_3,
       type::us_3,
       type::ue_3,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ui_3"sv,
       "ud_3"sv,
       "us_3"sv,
@@ -174,14 +174,14 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type> {
   using type = ::test_cpp2::cpp_reflection::unionA::Type;
   static constexpr const std::size_t size = 5;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::i,
       type::d,
       type::s,
       type::e,
       type::a,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "i"sv,
       "d"sv,
       "s"sv,
@@ -193,7 +193,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type> {
   using type = ::test_cpp2::cpp_reflection::union_with_special_names::Type;
   static constexpr const std::size_t size = 28;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::get,
       type::getter,
       type::lists,
@@ -223,7 +223,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_spec
       type::field,
       type::fields,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "get"sv,
       "getter"sv,
       "lists"sv,

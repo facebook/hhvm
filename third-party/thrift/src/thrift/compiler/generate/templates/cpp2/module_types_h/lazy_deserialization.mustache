@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,32 +14,32 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#struct:lazy_fields?%>
+}}{{#struct:lazy_fields?}}
  private:
-  <%! Stores serialized data of each lazy field %>
+  {{! Stores serialized data of each lazy field }}
   mutable struct __fbthrift_SerializedData {
-<%#struct:fields%><%#field:lazy?%>
-    <%^field:lazy_ref?%>folly::IOBuf<%/field:lazy_ref?%><%!
-    %><%#field:lazy_ref?%>std::unique_ptr<folly::IOBuf><%/field:lazy_ref?%><%!
-    %> <%field:cpp_name%>;
-<%/field:lazy?%><%/struct:fields%>
+{{#struct:fields}}{{#field:lazy?}}
+    {{^field:lazy_ref?}}folly::IOBuf{{/field:lazy_ref?}}{{!
+    }}{{#field:lazy_ref?}}std::unique_ptr<folly::IOBuf>{{/field:lazy_ref?}}{{!
+    }} {{field:cpp_name}};
+{{/field:lazy?}}{{/struct:fields}}
   } __fbthrift_serializedData_;
 
   mutable ::apache::thrift::detail::st::DeserializationMutex __fbthrift_deserializationMutex_;
   ::apache::thrift::ProtocolType __fbthrift_protocol_{};
 
-  <%! Use double checked locking pattern to deserialize %>
+  {{! Use double checked locking pattern to deserialize }}
   mutable struct __fbthrift_IsDeserialized {
-<%#struct:fields%><%#field:lazy?%>
-    std::atomic<uint8_t> <%field:cpp_name%>{::apache::thrift::detail::LazyDeserializationState::UNTAINTED | ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED};
-<%/field:lazy?%><%/struct:fields%>
+{{#struct:fields}}{{#field:lazy?}}
+    std::atomic<uint8_t> {{field:cpp_name}}{::apache::thrift::detail::LazyDeserializationState::UNTAINTED | ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED};
+{{/field:lazy?}}{{/struct:fields}}
   } __fbthrift_isDeserialized_;
 
-<%#struct:fields%><%#field:lazy?%>
-  const <%field:cpp_storage_type%>& __fbthrift_read_field_<%field:cpp_name%>() const;
-  <%field:cpp_storage_type%>& __fbthrift_read_field_<%field:cpp_name%>();
-  void __fbthrift_read_field_<%field:cpp_name%>_slow() const;
-  template<class ProtocolReader> void __fbthrift_read_field_<%field:cpp_name%>_impl() const;
-<%/field:lazy?%><%/struct:fields%>
+{{#struct:fields}}{{#field:lazy?}}
+  const {{field:cpp_storage_type}}& __fbthrift_read_field_{{field:cpp_name}}() const;
+  {{field:cpp_storage_type}}& __fbthrift_read_field_{{field:cpp_name}}();
+  void __fbthrift_read_field_{{field:cpp_name}}_slow() const;
+  template<class ProtocolReader> void __fbthrift_read_field_{{field:cpp_name}}_impl() const;
+{{/field:lazy?}}{{/struct:fields}}
 
-<%/struct:lazy_fields?%>
+{{/struct:lazy_fields?}}

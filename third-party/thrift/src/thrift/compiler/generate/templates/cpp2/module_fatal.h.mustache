@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/reflection/reflection.h>
@@ -23,76 +23,76 @@
 #include <fatal/type/pair.h>
 #include <fatal/type/sequence.h>
 
-#include "<%program:include_prefix%><%program:name%>_types.h"
-<% > common/namespace_cpp2_begin%>
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+{{ > common/namespace_cpp2_begin}}
 
 
 namespace __fbthrift_refl {
 
-struct __fbthrift_strings_<%program:name%> {
-  <%#program:fatal_identifiers%>
-  using <%identifier:name%> = <%identifier:fatal_string%>;
-  <%/program:fatal_identifiers%>
+struct __fbthrift_strings_{{program:name}} {
+  {{#program:fatal_identifiers}}
+  using {{identifier:name}} = {{identifier:fatal_string}};
+  {{/program:fatal_identifiers}}
 };
 
-struct <%program:name%>_module_traits {
-  using strings = __fbthrift_strings_<%program:name%>;
-  using name = strings::<%program:name%>;
+struct {{program:name}}_module_traits {
+  using strings = __fbthrift_strings_{{program:name}};
+  using name = strings::{{program:name}};
   using namespaces = ::fatal::list<
-      <%#program:fatal_languages%><%#fatal_languages:items%>
-      ::fatal::pair<strings::<%language:safe_name%>, strings::<%language:safe_namespace%>><%^last?%>,<%/last?%>
-      <%/fatal_languages:items%><%/program:fatal_languages%>
+      {{#program:fatal_languages}}{{#fatal_languages:items}}
+      ::fatal::pair<strings::{{language:safe_name}}, strings::{{language:safe_namespace}}>{{^last?}},{{/last?}}
+      {{/fatal_languages:items}}{{/program:fatal_languages}}
   >;
   using enums = ::fatal::list<
-      <%#program:fatal_enums%><%#fatal_strings:items%>
-      ::fatal::pair<<% > common/namespace_cpp2%><%fatal_string:name%>, strings::<%fatal_string:name%>><%^last?%>,<%/last?%>
-      <%/fatal_strings:items%><%/program:fatal_enums%>
+      {{#program:fatal_enums}}{{#fatal_strings:items}}
+      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      {{/fatal_strings:items}}{{/program:fatal_enums}}
   >;
   using unions = ::fatal::list<
-      <%#program:fatal_unions%><%#fatal_strings:items%>
-      ::fatal::pair<<% > common/namespace_cpp2%><%fatal_string:name%>, strings::<%fatal_string:name%>><%^last?%>,<%/last?%>
-      <%/fatal_strings:items%><%/program:fatal_unions%>
+      {{#program:fatal_unions}}{{#fatal_strings:items}}
+      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      {{/fatal_strings:items}}{{/program:fatal_unions}}
   >;
   using structs = ::fatal::list<
-      <%#program:fatal_structs%><%#fatal_strings:items%>
-      ::fatal::pair<<% > common/namespace_cpp2%><%fatal_string:name%>, strings::<%fatal_string:name%>><%^last?%>,<%/last?%>
-      <%/fatal_strings:items%><%/program:fatal_structs%>
+      {{#program:fatal_structs}}{{#fatal_strings:items}}
+      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      {{/fatal_strings:items}}{{/program:fatal_structs}}
   >;
   using constants = ::fatal::list<
-      <%#program:fatal_constants%><%#fatal_strings:items%>
-      strings::<%fatal_string:name%><%^last?%>,<%/last?%>
-      <%/fatal_strings:items%><%/program:fatal_constants%>
+      {{#program:fatal_constants}}{{#fatal_strings:items}}
+      strings::{{fatal_string:name}}{{^last?}},{{/last?}}
+      {{/fatal_strings:items}}{{/program:fatal_constants}}
   >;
   using services = ::fatal::list<
-      <%#program:fatal_services%><%#fatal_strings:items%>
-      strings::<%fatal_string:name%><%^last?%>,<%/last?%>
-      <%/fatal_strings:items%><%/program:fatal_services%>
+      {{#program:fatal_services}}{{#fatal_strings:items}}
+      strings::{{fatal_string:name}}{{^last?}},{{/last?}}
+      {{/fatal_strings:items}}{{/program:fatal_services}}
   >;
 };
 
 } // __fbthrift_refl
 
-class <%program:name%>_tags {
-  using __fbthrift_strings = __fbthrift_refl::__fbthrift_strings_<%program:name%>;
+class {{program:name}}_tags {
+  using __fbthrift_strings = __fbthrift_refl::__fbthrift_strings_{{program:name}};
   struct __fbthrift_languages {
-    <%#program:fatal_languages%><%#fatal_languages:items%>
-    using <%language:safe_name%> = __fbthrift_strings::<%language:safe_name%>;
-    <%/fatal_languages:items%><%/program:fatal_languages%>
+    {{#program:fatal_languages}}{{#fatal_languages:items}}
+    using {{language:safe_name}} = __fbthrift_strings::{{language:safe_name}};
+    {{/fatal_languages:items}}{{/program:fatal_languages}}
   };
   struct __fbthrift_enums {
-    <%#program:fatal_enums%><% > fatal/fatal_using_string_declaration%><%/program:fatal_enums%>
+    {{#program:fatal_enums}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_enums}}
   };
   struct __fbthrift_unions {
-    <%#program:fatal_unions%><% > fatal/fatal_using_string_declaration%><%/program:fatal_unions%>
+    {{#program:fatal_unions}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_unions}}
   };
   struct __fbthrift_structs {
-    <%#program:fatal_structs%><% > fatal/fatal_using_string_declaration%><%/program:fatal_structs%>
+    {{#program:fatal_structs}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_structs}}
   };
   struct __fbthrift_constants {
-    <%#program:fatal_constants%><% > fatal/fatal_using_string_declaration%><%/program:fatal_constants%>
+    {{#program:fatal_constants}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_constants}}
   };
   struct __fbthrift_services {
-    <%#program:fatal_services%><% > fatal/fatal_using_string_declaration%><%/program:fatal_services%>
+    {{#program:fatal_services}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_services}}
   };
  public:
   struct module {};
@@ -106,6 +106,6 @@ class <%program:name%>_tags {
   using services = __fbthrift_services;
 };
 
-THRIFT_REGISTER_REFLECTION_METADATA(<%program:name%>_tags::module, __fbthrift_refl::<%program:name%>_module_traits);
+THRIFT_REGISTER_REFLECTION_METADATA({{program:name}}_tags::module, __fbthrift_refl::{{program:name}}_module_traits);
 
-<% > common/namespace_cpp2_end%>
+{{ > common/namespace_cpp2_end}}

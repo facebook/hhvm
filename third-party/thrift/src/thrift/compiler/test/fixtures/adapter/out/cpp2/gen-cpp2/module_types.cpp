@@ -104,7 +104,7 @@ MyAnnotation& MyAnnotation::operator=([[maybe_unused]] MyAnnotation&& other) noe
 
 MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::Color color__arg) :
     __fbthrift_field_signature(std::move(signature__arg)),
-    __fbthrift_field_color(std::move(color__arg)) {
+    __fbthrift_field_color(std::move(color__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -297,7 +297,7 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
     __fbthrift_field_binaryField(std::move(binaryField__arg)),
     __fbthrift_field_longField(std::move(longField__arg)),
     __fbthrift_field_adaptedLongField(std::move(adaptedLongField__arg)),
-    __fbthrift_field_doubleAdaptedField(std::move(doubleAdaptedField__arg)) {
+    __fbthrift_field_doubleAdaptedField(std::move(doubleAdaptedField__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
@@ -653,7 +653,7 @@ Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, 
     __fbthrift_field_optionalStructListField(std::move(optionalStructListField__arg)),
     __fbthrift_field_unionField(std::move(unionField__arg)),
     __fbthrift_field_optionalUnionField(std::move(optionalUnionField__arg)),
-    __fbthrift_field_adaptedStructField(std::move(adaptedStructField__arg)) {
+    __fbthrift_field_adaptedStructField(std::move(adaptedStructField__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
@@ -805,7 +805,7 @@ std::string_view DirectlyAdapted::__fbthrift_get_class_name() {
 
 
 DirectlyAdapted::DirectlyAdapted(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -889,7 +889,7 @@ std::string_view IndependentDirectlyAdapted::__fbthrift_get_class_name() {
 
 
 IndependentDirectlyAdapted::IndependentDirectlyAdapted(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -1025,7 +1025,7 @@ StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructo
     __fbthrift_field_field(std::move(field__arg)),
     __fbthrift_field_shared_field(std::move(shared_field__arg)),
     __fbthrift_field_opt_shared_field(std::move(opt_shared_field__arg)),
-    __fbthrift_field_opt_boxed_field(std::move(opt_boxed_field__arg)) {
+    __fbthrift_field_opt_boxed_field(std::move(opt_boxed_field__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
   if (__fbthrift_field_opt_shared_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_opt_shared_field, *this);
@@ -1161,7 +1161,7 @@ TerseAdaptedFields& TerseAdaptedFields::operator=([[maybe_unused]] TerseAdaptedF
 TerseAdaptedFields::TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg) :
     __fbthrift_field_int_field(std::move(int_field__arg)),
     __fbthrift_field_string_field(std::move(string_field__arg)),
-    __fbthrift_field_set_field(std::move(set_field__arg)) {
+    __fbthrift_field_set_field(std::move(set_field__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
@@ -1277,7 +1277,7 @@ B& B::operator=([[maybe_unused]] B&& other) noexcept {
 
 
 B::B(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptedA a__arg) :
-    __fbthrift_field_a(std::move(a__arg)) {
+    __fbthrift_field_a(std::move(a__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -1459,7 +1459,7 @@ Config& Config::operator=([[maybe_unused]] Config&& other) noexcept {
 
 
 Config::Config(apache::thrift::FragileConstructor, ::std::string path__arg) :
-    __fbthrift_field_path(std::move(path__arg)) {
+    __fbthrift_field_path(std::move(path__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -1578,7 +1578,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg, ::facebook::thrift::test::SetWithAdapter set_string__arg) :
     __fbthrift_field_field(std::move(field__arg)),
-    __fbthrift_field_set_string(std::move(set_string__arg)) {
+    __fbthrift_field_set_string(std::move(set_string__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -1761,7 +1761,7 @@ AdaptTestStruct::AdaptTestStruct(apache::thrift::FragileConstructor, ::facebook:
     __fbthrift_field_string_data(std::move(string_data__arg)),
     __fbthrift_field_double_wrapped_bool(std::move(double_wrapped_bool__arg)),
     __fbthrift_field_double_wrapped_integer(std::move(double_wrapped_integer__arg)),
-    __fbthrift_field_binary_data(std::move(binary_data__arg)) {
+    __fbthrift_field_binary_data(std::move(binary_data__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::AdaptTestMsAdapter, 1>(__fbthrift_field_delay, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CustomProtocolAdapter, 2>(__fbthrift_field_custom, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::AdaptTestMsAdapter, 3>(__fbthrift_field_timeout, *this);
@@ -1947,9 +1947,9 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct() :
       __fbthrift_field_adaptedDoubleDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 16>(double(static_cast<double>(5)), *this)),
       __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(::std::string(apache::thrift::StringTraits<std::string>::fromStringLiteral("6")), *this)),
       __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(::facebook::thrift::test::ThriftAdaptedEnum( ::facebook::thrift::test::AdaptedEnum::One), *this)),
-      __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(::std::vector<::std::int64_t>(std::initializer_list<::std::int64_t>{static_cast<::std::int64_t>(1)}), *this)),
-      __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(::std::set<::std::int64_t>(std::initializer_list<::std::int64_t>{static_cast<::std::int64_t>(1)}), *this)),
-      __fbthrift_field_adaptedMapDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 21>(::std::map<::std::int64_t, ::std::int64_t>(std::initializer_list<::std::map<::std::int64_t, ::std::int64_t>::value_type>{{static_cast<::std::int64_t>(1), static_cast<::std::int64_t>(1)}}), *this)),
+      __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(::std::vector<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
+      __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(::std::set<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
+      __fbthrift_field_adaptedMapDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 21>(::std::map<::std::int64_t, ::std::int64_t>(std::initializer_list<::std::map<::std::int64_t, ::std::int64_t>::value_type>{ { static_cast<::std::int64_t>(1), static_cast<::std::int64_t>(1) } }), *this)),
       __fbthrift_field_doubleTypedefBool() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 1>(__fbthrift_field_adaptedBool, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 2>(__fbthrift_field_adaptedByte, *this);
@@ -2076,7 +2076,7 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct(apache::thrift::FragileConstr
     __fbthrift_field_adaptedListDefault(std::move(adaptedListDefault__arg)),
     __fbthrift_field_adaptedSetDefault(std::move(adaptedSetDefault__arg)),
     __fbthrift_field_adaptedMapDefault(std::move(adaptedMapDefault__arg)),
-    __fbthrift_field_doubleTypedefBool(std::move(doubleTypedefBool__arg)) {
+    __fbthrift_field_doubleTypedefBool(std::move(doubleTypedefBool__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 1>(__fbthrift_field_adaptedBool, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 2>(__fbthrift_field_adaptedByte, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 3>(__fbthrift_field_adaptedShort, *this);
@@ -2256,7 +2256,7 @@ AdaptTemplatedNestedTestStruct& AdaptTemplatedNestedTestStruct::operator=([[mayb
 
 
 AdaptTemplatedNestedTestStruct::AdaptTemplatedNestedTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptTemplatedTestStruct adaptedStruct__arg) :
-    __fbthrift_field_adaptedStruct(std::move(adaptedStruct__arg)) {
+    __fbthrift_field_adaptedStruct(std::move(adaptedStruct__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -2490,7 +2490,7 @@ std::string_view ThriftAdaptedStruct::__fbthrift_get_class_name() {
 
 
 ThriftAdaptedStruct::ThriftAdaptedStruct(apache::thrift::FragileConstructor, ::std::int64_t data__arg) :
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -2573,7 +2573,7 @@ std::string_view DirectlyAdaptedStruct::__fbthrift_get_class_name() {
 
 
 DirectlyAdaptedStruct::DirectlyAdaptedStruct(apache::thrift::FragileConstructor, ::std::int64_t data__arg) :
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -2699,7 +2699,7 @@ StructFieldAdaptedStruct::StructFieldAdaptedStruct(apache::thrift::FragileConstr
     __fbthrift_field_adaptedStruct(std::move(adaptedStruct__arg)),
     __fbthrift_field_adaptedTypedef(std::move(adaptedTypedef__arg)),
     __fbthrift_field_directlyAdapted(std::move(directlyAdapted__arg)),
-    __fbthrift_field_typedefOfAdapted(std::move(typedefOfAdapted__arg)) {
+    __fbthrift_field_typedefOfAdapted(std::move(typedefOfAdapted__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 1>(__fbthrift_field_adaptedStruct, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 2>(__fbthrift_field_adaptedTypedef, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 3>(__fbthrift_field_directlyAdapted, *this);
@@ -2831,7 +2831,7 @@ CircularAdaptee& CircularAdaptee::operator=([[maybe_unused]] CircularAdaptee&& o
 
 
 CircularAdaptee::CircularAdaptee(apache::thrift::FragileConstructor, ::facebook::thrift::test::CircularStruct field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -2956,7 +2956,7 @@ CircularStruct& CircularStruct::operator=([[maybe_unused]] CircularStruct&& othe
 
 
 CircularStruct::CircularStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee> field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   if (__fbthrift_field_field) ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MemberAccessAdapter, 1>(*__fbthrift_field_field, *this);
 }
 
@@ -3073,7 +3073,7 @@ ReorderedStruct& ReorderedStruct::operator=([[maybe_unused]] ReorderedStruct&& o
 
 
 ReorderedStruct::ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> reordered_dependent_adapted__arg) :
-    __fbthrift_field_reordered_dependent_adapted(std::move(reordered_dependent_adapted__arg)) {
+    __fbthrift_field_reordered_dependent_adapted(std::move(reordered_dependent_adapted__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
 }
 
@@ -3235,7 +3235,7 @@ std::string_view UnderlyingRenamedStruct::__fbthrift_get_class_name() {
 
 
 UnderlyingRenamedStruct::UnderlyingRenamedStruct(apache::thrift::FragileConstructor, ::std::int64_t data__arg) :
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -3317,7 +3317,7 @@ std::string_view UnderlyingSameNamespaceStruct::__fbthrift_get_class_name() {
 
 
 UnderlyingSameNamespaceStruct::UnderlyingSameNamespaceStruct(apache::thrift::FragileConstructor, ::std::int64_t data__arg) :
-    __fbthrift_field_data(std::move(data__arg)) {
+    __fbthrift_field_data(std::move(data__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -3489,7 +3489,7 @@ MoveOnly& MoveOnly::operator=(const MoveOnly& other) {
 
 
 MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::HeapAllocated ptr__arg) :
-    __fbthrift_field_ptr(std::move(ptr__arg)) {
+    __fbthrift_field_ptr(std::move(ptr__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -3590,7 +3590,7 @@ AlsoMoveOnly& AlsoMoveOnly::operator=(const AlsoMoveOnly& other) {
 
 
 AlsoMoveOnly::AlsoMoveOnly(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, AlsoMoveOnly> ptr__arg) :
-    __fbthrift_field_ptr(std::move(ptr__arg)) {
+    __fbthrift_field_ptr(std::move(ptr__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -3873,7 +3873,7 @@ CountingStruct& CountingStruct::operator=([[maybe_unused]] CountingStruct&& othe
 CountingStruct::CountingStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct> regularInt__arg, ::facebook::thrift::test::CountingInt countingInt__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, CountingStruct> regularString__arg) :
     __fbthrift_field_regularInt(std::move(regularInt__arg)),
     __fbthrift_field_countingInt(std::move(countingInt__arg)),
-    __fbthrift_field_regularString(std::move(regularString__arg)) {
+    __fbthrift_field_regularString(std::move(regularString__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, int>, 1>(__fbthrift_field_regularInt, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<true, int>, 2>(__fbthrift_field_countingInt, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, std::string>, 3>(__fbthrift_field_regularString, *this);
@@ -3985,7 +3985,7 @@ Person& Person::operator=([[maybe_unused]] Person&& other) noexcept {
 
 
 Person::Person(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -4086,7 +4086,7 @@ Person2& Person2::operator=([[maybe_unused]] Person2&& other) noexcept {
 
 
 Person2::Person2(apache::thrift::FragileConstructor, ::std::string name__arg) :
-    __fbthrift_field_name(std::move(name__arg)) {
+    __fbthrift_field_name(std::move(name__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

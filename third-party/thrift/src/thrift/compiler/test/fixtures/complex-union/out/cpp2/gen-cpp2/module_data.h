@@ -15,7 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::ComplexUnion::Type> {
   using type = ::cpp2::ComplexUnion::Type;
   static constexpr const std::size_t size = 6;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::intValue,
       type::stringValue,
       type::intListValue,
@@ -23,7 +23,7 @@ template <> struct TEnumDataStorage<::cpp2::ComplexUnion::Type> {
       type::typedefValue,
       type::stringRef,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "intValue"sv,
       "stringValue"sv,
       "intListValue"sv,
@@ -36,11 +36,11 @@ template <> struct TEnumDataStorage<::cpp2::ComplexUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::ListUnion::Type> {
   using type = ::cpp2::ListUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::intListValue,
       type::stringListValue,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "intListValue"sv,
       "stringListValue"sv,
   }};
@@ -49,11 +49,11 @@ template <> struct TEnumDataStorage<::cpp2::ListUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::DataUnion::Type> {
   using type = ::cpp2::DataUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::binaryData,
       type::stringData,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "binaryData"sv,
       "stringData"sv,
   }};
@@ -62,11 +62,11 @@ template <> struct TEnumDataStorage<::cpp2::DataUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::ValUnion::Type> {
   using type = ::cpp2::ValUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::v1,
       type::v2,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "v1"sv,
       "v2"sv,
   }};
@@ -75,11 +75,11 @@ template <> struct TEnumDataStorage<::cpp2::ValUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::VirtualComplexUnion::Type> {
   using type = ::cpp2::VirtualComplexUnion::Type;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::thingOne,
       type::thingTwo,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "thingOne"sv,
       "thingTwo"sv,
   }};
@@ -88,10 +88,10 @@ template <> struct TEnumDataStorage<::cpp2::VirtualComplexUnion::Type> {
 template <> struct TEnumDataStorage<::cpp2::NonCopyableUnion::Type> {
   using type = ::cpp2::NonCopyableUnion::Type;
   static constexpr const std::size_t size = 1;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::s,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "s"sv,
   }};
 };

@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,26 +14,26 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^function:sync_returns_by_outparam?%>
-<% > types/return_type_client_no_handle%> <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
-<%#function:cpp_void?%>
-  auto ew = recv_wrapped_<%function:cpp_name%>(state);
-<%/function:cpp_void?%>
-<%^function:cpp_void?%>
-  <% > types/return_type_client_no_handle%> _return;
-  auto ew = recv_wrapped_<%function:cpp_name%>(_return, state);
-<%/function:cpp_void?%>
-<%/function:sync_returns_by_outparam?%>
-<%#function:sync_returns_by_outparam?%>
-void <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(<%function:cpp_return_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
-  auto ew = recv_wrapped_<%function:cpp_name%>(_return, state);
-<%/function:sync_returns_by_outparam?%>
+}}{{^function:sync_returns_by_outparam?}}
+{{ > types/return_type_client_no_handle}} {{ > service_common/client_class_name}}::recv_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+{{#function:cpp_void?}}
+  auto ew = recv_wrapped_{{function:cpp_name}}(state);
+{{/function:cpp_void?}}
+{{^function:cpp_void?}}
+  {{ > types/return_type_client_no_handle}} _return;
+  auto ew = recv_wrapped_{{function:cpp_name}}(_return, state);
+{{/function:cpp_void?}}
+{{/function:sync_returns_by_outparam?}}
+{{#function:sync_returns_by_outparam?}}
+void {{ > service_common/client_class_name}}::recv_{{function:cpp_name}}({{function:cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
+  auto ew = recv_wrapped_{{function:cpp_name}}(_return, state);
+{{/function:sync_returns_by_outparam?}}
   if (ew) {
     ew.throw_exception();
   }
-<%^function:sync_returns_by_outparam?%>
-<%^function:cpp_void?%>
+{{^function:sync_returns_by_outparam?}}
+{{^function:cpp_void?}}
   return _return;
-<%/function:cpp_void?%>
-<%/function:sync_returns_by_outparam?%>
+{{/function:cpp_void?}}
+{{/function:sync_returns_by_outparam?}}
 }

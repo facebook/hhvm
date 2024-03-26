@@ -511,7 +511,7 @@ Val& Val::operator=([[maybe_unused]] Val&& other) noexcept {
 Val::Val(apache::thrift::FragileConstructor, ::std::string strVal__arg, ::std::int32_t intVal__arg, ::cpp2::containerTypedef typedefValue__arg) :
     __fbthrift_field_strVal(std::move(strVal__arg)),
     __fbthrift_field_intVal(std::move(intVal__arg)),
-    __fbthrift_field_typedefValue(std::move(typedefValue__arg)) {
+    __fbthrift_field_typedefValue(std::move(typedefValue__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -883,7 +883,7 @@ std::string_view NonCopyableStruct::__fbthrift_get_class_name() {
 
 
 NonCopyableStruct::NonCopyableStruct(apache::thrift::FragileConstructor, ::std::int64_t num__arg) :
-    __fbthrift_field_num(std::move(num__arg)) {
+    __fbthrift_field_num(std::move(num__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

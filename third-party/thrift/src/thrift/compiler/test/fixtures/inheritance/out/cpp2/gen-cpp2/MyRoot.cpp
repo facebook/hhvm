@@ -139,7 +139,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyRootSvNull::do_root() {
+void MyRootSvNull::do_root() { 
   return;
 }
 
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& MyRootServiceInfoHolder::requestInf
 apache::thrift::ServiceRequestInfoMap MyRootServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"do_root",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyRoot.do_root",
      std::nullopt,

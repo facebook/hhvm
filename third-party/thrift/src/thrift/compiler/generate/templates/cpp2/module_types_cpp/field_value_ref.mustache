@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
+}}{{!
 
 For the Thrift field foo this generates:
   foo().value()
@@ -22,16 +22,16 @@ if it's non-optional and
   foo().value_unchecked()
 otherwise.
 
-%><%!
-  %><%^field:cpp_ref?%><%!
-    %><%#field:optional?%><%!
-      %><%field:cpp_name%>_ref().value_unchecked()<%!
-    %><%/field:optional?%><%!
-    %><%^field:optional?%><%!
-      %><%field:cpp_name%>_ref().value()<%!
-    %><%/field:optional?%><%!
-  %><%/field:cpp_ref?%><%!
-  %><%#field:cpp_ref?%><%!
-    %><%field:cpp_storage_name%><%!
-  %><%/field:cpp_ref?%><%!
-%>
+}}{{!
+  }}{{^field:cpp_ref?}}{{!
+    }}{{#field:optional?}}{{!
+      }}{{field:cpp_name}}_ref().value_unchecked(){{!
+    }}{{/field:optional?}}{{!
+    }}{{^field:optional?}}{{!
+      }}{{field:cpp_name}}_ref().value(){{!
+    }}{{/field:optional?}}{{!
+  }}{{/field:cpp_ref?}}{{!
+  }}{{#field:cpp_ref?}}{{!
+    }}{{field:cpp_storage_name}}{{!
+  }}{{/field:cpp_ref?}}{{!
+}}

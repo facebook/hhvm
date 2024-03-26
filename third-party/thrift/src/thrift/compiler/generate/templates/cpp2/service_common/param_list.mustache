@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#function:args%><%#field:type%><%!
-  %><%^first?%>, <%/first?%><%!
-  %>p_<%field:cpp_name%><%!
-%><%/field:type%><%/function:args%>
+}}{{#function:args}}{{#field:type}}{{!
+  }}{{^first?}}, {{/first?}}{{!
+  }}p_{{field:cpp_name}}{{!
+}}{{/field:type}}{{/function:args}}

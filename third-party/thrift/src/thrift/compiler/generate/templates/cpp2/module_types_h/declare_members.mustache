@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,11 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#struct:fields_in_layout_order%><%#field:type%>
- <%field:visibility%>:
-  <%#field:lazy?%>mutable <%/field:lazy?%><%field:cpp_storage_type%> <%field:cpp_storage_name%>;
-<%/field:type%><%/struct:fields_in_layout_order%>
-<%#struct:isset_fields?%>
+}}{{#struct:fields_in_layout_order}}{{#field:type}}
+ {{field:visibility}}:
+  {{#field:lazy?}}mutable {{/field:lazy?}}{{field:cpp_storage_type}} {{field:cpp_storage_name}};
+{{/field:type}}{{/struct:fields_in_layout_order}}
+{{#struct:isset_fields?}}
  private:
-  apache::thrift::detail::isset_bitset<<%struct:isset_fields_size%>, <%struct:isset_bitset_option%>> __isset;
-<%/struct:isset_fields?%>
+  apache::thrift::detail::isset_bitset<{{struct:isset_fields_size}}, {{struct:isset_bitset_option}}> __isset;
+{{/struct:isset_fields?}}

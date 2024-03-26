@@ -139,7 +139,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyNodeSvNull::do_mid() {
+void MyNodeSvNull::do_mid() { 
   return;
 }
 
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& MyNodeServiceInfoHolder::requestInf
 apache::thrift::ServiceRequestInfoMap MyNodeServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"do_mid",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyNode.do_mid",
      std::nullopt,

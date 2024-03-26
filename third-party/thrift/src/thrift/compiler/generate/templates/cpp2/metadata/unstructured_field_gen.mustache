@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,4 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>std::map<std::string, std::string>{<%#field:annotations%>{R"THRIFT_CODEGEN(<%annotation:key%>)THRIFT_CODEGEN", R"THRIFT_CODEGEN(<%annotation:value%>)THRIFT_CODEGEN"},<%/field:annotations%>}
+}}std::map<std::string, std::string>{ {{#field:annotations}}{R"THRIFT_CODEGEN({{annotation:key}})THRIFT_CODEGEN", R"THRIFT_CODEGEN({{annotation:value}})THRIFT_CODEGEN"},{{/field:annotations}} }

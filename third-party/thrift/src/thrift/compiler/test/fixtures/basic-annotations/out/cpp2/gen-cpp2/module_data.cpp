@@ -34,48 +34,48 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::MyStructNestedAnnotation>::name = "MyStructNestedAnnotation";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_names = { {
   "name"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::storage_names = { {
   "__fbthrift_field_name"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::isset_indexes = { {
   0,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourUnion>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourUnion>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourException>::name = "MyException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::detail::YourException>::storage_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourException>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourException>::isset_indexes = { {
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = { {
   "major"sv,
   "abstract"sv,
   "annotation_with_quote"sv,
@@ -86,7 +86,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cp
   "cpp_type_annotation"sv,
   "my_union"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_ids = { {
   2,
   1,
   3,
@@ -97,7 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::cpp2::detai
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRING,
@@ -108,7 +108,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp
   TType::T_LIST,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = { {
   "__fbthrift_field_majorVer"sv,
   "__fbthrift_field_abstract"sv,
   "__fbthrift_field_annotation_with_quote"sv,
@@ -119,7 +119,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cp
   "__fbthrift_field_cpp_type_annotation"sv,
   "__fbthrift_field_my_union"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -132,23 +132,23 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::Y
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::SecretStruct>::name = "SecretStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = { {
   "id"sv,
   "password"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SecretStruct>::storage_names = { {
   "__fbthrift_field_id"sv,
   "__fbthrift_field_password"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SecretStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SecretStruct>::isset_indexes = { {
   0,
   1,
 }};

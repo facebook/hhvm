@@ -139,7 +139,7 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void MyServicePrioChildSvNull::pang() {
+void MyServicePrioChildSvNull::pang() { 
   return;
 }
 
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& MyServicePrioChildServiceInfoHolder
 apache::thrift::ServiceRequestInfoMap MyServicePrioChildServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"pang",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioChild.pang",
      std::nullopt,

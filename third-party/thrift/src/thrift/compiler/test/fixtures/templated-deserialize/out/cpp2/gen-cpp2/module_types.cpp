@@ -62,7 +62,7 @@ std::string_view SmallStruct::__fbthrift_get_class_name() {
 
 SmallStruct::SmallStruct(apache::thrift::FragileConstructor, bool small_A__arg, ::std::int32_t small_B__arg) :
     __fbthrift_field_small_A(std::move(small_A__arg)),
-    __fbthrift_field_small_B(std::move(small_B__arg)) {
+    __fbthrift_field_small_B(std::move(small_B__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -179,20 +179,20 @@ containerStruct& containerStruct::operator=(const containerStruct& other) {
 
 containerStruct::containerStruct() :
       __fbthrift_field_fieldA(),
-      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
-  static_cast<::std::int32_t>(4)}),
+  static_cast<::std::int32_t>(4) }),
       __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
       __fbthrift_field_fieldI(true),
-      __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(1),
+      __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
-  static_cast<::std::int32_t>(12)}},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
+  static_cast<::std::int32_t>(12) } },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
-  static_cast<::std::int32_t>(13)}}}),
+  static_cast<::std::int32_t>(13) } } }),
       __fbthrift_field_fieldQ(),
       __fbthrift_field_fieldR(std::make_unique<::std::map<::std::string, bool>>()),
       __fbthrift_field_fieldS(std::make_unique<::cpp2::SmallStruct>()),
@@ -280,7 +280,7 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
     __fbthrift_field_fieldS(std::move(fieldS__arg)),
     __fbthrift_field_fieldT(std::move(fieldT__arg)),
     __fbthrift_field_fieldU(std::move(fieldU__arg)),
-    __fbthrift_field_fieldX(std::move(fieldX__arg)) {
+    __fbthrift_field_fieldX(std::move(fieldX__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

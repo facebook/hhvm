@@ -1,4 +1,4 @@
-<%!
+{{!
 
   Copyright (c) Meta Platforms, Inc. and its affiliates.
 
@@ -14,21 +14,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > Autogen%>
+}}{{ > Autogen}}
 
-<%#program%>
-#include "<%program:include_prefix%><%program:name%>_handlers.h"
-#include "<%program:include_prefix%><%program:name%>_handlers-inl.h"
-#include "<%program:include_prefix%><%program:name%>_metadata.h"
-<%#program:constants?%>
-#include "<%program:include_prefix%><%program:name%>_constants.h"
-<%/program:constants?%>
-<%/program%>
+{{#program}}
+#include "{{program:include_prefix}}{{program:name}}_handlers.h"
+#include "{{program:include_prefix}}{{program:name}}_handlers-inl.h"
+#include "{{program:include_prefix}}{{program:name}}_metadata.h"
+{{#program:constants?}}
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
+{{/program:constants?}}
+{{/program}}
 
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-<%#services%>
-<% > service_cpp/handlers_cpp%>
+{{#services}}
+{{ > service_cpp/handlers_cpp}}
 
 
-<%/services%>
+{{/services}}

@@ -36,9 +36,8 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
   module_MyStruct.name() = "module.MyStruct";
   module_MyStruct.is_union() = false;
   static const auto* const
-  module_MyStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -48,7 +47,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -61,9 +60,8 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
   module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
   static const auto* const
-  module_MyUnion_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyUnion_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -85,9 +83,8 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
   module_MyException.name() = "module.MyException";
   module_MyException.is_union() = false;
   static const auto* const
-  module_MyException_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -108,9 +105,8 @@ void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyExce
   ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
   module_MyException.name() = "module.MyException";
   static const auto* const
-  module_MyException_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

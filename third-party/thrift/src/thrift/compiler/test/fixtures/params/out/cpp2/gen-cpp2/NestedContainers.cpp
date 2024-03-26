@@ -579,23 +579,23 @@ determineInvocationType:
 
 namespace cpp2 {
 
-void NestedContainersSvNull::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) {
+void NestedContainersSvNull::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) { 
   return;
 }
 
-void NestedContainersSvNull::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) {
+void NestedContainersSvNull::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) { 
   return;
 }
 
-void NestedContainersSvNull::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) {
+void NestedContainersSvNull::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) { 
   return;
 }
 
-void NestedContainersSvNull::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) {
+void NestedContainersSvNull::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) { 
   return;
 }
 
-void NestedContainersSvNull::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) {
+void NestedContainersSvNull::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) { 
   return;
 }
 
@@ -656,35 +656,35 @@ apache::thrift::ServiceRequestInfoMap const& NestedContainersServiceInfoHolder::
 apache::thrift::ServiceRequestInfoMap NestedContainersServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"mapList",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "NestedContainers.mapList",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"mapSet",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "NestedContainers.mapSet",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"listMap",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "NestedContainers.listMap",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"listSet",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "NestedContainers.listSet",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"turtles",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "NestedContainers.turtles",
      std::nullopt,

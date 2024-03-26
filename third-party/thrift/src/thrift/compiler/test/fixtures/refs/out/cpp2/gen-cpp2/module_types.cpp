@@ -413,7 +413,7 @@ MyField::MyField(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::in
     __fbthrift_field_req_enum_value(std::move(req_enum_value__arg)),
     __fbthrift_field_opt_str_value(std::move(opt_str_value__arg)),
     __fbthrift_field_str_value(std::move(str_value__arg)),
-    __fbthrift_field_req_str_value(std::move(req_str_value__arg)) {
+    __fbthrift_field_req_str_value(std::move(req_str_value__arg)) { 
 }
 
 
@@ -543,7 +543,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyField> opt_ref__arg, ::std::unique_ptr<::cpp2::MyField> ref__arg, ::std::unique_ptr<::cpp2::MyField> req_ref__arg) :
     __fbthrift_field_opt_ref(std::move(opt_ref__arg)),
     __fbthrift_field_ref(std::move(ref__arg)),
-    __fbthrift_field_req_ref(std::move(req_ref__arg)) {
+    __fbthrift_field_req_ref(std::move(req_ref__arg)) { 
 }
 
 
@@ -681,7 +681,7 @@ StructWithUnion& StructWithUnion::operator=([[maybe_unused]] StructWithUnion&& o
 StructWithUnion::StructWithUnion(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyUnion> u__arg, ::std::unique_ptr<double> aDouble__arg, ::cpp2::MyField f__arg) :
     __fbthrift_field_u(std::move(u__arg)),
     __fbthrift_field_aDouble(std::move(aDouble__arg)),
-    __fbthrift_field_f(std::move(f__arg)) {
+    __fbthrift_field_f(std::move(f__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -802,7 +802,7 @@ RecursiveStruct& RecursiveStruct::operator=([[maybe_unused]] RecursiveStruct&& o
 
 
 RecursiveStruct::RecursiveStruct(apache::thrift::FragileConstructor, ::std::vector<::cpp2::RecursiveStruct> mes__arg) :
-    __fbthrift_field_mes(std::move(mes__arg)) {
+    __fbthrift_field_mes(std::move(mes__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -950,7 +950,7 @@ StructWithContainers::StructWithContainers(apache::thrift::FragileConstructor, :
     __fbthrift_field_map_ref(std::move(map_ref__arg)),
     __fbthrift_field_list_ref_unique(std::move(list_ref_unique__arg)),
     __fbthrift_field_set_ref_shared(std::move(set_ref_shared__arg)),
-    __fbthrift_field_list_ref_shared_const(std::move(list_ref_shared_const__arg)) {
+    __fbthrift_field_list_ref_shared_const(std::move(list_ref_shared_const__arg)) { 
 }
 
 
@@ -1060,7 +1060,7 @@ StructWithSharedConst& StructWithSharedConst::operator=([[maybe_unused]] StructW
 StructWithSharedConst::StructWithSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::MyField> opt_shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> req_shared_const__arg) :
     __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
     __fbthrift_field_shared_const(std::move(shared_const__arg)),
-    __fbthrift_field_req_shared_const(std::move(req_shared_const__arg)) {
+    __fbthrift_field_req_shared_const(std::move(req_shared_const__arg)) { 
 }
 
 
@@ -1267,7 +1267,7 @@ StructWithRef& StructWithRef::operator=([[maybe_unused]] StructWithRef&& other) 
 StructWithRef::StructWithRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg) :
     __fbthrift_field_def_field(std::move(def_field__arg)),
     __fbthrift_field_opt_field(std::move(opt_field__arg)),
-    __fbthrift_field_req_field(std::move(req_field__arg)) {
+    __fbthrift_field_req_field(std::move(req_field__arg)) { 
 }
 
 
@@ -1384,7 +1384,7 @@ StructWithBox& StructWithBox::operator=([[maybe_unused]] StructWithBox&& other) 
 StructWithBox::StructWithBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::std::string> a__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::int64_t>> b__arg, ::apache::thrift::detail::boxed_value_ptr<::cpp2::StructWithRef> c__arg) :
     __fbthrift_field_a(std::move(a__arg)),
     __fbthrift_field_b(std::move(b__arg)),
-    __fbthrift_field_c(std::move(c__arg)) {
+    __fbthrift_field_c(std::move(c__arg)) { 
 }
 
 
@@ -1495,7 +1495,7 @@ StructWithInternBox& StructWithInternBox::operator=([[maybe_unused]] StructWithI
 
 StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::cpp2::Empty> field1__arg, ::apache::thrift::detail::boxed_value<::cpp2::MyField> field2__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
-    __fbthrift_field_field2(std::move(field2__arg)) {
+    __fbthrift_field_field2(std::move(field2__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -1609,7 +1609,7 @@ StructWithTerseInternBox& StructWithTerseInternBox::operator=([[maybe_unused]] S
 
 StructWithTerseInternBox::StructWithTerseInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::cpp2::Empty> field1__arg, ::apache::thrift::detail::boxed_value<::cpp2::MyField> field2__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
-    __fbthrift_field_field2(std::move(field2__arg)) {
+    __fbthrift_field_field2(std::move(field2__arg)) { 
 }
 
 
@@ -1738,7 +1738,7 @@ AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=([[maybe_unused
 
 AdaptedStructWithInternBox::AdaptedStructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>> field1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>> field2__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
-    __fbthrift_field_field2(std::move(field2__arg)) {
+    __fbthrift_field_field2(std::move(field2__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
   __isset.set(folly::index_constant<0>(), true);
@@ -1868,7 +1868,7 @@ AdaptedStructWithTerseInternBox& AdaptedStructWithTerseInternBox::operator=([[ma
 
 AdaptedStructWithTerseInternBox::AdaptedStructWithTerseInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>> field1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>> field2__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
-    __fbthrift_field_field2(std::move(field2__arg)) {
+    __fbthrift_field_field2(std::move(field2__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
 }
@@ -1999,7 +1999,7 @@ StructWithRefTypeUnique& StructWithRefTypeUnique::operator=([[maybe_unused]] Str
 StructWithRefTypeUnique::StructWithRefTypeUnique(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg) :
     __fbthrift_field_def_field(std::move(def_field__arg)),
     __fbthrift_field_opt_field(std::move(opt_field__arg)),
-    __fbthrift_field_req_field(std::move(req_field__arg)) {
+    __fbthrift_field_req_field(std::move(req_field__arg)) { 
 }
 
 
@@ -2118,7 +2118,7 @@ StructWithRefTypeShared& StructWithRefTypeShared::operator=([[maybe_unused]] Str
 StructWithRefTypeShared::StructWithRefTypeShared(apache::thrift::FragileConstructor, ::std::shared_ptr<::cpp2::Empty> def_field__arg, ::std::shared_ptr<::cpp2::Empty> opt_field__arg, ::std::shared_ptr<::cpp2::Empty> req_field__arg) :
     __fbthrift_field_def_field(std::move(def_field__arg)),
     __fbthrift_field_opt_field(std::move(opt_field__arg)),
-    __fbthrift_field_req_field(std::move(req_field__arg)) {
+    __fbthrift_field_req_field(std::move(req_field__arg)) { 
 }
 
 
@@ -2237,7 +2237,7 @@ StructWithRefTypeSharedConst& StructWithRefTypeSharedConst::operator=([[maybe_un
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::Empty> def_field__arg, ::std::shared_ptr<const ::cpp2::Empty> opt_field__arg, ::std::shared_ptr<const ::cpp2::Empty> req_field__arg) :
     __fbthrift_field_def_field(std::move(def_field__arg)),
     __fbthrift_field_opt_field(std::move(opt_field__arg)),
-    __fbthrift_field_req_field(std::move(req_field__arg)) {
+    __fbthrift_field_req_field(std::move(req_field__arg)) { 
 }
 
 
@@ -2359,7 +2359,7 @@ StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCt
 
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg) :
-    __fbthrift_field_def_field(std::move(def_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)) { 
 }
 
 
@@ -2488,7 +2488,7 @@ StructWithString::StructWithString(apache::thrift::FragileConstructor, ::std::un
     __fbthrift_field_def_shared_string_ref(std::move(def_shared_string_ref__arg)),
     __fbthrift_field_def_shared_string_const_ref(std::move(def_shared_string_const_ref__arg)),
     __fbthrift_field_unique_string_ref(std::move(unique_string_ref__arg)),
-    __fbthrift_field_shared_string_ref(std::move(shared_string_ref__arg)) {
+    __fbthrift_field_shared_string_ref(std::move(shared_string_ref__arg)) { 
 }
 
 

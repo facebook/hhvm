@@ -64,7 +64,7 @@ CustomException& CustomException::operator=([[maybe_unused]] CustomException&& o
 
 
 CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string message__arg) :
-    __fbthrift_field_message(std::move(message__arg)) {
+    __fbthrift_field_message(std::move(message__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

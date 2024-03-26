@@ -64,7 +64,7 @@ A& A::operator=([[maybe_unused]] A&& other) noexcept {
 
 
 A::A(apache::thrift::FragileConstructor, std::unordered_map<::std::int32_t, ::apache::thrift::test::B> some_map__arg) :
-    __fbthrift_field_some_map(std::move(some_map__arg)) {
+    __fbthrift_field_some_map(std::move(some_map__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -152,7 +152,7 @@ std::string_view B::__fbthrift_get_class_name() {
 
 
 B::B(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
-    __fbthrift_field_field(std::move(field__arg)) {
+    __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
 

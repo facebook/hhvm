@@ -36,12 +36,8 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
   serialized_dep_SerializedStruct.name() = "serialized_dep.SerializedStruct";
   serialized_dep_SerializedStruct.is_union() = false;
   static const auto* const
-  serialized_dep_SerializedStruct_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_SerializedStruct_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_SerializedStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -51,7 +47,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_SerializedStruct.fields()->push_back(std::move(field));
   }
-  serialized_dep_SerializedStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {{"serialize", cvBool(true)}}).cv_struct_ref());
+  serialized_dep_SerializedStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -64,10 +60,8 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
   serialized_dep_SerializedUnion.name() = "serialized_dep.SerializedUnion";
   serialized_dep_SerializedUnion.is_union() = true;
   static const auto* const
-  serialized_dep_SerializedUnion_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_SerializedUnion_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_SerializedUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -77,7 +71,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_SerializedUnion.fields()->push_back(std::move(field));
   }
-  serialized_dep_SerializedUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {{"serialize", cvBool(true)}}).cv_struct_ref());
+  serialized_dep_SerializedUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -90,11 +84,8 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
   serialized_dep_SerializedError.name() = "serialized_dep.SerializedError";
   serialized_dep_SerializedError.is_union() = false;
   static const auto* const
-  serialized_dep_SerializedError_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_SerializedError_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_SerializedError_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -104,7 +95,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_SerializedError.fields()->push_back(std::move(field));
   }
-  serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {{"serialize", cvBool(true)}}).cv_struct_ref());
+  serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -117,12 +108,8 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
   serialized_dep_MarshalStruct.name() = "serialized_dep.MarshalStruct";
   serialized_dep_MarshalStruct.is_union() = false;
   static const auto* const
-  serialized_dep_MarshalStruct_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_MarshalStruct_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_MarshalStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -132,7 +119,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_MarshalStruct.fields()->push_back(std::move(field));
   }
-  serialized_dep_MarshalStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {}).cv_struct_ref());
+  serialized_dep_MarshalStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -145,10 +132,8 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
   serialized_dep_MarshalUnion.name() = "serialized_dep.MarshalUnion";
   serialized_dep_MarshalUnion.is_union() = true;
   static const auto* const
-  serialized_dep_MarshalUnion_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_MarshalUnion_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_MarshalUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -158,7 +143,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_MarshalUnion.fields()->push_back(std::move(field));
   }
-  serialized_dep_MarshalUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {}).cv_struct_ref());
+  serialized_dep_MarshalUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -171,11 +156,8 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
   serialized_dep_MarshalError.name() = "serialized_dep.MarshalError";
   serialized_dep_MarshalError.is_union() = false;
   static const auto* const
-  serialized_dep_MarshalError_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_MarshalError_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_MarshalError_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -185,7 +167,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     serialized_dep_MarshalError.fields()->push_back(std::move(field));
   }
-  serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {}).cv_struct_ref());
+  serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct_ref());
   return res.first->second;
 }
 
@@ -197,11 +179,8 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   ::apache::thrift::metadata::ThriftException& serialized_dep_SerializedError = res.first->second;
   serialized_dep_SerializedError.name() = "serialized_dep.SerializedError";
   static const auto* const
-  serialized_dep_SerializedError_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_SerializedError_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_SerializedError_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -210,7 +189,7 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     serialized_dep_SerializedError.fields()->push_back(std::move(field));
   }
-  serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {{"serialize", cvBool(true)}}).cv_struct_ref());
+  serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct_ref());
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("serialized_dep.MarshalError", ::apache::thrift::metadata::ThriftException{});
@@ -220,11 +199,8 @@ void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftM
   ::apache::thrift::metadata::ThriftException& serialized_dep_MarshalError = res.first->second;
   serialized_dep_MarshalError.name() = "serialized_dep.MarshalError";
   static const auto* const
-  serialized_dep_MarshalError_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  serialized_dep_MarshalError_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *serialized_dep_MarshalError_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -233,7 +209,7 @@ void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftM
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     serialized_dep_MarshalError.fields()->push_back(std::move(field));
   }
-  serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {}).cv_struct_ref());
+  serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct_ref());
 }
 } // namespace md
 } // namespace detail

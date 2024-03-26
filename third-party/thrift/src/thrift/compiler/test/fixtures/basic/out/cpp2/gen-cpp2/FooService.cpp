@@ -139,7 +139,7 @@ determineInvocationType:
 
 namespace test::fixtures::basic {
 
-void FooServiceSvNull::simple_rpc() {
+void FooServiceSvNull::simple_rpc() { 
   return;
 }
 
@@ -180,7 +180,7 @@ apache::thrift::ServiceRequestInfoMap const& FooServiceServiceInfoHolder::reques
 apache::thrift::ServiceRequestInfoMap FooServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"simple_rpc",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FooService.simple_rpc",
      std::nullopt,

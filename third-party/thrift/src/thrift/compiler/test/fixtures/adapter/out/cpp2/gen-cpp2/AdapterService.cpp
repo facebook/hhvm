@@ -253,9 +253,9 @@ determineInvocationType:
 
 namespace facebook::thrift::test {
 
-void AdapterServiceSvNull::count(::facebook::thrift::test::CountingStruct& /*_return*/) {}
+void AdapterServiceSvNull::count(::facebook::thrift::test::CountingStruct& /*_return*/) {  }
 
-void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/) {}
+void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/) {  }
 
 
 const char* AdapterServiceAsyncProcessor::getServiceName() {
@@ -299,14 +299,14 @@ apache::thrift::ServiceRequestInfoMap const& AdapterServiceServiceInfoHolder::re
 apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticRequestInfoMap() {
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
   {"count",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "AdapterService.count",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   {"adaptedTypes",
-    {false,
+    { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "AdapterService.adaptedTypes",
      std::nullopt,

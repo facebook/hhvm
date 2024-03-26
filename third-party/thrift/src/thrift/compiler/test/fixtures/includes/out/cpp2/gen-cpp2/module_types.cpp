@@ -64,7 +64,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::cpp2::Included MyIncludedField__arg, ::cpp2::Included MyOtherIncludedField__arg, ::cpp2::IncludedInt64 MyIncludedInt__arg) :
     __fbthrift_field_MyIncludedField(std::move(MyIncludedField__arg)),
     __fbthrift_field_MyOtherIncludedField(std::move(MyOtherIncludedField__arg)),
-    __fbthrift_field_MyIncludedInt(std::move(MyIncludedInt__arg)) {
+    __fbthrift_field_MyIncludedInt(std::move(MyIncludedInt__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);

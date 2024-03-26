@@ -34,29 +34,29 @@ namespace apache {
 namespace thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::SmallStruct>::name = "SmallStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_names = { {
   "small_A"sv,
   "small_B"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SmallStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SmallStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SmallStruct>::storage_names = { {
   "__fbthrift_field_small_A"sv,
   "__fbthrift_field_small_B"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SmallStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SmallStruct>::isset_indexes = { {
   0,
   1,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::containerStruct>::name = "containerStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::cpp2::containerStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::cpp2::containerStruct>::fields_names = { {
   "fieldA"sv,
   "fieldB"sv,
   "fieldC"sv,
@@ -80,7 +80,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::c
   "fieldU"sv,
   "fieldX"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 22> TStructDataStorage<::cpp2::containerStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 22> TStructDataStorage<::cpp2::containerStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -104,7 +104,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 22> TStructDataStorage<::cpp2::cont
   21,
   23,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::cpp2::containerStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::cpp2::containerStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_MAP,
   TType::T_SET,
@@ -128,7 +128,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::cp
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::cpp2::containerStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::cpp2::containerStruct>::storage_names = { {
   "__fbthrift_field_fieldA"sv,
   "__fbthrift_field_fieldB"sv,
   "__fbthrift_field_fieldC"sv,
@@ -152,7 +152,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::c
   "__fbthrift_field_fieldU"sv,
   "__fbthrift_field_fieldX"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::cpp2::containerStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::cpp2::containerStruct>::isset_indexes = { {
   0,
   1,
   2,

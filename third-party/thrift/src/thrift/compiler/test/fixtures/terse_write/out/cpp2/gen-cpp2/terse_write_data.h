@@ -15,11 +15,11 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum> {
   using type = ::facebook::thrift::test::terse_write::MyEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::ME0,
       type::ME1,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "ME0"sv,
       "ME1"sv,
   }};
@@ -28,7 +28,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnu
 template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type> {
   using type = ::facebook::thrift::test::terse_write::MyUnion::Type;
   static constexpr const std::size_t size = 14;
-  static constexpr std::array<type, size> values = {{
+  static constexpr std::array<type, size> values = { {
       type::bool_field,
       type::byte_field,
       type::short_field,
@@ -44,7 +44,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUni
       type::map_field,
       type::struct_field,
   }};
-  static constexpr std::array<std::string_view, size> names = {{
+  static constexpr std::array<std::string_view, size> names = { {
       "bool_field"sv,
       "byte_field"sv,
       "short_field"sv,

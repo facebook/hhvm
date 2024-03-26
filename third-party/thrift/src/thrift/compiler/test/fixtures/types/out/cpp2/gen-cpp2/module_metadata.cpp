@@ -83,9 +83,8 @@ StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftM
   module_decorated_struct.name() = "module.decorated_struct";
   module_decorated_struct.is_union() = false;
   static const auto* const
-  module_decorated_struct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_decorated_struct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_decorated_struct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -107,16 +106,8 @@ StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMe
   module_ContainerStruct.name() = "module.ContainerStruct";
   module_ContainerStruct.is_union() = false;
   static const auto* const
-  module_ContainerStruct_fields = new std::array<EncodedThriftField, 8>{{
-    {12, "fieldA", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}},
-    {2, "fieldB", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::list")}}).cv_struct_ref(), }},
-    {3, "fieldC", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::deque")}}).cv_struct_ref(), }},
-    {4, "fieldD", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("folly::fbvector")}}).cv_struct_ref(), }},
-    {5, "fieldE", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("folly::small_vector")}}).cv_struct_ref(), }},
-    {6, "fieldF", false, std::make_unique<Typedef>("module.set_i32_7194", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("folly::sorted_vector_set")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-    {7, "fieldG", false, std::make_unique<Typedef>("module.map_i32_string_1261", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("folly::sorted_vector_map")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-    {8, "fieldH", false, std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-  }};
+  module_ContainerStruct_fields = new std::array<EncodedThriftField, 8>{ {
+    { 12, "fieldA", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "fieldB", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::list") } }).cv_struct_ref(), }},    { 3, "fieldC", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct_ref(), }},    { 4, "fieldD", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct_ref(), }},    { 5, "fieldE", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct_ref(), }},    { 6, "fieldF", false, std::make_unique<Typedef>("module.set_i32_7194", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "fieldG", false, std::make_unique<Typedef>("module.map_i32_string_1261", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "fieldH", false, std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_ContainerStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -138,9 +129,8 @@ StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMeta
   module_CppTypeStruct.name() = "module.CppTypeStruct";
   module_CppTypeStruct.is_union() = false;
   static const auto* const
-  module_CppTypeStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "fieldA", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::list<int32_t>")}}).cv_struct_ref(), }},
-  }};
+  module_CppTypeStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "fieldA", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::list<int32_t>") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_CppTypeStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -162,9 +152,8 @@ StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMeta
   module_VirtualStruct.name() = "module.VirtualStruct";
   module_VirtualStruct.is_union() = false;
   static const auto* const
-  module_VirtualStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_VirtualStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_VirtualStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -186,10 +175,8 @@ StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::g
   module_MyStructWithForwardRefEnum.name() = "module.MyStructWithForwardRefEnum";
   module_MyStructWithForwardRefEnum.is_union() = false;
   static const auto* const
-  module_MyStructWithForwardRefEnum_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "a", false, std::make_unique<Enum<::apache::thrift::fixtures::types::MyForwardRefEnum>>("module.MyForwardRefEnum"), std::vector<ThriftConstStruct>{}},
-    {2, "b", false, std::make_unique<Enum<::apache::thrift::fixtures::types::MyForwardRefEnum>>("module.MyForwardRefEnum"), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyStructWithForwardRefEnum_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "a", false, std::make_unique<Enum<::apache::thrift::fixtures::types::MyForwardRefEnum>>("module.MyForwardRefEnum"), std::vector<ThriftConstStruct>{ }},    { 2, "b", false, std::make_unique<Enum<::apache::thrift::fixtures::types::MyForwardRefEnum>>("module.MyForwardRefEnum"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyStructWithForwardRefEnum_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -211,10 +198,8 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMet
   module_TrivialNumeric.name() = "module.TrivialNumeric";
   module_TrivialNumeric.is_union() = false;
   static const auto* const
-  module_TrivialNumeric_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "a", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "b", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_TrivialNumeric_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "a", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "b", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_TrivialNumeric_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -236,10 +221,8 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen
   module_TrivialNestedWithDefault.name() = "module.TrivialNestedWithDefault";
   module_TrivialNestedWithDefault.is_union() = false;
   static const auto* const
-  module_TrivialNestedWithDefault_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "z", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "n", false, std::make_unique<Struct<::apache::thrift::fixtures::types::TrivialNumeric>>("module.TrivialNumeric"), std::vector<ThriftConstStruct>{}},
-  }};
+  module_TrivialNestedWithDefault_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "z", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "n", false, std::make_unique<Struct<::apache::thrift::fixtures::types::TrivialNumeric>>("module.TrivialNumeric"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_TrivialNestedWithDefault_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -261,10 +244,8 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMeta
   module_ComplexString.name() = "module.ComplexString";
   module_ComplexString.is_union() = false;
   static const auto* const
-  module_ComplexString_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "a", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "b", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}},
-  }};
+  module_ComplexString_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "a", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "b", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_ComplexString_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -286,10 +267,8 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen
   module_ComplexNestedWithDefault.name() = "module.ComplexNestedWithDefault";
   module_ComplexNestedWithDefault.is_union() = false;
   static const auto* const
-  module_ComplexNestedWithDefault_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "z", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "n", false, std::make_unique<Struct<::apache::thrift::fixtures::types::ComplexString>>("module.ComplexString"), std::vector<ThriftConstStruct>{}},
-  }};
+  module_ComplexNestedWithDefault_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "z", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "n", false, std::make_unique<Struct<::apache::thrift::fixtures::types::ComplexString>>("module.ComplexString"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_ComplexNestedWithDefault_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -311,13 +290,8 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
   module_MinPadding.name() = "module.MinPadding";
   module_MinPadding.is_union() = false;
   static const auto* const
-  module_MinPadding_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MinPadding_fields = new std::array<EncodedThriftField, 5>{ {
+    { 1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MinPadding_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -327,7 +301,7 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_MinPadding.fields()->push_back(std::move(field));
   }
-  module_MinPadding.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {}).cv_struct_ref());
+  module_MinPadding.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -340,13 +314,8 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
   module_MinPaddingWithCustomType.name() = "module.MinPaddingWithCustomType";
   module_MinPaddingWithCustomType.is_union() = false;
   static const auto* const
-  module_MinPaddingWithCustomType_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter")}}).cv_struct_ref(), }},
-    {4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MinPaddingWithCustomType_fields = new std::array<EncodedThriftField, 5>{ {
+    { 1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct_ref(), }},    { 4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MinPaddingWithCustomType_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -356,9 +325,9 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
     field.structured_annotations() = f.structured_annotations;
     module_MinPaddingWithCustomType.fields()->push_back(std::move(field));
   }
-  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {}).cv_struct_ref());
-  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {}).cv_struct_ref());
-  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct_ref());
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {  }).cv_struct_ref());
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -371,12 +340,8 @@ StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata&
   module_MyStruct.name() = "module.MyStruct";
   module_MyStruct.is_union() = false;
   static const auto* const
-  module_MyStruct_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "majorVer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "data", false, std::make_unique<Struct<::apache::thrift::fixtures::types::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
-  }};
+  module_MyStruct_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "majorVer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "data", false, std::make_unique<Struct<::apache::thrift::fixtures::types::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -409,9 +374,8 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
   module_Renaming.name() = "module.Renaming";
   module_Renaming.is_union() = false;
   static const auto* const
-  module_Renaming_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "foo", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_Renaming_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "foo", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_Renaming_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -433,10 +397,8 @@ StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMet
   module_AnnotatedTypes.name() = "module.AnnotatedTypes";
   module_AnnotatedTypes.is_union() = false;
   static const auto* const
-  module_AnnotatedTypes_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "binary_field", false, std::make_unique<Typedef>("module.TBinary_8623", std::make_unique<Typedef>("module.TBinary", std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {2, "list_field", false, std::make_unique<Typedef>("module.SomeListOfTypeMap_2468", std::make_unique<Typedef>("included.SomeListOfTypeMap", std::make_unique<Typedef>("included.SomeListOfTypeMap", std::make_unique<List>(std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-  }};
+  module_AnnotatedTypes_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "binary_field", false, std::make_unique<Typedef>("module.TBinary_8623", std::make_unique<Typedef>("module.TBinary", std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 2, "list_field", false, std::make_unique<Typedef>("module.SomeListOfTypeMap_2468", std::make_unique<Typedef>("included.SomeListOfTypeMap", std::make_unique<Typedef>("included.SomeListOfTypeMap", std::make_unique<List>(std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(),  })), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_AnnotatedTypes_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -458,10 +420,8 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftM
   module_ForwardUsageRoot.name() = "module.ForwardUsageRoot";
   module_ForwardUsageRoot.is_union() = false;
   static const auto* const
-  module_ForwardUsageRoot_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "ForwardUsageStruct", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageStruct>>("module.ForwardUsageStruct"), std::vector<ThriftConstStruct>{}},
-    {2, "ForwardUsageByRef", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageByRef>>("module.ForwardUsageByRef"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-  }};
+  module_ForwardUsageRoot_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "ForwardUsageStruct", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageStruct>>("module.ForwardUsageStruct"), std::vector<ThriftConstStruct>{ }},    { 2, "ForwardUsageByRef", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageByRef>>("module.ForwardUsageByRef"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_ForwardUsageRoot_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -483,9 +443,8 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(Thrif
   module_ForwardUsageStruct.name() = "module.ForwardUsageStruct";
   module_ForwardUsageStruct.is_union() = false;
   static const auto* const
-  module_ForwardUsageStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "foo", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageRoot>>("module.ForwardUsageRoot"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-  }};
+  module_ForwardUsageStruct_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "foo", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageRoot>>("module.ForwardUsageRoot"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_ForwardUsageStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -507,9 +466,8 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(Thrift
   module_ForwardUsageByRef.name() = "module.ForwardUsageByRef";
   module_ForwardUsageByRef.is_union() = false;
   static const auto* const
-  module_ForwardUsageByRef_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "foo", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageRoot>>("module.ForwardUsageRoot"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-  }};
+  module_ForwardUsageByRef_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "foo", true, std::make_unique<Struct<::apache::thrift::fixtures::types::ForwardUsageRoot>>("module.ForwardUsageRoot"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_ForwardUsageByRef_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -531,9 +489,8 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMeta
   module_IncompleteMap.name() = "module.IncompleteMap";
   module_IncompleteMap.is_union() = false;
   static const auto* const
-  module_IncompleteMap_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteMapDep>>("module.IncompleteMapDep")), std::vector<ThriftConstStruct>{}},
-  }};
+  module_IncompleteMap_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteMapDep>>("module.IncompleteMapDep")), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_IncompleteMap_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -566,9 +523,8 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetada
   module_CompleteMap.name() = "module.CompleteMap";
   module_CompleteMap.is_union() = false;
   static const auto* const
-  module_CompleteMap_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteMapDep>>("module.CompleteMapDep")), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), }},
-  }};
+  module_CompleteMap_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteMapDep>>("module.CompleteMapDep")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_CompleteMap_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -601,9 +557,8 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMet
   module_IncompleteList.name() = "module.IncompleteList";
   module_IncompleteList.is_union() = false;
   static const auto* const
-  module_IncompleteList_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteListDep>>("module.IncompleteListDep")), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("::std::list")}}).cv_struct_ref(), }},
-  }};
+  module_IncompleteList_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteListDep>>("module.IncompleteListDep")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("::std::list") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_IncompleteList_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -636,9 +591,8 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetad
   module_CompleteList.name() = "module.CompleteList";
   module_CompleteList.is_union() = false;
   static const auto* const
-  module_CompleteList_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteListDep>>("module.CompleteListDep")), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("folly::small_vector")}}).cv_struct_ref(), }},
-  }};
+  module_CompleteList_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteListDep>>("module.CompleteListDep")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_CompleteList_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -671,9 +625,8 @@ StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetada
   module_AdaptedList.name() = "module.AdaptedList";
   module_AdaptedList.is_union() = false;
   static const auto* const
-  module_AdaptedList_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::detail::AdaptedListDep>>("module.AdaptedListDep")), std::vector<ThriftConstStruct>{}},
-  }};
+  module_AdaptedList_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::detail::AdaptedListDep>>("module.AdaptedListDep")), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_AdaptedList_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -695,9 +648,8 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
   module_AdaptedListDep.name() = "module.AdaptedListDep";
   module_AdaptedListDep.is_union() = false;
   static const auto* const
-  module_AdaptedListDep_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", false, std::make_unique<Struct<::apache::thrift::fixtures::types::AdaptedList>>("module.AdaptedList"), std::vector<ThriftConstStruct>{}},
-  }};
+  module_AdaptedListDep_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", false, std::make_unique<Struct<::apache::thrift::fixtures::types::AdaptedList>>("module.AdaptedList"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_AdaptedListDep_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -707,7 +659,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedListDep.fields()->push_back(std::move(field));
   }
-  module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("IdentityAdapter<detail::AdaptedListDep>")}, {"adaptedType", cvString("detail::AdaptedListDep")}}).cv_struct_ref());
+  module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("IdentityAdapter<detail::AdaptedListDep>") }, {"adaptedType", cvString("detail::AdaptedListDep") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -720,9 +672,8 @@ StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(Thr
   module_DependentAdaptedList.name() = "module.DependentAdaptedList";
   module_DependentAdaptedList.is_union() = false;
   static const auto* const
-  module_DependentAdaptedList_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>("module.DependentAdaptedListDep")), std::vector<ThriftConstStruct>{}},
-  }};
+  module_DependentAdaptedList_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<List>(std::make_unique<Struct<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>("module.DependentAdaptedListDep")), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_DependentAdaptedList_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -744,9 +695,8 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
   module_DependentAdaptedListDep.name() = "module.DependentAdaptedListDep";
   module_DependentAdaptedListDep.is_union() = false;
   static const auto* const
-  module_DependentAdaptedListDep_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
-  }};
+  module_DependentAdaptedListDep_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_DependentAdaptedListDep_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -756,7 +706,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
     field.structured_annotations() = f.structured_annotations;
     module_DependentAdaptedListDep.fields()->push_back(std::move(field));
   }
-  module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("IdentityAdapter<detail::DependentAdaptedListDep>")}}).cv_struct_ref());
+  module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("IdentityAdapter<detail::DependentAdaptedListDep>") } }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -769,15 +719,8 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMet
   module_AllocatorAware.name() = "module.AllocatorAware";
   module_AllocatorAware.is_union() = false;
   static const auto* const
-  module_AllocatorAware_fields = new std::array<EncodedThriftField, 7>{{
-    {1, "aa_list", false, std::make_unique<Typedef>("module.list_i32_9187", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {2, "aa_set", false, std::make_unique<Typedef>("module.set_i32_7070", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {3, "aa_map", false, std::make_unique<Typedef>("module.map_i32_i32_9565", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {4, "aa_string", false, std::make_unique<Typedef>("module.string_5252", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {5, "not_a_container", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {6, "aa_unique", false, std::make_unique<Typedef>("module.i32_9314", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-    {7, "aa_shared", false, std::make_unique<Typedef>("module.i32_9314", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(2)}}).cv_struct_ref(), }},
-  }};
+  module_AllocatorAware_fields = new std::array<EncodedThriftField, 7>{ {
+    { 1, "aa_list", false, std::make_unique<Typedef>("module.list_i32_9187", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 2, "aa_set", false, std::make_unique<Typedef>("module.set_i32_7070", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 3, "aa_map", false, std::make_unique<Typedef>("module.map_i32_i32_9565", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 4, "aa_string", false, std::make_unique<Typedef>("module.string_5252", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 5, "not_a_container", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "aa_unique", false, std::make_unique<Typedef>("module.i32_9314", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), }},    { 7, "aa_shared", false, std::make_unique<Typedef>("module.i32_9314", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_AllocatorAware_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -799,10 +742,8 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMe
   module_AllocatorAware2.name() = "module.AllocatorAware2";
   module_AllocatorAware2.is_union() = false;
   static const auto* const
-  module_AllocatorAware2_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "not_a_container", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "box_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
-  }};
+  module_AllocatorAware2_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "not_a_container", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "box_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct_ref(), }},  }};
   for (const auto& f : *module_AllocatorAware2_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -824,11 +765,8 @@ StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMeta
   module_TypedefStruct.name() = "module.TypedefStruct";
   module_TypedefStruct.is_union() = false;
   static const auto* const
-  module_TypedefStruct_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "i32_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "IntTypedef_field", false, std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {3, "UintTypedef_field", false, std::make_unique<Typedef>("module.UintTypedef", std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::uint32_t")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-  }};
+  module_TypedefStruct_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "i32_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "IntTypedef_field", false, std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 3, "UintTypedef_field", false, std::make_unique<Typedef>("module.UintTypedef", std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Typedef>("module.IntTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::uint32_t") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_TypedefStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -850,9 +788,8 @@ StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::
   module_StructWithDoubleUnderscores.name() = "module.StructWithDoubleUnderscores";
   module_StructWithDoubleUnderscores.is_union() = false;
   static const auto* const
-  module_StructWithDoubleUnderscores_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "__field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
+  module_StructWithDoubleUnderscores_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "__field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_StructWithDoubleUnderscores_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -868,13 +805,13 @@ StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "bounce_map";
-  auto func_ret_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), });
+  auto func_ret_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(),  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SomeService_bounce_map_m_1;
   module_SomeService_bounce_map_m_1.id() = 1;
   module_SomeService_bounce_map_m_1.name() = "m";
   module_SomeService_bounce_map_m_1.is_optional() = false;
-  auto module_SomeService_bounce_map_m_1_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), });
+  auto module_SomeService_bounce_map_m_1_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct_ref(),  });
   module_SomeService_bounce_map_m_1_type->writeAndGenType(*module_SomeService_bounce_map_m_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SomeService_bounce_map_m_1));
   func.is_oneway() = false;
@@ -883,7 +820,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "binary_keyed_map";
-  auto func_ret_type = std::make_unique<Map>(std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
+  auto func_ret_type = std::make_unique<Map>(std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{  }), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SomeService_binary_keyed_map_r_1;
   module_SomeService_binary_keyed_map_r_1.id() = 1;

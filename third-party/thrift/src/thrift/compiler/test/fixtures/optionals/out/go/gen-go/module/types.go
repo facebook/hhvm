@@ -96,11 +96,6 @@ func AnimalFromString(s string) (Animal, error) {
     return Animal(0), fmt.Errorf("not a valid Animal string")
 }
 
-// Deprecated: Use Animal.Ptr() instead.
-func AnimalPtr(v Animal) *Animal {
-    return &v
-}
-
 
 type Color struct {
     Red float64 `thrift:"red,1" json:"red" db:"red"`

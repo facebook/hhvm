@@ -65,11 +65,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
 
-// Deprecated: Use MyEnum.Ptr() instead.
-func MyEnumPtr(v MyEnum) *MyEnum {
-    return &v
-}
-
 
 type HackEnum int32
 
@@ -118,11 +113,6 @@ func HackEnumFromString(s string) (HackEnum, error) {
         return v, nil
     }
     return HackEnum(0), fmt.Errorf("not a valid HackEnum string")
-}
-
-// Deprecated: Use HackEnum.Ptr() instead.
-func HackEnumPtr(v HackEnum) *HackEnum {
-    return &v
 }
 
 

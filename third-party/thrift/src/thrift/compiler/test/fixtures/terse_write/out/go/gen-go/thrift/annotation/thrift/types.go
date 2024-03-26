@@ -80,11 +80,6 @@ func RpcPriorityFromString(s string) (RpcPriority, error) {
     return RpcPriority(0), fmt.Errorf("not a valid RpcPriority string")
 }
 
-// Deprecated: Use RpcPriority.Ptr() instead.
-func RpcPriorityPtr(v RpcPriority) *RpcPriority {
-    return &v
-}
-
 
 type Experimental struct {
 }

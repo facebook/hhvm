@@ -112,11 +112,6 @@ func VoidFromString(s string) (Void, error) {
     return Void(0), fmt.Errorf("not a valid Void string")
 }
 
-// Deprecated: Use Void.Ptr() instead.
-func VoidPtr(v Void) *Void {
-    return &v
-}
-
 
 type StandardProtocol int32
 
@@ -180,11 +175,6 @@ func StandardProtocolFromString(s string) (StandardProtocol, error) {
         return v, nil
     }
     return StandardProtocol(0), fmt.Errorf("not a valid StandardProtocol string")
-}
-
-// Deprecated: Use StandardProtocol.Ptr() instead.
-func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
-    return &v
 }
 
 

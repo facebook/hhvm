@@ -1189,11 +1189,6 @@ func ColorFromString(s string) (Color, error) {
     return Color(0), fmt.Errorf("not a valid Color string")
 }
 
-// Deprecated: Use Color.Ptr() instead.
-func ColorPtr(v Color) *Color {
-    return &v
-}
-
 
 type ThriftAdaptedEnum int32
 
@@ -1242,11 +1237,6 @@ func ThriftAdaptedEnumFromString(s string) (ThriftAdaptedEnum, error) {
         return v, nil
     }
     return ThriftAdaptedEnum(0), fmt.Errorf("not a valid ThriftAdaptedEnum string")
-}
-
-// Deprecated: Use ThriftAdaptedEnum.Ptr() instead.
-func ThriftAdaptedEnumPtr(v ThriftAdaptedEnum) *ThriftAdaptedEnum {
-    return &v
 }
 
 

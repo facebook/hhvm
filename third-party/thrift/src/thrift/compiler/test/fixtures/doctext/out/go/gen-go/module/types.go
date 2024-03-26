@@ -112,11 +112,6 @@ func BFromString(s string) (B, error) {
     return B(0), fmt.Errorf("not a valid B string")
 }
 
-// Deprecated: Use B.Ptr() instead.
-func BPtr(v B) *B {
-    return &v
-}
-
 
 type A struct {
     UselessField int32 `thrift:"useless_field,1" json:"useless_field" db:"useless_field"`

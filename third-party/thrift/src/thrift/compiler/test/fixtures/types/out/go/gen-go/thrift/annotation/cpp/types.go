@@ -70,11 +70,6 @@ func RefTypeFromString(s string) (RefType, error) {
     return RefType(0), fmt.Errorf("not a valid RefType string")
 }
 
-// Deprecated: Use RefType.Ptr() instead.
-func RefTypePtr(v RefType) *RefType {
-    return &v
-}
-
 
 type EnumUnderlyingType int32
 
@@ -138,11 +133,6 @@ func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
         return v, nil
     }
     return EnumUnderlyingType(0), fmt.Errorf("not a valid EnumUnderlyingType string")
-}
-
-// Deprecated: Use EnumUnderlyingType.Ptr() instead.
-func EnumUnderlyingTypePtr(v EnumUnderlyingType) *EnumUnderlyingType {
-    return &v
 }
 
 

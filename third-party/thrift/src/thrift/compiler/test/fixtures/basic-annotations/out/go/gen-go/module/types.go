@@ -179,11 +179,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
 
-// Deprecated: Use MyEnum.Ptr() instead.
-func MyEnumPtr(v MyEnum) *MyEnum {
-    return &v
-}
-
 
 type MyStructNestedAnnotation struct {
     Name string `thrift:"name,1" json:"name" db:"name"`

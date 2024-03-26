@@ -91,11 +91,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
 
-// Deprecated: Use MyEnum.Ptr() instead.
-func MyEnumPtr(v MyEnum) *MyEnum {
-    return &v
-}
-
 
 type MyStruct struct {
 }

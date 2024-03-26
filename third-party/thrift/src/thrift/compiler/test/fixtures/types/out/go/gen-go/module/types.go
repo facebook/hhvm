@@ -576,11 +576,6 @@ func HasBitwiseOpsFromString(s string) (HasBitwiseOps, error) {
     return HasBitwiseOps(0), fmt.Errorf("not a valid HasBitwiseOps string")
 }
 
-// Deprecated: Use HasBitwiseOps.Ptr() instead.
-func HasBitwiseOpsPtr(v HasBitwiseOps) *HasBitwiseOps {
-    return &v
-}
-
 
 type IsUnscoped int32
 
@@ -631,11 +626,6 @@ func IsUnscopedFromString(s string) (IsUnscoped, error) {
     return IsUnscoped(0), fmt.Errorf("not a valid IsUnscoped string")
 }
 
-// Deprecated: Use IsUnscoped.Ptr() instead.
-func IsUnscopedPtr(v IsUnscoped) *IsUnscoped {
-    return &v
-}
-
 
 type MyForwardRefEnum int32
 
@@ -684,11 +674,6 @@ func MyForwardRefEnumFromString(s string) (MyForwardRefEnum, error) {
         return v, nil
     }
     return MyForwardRefEnum(0), fmt.Errorf("not a valid MyForwardRefEnum string")
-}
-
-// Deprecated: Use MyForwardRefEnum.Ptr() instead.
-func MyForwardRefEnumPtr(v MyForwardRefEnum) *MyForwardRefEnum {
-    return &v
 }
 
 

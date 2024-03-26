@@ -206,11 +206,6 @@ func EmptyEnumFromString(s string) (EmptyEnum, error) {
     return EmptyEnum(0), fmt.Errorf("not a valid EmptyEnum string")
 }
 
-// Deprecated: Use EmptyEnum.Ptr() instead.
-func EmptyEnumPtr(v EmptyEnum) *EmptyEnum {
-    return &v
-}
-
 
 type City int32
 
@@ -271,11 +266,6 @@ func CityFromString(s string) (City, error) {
     return City(0), fmt.Errorf("not a valid City string")
 }
 
-// Deprecated: Use City.Ptr() instead.
-func CityPtr(v City) *City {
-    return &v
-}
-
 
 type Company int32
 
@@ -334,11 +324,6 @@ func CompanyFromString(s string) (Company, error) {
         return v, nil
     }
     return Company(0), fmt.Errorf("not a valid Company string")
-}
-
-// Deprecated: Use Company.Ptr() instead.
-func CompanyPtr(v Company) *Company {
-    return &v
 }
 
 

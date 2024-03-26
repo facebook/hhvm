@@ -78,9 +78,4 @@ func {{enum:go_name}}FromString(s string) ({{enum:go_name}}, error) {
     }
     return {{enum:go_name}}(0), fmt.Errorf("not a valid {{enum:go_name}} string")
 }
-
-// Deprecated: Use {{enum:go_name}}.Ptr() instead.
-func {{enum:go_name}}Ptr(v {{enum:go_name}}) *{{enum:go_name}} {
-    return &v
-}
 {{/program:compat?}}

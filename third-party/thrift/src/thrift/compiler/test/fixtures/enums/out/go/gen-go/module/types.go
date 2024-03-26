@@ -75,11 +75,6 @@ func MetasyntacticFromString(s string) (Metasyntactic, error) {
     return Metasyntactic(0), fmt.Errorf("not a valid Metasyntactic string")
 }
 
-// Deprecated: Use Metasyntactic.Ptr() instead.
-func MetasyntacticPtr(v Metasyntactic) *Metasyntactic {
-    return &v
-}
-
 
 type MyEnum1 int32
 
@@ -150,11 +145,6 @@ func MyEnum1FromString(s string) (MyEnum1, error) {
     return MyEnum1(0), fmt.Errorf("not a valid MyEnum1 string")
 }
 
-// Deprecated: Use MyEnum1.Ptr() instead.
-func MyEnum1Ptr(v MyEnum1) *MyEnum1 {
-    return &v
-}
-
 
 type MyEnum2 int32
 
@@ -208,11 +198,6 @@ func MyEnum2FromString(s string) (MyEnum2, error) {
         return v, nil
     }
     return MyEnum2(0), fmt.Errorf("not a valid MyEnum2 string")
-}
-
-// Deprecated: Use MyEnum2.Ptr() instead.
-func MyEnum2Ptr(v MyEnum2) *MyEnum2 {
-    return &v
 }
 
 
@@ -285,11 +270,6 @@ func MyEnum3FromString(s string) (MyEnum3, error) {
     return MyEnum3(0), fmt.Errorf("not a valid MyEnum3 string")
 }
 
-// Deprecated: Use MyEnum3.Ptr() instead.
-func MyEnum3Ptr(v MyEnum3) *MyEnum3 {
-    return &v
-}
-
 
 type MyEnum4 int32
 
@@ -350,11 +330,6 @@ func MyEnum4FromString(s string) (MyEnum4, error) {
     return MyEnum4(0), fmt.Errorf("not a valid MyEnum4 string")
 }
 
-// Deprecated: Use MyEnum4.Ptr() instead.
-func MyEnum4Ptr(v MyEnum4) *MyEnum4 {
-    return &v
-}
-
 
 type MyBitmaskEnum1 int32
 
@@ -410,11 +385,6 @@ func MyBitmaskEnum1FromString(s string) (MyBitmaskEnum1, error) {
     return MyBitmaskEnum1(0), fmt.Errorf("not a valid MyBitmaskEnum1 string")
 }
 
-// Deprecated: Use MyBitmaskEnum1.Ptr() instead.
-func MyBitmaskEnum1Ptr(v MyBitmaskEnum1) *MyBitmaskEnum1 {
-    return &v
-}
-
 
 type MyBitmaskEnum2 int32
 
@@ -468,11 +438,6 @@ func MyBitmaskEnum2FromString(s string) (MyBitmaskEnum2, error) {
         return v, nil
     }
     return MyBitmaskEnum2(0), fmt.Errorf("not a valid MyBitmaskEnum2 string")
-}
-
-// Deprecated: Use MyBitmaskEnum2.Ptr() instead.
-func MyBitmaskEnum2Ptr(v MyBitmaskEnum2) *MyBitmaskEnum2 {
-    return &v
 }
 
 

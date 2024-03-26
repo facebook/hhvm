@@ -70,9 +70,4 @@ func EnumFromString(s string) (Enum, error) {
     return Enum(0), fmt.Errorf("not a valid Enum string")
 }
 
-// Deprecated: Use Enum.Ptr() instead.
-func EnumPtr(v Enum) *Enum {
-    return &v
-}
-
 

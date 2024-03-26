@@ -10,8 +10,6 @@
 
 #include <sodium.h>
 
-#include <folly/ssl/Init.h>
-
 namespace {
 
 class InitFizz {
@@ -20,8 +18,6 @@ class InitFizz {
     if (sodium_init() == -1) {
       throw std::runtime_error("Couldn't init libsodium");
     }
-
-    folly::ssl::init();
   }
 };
 } // namespace

@@ -13,7 +13,6 @@
 #include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/OpenSSL.h>
-#include <folly/ssl/Init.h>
 #include <sodium.h>
 
 #include <openssl/bio.h>

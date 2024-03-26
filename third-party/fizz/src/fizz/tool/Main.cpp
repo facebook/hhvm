@@ -9,7 +9,6 @@
 #include <fizz/tool/Commands.h>
 #include <folly/Conv.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 #include <glog/logging.h>
 
 #include <iostream>
@@ -64,7 +63,6 @@ int main(int argc, char** argv) {
 
   FLAGS_logtostderr = 1;
   google::InitGoogleLogging(argv[0]);
-  folly::ssl::init();
 
   if (arguments.size() < 2) {
     showUsage();

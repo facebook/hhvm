@@ -17,7 +17,6 @@
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
 #include <folly/String.h>
-#include <folly/ssl/Init.h>
 
 using namespace folly;
 
@@ -63,7 +62,6 @@ TEST(ExportedAuthenticatorTest, TestEmptyAuthenticatorRequest) {
 class AuthenticatorTest : public ::testing::Test {
  public:
   void SetUp() override {
-    folly::ssl::init();
     CertificateRequest cr;
     cr.certificate_request_context =
         folly::IOBuf::copyBuffer("0123456789abcdefghij");
@@ -147,7 +145,6 @@ TEST(ExportedAuthenticatorTest, TestGetContext) {
 class ValidateAuthenticatorTest : public ::testing::Test {
  public:
   void SetUp() override {
-    folly::ssl::init();
     CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
     deriver_ = OpenSSLFactory().makeKeyDeriver(cipher);
     schemes_.push_back(SignatureScheme::ecdsa_secp256r1_sha256);

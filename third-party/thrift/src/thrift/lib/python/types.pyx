@@ -107,7 +107,7 @@ cdef class IntegerTypeInfo:
         return inst
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, object value not None):
+    cpdef to_internal_data(self, object value):
         if not isinstance(value, pint):
             raise TypeError(f"value {value} is not a <class 'int'>, is actually of type {type(value)}")
         cdef int64_t cvalue = value
@@ -131,7 +131,7 @@ cdef class StringTypeInfo:
         return inst
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, object value not None):
+    cpdef to_internal_data(self, object value):
         """
         Returns a new Python bytes object (i.e. string) containing the UTF-8
         encoding of the given unicode object.
@@ -371,6 +371,16 @@ cdef class ListTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
+        cdef IntegerTypeInfo int_type_info = None
+        if isinstance(self.val_info, IntegerTypeInfo):
+            int_type_info = self.val_info
+            return tuple(int_type_info.to_internal_data(v) for v in value)
+
+        cdef StringTypeInfo str_type_info = None
+        if isinstance(self.val_info, StringTypeInfo):
+            str_type_info = self.val_info
+            return tuple(str_type_info.to_internal_data(v) for v in value)
+
         return tuple(self.val_info.to_internal_data(v) for v in value)
 
     # convert deserialized data to user format
@@ -396,6 +406,16 @@ cdef class SetTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
+        cdef IntegerTypeInfo int_type_info = None
+        if isinstance(self.val_info, IntegerTypeInfo):
+            int_type_info = self.val_info
+            return frozenset(int_type_info.to_internal_data(v) for v in value)
+
+        cdef StringTypeInfo str_type_info = None
+        if isinstance(self.val_info, StringTypeInfo):
+            str_type_info = self.val_info
+            return frozenset(str_type_info.to_internal_data(v) for v in value)
+
         return frozenset(self.val_info.to_internal_data(v) for v in value)
 
     # convert deserialized data to user format

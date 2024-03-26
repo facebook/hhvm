@@ -86,11 +86,13 @@ cdef class IntegerTypeInfo:
     cdef int64_t max_value
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, min_value, max_value)
+    cpdef to_internal_data(self, object)
 
 cdef class StringTypeInfo:
     cdef const cTypeInfo* cpp_obj
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj)
+    cpdef to_internal_data(self, object)
 
 cdef class IOBufTypeInfo:
     cdef const cTypeInfo* cpp_obj

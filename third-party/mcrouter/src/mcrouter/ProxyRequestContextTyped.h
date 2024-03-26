@@ -236,8 +236,8 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       const void* ptr = nullptr)
       : ProxyRequestContext(pr, priority__, ptr),
         proxy_(pr),
-        logger_(folly::in_place, pr),
-        additionalLogger_(folly::in_place, *this) {}
+        logger_(std::in_place, pr),
+        additionalLogger_(std::in_place, *this) {}
 
   Proxy<RouterInfo>& proxy_;
 

@@ -22,6 +22,7 @@ from libcpp.memory cimport make_unique
 from cpython cimport bool as pbool, int as pint, float as pfloat
 from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM, PyTuple_GET_ITEM, PyTuple_Check
+from cpython.set cimport PyFrozenSet_New, PySet_Add
 from cpython.ref cimport Py_INCREF, Py_DECREF
 from cpython.unicode cimport PyUnicode_AsUTF8String, PyUnicode_FromEncodedObject
 from cython.operator cimport dereference as deref
@@ -371,15 +372,11 @@ cdef class ListTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
-        cdef IntegerTypeInfo int_type_info = None
         if isinstance(self.val_info, IntegerTypeInfo):
-            int_type_info = self.val_info
-            return tuple(int_type_info.to_internal_data(v) for v in value)
+            return self.to_internal_from_values(value, <IntegerTypeInfo>self.val_info)
 
-        cdef StringTypeInfo str_type_info = None
         if isinstance(self.val_info, StringTypeInfo):
-            str_type_info = self.val_info
-            return tuple(str_type_info.to_internal_data(v) for v in value)
+            return self.to_internal_from_values(value, <StringTypeInfo>self.val_info)
 
         return tuple(self.val_info.to_internal_data(v) for v in value)
 
@@ -395,6 +392,16 @@ cdef class ListTypeInfo:
             return value
         return List(self.val_info, value)
 
+    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info):
+        cdef idx = 0
+        cdef tuple tpl = PyTuple_New(len(values))
+        for idx, value in enumerate(values):
+            internal_data = val_type_info.to_internal_data(value)
+            Py_INCREF(internal_data)
+            PyTuple_SET_ITEM(tpl, idx, internal_data)
+
+        return tpl
+
 
 cdef class SetTypeInfo:
     def __cinit__(self, val_info):
@@ -406,15 +413,11 @@ cdef class SetTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
-        cdef IntegerTypeInfo int_type_info = None
         if isinstance(self.val_info, IntegerTypeInfo):
-            int_type_info = self.val_info
-            return frozenset(int_type_info.to_internal_data(v) for v in value)
+            return self.to_internal_from_values(value, <IntegerTypeInfo>self.val_info)
 
-        cdef StringTypeInfo str_type_info = None
         if isinstance(self.val_info, StringTypeInfo):
-            str_type_info = self.val_info
-            return frozenset(str_type_info.to_internal_data(v) for v in value)
+            return self.to_internal_from_values(value, <StringTypeInfo>self.val_info)
 
         return frozenset(self.val_info.to_internal_data(v) for v in value)
 
@@ -429,6 +432,13 @@ cdef class SetTypeInfo:
         if isinstance(value, Set):
             return value
         return Set(self.val_info, value)
+
+    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info):
+        cdef frozenset frozen_set = PyFrozenSet_New([])
+        for value in values:
+            PySet_Add(frozen_set, val_type_info.to_internal_data(value))
+
+        return frozen_set
 
 
 cdef class MapTypeInfo:

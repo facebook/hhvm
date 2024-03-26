@@ -73,6 +73,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
 cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
 
+ctypedef fused FusedTypeInfo:
+    IntegerTypeInfo
+    StringTypeInfo
 
 cdef class TypeInfo:
     cdef const cTypeInfo* cpp_obj
@@ -119,11 +122,13 @@ cdef class ListTypeInfo:
     cdef object val_info
     cdef unique_ptr[cListTypeInfo] cpp_obj
     cdef const cTypeInfo* get(self)
+    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info)
 
 cdef class SetTypeInfo:
     cdef object val_info
     cdef unique_ptr[cSetTypeInfo] cpp_obj
     cdef const cTypeInfo* get(self)
+    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info)
 
 cdef class MapTypeInfo:
     cdef object key_info

@@ -193,19 +193,11 @@ class RateLimitFilter : public PassThroughHTTPCodecFilter {
     // These may trigger a direct HTTP response.
     if (!rateLimiter || streamID == 0 || error.hasCodecStatusCode()) {
       callback_->onError(streamID, error, newTxn);
+    } else if (rateLimiter->incrementNumEventsInCurrentInterval()) {
+      sendErrorCallback(http2::FrameType::RST_STREAM,
+                        rateLimiter->numEventsInCurrentInterval());
     } else {
-      if (rateLimiter->incrementNumEventsInCurrentInterval()) {
-        HTTPException ex(
-            HTTPException::Direction::INGRESS_AND_EGRESS,
-            folly::to<std::string>(
-                "dropping connection due to too many newly created txns  when "
-                "directly handling errors, num direct error handling cases = ",
-                rateLimiter->numEventsInCurrentInterval()));
-        ex.setProxygenError(kErrorDropped);
-        callback_->onError(0, ex, true);
-      } else {
-        callback_->onError(streamID, error, newTxn);
-      }
+      callback_->onError(streamID, error, newTxn);
     }
   }
 
@@ -250,6 +242,7 @@ class RateLimitFilter : public PassThroughHTTPCodecFilter {
             numEventsInCurrentInterval,
             ", most recent frame type = ",
             getFrameTypeString(frameType)));
+    ex.setCodecStatusCode(ErrorCode::CANCEL);
     ex.setProxygenError(kErrorDropped);
     callback_->onError(0, ex, true);
   }

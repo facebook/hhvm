@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import dataclasses
 import importlib
 import types
 import unittest
 
 from thrift.python.mutable_types import MutableStruct, MutableStructOrUnion
+from thrift.python.types import StructMeta
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
@@ -65,6 +67,23 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         mapping[w_new2] = 456
         self.assertEqual(mapping[w_new], 456)
         self.assertEqual(mapping[w_new2], 456)
+
+    def test_type(self) -> None:
+        self.assertEqual(type(TestStructImmutable), StructMeta)
+        self.assertEqual(type(TestStructImmutable()), TestStructImmutable)
+
+    def test_iteration(self) -> None:
+        # Iterating over the class yields tuples of (field_name, None).
+        self.assertSetEqual(
+            set(TestStructImmutable),
+            {("unqualified_string", None), ("optional_string", None)},
+        )
+
+        # Iterating over an instance yields (field_name, field_value) tuples.
+        self.assertSetEqual(
+            set(TestStructImmutable(unqualified_string="hello")),
+            {("unqualified_string", "hello"), ("optional_string", None)},
+        )
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
@@ -137,3 +156,27 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             ),
         ):
             w_mutable._to_immutable()
+
+    def test_type(self) -> None:
+        # Contrary to immutable struct, the type of the generated clas
+        # is not MutableStructMeta, but 'type' (because it is a dataclass type)
+        self.assertEqual(type(TestStructMutable), type)
+        self.assertEqual(type(TestStructMutable()), TestStructMutable)
+
+    def test_iteration(self) -> None:
+        # Contrary to immutable types, the dataclass-based mutable type is not
+        # iterable (mostly because we do not control the metaclass of
+        # dataclasses).
+        with self.assertRaisesRegex(TypeError, "'type' object is not iterable"):
+            iter(TestStructMutable)
+
+        self.assertSetEqual(
+            {field.name for field in dataclasses.fields(TestStructMutable)},
+            {"unqualified_string", "optional_string"},
+        )
+
+        # Iterating over an instance yields (field_name, field_value) tuples.
+        self.assertSetEqual(
+            set(TestStructMutable(unqualified_string="hello")),
+            {("unqualified_string", "hello"), ("optional_string", None)},
+        )

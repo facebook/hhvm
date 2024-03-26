@@ -21,7 +21,11 @@ class MutableStructOrUnion:
 
 
 class MutableStruct(MutableStructOrUnion):
-    pass
+    def __iter__(self):
+        return (
+            (field.name, getattr(self, field.name))
+            for field in dataclasses.fields(self)
+        )
 
 
 def _gen_subclass_forbidden(thrift_type_name: str):

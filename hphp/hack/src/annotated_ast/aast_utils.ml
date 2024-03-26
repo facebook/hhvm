@@ -6,6 +6,7 @@
  *
  *)
 
+open Common
 open Ast_defs
 open Aast_defs
 
@@ -68,8 +69,8 @@ let rec can_be_captured = function
     can_be_captured exp
 
 let find_shape_field name fields =
-  List.find_opt
-    (fun (field_name, _e) ->
+  List.find
+    ~f:(fun (field_name, _e) ->
       match field_name with
       | SFlit_str (_, n) -> String.equal name n
       | _ -> false)
@@ -109,3 +110,85 @@ let get_virtual_expr expr =
     | Some expr -> expr
     | None -> expr)
   | _ -> expr
+
+let rec is_fun_expr expr =
+  match expr with
+  | (_, _, Lfun _)
+  | (_, _, Efun _) ->
+    true
+  | (_, _, Hole (e, _, _, _)) -> is_fun_expr e
+  | _ -> false
+
+let rec is_const_expr (_, _, expr_) =
+  match expr_ with
+  | Null
+  | True
+  | False
+  | This
+  | Omitted
+  | Id _
+  | Lvar _
+  | Dollardollar _
+  | Class_const _
+  | FunctionPointer _
+  | Int _
+  | Float _
+  | String _
+  | List _
+  | Efun _
+  | Lfun _
+  | EnumClassLabel _
+  | Lplaceholder _
+  | Method_caller _
+  | Package _
+  | Nameof _ ->
+    true
+  | Call _
+  | New _
+  | Await _
+  | Binop { bop = Eq _; lhs = _; rhs = _ }
+  | ExpressionTree _
+  | ET_Splice _
+  | Xml _ ->
+    false
+  | Clone expr
+  | PrefixedString (_, expr)
+  | ReadonlyExpr expr
+  | Cast (_, expr)
+  | Unop (_, expr)
+  | Is (expr, _)
+  | As { expr; hint = _; is_nullable = _; enforce_deep = _ }
+  | Upcast (expr, _)
+  | Hole (expr, _, _, _)
+  | Import (_, expr) ->
+    is_const_expr expr
+  | Obj_get (e1, e2, _, _)
+  | Pipe (_, e1, e2)
+  | Binop { bop = _; lhs = e1; rhs = e2 }
+  | Pair (_, e1, e2) ->
+    is_const_expr e1 && is_const_expr e2
+  | ValCollection (_, _, exprs)
+  | String2 exprs
+  | Tuple exprs ->
+    List.for_all exprs ~f:is_const_expr
+  | Shape shapes -> List.for_all ~f:(fun (_, e) -> is_const_expr e) shapes
+  | KeyValCollection (_, _, exprs) ->
+    List.for_all ~f:(fun (e1, e2) -> is_const_expr e1 && is_const_expr e2) exprs
+  | Invalid e -> Option.fold ~none:true ~some:is_const_expr e
+  | Array_get (e1, e2) ->
+    is_const_expr e1 && Option.fold ~none:true ~some:is_const_expr e2
+  | Class_get (_, cge, _) ->
+    (match cge with
+    | CGstring _ -> true
+    | CGexpr e -> is_const_expr e)
+  | Yield afield -> is_const_afield afield
+  | Eif (e1, e2, e3) ->
+    is_const_expr e1
+    && Option.fold ~none:true ~some:is_const_expr e2
+    && is_const_expr e3
+  | Collection (_, _, afields) -> List.for_all afields ~f:is_const_afield
+
+and is_const_afield afield =
+  match afield with
+  | AFvalue expr -> is_const_expr expr
+  | AFkvalue (e1, e2) -> is_const_expr e1 && is_const_expr e2

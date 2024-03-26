@@ -943,8 +943,12 @@ let closure_check_param env param =
     env
 
 let stash_conts_for_closure
-    env p is_anon (captured : Typing_local_types.local Aast.capture_lid list) f
-    =
+    env
+    p
+    ~should_invalidate_fakes
+    ~is_anon
+    (captured : Typing_local_types.local Aast.capture_lid list)
+    f =
   let with_ty_for_lid ((_, name) as lid) = (Env.get_local env name, lid) in
 
   let captured =
@@ -971,7 +975,10 @@ let stash_conts_for_closure
             next_cont.Typing_per_cont_env.local_types
         in
         let initial_fakes =
-          Fake.forget (Env.get_fake_members env) Reason.(Blame (p, BSlambda))
+          if should_invalidate_fakes then
+            Fake.forget (Env.get_fake_members env) Reason.(Blame (p, BSlambda))
+          else
+            Env.get_fake_members env
         in
         let tpenv = Env.get_tpenv env in
         (initial_locals, initial_fakes, tpenv))
@@ -2412,6 +2419,8 @@ module rec Expr : sig
           (** Set to [true] when the subexpression we are typing is either a function/method argument, the receiver of a property access or instance method invocation or the scrutinee in a [foreach] statment. When set, [This] and [Lvar] expressions will be checked against in-scope using vars to ensure they don't escape *)
       check_defined: bool;
           (** Set to [false] when the subexpression is a lvalue we are defining. When true, we raise an error if [Lvar] or [This] expressions are not bound in the environment. *)
+      immediately_called_lambda: bool;
+          (** Set to [true] when checking a lambda expression that is immediately called *)
     }
 
     val default : t
@@ -2512,6 +2521,7 @@ end = struct
       lhs_of_null_coalesce: bool;
       accept_using_var: bool;
       check_defined: bool;
+      immediately_called_lambda: bool;
     }
 
     let default =
@@ -2523,6 +2533,7 @@ end = struct
         lhs_of_null_coalesce = false;
         accept_using_var = false;
         check_defined = true;
+        immediately_called_lambda = false;
       }
   end
 
@@ -4480,9 +4491,18 @@ end = struct
     | Efun
         { ef_fun = f; ef_use = idl; ef_closure_class_name = closure_class_name }
       ->
-      Lambda.lambda ~is_anon:true ~closure_class_name ~expected p env f idl
+      Lambda.lambda
+        ~should_invalidate_fakes:(not ctxt.Context.immediately_called_lambda)
+        ~is_anon:true
+        ~closure_class_name
+        ~expected
+        p
+        env
+        f
+        idl
     | Lfun (f, idl) ->
       Lambda.lambda
+        ~should_invalidate_fakes:(not ctxt.Context.immediately_called_lambda)
         ~is_anon:false
         ~closure_class_name:None
         ~expected
@@ -5790,7 +5810,22 @@ end = struct
     (* Function invocation *)
     | Id id -> dispatch_id env id
     | _ ->
-      let (env, te, fty) = expr ~expected:None ~ctxt:Context.default env e in
+      (* If we are immediately calling an lambda, then we don't want to conservatively
+         invalidate the refinements, because it won't escape. However, we do need to
+         invalidate any refinements that the argument expressions would invalidate.
+         Ideally, we'd check all non-lambda args before checking the function, but
+         that's a large refactor. Instead, we'll not invalidate when the arguments
+         are constant or variables, and so obviously don't need to invalidate. *)
+      let ctxt =
+        Context.
+          {
+            default with
+            immediately_called_lambda =
+              Aast_utils.is_fun_expr e
+              && List.for_all ~f:(fun (_, e) -> Aast_utils.is_const_expr e) el;
+          }
+      in
+      let (env, te, fty) = expr ~expected:None ~ctxt env e in
       let ((env, ty_err_opt1), fty) =
         Typing_solver.expand_type_and_solve
           ~description_of_expected:"a function value"
@@ -8125,6 +8160,7 @@ end
 
 and Lambda : sig
   val lambda :
+    should_invalidate_fakes:bool ->
     is_anon:bool ->
     closure_class_name:byte_string option ->
     expected:ExpectedTy.t option ->
@@ -8556,6 +8592,7 @@ end = struct
       ?(check_escapes = true)
       ~supportdyn
       ~closure_class_name
+      ~should_invalidate_fakes
       env
       lambda_pos
       decl_ft
@@ -8576,7 +8613,13 @@ end = struct
       let snap = Typing_escape.snapshot_env env in
       let (env, (escaping, (te, ft, support_dynamic_type))) =
         Env.closure env (fun env ->
-            stash_conts_for_closure env lambda_pos is_anon idl (fun env ->
+            stash_conts_for_closure
+              env
+              lambda_pos
+              ~should_invalidate_fakes
+              ~is_anon
+              idl
+              (fun env ->
                 let (env, res) = f env in
                 let escaping = Typing_escape.escaping_from_snapshot snap env in
                 (env, (escaping, res))))
@@ -8941,7 +8984,15 @@ end = struct
     let env = Env.set_tyvar_variance env ty in
     (env, (te, ft, support_dynamic_type))
 
-  let lambda ~is_anon ~closure_class_name ~expected p env f idl =
+  let lambda
+      ~should_invalidate_fakes
+      ~is_anon
+      ~closure_class_name
+      ~expected
+      p
+      env
+      f
+      idl =
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Twildcard instead. *)
     let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
@@ -9003,6 +9054,7 @@ end = struct
         env * _ * locl_ty =
       let (env, (tefun, ft, support_dynamic_type)) =
         closure_make
+          ~should_invalidate_fakes
           ~supportdyn
           ~closure_class_name
           ?ret_ty

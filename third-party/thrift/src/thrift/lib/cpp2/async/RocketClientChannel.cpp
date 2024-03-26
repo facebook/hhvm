@@ -45,7 +45,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/transport/core/EnvelopeUtil.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
@@ -68,6 +68,7 @@ const int64_t kRocketClientMinVersion = 8;
 THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_client_max_version, kRocketClientMaxVersion);
 THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
+THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, true);
 
 using namespace apache::thrift::transport;
 
@@ -653,7 +654,15 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     if (tryFds.hasValue()) {
       tHeader->fds = std::move(tryFds->dcheckReceivedOrEmpty());
     }
-
+    if (THRIFT_FLAG(rocket_client_enable_bidirectional_propagation)) {
+      auto otherMetadata = response->metadata.otherMetadata_ref();
+      if (!otherMetadata ||
+          !detail::ingestFrameworkMetadataOnResponseHeader(*otherMetadata)) {
+        if (auto tfmr = response->metadata.frameworkMetadata_ref()) {
+          detail::ingestFrameworkMetadataOnResponse(std::move(*tfmr));
+        }
+      }
+    }
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         response->metadata, *tHeader);
     cb_.release()->onResponse(ClientReceiveState(

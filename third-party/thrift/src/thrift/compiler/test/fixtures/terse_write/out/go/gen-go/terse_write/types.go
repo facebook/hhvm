@@ -60,16 +60,6 @@ var (
         "ME0": MyEnum_ME0,
         "ME1": MyEnum_ME1,
     }
-
-    MyEnumNames = []string{
-        "ME0",
-        "ME1",
-    }
-
-    MyEnumValues = []MyEnum{
-        MyEnum_ME0,
-        MyEnum_ME1,
-    }
 )
 
 func (x MyEnum) String() string {

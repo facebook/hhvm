@@ -63,18 +63,6 @@ var (
         "CAT": Animal_CAT,
         "TARANTULA": Animal_TARANTULA,
     }
-
-    AnimalNames = []string{
-        "DOG",
-        "CAT",
-        "TARANTULA",
-    }
-
-    AnimalValues = []Animal{
-        Animal_DOG,
-        Animal_CAT,
-        Animal_TARANTULA,
-    }
 )
 
 func (x Animal) String() string {

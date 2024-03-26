@@ -539,22 +539,6 @@ var (
         "two": HasBitwiseOps_two,
         "three": HasBitwiseOps_three,
     }
-
-    HasBitwiseOpsNames = []string{
-        "none",
-        "zero",
-        "one",
-        "two",
-        "three",
-    }
-
-    HasBitwiseOpsValues = []HasBitwiseOps{
-        HasBitwiseOps_none,
-        HasBitwiseOps_zero,
-        HasBitwiseOps_one,
-        HasBitwiseOps_two,
-        HasBitwiseOps_three,
-    }
 )
 
 func (x HasBitwiseOps) String() string {
@@ -595,16 +579,6 @@ var (
         "hello": IsUnscoped_hello,
         "world": IsUnscoped_world,
     }
-
-    IsUnscopedNames = []string{
-        "hello",
-        "world",
-    }
-
-    IsUnscopedValues = []IsUnscoped{
-        IsUnscoped_hello,
-        IsUnscoped_world,
-    }
 )
 
 func (x IsUnscoped) String() string {
@@ -644,16 +618,6 @@ var (
     MyForwardRefEnumToValue = map[string]MyForwardRefEnum {
         "ZERO": MyForwardRefEnum_ZERO,
         "NONZERO": MyForwardRefEnum_NONZERO,
-    }
-
-    MyForwardRefEnumNames = []string{
-        "ZERO",
-        "NONZERO",
-    }
-
-    MyForwardRefEnumValues = []MyForwardRefEnum{
-        MyForwardRefEnum_ZERO,
-        MyForwardRefEnum_NONZERO,
     }
 )
 

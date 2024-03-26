@@ -1154,20 +1154,6 @@ var (
         "GREEN": Color_GREEN,
         "BLUE": Color_BLUE,
     }
-
-    ColorNames = []string{
-        "UNKNOWN",
-        "RED",
-        "GREEN",
-        "BLUE",
-    }
-
-    ColorValues = []Color{
-        Color_UNKNOWN,
-        Color_RED,
-        Color_GREEN,
-        Color_BLUE,
-    }
 )
 
 func (x Color) String() string {
@@ -1207,16 +1193,6 @@ var (
     ThriftAdaptedEnumToValue = map[string]ThriftAdaptedEnum {
         "Zero": ThriftAdaptedEnum_Zero,
         "One": ThriftAdaptedEnum_One,
-    }
-
-    ThriftAdaptedEnumNames = []string{
-        "Zero",
-        "One",
-    }
-
-    ThriftAdaptedEnumValues = []ThriftAdaptedEnum{
-        ThriftAdaptedEnum_Zero,
-        ThriftAdaptedEnum_One,
     }
 )
 

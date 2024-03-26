@@ -83,14 +83,6 @@ var (
     BToValue = map[string]B {
         "HELLO": B_HELLO,
     }
-
-    BNames = []string{
-        "HELLO",
-    }
-
-    BValues = []B{
-        B_HELLO,
-    }
 )
 
 func (x B) String() string {

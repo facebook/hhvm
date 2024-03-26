@@ -83,14 +83,6 @@ var (
     VoidToValue = map[string]Void {
         "Unused": Void_Unused,
     }
-
-    VoidNames = []string{
-        "Unused",
-    }
-
-    VoidValues = []Void{
-        Void_Unused,
-    }
 )
 
 func (x Void) String() string {
@@ -139,22 +131,6 @@ var (
         "Compact": StandardProtocol_Compact,
         "Json": StandardProtocol_Json,
         "SimpleJson": StandardProtocol_SimpleJson,
-    }
-
-    StandardProtocolNames = []string{
-        "Custom",
-        "Binary",
-        "Compact",
-        "Json",
-        "SimpleJson",
-    }
-
-    StandardProtocolValues = []StandardProtocol{
-        StandardProtocol_Custom,
-        StandardProtocol_Binary,
-        StandardProtocol_Compact,
-        StandardProtocol_Json,
-        StandardProtocol_SimpleJson,
     }
 )
 

@@ -43,22 +43,6 @@ var (
         "NORMAL": RpcPriority_NORMAL,
         "BEST_EFFORT": RpcPriority_BEST_EFFORT,
     }
-
-    RpcPriorityNames = []string{
-        "HIGH_IMPORTANT",
-        "HIGH",
-        "IMPORTANT",
-        "NORMAL",
-        "BEST_EFFORT",
-    }
-
-    RpcPriorityValues = []RpcPriority{
-        RpcPriority_HIGH_IMPORTANT,
-        RpcPriority_HIGH,
-        RpcPriority_IMPORTANT,
-        RpcPriority_NORMAL,
-        RpcPriority_BEST_EFFORT,
-    }
 )
 
 func (x RpcPriority) String() string {

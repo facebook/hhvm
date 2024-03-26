@@ -146,18 +146,6 @@ var (
         "MyValue2": MyEnum_MyValue2,
         "DOMAIN": MyEnum_DOMAIN,
     }
-
-    MyEnumNames = []string{
-        "MyValue1",
-        "MyValue2",
-        "DOMAIN",
-    }
-
-    MyEnumValues = []MyEnum{
-        MyEnum_MyValue1,
-        MyEnum_MyValue2,
-        MyEnum_DOMAIN,
-    }
 )
 
 func (x MyEnum) String() string {

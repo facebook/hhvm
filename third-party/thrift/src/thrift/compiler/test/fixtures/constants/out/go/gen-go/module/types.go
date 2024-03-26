@@ -179,12 +179,6 @@ var (
 
     EmptyEnumToValue = map[string]EmptyEnum {
     }
-
-    EmptyEnumNames = []string{
-    }
-
-    EmptyEnumValues = []EmptyEnum{
-    }
 )
 
 func (x EmptyEnum) String() string {
@@ -231,20 +225,6 @@ var (
         "SEA": City_SEA,
         "LON": City_LON,
     }
-
-    CityNames = []string{
-        "NYC",
-        "MPK",
-        "SEA",
-        "LON",
-    }
-
-    CityValues = []City{
-        City_NYC,
-        City_MPK,
-        City_SEA,
-        City_LON,
-    }
 )
 
 func (x City) String() string {
@@ -290,20 +270,6 @@ var (
         "WHATSAPP": Company_WHATSAPP,
         "OCULUS": Company_OCULUS,
         "INSTAGRAM": Company_INSTAGRAM,
-    }
-
-    CompanyNames = []string{
-        "FACEBOOK",
-        "WHATSAPP",
-        "OCULUS",
-        "INSTAGRAM",
-    }
-
-    CompanyValues = []Company{
-        Company_FACEBOOK,
-        Company_WHATSAPP,
-        Company_OCULUS,
-        Company_INSTAGRAM,
     }
 )
 

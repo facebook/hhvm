@@ -42,21 +42,6 @@ var (
         "{{enum_value:name}}": {{enum:go_name}}_{{enum_value:name}},
     {{/enum:values}}
     }
-    {{! create variables compatible with the older codegen}}
-    {{#program:compat?}}
-
-    {{enum:go_name}}Names = []string{
-    {{#enum:values}}
-        "{{enum_value:name}}",
-    {{/enum:values}}
-    }
-
-    {{enum:go_name}}Values = []{{enum:go_name}}{
-    {{#enum:values}}
-        {{enum:go_name}}_{{enum_value:name}},
-    {{/enum:values}}
-    }
-    {{/program:compat?}}
 )
 
 func (x {{enum:go_name}}) String() string {

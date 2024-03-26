@@ -40,20 +40,6 @@ var (
         "BAZ": Metasyntactic_BAZ,
         "BAX": Metasyntactic_BAX,
     }
-
-    MetasyntacticNames = []string{
-        "FOO",
-        "BAR",
-        "BAZ",
-        "BAX",
-    }
-
-    MetasyntacticValues = []Metasyntactic{
-        Metasyntactic_FOO,
-        Metasyntactic_BAR,
-        Metasyntactic_BAZ,
-        Metasyntactic_BAX,
-    }
 )
 
 func (x Metasyntactic) String() string {
@@ -106,24 +92,6 @@ var (
         "ME1_5": MyEnum1_ME1_5,
         "ME1_6": MyEnum1_ME1_6,
     }
-
-    MyEnum1Names = []string{
-        "ME1_0",
-        "ME1_1",
-        "ME1_2",
-        "ME1_3",
-        "ME1_5",
-        "ME1_6",
-    }
-
-    MyEnum1Values = []MyEnum1{
-        MyEnum1_ME1_0,
-        MyEnum1_ME1_1,
-        MyEnum1_ME1_2,
-        MyEnum1_ME1_3,
-        MyEnum1_ME1_5,
-        MyEnum1_ME1_6,
-    }
 )
 
 func (x MyEnum1) String() string {
@@ -166,18 +134,6 @@ var (
         "ME2_0": MyEnum2_ME2_0,
         "ME2_1": MyEnum2_ME2_1,
         "ME2_2": MyEnum2_ME2_2,
-    }
-
-    MyEnum2Names = []string{
-        "ME2_0",
-        "ME2_1",
-        "ME2_2",
-    }
-
-    MyEnum2Values = []MyEnum2{
-        MyEnum2_ME2_0,
-        MyEnum2_ME2_1,
-        MyEnum2_ME2_2,
     }
 )
 
@@ -231,24 +187,6 @@ var (
         "ME3_9": MyEnum3_ME3_9,
         "ME3_10": MyEnum3_ME3_10,
     }
-
-    MyEnum3Names = []string{
-        "ME3_0",
-        "ME3_1",
-        "ME3_N2",
-        "ME3_N1",
-        "ME3_9",
-        "ME3_10",
-    }
-
-    MyEnum3Values = []MyEnum3{
-        MyEnum3_ME3_0,
-        MyEnum3_ME3_1,
-        MyEnum3_ME3_N2,
-        MyEnum3_ME3_N1,
-        MyEnum3_ME3_9,
-        MyEnum3_ME3_10,
-    }
 )
 
 func (x MyEnum3) String() string {
@@ -295,20 +233,6 @@ var (
         "ME4_C": MyEnum4_ME4_C,
         "ME4_D": MyEnum4_ME4_D,
     }
-
-    MyEnum4Names = []string{
-        "ME4_A",
-        "ME4_B",
-        "ME4_C",
-        "ME4_D",
-    }
-
-    MyEnum4Values = []MyEnum4{
-        MyEnum4_ME4_A,
-        MyEnum4_ME4_B,
-        MyEnum4_ME4_C,
-        MyEnum4_ME4_D,
-    }
 )
 
 func (x MyEnum4) String() string {
@@ -352,18 +276,6 @@ var (
         "TWO": MyBitmaskEnum1_TWO,
         "FOUR": MyBitmaskEnum1_FOUR,
     }
-
-    MyBitmaskEnum1Names = []string{
-        "ONE",
-        "TWO",
-        "FOUR",
-    }
-
-    MyBitmaskEnum1Values = []MyBitmaskEnum1{
-        MyBitmaskEnum1_ONE,
-        MyBitmaskEnum1_TWO,
-        MyBitmaskEnum1_FOUR,
-    }
 )
 
 func (x MyBitmaskEnum1) String() string {
@@ -406,18 +318,6 @@ var (
         "ONE": MyBitmaskEnum2_ONE,
         "TWO": MyBitmaskEnum2_TWO,
         "FOUR": MyBitmaskEnum2_FOUR,
-    }
-
-    MyBitmaskEnum2Names = []string{
-        "ONE",
-        "TWO",
-        "FOUR",
-    }
-
-    MyBitmaskEnum2Values = []MyBitmaskEnum2{
-        MyBitmaskEnum2_ONE,
-        MyBitmaskEnum2_TWO,
-        MyBitmaskEnum2_FOUR,
     }
 )
 

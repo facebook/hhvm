@@ -37,18 +37,6 @@ var (
         "Shared": RefType_Shared,
         "SharedMutable": RefType_SharedMutable,
     }
-
-    RefTypeNames = []string{
-        "Unique",
-        "Shared",
-        "SharedMutable",
-    }
-
-    RefTypeValues = []RefType{
-        RefType_Unique,
-        RefType_Shared,
-        RefType_SharedMutable,
-    }
 )
 
 func (x RefType) String() string {
@@ -97,22 +85,6 @@ var (
         "I16": EnumUnderlyingType_I16,
         "U16": EnumUnderlyingType_U16,
         "U32": EnumUnderlyingType_U32,
-    }
-
-    EnumUnderlyingTypeNames = []string{
-        "I8",
-        "U8",
-        "I16",
-        "U16",
-        "U32",
-    }
-
-    EnumUnderlyingTypeValues = []EnumUnderlyingType{
-        EnumUnderlyingType_I8,
-        EnumUnderlyingType_U8,
-        EnumUnderlyingType_I16,
-        EnumUnderlyingType_U16,
-        EnumUnderlyingType_U32,
     }
 )
 

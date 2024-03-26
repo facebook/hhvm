@@ -35,14 +35,6 @@ var (
     MyEnumToValue = map[string]MyEnum {
         "MyValue0": MyEnum_MyValue0,
     }
-
-    MyEnumNames = []string{
-        "MyValue0",
-    }
-
-    MyEnumValues = []MyEnum{
-        MyEnum_MyValue0,
-    }
 )
 
 func (x MyEnum) String() string {

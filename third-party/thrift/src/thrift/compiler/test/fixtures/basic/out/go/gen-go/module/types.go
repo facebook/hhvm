@@ -34,16 +34,6 @@ var (
         "MyValue1": MyEnum_MyValue1,
         "MyValue2": MyEnum_MyValue2,
     }
-
-    MyEnumNames = []string{
-        "MyValue1",
-        "MyValue2",
-    }
-
-    MyEnumValues = []MyEnum{
-        MyEnum_MyValue1,
-        MyEnum_MyValue2,
-    }
 )
 
 func (x MyEnum) String() string {
@@ -83,16 +73,6 @@ var (
     HackEnumToValue = map[string]HackEnum {
         "Value1": HackEnum_Value1,
         "Value2": HackEnum_Value2,
-    }
-
-    HackEnumNames = []string{
-        "Value1",
-        "Value2",
-    }
-
-    HackEnumValues = []HackEnum{
-        HackEnum_Value1,
-        HackEnum_Value2,
     }
 )
 

@@ -37,18 +37,6 @@ var (
         "B": Enum_B,
         "C": Enum_C,
     }
-
-    EnumNames = []string{
-        "A",
-        "B",
-        "C",
-    }
-
-    EnumValues = []Enum{
-        Enum_A,
-        Enum_B,
-        Enum_C,
-    }
 )
 
 func (x Enum) String() string {

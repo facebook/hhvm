@@ -54,11 +54,12 @@ type rocketProtocol struct {
 // rocketSocket is a minimal interface for thrift.Socket
 type rocketSocket interface {
 	Conn() net.Conn
-	IsOpen() bool
 	Open() error
 	Close() error
 	Flush() error
 }
+
+var _ rocketSocket = (*socket)(nil)
 
 // NewRocketProtocol creates a RocketProtocol, given a RocketTransport
 func NewRocketProtocol(trans Transport) Protocol {
@@ -172,11 +173,6 @@ func (p *rocketProtocol) Flush() (err error) {
 
 // Open opens the internal transport (required for Transport)
 func (p *rocketProtocol) open() error {
-	if !p.socket.IsOpen() {
-		if err := p.socket.Open(); err != nil {
-			return err
-		}
-	}
 	if p.client != nil {
 		return nil
 	}

@@ -25,11 +25,8 @@ import (
 // Socket is a Transport that can be opened and reopened.
 type Socket interface {
 	Transport
-	// Opens the transport for communication
+	// Opens the socket for communication
 	Open() error
-
-	// Returns true if the transport is open
-	IsOpen() bool
 }
 
 type socket struct {
@@ -116,7 +113,7 @@ func (p *socket) pushDeadline(read, write bool) {
 
 // Open connects the socket to a server, creating a new socket object if necessary.
 func (p *socket) Open() error {
-	if p.IsOpen() {
+	if p.conn != nil {
 		return NewTransportException(ALREADY_OPEN, "Socket already connected.")
 	}
 	if p.addr == nil {
@@ -133,11 +130,6 @@ func (p *socket) Open() error {
 		return NewTransportException(NOT_OPEN, err.Error())
 	}
 	return nil
-}
-
-// IsOpen checks to see if we've dialed already.
-func (p *socket) IsOpen() bool {
-	return p.conn != nil
 }
 
 // Addr returns the address the Socket is listening on.
@@ -164,7 +156,7 @@ func (p *socket) Close() error {
 }
 
 func (p *socket) Read(buf []byte) (int, error) {
-	if !p.IsOpen() {
+	if p.conn == nil {
 		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
 	p.pushDeadline(true, false)
@@ -173,7 +165,7 @@ func (p *socket) Read(buf []byte) (int, error) {
 }
 
 func (p *socket) Write(buf []byte) (int, error) {
-	if !p.IsOpen() {
+	if p.conn == nil {
 		return 0, NewTransportException(NOT_OPEN, "connection not open")
 	}
 	p.pushDeadline(false, true)

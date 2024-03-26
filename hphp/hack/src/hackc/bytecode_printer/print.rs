@@ -14,7 +14,6 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Vector;
 use hash::HashSet;
-use hhbc::Adata;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -162,12 +161,12 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
 
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
-    concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
-    concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
-    concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
-    concat(w, &prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
-    concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
-    concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
+    concat(w, &prog.adata, |w, i, a| print_adata_region(ctx, w, i, a))?;
+    concat(w, &prog.functions, |w, _, f| print_fun_def(ctx, w, f))?;
+    concat(w, &prog.classes, |w, _, cd| print_class_def(ctx, w, cd))?;
+    concat(w, &prog.modules, |w, _, cd| print_module_def(ctx, w, cd))?;
+    concat(w, &prog.constants, |w, _, c| print_constant(ctx, w, c))?;
+    concat(w, &prog.typedefs, |w, _, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
     print_include_region(w, &prog.symbol_refs.includes)?;
     print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
@@ -246,9 +245,14 @@ fn print_symbol_ref_regions(
     )
 }
 
-fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata) -> Result<()> {
-    write_bytes!(w, ".adata A_{} = ", adata.id.id())?;
-    triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
+fn print_adata_region(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    id: usize,
+    value: &TypedValue,
+) -> Result<()> {
+    write_bytes!(w, ".adata A_{} = ", id)?;
+    triple_quotes(w, |w| print_adata(ctx, w, value))?;
     w.write_all(b";")?;
     ctx.newline(w)
 }
@@ -724,15 +728,11 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
-        TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, Adata::VEC_PREFIX, values.as_ref())
-        }
+        TypedValue::Vec(values) => print_adata_collection_argument(ctx, w, "v", values.as_ref()),
         TypedValue::Dict(entries) => {
-            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, entries.as_ref())
+            print_adata_dict_collection_argument(ctx, w, "D", entries.as_ref())
         }
-        TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, Adata::KEYSET_PREFIX, values.as_ref())
-        }
+        TypedValue::Keyset(values) => print_adata_collection_argument(ctx, w, "k", values.as_ref()),
     }
 }
 
@@ -743,14 +743,8 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute) -> Resul
     } else {
         escaper::escape_bstr(unescaped)
     };
-    write_bytes!(
-        w,
-        "\"{}\"(\"\"\"{}:{}:{{",
-        escaped,
-        Adata::VEC_PREFIX,
-        a.arguments.len()
-    )?;
-    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    write_bytes!(w, "\"{}\"(\"\"\"v:{}:{{", escaped, a.arguments.len())?;
+    concat(w, &a.arguments, |w, _, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 
@@ -816,7 +810,7 @@ fn print_body(
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
-        concat_by(w, " ", &body.decl_vars, |w, var| {
+        concat_by(w, " ", &body.decl_vars, |w, _, var| {
             let var = var.as_str().as_bytes();
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
@@ -899,13 +893,13 @@ pub(crate) fn print_fcall_args(
     print_int(w, num_rets)?;
     w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", inouts, |w, i| {
+        concat_by(w, "", inouts, |w, _, i| {
             w.write_all(if *i { b"1" } else { b"0" })
         })
     })?;
     w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", readonly, |w, i| {
+        concat_by(w, "", readonly, |w, _, i| {
             w.write_all(if *i { b"1" } else { b"0" })
         })
     })?;
@@ -970,7 +964,7 @@ fn print_params(
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
-        concat_by(w, ", ", params, |w, i| print_param(ctx, w, i, dv_labels))
+        concat_by(w, ", ", params, |w, _, i| print_param(ctx, w, i, dv_labels))
     })
 }
 
@@ -1060,24 +1054,28 @@ fn print_special_and_user_attrs(
 }
 
 fn print_upper_bounds(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
-    braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
+    braces(w, |w| {
+        concat_by(w, ", ", ubs, |w, _, ub| print_upper_bound(w, ub))
+    })
 }
 
 fn print_upper_bound(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
     paren(w, |w| {
         write!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", &ub.bounds, print_type_info)
+        concat_by(w, ", ", &ub.bounds, |w, _, t| print_type_info(w, t))
     })
 }
 
 fn print_upper_bounds_(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
-    braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
+    braces(w, |w| {
+        concat_by(w, ", ", ubs, |w, _, ub| print_upper_bound_(w, ub))
+    })
 }
 
 fn print_upper_bound_(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
     paren(w, |w| {
         write!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", &ub.bounds, print_type_info)
+        concat_by(w, ", ", &ub.bounds, |w, _, t| print_type_info(w, t))
     })
 }
 
@@ -1133,7 +1131,7 @@ fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo) -> Result<()> {
 }
 
 fn print_typedef_info_union(w: &mut dyn Write, tis: &[TypeInfo]) -> Result<()> {
-    concat_by(w, ",", tis, print_typedef_info)
+    concat_by(w, ",", tis, |w, _, td| print_typedef_info(w, td))
 }
 
 fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {

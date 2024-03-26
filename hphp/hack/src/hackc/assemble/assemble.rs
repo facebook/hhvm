@@ -16,6 +16,9 @@ use anyhow::Context;
 use anyhow::Result;
 use ffi::Maybe;
 use ffi::Vector;
+use hash::HashMap;
+use hhbc::AdataId;
+use hhbc::AdataState;
 use hhbc::Attribute;
 use hhbc::BytesId;
 use hhbc::ClassName;
@@ -23,6 +26,7 @@ use hhbc::ModuleName;
 use hhbc::ParamEntry;
 use hhbc::StringId;
 use hhbc::StringIdMap;
+use hhbc::TypedValue;
 use hhvm_types_ffi::Attr;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
@@ -76,7 +80,8 @@ fn assemble_from_toks(token_iter: &mut Lexer<'_>) -> Result<(hhbc::Unit, PathBuf
 
 #[derive(Default)]
 struct UnitBuilder {
-    adatas: Vec<hhbc::Adata>,
+    adata_remap: HashMap<AdataId, AdataId>,
+    adatas: AdataState,
     class_refs: Option<Vec<hhbc::ClassName>>,
     classes: Vec<hhbc::Class>,
     constant_refs: Option<Vec<hhbc::ConstName>>,
@@ -93,9 +98,33 @@ struct UnitBuilder {
 }
 
 impl UnitBuilder {
-    fn into_unit(self) -> hhbc::Unit {
+    fn into_unit(mut self) -> hhbc::Unit {
+        use hhbc::Instruct;
+        use hhbc::Opcode;
+        if !self.adata_remap.is_empty() {
+            let adata_remap = self.adata_remap;
+            let remap_adata_id = |src_id| adata_remap.get(&src_id).copied().unwrap_or(src_id);
+            for body in self.funcs.iter_mut().map(|f| &mut f.body).chain(
+                (self.classes.iter_mut()).flat_map(|c| c.methods.iter_mut().map(|m| &mut m.body)),
+            ) {
+                for instr in body.body_instrs.iter_mut() {
+                    match instr {
+                        Instruct::Opcode(Opcode::Vec(src_id)) => {
+                            *instr = Instruct::Opcode(Opcode::Vec(remap_adata_id(*src_id)));
+                        }
+                        Instruct::Opcode(Opcode::Dict(src_id)) => {
+                            *instr = Instruct::Opcode(Opcode::Dict(remap_adata_id(*src_id)));
+                        }
+                        Instruct::Opcode(Opcode::Keyset(src_id)) => {
+                            *instr = Instruct::Opcode(Opcode::Keyset(remap_adata_id(*src_id)));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
         hhbc::Unit {
-            adata: self.adatas.into(),
+            adata: self.adatas.finish().into(),
             functions: self.funcs.into(),
             classes: self.classes.into(),
             typedefs: self.typedefs.into(),
@@ -127,7 +156,11 @@ impl UnitBuilder {
                 self.fatal = Some(assemble_fatal(token_iter)?);
             }
             b".adata" => {
-                self.adatas.push(assemble_adata(token_iter)?);
+                let (src_id, value) = assemble_adata(token_iter)?;
+                let id = self.adatas.intern(value);
+                if id != src_id {
+                    self.adata_remap.insert(src_id, id);
+                }
             }
             b".function" => {
                 self.funcs.push(assemble_function(token_iter)?);
@@ -718,10 +751,10 @@ fn assemble_fatal(token_iter: &mut Lexer<'_>) -> Result<hhbc::Fatal> {
 /// A line of adata looks like:
 /// .adata id = """<tv>"""
 /// with tv being a typed value; see `assemble_typed_value` doc for what <tv> looks like.
-fn assemble_adata(token_iter: &mut Lexer<'_>) -> Result<hhbc::Adata> {
+fn assemble_adata(token_iter: &mut Lexer<'_>) -> Result<(AdataId, TypedValue)> {
     parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value()> ";");
     let id = hhbc::AdataId::parse(std::str::from_utf8(id.as_bytes())?)?;
-    Ok(hhbc::Adata { id, value })
+    Ok((id, value))
 }
 
 /// For use by initial value

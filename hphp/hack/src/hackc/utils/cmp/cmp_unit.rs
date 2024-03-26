@@ -35,12 +35,6 @@ use crate::CmpError;
 use crate::MapName;
 use crate::Result;
 
-impl MapName for hhbc::Adata {
-    fn get_name(&self) -> String {
-        self.id.to_string()
-    }
-}
-
 impl MapName for hhbc::Class {
     fn get_name(&self) -> String {
         self.name.into_string()
@@ -842,7 +836,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         error_symbols: _,
     } = b_unit;
 
-    cmp_map_t(a_adata, b_adata, cmp_eq).qualified("adata")?;
+    cmp_slice(a_adata, b_adata, cmp_eq).qualified("adata")?;
 
     cmp_map_t(a_typedefs, b_typedefs, cmp_typedef).qualified("typedefs")?;
 

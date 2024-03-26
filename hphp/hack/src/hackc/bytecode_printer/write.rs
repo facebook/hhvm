@@ -100,7 +100,7 @@ wrap_by!(angle, "<", ">");
 wrap_by!(square, "[", "]");
 
 pub(crate) fn concat_str<I: AsRef<str>>(w: &mut dyn Write, ss: impl AsRef<[I]>) -> Result<()> {
-    concat(w, ss, |w, s| {
+    concat(w, ss, |w, _, s| {
         w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
@@ -111,7 +111,7 @@ pub(crate) fn concat_str_by<I: AsRef<str>>(
     sep: impl AsRef<str>,
     ss: impl AsRef<[I]>,
 ) -> Result<()> {
-    concat_by(w, sep, ss, |w, s| {
+    concat_by(w, sep, ss, |w, _, s| {
         w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
@@ -119,7 +119,7 @@ pub(crate) fn concat_str_by<I: AsRef<str>>(
 
 pub(crate) fn concat<T, F>(w: &mut dyn Write, items: impl AsRef<[T]>, f: F) -> Result<()>
 where
-    F: FnMut(&mut dyn Write, &T) -> Result<()>,
+    F: FnMut(&mut dyn Write, usize, &T) -> Result<()>,
 {
     concat_by(w, "", items, f)
 }
@@ -131,18 +131,19 @@ pub(crate) fn concat_by<T, F>(
     mut f: F,
 ) -> Result<()>
 where
-    F: FnMut(&mut dyn Write, &T) -> Result<()>,
+    F: FnMut(&mut dyn Write, usize, &T) -> Result<()>,
 {
     let mut first = true;
     let sep = sep.as_ref();
-    Ok(for i in items.as_ref() {
+    for (i, e) in items.as_ref().iter().enumerate() {
         if first {
             first = false;
         } else {
             w.write_all(sep.as_bytes())?;
         }
-        f(w, i)?;
-    })
+        f(w, i, e)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn option<T, F>(w: &mut dyn Write, i: impl Into<Option<T>>, mut f: F) -> Result<()>

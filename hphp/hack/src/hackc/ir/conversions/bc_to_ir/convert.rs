@@ -6,6 +6,7 @@
 use std::sync::Arc;
 
 use hash::HashMap;
+use hhbc::AdataId;
 use hhbc::Unit;
 
 /// Convert a hhbc::Unit to an ir::Unit.
@@ -14,12 +15,11 @@ use hhbc::Unit;
 /// result the "interesting" work is in the conversion of the bytecode to IR
 /// when converting functions and methods (see `convert_body` in func.rs).
 pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
-    // Traditionally the HHBC AdataIds are named A_# - but let's not rely on
-    // that.
     let adata_lookup = unit
         .adata
         .iter()
-        .map(|hhbc::Adata { id, value }| (*id, Arc::new(value.clone())))
+        .enumerate()
+        .map(|(i, value)| (AdataId::new(i), Arc::new(value.clone())))
         .collect();
 
     let unit_state = UnitState { adata_lookup };

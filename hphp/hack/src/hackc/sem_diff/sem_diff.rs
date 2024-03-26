@@ -4,9 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use hash::HashMap;
-use hhbc::Adata;
-use hhbc::AdataId;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -75,17 +72,6 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
     } = b_unit;
 
     let path = CodePath::name("Unit");
-
-    // Ignore adata for now - when we use it we'll compare that the values are
-    // the same at that time (because the key names may be different).
-    let a_adata = a_adata
-        .iter()
-        .map(|Adata { id, value }| (*id, value))
-        .collect();
-    let b_adata = b_adata
-        .iter()
-        .map(|Adata { id, value }| (*id, value))
-        .collect();
 
     sem_diff_map_t(
         &path.qualified("typedefs"),
@@ -173,9 +159,9 @@ fn sem_diff_attributes(path: &CodePath<'_>, a: &[Attribute], b: &[Attribute]) ->
 fn sem_diff_body<'a>(
     path: &CodePath<'_>,
     a: &Body,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    a_adata: &'a [TypedValue],
     b: &Body,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let Body {
         attributes: a_attributes,
@@ -310,9 +296,9 @@ fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result
 fn sem_diff_class<'a>(
     path: &CodePath<'_>,
     a: &Class,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    a_adata: &'a [TypedValue],
     b: &Class,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let Class {
         attributes: a_attributes,
@@ -518,9 +504,9 @@ fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal, b: &Fatal) -> Result<()> {
 fn sem_diff_function<'a>(
     path: &CodePath<'_>,
     a: &Function,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    a_adata: &'a [TypedValue],
     b: &Function,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let Function {
         name: a_name,
@@ -542,9 +528,9 @@ fn sem_diff_function<'a>(
 fn sem_diff_method<'a>(
     path: &CodePath<'_>,
     a: &Method,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    a_adata: &'a [TypedValue],
     b: &Method,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let Method {
         visibility: a_visibility,

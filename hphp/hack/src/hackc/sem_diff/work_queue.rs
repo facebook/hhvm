@@ -4,9 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use hash::HashMap;
 use hash::HashSet;
-use hhbc::AdataId;
 use hhbc::Local;
 use hhbc::ParamEntry;
 use hhbc::TypedValue;
@@ -28,9 +26,9 @@ impl<'a> WorkQueue<'a> {
         &mut self,
         value_builder: &mut ValueBuilder<'a>,
         a: &'a Body<'a>,
-        a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+        a_adata: &'a [TypedValue],
         b: &'a Body<'a>,
-        b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+        b_adata: &'a [TypedValue],
     ) {
         let mut a_state = State::new(a, "A", a_adata);
         let mut b_state = State::new(b, "B", b_adata);

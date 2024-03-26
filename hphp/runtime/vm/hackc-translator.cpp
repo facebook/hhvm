@@ -1366,11 +1366,12 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   translateClassBody(ts, c, classUbs);
 }
 
-void translateAdata(TranslationState& ts, const hhbc::Adata& adata) {
-  auto tv = toTypedValue(adata.value);
+void translateAdata(TranslationState& ts, uint32_t id,
+                    const hhbc::TypedValue& value) {
+  auto tv = toTypedValue(value);
   auto arr = tv.m_data.parr;
   ArrayData::GetScalarArray(&arr);
-  ts.adataMap[adata.id.id] = arr;
+  ts.adataMap[id] = arr;
   ts.ue->mergeArray(arr);
 }
 
@@ -1519,9 +1520,11 @@ void translateSymbolRefs(TranslationState& ts, const hhbc::SymbolRefs& s) {
 
 void translate(TranslationState& ts, const hhbc::Unit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
+  uint32_t adata_id = 0;
   auto adata = range(unit.adata);
   for (auto const& d : adata) {
-    translateAdata(ts, d);
+    translateAdata(ts, adata_id, d);
+    adata_id++;
   }
 
   auto funcs = range(unit.functions);

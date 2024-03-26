@@ -4,7 +4,6 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
 use hash::HashMap;
-use hhbc::AdataId;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Local;
@@ -48,9 +47,9 @@ use crate::work_queue::WorkQueue;
 pub(crate) fn compare_bodies<'a>(
     path: &CodePath<'_>,
     body_a: &hhbc::Body,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    a_adata: &'a [TypedValue],
     body_b: &hhbc::Body,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
+    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 

@@ -7,7 +7,6 @@ use ffi::Maybe;
 use ffi::Vector;
 use serde::Serialize;
 
-use crate::Adata;
 use crate::Attribute;
 use crate::Class;
 use crate::Constant;
@@ -18,12 +17,13 @@ use crate::ModuleName;
 use crate::SrcLoc;
 use crate::StringId;
 use crate::SymbolRefs;
+use crate::TypedValue;
 use crate::Typedef;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Unit {
-    pub adata: Vector<Adata>,
+    pub adata: Vector<TypedValue>,
     pub functions: Vector<Function>,
     pub classes: Vector<Class>,
     pub modules: Vector<Module>,

@@ -255,6 +255,12 @@ impl<T> std::ops::Deref for Vector<T> {
     }
 }
 
+impl<T> std::ops::DerefMut for Vector<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.as_mut_slice()
+    }
+}
+
 impl<'a, T> IntoIterator for &'a Vector<T> {
     type Item = &'a T;
     type IntoIter = std::slice::Iter<'a, T>;

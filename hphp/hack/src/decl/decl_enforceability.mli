@@ -38,6 +38,8 @@ module type ContextAccess = sig
 
   val get_tparams : class_t -> Typing_defs.decl_tparam list
 
+  val is_final : class_t -> bool
+
   val get_name : class_t -> string
 
   (** [get_enum_type cls] returns the enumeration type if [cls] is an enum. *)

@@ -41,6 +41,8 @@ struct
 
   let get_tparams = Cls.tparams
 
+  let is_final = Cls.final
+
   let get_name = Cls.name
 
   let get_enum_type = Cls.enum_type

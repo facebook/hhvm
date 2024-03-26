@@ -137,6 +137,8 @@ module type ContextAccess = sig
 
   val get_tparams : class_t -> decl_tparam list
 
+  val is_final : class_t -> bool
+
   val get_name : class_t -> string
 
   (** [get_enum_type cls] returns the enumeration type if [cls] is an enum. *)
@@ -235,7 +237,18 @@ module Enforce (ContextAccess : ContextAccess) :
     let rec enforcement
         ~is_dynamic_enforceable (ctx : ContextAccess.t) visited ty =
       match get_node ty with
-      | Tthis -> Unenforced None
+      | Tthis -> begin
+        match this_class with
+        | None -> Unenforced None
+        | Some c ->
+          if
+            ContextAccess.is_final c
+            && List.is_empty (ContextAccess.get_tparams c)
+          then
+            Enforced ty
+          else
+            Unenforced None
+      end
       (* Look through supportdyn, just as we look through ~ *)
       | Tapply ((_, name), [ty])
         when String.equal name Naming_special_names.Classes.cSupportDyn
@@ -483,6 +496,8 @@ module ShallowContextAccess :
   let get_typeconst_type = get_typeconst_type
 
   let get_tparams sc = sc.Shallow_decl_defs.sc_tparams
+
+  let is_final sc = sc.Shallow_decl_defs.sc_final
 
   let get_name cd = snd cd.Shallow_decl_defs.sc_name
 

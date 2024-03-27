@@ -1433,7 +1433,7 @@ end = struct
             }
           env
     end
-    | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
+    | (r_super, Tclass (class_id_super, Nonexact cr_super, tyargs_super))
       when (not (Class_refinement.is_empty cr_super))
            && (subtype_env.Subtype_env.require_soundness
               || (* To deal with refinements, the code below generates a
@@ -1444,15 +1444,66 @@ end = struct
                   * only if we know for sure that we can discharge it on
                   * the spot; e.g., when ety_sub is a class-ish. This
                   * limits the information lost by skipping refinements. *)
-              TUtils.is_class ty_sub) ->
-      Subtype_class_r.simplify_with_refinements
+              TUtils.is_class ty_sub) -> begin
+      (* We discharge class refinements before anything
+              * else ... *)
+      Class_refinement.fold_refined_consts
+        cr_super
+        ~init:(valid env)
+        ~f:(fun type_id { rc_bound; _ } (env, prop) ->
+          (env, prop)
+          &&&
+          let (htm_lower, htm_upper) =
+            match rc_bound with
+            | TRexact ty -> (ty, ty)
+            | TRloose { tr_lower; tr_upper } ->
+              let loty = MakeType.union r_super tr_lower in
+              let upty = MakeType.intersection r_super tr_upper in
+              (loty, upty)
+          in
+          let htm = { htm_id = type_id; htm_lower; htm_upper } in
+          let lhs = { sub_supportdyn; ty_sub }
+          and rhs =
+            Has_type_member.{ reason_super = r_super; has_type_member = htm }
+          in
+          let subtype_env =
+            Subtype_env.possibly_add_violated_constraint
+              subtype_env
+              ~r_sub:(get_reason ty_sub)
+              ~r_super
+          in
+          let ity_super =
+            ConstraintType (mk_constraint_type (r_super, Thas_type_member htm))
+          in
+          let ity_sub = LoclType ty_sub in
+          let fail =
+            Subtype_env.fail subtype_env ~ty_sub:ity_sub ~ty_super:ity_super
+          in
+          let secondary_error =
+            Subtype_env.mk_secondary_error subtype_env ity_sub ity_super
+          in
+          (* Contextualize errors that may be generated when
+                               * checking refinement bounds. *)
+          let on_error =
+            Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+                let open Typing_error.Reasons_callback in
+                prepend_on_apply on_error secondary_error)
+          in
+          let subtype_env = Subtype_env.{ subtype_env with on_error } in
+          Has_type_member.simplify ~subtype_env ~this_ty ~fail ~lhs ~rhs)
+      &&&
+      (* then recursively check the class with all the
+         refinements dropped. *)
+      let ty_super =
+        mk (r_super, Tclass (class_id_super, nonexact, tyargs_super))
+      in
+
+      simplify_subtype
         ~subtype_env
-        ~sub_supportdyn
         ~this_ty
-        ~super_like
-        ty_sub
-        (r_super, (x_super, cr_super, tyl_super))
-        env
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super }
+    end
     | (r_super, Tclass ((pos_super, class_name), exact_super, tyl_super)) ->
       Subtype_class_r.simplify
         ~subtype_env
@@ -1476,84 +1527,7 @@ and Subtype_class_r : sig
     locl_phase Reason.t_ * ((Pos_or_decl.t * string) * exact * locl_ty list) ->
     env ->
     env * TL.subtype_prop
-
-  val simplify_with_refinements :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    locl_ty ->
-    locl_phase Reason.t_ * (pos_id * locl_phase class_refinement * locl_ty list) ->
-    env ->
-    env * TL.subtype_prop
 end = struct
-  let simplify_with_refinements
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      lty_sub
-      (r_super, (class_id_super, cr_super, tyargs_super))
-      env =
-    (* We discharge class refinements before anything
-        * else ... *)
-    Class_refinement.fold_refined_consts
-      cr_super
-      ~init:(valid env)
-      ~f:(fun type_id { rc_bound; _ } (env, prop) ->
-        (env, prop)
-        &&&
-        let (htm_lower, htm_upper) =
-          match rc_bound with
-          | TRexact ty -> (ty, ty)
-          | TRloose { tr_lower; tr_upper } ->
-            let loty = MakeType.union r_super tr_lower in
-            let upty = MakeType.intersection r_super tr_upper in
-            (loty, upty)
-        in
-        let htm = { htm_id = type_id; htm_lower; htm_upper } in
-        let lhs = { sub_supportdyn; ty_sub = lty_sub }
-        and rhs =
-          Has_type_member.{ reason_super = r_super; has_type_member = htm }
-        in
-        let subtype_env =
-          Subtype_env.possibly_add_violated_constraint
-            subtype_env
-            ~r_sub:(get_reason lty_sub)
-            ~r_super
-        in
-        let ity_super =
-          ConstraintType (mk_constraint_type (r_super, Thas_type_member htm))
-        in
-        let ity_sub = LoclType lty_sub in
-        let fail =
-          Subtype_env.fail subtype_env ~ty_sub:ity_sub ~ty_super:ity_super
-        in
-        let secondary_error =
-          Subtype_env.mk_secondary_error subtype_env ity_sub ity_super
-        in
-        (* Contextualize errors that may be generated when
-                             * checking refinement bounds. *)
-        let on_error =
-          Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-              let open Typing_error.Reasons_callback in
-              prepend_on_apply on_error secondary_error)
-        in
-        let subtype_env = Subtype_env.{ subtype_env with on_error } in
-        Has_type_member.simplify ~subtype_env ~this_ty ~fail ~lhs ~rhs)
-    &&&
-    (* then recursively check the class with all the
-       refinements dropped. *)
-    let ty_super =
-      mk (r_super, Tclass (class_id_super, nonexact, tyargs_super))
-    in
-    Subtype.(
-      simplify_subtype
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-        ~rhs:{ super_like; super_supportdyn = false; ty_super })
-
   let simplify
       ~subtype_env
       ~sub_supportdyn

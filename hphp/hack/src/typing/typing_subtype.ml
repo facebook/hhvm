@@ -1237,16 +1237,57 @@ end = struct
       (match deref ty_sub with
       | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
       | _ -> default_subtype_help env)
-    | (r_super, Tneg (Neg_prim tprim_super)) ->
-      Subtype_neg_prim_r.simplify
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        ~fail
-        ty_sub
-        (r_super, tprim_super)
-        env
+    | (r_super, Tneg (Neg_prim prim_super)) -> begin
+      match deref ty_sub with
+      | (r_sub, Tneg (Neg_prim prim_sub)) ->
+        Subtype.(
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:
+              {
+                sub_supportdyn = None;
+                ty_sub = MakeType.prim_type r_super prim_super;
+              }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = MakeType.prim_type r_sub prim_sub;
+              }
+            env)
+      | (_, Tneg (Neg_class _)) ->
+        (* not C contains all primitive types, and so can't be a subtype of
+           not p, which doesn't contain primitive type p *)
+        invalid ~fail env
+      | (_, Tprim tprim_sub) ->
+        if Subtype_negation.is_tprim_disjoint tprim_sub prim_super then
+          valid env
+        else
+          invalid ~fail env
+      | (_, Tclass ((_, cname), ex, _))
+        when String.equal cname SN.Classes.cStringish
+             && is_nonexact ex
+             && Aast.(
+                  equal_tprim prim_super Tstring
+                  || equal_tprim prim_super Tarraykey) ->
+        invalid ~fail env
+      (* All of these are definitely disjoint from primitive types *)
+      | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tneg (Neg_prim prim_super));
+            }
+          env
+    end
     | (reason_super, Tneg (Neg_predicate predicate)) ->
       Type_switch.(
         simplify
@@ -1544,79 +1585,6 @@ end = struct
         valid env
       | (_, _) -> default_subtype_help env)
     | _ -> default_subtype_help env
-end
-
-and Subtype_neg_prim_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    locl_phase ty ->
-    locl_phase Reason.t_ * Ast_defs.tprim ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      ~fail
-      lty_sub
-      (r_super, prim_super)
-      env =
-    match deref lty_sub with
-    | (r_sub, Tneg (Neg_prim prim_sub)) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:
-            {
-              sub_supportdyn = None;
-              ty_sub = MakeType.prim_type r_super prim_super;
-            }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = MakeType.prim_type r_sub prim_sub;
-            }
-          env)
-    | (_, Tneg (Neg_class _)) ->
-      (* not C contains all primitive types, and so can't be a subtype of
-         not p, which doesn't contain primitive type p *)
-      invalid ~fail env
-    | (_, Tprim tprim_sub) ->
-      if Subtype_negation.is_tprim_disjoint tprim_sub prim_super then
-        valid env
-      else
-        invalid ~fail env
-    | (_, Tclass ((_, cname), ex, _))
-      when String.equal cname SN.Classes.cStringish
-           && is_nonexact ex
-           && Aast.(
-                equal_tprim prim_super Tstring
-                || equal_tprim prim_super Tarraykey) ->
-      invalid ~fail env
-    (* All of these are definitely disjoint from primitive types *)
-    | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
-    | _ ->
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (Neg_prim prim_super));
-            }
-          env)
 end
 
 and Subtype_vec_or_dict_r : sig

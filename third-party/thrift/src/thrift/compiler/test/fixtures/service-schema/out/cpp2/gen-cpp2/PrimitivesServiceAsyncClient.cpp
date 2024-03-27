@@ -16,7 +16,7 @@ typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throw
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::cpp2::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::CustomException>> PrimitivesService_method_that_throws_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_return_void_method_pargs;
 typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::PrimitivesService>::initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
 

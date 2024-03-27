@@ -5612,4 +5612,4 @@ extern template uint32_t StructWithDoubleUnderscores::serializedSize<>(apache::t
 extern template uint32_t StructWithDoubleUnderscores::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

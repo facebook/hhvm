@@ -119,4 +119,4 @@ class extra_services_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(extra_services_tags::module, __fbthrift_refl::extra_services_module_traits);
 
-} // extra::svc
+} // namespace extra::svc

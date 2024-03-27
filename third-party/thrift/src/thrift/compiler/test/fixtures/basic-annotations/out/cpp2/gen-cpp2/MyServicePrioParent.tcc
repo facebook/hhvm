@@ -156,4 +156,4 @@ void MyServicePrioParentAsyncProcessor::throw_wrapped_pong(apache::thrift::Respo
 }
 
 
-} // cpp2
+} // namespace cpp2

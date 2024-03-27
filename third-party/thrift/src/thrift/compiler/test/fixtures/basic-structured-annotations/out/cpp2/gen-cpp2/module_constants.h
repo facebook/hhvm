@@ -18,4 +18,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

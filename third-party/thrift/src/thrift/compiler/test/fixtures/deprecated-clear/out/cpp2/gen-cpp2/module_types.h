@@ -94,7 +94,7 @@ enum class MyEnum {
 
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace std {
 template<> struct hash<::apache::thrift::test::MyEnum> :
@@ -133,7 +133,7 @@ template <> struct TEnumTraits<::apache::thrift::test::MyEnum> {
 // BEGIN forward_declare
 namespace apache::thrift::test {
 class StructWithDefaultStruct;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -955,4 +955,4 @@ unsigned long StructWithDefaultStruct::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

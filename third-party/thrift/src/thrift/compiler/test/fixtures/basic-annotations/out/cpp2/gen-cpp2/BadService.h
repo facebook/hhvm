@@ -33,7 +33,7 @@ class GoodServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -95,7 +95,7 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
 
 namespace cpp2 {
 using GoodServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<GoodService> instead")]] = ::apache::thrift::ServiceHandler<GoodService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class GoodServiceSvNull : public ::apache::thrift::ServiceHandler<GoodService> {
  public:
@@ -149,4 +149,4 @@ class GoodServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~GoodServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

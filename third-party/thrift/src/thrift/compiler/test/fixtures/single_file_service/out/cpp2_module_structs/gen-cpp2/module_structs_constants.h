@@ -16,4 +16,4 @@ struct module_structs_constants {
 
 };
 
-} // cpp2
+} // namespace cpp2

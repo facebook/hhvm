@@ -108,7 +108,7 @@ class TerseFoo;
 class TerseLazyFoo;
 class TerseOptionalFoo;
 class TerseOptionalLazyFoo;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1371,4 +1371,4 @@ unsigned long TerseOptionalLazyFoo::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

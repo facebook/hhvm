@@ -188,4 +188,4 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
 
   return requestInfoMap;
 }
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

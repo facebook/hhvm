@@ -10,5 +10,5 @@
 namespace cpp2 {
 class Empty;
 class Nada;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

@@ -88,4 +88,4 @@ void FB303ServiceAsyncProcessor::throw_wrapped_simple_rpc(apache::thrift::Respon
 }
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

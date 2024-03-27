@@ -12,11 +12,11 @@
 namespace a::different::ns {
 class AStruct;
 class AStructB;
-} // a::different::ns
+} // namespace a::different::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace a::different::ns {
 enum class AnEnum;
-} // a::different::ns
+} // namespace a::different::ns
 // END forward_declare_enums

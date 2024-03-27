@@ -31,7 +31,7 @@ class MyServiceFastServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -58,7 +58,7 @@ class ServiceHandler<::cpp2::MyServiceFast> : public apache::thrift::ServerInter
 
 namespace cpp2 {
 using MyServiceFastSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyServiceFast> instead")]] = ::apache::thrift::ServiceHandler<MyServiceFast>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class MyServiceFastSvNull : public ::apache::thrift::ServiceHandler<MyServiceFast> {
  public:
@@ -115,4 +115,4 @@ class MyServiceFastAsyncProcessor : public ::apache::thrift::GeneratedAsyncProce
   ~MyServiceFastAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

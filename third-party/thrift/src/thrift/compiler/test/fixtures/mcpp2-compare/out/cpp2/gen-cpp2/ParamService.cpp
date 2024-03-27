@@ -3260,4 +3260,4 @@ apache::thrift::ServiceRequestInfoMap ParamServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-} // some::valid::ns
+} // namespace some::valid::ns

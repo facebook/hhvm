@@ -151,4 +151,4 @@ extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProto
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // matching_module_name
+} // namespace matching_module_name

@@ -1410,4 +1410,4 @@ extern template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtoc
 extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

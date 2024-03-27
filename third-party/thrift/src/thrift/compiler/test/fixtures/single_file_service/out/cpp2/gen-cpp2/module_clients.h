@@ -33,7 +33,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class A;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -252,11 +252,11 @@ class I final : public apache::thrift::InteractionHandle {
 
 namespace cpp2 {
 using AAsyncClient [[deprecated("Use apache::thrift::Client<A> instead")]] = ::apache::thrift::Client<A>;
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 class B;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -489,11 +489,11 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
 
 namespace cpp2 {
 using BAsyncClient [[deprecated("Use apache::thrift::Client<B> instead")]] = ::apache::thrift::Client<B>;
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 class C;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -612,5 +612,5 @@ class I final : public apache::thrift::InteractionHandle {
 
 namespace cpp2 {
 using CAsyncClient [[deprecated("Use apache::thrift::Client<C> instead")]] = ::apache::thrift::Client<C>;
-} // cpp2
+} // namespace cpp2
 

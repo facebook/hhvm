@@ -12,5 +12,5 @@ class TerseFoo;
 class TerseLazyFoo;
 class TerseOptionalFoo;
 class TerseOptionalLazyFoo;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare

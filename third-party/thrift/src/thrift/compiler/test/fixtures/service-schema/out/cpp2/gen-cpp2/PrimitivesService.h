@@ -32,7 +32,7 @@ class PrimitivesServiceServiceInfoHolder : public apache::thrift::ServiceInfoHol
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -88,7 +88,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
 
 namespace cpp2 {
 using PrimitivesServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<PrimitivesService> instead")]] = ::apache::thrift::ServiceHandler<PrimitivesService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class PrimitivesServiceSvNull : public ::apache::thrift::ServiceHandler<PrimitivesService> {
  public:
@@ -144,4 +144,4 @@ class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncP
   ~PrimitivesServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

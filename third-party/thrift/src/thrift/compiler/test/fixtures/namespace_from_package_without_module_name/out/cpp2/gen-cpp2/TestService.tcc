@@ -88,4 +88,4 @@ void TestServiceAsyncProcessor::throw_wrapped_init(apache::thrift::ResponseChann
 }
 
 
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

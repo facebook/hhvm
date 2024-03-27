@@ -31,7 +31,7 @@ class RaiserServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -94,7 +94,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
 
 namespace cpp2 {
 using RaiserSvIf [[deprecated("Use apache::thrift::ServiceHandler<Raiser> instead")]] = ::apache::thrift::ServiceHandler<Raiser>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class RaiserSvNull : public ::apache::thrift::ServiceHandler<Raiser> {
  public:
@@ -159,4 +159,4 @@ class RaiserAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBas
   ~RaiserAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

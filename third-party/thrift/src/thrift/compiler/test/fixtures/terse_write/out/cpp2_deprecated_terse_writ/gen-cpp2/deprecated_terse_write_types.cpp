@@ -101,7 +101,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated
 
 namespace apache {
 namespace thrift {
@@ -333,7 +333,7 @@ static_assert(
         ::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     "inconsistent use of json option");
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated
 
 namespace apache {
 namespace thrift {
@@ -685,11 +685,11 @@ static_assert(
         ::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     "inconsistent use of json option");
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated
 
 namespace facebook::thrift::test::terse_write::deprecated { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // facebook::thrift::test::terse_write::deprecated
+}} // namespace facebook::thrift::test::terse_write::deprecated
 namespace apache::thrift::detail::annotation {
 }

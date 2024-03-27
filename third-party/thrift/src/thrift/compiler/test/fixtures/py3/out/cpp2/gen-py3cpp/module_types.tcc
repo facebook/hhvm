@@ -1780,4 +1780,4 @@ extern template uint32_t BinaryUnionStruct::serializedSize<>(apache::thrift::Com
 extern template uint32_t BinaryUnionStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple

@@ -16,4 +16,4 @@ struct matching_module_name_constants {
 
 };
 
-} // matching_module_name
+} // namespace matching_module_name

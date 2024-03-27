@@ -916,7 +916,7 @@ enum class MyEnumB {
 
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace std {
 template<> struct hash<::some::valid::ns::MyEnumA> :
@@ -1041,7 +1041,7 @@ class ComplexContainerStruct;
 class FloatStruct;
 class FloatUnion;
 class AllRequiredNoExceptMoveCtrStruct;
-} // some::valid::ns
+} // namespace some::valid::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -9928,7 +9928,7 @@ unsigned long AllRequiredNoExceptMoveCtrStruct::read(Protocol_* iprot) {
 }
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache { namespace thrift {
 

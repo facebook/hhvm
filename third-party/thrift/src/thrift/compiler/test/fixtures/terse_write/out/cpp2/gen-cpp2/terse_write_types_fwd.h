@@ -19,11 +19,11 @@ class TerseStructWithCustomDefault;
 class AdaptedFields;
 class WrappedFields;
 class TerseException;
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace facebook::thrift::test::terse_write {
 enum class MyEnum;
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write
 // END forward_declare_enums

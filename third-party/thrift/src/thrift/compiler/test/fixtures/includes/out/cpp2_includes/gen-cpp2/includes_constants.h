@@ -23,4 +23,4 @@ struct includes_constants {
 
 };
 
-} // cpp2
+} // namespace cpp2

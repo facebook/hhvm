@@ -97,7 +97,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -330,7 +330,7 @@ static_assert(
         ::apache::thrift::test::MyStruct>,
     "inconsistent use of json option");
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -550,11 +550,11 @@ static_assert(
         ::apache::thrift::test::MyStruct>,
     "inconsistent use of json option");
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // apache::thrift::test
+}} // namespace apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

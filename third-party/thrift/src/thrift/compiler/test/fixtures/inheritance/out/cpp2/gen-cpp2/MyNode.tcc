@@ -84,4 +84,4 @@ void MyNodeAsyncProcessor::throw_wrapped_do_mid(apache::thrift::ResponseChannelR
 }
 
 
-} // cpp2
+} // namespace cpp2

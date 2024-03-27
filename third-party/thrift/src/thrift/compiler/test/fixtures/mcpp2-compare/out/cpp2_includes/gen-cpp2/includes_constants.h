@@ -21,4 +21,4 @@ struct includes_constants {
 
 };
 
-} // a::different::ns
+} // namespace a::different::ns

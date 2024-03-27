@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class Raiser;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -433,4 +433,4 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
 
 namespace cpp2 {
 using RaiserAsyncClient [[deprecated("Use apache::thrift::Client<Raiser> instead")]] = ::apache::thrift::Client<Raiser>;
-} // cpp2
+} // namespace cpp2

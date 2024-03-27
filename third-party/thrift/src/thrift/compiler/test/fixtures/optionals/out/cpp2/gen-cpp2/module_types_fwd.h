@@ -13,11 +13,11 @@ namespace cpp2 {
 class Color;
 class Vehicle;
 class Person;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace cpp2 {
 enum class Animal;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

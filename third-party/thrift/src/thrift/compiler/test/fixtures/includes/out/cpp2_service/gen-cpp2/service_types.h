@@ -35,4 +35,4 @@ using ::apache::thrift::detail::operator>=;
 typedef ::cpp2::Included IncludesIncluded;
 typedef ::cpp2::TransitiveFoo IncludesTransitiveFoo;
 
-} // cpp2
+} // namespace cpp2

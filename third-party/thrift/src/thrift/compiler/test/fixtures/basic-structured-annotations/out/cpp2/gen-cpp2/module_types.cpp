@@ -101,7 +101,7 @@ template uint32_t runtime_annotation::serializedSize<>(apache::thrift::CompactPr
 template uint32_t runtime_annotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -210,7 +210,7 @@ template uint32_t structured_annotation_inline::serializedSize<>(apache::thrift:
 template uint32_t structured_annotation_inline::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -312,7 +312,7 @@ template uint32_t structured_annotation_with_default::serializedSize<>(apache::t
 template uint32_t structured_annotation_with_default::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -457,7 +457,7 @@ static_assert(
         ::test::fixtures::basic-structured-annotations::structured_annotation_forward>,
     "inconsistent use of json option");
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -539,7 +539,7 @@ template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift
 template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -660,7 +660,7 @@ static_assert(
         ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>,
     "inconsistent use of json option");
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -781,7 +781,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -882,7 +882,7 @@ template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {
@@ -1020,12 +1020,12 @@ template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace test::fixtures::basic-structured-annotations { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::basic-structured-annotations
+}} // namespace test::fixtures::basic-structured-annotations
 namespace apache::thrift::detail::annotation {
 template<> const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId id) {
   switch (static_cast<int16_t>(id)) {

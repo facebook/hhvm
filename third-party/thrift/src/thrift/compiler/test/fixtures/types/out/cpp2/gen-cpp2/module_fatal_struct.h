@@ -2028,4 +2028,4 @@ THRIFT_REGISTER_STRUCT_TRAITS(AllocatorAware, __fbthrift_refl::AllocatorAware_st
 THRIFT_REGISTER_STRUCT_TRAITS(AllocatorAware2, __fbthrift_refl::AllocatorAware2_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(TypedefStruct, __fbthrift_refl::TypedefStruct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(StructWithDoubleUnderscores, __fbthrift_refl::StructWithDoubleUnderscores_struct_traits);
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

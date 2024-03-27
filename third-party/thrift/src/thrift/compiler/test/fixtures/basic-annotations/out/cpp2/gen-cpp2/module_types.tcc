@@ -916,4 +916,4 @@ extern template uint32_t SecretStruct::serializedSize<>(apache::thrift::CompactP
 extern template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

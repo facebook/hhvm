@@ -528,4 +528,4 @@ extern template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtoc
 extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

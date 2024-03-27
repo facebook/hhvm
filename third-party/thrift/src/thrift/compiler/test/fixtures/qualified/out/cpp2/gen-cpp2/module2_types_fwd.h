@@ -10,5 +10,5 @@
 namespace module2 {
 class Struct;
 class BigStruct;
-} // module2
+} // namespace module2
 // END forward_declare

@@ -84,4 +84,4 @@ void MyRootAsyncProcessor::throw_wrapped_do_root(apache::thrift::ResponseChannel
 }
 
 
-} // cpp2
+} // namespace cpp2

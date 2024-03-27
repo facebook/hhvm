@@ -444,4 +444,4 @@ apache::thrift::ServiceRequestInfoMap PrimitivesServiceServiceInfoHolder::static
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

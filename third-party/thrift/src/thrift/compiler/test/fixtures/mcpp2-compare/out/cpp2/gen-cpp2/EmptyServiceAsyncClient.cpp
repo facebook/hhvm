@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
 namespace some::valid::ns {
-} // some::valid::ns
+} // namespace some::valid::ns
 
 
 

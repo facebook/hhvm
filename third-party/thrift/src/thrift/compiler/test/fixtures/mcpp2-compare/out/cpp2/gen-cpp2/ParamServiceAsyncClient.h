@@ -20,7 +20,7 @@ namespace apache { namespace thrift {
 
 namespace some::valid::ns {
 class ParamService;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace apache::thrift {
 
 template <>
@@ -2923,4 +2923,4 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
 
 namespace some::valid::ns {
 using ParamServiceAsyncClient [[deprecated("Use apache::thrift::Client<ParamService> instead")]] = ::apache::thrift::Client<ParamService>;
-} // some::valid::ns
+} // namespace some::valid::ns

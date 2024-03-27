@@ -66,7 +66,7 @@ typedef apache::thrift::ThriftPresult<false> service_with_special_names_field_pa
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> service_with_special_names_field_presult;
 typedef apache::thrift::ThriftPresult<false> service_with_special_names_fields_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> service_with_special_names_fields_presult;
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::getT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

@@ -356,4 +356,4 @@ extern template uint32_t BigStruct::serializedSize<>(apache::thrift::CompactProt
 extern template uint32_t BigStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // module2
+} // namespace module2

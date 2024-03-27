@@ -378,4 +378,4 @@ void RaiserAsyncProcessor::throw_wrapped_get500(apache::thrift::ResponseChannelR
 }
 
 
-} // cpp2
+} // namespace cpp2

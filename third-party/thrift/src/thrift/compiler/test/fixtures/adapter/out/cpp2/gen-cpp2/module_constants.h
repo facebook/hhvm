@@ -46,4 +46,4 @@ struct module_constants {
 
 };
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

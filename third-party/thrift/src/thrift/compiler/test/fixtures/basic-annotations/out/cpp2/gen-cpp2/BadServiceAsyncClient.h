@@ -21,7 +21,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class GoodService;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -240,4 +240,4 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
 
 namespace cpp2 {
 using GoodServiceAsyncClient [[deprecated("Use apache::thrift::Client<GoodService> instead")]] = ::apache::thrift::Client<GoodService>;
-} // cpp2
+} // namespace cpp2

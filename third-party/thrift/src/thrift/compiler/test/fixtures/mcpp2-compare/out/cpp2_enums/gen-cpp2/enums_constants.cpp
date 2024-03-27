@@ -34,4 +34,4 @@ namespace facebook::ns::qwerty {
   return *instance;
 }
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

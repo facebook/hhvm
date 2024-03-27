@@ -217,7 +217,7 @@ static_assert(
         ::test::fixtures::basic::MyDataItem>,
     "inconsistent use of json option");
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -292,7 +292,7 @@ template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -460,7 +460,7 @@ static_assert(
         ::test::fixtures::basic::MyDataItem>,
     "inconsistent use of json option");
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -542,7 +542,7 @@ template uint32_t ReservedKeyword::serializedSize<>(apache::thrift::CompactProto
 template uint32_t ReservedKeyword::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache {
 namespace thrift {
@@ -668,11 +668,11 @@ template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::CompactProt
 template uint32_t UnionToBeRenamed::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace test::fixtures::basic { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::basic
+}} // namespace test::fixtures::basic
 namespace apache::thrift::detail::annotation {
 }

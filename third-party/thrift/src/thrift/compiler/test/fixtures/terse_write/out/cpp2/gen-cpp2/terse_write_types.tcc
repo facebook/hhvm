@@ -3770,4 +3770,4 @@ extern template uint32_t TerseException::serializedSize<>(apache::thrift::Compac
 extern template uint32_t TerseException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write

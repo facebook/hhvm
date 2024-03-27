@@ -16,5 +16,5 @@ class ValUnion;
 class VirtualComplexUnion;
 class NonCopyableStruct;
 class NonCopyableUnion;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

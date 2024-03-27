@@ -14,11 +14,11 @@ class MyStruct;
 class EmptiableStruct;
 class EmptiableTerseStruct;
 class NotEmptiableStruct;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace apache::thrift::test {
 enum class MyEnum;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare_enums

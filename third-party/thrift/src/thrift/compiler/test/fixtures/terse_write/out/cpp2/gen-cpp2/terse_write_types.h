@@ -424,7 +424,7 @@ enum class MyEnum {
 
 
 
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::terse_write::MyEnum> :
@@ -471,7 +471,7 @@ class TerseStructWithCustomDefault;
 class AdaptedFields;
 class WrappedFields;
 class TerseException;
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -5854,7 +5854,7 @@ unsigned long TerseException::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write
 
 namespace apache { namespace thrift {
 

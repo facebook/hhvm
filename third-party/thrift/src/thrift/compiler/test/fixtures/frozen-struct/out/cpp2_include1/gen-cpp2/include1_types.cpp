@@ -114,11 +114,11 @@ template uint32_t IncludedA::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // some::ns
+} // namespace some::ns
 
 namespace some::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // some::ns
+}} // namespace some::ns
 namespace apache::thrift::detail::annotation {
 }

@@ -228,4 +228,4 @@ void FooBarBazServiceAsyncProcessor::throw_wrapped_baz(apache::thrift::ResponseC
 }
 
 
-} // cpp2
+} // namespace cpp2

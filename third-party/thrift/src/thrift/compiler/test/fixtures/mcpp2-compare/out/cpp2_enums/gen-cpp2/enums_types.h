@@ -58,7 +58,7 @@ enum class AnEnumE {
 
 
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty
 
 namespace std {
 template<> struct hash<::facebook::ns::qwerty::AnEnumA> :
@@ -193,7 +193,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
 // BEGIN forward_declare
 namespace facebook::ns::qwerty {
 class SomeStruct;
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -359,4 +359,4 @@ unsigned long SomeStruct::read(Protocol_* iprot) {
 }
 
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

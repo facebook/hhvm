@@ -11,11 +11,11 @@
 // BEGIN forward_declare
 namespace cpp2 {
 class CustomException;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace cpp2 {
 enum class Result;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

@@ -31,7 +31,7 @@ class TestServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name
 
 namespace apache::thrift {
 template <>
@@ -68,7 +68,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
 
 namespace test::namespace_from_package_without_module_name {
 using TestServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<TestService> instead")]] = ::apache::thrift::ServiceHandler<TestService>;
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name
 namespace test::namespace_from_package_without_module_name {
 class TestServiceSvNull : public ::apache::thrift::ServiceHandler<TestService> {
  public:
@@ -106,4 +106,4 @@ class TestServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~TestServiceAsyncProcessor() override {}
 };
 
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

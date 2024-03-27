@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

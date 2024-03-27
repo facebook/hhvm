@@ -104,7 +104,7 @@ enum class ExampleEnum {
 
 
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 
 namespace std {
 template<> struct hash<::test::fixtures::tablebased::ExampleEnum> :
@@ -145,7 +145,7 @@ namespace test::fixtures::tablebased {
 class TrivialTypesStruct;
 class ContainerStruct;
 class ExampleUnion;
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1363,7 +1363,7 @@ unsigned long ExampleUnion::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 
 namespace apache { namespace thrift {
 

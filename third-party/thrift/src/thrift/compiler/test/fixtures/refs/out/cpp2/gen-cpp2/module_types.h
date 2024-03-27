@@ -321,7 +321,7 @@ enum class TypedEnum : ::std::int16_t {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::MyEnum> :
@@ -403,7 +403,7 @@ class StructWithRefTypeShared;
 class StructWithRefTypeSharedConst;
 class StructWithRefAndAnnotCppNoexceptMoveCtor;
 class StructWithString;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -4970,7 +4970,7 @@ unsigned long StructWithString::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

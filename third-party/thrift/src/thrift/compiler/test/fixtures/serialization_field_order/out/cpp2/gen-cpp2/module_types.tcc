@@ -424,4 +424,4 @@ extern template uint32_t Foo2::serializedSize<>(apache::thrift::CompactProtocolW
 extern template uint32_t Foo2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

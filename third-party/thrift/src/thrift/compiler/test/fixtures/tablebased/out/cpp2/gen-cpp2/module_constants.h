@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased

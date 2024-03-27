@@ -52,7 +52,7 @@ typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::SinkPayload*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::FinalResponse*>>
     > SinkService_methodFast_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::SinkService>::methodT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback) {
 

@@ -32,7 +32,7 @@ class PubSubStreamingServiceServiceInfoHolder : public apache::thrift::ServiceIn
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -136,7 +136,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 
 namespace cpp2 {
 using PubSubStreamingServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<PubSubStreamingService> instead")]] = ::apache::thrift::ServiceHandler<PubSubStreamingService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class PubSubStreamingServiceSvNull : public ::apache::thrift::ServiceHandler<PubSubStreamingService> {
  public:
@@ -237,4 +237,4 @@ class PubSubStreamingServiceAsyncProcessor : public ::apache::thrift::GeneratedA
   ~PubSubStreamingServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

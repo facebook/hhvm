@@ -255,4 +255,4 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_return_void_method(apache::t
 }
 
 
-} // cpp2
+} // namespace cpp2

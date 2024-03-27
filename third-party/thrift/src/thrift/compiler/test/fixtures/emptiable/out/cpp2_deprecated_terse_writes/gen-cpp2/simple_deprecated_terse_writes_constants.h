@@ -16,4 +16,4 @@ struct simple_deprecated_terse_writes_constants {
 
 };
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

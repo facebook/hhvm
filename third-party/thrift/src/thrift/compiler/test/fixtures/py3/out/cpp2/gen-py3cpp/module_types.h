@@ -179,7 +179,7 @@ enum class Flags {
 
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace std {
 template<> struct hash<::py3::simple::AnEnum> :
@@ -276,7 +276,7 @@ class HiddenException;
 class ComplexStruct;
 class BinaryUnion;
 class BinaryUnionStruct;
-} // py3::simple
+} // namespace py3::simple
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -2703,7 +2703,7 @@ unsigned long BinaryUnionStruct::read(Protocol_* iprot) {
 }
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache { namespace thrift {
 

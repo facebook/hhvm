@@ -91,7 +91,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(opt_fieldE);
 // BEGIN forward_declare
 namespace extra::svc {
 class containerStruct2;
-} // extra::svc
+} // namespace extra::svc
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -928,4 +928,4 @@ unsigned long containerStruct2::read(Protocol_* iprot) {
 }
 
 
-} // extra::svc
+} // namespace extra::svc

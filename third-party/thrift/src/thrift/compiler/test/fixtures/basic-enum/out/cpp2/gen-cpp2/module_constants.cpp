@@ -19,4 +19,4 @@ namespace test::fixtures::enumstrict {
   return *instance;
 }
 
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict

@@ -44,7 +44,7 @@ class MyStruct;
 } // namespace detail
 class MyUnion;
 class MyException;
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -599,7 +599,7 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace apache { namespace thrift {
 

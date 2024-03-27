@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // test::namespace_from_package::module
+} // namespace test::namespace_from_package::module

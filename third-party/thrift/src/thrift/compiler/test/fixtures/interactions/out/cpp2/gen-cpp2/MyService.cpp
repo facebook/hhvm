@@ -1182,4 +1182,4 @@ const MyServiceAsyncProcessor::InteractionConstructorMap MyServiceAsyncProcessor
 std::unique_ptr<apache::thrift::Tile> MyServiceAsyncProcessor::createInteractionImpl(const std::string& name) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
-}} // cpp2
+}} // namespace cpp2

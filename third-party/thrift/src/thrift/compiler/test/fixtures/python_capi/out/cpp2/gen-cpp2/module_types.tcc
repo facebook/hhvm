@@ -7397,4 +7397,4 @@ extern template uint32_t MyDataItemSafePatch::serializedSize<>(apache::thrift::C
 extern template uint32_t MyDataItemSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi

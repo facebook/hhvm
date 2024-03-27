@@ -602,4 +602,4 @@ extern template uint32_t StructWithDefaultStruct::serializedSize<>(apache::thrif
 extern template uint32_t StructWithDefaultStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

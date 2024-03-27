@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/exceptions/gen-cpp2/Raiser.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

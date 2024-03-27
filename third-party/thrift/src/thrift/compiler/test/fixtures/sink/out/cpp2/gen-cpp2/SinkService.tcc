@@ -684,4 +684,4 @@ void SinkServiceAsyncProcessor::throw_wrapped_methodFast(apache::thrift::Respons
 }
 
 
-} // cpp2
+} // namespace cpp2

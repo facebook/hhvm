@@ -1190,4 +1190,4 @@ extern template uint32_t MarshalError::serializedSize<>(apache::thrift::CompactP
 extern template uint32_t MarshalError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi

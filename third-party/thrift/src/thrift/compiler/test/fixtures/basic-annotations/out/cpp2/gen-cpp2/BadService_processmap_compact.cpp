@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadService.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

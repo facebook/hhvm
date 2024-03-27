@@ -33,7 +33,7 @@ class ParamServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache::thrift {
 template <>
@@ -310,7 +310,7 @@ class ServiceHandler<::some::valid::ns::ParamService> : public apache::thrift::S
 
 namespace some::valid::ns {
 using ParamServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ParamService> instead")]] = ::apache::thrift::ServiceHandler<ParamService>;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace some::valid::ns {
 class ParamServiceSvNull : public ::apache::thrift::ServiceHandler<ParamService> {
  public:
@@ -596,4 +596,4 @@ class ParamServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   ~ParamServiceAsyncProcessor() override {}
 };
 
-} // some::valid::ns
+} // namespace some::valid::ns

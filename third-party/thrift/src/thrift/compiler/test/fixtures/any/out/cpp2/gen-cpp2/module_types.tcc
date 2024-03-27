@@ -390,4 +390,4 @@ extern template uint32_t MyException::serializedSize<>(apache::thrift::CompactPr
 extern template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any

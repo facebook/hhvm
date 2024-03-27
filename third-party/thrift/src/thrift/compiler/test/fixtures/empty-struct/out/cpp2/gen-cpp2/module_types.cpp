@@ -81,7 +81,7 @@ template uint32_t Empty::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Empty::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -194,11 +194,11 @@ template uint32_t Nada::serializedSize<>(apache::thrift::CompactProtocolWriter c
 template uint32_t Nada::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

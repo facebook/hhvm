@@ -31,7 +31,7 @@ class MyServicePrioParentServiceInfoHolder : public apache::thrift::ServiceInfoH
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -74,7 +74,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
 
 namespace cpp2 {
 using MyServicePrioParentSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyServicePrioParent> instead")]] = ::apache::thrift::ServiceHandler<MyServicePrioParent>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class MyServicePrioParentSvNull : public ::apache::thrift::ServiceHandler<MyServicePrioParent> {
  public:
@@ -121,4 +121,4 @@ class MyServicePrioParentAsyncProcessor : public ::apache::thrift::GeneratedAsyn
   ~MyServicePrioParentAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

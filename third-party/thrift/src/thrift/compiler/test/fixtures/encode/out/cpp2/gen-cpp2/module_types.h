@@ -109,7 +109,7 @@ enum class Enum {
 
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::Enum> :
@@ -151,7 +151,7 @@ class Foo;
 class Bar;
 class Baz;
 class OpEncodeStruct;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1380,4 +1380,4 @@ unsigned long OpEncodeStruct::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

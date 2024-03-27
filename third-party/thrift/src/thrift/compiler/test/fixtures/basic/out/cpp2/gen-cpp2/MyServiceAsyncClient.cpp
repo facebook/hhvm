@@ -29,7 +29,7 @@ typedef apache::thrift::ThriftPresult<false> MyService_invalid_return_for_hack_p
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::set<::apache::thrift::type_class::floating_point>, ::std::set<float>*>> MyService_invalid_return_for_hack_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_rpc_skipped_codegen_pargs;
 typedef apache::thrift::ThriftPresult<true> MyService_rpc_skipped_codegen_presult;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test::fixtures::basic::MyService>::pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

@@ -120,7 +120,7 @@ class SerializedError;
 class MarshalStruct;
 class MarshalUnion;
 class MarshalError;
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1911,7 +1911,7 @@ unsigned long MarshalError::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache { namespace thrift {
 

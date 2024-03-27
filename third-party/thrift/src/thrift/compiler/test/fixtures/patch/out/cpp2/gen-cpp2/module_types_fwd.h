@@ -68,11 +68,11 @@ class RefFieldsField7PatchStruct;
 class RefFieldsFieldPatchStruct;
 class RefFieldsEnsureStruct;
 class RefFieldsSafePatch;
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace test::fixtures::patch {
 enum class MyEnum;
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 // END forward_declare_enums

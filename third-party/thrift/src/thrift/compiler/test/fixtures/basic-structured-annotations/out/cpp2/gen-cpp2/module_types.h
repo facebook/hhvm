@@ -111,7 +111,7 @@ enum class MyEnum {
 
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace std {
 template<> struct hash<::test::fixtures::basic-structured-annotations::MyEnum> :
@@ -158,7 +158,7 @@ class structured_annotation_nested;
 class MyStruct;
 class MyException;
 class MyUnion;
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 template<>
@@ -2013,7 +2013,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache { namespace thrift {
 

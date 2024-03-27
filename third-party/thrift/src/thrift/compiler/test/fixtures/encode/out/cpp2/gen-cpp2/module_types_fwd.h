@@ -14,11 +14,11 @@ class Foo;
 class Bar;
 class Baz;
 class OpEncodeStruct;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace facebook::thrift::test {
 enum class Enum;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare_enums

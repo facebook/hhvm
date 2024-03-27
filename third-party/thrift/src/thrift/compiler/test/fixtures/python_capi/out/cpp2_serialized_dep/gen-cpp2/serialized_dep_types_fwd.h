@@ -14,5 +14,5 @@ class SerializedError;
 class MarshalStruct;
 class MarshalUnion;
 class MarshalError;
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 // END forward_declare

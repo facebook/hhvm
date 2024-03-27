@@ -419,4 +419,4 @@ extern template uint32_t Bang::serializedSize<>(apache::thrift::CompactProtocolW
 extern template uint32_t Bang::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

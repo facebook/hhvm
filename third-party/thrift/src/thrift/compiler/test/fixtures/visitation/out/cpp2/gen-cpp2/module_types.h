@@ -881,7 +881,7 @@ enum class enum_with_special_names {
 
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace std {
 template<> struct hash<::test_cpp2::cpp_reflection::enum1> :
@@ -1010,7 +1010,7 @@ class annotated;
 class union_with_special_names;
 class struct_with_special_names;
 class struct_with_indirections;
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -12088,7 +12088,7 @@ unsigned long struct_with_indirections::read(Protocol_* iprot) {
 }
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache { namespace thrift {
 

@@ -470,4 +470,4 @@ void service1AsyncProcessor::throw_wrapped_method6(apache::thrift::ResponseChann
 }
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

@@ -303,4 +303,4 @@ extern template uint32_t AStructB::serializedSize<>(apache::thrift::SimpleJSONPr
 extern template uint32_t AStructB::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // a::different::ns
+} // namespace a::different::ns

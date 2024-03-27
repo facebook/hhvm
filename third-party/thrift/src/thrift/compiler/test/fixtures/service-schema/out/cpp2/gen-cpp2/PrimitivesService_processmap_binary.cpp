@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

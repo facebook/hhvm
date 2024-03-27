@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace facebook::thrift::test {
 class AdapterService;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 namespace apache::thrift {
 
 template <>
@@ -241,4 +241,4 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
 
 namespace facebook::thrift::test {
 using AdapterServiceAsyncClient [[deprecated("Use apache::thrift::Client<AdapterService> instead")]] = ::apache::thrift::Client<AdapterService>;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

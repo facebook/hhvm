@@ -170,7 +170,7 @@ enum class Company {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::EmptyEnum> :
@@ -262,7 +262,7 @@ class struct3;
 class struct4;
 class union1;
 class union2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -2587,7 +2587,7 @@ unsigned long union2::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

@@ -129,7 +129,7 @@ template uint32_t SerializedStruct::serializedSize<>(apache::thrift::CompactProt
 template uint32_t SerializedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -267,7 +267,7 @@ template uint32_t SerializedUnion::serializedSize<>(apache::thrift::CompactProto
 template uint32_t SerializedUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -379,7 +379,7 @@ template uint32_t SerializedError::serializedSize<>(apache::thrift::CompactProto
 template uint32_t SerializedError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -498,7 +498,7 @@ template uint32_t MarshalStruct::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t MarshalStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -636,7 +636,7 @@ template uint32_t MarshalUnion::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t MarshalUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -748,11 +748,11 @@ template uint32_t MarshalError::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t MarshalError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace test::fixtures::python_capi { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::python_capi
+}} // namespace test::fixtures::python_capi
 namespace apache::thrift::detail::annotation {
 }

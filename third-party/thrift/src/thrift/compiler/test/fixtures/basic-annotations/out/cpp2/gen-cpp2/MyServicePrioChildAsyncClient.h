@@ -23,7 +23,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class MyServicePrioChild;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -140,4 +140,4 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
 
 namespace cpp2 {
 using MyServicePrioChildAsyncClient [[deprecated("Use apache::thrift::Client<MyServicePrioChild> instead")]] = ::apache::thrift::Client<MyServicePrioChild>;
-} // cpp2
+} // namespace cpp2

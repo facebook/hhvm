@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/sink/gen-cpp2/SinkService.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

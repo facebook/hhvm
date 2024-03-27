@@ -43,7 +43,7 @@ class AServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -105,7 +105,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 
 namespace cpp2 {
 using ASvIf [[deprecated("Use apache::thrift::ServiceHandler<A> instead")]] = ::apache::thrift::ServiceHandler<A>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class ASvNull : public ::apache::thrift::ServiceHandler<A> {
  public:
@@ -159,7 +159,7 @@ class AAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
   ~AAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 class B;
@@ -170,7 +170,7 @@ class BServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -223,7 +223,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 
 namespace cpp2 {
 using BSvIf [[deprecated("Use apache::thrift::ServiceHandler<B> instead")]] = ::apache::thrift::ServiceHandler<B>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class BSvNull : public ::apache::thrift::ServiceHandler<B>, virtual public ::apache::thrift::ServiceHandler<::cpp2::A> {
  public:
@@ -279,7 +279,7 @@ class BAsyncProcessor : public ::cpp2::AAsyncProcessor {
   ~BAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 class C;
@@ -290,7 +290,7 @@ class CServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -342,7 +342,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 
 namespace cpp2 {
 using CSvIf [[deprecated("Use apache::thrift::ServiceHandler<C> instead")]] = ::apache::thrift::ServiceHandler<C>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class CSvNull : public ::apache::thrift::ServiceHandler<C> {
  public:
@@ -387,5 +387,5 @@ class CAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
   ~CAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2
 

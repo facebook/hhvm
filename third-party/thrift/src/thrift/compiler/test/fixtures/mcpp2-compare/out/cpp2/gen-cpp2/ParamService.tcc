@@ -2236,4 +2236,4 @@ void ParamServiceAsyncProcessor::throw_wrapped_listunion_string_param(apache::th
 }
 
 
-} // some::valid::ns
+} // namespace some::valid::ns

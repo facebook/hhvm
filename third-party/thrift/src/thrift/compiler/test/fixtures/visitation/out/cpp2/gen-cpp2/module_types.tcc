@@ -7491,4 +7491,4 @@ extern template uint32_t struct_with_indirections::serializedSize<>(apache::thri
 extern template uint32_t struct_with_indirections::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

@@ -117,7 +117,7 @@ static_assert(
         std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>,
     "inconsistent use of json option");
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -195,11 +195,11 @@ template uint32_t B::serializedSize<>(apache::thrift::CompactProtocolWriter cons
 template uint32_t B::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // apache::thrift::test
+}} // namespace apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

@@ -135,7 +135,7 @@ static_assert(
         ::module1::Struct>,
     "inconsistent use of json option");
 
-} // module2
+} // namespace module2
 
 namespace apache {
 namespace thrift {
@@ -246,11 +246,11 @@ static_assert(
         ::module2::Struct>,
     "inconsistent use of json option");
 
-} // module2
+} // namespace module2
 
 namespace module2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // module2
+}} // namespace module2
 namespace apache::thrift::detail::annotation {
 }

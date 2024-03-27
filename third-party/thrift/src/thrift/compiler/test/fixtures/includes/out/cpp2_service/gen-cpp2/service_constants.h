@@ -16,4 +16,4 @@ struct service_constants {
 
 };
 
-} // cpp2
+} // namespace cpp2

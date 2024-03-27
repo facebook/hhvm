@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class NestedContainers;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -527,4 +527,4 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
 
 namespace cpp2 {
 using NestedContainersAsyncClient [[deprecated("Use apache::thrift::Client<NestedContainers> instead")]] = ::apache::thrift::Client<NestedContainers>;
-} // cpp2
+} // namespace cpp2

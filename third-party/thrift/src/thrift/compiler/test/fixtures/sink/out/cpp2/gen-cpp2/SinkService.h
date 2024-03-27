@@ -32,7 +32,7 @@ class SinkServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -116,7 +116,7 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
 
 namespace cpp2 {
 using SinkServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<SinkService> instead")]] = ::apache::thrift::ServiceHandler<SinkService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class SinkServiceSvNull : public ::apache::thrift::ServiceHandler<SinkService> {
  public:
@@ -207,4 +207,4 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~SinkServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

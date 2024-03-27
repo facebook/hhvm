@@ -31,7 +31,7 @@ class NullServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::NullService> : public apache::thrift::ServerInterfa
 
 namespace cpp2 {
 using NullServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<NullService> instead")]] = ::apache::thrift::ServiceHandler<NullService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class NullServiceSvNull : public ::apache::thrift::ServiceHandler<NullService> {
  public:
@@ -83,4 +83,4 @@ class NullServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~NullServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

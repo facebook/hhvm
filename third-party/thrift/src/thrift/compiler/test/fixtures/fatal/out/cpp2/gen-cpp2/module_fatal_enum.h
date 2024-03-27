@@ -511,4 +511,4 @@ FATAL_REGISTER_ENUM_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(1630079061865176360ull)
   >
 );
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

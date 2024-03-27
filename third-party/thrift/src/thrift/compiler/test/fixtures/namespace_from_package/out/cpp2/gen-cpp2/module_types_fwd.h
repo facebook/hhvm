@@ -9,5 +9,5 @@
 // BEGIN forward_declare
 namespace test::namespace_from_package::module {
 class Foo;
-} // test::namespace_from_package::module
+} // namespace test::namespace_from_package::module
 // END forward_declare

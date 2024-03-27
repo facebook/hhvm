@@ -21,7 +21,7 @@ class HiddenException;
 class ComplexStruct;
 class BinaryUnion;
 class BinaryUnionStruct;
-} // py3::simple
+} // namespace py3::simple
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -29,5 +29,5 @@ namespace py3::simple {
 enum class AnEnum;
 enum class AnEnumRenamed;
 enum class Flags;
-} // py3::simple
+} // namespace py3::simple
 // END forward_declare_enums

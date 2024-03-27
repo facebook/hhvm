@@ -3536,4 +3536,4 @@ apache::thrift::ServiceRequestInfoMap service_with_special_namesServiceInfoHolde
 
   return requestInfoMap;
 }
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

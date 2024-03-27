@@ -685,7 +685,7 @@ enum class NormalDecentEnum {
 
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace std {
 template<> struct hash<::test::fixtures::python_capi::MyEnum> :
@@ -774,7 +774,7 @@ class MyDataItemPatchStruct;
 class MyDataItemFieldPatchStruct;
 class MyDataItemEnsureStruct;
 class MyDataItemSafePatch;
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -10011,7 +10011,7 @@ unsigned long MyDataItemSafePatch::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache { namespace thrift {
 

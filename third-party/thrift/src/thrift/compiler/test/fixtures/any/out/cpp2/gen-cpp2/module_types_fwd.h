@@ -13,5 +13,5 @@ class MyStruct;
 } // namespace detail
 class MyUnion;
 class MyException;
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 // END forward_declare

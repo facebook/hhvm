@@ -13,11 +13,11 @@ namespace test::fixtures::tablebased {
 class TrivialTypesStruct;
 class ContainerStruct;
 class ExampleUnion;
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace test::fixtures::tablebased {
 enum class ExampleEnum;
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 // END forward_declare_enums

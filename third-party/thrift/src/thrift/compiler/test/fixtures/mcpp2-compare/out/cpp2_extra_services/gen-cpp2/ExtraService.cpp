@@ -972,4 +972,4 @@ apache::thrift::ServiceRequestInfoMap ExtraServiceServiceInfoHolder::staticReque
 
   return requestInfoMap;
 }
-} // extra::svc
+} // namespace extra::svc

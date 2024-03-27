@@ -11,7 +11,7 @@
 // BEGIN forward_declare
 namespace facebook::ns::qwerty {
 class SomeStruct;
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -21,5 +21,5 @@ enum class AnEnumB;
 enum class AnEnumC;
 enum class AnEnumD;
 enum class AnEnumE;
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty
 // END forward_declare_enums

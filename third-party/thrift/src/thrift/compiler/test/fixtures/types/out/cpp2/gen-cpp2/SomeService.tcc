@@ -164,4 +164,4 @@ void SomeServiceAsyncProcessor::throw_wrapped_binary_keyed_map(apache::thrift::R
 }
 
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

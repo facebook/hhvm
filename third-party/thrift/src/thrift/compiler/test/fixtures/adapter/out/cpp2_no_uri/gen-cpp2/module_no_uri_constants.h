@@ -16,4 +16,4 @@ struct module_no_uri_constants {
 
 };
 
-} // cpp2
+} // namespace cpp2

@@ -121,4 +121,4 @@ namespace facebook::thrift::test {
   return *instance;
 }
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

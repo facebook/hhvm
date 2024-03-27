@@ -64,4 +64,4 @@ class SomeStruct_struct_traits {
 } // __fbthrift_refl
 
 THRIFT_REGISTER_STRUCT_TRAITS(SomeStruct, __fbthrift_refl::SomeStruct_struct_traits);
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

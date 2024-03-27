@@ -190,4 +190,4 @@ apache::thrift::ServiceRequestInfoMap RederivedServiceServiceInfoHolder::staticR
 
   return requestInfoMap;
 }
-} // py3::simple
+} // namespace py3::simple

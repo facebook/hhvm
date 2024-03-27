@@ -162,4 +162,4 @@ void MyServiceAsyncProcessor::throw_wrapped_second(apache::thrift::ResponseChann
 }
 
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

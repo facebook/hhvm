@@ -107,7 +107,7 @@ template uint32_t Mixin1::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t Mixin1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -224,7 +224,7 @@ static_assert(
         ::cpp2::Mixin1>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -321,7 +321,7 @@ template uint32_t Mixin3Base::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t Mixin3Base::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -458,11 +458,11 @@ static_assert(
         ::cpp2::Mixin3>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

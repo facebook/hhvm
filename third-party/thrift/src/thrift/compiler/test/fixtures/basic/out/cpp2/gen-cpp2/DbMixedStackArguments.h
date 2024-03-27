@@ -31,7 +31,7 @@ class DbMixedStackArgumentsServiceInfoHolder : public apache::thrift::ServiceInf
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache::thrift {
 template <>
@@ -78,7 +78,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 
 namespace test::fixtures::basic {
 using DbMixedStackArgumentsSvIf [[deprecated("Use apache::thrift::ServiceHandler<DbMixedStackArguments> instead")]] = ::apache::thrift::ServiceHandler<DbMixedStackArguments>;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 namespace test::fixtures::basic {
 class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMixedStackArguments> {
  public:
@@ -125,4 +125,4 @@ class DbMixedStackArgumentsAsyncProcessor : public ::apache::thrift::GeneratedAs
   ~DbMixedStackArgumentsAsyncProcessor() override {}
 };
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

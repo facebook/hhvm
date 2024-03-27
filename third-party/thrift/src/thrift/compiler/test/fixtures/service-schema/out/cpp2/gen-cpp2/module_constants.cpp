@@ -24,4 +24,4 @@ namespace cpp2 {
   return *instance;
 }
 
-} // cpp2
+} // namespace cpp2

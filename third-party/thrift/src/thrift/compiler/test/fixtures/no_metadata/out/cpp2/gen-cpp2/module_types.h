@@ -64,7 +64,7 @@ enum class MyEnum {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::MyEnum> :
@@ -105,7 +105,7 @@ namespace cpp2 {
 class MyStruct;
 class MyDataItem;
 class MyUnion;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -878,7 +878,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

@@ -12,7 +12,7 @@
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyRoot_do_root_pargs;
 typedef apache::thrift::ThriftPresult<true> MyRoot_do_root_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::MyRoot>::do_rootT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

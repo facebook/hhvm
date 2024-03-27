@@ -20,7 +20,7 @@ namespace apache { namespace thrift {
 
 namespace some::valid::ns {
 class ReturnService;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace apache::thrift {
 
 template <>
@@ -2137,4 +2137,4 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
 
 namespace some::valid::ns {
 using ReturnServiceAsyncClient [[deprecated("Use apache::thrift::Client<ReturnService> instead")]] = ::apache::thrift::Client<ReturnService>;
-} // some::valid::ns
+} // namespace some::valid::ns

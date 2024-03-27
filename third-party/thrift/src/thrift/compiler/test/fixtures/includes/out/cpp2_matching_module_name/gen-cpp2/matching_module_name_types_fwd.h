@@ -9,5 +9,5 @@
 // BEGIN forward_declare
 namespace matching_module_name {
 class MyStruct;
-} // matching_module_name
+} // namespace matching_module_name
 // END forward_declare

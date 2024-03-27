@@ -40,7 +40,7 @@ enum class AnEnum {
 
 
 
-} // a::different::ns
+} // namespace a::different::ns
 
 namespace std {
 template<> struct hash<::a::different::ns::AnEnum> :
@@ -80,7 +80,7 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
 namespace a::different::ns {
 class AStruct;
 class AStructB;
-} // a::different::ns
+} // namespace a::different::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -384,4 +384,4 @@ unsigned long AStructB::read(Protocol_* iprot) {
 }
 
 
-} // a::different::ns
+} // namespace a::different::ns

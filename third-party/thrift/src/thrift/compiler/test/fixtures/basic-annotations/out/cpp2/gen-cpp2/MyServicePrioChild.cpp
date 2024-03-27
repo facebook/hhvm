@@ -192,4 +192,4 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioChildServiceInfoHolder::stati
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

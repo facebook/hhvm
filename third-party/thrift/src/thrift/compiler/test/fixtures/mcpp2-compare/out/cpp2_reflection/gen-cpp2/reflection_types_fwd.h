@@ -9,5 +9,5 @@
 // BEGIN forward_declare
 namespace cpp2 {
 class ReflectionStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

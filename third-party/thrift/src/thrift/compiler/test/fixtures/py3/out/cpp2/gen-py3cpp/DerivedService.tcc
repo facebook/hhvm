@@ -86,4 +86,4 @@ void DerivedServiceAsyncProcessor::throw_wrapped_get_six(apache::thrift::Respons
 }
 
 
-} // py3::simple
+} // namespace py3::simple

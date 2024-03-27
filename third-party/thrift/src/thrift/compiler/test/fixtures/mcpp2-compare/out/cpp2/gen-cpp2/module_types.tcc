@@ -7830,4 +7830,4 @@ extern template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSize<>(apac
 extern template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns

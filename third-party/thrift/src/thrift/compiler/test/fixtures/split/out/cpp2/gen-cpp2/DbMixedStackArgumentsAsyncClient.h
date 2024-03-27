@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class DbMixedStackArguments;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -237,4 +237,4 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
 
 namespace cpp2 {
 using DbMixedStackArgumentsAsyncClient [[deprecated("Use apache::thrift::Client<DbMixedStackArguments> instead")]] = ::apache::thrift::Client<DbMixedStackArguments>;
-} // cpp2
+} // namespace cpp2

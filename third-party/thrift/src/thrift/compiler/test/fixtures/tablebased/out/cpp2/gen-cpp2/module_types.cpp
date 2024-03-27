@@ -258,7 +258,7 @@ constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_Trivia
   }}
 };
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 
 namespace test::fixtures::tablebased {
 
@@ -519,7 +519,7 @@ static_assert(
         ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>>,
     "inconsistent use of json option");
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 
 namespace apache { namespace thrift {
 
@@ -678,12 +678,12 @@ static_assert(
         ::test::fixtures::tablebased::TrivialTypesStruct>,
     "inconsistent use of json option");
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased
 
 namespace test::fixtures::tablebased { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::tablebased
+}} // namespace test::fixtures::tablebased
 
 namespace apache {
 namespace thrift {

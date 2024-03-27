@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

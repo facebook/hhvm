@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/MyService.tcc"
 
 namespace test::fixtures::basic {
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

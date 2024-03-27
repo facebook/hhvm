@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/EmptyService.tcc"
 
 namespace some::valid::ns {
-} // some::valid::ns
+} // namespace some::valid::ns

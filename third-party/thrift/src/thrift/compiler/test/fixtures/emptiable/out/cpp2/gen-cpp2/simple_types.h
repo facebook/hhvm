@@ -239,7 +239,7 @@ enum class MyEnum {
 
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace std {
 template<> struct hash<::apache::thrift::test::MyEnum> :
@@ -281,7 +281,7 @@ class MyStruct;
 class EmptiableStruct;
 class EmptiableTerseStruct;
 class NotEmptiableStruct;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -3049,4 +3049,4 @@ unsigned long NotEmptiableStruct::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

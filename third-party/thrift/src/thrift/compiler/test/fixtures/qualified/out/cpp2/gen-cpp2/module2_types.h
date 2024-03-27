@@ -48,7 +48,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(id);
 namespace module2 {
 class Struct;
 class BigStruct;
-} // module2
+} // namespace module2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -465,4 +465,4 @@ unsigned long BigStruct::read(Protocol_* iprot) {
 }
 
 
-} // module2
+} // namespace module2

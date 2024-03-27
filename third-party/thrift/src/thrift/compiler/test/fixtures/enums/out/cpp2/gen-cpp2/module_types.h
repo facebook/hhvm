@@ -157,7 +157,7 @@ inline constexpr MyBitmaskEnum2 operator~(MyBitmaskEnum2 a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 
 namespace std {
 template<> struct hash<::test::fixtures::enums::Metasyntactic> :
@@ -341,7 +341,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
 namespace test::fixtures::enums {
 class SomeStruct;
 class MyStruct;
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -985,4 +985,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums

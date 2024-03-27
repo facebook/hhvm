@@ -37,7 +37,7 @@ class ExtraServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // extra::svc
+} // namespace extra::svc
 
 namespace apache::thrift {
 template <>
@@ -132,7 +132,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 
 namespace extra::svc {
 using ExtraServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ExtraService> instead")]] = ::apache::thrift::ServiceHandler<ExtraService>;
-} // extra::svc
+} // namespace extra::svc
 namespace extra::svc {
 class ExtraServiceSvNull : public ::apache::thrift::ServiceHandler<ExtraService>, virtual public ::apache::thrift::ServiceHandler<::some::valid::ns::ParamService> {
  public:
@@ -221,4 +221,4 @@ class ExtraServiceAsyncProcessor : public ::some::valid::ns::ParamServiceAsyncPr
   ~ExtraServiceAsyncProcessor() override {}
 };
 
-} // extra::svc
+} // namespace extra::svc

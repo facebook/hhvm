@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/DbMixedStackArguments.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

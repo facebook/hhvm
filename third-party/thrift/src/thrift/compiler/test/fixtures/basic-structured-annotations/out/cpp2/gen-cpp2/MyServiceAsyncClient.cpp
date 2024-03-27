@@ -14,7 +14,7 @@ typedef apache::thrift::ThriftPresult<false> MyService_first_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string*>> MyService_first_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> MyService_second_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> MyService_second_presult;
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::firstT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

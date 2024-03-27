@@ -100,7 +100,7 @@ enum class EnumB {
 
 
 
-} // some::ns
+} // namespace some::ns
 
 namespace std {
 template<> struct hash<::some::ns::EnumB> :
@@ -144,7 +144,7 @@ namespace detail {
 class DirectlyAdapted;
 } // namespace detail
 class CppRef;
-} // some::ns
+} // namespace some::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1255,4 +1255,4 @@ unsigned long CppRef::read(Protocol_* iprot) {
 }
 
 
-} // some::ns
+} // namespace some::ns

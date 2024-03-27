@@ -297,4 +297,4 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(apache::thrift::Ser
 }
 
 
-} // cpp2
+} // namespace cpp2

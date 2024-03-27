@@ -19,4 +19,4 @@ namespace cpp2 {
 }
 
 
-} // cpp2
+} // namespace cpp2

@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/service3.tcc"
 
 namespace test_cpp2::cpp_reflection {
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

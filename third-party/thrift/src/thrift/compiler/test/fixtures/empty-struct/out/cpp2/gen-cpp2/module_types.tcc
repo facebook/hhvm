@@ -191,4 +191,4 @@ extern template uint32_t Nada::serializedSize<>(apache::thrift::CompactProtocolW
 extern template uint32_t Nada::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

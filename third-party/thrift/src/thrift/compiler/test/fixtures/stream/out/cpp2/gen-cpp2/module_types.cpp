@@ -94,7 +94,7 @@ template uint32_t FooStreamEx::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t FooStreamEx::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -178,7 +178,7 @@ template uint32_t FooEx::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t FooEx::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -262,11 +262,11 @@ template uint32_t FooEx2::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t FooEx2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

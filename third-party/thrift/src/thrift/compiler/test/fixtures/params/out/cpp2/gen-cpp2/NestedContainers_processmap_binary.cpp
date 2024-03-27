@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/params/gen-cpp2/NestedContainers.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

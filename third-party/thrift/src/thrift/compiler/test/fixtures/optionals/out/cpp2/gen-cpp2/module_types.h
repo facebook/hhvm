@@ -125,7 +125,7 @@ enum class Animal {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::Animal> :
@@ -166,7 +166,7 @@ namespace cpp2 {
 class Color;
 class Vehicle;
 class Person;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1548,4 +1548,4 @@ unsigned long Person::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

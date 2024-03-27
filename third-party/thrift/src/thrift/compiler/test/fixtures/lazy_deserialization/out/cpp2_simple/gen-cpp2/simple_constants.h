@@ -26,4 +26,4 @@ struct simple_constants {
 
 };
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

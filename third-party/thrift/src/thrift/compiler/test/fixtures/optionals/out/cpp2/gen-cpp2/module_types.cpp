@@ -116,7 +116,7 @@ template uint32_t Color::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Color::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -252,7 +252,7 @@ static_assert(
         ::cpp2::Color>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -451,11 +451,11 @@ static_assert(
         ::std::vector<::cpp2::Vehicle>>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

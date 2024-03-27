@@ -7731,4 +7731,4 @@ extern template uint32_t UnionWithTypedefFieldAdapter::serializedSize<>(apache::
 extern template uint32_t UnionWithTypedefFieldAdapter::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

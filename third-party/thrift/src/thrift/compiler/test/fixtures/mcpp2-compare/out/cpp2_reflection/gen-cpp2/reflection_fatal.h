@@ -74,4 +74,4 @@ class reflection_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(reflection_tags::module, __fbthrift_refl::reflection_module_traits);
 
-} // cpp2
+} // namespace cpp2

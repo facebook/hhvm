@@ -6417,4 +6417,4 @@ extern template uint32_t Person2::serializedSize<>(apache::thrift::CompactProtoc
 extern template uint32_t Person2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

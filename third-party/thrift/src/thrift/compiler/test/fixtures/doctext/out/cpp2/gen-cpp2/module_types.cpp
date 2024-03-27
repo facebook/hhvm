@@ -104,7 +104,7 @@ template uint32_t A::serializedSize<>(apache::thrift::CompactProtocolWriter cons
 template uint32_t A::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -238,7 +238,7 @@ template uint32_t U::serializedSize<>(apache::thrift::CompactProtocolWriter cons
 template uint32_t U::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -335,11 +335,11 @@ template uint32_t Bang::serializedSize<>(apache::thrift::CompactProtocolWriter c
 template uint32_t Bang::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

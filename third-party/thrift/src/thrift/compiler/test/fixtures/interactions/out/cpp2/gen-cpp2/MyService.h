@@ -33,7 +33,7 @@ class MyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -205,7 +205,7 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
 
 namespace cpp2 {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:
@@ -345,4 +345,4 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   ~MyServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

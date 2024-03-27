@@ -283,4 +283,4 @@ extern template uint32_t B::serializedSize<>(apache::thrift::CompactProtocolWrit
 extern template uint32_t B::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

@@ -226,7 +226,7 @@ template uint32_t union1::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -378,7 +378,7 @@ template uint32_t union2::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -530,7 +530,7 @@ template uint32_t union3::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union3::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -634,7 +634,7 @@ template uint32_t structA::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t structA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -801,7 +801,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structA>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -883,7 +883,7 @@ template uint32_t structB::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t structB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1417,7 +1417,7 @@ static_assert(
         ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1573,7 +1573,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::union2>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -1751,7 +1751,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::struct1>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2113,7 +2113,7 @@ static_assert(
         ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2249,7 +2249,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structA>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2399,7 +2399,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::structB>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2496,7 +2496,7 @@ template uint32_t struct_binary::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t struct_binary::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2610,7 +2610,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::dep_C_struct>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2724,7 +2724,7 @@ static_assert(
         ::test_cpp2::cpp_reflection::dep_C_struct>,
     "inconsistent use of json option");
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -2802,7 +2802,7 @@ template uint32_t annotated::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t annotated::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3167,7 +3167,7 @@ template uint32_t union_with_special_names::serializedSize<>(apache::thrift::Com
 template uint32_t union_with_special_names::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3353,7 +3353,7 @@ template uint32_t struct_with_special_names::serializedSize<>(apache::thrift::Co
 template uint32_t struct_with_special_names::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3482,7 +3482,7 @@ template uint32_t struct_with_indirections::serializedSize<>(apache::thrift::Com
 template uint32_t struct_with_indirections::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3574,7 +3574,7 @@ template uint32_t StructWithFieldAdapter::serializedSize<>(apache::thrift::Compa
 template uint32_t StructWithFieldAdapter::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {
@@ -3699,13 +3699,13 @@ template uint32_t UnionWithTypedefFieldAdapter::serializedSize<>(apache::thrift:
 template uint32_t UnionWithTypedefFieldAdapter::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection
 
 namespace test_cpp2::cpp_reflection { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::StructWithFieldAdapter>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter>();
 }
-}} // test_cpp2::cpp_reflection
+}} // namespace test_cpp2::cpp_reflection
 namespace apache::thrift::detail::annotation {
 }

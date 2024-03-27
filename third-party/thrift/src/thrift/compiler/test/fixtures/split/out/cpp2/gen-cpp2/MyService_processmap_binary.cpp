@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/split/gen-cpp2/MyService.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

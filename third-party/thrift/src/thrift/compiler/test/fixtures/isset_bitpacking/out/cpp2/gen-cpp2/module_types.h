@@ -108,7 +108,7 @@ class Default;
 class NonAtomic;
 class Atomic;
 class AtomicFoo;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1457,4 +1457,4 @@ unsigned long AtomicFoo::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

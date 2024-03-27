@@ -55,12 +55,12 @@ class TransitiveAdapted;
 class CountingStruct;
 class Person;
 class Person2;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace facebook::thrift::test {
 enum class Color;
 enum class ThriftAdaptedEnum;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare_enums

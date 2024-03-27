@@ -323,4 +323,4 @@ class module_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(module_tags::module, __fbthrift_refl::module_module_traits);
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

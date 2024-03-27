@@ -144,7 +144,7 @@ template uint32_t MyStructFloatFieldThrowExp::serializedSize<>(apache::thrift::C
 template uint32_t MyStructFloatFieldThrowExp::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -256,7 +256,7 @@ template uint32_t MyStructMapFloatThrowExp::serializedSize<>(apache::thrift::Com
 template uint32_t MyStructMapFloatThrowExp::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -699,7 +699,7 @@ static_assert(
         ::std::set<::cpp2::MyStruct>>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -804,7 +804,7 @@ template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1184,7 +1184,7 @@ static_assert(
         ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1371,7 +1371,7 @@ template uint32_t MyStructTypeDef::serializedSize<>(apache::thrift::CompactProto
 template uint32_t MyStructTypeDef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1442,7 +1442,7 @@ template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1630,7 +1630,7 @@ static_assert(
         ::cpp2::ComplexNestedStruct>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1794,7 +1794,7 @@ static_assert(
         ::cpp2::ComplexNestedStruct>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2167,7 +2167,7 @@ static_assert(
         ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2299,7 +2299,7 @@ template uint32_t TypeRemapped::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t TypeRemapped::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2383,7 +2383,7 @@ template uint32_t emptyXcep::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t emptyXcep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2481,7 +2481,7 @@ template uint32_t reqXcep::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t reqXcep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2586,7 +2586,7 @@ template uint32_t optXcep::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t optXcep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -2758,11 +2758,11 @@ static_assert(
         ::cpp2::MyStruct>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

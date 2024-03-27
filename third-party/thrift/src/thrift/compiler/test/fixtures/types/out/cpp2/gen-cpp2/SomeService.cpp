@@ -316,4 +316,4 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
 
   return requestInfoMap;
 }
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

@@ -31,7 +31,7 @@ class FooBarBazServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -84,7 +84,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
 
 namespace cpp2 {
 using FooBarBazServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<FooBarBazService> instead")]] = ::apache::thrift::ServiceHandler<FooBarBazService>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class FooBarBazServiceSvNull : public ::apache::thrift::ServiceHandler<FooBarBazService> {
  public:
@@ -140,4 +140,4 @@ class FooBarBazServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncPr
   ~FooBarBazServiceAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

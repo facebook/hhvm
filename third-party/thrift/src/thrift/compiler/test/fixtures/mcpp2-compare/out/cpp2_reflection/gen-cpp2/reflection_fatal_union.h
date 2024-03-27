@@ -21,4 +21,4 @@ namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 } // __fbthrift_refl
 
-} // cpp2
+} // namespace cpp2

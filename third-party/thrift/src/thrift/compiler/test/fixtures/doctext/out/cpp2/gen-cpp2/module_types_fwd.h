@@ -13,11 +13,11 @@ namespace cpp2 {
 class A;
 class U;
 class Bang;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace cpp2 {
 enum class B;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

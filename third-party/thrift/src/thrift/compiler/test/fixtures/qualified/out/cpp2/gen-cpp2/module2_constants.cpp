@@ -29,4 +29,4 @@ namespace module2 {
   return *instance;
 }
 
-} // module2
+} // namespace module2

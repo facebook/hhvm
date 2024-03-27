@@ -162,4 +162,4 @@ void AdapterServiceAsyncProcessor::throw_wrapped_adaptedTypes(apache::thrift::Re
 }
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

@@ -111,7 +111,7 @@ enum class HackEnum {
 
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace std {
 template<> struct hash<::test::fixtures::basic::MyEnum> :
@@ -178,7 +178,7 @@ class MyDataItem;
 class MyUnion;
 class ReservedKeyword;
 class UnionToBeRenamed;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1647,7 +1647,7 @@ unsigned long UnionToBeRenamed::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache { namespace thrift {
 

@@ -2035,4 +2035,4 @@ extern template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::Co
 extern template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

@@ -16,7 +16,7 @@ typedef apache::thrift::ThriftPresult<false> FooBarBazService_bar_pargs;
 typedef apache::thrift::ThriftPresult<true> FooBarBazService_bar_presult;
 typedef apache::thrift::ThriftPresult<false> FooBarBazService_baz_pargs;
 typedef apache::thrift::ThriftPresult<true> FooBarBazService_baz_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::FooBarBazService>::fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

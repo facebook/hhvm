@@ -261,4 +261,4 @@ void CAsyncProcessor::throw_wrapped_thing(apache::thrift::ResponseChannelRequest
 }
 
 
-} // cpp2
+} // namespace cpp2

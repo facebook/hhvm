@@ -12,7 +12,7 @@
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> A_foo_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::Foo*>> A_foo_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::A>::fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -226,7 +226,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::A>::recv_instance_wrappe
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> A_I_interact_pargs;
 typedef apache::thrift::ThriftPresult<true> A_I_interact_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::A>::I::interactT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
@@ -406,7 +406,7 @@ typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>
     > B_sink_stuff_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::B>::barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::Foo& p_foo) {
 
@@ -948,7 +948,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::B>::recv_instance_wrappe
 
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2
 
 
 apache::thrift::Client<::cpp2::C>::I apache::thrift::Client<::cpp2::C>::createI() {
@@ -959,7 +959,7 @@ apache::thrift::Client<::cpp2::C>::I apache::thrift::Client<::cpp2::C>::createI(
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> C_I_interact_pargs;
 typedef apache::thrift::ThriftPresult<true> C_I_interact_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::C>::I::interactT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));

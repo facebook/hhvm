@@ -12,7 +12,7 @@
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> GoodService_bar_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> GoodService_bar_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::GoodService>::barT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -228,7 +228,7 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::GoodService>::recv_insta
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> GoodService_BadInteraction_foo_pargs;
 typedef apache::thrift::ThriftPresult<true> GoodService_BadInteraction_foo_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));

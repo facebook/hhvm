@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums

@@ -1321,4 +1321,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 
   return requestInfoMap;
 }
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

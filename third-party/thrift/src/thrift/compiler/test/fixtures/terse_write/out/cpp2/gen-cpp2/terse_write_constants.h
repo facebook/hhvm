@@ -16,4 +16,4 @@ struct terse_write_constants {
 
 };
 
-} // facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::terse_write

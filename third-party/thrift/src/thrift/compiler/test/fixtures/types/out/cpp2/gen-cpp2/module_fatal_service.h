@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
 
 namespace apache::thrift::fixtures::types {
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

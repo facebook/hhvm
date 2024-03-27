@@ -1003,4 +1003,4 @@ extern template uint32_t OpEncodeStruct::serializedSize<>(apache::thrift::Compac
 extern template uint32_t OpEncodeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

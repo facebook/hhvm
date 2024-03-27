@@ -577,7 +577,7 @@ enum class MyEnum {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::MyEnum> :
@@ -630,7 +630,7 @@ class emptyXcep;
 class reqXcep;
 class optXcep;
 class complexException;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -8256,7 +8256,7 @@ unsigned long complexException::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

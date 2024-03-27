@@ -1294,4 +1294,4 @@ extern template uint32_t TerseOptionalLazyFoo::serializedSize<>(apache::thrift::
 extern template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

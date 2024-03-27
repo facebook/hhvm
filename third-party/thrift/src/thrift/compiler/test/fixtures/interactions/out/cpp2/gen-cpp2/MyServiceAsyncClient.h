@@ -22,7 +22,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class MyService;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -1085,4 +1085,4 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
 
 namespace cpp2 {
 using MyServiceAsyncClient [[deprecated("Use apache::thrift::Client<MyService> instead")]] = ::apache::thrift::Client<MyService>;
-} // cpp2
+} // namespace cpp2

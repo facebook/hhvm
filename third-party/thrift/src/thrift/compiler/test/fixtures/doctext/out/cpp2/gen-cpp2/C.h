@@ -32,7 +32,7 @@ class CServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -85,7 +85,7 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
 
 namespace cpp2 {
 using CSvIf [[deprecated("Use apache::thrift::ServiceHandler<C> instead")]] = ::apache::thrift::ServiceHandler<C>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class CSvNull : public ::apache::thrift::ServiceHandler<C> {
  public:
@@ -140,4 +140,4 @@ class CAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
   ~CAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

@@ -31,7 +31,7 @@ class DbMixedStackArgumentsServiceInfoHolder : public apache::thrift::ServiceInf
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -74,7 +74,7 @@ class ServiceHandler<::cpp2::DbMixedStackArguments> : public apache::thrift::Ser
 
 namespace cpp2 {
 using DbMixedStackArgumentsSvIf [[deprecated("Use apache::thrift::ServiceHandler<DbMixedStackArguments> instead")]] = ::apache::thrift::ServiceHandler<DbMixedStackArguments>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMixedStackArguments> {
  public:
@@ -121,4 +121,4 @@ class DbMixedStackArgumentsAsyncProcessor : public ::apache::thrift::GeneratedAs
   ~DbMixedStackArgumentsAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

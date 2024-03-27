@@ -9,5 +9,5 @@
 // BEGIN forward_declare
 namespace facebook::thrift::test {
 class InterceptedFields;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare

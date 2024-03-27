@@ -9,5 +9,5 @@
 // BEGIN forward_declare
 namespace extra::svc {
 class containerStruct2;
-} // extra::svc
+} // namespace extra::svc
 // END forward_declare

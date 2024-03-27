@@ -20,4 +20,4 @@ namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 
 } // __fbthrift_refl
 
-} // extra::svc
+} // namespace extra::svc

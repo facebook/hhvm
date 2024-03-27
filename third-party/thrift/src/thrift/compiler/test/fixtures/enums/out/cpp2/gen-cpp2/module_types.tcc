@@ -501,4 +501,4 @@ extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProto
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums

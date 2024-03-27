@@ -63,7 +63,7 @@ class Mixin1;
 class Mixin2;
 class Mixin3Base;
 class Foo;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -901,4 +901,4 @@ unsigned long Foo::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

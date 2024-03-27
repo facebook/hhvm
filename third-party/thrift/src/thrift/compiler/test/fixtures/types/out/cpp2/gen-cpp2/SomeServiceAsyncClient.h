@@ -19,7 +19,7 @@ namespace apache { namespace thrift {
 
 namespace apache::thrift::fixtures::types {
 class SomeService;
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types
 namespace apache::thrift {
 
 template <>
@@ -242,4 +242,4 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
 
 namespace apache::thrift::fixtures::types {
 using SomeServiceAsyncClient [[deprecated("Use apache::thrift::Client<SomeService> instead")]] = ::apache::thrift::Client<SomeService>;
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

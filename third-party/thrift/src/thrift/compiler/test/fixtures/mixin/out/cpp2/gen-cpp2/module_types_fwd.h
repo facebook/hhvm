@@ -12,5 +12,5 @@ class Mixin1;
 class Mixin2;
 class Mixin3Base;
 class Foo;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

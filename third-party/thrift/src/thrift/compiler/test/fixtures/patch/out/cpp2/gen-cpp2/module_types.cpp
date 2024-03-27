@@ -131,7 +131,7 @@ template uint32_t MyData::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t MyData::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -237,7 +237,7 @@ template uint32_t MyDataWithCustomDefault::serializedSize<>(apache::thrift::Comp
 template uint32_t MyDataWithCustomDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -366,7 +366,7 @@ template uint32_t InnerUnion::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t InnerUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -519,7 +519,7 @@ static_assert(
         ::test::fixtures::patch::InnerUnion>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -997,7 +997,7 @@ static_assert(
         ::test::fixtures::patch::MyData>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1072,7 +1072,7 @@ template uint32_t LateDefStruct::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t LateDefStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1183,7 +1183,7 @@ static_assert(
         ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1297,7 +1297,7 @@ static_assert(
         ::test::fixtures::patch::Loop>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1402,7 +1402,7 @@ static_assert(
         ::test::fixtures::patch::Bar>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1557,7 +1557,7 @@ template uint32_t RefFields::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t RefFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1747,7 +1747,7 @@ static_assert(
         ::test::fixtures::patch::MyDataFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1881,7 +1881,7 @@ static_assert(
         ::apache::thrift::op::I32Patch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -1990,7 +1990,7 @@ template uint32_t MyDataEnsureStruct::serializedSize<>(apache::thrift::CompactPr
 template uint32_t MyDataEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2106,7 +2106,7 @@ template uint32_t MyDataSafePatch::serializedSize<>(apache::thrift::CompactProto
 template uint32_t MyDataSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2296,7 +2296,7 @@ static_assert(
         ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2430,7 +2430,7 @@ static_assert(
         ::apache::thrift::op::I32Patch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2539,7 +2539,7 @@ template uint32_t MyDataWithCustomDefaultEnsureStruct::serializedSize<>(apache::
 template uint32_t MyDataWithCustomDefaultEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2655,7 +2655,7 @@ template uint32_t MyDataWithCustomDefaultSafePatch::serializedSize<>(apache::thr
 template uint32_t MyDataWithCustomDefaultSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2826,7 +2826,7 @@ static_assert(
         ::test::fixtures::patch::InnerUnionFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -2942,7 +2942,7 @@ static_assert(
         ::apache::thrift::op::BinaryPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3058,7 +3058,7 @@ template uint32_t InnerUnionSafePatch::serializedSize<>(apache::thrift::CompactP
 template uint32_t InnerUnionSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3229,7 +3229,7 @@ static_assert(
         ::test::fixtures::patch::MyUnionFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3381,7 +3381,7 @@ static_assert(
         ::test::fixtures::patch::InnerUnionPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3497,7 +3497,7 @@ template uint32_t MyUnionSafePatch::serializedSize<>(apache::thrift::CompactProt
 template uint32_t MyUnionSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3687,7 +3687,7 @@ static_assert(
         ::test::fixtures::patch::MyStructFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3774,7 +3774,7 @@ template uint32_t MyStructField10PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t MyStructField10PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -3861,7 +3861,7 @@ template uint32_t MyStructField23PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t MyStructField23PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4008,7 +4008,7 @@ template uint32_t MyStructField26PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t MyStructField26PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4155,7 +4155,7 @@ template uint32_t MyStructField27PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t MyStructField27PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4359,7 +4359,7 @@ static_assert(
         ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4506,7 +4506,7 @@ template uint32_t MyStructField29PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t MyStructField29PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4710,7 +4710,7 @@ static_assert(
         ::std::unordered_map<::std::string, ::test::fixtures::patch::MyStructField30Patch1>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -4914,7 +4914,7 @@ static_assert(
         ::std::unordered_map<::std::string, ::apache::thrift::op::I32Patch>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -5606,7 +5606,7 @@ static_assert(
         ::test::fixtures::patch::MyDataPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6021,7 +6021,7 @@ static_assert(
         ::test::fixtures::patch::MyData>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6137,7 +6137,7 @@ template uint32_t MyStructSafePatch::serializedSize<>(apache::thrift::CompactPro
 template uint32_t MyStructSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6320,7 +6320,7 @@ static_assert(
         ::test::fixtures::patch::LateDefStructFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6395,7 +6395,7 @@ template uint32_t LateDefStructFieldPatchStruct::serializedSize<>(apache::thrift
 template uint32_t LateDefStructFieldPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6470,7 +6470,7 @@ template uint32_t LateDefStructEnsureStruct::serializedSize<>(apache::thrift::Co
 template uint32_t LateDefStructEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6586,7 +6586,7 @@ template uint32_t LateDefStructSafePatch::serializedSize<>(apache::thrift::Compa
 template uint32_t LateDefStructSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6776,7 +6776,7 @@ static_assert(
         ::test::fixtures::patch::RecursiveFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -6899,7 +6899,7 @@ static_assert(
         ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7015,7 +7015,7 @@ static_assert(
         ::test::fixtures::patch::RecursiveField1Patch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7130,7 +7130,7 @@ static_assert(
         ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7246,7 +7246,7 @@ template uint32_t RecursiveSafePatch::serializedSize<>(apache::thrift::CompactPr
 template uint32_t RecursiveSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7436,7 +7436,7 @@ static_assert(
         ::test::fixtures::patch::BarFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7552,7 +7552,7 @@ static_assert(
         ::test::fixtures::patch::LoopPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7654,7 +7654,7 @@ static_assert(
         ::test::fixtures::patch::Loop>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7770,7 +7770,7 @@ template uint32_t BarSafePatch::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t BarSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7880,7 +7880,7 @@ static_assert(
         ::test::fixtures::patch::Loop>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -7996,7 +7996,7 @@ template uint32_t LoopSafePatch::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t LoopSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8186,7 +8186,7 @@ static_assert(
         ::test::fixtures::patch::RefFieldsFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8333,7 +8333,7 @@ template uint32_t RefFieldsField1PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t RefFieldsField1PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8480,7 +8480,7 @@ template uint32_t RefFieldsField4PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t RefFieldsField4PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8627,7 +8627,7 @@ template uint32_t RefFieldsField7PatchStruct::serializedSize<>(apache::thrift::C
 template uint32_t RefFieldsField7PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8779,7 +8779,7 @@ static_assert(
         ::test::fixtures::patch::RefFieldsField7Patch>,
     "inconsistent use of json option");
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -8978,7 +8978,7 @@ template uint32_t RefFieldsEnsureStruct::serializedSize<>(apache::thrift::Compac
 template uint32_t RefFieldsEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache {
 namespace thrift {
@@ -9094,7 +9094,7 @@ template uint32_t RefFieldsSafePatch::serializedSize<>(apache::thrift::CompactPr
 template uint32_t RefFieldsSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace test::fixtures::patch { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
@@ -9170,6 +9170,6 @@ namespace test::fixtures::patch { namespace {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4, ::test::fixtures::patch::RefFieldsField4PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7, ::test::fixtures::patch::RefFieldsField7PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
 }
-}} // test::fixtures::patch
+}} // namespace test::fixtures::patch
 namespace apache::thrift::detail::annotation {
 }

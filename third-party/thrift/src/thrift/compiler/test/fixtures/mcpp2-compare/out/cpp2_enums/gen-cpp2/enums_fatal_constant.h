@@ -10,4 +10,4 @@
 
 namespace facebook::ns::qwerty {
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

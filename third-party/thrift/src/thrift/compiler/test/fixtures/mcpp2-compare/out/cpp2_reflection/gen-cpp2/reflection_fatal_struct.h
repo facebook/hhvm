@@ -64,4 +64,4 @@ class ReflectionStruct_struct_traits {
 } // __fbthrift_refl
 
 THRIFT_REGISTER_STRUCT_TRAITS(ReflectionStruct, __fbthrift_refl::ReflectionStruct_struct_traits);
-} // cpp2
+} // namespace cpp2

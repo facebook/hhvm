@@ -198,7 +198,7 @@ static_assert(
         ::some::ns::IncludedB>,
     "inconsistent use of json option");
 
-} // some::ns
+} // namespace some::ns
 
 namespace apache {
 namespace thrift {
@@ -280,7 +280,7 @@ template uint32_t ModuleB::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t ModuleB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // some::ns
+} // namespace some::ns
 
 namespace apache {
 namespace thrift {
@@ -360,7 +360,7 @@ template uint32_t DirectlyAdapted::serializedSizeZC<>(apache::thrift::CompactPro
 
 
 } // namespace detail
-} // some::ns
+} // namespace some::ns
 
 namespace apache {
 namespace thrift {
@@ -474,11 +474,11 @@ template uint32_t CppRef::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t CppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // some::ns
+} // namespace some::ns
 
 namespace some::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // some::ns
+}} // namespace some::ns
 namespace apache::thrift::detail::annotation {
 }

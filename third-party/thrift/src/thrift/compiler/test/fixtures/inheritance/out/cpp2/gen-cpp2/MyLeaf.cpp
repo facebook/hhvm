@@ -192,4 +192,4 @@ apache::thrift::ServiceRequestInfoMap MyLeafServiceInfoHolder::staticRequestInfo
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

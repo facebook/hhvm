@@ -11,5 +11,5 @@ namespace cpp2 {
 class FooStreamEx;
 class FooEx;
 class FooEx2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

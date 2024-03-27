@@ -1931,4 +1931,4 @@ extern template uint32_t FieldLevelTerseStruct::serializedSize<>(apache::thrift:
 extern template uint32_t FieldLevelTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated

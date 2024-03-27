@@ -16,4 +16,4 @@ struct deprecated_terse_write_constants {
 
 };
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated

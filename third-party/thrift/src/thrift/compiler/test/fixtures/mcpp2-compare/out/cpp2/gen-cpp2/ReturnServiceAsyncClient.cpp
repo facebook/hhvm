@@ -52,7 +52,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf*>> ReturnService_readDataEb_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> ReturnService_readData_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr*>> ReturnService_readData_presult;
-} // some::valid::ns
+} // namespace some::valid::ns
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::some::valid::ns::ReturnService>::noReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

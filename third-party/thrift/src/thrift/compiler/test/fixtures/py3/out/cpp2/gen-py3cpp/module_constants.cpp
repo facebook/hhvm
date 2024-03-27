@@ -72,4 +72,4 @@ namespace py3::simple {
   return *instance;
 }
 
-} // py3::simple
+} // namespace py3::simple

@@ -684,4 +684,4 @@ extern template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apac
 extern template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

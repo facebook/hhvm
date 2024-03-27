@@ -12,4 +12,4 @@
 
 namespace some::valid::ns {
 
-} // some::valid::ns
+} // namespace some::valid::ns

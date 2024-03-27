@@ -14,7 +14,7 @@ typedef apache::thrift::ThriftPresult<false> AdapterService_count_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::facebook::thrift::test::CountingStruct*>> AdapterService_count_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::HeapAllocated*, ::apache::thrift::type::adapted<::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::HeapAllocated>>>> AdapterService_adaptedTypes_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::facebook::thrift::test::HeapAllocated*, ::apache::thrift::type::adapted<::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::HeapAllocated>>>> AdapterService_adaptedTypes_presult;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

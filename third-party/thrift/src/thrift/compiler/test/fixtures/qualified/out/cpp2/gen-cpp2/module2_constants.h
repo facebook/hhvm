@@ -22,4 +22,4 @@ struct module2_constants {
 
 };
 
-} // module2
+} // namespace module2

@@ -36,7 +36,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 namespace apache::thrift::test {
 class A;
 class B;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -357,4 +357,4 @@ unsigned long A::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

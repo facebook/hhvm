@@ -10,7 +10,7 @@
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2
 
 
 

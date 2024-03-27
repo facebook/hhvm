@@ -31,4 +31,4 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
-} // cpp2
+} // namespace cpp2

@@ -24,4 +24,4 @@ struct enums_constants {
 
 };
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

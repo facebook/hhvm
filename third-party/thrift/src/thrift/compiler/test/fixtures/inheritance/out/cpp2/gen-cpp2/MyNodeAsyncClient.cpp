@@ -12,7 +12,7 @@
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyNode_do_mid_pargs;
 typedef apache::thrift::ThriftPresult<true> MyNode_do_mid_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::MyNode>::do_midT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

@@ -48,7 +48,7 @@ enum class B {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::B> :
@@ -89,7 +89,7 @@ namespace cpp2 {
 class A;
 class U;
 class Bang;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -694,7 +694,7 @@ unsigned long Bang::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

@@ -35,7 +35,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(strField);
 // BEGIN forward_declare
 namespace some::ns {
 class IncludedB;
-} // some::ns
+} // namespace some::ns
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -261,4 +261,4 @@ unsigned long IncludedB::read(Protocol_* iprot) {
 }
 
 
-} // some::ns
+} // namespace some::ns

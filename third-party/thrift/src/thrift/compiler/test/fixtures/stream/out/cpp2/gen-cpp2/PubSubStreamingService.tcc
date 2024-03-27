@@ -898,4 +898,4 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_returnstreamFast(apache
 }
 
 
-} // cpp2
+} // namespace cpp2

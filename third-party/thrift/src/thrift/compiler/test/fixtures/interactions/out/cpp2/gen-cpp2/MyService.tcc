@@ -998,4 +998,4 @@ void MyServiceAsyncProcessor::throw_wrapped_SerialInteraction_frobnicate(apache:
   }
 }
 
-} // cpp2
+} // namespace cpp2

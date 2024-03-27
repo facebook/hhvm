@@ -32,7 +32,7 @@ class SomeServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types
 
 namespace apache::thrift {
 template <>
@@ -79,7 +79,7 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
 
 namespace apache::thrift::fixtures::types {
 using SomeServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<SomeService> instead")]] = ::apache::thrift::ServiceHandler<SomeService>;
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types
 namespace apache::thrift::fixtures::types {
 class SomeServiceSvNull : public ::apache::thrift::ServiceHandler<SomeService> {
  public:
@@ -126,4 +126,4 @@ class SomeServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   ~SomeServiceAsyncProcessor() override {}
 };
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

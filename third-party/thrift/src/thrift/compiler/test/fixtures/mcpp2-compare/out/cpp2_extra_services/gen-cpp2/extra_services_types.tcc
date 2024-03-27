@@ -619,4 +619,4 @@ extern template uint32_t containerStruct2::serializedSize<>(apache::thrift::Simp
 extern template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // extra::svc
+} // namespace extra::svc

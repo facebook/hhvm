@@ -36,7 +36,7 @@ class MyLeafServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // cpp2
+} // namespace cpp2
 
 namespace apache::thrift {
 template <>
@@ -69,7 +69,7 @@ class ServiceHandler<::cpp2::MyLeaf> : virtual public ::cpp2::MyNodeSvIf {
 
 namespace cpp2 {
 using MyLeafSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyLeaf> instead")]] = ::apache::thrift::ServiceHandler<MyLeaf>;
-} // cpp2
+} // namespace cpp2
 namespace cpp2 {
 class MyLeafSvNull : public ::apache::thrift::ServiceHandler<MyLeaf>, virtual public ::apache::thrift::ServiceHandler<::cpp2::MyNode> {
  public:
@@ -108,4 +108,4 @@ class MyLeafAsyncProcessor : public ::cpp2::MyNodeAsyncProcessor {
   ~MyLeafAsyncProcessor() override {}
 };
 
-} // cpp2
+} // namespace cpp2

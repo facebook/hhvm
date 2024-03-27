@@ -18,7 +18,7 @@ class struct3;
 class struct4;
 class union1;
 class union2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -26,5 +26,5 @@ namespace cpp2 {
 enum class EmptyEnum;
 enum class City;
 enum class Company;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

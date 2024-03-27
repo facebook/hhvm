@@ -41,7 +41,7 @@ void __fbthrift_static_init_MyException() {
         apache::thrift::conformance::StandardProtocol::Binary>(),
     false);
 }
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -144,7 +144,7 @@ template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWr
 
 
 } // namespace detail
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -273,7 +273,7 @@ template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
@@ -374,11 +374,11 @@ template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace facebook::thrift::compiler::test::fixtures::any { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // facebook::thrift::compiler::test::fixtures::any
+}} // namespace facebook::thrift::compiler::test::fixtures::any
 namespace apache::thrift::detail::annotation {
 }

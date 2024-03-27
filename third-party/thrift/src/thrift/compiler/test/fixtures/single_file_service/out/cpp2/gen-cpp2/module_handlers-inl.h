@@ -160,7 +160,7 @@ void AAsyncProcessor::throw_wrapped_I_interact(apache::thrift::ResponseChannelRe
   }
 }
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::Foo*>> B_bar_pargs;
@@ -408,7 +408,7 @@ void BAsyncProcessor::throw_wrapped_sink_stuff(apache::thrift::ResponseChannelRe
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 {
 
@@ -486,5 +486,5 @@ void CAsyncProcessor::throw_wrapped_I_interact(apache::thrift::ResponseChannelRe
   }
 }
 
-} // cpp2
+} // namespace cpp2
 

@@ -213,7 +213,7 @@ class LazyCppRef;
 class IndexedFoo;
 class OptionalIndexedFoo;
 class Empty;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -3008,4 +3008,4 @@ unsigned long Empty::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

@@ -435,4 +435,4 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
 }
 
 
-} // cpp2
+} // namespace cpp2

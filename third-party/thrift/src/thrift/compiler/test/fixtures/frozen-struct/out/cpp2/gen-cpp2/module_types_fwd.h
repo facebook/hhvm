@@ -16,11 +16,11 @@ namespace detail {
 class DirectlyAdapted;
 } // namespace detail
 class CppRef;
-} // some::ns
+} // namespace some::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace some::ns {
 enum class EnumB;
-} // some::ns
+} // namespace some::ns
 // END forward_declare_enums

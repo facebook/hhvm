@@ -382,4 +382,4 @@ void NestedContainersAsyncProcessor::throw_wrapped_turtles(apache::thrift::Respo
 }
 
 
-} // cpp2
+} // namespace cpp2

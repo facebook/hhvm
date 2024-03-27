@@ -10,4 +10,4 @@
 
 namespace apache::thrift::fixtures::types {
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

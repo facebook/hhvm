@@ -33,7 +33,7 @@ class EmptyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache::thrift {
 template <>
@@ -56,7 +56,7 @@ class ServiceHandler<::some::valid::ns::EmptyService> : public apache::thrift::S
 
 namespace some::valid::ns {
 using EmptyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<EmptyService> instead")]] = ::apache::thrift::ServiceHandler<EmptyService>;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace some::valid::ns {
 class EmptyServiceSvNull : public ::apache::thrift::ServiceHandler<EmptyService> {
  public:
@@ -85,4 +85,4 @@ class EmptyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   ~EmptyServiceAsyncProcessor() override {}
 };
 
-} // some::valid::ns
+} // namespace some::valid::ns

@@ -156,7 +156,7 @@ template uint32_t SimpleException::serializedSize<>(apache::thrift::CompactProto
 template uint32_t SimpleException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -264,7 +264,7 @@ template uint32_t OptionalRefStruct::serializedSize<>(apache::thrift::CompactPro
 template uint32_t OptionalRefStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -397,7 +397,7 @@ template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -540,7 +540,7 @@ static_assert(
         ::py3::simple::AdaptedTypeDef>,
     "inconsistent use of json option");
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -664,7 +664,7 @@ template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 
 } // namespace detail
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -762,7 +762,7 @@ template uint32_t HiddenException::serializedSize<>(apache::thrift::CompactProto
 template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -937,7 +937,7 @@ static_assert(
         ::py3::simple::SimpleStruct>,
     "inconsistent use of json option");
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -1055,7 +1055,7 @@ template uint32_t BinaryUnion::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t BinaryUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache {
 namespace thrift {
@@ -1154,13 +1154,13 @@ static_assert(
         ::py3::simple::BinaryUnion>,
     "inconsistent use of json option");
 
-} // py3::simple
+} // namespace py3::simple
 
 namespace py3::simple { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<Adapter, 1, ::py3::simple::SimpleStruct, ::py3::simple::HiddenTypeFieldsStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }
-}} // py3::simple
+}} // namespace py3::simple
 namespace apache::thrift::detail::annotation {
 }

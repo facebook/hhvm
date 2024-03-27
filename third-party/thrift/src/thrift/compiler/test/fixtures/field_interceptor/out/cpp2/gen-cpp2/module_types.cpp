@@ -139,11 +139,11 @@ template uint32_t InterceptedFields::serializedSize<>(apache::thrift::CompactPro
 template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace facebook::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // facebook::thrift::test
+}} // namespace facebook::thrift::test
 namespace apache::thrift::detail::annotation {
 }

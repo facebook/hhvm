@@ -36,7 +36,7 @@ class RederivedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache::thrift {
 template <>
@@ -69,7 +69,7 @@ class ServiceHandler<::py3::simple::RederivedService> : virtual public ::py3::si
 
 namespace py3::simple {
 using RederivedServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<RederivedService> instead")]] = ::apache::thrift::ServiceHandler<RederivedService>;
-} // py3::simple
+} // namespace py3::simple
 namespace py3::simple {
 class RederivedServiceSvNull : public ::apache::thrift::ServiceHandler<RederivedService>, virtual public ::apache::thrift::ServiceHandler<::py3::simple::DerivedService> {
  public:
@@ -108,4 +108,4 @@ class RederivedServiceAsyncProcessor : public ::py3::simple::DerivedServiceAsync
   ~RederivedServiceAsyncProcessor() override {}
 };
 
-} // py3::simple
+} // namespace py3::simple

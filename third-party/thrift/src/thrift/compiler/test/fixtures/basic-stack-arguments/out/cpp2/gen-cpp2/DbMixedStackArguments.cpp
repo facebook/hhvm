@@ -316,4 +316,4 @@ apache::thrift::ServiceRequestInfoMap DbMixedStackArgumentsServiceInfoHolder::st
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

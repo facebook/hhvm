@@ -31,7 +31,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(OtherStructField);
 // BEGIN forward_declare
 namespace matching_module_name {
 class MyStruct;
-} // matching_module_name
+} // namespace matching_module_name
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -195,4 +195,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-} // matching_module_name
+} // namespace matching_module_name

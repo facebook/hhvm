@@ -3213,4 +3213,4 @@ void SimpleServiceAsyncProcessor::throw_wrapped_get_struct_hidden(apache::thrift
 }
 
 
-} // py3::simple
+} // namespace py3::simple

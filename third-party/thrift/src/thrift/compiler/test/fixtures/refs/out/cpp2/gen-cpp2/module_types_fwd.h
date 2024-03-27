@@ -30,12 +30,12 @@ class StructWithRefTypeShared;
 class StructWithRefTypeSharedConst;
 class StructWithRefAndAnnotCppNoexceptMoveCtor;
 class StructWithString;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace cpp2 {
 enum class MyEnum;
 enum class TypedEnum : ::std::int16_t;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

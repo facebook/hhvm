@@ -15,5 +15,5 @@ class CompatibleWithKeywordSink;
 class InitialException;
 class SinkException1;
 class SinkException2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

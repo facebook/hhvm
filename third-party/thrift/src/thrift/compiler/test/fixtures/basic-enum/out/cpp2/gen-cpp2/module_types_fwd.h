@@ -11,7 +11,7 @@
 // BEGIN forward_declare
 namespace test::fixtures::enumstrict {
 class MyStruct;
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -19,5 +19,5 @@ namespace test::fixtures::enumstrict {
 enum class EmptyEnum;
 enum class MyEnum;
 enum class MyBigEnum;
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict
 // END forward_declare_enums

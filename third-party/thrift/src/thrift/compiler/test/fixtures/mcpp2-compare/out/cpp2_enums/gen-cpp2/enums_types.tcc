@@ -153,4 +153,4 @@ extern template uint32_t SomeStruct::serializedSize<>(apache::thrift::SimpleJSON
 extern template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // facebook::ns::qwerty
+} // namespace facebook::ns::qwerty

@@ -23,7 +23,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class MyLeaf;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -140,4 +140,4 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
 
 namespace cpp2 {
 using MyLeafAsyncClient [[deprecated("Use apache::thrift::Client<MyLeaf> instead")]] = ::apache::thrift::Client<MyLeaf>;
-} // cpp2
+} // namespace cpp2

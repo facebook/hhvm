@@ -10,5 +10,5 @@
 namespace apache::thrift::test {
 class A;
 class B;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare

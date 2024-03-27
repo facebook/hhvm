@@ -36,7 +36,7 @@ enum class Result {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::Result> :
@@ -75,7 +75,7 @@ template <> struct TEnumTraits<::cpp2::Result> {
 // BEGIN forward_declare
 namespace cpp2 {
 class CustomException;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -257,4 +257,4 @@ unsigned long CustomException::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

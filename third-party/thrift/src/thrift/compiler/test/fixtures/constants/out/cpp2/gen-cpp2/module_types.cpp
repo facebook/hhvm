@@ -181,7 +181,7 @@ template uint32_t Internship::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t Internship::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -259,7 +259,7 @@ template uint32_t Range::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Range::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -364,7 +364,7 @@ template uint32_t struct1::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t struct1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -502,7 +502,7 @@ static_assert(
         ::cpp2::struct1>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -626,7 +626,7 @@ static_assert(
         ::cpp2::struct2>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -729,7 +729,7 @@ template uint32_t struct4::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t struct4::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -860,7 +860,7 @@ template uint32_t union1::serializedSize<>(apache::thrift::CompactProtocolWriter
 template uint32_t union1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -1024,11 +1024,11 @@ static_assert(
         ::cpp2::union1>,
     "inconsistent use of json option");
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

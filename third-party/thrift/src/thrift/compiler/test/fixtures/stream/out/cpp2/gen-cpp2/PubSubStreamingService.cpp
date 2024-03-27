@@ -1040,4 +1040,4 @@ apache::thrift::ServiceRequestInfoMap PubSubStreamingServiceServiceInfoHolder::s
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

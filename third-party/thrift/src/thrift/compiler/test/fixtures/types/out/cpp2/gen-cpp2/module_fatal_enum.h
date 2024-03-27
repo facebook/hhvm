@@ -224,4 +224,4 @@ FATAL_REGISTER_ENUM_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(3846919192928447240ull)
   >
 );
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

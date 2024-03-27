@@ -31,7 +31,7 @@ class AdapterServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace apache::thrift {
 template <>
@@ -78,7 +78,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
 
 namespace facebook::thrift::test {
 using AdapterServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<AdapterService> instead")]] = ::apache::thrift::ServiceHandler<AdapterService>;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 namespace facebook::thrift::test {
 class AdapterServiceSvNull : public ::apache::thrift::ServiceHandler<AdapterService> {
  public:
@@ -125,4 +125,4 @@ class AdapterServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProc
   ~AdapterServiceAsyncProcessor() override {}
 };
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

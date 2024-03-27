@@ -55,7 +55,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(access_optional_boxed_field);
 // BEGIN forward_declare
 namespace facebook::thrift::test {
 class InterceptedFields;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -483,4 +483,4 @@ unsigned long InterceptedFields::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

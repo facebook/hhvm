@@ -300,4 +300,4 @@ extern template uint32_t ExampleUnion::serializedSize<>(apache::thrift::SimpleJS
 extern template uint32_t ExampleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // test::fixtures::tablebased
+} // namespace test::fixtures::tablebased

@@ -33,7 +33,7 @@ class MyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache::thrift {
 template <>
@@ -80,7 +80,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 
 namespace test::fixtures::basic-structured-annotations {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 namespace test::fixtures::basic-structured-annotations {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:
@@ -127,4 +127,4 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   ~MyServiceAsyncProcessor() override {}
 };
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

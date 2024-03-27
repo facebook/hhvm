@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi

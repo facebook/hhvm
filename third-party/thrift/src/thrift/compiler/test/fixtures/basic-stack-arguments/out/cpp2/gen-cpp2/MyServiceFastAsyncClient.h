@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class MyServiceFast;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -417,4 +417,4 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
 
 namespace cpp2 {
 using MyServiceFastAsyncClient [[deprecated("Use apache::thrift::Client<MyServiceFast> instead")]] = ::apache::thrift::Client<MyServiceFast>;
-} // cpp2
+} // namespace cpp2

@@ -123,7 +123,7 @@ template uint32_t MyStructNestedAnnotation::serializedSize<>(apache::thrift::Com
 template uint32_t MyStructNestedAnnotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -238,7 +238,7 @@ template uint32_t YourUnion::serializedSizeZC<>(apache::thrift::CompactProtocolW
 
 
 } // namespace detail
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -324,7 +324,7 @@ template uint32_t YourException::serializedSizeZC<>(apache::thrift::CompactProto
 
 
 } // namespace detail
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -512,7 +512,7 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace detail
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -616,7 +616,7 @@ template uint32_t SecretStruct::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
@@ -624,6 +624,6 @@ namespace cpp2 { namespace {
   ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

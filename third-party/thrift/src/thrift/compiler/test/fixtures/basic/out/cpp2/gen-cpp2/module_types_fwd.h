@@ -15,12 +15,12 @@ class MyDataItem;
 class MyUnion;
 class ReservedKeyword;
 class UnionToBeRenamed;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace test::fixtures::basic {
 enum class MyEnum;
 enum class HackEnum;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 // END forward_declare_enums

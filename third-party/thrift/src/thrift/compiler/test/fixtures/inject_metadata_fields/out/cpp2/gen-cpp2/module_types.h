@@ -69,7 +69,7 @@ class Fields;
 class FieldsInjectedToEmptyStruct;
 class FieldsInjectedToStruct;
 class FieldsInjectedWithIncludedStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -916,4 +916,4 @@ unsigned long FieldsInjectedWithIncludedStruct::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

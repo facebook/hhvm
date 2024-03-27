@@ -23,4 +23,4 @@ struct module_constants {
 
 };
 
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict

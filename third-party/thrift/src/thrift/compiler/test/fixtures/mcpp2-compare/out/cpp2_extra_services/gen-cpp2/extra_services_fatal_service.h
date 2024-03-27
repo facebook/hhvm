@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
 
 namespace extra::svc {
-} // extra::svc
+} // namespace extra::svc

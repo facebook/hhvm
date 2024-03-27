@@ -36,7 +36,7 @@ class DerivedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // py3::simple
+} // namespace py3::simple
 
 namespace apache::thrift {
 template <>
@@ -69,7 +69,7 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
 
 namespace py3::simple {
 using DerivedServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<DerivedService> instead")]] = ::apache::thrift::ServiceHandler<DerivedService>;
-} // py3::simple
+} // namespace py3::simple
 namespace py3::simple {
 class DerivedServiceSvNull : public ::apache::thrift::ServiceHandler<DerivedService>, virtual public ::apache::thrift::ServiceHandler<::py3::simple::SimpleService> {
  public:
@@ -108,4 +108,4 @@ class DerivedServiceAsyncProcessor : public ::py3::simple::SimpleServiceAsyncPro
   ~DerivedServiceAsyncProcessor() override {}
 };
 
-} // py3::simple
+} // namespace py3::simple

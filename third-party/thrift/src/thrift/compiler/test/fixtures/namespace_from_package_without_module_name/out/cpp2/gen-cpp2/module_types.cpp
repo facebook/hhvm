@@ -92,11 +92,11 @@ template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter co
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name
 
 namespace test::namespace_from_package_without_module_name { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::namespace_from_package_without_module_name
+}} // namespace test::namespace_from_package_without_module_name
 namespace apache::thrift::detail::annotation {
 }

@@ -5314,4 +5314,4 @@ apache::thrift::ServiceRequestInfoMap SimpleServiceServiceInfoHolder::staticRequ
 
   return requestInfoMap;
 }
-} // py3::simple
+} // namespace py3::simple

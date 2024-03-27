@@ -16,4 +16,4 @@ struct empty_constants {
 
 };
 
-} // cpp2
+} // namespace cpp2

@@ -21,11 +21,11 @@ namespace detail {
 class YourStruct;
 } // namespace detail
 class SecretStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace cpp2 {
 enum class YourEnum;
-} // cpp2
+} // namespace cpp2
 // END forward_declare_enums

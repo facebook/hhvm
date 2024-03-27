@@ -160,7 +160,7 @@ template uint32_t TerseFoo::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t TerseFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -428,7 +428,7 @@ template uint32_t TerseLazyFoo::serializedSize<>(apache::thrift::CompactProtocol
 template uint32_t TerseLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -578,7 +578,7 @@ template uint32_t TerseOptionalFoo::serializedSize<>(apache::thrift::CompactProt
 template uint32_t TerseOptionalFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -846,11 +846,11 @@ template uint32_t TerseOptionalLazyFoo::serializedSize<>(apache::thrift::Compact
 template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test
 
 namespace apache::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // apache::thrift::test
+}} // namespace apache::thrift::test
 namespace apache::thrift::detail::annotation {
 }

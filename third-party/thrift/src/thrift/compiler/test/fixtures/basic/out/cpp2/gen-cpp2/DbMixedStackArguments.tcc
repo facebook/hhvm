@@ -164,4 +164,4 @@ void DbMixedStackArgumentsAsyncProcessor::throw_wrapped_getDataByKey1(apache::th
 }
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

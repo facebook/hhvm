@@ -488,4 +488,4 @@ class module_tags {
 
 THRIFT_REGISTER_REFLECTION_METADATA(module_tags::module, __fbthrift_refl::module_module_traits);
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

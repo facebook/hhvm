@@ -2036,4 +2036,4 @@ apache::thrift::ServiceRequestInfoMap ReturnServiceServiceInfoHolder::staticRequ
 
   return requestInfoMap;
 }
-} // some::valid::ns
+} // namespace some::valid::ns

@@ -12,7 +12,7 @@
 namespace test::fixtures::enums {
 class SomeStruct;
 class MyStruct;
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -24,5 +24,5 @@ enum class MyEnum3;
 enum class MyEnum4;
 enum class MyBitmaskEnum1;
 enum class MyBitmaskEnum2;
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 // END forward_declare_enums

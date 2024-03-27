@@ -1333,4 +1333,4 @@ extern template uint32_t NonCopyableUnion::serializedSize<>(apache::thrift::Comp
 extern template uint32_t NonCopyableUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

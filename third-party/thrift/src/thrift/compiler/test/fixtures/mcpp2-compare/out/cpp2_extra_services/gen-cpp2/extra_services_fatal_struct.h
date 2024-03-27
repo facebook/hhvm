@@ -245,4 +245,4 @@ class containerStruct2_struct_traits {
 } // __fbthrift_refl
 
 THRIFT_REGISTER_STRUCT_TRAITS(containerStruct2, __fbthrift_refl::containerStruct2_struct_traits);
-} // extra::svc
+} // namespace extra::svc

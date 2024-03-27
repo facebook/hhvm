@@ -31,7 +31,7 @@ class FB303ServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 
 namespace apache::thrift {
 template <>
@@ -68,7 +68,7 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
 
 namespace test::fixtures::basic {
 using FB303ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<FB303Service> instead")]] = ::apache::thrift::ServiceHandler<FB303Service>;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 namespace test::fixtures::basic {
 class FB303ServiceSvNull : public ::apache::thrift::ServiceHandler<FB303Service> {
  public:
@@ -106,4 +106,4 @@ class FB303ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
   ~FB303ServiceAsyncProcessor() override {}
 };
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

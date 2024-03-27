@@ -86,4 +86,4 @@ void RederivedServiceAsyncProcessor::throw_wrapped_get_seven(apache::thrift::Res
 }
 
 
-} // py3::simple
+} // namespace py3::simple

@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleService.tcc"
 
 namespace py3::simple {
-} // py3::simple
+} // namespace py3::simple

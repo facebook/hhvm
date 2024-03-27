@@ -106,7 +106,7 @@ template uint32_t Fiery::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Fiery::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -207,7 +207,7 @@ template uint32_t Serious::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t Serious::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -314,7 +314,7 @@ template uint32_t ComplexFieldNames::serializedSize<>(apache::thrift::CompactPro
 template uint32_t ComplexFieldNames::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -421,7 +421,7 @@ template uint32_t CustomFieldNames::serializedSize<>(apache::thrift::CompactProt
 template uint32_t CustomFieldNames::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -529,7 +529,7 @@ template uint32_t ExceptionWithPrimitiveField::serializedSize<>(apache::thrift::
 template uint32_t ExceptionWithPrimitiveField::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -637,7 +637,7 @@ template uint32_t ExceptionWithStructuredAnnotation::serializedSize<>(apache::th
 template uint32_t ExceptionWithStructuredAnnotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -721,11 +721,11 @@ template uint32_t Banal::serializedSize<>(apache::thrift::CompactProtocolWriter 
 template uint32_t Banal::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

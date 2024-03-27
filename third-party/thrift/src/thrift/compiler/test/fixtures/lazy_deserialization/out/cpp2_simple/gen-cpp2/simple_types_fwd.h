@@ -17,5 +17,5 @@ class LazyCppRef;
 class IndexedFoo;
 class OptionalIndexedFoo;
 class Empty;
-} // apache::thrift::test
+} // namespace apache::thrift::test
 // END forward_declare

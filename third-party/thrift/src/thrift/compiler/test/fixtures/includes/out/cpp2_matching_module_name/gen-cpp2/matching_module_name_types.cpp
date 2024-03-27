@@ -102,11 +102,11 @@ static_assert(
         ::matching_module_name::OtherStruct>,
     "inconsistent use of json option");
 
-} // matching_module_name
+} // namespace matching_module_name
 
 namespace matching_module_name { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // matching_module_name
+}} // namespace matching_module_name
 namespace apache::thrift::detail::annotation {
 }

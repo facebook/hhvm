@@ -87,4 +87,4 @@ struct module_constants {
 
 };
 
-} // some::valid::ns
+} // namespace some::valid::ns

@@ -36,4 +36,4 @@ struct module_constants {
 
 };
 
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

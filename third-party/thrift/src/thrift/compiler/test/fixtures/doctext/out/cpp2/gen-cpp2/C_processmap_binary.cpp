@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/doctext/gen-cpp2/C.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

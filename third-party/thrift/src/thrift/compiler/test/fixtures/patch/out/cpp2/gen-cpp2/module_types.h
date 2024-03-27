@@ -1370,7 +1370,7 @@ enum class MyEnum {
 
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace std {
 template<> struct hash<::test::fixtures::patch::MyEnum> :
@@ -1466,7 +1466,7 @@ class RefFieldsField7PatchStruct;
 class RefFieldsFieldPatchStruct;
 class RefFieldsEnsureStruct;
 class RefFieldsSafePatch;
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -20968,7 +20968,7 @@ unsigned long RefFieldsSafePatch::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch
 
 namespace apache { namespace thrift {
 

@@ -24,7 +24,7 @@ namespace apache { namespace thrift {
 
 namespace extra::svc {
 class ExtraService;
-} // extra::svc
+} // namespace extra::svc
 namespace apache::thrift {
 
 template <>
@@ -821,4 +821,4 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 namespace extra::svc {
 using ExtraServiceAsyncClient [[deprecated("Use apache::thrift::Client<ExtraService> instead")]] = ::apache::thrift::Client<ExtraService>;
-} // extra::svc
+} // namespace extra::svc

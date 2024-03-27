@@ -15,5 +15,5 @@ class CustomFieldNames;
 class ExceptionWithPrimitiveField;
 class ExceptionWithStructuredAnnotation;
 class Banal;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

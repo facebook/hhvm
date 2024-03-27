@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/NullService.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

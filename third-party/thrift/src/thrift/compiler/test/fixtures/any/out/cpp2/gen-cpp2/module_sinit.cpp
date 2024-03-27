@@ -25,4 +25,4 @@ struct StaticInit {
 StaticInit staticInit;
 }
 
-} // facebook::thrift::compiler::test::fixtures::any
+} // namespace facebook::thrift::compiler::test::fixtures::any

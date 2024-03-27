@@ -69,7 +69,7 @@ enum class MyBigEnum {
 
 
 
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict
 
 namespace std {
 template<> struct hash<::test::fixtures::enumstrict::EmptyEnum> :
@@ -154,7 +154,7 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
 // BEGIN forward_declare
 namespace test::fixtures::enumstrict {
 class MyStruct;
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -375,4 +375,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict

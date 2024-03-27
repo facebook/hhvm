@@ -226,7 +226,7 @@ static_assert(
         ::test::fixtures::python_capi::MyDataItem>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -327,7 +327,7 @@ template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -402,7 +402,7 @@ template uint32_t TransitiveDoubler::serializedSize<>(apache::thrift::CompactPro
 template uint32_t TransitiveDoubler::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -512,7 +512,7 @@ template uint32_t DoubledPair::serializedSizeZC<>(apache::thrift::CompactProtoco
 
 
 } // namespace detail
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -634,7 +634,7 @@ template uint32_t StringPair::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t StringPair::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -709,7 +709,7 @@ template uint32_t VapidStruct::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t VapidStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -965,7 +965,7 @@ static_assert(
         ::test::fixtures::python_capi::VapidStruct>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -1123,7 +1123,7 @@ template uint32_t AdaptedFields::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t AdaptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -1333,7 +1333,7 @@ template uint32_t ListStruct::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t ListStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -1517,7 +1517,7 @@ template uint32_t SetStruct::serializedSize<>(apache::thrift::CompactProtocolWri
 template uint32_t SetStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -1769,7 +1769,7 @@ static_assert(
         ::std::map<::std::string, ::test::fixtures::python_capi::PrimitiveStruct>>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2009,7 +2009,7 @@ static_assert(
         ::test::fixtures::python_capi::SerializedUnion>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2198,7 +2198,7 @@ static_assert(
         ::test::fixtures::python_capi::PrimitiveStruct>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2388,7 +2388,7 @@ static_assert(
         ::test::fixtures::python_capi::MyStructFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2475,7 +2475,7 @@ template uint32_t MyStructField4PatchStruct::serializedSize<>(apache::thrift::Co
 template uint32_t MyStructField4PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2622,7 +2622,7 @@ template uint32_t MyStructField6PatchStruct::serializedSize<>(apache::thrift::Co
 template uint32_t MyStructField6PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2826,7 +2826,7 @@ static_assert(
         ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -2973,7 +2973,7 @@ template uint32_t MyStructField8PatchStruct::serializedSize<>(apache::thrift::Co
 template uint32_t MyStructField8PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3215,7 +3215,7 @@ static_assert(
         ::test::fixtures::python_capi::MyStructField8Patch>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3397,7 +3397,7 @@ static_assert(
         ::test::fixtures::python_capi::MyDataItem>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3513,7 +3513,7 @@ template uint32_t MyStructSafePatch::serializedSize<>(apache::thrift::CompactPro
 template uint32_t MyStructSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3703,7 +3703,7 @@ static_assert(
         ::test::fixtures::python_capi::MyDataItemFieldPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3819,7 +3819,7 @@ static_assert(
         ::apache::thrift::op::StringPatch>,
     "inconsistent use of json option");
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -3920,7 +3920,7 @@ template uint32_t MyDataItemEnsureStruct::serializedSize<>(apache::thrift::Compa
 template uint32_t MyDataItemEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace apache {
 namespace thrift {
@@ -4036,7 +4036,7 @@ template uint32_t MyDataItemSafePatch::serializedSize<>(apache::thrift::CompactP
 template uint32_t MyDataItemSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 
 namespace test::fixtures::python_capi { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
@@ -4060,6 +4060,6 @@ namespace test::fixtures::python_capi { namespace {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::python_capi::MyDataItemPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::python_capi::MyDataItemFieldPatchStruct>();
 }
-}} // test::fixtures::python_capi
+}} // namespace test::fixtures::python_capi
 namespace apache::thrift::detail::annotation {
 }

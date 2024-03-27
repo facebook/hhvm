@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace test::fixtures::basic {
 class FooService;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 namespace apache::thrift {
 
 template <>
@@ -139,4 +139,4 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
 
 namespace test::fixtures::basic {
 using FooServiceAsyncClient [[deprecated("Use apache::thrift::Client<FooService> instead")]] = ::apache::thrift::Client<FooService>;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

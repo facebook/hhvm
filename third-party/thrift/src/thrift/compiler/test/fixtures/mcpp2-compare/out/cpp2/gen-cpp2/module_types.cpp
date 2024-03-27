@@ -149,7 +149,7 @@ template uint32_t Empty::serializedSize<>(apache::thrift::SimpleJSONProtocolWrit
 template uint32_t Empty::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -227,7 +227,7 @@ template uint32_t ASimpleStruct::serializedSize<>(apache::thrift::SimpleJSONProt
 template uint32_t ASimpleStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -309,7 +309,7 @@ template uint32_t ASimpleStructNoexcept::serializedSize<>(apache::thrift::Simple
 template uint32_t ASimpleStructNoexcept::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -519,7 +519,7 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolW
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -657,7 +657,7 @@ template uint32_t SimpleUnion::serializedSize<>(apache::thrift::SimpleJSONProtoc
 template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1109,7 +1109,7 @@ static_assert(
         ::some::valid::ns::MyStruct>,
     "inconsistent use of json option");
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1451,7 +1451,7 @@ static_assert(
         ::some::valid::ns::unionTypeDef>,
     "inconsistent use of json option");
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -1565,7 +1565,7 @@ template uint32_t AnotherException::serializedSize<>(apache::thrift::SimpleJSONP
 template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2166,7 +2166,7 @@ static_assert(
         ::some::valid::ns::unionTypeDef>,
     "inconsistent use of json option");
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2333,7 +2333,7 @@ static_assert(
         ::some::valid::ns::AStruct>,
     "inconsistent use of json option");
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2790,7 +2790,7 @@ static_assert(
         ::some::valid::ns::containerStruct>,
     "inconsistent use of json option");
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -2926,7 +2926,7 @@ template uint32_t ComplexContainerStruct::serializedSize<>(apache::thrift::Simpl
 template uint32_t ComplexContainerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -3013,7 +3013,7 @@ template uint32_t FloatStruct::serializedSize<>(apache::thrift::SimpleJSONProtoc
 template uint32_t FloatStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -3148,7 +3148,7 @@ template uint32_t FloatUnion::serializedSize<>(apache::thrift::SimpleJSONProtoco
 template uint32_t FloatUnion::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {
@@ -3227,7 +3227,7 @@ template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSize<>(apache::thr
 template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace some::valid::ns { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
@@ -3237,6 +3237,6 @@ namespace some::valid::ns { namespace {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 20, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
 }
-}} // some::valid::ns
+}} // namespace some::valid::ns
 namespace apache::thrift::detail::annotation {
 }

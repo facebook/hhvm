@@ -22,4 +22,4 @@ namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 } // __fbthrift_refl
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

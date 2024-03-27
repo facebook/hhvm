@@ -12,7 +12,7 @@
 namespace py3::simple {
 typedef apache::thrift::ThriftPresult<false> RederivedService_get_seven_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> RederivedService_get_seven_presult;
-} // py3::simple
+} // namespace py3::simple
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::py3::simple::RederivedService>::get_sevenT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

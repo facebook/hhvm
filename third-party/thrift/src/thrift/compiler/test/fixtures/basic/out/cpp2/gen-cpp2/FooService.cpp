@@ -190,4 +190,4 @@ apache::thrift::ServiceRequestInfoMap FooServiceServiceInfoHolder::staticRequest
 
   return requestInfoMap;
 }
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

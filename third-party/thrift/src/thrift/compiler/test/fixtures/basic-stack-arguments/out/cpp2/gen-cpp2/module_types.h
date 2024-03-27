@@ -39,7 +39,7 @@ enum class MyEnum {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::MyEnum> :
@@ -78,7 +78,7 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
 // BEGIN forward_declare
 namespace cpp2 {
 class MyStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -304,4 +304,4 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

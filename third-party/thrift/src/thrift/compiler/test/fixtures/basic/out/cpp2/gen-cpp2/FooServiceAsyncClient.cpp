@@ -12,7 +12,7 @@
 namespace test::fixtures::basic {
 typedef apache::thrift::ThriftPresult<false> FooService_simple_rpc_pargs;
 typedef apache::thrift::ThriftPresult<true> FooService_simple_rpc_presult;
-} // test::fixtures::basic
+} // namespace test::fixtures::basic
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::test::fixtures::basic::FooService>::simple_rpcT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

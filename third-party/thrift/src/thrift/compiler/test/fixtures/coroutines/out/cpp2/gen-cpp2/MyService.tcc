@@ -389,4 +389,4 @@ void MyServiceAsyncProcessor::throw_wrapped_putDataById(apache::thrift::Response
 }
 
 
-} // cpp2
+} // namespace cpp2

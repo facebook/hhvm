@@ -160,4 +160,4 @@ void GoodServiceAsyncProcessor::throw_wrapped_BadInteraction_foo(apache::thrift:
   }
 }
 
-} // cpp2
+} // namespace cpp2

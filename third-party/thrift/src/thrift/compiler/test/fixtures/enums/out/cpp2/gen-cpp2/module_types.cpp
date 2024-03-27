@@ -252,7 +252,7 @@ template uint32_t SomeStruct::serializedSize<>(apache::thrift::CompactProtocolWr
 template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 
 namespace apache {
 namespace thrift {
@@ -346,11 +346,11 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::enums
+} // namespace test::fixtures::enums
 
 namespace test::fixtures::enums { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::enums
+}} // namespace test::fixtures::enums
 namespace apache::thrift::detail::annotation {
 }

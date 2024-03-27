@@ -442,4 +442,4 @@ apache::thrift::ServiceRequestInfoMap FooBarBazServiceServiceInfoHolder::staticR
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

@@ -314,4 +314,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 
   return requestInfoMap;
 }
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

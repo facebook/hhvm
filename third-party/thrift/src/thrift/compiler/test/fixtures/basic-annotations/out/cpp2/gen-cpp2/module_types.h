@@ -90,7 +90,7 @@ enum class YourEnum {
 
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace std {
 template<> struct hash<::cpp2::YourEnum> :
@@ -139,7 +139,7 @@ namespace detail {
 class YourStruct;
 } // namespace detail
 class SecretStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1365,7 +1365,7 @@ unsigned long SecretStruct::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache { namespace thrift {
 

@@ -13,4 +13,4 @@
 namespace a::different::ns {
 
 
-} // a::different::ns
+} // namespace a::different::ns

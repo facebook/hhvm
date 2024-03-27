@@ -14,7 +14,7 @@ typedef apache::thrift::ThriftPresult<false> MyServicePrioParent_ping_pargs;
 typedef apache::thrift::ThriftPresult<true> MyServicePrioParent_ping_presult;
 typedef apache::thrift::ThriftPresult<false> MyServicePrioParent_pong_pargs;
 typedef apache::thrift::ThriftPresult<true> MyServicePrioParent_pong_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::MyServicePrioParent>::pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

@@ -239,7 +239,7 @@ enum class MyEnum {
 
 
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::terse_write::deprecated::MyEnum> :
@@ -280,7 +280,7 @@ namespace facebook::thrift::test::terse_write::deprecated {
 class MyStruct;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -2868,4 +2868,4 @@ unsigned long FieldLevelTerseStruct::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::terse_write::deprecated

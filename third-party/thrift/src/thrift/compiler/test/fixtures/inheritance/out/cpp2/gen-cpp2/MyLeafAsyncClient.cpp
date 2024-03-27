@@ -12,7 +12,7 @@
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyLeaf_do_leaf_pargs;
 typedef apache::thrift::ThriftPresult<true> MyLeaf_do_leaf_presult;
-} // cpp2
+} // namespace cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::MyLeaf>::do_leafT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
 

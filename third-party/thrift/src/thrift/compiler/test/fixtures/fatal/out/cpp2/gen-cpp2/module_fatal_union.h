@@ -2237,4 +2237,4 @@ FATAL_REGISTER_VARIANT_TRAITS(
       static_cast<::apache::thrift::legacy_type_id_t>(10841541077214060908ull)
   >
 );
-} // test_cpp2::cpp_reflection
+} // namespace test_cpp2::cpp_reflection

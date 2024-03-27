@@ -18,4 +18,4 @@ namespace test::fixtures::basic-structured-annotations {
   return *instance;
 }
 
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations

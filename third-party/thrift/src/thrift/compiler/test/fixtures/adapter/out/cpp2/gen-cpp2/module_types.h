@@ -494,7 +494,7 @@ enum class ThriftAdaptedEnum {
 
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace std {
 template<> struct hash<::facebook::thrift::test::Color> :
@@ -601,7 +601,7 @@ class TransitiveAdapted;
 class CountingStruct;
 class Person;
 class Person2;
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -8286,7 +8286,7 @@ unsigned long Person2::read(Protocol_* iprot) {
 }
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace apache { namespace thrift {
 

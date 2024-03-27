@@ -10,5 +10,5 @@
 namespace cpp2 {
 class Foo;
 class Foo2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

@@ -30,7 +30,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(MyInt);
 // BEGIN forward_declare
 namespace test::namespace_from_package::module {
 class Foo;
-} // test::namespace_from_package::module
+} // namespace test::namespace_from_package::module
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -197,4 +197,4 @@ unsigned long Foo::read(Protocol_* iprot) {
 }
 
 
-} // test::namespace_from_package::module
+} // namespace test::namespace_from_package::module

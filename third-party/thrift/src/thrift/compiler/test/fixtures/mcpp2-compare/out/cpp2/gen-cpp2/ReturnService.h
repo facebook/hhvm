@@ -33,7 +33,7 @@ class ReturnServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache::thrift {
 template <>
@@ -212,7 +212,7 @@ class ServiceHandler<::some::valid::ns::ReturnService> : public apache::thrift::
 
 namespace some::valid::ns {
 using ReturnServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ReturnService> instead")]] = ::apache::thrift::ServiceHandler<ReturnService>;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace some::valid::ns {
 class ReturnServiceSvNull : public ::apache::thrift::ServiceHandler<ReturnService> {
  public:
@@ -424,4 +424,4 @@ class ReturnServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProce
   ~ReturnServiceAsyncProcessor() override {}
 };
 
-} // some::valid::ns
+} // namespace some::valid::ns

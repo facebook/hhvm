@@ -19,11 +19,11 @@ class structured_annotation_nested;
 class MyStruct;
 class MyException;
 class MyUnion;
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace test::fixtures::basic-structured-annotations {
 enum class MyEnum;
-} // test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 // END forward_declare_enums

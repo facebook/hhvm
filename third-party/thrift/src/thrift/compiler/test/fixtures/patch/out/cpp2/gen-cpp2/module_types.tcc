@@ -16808,4 +16808,4 @@ extern template uint32_t RefFieldsSafePatch::serializedSize<>(apache::thrift::Co
 extern template uint32_t RefFieldsSafePatch::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::patch
+} // namespace test::fixtures::patch

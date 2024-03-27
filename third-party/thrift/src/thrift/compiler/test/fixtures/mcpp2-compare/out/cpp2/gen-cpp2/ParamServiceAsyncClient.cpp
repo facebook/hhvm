@@ -68,7 +68,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<4, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion*>> ParamService_union_ret_i32_i32_param_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::std::string*>> ParamService_listunion_string_param_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>*>> ParamService_listunion_string_param_presult;
-} // some::valid::ns
+} // namespace some::valid::ns
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1) {
 

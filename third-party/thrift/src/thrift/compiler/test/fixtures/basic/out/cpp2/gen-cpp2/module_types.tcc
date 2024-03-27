@@ -989,4 +989,4 @@ extern template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::Comp
 extern template uint32_t UnionToBeRenamed::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

@@ -729,4 +729,4 @@ void MyServiceAsyncProcessor::throw_wrapped_rpc_skipped_codegen(apache::thrift::
 }
 
 
-} // test::fixtures::basic
+} // namespace test::fixtures::basic

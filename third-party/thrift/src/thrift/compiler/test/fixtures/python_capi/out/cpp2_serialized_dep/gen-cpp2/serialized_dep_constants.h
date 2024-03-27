@@ -16,4 +16,4 @@ struct serialized_dep_constants {
 
 };
 
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi

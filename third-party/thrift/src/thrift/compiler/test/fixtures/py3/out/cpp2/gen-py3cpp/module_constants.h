@@ -75,4 +75,4 @@ struct module_constants {
 
 };
 
-} // py3::simple
+} // namespace py3::simple

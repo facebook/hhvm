@@ -25,7 +25,7 @@ class ComplexContainerStruct;
 class FloatStruct;
 class FloatUnion;
 class AllRequiredNoExceptMoveCtrStruct;
-} // some::valid::ns
+} // namespace some::valid::ns
 // END forward_declare
 
 // BEGIN forward_declare_enums
@@ -34,5 +34,5 @@ enum class MyEnumA;
 enum class AnnotatedEnum : ::std::uint32_t;
 enum class AnnotatedEnum2 : ::std::int16_t;
 enum class MyEnumB;
-} // some::valid::ns
+} // namespace some::valid::ns
 // END forward_declare_enums

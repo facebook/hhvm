@@ -313,4 +313,4 @@ const GoodServiceAsyncProcessor::InteractionConstructorMap GoodServiceAsyncProce
 std::unique_ptr<apache::thrift::Tile> GoodServiceAsyncProcessor::createInteractionImpl(const std::string& name) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
-}} // cpp2
+}} // namespace cpp2

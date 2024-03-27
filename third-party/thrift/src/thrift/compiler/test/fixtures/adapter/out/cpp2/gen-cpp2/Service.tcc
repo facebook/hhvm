@@ -92,4 +92,4 @@ void ServiceAsyncProcessor::throw_wrapped_func(apache::thrift::ResponseChannelRe
 }
 
 
-} // facebook::thrift::test
+} // namespace facebook::thrift::test

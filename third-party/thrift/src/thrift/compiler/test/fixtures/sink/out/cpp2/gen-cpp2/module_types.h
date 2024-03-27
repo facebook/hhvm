@@ -66,7 +66,7 @@ class CompatibleWithKeywordSink;
 class InitialException;
 class SinkException1;
 class SinkException2;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -1193,4 +1193,4 @@ unsigned long SinkException2::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

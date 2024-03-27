@@ -37,12 +37,12 @@ class MyDataItemPatchStruct;
 class MyDataItemFieldPatchStruct;
 class MyDataItemEnsureStruct;
 class MyDataItemSafePatch;
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 // END forward_declare
 
 // BEGIN forward_declare_enums
 namespace test::fixtures::python_capi {
 enum class MyEnum;
 enum class NormalDecentEnum;
-} // test::fixtures::python_capi
+} // namespace test::fixtures::python_capi
 // END forward_declare_enums

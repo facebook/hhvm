@@ -30,7 +30,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
 // BEGIN forward_declare
 namespace cpp2 {
 class ReflectionStruct;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -196,4 +196,4 @@ unsigned long ReflectionStruct::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

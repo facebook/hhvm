@@ -20,7 +20,7 @@ namespace apache { namespace thrift {
 
 namespace some::valid::ns {
 class EmptyService;
-} // some::valid::ns
+} // namespace some::valid::ns
 namespace apache::thrift {
 
 template <>
@@ -39,4 +39,4 @@ class Client<::some::valid::ns::EmptyService> : public apache::thrift::Generated
 
 namespace some::valid::ns {
 using EmptyServiceAsyncClient [[deprecated("Use apache::thrift::Client<EmptyService> instead")]] = ::apache::thrift::Client<EmptyService>;
-} // some::valid::ns
+} // namespace some::valid::ns

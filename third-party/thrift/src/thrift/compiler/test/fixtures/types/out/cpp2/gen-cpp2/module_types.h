@@ -393,7 +393,7 @@ enum class MyForwardRefEnum {
 
 
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types
 
 namespace std {
 template<> struct hash<::apache::thrift::fixtures::types::has_bitwise_ops> :
@@ -518,7 +518,7 @@ class AllocatorAware;
 class AllocatorAware2;
 class TypedefStruct;
 class StructWithDoubleUnderscores;
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -7314,4 +7314,4 @@ unsigned long StructWithDoubleUnderscores::read(Protocol_* iprot) {
 }
 
 
-} // apache::thrift::fixtures::types
+} // namespace apache::thrift::fixtures::types

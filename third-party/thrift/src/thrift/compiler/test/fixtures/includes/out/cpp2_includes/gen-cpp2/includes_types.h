@@ -36,7 +36,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(MyTransitiveField);
 // BEGIN forward_declare
 namespace cpp2 {
 class Included;
-} // cpp2
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -258,4 +258,4 @@ unsigned long Included::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+} // namespace cpp2

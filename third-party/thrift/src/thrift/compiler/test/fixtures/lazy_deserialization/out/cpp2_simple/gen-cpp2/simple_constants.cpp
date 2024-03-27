@@ -14,4 +14,4 @@ namespace apache::thrift::test {
 
 
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

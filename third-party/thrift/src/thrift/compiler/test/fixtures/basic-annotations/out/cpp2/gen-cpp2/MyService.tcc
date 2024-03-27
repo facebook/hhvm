@@ -524,4 +524,4 @@ void MyServiceAsyncProcessor::throw_wrapped_cppDoNothing(apache::thrift::Respons
 }
 
 
-} // cpp2
+} // namespace cpp2

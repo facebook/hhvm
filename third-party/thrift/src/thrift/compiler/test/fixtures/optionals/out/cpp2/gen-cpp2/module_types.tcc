@@ -1032,4 +1032,4 @@ extern template uint32_t Person::serializedSize<>(apache::thrift::CompactProtoco
 extern template uint32_t Person::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2

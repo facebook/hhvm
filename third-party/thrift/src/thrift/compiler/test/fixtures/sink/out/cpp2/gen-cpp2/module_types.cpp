@@ -107,7 +107,7 @@ template uint32_t InitialResponse::serializedSize<>(apache::thrift::CompactProto
 template uint32_t InitialResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -204,7 +204,7 @@ template uint32_t FinalResponse::serializedSize<>(apache::thrift::CompactProtoco
 template uint32_t FinalResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -301,7 +301,7 @@ template uint32_t SinkPayload::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t SinkPayload::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -398,7 +398,7 @@ template uint32_t CompatibleWithKeywordSink::serializedSize<>(apache::thrift::Co
 template uint32_t CompatibleWithKeywordSink::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -495,7 +495,7 @@ template uint32_t InitialException::serializedSize<>(apache::thrift::CompactProt
 template uint32_t InitialException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -592,7 +592,7 @@ template uint32_t SinkException1::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t SinkException1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -690,11 +690,11 @@ template uint32_t SinkException2::serializedSize<>(apache::thrift::CompactProtoc
 template uint32_t SinkException2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace cpp2
 
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}} // namespace cpp2
 namespace apache::thrift::detail::annotation {
 }

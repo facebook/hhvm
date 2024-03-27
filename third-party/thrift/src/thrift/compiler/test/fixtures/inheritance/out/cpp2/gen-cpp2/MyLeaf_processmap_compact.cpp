@@ -9,4 +9,4 @@
 #include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/MyLeaf.tcc"
 
 namespace cpp2 {
-} // cpp2
+} // namespace cpp2

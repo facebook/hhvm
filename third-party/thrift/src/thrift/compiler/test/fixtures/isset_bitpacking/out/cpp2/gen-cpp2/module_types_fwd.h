@@ -12,5 +12,5 @@ class Default;
 class NonAtomic;
 class Atomic;
 class AtomicFoo;
-} // cpp2
+} // namespace cpp2
 // END forward_declare

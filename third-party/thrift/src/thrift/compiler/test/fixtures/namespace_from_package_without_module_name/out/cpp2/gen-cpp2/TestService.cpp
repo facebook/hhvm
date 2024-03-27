@@ -188,4 +188,4 @@ apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticReques
 
   return requestInfoMap;
 }
-} // test::namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

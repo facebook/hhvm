@@ -140,11 +140,11 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // test::fixtures::enumstrict
+} // namespace test::fixtures::enumstrict
 
 namespace test::fixtures::enumstrict { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // test::fixtures::enumstrict
+}} // namespace test::fixtures::enumstrict
 namespace apache::thrift::detail::annotation {
 }

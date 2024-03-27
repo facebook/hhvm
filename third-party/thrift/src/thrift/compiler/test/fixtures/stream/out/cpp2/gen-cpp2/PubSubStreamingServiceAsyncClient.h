@@ -19,7 +19,7 @@ namespace apache { namespace thrift {
 
 namespace cpp2 {
 class PubSubStreamingService;
-} // cpp2
+} // namespace cpp2
 namespace apache::thrift {
 
 template <>
@@ -920,4 +920,4 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
 
 namespace cpp2 {
 using PubSubStreamingServiceAsyncClient [[deprecated("Use apache::thrift::Client<PubSubStreamingService> instead")]] = ::apache::thrift::Client<PubSubStreamingService>;
-} // cpp2
+} // namespace cpp2

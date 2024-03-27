@@ -824,4 +824,4 @@ apache::thrift::ServiceRequestInfoMap SinkServiceServiceInfoHolder::staticReques
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

@@ -18,7 +18,7 @@ namespace apache { namespace thrift {
 
 namespace py3::simple {
 class SimpleService;
-} // py3::simple
+} // namespace py3::simple
 namespace apache::thrift {
 
 template <>
@@ -4233,4 +4233,4 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
 
 namespace py3::simple {
 using SimpleServiceAsyncClient [[deprecated("Use apache::thrift::Client<SimpleService> instead")]] = ::apache::thrift::Client<SimpleService>;
-} // py3::simple
+} // namespace py3::simple

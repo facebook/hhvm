@@ -16,4 +16,4 @@ struct include1_constants {
 
 };
 
-} // some::ns
+} // namespace some::ns

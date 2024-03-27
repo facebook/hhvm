@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // apache::thrift::test
+} // namespace apache::thrift::test

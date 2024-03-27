@@ -568,4 +568,4 @@ apache::thrift::ServiceRequestInfoMap RaiserServiceInfoHolder::staticRequestInfo
 
   return requestInfoMap;
 }
-} // cpp2
+} // namespace cpp2

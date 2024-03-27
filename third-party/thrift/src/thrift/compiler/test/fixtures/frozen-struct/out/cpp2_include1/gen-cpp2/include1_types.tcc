@@ -186,4 +186,4 @@ extern template uint32_t IncludedA::serializedSize<>(apache::thrift::CompactProt
 extern template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // some::ns
+} // namespace some::ns

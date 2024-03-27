@@ -16,4 +16,4 @@ struct module_constants {
 
 };
 
-} // some::ns
+} // namespace some::ns

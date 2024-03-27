@@ -16,4 +16,4 @@ struct extra_services_constants {
 
 };
 
-} // extra::svc
+} // namespace extra::svc

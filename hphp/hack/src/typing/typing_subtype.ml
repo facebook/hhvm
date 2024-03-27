@@ -984,14 +984,14 @@ end = struct
   and simplify_subtype_locl_super
       ~subtype_env
       ~this_ty
-      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-      ~rhs:{ super_supportdyn; super_like; ty_super = lty_super }
+      ~lhs:{ sub_supportdyn; ty_sub }
+      ~rhs:{ super_supportdyn; super_like; ty_super }
       env : env * TL.subtype_prop =
     let fail =
       Subtype_env.fail
         subtype_env
-        ~ty_sub:(LoclType lty_sub)
-        ~ty_super:(LoclType lty_super)
+        ~ty_sub:(LoclType ty_sub)
+        ~ty_super:(LoclType ty_super)
     in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
@@ -1001,19 +1001,19 @@ end = struct
         ~sub_supportdyn
         ~coerce:subtype_env.Subtype_env.coerce
         env
-        (LoclType lty_sub)
-        (LoclType lty_super)
+        (LoclType ty_sub)
+        (LoclType ty_super)
     in
     let default_subtype_help env =
       default_subtype
         ~subtype_env
         ~this_ty
         ~fail
-        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-        ~rhs:{ super_supportdyn; super_like; ty_super = lty_super }
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     in
-    match deref lty_super with
+    match deref ty_super with
     | (r_super, Tvar var_super) ->
       Subtype_var_r.simplify
         ~subtype_env
@@ -1021,10 +1021,10 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, var_super)
         env
-    | (_, Tintersection _) when is_union lty_sub -> default_subtype_help env
+    | (_, Tintersection _) when is_union ty_sub -> default_subtype_help env
     | (_, Tintersection tyl) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
@@ -1035,7 +1035,7 @@ end = struct
           &&& simplify_subtype
                 ~subtype_env
                 ~this_ty
-                ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+                ~lhs:{ sub_supportdyn; ty_sub }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
     (* Empty union encodes the bottom type nothing *)
     | (_, Tunion []) -> default_subtype_help env
@@ -1044,7 +1044,7 @@ end = struct
       simplify_subtype
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+        ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super = ty_super' }
         env
     | (r, Tunion (_ :: _ as tyl_super)) ->
@@ -1054,7 +1054,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r, tyl_super)
         env
     | (r_super, Toption arg_ty_super) ->
@@ -1070,7 +1070,7 @@ end = struct
           ~this_ty
           ~super_like
           ~fail
-          lty_sub
+          ty_sub
           (r_super, ety)
           env
     | (r_super, Tdependent (d_sup, bound_sup)) ->
@@ -1081,7 +1081,7 @@ end = struct
         ~sub_supportdyn
         ~this_ty
         ~super_like
-        lty_sub
+        ty_sub
         (r_super, (d_sup, bound_sup))
         env
     | (_, Taccess _) -> invalid_env env
@@ -1094,7 +1094,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, (name_super, tyargs_super))
         env
     | (r_nonnull, Tnonnull) ->
@@ -1104,7 +1104,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         r_nonnull
         env
     | (r_dynamic, Tdynamic)
@@ -1117,10 +1117,10 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         r_dynamic
         env
-    | (_, Tdynamic) when is_dynamic lty_sub -> valid env
+    | (_, Tdynamic) when is_dynamic ty_sub -> valid env
     | (_, Tdynamic) -> default_subtype_help env
     | (r_prim, Tprim prim_ty) ->
       Subtype_prim_r.simplify
@@ -1129,17 +1129,17 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_prim, prim_ty)
         env
     | (_, Tany _) ->
-      (match deref lty_sub with
+      (match deref ty_sub with
       | (_, Tany _) -> valid env
       | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype_help env
       | _ when subtype_env.Subtype_env.no_top_bottom -> default env
       | _ -> valid env)
     | (r_super, Tfun ft_super) ->
-      (match deref lty_sub with
+      (match deref ty_sub with
       | (r_sub, Tfun ft_sub) ->
         Subtype_fun.simplify_subtype_funs
           ~subtype_env
@@ -1153,7 +1153,7 @@ end = struct
           env
       | _ -> default_subtype_help env)
     | (_, Ttuple tyl_super) ->
-      (match get_node lty_sub with
+      (match get_node ty_sub with
       | Ttuple tyl_sub
         when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
         wfold_left2
@@ -1177,7 +1177,7 @@ end = struct
             s_unknown_value = shape_kind_super;
             s_fields = fdm_super;
           } ) ->
-      let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty_sub in
+      let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env ty_sub in
       let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
       (match deref lty with
       | ( r_sub,
@@ -1207,7 +1207,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, (lty_key_sup, lty_val_sup))
         env
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
@@ -1219,7 +1219,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_supportdyn, (tyarg_super, bound_super))
         env
     | (r_super, Tnewtype (name_super, tyl_super, bound_super)) ->
@@ -1229,11 +1229,11 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, (name_super, tyl_super, bound_super))
         env
     | (_, Tunapplied_alias n_sup) ->
-      (match deref lty_sub with
+      (match deref ty_sub with
       | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
       | _ -> default_subtype_help env)
     | (r_super, Tneg (Neg_prim tprim_super)) ->
@@ -1243,7 +1243,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, tprim_super)
         env
     | (reason_super, Tneg (Neg_predicate predicate)) ->
@@ -1252,7 +1252,7 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ reason_super; predicate; ty_super_opt = None; super_like }
           env)
     | (r_super, Tneg (Neg_class cls_id_super)) ->
@@ -1262,7 +1262,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, cls_id_super)
         env
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
@@ -1276,13 +1276,13 @@ end = struct
                   * only if we know for sure that we can discharge it on
                   * the spot; e.g., when ety_sub is a class-ish. This
                   * limits the information lost by skipping refinements. *)
-              TUtils.is_class lty_sub) ->
+              TUtils.is_class ty_sub) ->
       Subtype_class_r.simplify_with_refinements
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
         ~super_like
-        lty_sub
+        ty_sub
         (r_super, (x_super, cr_super, tyl_super))
         env
     | (r_super, Tclass ((pos_super, class_name), exact_super, tyl_super)) ->
@@ -1292,7 +1292,7 @@ end = struct
         ~this_ty
         ~super_like
         ~fail
-        lty_sub
+        ty_sub
         (r_super, ((pos_super, class_name), exact_super, tyl_super))
         env
 

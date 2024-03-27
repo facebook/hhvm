@@ -1504,116 +1504,77 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super }
     end
-    | (r_super, Tclass ((pos_super, class_name), exact_super, tyl_super)) ->
-      Subtype_class_r.simplify
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        ~fail
-        ty_sub
-        (r_super, ((pos_super, class_name), exact_super, tyl_super))
-        env
-end
-
-and Subtype_class_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    locl_ty ->
-    locl_phase Reason.t_ * ((Pos_or_decl.t * string) * exact * locl_ty list) ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      ~fail
-      lty_sub
-      (r_super, ((pos_super, class_nm_super), exact_super, tyargs_super))
-      env =
-    let lty_super =
-      mk
-        ( r_super,
-          Tclass ((pos_super, class_nm_super), exact_super, tyargs_super) )
-    in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
-          env)
-    in
-    match deref lty_sub with
-    | (_, Tnewtype (enum_name, _, _))
-      when String.equal enum_name class_nm_super
-           && is_nonexact exact_super
-           && Env.is_enum env enum_name ->
-      valid env
-    | (_, Tnewtype (cid, _, _))
-      when String.equal class_nm_super SN.Classes.cHH_BuiltinEnum
-           && Env.is_enum env cid ->
-      (match tyargs_super with
-      | [lty_super'] ->
-        env
-        |> Subtype.(
-             simplify_subtype
+    | ( _r_super,
+        Tclass ((_pos_super, class_nm_super), exact_super, tyargs_super) ) ->
+    begin
+      match deref ty_sub with
+      | (_, Tnewtype (enum_name, _, _))
+        when String.equal enum_name class_nm_super
+             && is_nonexact exact_super
+             && Env.is_enum env enum_name ->
+        valid env
+      | (_, Tnewtype (cid, _, _))
+        when String.equal class_nm_super SN.Classes.cHH_BuiltinEnum
+             && Env.is_enum env cid ->
+        (match tyargs_super with
+        | [lty_super'] ->
+          env
+          |> simplify_subtype
                ~subtype_env
                ~this_ty
-               ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+               ~lhs:{ sub_supportdyn; ty_sub }
                ~rhs:
                  {
                    super_like = false;
                    super_supportdyn = false;
                    ty_super = lty_super';
-                 })
-      | _ -> default_subtype_help env)
-    | (_, Tnewtype (enum_name, _, _))
-      when String.equal enum_name class_nm_super && Env.is_enum env enum_name ->
-      valid env
-    | (_, Tnewtype (enum_name, _, _))
-      when Env.is_enum env enum_name
-           && String.equal class_nm_super SN.Classes.cXHPChild ->
-      valid env
-    | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
-      when String.equal class_nm_super SN.Classes.cXHPChild
-           && is_nonexact exact_super ->
-      valid env
-    | (_, Tprim Nast.Tstring)
-      when String.equal class_nm_super SN.Classes.cStringish
-           && is_nonexact exact_super ->
-      valid env
-    (* Match what's done in unify for non-strict code *)
-    | (_, Tclass _) ->
-      Subtype_class.simplify_subtype_classes
-        ~fail
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        lty_sub
-        lty_super
-        env
-    | (_r_sub, Tvec_or_dict (_, tv)) ->
-      (match (exact_super, tyargs_super) with
-      | (Nonexact _, [tv_super])
-        when String.equal class_nm_super SN.Collections.cTraversable
-             || String.equal class_nm_super SN.Collections.cContainer ->
-        (* vec<tv> <: Traversable<tv_super>
-         * iff tv <: tv_super
-         * Likewise for vec<tv> <: Container<tv_super>
-         *          and map<_,tv> <: Traversable<tv_super>
-         *          and map<_,tv> <: Container<tv_super>
-         *)
-        Subtype.(
+                 }
+        | _ ->
+          default_subtype
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
+            env)
+      | (_, Tnewtype (enum_name, _, _))
+        when String.equal enum_name class_nm_super && Env.is_enum env enum_name
+        ->
+        valid env
+      | (_, Tnewtype (enum_name, _, _))
+        when Env.is_enum env enum_name
+             && String.equal class_nm_super SN.Classes.cXHPChild ->
+        valid env
+      | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
+        when String.equal class_nm_super SN.Classes.cXHPChild
+             && is_nonexact exact_super ->
+        valid env
+      | (_, Tprim Nast.Tstring)
+        when String.equal class_nm_super SN.Classes.cStringish
+             && is_nonexact exact_super ->
+        valid env
+      (* Match what's done in unify for non-strict code *)
+      | (_, Tclass _) ->
+        Subtype_class.simplify_subtype_classes
+          ~fail
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ty_sub
+          ty_super
+          env
+      | (_r_sub, Tvec_or_dict (_, tv)) ->
+        (match (exact_super, tyargs_super) with
+        | (Nonexact _, [tv_super])
+          when String.equal class_nm_super SN.Collections.cTraversable
+               || String.equal class_nm_super SN.Collections.cContainer ->
+          (* vec<tv> <: Traversable<tv_super>
+           * iff tv <: tv_super
+           * Likewise for vec<tv> <: Container<tv_super>
+           *          and map<_,tv> <: Traversable<tv_super>
+           *          and map<_,tv> <: Container<tv_super>
+           *)
           simplify_subtype
             ~subtype_env
             ~this_ty
@@ -1624,16 +1585,15 @@ end = struct
                 super_supportdyn = false;
                 ty_super = tv_super;
               }
-            env)
-      | (Nonexact _, [tk_super; tv_super])
-        when String.equal class_nm_super SN.Collections.cKeyedTraversable
-             || String.equal class_nm_super SN.Collections.cKeyedContainer
-             || String.equal class_nm_super SN.Collections.cAnyArray ->
-        (match get_node lty_sub with
-        | Tvec_or_dict (tk, _) ->
-          env
-          |> Subtype.(
-               simplify_subtype
+            env
+        | (Nonexact _, [tk_super; tv_super])
+          when String.equal class_nm_super SN.Collections.cKeyedTraversable
+               || String.equal class_nm_super SN.Collections.cKeyedContainer
+               || String.equal class_nm_super SN.Collections.cAnyArray ->
+          (match get_node ty_sub with
+          | Tvec_or_dict (tk, _) ->
+            env
+            |> simplify_subtype
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub = tk }
@@ -1642,9 +1602,8 @@ end = struct
                      super_like = false;
                      super_supportdyn = false;
                      ty_super = tk_super;
-                   })
-          &&& Subtype.(
-                simplify_subtype
+                   }
+            &&& simplify_subtype
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = tv }
@@ -1653,16 +1612,38 @@ end = struct
                       super_like = false;
                       super_supportdyn = false;
                       ty_super = tv_super;
-                    })
-        | _ -> default_subtype_help env)
-      | (Nonexact _, [])
-        when String.equal class_nm_super SN.Collections.cKeyedTraversable
-             || String.equal class_nm_super SN.Collections.cKeyedContainer
-             || String.equal class_nm_super SN.Collections.cAnyArray ->
-        (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
-        valid env
-      | (_, _) -> default_subtype_help env)
-    | _ -> default_subtype_help env
+                    }
+          | _ ->
+            default_subtype
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
+              env)
+        | (Nonexact _, [])
+          when String.equal class_nm_super SN.Collections.cKeyedTraversable
+               || String.equal class_nm_super SN.Collections.cKeyedContainer
+               || String.equal class_nm_super SN.Collections.cAnyArray ->
+          (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
+          valid env
+        | (_, _) ->
+          default_subtype
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
+            env)
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
+    end
 end
 
 and Subtype_nonnull_r : sig

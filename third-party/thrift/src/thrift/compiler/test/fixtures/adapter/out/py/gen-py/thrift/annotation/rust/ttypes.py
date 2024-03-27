@@ -41,6 +41,13 @@ def __EXPAND_THRIFT_SPEC(spec):
         yield item
         next_id = item[0] + 1
 
+class ThriftEnumWrapper(int):
+  def __new__(cls, enum_class, value):
+    return super().__new__(cls, value)
+  def __init__(self, enum_class, value):    self.enum_class = enum_class
+  def __repr__(self):
+    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]
+
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
@@ -98,11 +105,17 @@ class Name:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -190,11 +203,17 @@ class Copy:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -275,11 +294,17 @@ class RequestContext:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -360,11 +385,17 @@ class Arc:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -445,11 +476,17 @@ class Box:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -530,11 +567,17 @@ class Exhaustive:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -615,11 +658,17 @@ class Ord:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -700,11 +749,17 @@ class NewType:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -799,11 +854,17 @@ class Type:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -905,11 +966,17 @@ class Adapter:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1024,11 +1091,17 @@ class Derive:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1132,11 +1205,17 @@ class ServiceExn:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )

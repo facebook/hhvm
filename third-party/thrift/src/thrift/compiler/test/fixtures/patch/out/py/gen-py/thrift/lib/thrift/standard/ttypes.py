@@ -41,6 +41,13 @@ def __EXPAND_THRIFT_SPEC(spec):
         yield item
         next_id = item[0] + 1
 
+class ThriftEnumWrapper(int):
+  def __new__(cls, enum_class, value):
+    return super().__new__(cls, value)
+  def __init__(self, enum_class, value):    self.enum_class = enum_class
+  def __repr__(self):
+    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]
+
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
@@ -227,11 +234,17 @@ class TypeUri(object):
     oprot.writeUnionEnd()
   
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -780,11 +793,17 @@ class TypeName(object):
     oprot.writeUnionEnd()
   
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -804,6 +823,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_boolType = ThriftEnumWrapper(Void, _fbthrift_boolType)
       self.set_boolType(_fbthrift_boolType)
     if 'byteType' in obj:
       _fbthrift_byteType = obj['byteType']
@@ -813,6 +834,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_byteType = ThriftEnumWrapper(Void, _fbthrift_byteType)
       self.set_byteType(_fbthrift_byteType)
     if 'i16Type' in obj:
       _fbthrift_i16Type = obj['i16Type']
@@ -822,6 +845,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_i16Type = ThriftEnumWrapper(Void, _fbthrift_i16Type)
       self.set_i16Type(_fbthrift_i16Type)
     if 'i32Type' in obj:
       _fbthrift_i32Type = obj['i32Type']
@@ -831,6 +856,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_i32Type = ThriftEnumWrapper(Void, _fbthrift_i32Type)
       self.set_i32Type(_fbthrift_i32Type)
     if 'i64Type' in obj:
       _fbthrift_i64Type = obj['i64Type']
@@ -840,6 +867,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_i64Type = ThriftEnumWrapper(Void, _fbthrift_i64Type)
       self.set_i64Type(_fbthrift_i64Type)
     if 'floatType' in obj:
       _fbthrift_floatType = obj['floatType']
@@ -849,6 +878,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_floatType = ThriftEnumWrapper(Void, _fbthrift_floatType)
       self.set_floatType(_fbthrift_floatType)
     if 'doubleType' in obj:
       _fbthrift_doubleType = obj['doubleType']
@@ -858,6 +889,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_doubleType = ThriftEnumWrapper(Void, _fbthrift_doubleType)
       self.set_doubleType(_fbthrift_doubleType)
     if 'stringType' in obj:
       _fbthrift_stringType = obj['stringType']
@@ -867,6 +900,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_stringType = ThriftEnumWrapper(Void, _fbthrift_stringType)
       self.set_stringType(_fbthrift_stringType)
     if 'binaryType' in obj:
       _fbthrift_binaryType = obj['binaryType']
@@ -876,26 +911,28 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_binaryType = ThriftEnumWrapper(Void, _fbthrift_binaryType)
       self.set_binaryType(_fbthrift_binaryType)
     if 'enumType' in obj:
       _fbthrift_enumType = TypeUri()
-      _fbthrift_enumType.readFromJson(obj['enumType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_enumType.readFromJson(obj['enumType'], is_text=False, **kwargs)
       self.set_enumType(_fbthrift_enumType)
     if 'typedefType' in obj:
       _fbthrift_typedefType = TypeUri()
-      _fbthrift_typedefType.readFromJson(obj['typedefType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_typedefType.readFromJson(obj['typedefType'], is_text=False, **kwargs)
       self.set_typedefType(_fbthrift_typedefType)
     if 'structType' in obj:
       _fbthrift_structType = TypeUri()
-      _fbthrift_structType.readFromJson(obj['structType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_structType.readFromJson(obj['structType'], is_text=False, **kwargs)
       self.set_structType(_fbthrift_structType)
     if 'unionType' in obj:
       _fbthrift_unionType = TypeUri()
-      _fbthrift_unionType.readFromJson(obj['unionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_unionType.readFromJson(obj['unionType'], is_text=False, **kwargs)
       self.set_unionType(_fbthrift_unionType)
     if 'exceptionType' in obj:
       _fbthrift_exceptionType = TypeUri()
-      _fbthrift_exceptionType.readFromJson(obj['exceptionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_exceptionType.readFromJson(obj['exceptionType'], is_text=False, **kwargs)
       self.set_exceptionType(_fbthrift_exceptionType)
     if 'listType' in obj:
       _fbthrift_listType = obj['listType']
@@ -905,6 +942,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_listType = ThriftEnumWrapper(Void, _fbthrift_listType)
       self.set_listType(_fbthrift_listType)
     if 'setType' in obj:
       _fbthrift_setType = obj['setType']
@@ -914,6 +953,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_setType = ThriftEnumWrapper(Void, _fbthrift_setType)
       self.set_setType(_fbthrift_setType)
     if 'mapType' in obj:
       _fbthrift_mapType = obj['mapType']
@@ -923,6 +964,8 @@ class TypeName(object):
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        _fbthrift_mapType = ThriftEnumWrapper(Void, _fbthrift_mapType)
       self.set_mapType(_fbthrift_mapType)
 
   def __eq__(self, other):

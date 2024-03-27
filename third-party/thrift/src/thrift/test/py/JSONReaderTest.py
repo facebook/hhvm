@@ -22,7 +22,9 @@ from JsonReaderTest.ttypes import (
     StructContainingOptionalList,
     StructContainingRequiredList,
 )
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAcceleratedFactory
 from thrift.protocol.TProtocol import TProtocolException
+from thrift.transport import TTransport
 
 
 class TestJSONReader(unittest.TestCase):
@@ -69,6 +71,27 @@ class TestJSONReader(unittest.TestCase):
         )
 
         struct.readFromJson(json_data, relax_enum_validation=True)
+
+    def testReadFromJsonWrappingEnumValues(self):
+        struct = StructContainingEnum()
+        struct.readFromJson('{ "data": 5}', wrap_enum_constants=True)
+
+        # Verifying that one can write the config to BinaryProtocol
+        read_transport = TTransport.TMemoryBuffer()
+        oprot = TBinaryProtocolAcceleratedFactory().getProtocol(read_transport)
+        struct.write(oprot)
+        self.assertEqual(read_transport.getvalue(), b"\x08\x00\x01\x00\x00\x00\x05\x00")
+
+    def testWrapEnumConstantsExcludesRelaxEnumValidation(self):
+        struct = StructContainingEnum()
+        with self.assertRaises(ValueError) as ex:
+            struct.readFromJson(
+                '{ "data": 5}', wrap_enum_constants=True, relax_enum_validation=True
+            )
+        self.assertIn(
+            "wrap_enum_constants cannot be used together with relax_enum_validation",
+            str(ex.exception),
+        )
 
 
 if __name__ == "__main__":

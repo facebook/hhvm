@@ -465,10 +465,8 @@ void t_py_generator::generate_json_struct(
     const string& prefix_thrift,
     const string& prefix_json) {
   indent(out) << prefix_thrift << " = " << type_name(tstruct) << "()" << endl;
-  indent(out)
-      << prefix_thrift << ".readFromJson(" << prefix_json
-      << ", is_text=False, relax_enum_validation=relax_enum_validation, "
-      << "custom_set_cls=set_cls, custom_dict_cls=dict_cls)" << endl;
+  indent(out) << prefix_thrift << ".readFromJson(" << prefix_json
+              << ", is_text=False, **kwargs)" << endl;
 }
 
 void t_py_generator::generate_json_enum(
@@ -488,6 +486,11 @@ void t_py_generator::generate_json_enum(
   indent(out) << "else:" << endl;
   indent(out) << "    raise TProtocolException("
               << "TProtocolException.INVALID_DATA, msg)" << endl;
+  indent_down();
+  indent(out) << "if wrap_enum_constants:" << endl;
+  indent_up();
+  indent(out) << prefix_thrift << " = ThriftEnumWrapper(" << type_name(tenum)
+              << ", " << prefix_thrift << ")" << endl;
   indent_down();
 }
 
@@ -688,13 +691,23 @@ void t_py_generator::generate_json_reader_fn_signature(ofstream& out) {
   indent(out) << "def readFromJson(self, json, is_text=True, **kwargs):"
               << endl;
   indent_up();
+  indent(out) << "kwargs_copy = dict(kwargs)" << endl;
   indent(out) << "relax_enum_validation = "
-                 "bool(kwargs.pop('relax_enum_validation', False))"
+                 "bool(kwargs_copy.pop('relax_enum_validation', False))"
               << endl;
-  indent(out) << "set_cls = kwargs.pop('custom_set_cls', set)" << endl;
-  indent(out) << "dict_cls = kwargs.pop('custom_dict_cls', dict)" << endl;
-  indent(out) << "if kwargs:" << endl;
-  indent(out) << "    extra_kwargs = ', '.join(kwargs.keys())" << endl;
+  indent(out) << "set_cls = kwargs_copy.pop('custom_set_cls', set)" << endl;
+  indent(out) << "dict_cls = kwargs_copy.pop('custom_dict_cls', dict)" << endl;
+  indent(out)
+      << "wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)"
+      << endl;
+  indent(out) << "if wrap_enum_constants and relax_enum_validation:" << endl;
+  indent(out) << "    raise ValueError(" << endl;
+  indent(out)
+      << "        'wrap_enum_constants cannot be used together with relax_enum_validation'"
+      << endl;
+  indent(out) << "    )" << endl;
+  indent(out) << "if kwargs_copy:" << endl;
+  indent(out) << "    extra_kwargs = ', '.join(kwargs_copy.keys())" << endl;
   indent(out) << "    raise ValueError(" << endl;
   indent(out) << "        'Unexpected keyword arguments: ' + extra_kwargs"
               << endl;
@@ -901,7 +914,14 @@ string t_py_generator::render_fastproto_includes() {
          "            for _ in range(next_id, item[0]):\n"
          "                yield None\n"
          "        yield item\n"
-         "        next_id = item[0] + 1\n\n";
+         "        next_id = item[0] + 1\n\n"
+         "class ThriftEnumWrapper(int):\n"
+         "  def __new__(cls, enum_class, value):\n"
+         "    return super().__new__(cls, value)\n"
+         "  def __init__(self, enum_class, value):"
+         "    self.enum_class = enum_class\n"
+         "  def __repr__(self):\n"
+         "    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]\n\n";
 }
 
 /**

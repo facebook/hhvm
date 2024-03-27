@@ -41,6 +41,13 @@ def __EXPAND_THRIFT_SPEC(spec):
         yield item
         next_id = item[0] + 1
 
+class ThriftEnumWrapper(int):
+  def __new__(cls, enum_class, value):
+    return super().__new__(cls, value)
+  def __init__(self, enum_class, value):    self.enum_class = enum_class
+  def __repr__(self):
+    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]
+
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
@@ -284,11 +291,17 @@ class SomeStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -303,6 +316,8 @@ class SomeStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.reasonable = ThriftEnumWrapper(Metasyntactic, self.reasonable)
     if 'fine' in json_obj and json_obj['fine'] is not None:
       self.fine = json_obj['fine']
       if not self.fine in Metasyntactic._VALUES_TO_NAMES:
@@ -311,6 +326,8 @@ class SomeStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.fine = ThriftEnumWrapper(Metasyntactic, self.fine)
     if 'questionable' in json_obj and json_obj['questionable'] is not None:
       self.questionable = json_obj['questionable']
       if not self.questionable in Metasyntactic._VALUES_TO_NAMES:
@@ -319,6 +336,8 @@ class SomeStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.questionable = ThriftEnumWrapper(Metasyntactic, self.questionable)
     if 'tags' in json_obj and json_obj['tags'] is not None:
       self.tags = set_cls()
       for _tmp_e8 in json_obj['tags']:
@@ -463,11 +482,17 @@ class MyStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -482,6 +507,8 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.me2_3 = ThriftEnumWrapper(MyEnum2, self.me2_3)
     if 'me3_n3' in json_obj and json_obj['me3_n3'] is not None:
       self.me3_n3 = json_obj['me3_n3']
       if not self.me3_n3 in MyEnum3._VALUES_TO_NAMES:
@@ -490,6 +517,8 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.me3_n3 = ThriftEnumWrapper(MyEnum3, self.me3_n3)
     if 'me1_t1' in json_obj and json_obj['me1_t1'] is not None:
       self.me1_t1 = json_obj['me1_t1']
       if not self.me1_t1 in MyEnum1._VALUES_TO_NAMES:
@@ -498,6 +527,8 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.me1_t1 = ThriftEnumWrapper(MyEnum1, self.me1_t1)
     if 'me1_t2' in json_obj and json_obj['me1_t2'] is not None:
       self.me1_t2 = json_obj['me1_t2']
       if not self.me1_t2 in MyEnum1._VALUES_TO_NAMES:
@@ -506,6 +537,8 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.me1_t2 = ThriftEnumWrapper(MyEnum1, self.me1_t2)
 
   def __repr__(self):
     L = []

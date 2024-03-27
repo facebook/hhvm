@@ -44,6 +44,13 @@ def __EXPAND_THRIFT_SPEC(spec):
         yield item
         next_id = item[0] + 1
 
+class ThriftEnumWrapper(int):
+  def __new__(cls, enum_class, value):
+    return super().__new__(cls, value)
+  def __init__(self, enum_class, value):    self.enum_class = enum_class
+  def __repr__(self):
+    return self.enum_class.__name__ + '.' + self.enum_class._VALUES_TO_NAMES[self]
+
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
@@ -122,11 +129,17 @@ class MyData:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -247,11 +260,17 @@ class MyDataWithCustomDefault:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -390,11 +409,17 @@ class InnerUnion(object):
     oprot.writeUnionEnd()
   
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -567,11 +592,17 @@ class MyUnion(object):
     oprot.writeUnionEnd()
   
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -593,7 +624,7 @@ class MyUnion(object):
       self.set_option2(_fbthrift_option2)
     if 'option3' in obj:
       _fbthrift_option3 = InnerUnion()
-      _fbthrift_option3.readFromJson(obj['option3'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      _fbthrift_option3.readFromJson(obj['option3'], is_text=False, **kwargs)
       self.set_option3(_fbthrift_option3)
 
   def __eq__(self, other):
@@ -1126,11 +1157,17 @@ class MyStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1169,15 +1206,17 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.enumVal = ThriftEnumWrapper(MyEnum, self.enumVal)
     if 'structVal' in json_obj and json_obj['structVal'] is not None:
       self.structVal = MyData()
-      self.structVal.readFromJson(json_obj['structVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structVal.readFromJson(json_obj['structVal'], is_text=False, **kwargs)
     if 'unionVal' in json_obj and json_obj['unionVal'] is not None:
       self.unionVal = MyUnion()
-      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, **kwargs)
     if 'lateStructVal' in json_obj and json_obj['lateStructVal'] is not None:
       self.lateStructVal = LateDefStruct()
-      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, **kwargs)
     if 'optBoolVal' in json_obj and json_obj['optBoolVal'] is not None:
       self.optBoolVal = json_obj['optBoolVal']
     if 'optByteVal' in json_obj and json_obj['optByteVal'] is not None:
@@ -1210,12 +1249,14 @@ class MyStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.optEnumVal = ThriftEnumWrapper(MyEnum, self.optEnumVal)
     if 'optStructVal' in json_obj and json_obj['optStructVal'] is not None:
       self.optStructVal = MyData()
-      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, **kwargs)
     if 'optLateStructVal' in json_obj and json_obj['optLateStructVal'] is not None:
       self.optLateStructVal = LateDefStruct()
-      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, **kwargs)
     if 'optListVal' in json_obj and json_obj['optListVal'] is not None:
       self.optListVal = []
       for _tmp_e86 in json_obj['optListVal']:
@@ -1258,10 +1299,10 @@ class MyStruct:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
     if 'structWithCustomDefault' in json_obj and json_obj['structWithCustomDefault'] is not None:
       self.structWithCustomDefault = MyDataWithCustomDefault()
-      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, **kwargs)
     if 'structWithFieldCustomDefault' in json_obj and json_obj['structWithFieldCustomDefault'] is not None:
       self.structWithFieldCustomDefault = MyData()
-      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -1501,11 +1542,17 @@ class LateDefStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1618,11 +1665,17 @@ class Recursive:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1634,7 +1687,7 @@ class Recursive:
       for _tmp_k114, _tmp_v115 in json_obj['nodes'].items():
         _tmp_kp116 = _tmp_k114
         _struct117 = Recursive()
-        _struct117.readFromJson(_tmp_v115, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct117.readFromJson(_tmp_v115, is_text=False, **kwargs)
         self.nodes[_tmp_kp116] = _struct117
 
   def __repr__(self):
@@ -1730,11 +1783,17 @@ class Bar:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1743,7 +1802,7 @@ class Bar:
       json_obj = loads(json)
     if 'loop' in json_obj and json_obj['loop'] is not None:
       self.loop = Loop()
-      self.loop.readFromJson(json_obj['loop'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.loop.readFromJson(json_obj['loop'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -1838,11 +1897,17 @@ class Loop:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -1851,7 +1916,7 @@ class Loop:
       json_obj = loads(json)
     if 'bar' in json_obj and json_obj['bar'] is not None:
       self.bar = Bar()
-      self.bar.readFromJson(json_obj['bar'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.bar.readFromJson(json_obj['bar'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -2096,11 +2161,17 @@ class RefFields:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2344,11 +2415,17 @@ class MyDataPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2357,18 +2434,18 @@ class MyDataPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = MyData()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = MyDataFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = MyDataEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = MyDataFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e189 in json_obj['remove']:
@@ -2505,11 +2582,17 @@ class MyDataFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2518,10 +2601,10 @@ class MyDataFieldPatch:
       json_obj = loads(json)
     if 'data1' in json_obj and json_obj['data1'] is not None:
       self.data1 = thrift.lib.thrift.patch.ttypes.StringPatch()
-      self.data1.readFromJson(json_obj['data1'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.data1.readFromJson(json_obj['data1'], is_text=False, **kwargs)
     if 'data2' in json_obj and json_obj['data2'] is not None:
       self.data2 = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.data2.readFromJson(json_obj['data2'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.data2.readFromJson(json_obj['data2'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -2630,11 +2713,17 @@ class MyDataEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2755,11 +2844,17 @@ class MyDataSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2942,11 +3037,17 @@ class MyDataWithCustomDefaultPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -2955,18 +3056,18 @@ class MyDataWithCustomDefaultPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = MyDataWithCustomDefault()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = MyDataWithCustomDefaultFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = MyDataWithCustomDefaultEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = MyDataWithCustomDefaultFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e198 in json_obj['remove']:
@@ -3103,11 +3204,17 @@ class MyDataWithCustomDefaultFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3116,10 +3223,10 @@ class MyDataWithCustomDefaultFieldPatch:
       json_obj = loads(json)
     if 'data1' in json_obj and json_obj['data1'] is not None:
       self.data1 = thrift.lib.thrift.patch.ttypes.StringPatch()
-      self.data1.readFromJson(json_obj['data1'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.data1.readFromJson(json_obj['data1'], is_text=False, **kwargs)
     if 'data2' in json_obj and json_obj['data2'] is not None:
       self.data2 = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.data2.readFromJson(json_obj['data2'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.data2.readFromJson(json_obj['data2'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -3228,11 +3335,17 @@ class MyDataWithCustomDefaultEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3353,11 +3466,17 @@ class MyDataWithCustomDefaultSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3517,11 +3636,17 @@ class InnerUnionPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3530,18 +3655,18 @@ class InnerUnionPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = InnerUnion()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = InnerUnionFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = InnerUnion()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = InnerUnionFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -3656,11 +3781,17 @@ class InnerUnionFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3669,7 +3800,7 @@ class InnerUnionFieldPatch:
       json_obj = loads(json)
     if 'innerOption' in json_obj and json_obj['innerOption'] is not None:
       self.innerOption = thrift.lib.thrift.patch.ttypes.BinaryPatch()
-      self.innerOption.readFromJson(json_obj['innerOption'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.innerOption.readFromJson(json_obj['innerOption'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -3773,11 +3904,17 @@ class InnerUnionSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3937,11 +4074,17 @@ class MyUnionPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -3950,18 +4093,18 @@ class MyUnionPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = MyUnion()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = MyUnionFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = MyUnion()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = MyUnionFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -4098,11 +4241,17 @@ class MyUnionFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -4111,13 +4260,13 @@ class MyUnionFieldPatch:
       json_obj = loads(json)
     if 'option1' in json_obj and json_obj['option1'] is not None:
       self.option1 = thrift.lib.thrift.patch.ttypes.StringPatch()
-      self.option1.readFromJson(json_obj['option1'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.option1.readFromJson(json_obj['option1'], is_text=False, **kwargs)
     if 'option2' in json_obj and json_obj['option2'] is not None:
       self.option2 = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.option2.readFromJson(json_obj['option2'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.option2.readFromJson(json_obj['option2'], is_text=False, **kwargs)
     if 'option3' in json_obj and json_obj['option3'] is not None:
       self.option3 = InnerUnionPatch()
-      self.option3.readFromJson(json_obj['option3'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.option3.readFromJson(json_obj['option3'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -4231,11 +4380,17 @@ class MyUnionSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -4418,11 +4573,17 @@ class MyStructPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -4431,18 +4592,18 @@ class MyStructPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = MyStruct()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = MyStructFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = MyStructEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = MyStructFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e207 in json_obj['remove']:
@@ -4582,11 +4743,17 @@ class MyStructField10Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -4601,6 +4768,8 @@ class MyStructField10Patch:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.assign = ThriftEnumWrapper(MyEnum, self.assign)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
 
@@ -4716,11 +4885,17 @@ class MyStructField23Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -4735,6 +4910,8 @@ class MyStructField23Patch:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.assign = ThriftEnumWrapper(MyEnum, self.assign)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
 
@@ -4909,11 +5086,17 @@ class MyStructField26Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -5122,11 +5305,17 @@ class MyStructField27Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -5417,11 +5606,17 @@ class MyStructField28Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -5440,7 +5635,7 @@ class MyStructField28Patch:
       for _tmp_k328, _tmp_v329 in json_obj['patchPrior'].items():
         _tmp_kp330 = _tmp_k328
         _struct331 = thrift.lib.thrift.patch.ttypes.StringPatch()
-        _struct331.readFromJson(_tmp_v329, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct331.readFromJson(_tmp_v329, is_text=False, **kwargs)
         self.patchPrior[_tmp_kp330] = _struct331
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
@@ -5452,7 +5647,7 @@ class MyStructField28Patch:
       for _tmp_k335, _tmp_v336 in json_obj['patch'].items():
         _tmp_kp337 = _tmp_k335
         _struct338 = thrift.lib.thrift.patch.ttypes.StringPatch()
-        _struct338.readFromJson(_tmp_v336, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct338.readFromJson(_tmp_v336, is_text=False, **kwargs)
         self.patch[_tmp_kp337] = _struct338
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
@@ -5744,11 +5939,17 @@ class MyStructField29Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -6141,11 +6342,17 @@ class MyStructField30Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -6170,7 +6377,7 @@ class MyStructField30Patch:
       for _tmp_k572, _tmp_v573 in json_obj['patchPrior'].items():
         _tmp_kp574 = _tmp_k572
         _struct575 = MyStructField30Patch1()
-        _struct575.readFromJson(_tmp_v573, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct575.readFromJson(_tmp_v573, is_text=False, **kwargs)
         self.patchPrior[_tmp_kp574] = _struct575
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
@@ -6188,7 +6395,7 @@ class MyStructField30Patch:
       for _tmp_k583, _tmp_v584 in json_obj['patch'].items():
         _tmp_kp585 = _tmp_k583
         _struct586 = MyStructField30Patch1()
-        _struct586.readFromJson(_tmp_v584, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct586.readFromJson(_tmp_v584, is_text=False, **kwargs)
         self.patch[_tmp_kp585] = _struct586
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
@@ -6490,11 +6697,17 @@ class MyStructField30Patch1:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -6515,7 +6728,7 @@ class MyStructField30Patch1:
       for _tmp_k661, _tmp_v662 in json_obj['patchPrior'].items():
         _tmp_kp663 = _tmp_k661
         _struct664 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct664.readFromJson(_tmp_v662, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct664.readFromJson(_tmp_v662, is_text=False, **kwargs)
         self.patchPrior[_tmp_kp663] = _struct664
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
@@ -6529,7 +6742,7 @@ class MyStructField30Patch1:
       for _tmp_k668, _tmp_v669 in json_obj['patch'].items():
         _tmp_kp670 = _tmp_k668
         _struct671 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct671.readFromJson(_tmp_v669, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct671.readFromJson(_tmp_v669, is_text=False, **kwargs)
         self.patch[_tmp_kp670] = _struct671
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
@@ -7018,11 +7231,17 @@ class MyStructFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -7031,103 +7250,103 @@ class MyStructFieldPatch:
       json_obj = loads(json)
     if 'structWithCustomDefault' in json_obj and json_obj['structWithCustomDefault'] is not None:
       self.structWithCustomDefault = MyDataWithCustomDefaultPatch()
-      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, **kwargs)
     if 'i32WithCustomDefault' in json_obj and json_obj['i32WithCustomDefault'] is not None:
       self.i32WithCustomDefault = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.i32WithCustomDefault.readFromJson(json_obj['i32WithCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.i32WithCustomDefault.readFromJson(json_obj['i32WithCustomDefault'], is_text=False, **kwargs)
     if 'mapMap' in json_obj and json_obj['mapMap'] is not None:
       self.mapMap = MyStructField30Patch()
-      self.mapMap.readFromJson(json_obj['mapMap'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.mapMap.readFromJson(json_obj['mapMap'], is_text=False, **kwargs)
     if 'listMap' in json_obj and json_obj['listMap'] is not None:
       self.listMap = MyStructField29Patch()
-      self.listMap.readFromJson(json_obj['listMap'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.listMap.readFromJson(json_obj['listMap'], is_text=False, **kwargs)
     if 'optMapVal' in json_obj and json_obj['optMapVal'] is not None:
       self.optMapVal = MyStructField28Patch()
-      self.optMapVal.readFromJson(json_obj['optMapVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optMapVal.readFromJson(json_obj['optMapVal'], is_text=False, **kwargs)
     if 'optSetVal' in json_obj and json_obj['optSetVal'] is not None:
       self.optSetVal = MyStructField27Patch()
-      self.optSetVal.readFromJson(json_obj['optSetVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optSetVal.readFromJson(json_obj['optSetVal'], is_text=False, **kwargs)
     if 'optListVal' in json_obj and json_obj['optListVal'] is not None:
       self.optListVal = MyStructField26Patch()
-      self.optListVal.readFromJson(json_obj['optListVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optListVal.readFromJson(json_obj['optListVal'], is_text=False, **kwargs)
     if 'optLateStructVal' in json_obj and json_obj['optLateStructVal'] is not None:
       self.optLateStructVal = LateDefStructPatch()
-      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, **kwargs)
     if 'optStructVal' in json_obj and json_obj['optStructVal'] is not None:
       self.optStructVal = MyDataPatch()
-      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, **kwargs)
     if 'optEnumVal' in json_obj and json_obj['optEnumVal'] is not None:
       self.optEnumVal = MyStructField23Patch()
-      self.optEnumVal.readFromJson(json_obj['optEnumVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optEnumVal.readFromJson(json_obj['optEnumVal'], is_text=False, **kwargs)
     if 'optBinaryVal' in json_obj and json_obj['optBinaryVal'] is not None:
       self.optBinaryVal = thrift.lib.thrift.patch.ttypes.BinaryPatch()
-      self.optBinaryVal.readFromJson(json_obj['optBinaryVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optBinaryVal.readFromJson(json_obj['optBinaryVal'], is_text=False, **kwargs)
     if 'optStringVal' in json_obj and json_obj['optStringVal'] is not None:
       self.optStringVal = thrift.lib.thrift.patch.ttypes.StringPatch()
-      self.optStringVal.readFromJson(json_obj['optStringVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optStringVal.readFromJson(json_obj['optStringVal'], is_text=False, **kwargs)
     if 'optDoubleVal' in json_obj and json_obj['optDoubleVal'] is not None:
       self.optDoubleVal = thrift.lib.thrift.patch.ttypes.DoublePatch()
-      self.optDoubleVal.readFromJson(json_obj['optDoubleVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optDoubleVal.readFromJson(json_obj['optDoubleVal'], is_text=False, **kwargs)
     if 'optFloatVal' in json_obj and json_obj['optFloatVal'] is not None:
       self.optFloatVal = thrift.lib.thrift.patch.ttypes.FloatPatch()
-      self.optFloatVal.readFromJson(json_obj['optFloatVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optFloatVal.readFromJson(json_obj['optFloatVal'], is_text=False, **kwargs)
     if 'optI64Val' in json_obj and json_obj['optI64Val'] is not None:
       self.optI64Val = thrift.lib.thrift.patch.ttypes.I64Patch()
-      self.optI64Val.readFromJson(json_obj['optI64Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optI64Val.readFromJson(json_obj['optI64Val'], is_text=False, **kwargs)
     if 'optI32Val' in json_obj and json_obj['optI32Val'] is not None:
       self.optI32Val = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.optI32Val.readFromJson(json_obj['optI32Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optI32Val.readFromJson(json_obj['optI32Val'], is_text=False, **kwargs)
     if 'optI16Val' in json_obj and json_obj['optI16Val'] is not None:
       self.optI16Val = thrift.lib.thrift.patch.ttypes.I16Patch()
-      self.optI16Val.readFromJson(json_obj['optI16Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optI16Val.readFromJson(json_obj['optI16Val'], is_text=False, **kwargs)
     if 'optByteVal' in json_obj and json_obj['optByteVal'] is not None:
       self.optByteVal = thrift.lib.thrift.patch.ttypes.BytePatch()
-      self.optByteVal.readFromJson(json_obj['optByteVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optByteVal.readFromJson(json_obj['optByteVal'], is_text=False, **kwargs)
     if 'optBoolVal' in json_obj and json_obj['optBoolVal'] is not None:
       self.optBoolVal = thrift.lib.thrift.patch.ttypes.BoolPatch()
-      self.optBoolVal.readFromJson(json_obj['optBoolVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optBoolVal.readFromJson(json_obj['optBoolVal'], is_text=False, **kwargs)
     if 'lateStructVal' in json_obj and json_obj['lateStructVal'] is not None:
       self.lateStructVal = LateDefStructPatch()
-      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, **kwargs)
     if 'unionVal' in json_obj and json_obj['unionVal'] is not None:
       self.unionVal = MyUnionPatch()
-      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, **kwargs)
     if 'structVal' in json_obj and json_obj['structVal'] is not None:
       self.structVal = MyDataPatch()
-      self.structVal.readFromJson(json_obj['structVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structVal.readFromJson(json_obj['structVal'], is_text=False, **kwargs)
     if 'enumVal' in json_obj and json_obj['enumVal'] is not None:
       self.enumVal = MyStructField10Patch()
-      self.enumVal.readFromJson(json_obj['enumVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.enumVal.readFromJson(json_obj['enumVal'], is_text=False, **kwargs)
     if 'binaryVal' in json_obj and json_obj['binaryVal'] is not None:
       self.binaryVal = thrift.lib.thrift.patch.ttypes.BinaryPatch()
-      self.binaryVal.readFromJson(json_obj['binaryVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.binaryVal.readFromJson(json_obj['binaryVal'], is_text=False, **kwargs)
     if 'stringVal' in json_obj and json_obj['stringVal'] is not None:
       self.stringVal = thrift.lib.thrift.patch.ttypes.StringPatch()
-      self.stringVal.readFromJson(json_obj['stringVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.stringVal.readFromJson(json_obj['stringVal'], is_text=False, **kwargs)
     if 'doubleVal' in json_obj and json_obj['doubleVal'] is not None:
       self.doubleVal = thrift.lib.thrift.patch.ttypes.DoublePatch()
-      self.doubleVal.readFromJson(json_obj['doubleVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.doubleVal.readFromJson(json_obj['doubleVal'], is_text=False, **kwargs)
     if 'floatVal' in json_obj and json_obj['floatVal'] is not None:
       self.floatVal = thrift.lib.thrift.patch.ttypes.FloatPatch()
-      self.floatVal.readFromJson(json_obj['floatVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.floatVal.readFromJson(json_obj['floatVal'], is_text=False, **kwargs)
     if 'i64Val' in json_obj and json_obj['i64Val'] is not None:
       self.i64Val = thrift.lib.thrift.patch.ttypes.I64Patch()
-      self.i64Val.readFromJson(json_obj['i64Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.i64Val.readFromJson(json_obj['i64Val'], is_text=False, **kwargs)
     if 'i32Val' in json_obj and json_obj['i32Val'] is not None:
       self.i32Val = thrift.lib.thrift.patch.ttypes.I32Patch()
-      self.i32Val.readFromJson(json_obj['i32Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.i32Val.readFromJson(json_obj['i32Val'], is_text=False, **kwargs)
     if 'i16Val' in json_obj and json_obj['i16Val'] is not None:
       self.i16Val = thrift.lib.thrift.patch.ttypes.I16Patch()
-      self.i16Val.readFromJson(json_obj['i16Val'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.i16Val.readFromJson(json_obj['i16Val'], is_text=False, **kwargs)
     if 'byteVal' in json_obj and json_obj['byteVal'] is not None:
       self.byteVal = thrift.lib.thrift.patch.ttypes.BytePatch()
-      self.byteVal.readFromJson(json_obj['byteVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.byteVal.readFromJson(json_obj['byteVal'], is_text=False, **kwargs)
     if 'boolVal' in json_obj and json_obj['boolVal'] is not None:
       self.boolVal = thrift.lib.thrift.patch.ttypes.BoolPatch()
-      self.boolVal.readFromJson(json_obj['boolVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.boolVal.readFromJson(json_obj['boolVal'], is_text=False, **kwargs)
     if 'structWithFieldCustomDefault' in json_obj and json_obj['structWithFieldCustomDefault'] is not None:
       self.structWithFieldCustomDefault = MyDataPatch()
-      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -7835,11 +8054,17 @@ class MyStructEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -7848,7 +8073,7 @@ class MyStructEnsureStruct:
       json_obj = loads(json)
     if 'structWithCustomDefault' in json_obj and json_obj['structWithCustomDefault'] is not None:
       self.structWithCustomDefault = MyDataWithCustomDefault()
-      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithCustomDefault.readFromJson(json_obj['structWithCustomDefault'], is_text=False, **kwargs)
     if 'i32WithCustomDefault' in json_obj and json_obj['i32WithCustomDefault'] is not None:
       self.i32WithCustomDefault = json_obj['i32WithCustomDefault']
       if self.i32WithCustomDefault > 0x7fffffff or self.i32WithCustomDefault < -0x80000000:
@@ -7891,10 +8116,10 @@ class MyStructEnsureStruct:
         self.optListVal.append(_tmp_e778)
     if 'optLateStructVal' in json_obj and json_obj['optLateStructVal'] is not None:
       self.optLateStructVal = LateDefStruct()
-      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, **kwargs)
     if 'optStructVal' in json_obj and json_obj['optStructVal'] is not None:
       self.optStructVal = MyData()
-      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, **kwargs)
     if 'optEnumVal' in json_obj and json_obj['optEnumVal'] is not None:
       self.optEnumVal = json_obj['optEnumVal']
       if not self.optEnumVal in MyEnum._VALUES_TO_NAMES:
@@ -7903,6 +8128,8 @@ class MyStructEnsureStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.optEnumVal = ThriftEnumWrapper(MyEnum, self.optEnumVal)
     if 'optBinaryVal' in json_obj and json_obj['optBinaryVal'] is not None:
       self.optBinaryVal = json_obj['optBinaryVal']
     if 'optStringVal' in json_obj and json_obj['optStringVal'] is not None:
@@ -7929,13 +8156,13 @@ class MyStructEnsureStruct:
       self.optBoolVal = json_obj['optBoolVal']
     if 'lateStructVal' in json_obj and json_obj['lateStructVal'] is not None:
       self.lateStructVal = LateDefStruct()
-      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.lateStructVal.readFromJson(json_obj['lateStructVal'], is_text=False, **kwargs)
     if 'unionVal' in json_obj and json_obj['unionVal'] is not None:
       self.unionVal = MyUnion()
-      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.unionVal.readFromJson(json_obj['unionVal'], is_text=False, **kwargs)
     if 'structVal' in json_obj and json_obj['structVal'] is not None:
       self.structVal = MyData()
-      self.structVal.readFromJson(json_obj['structVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structVal.readFromJson(json_obj['structVal'], is_text=False, **kwargs)
     if 'enumVal' in json_obj and json_obj['enumVal'] is not None:
       self.enumVal = json_obj['enumVal']
       if not self.enumVal in MyEnum._VALUES_TO_NAMES:
@@ -7944,6 +8171,8 @@ class MyStructEnsureStruct:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.enumVal = ThriftEnumWrapper(MyEnum, self.enumVal)
     if 'binaryVal' in json_obj and json_obj['binaryVal'] is not None:
       self.binaryVal = json_obj['binaryVal']
     if 'stringVal' in json_obj and json_obj['stringVal'] is not None:
@@ -7970,7 +8199,7 @@ class MyStructEnsureStruct:
       self.boolVal = json_obj['boolVal']
     if 'structWithFieldCustomDefault' in json_obj and json_obj['structWithFieldCustomDefault'] is not None:
       self.structWithFieldCustomDefault = MyData()
-      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.structWithFieldCustomDefault.readFromJson(json_obj['structWithFieldCustomDefault'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -8234,11 +8463,17 @@ class MyStructSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8421,11 +8656,17 @@ class LateDefStructPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8434,18 +8675,18 @@ class LateDefStructPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = LateDefStruct()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = LateDefStructFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = LateDefStructEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = LateDefStructFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e787 in json_obj['remove']:
@@ -8556,11 +8797,17 @@ class LateDefStructFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8641,11 +8888,17 @@ class LateDefStructEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8750,11 +9003,17 @@ class LateDefStructSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8937,11 +9196,17 @@ class RecursivePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -8950,18 +9215,18 @@ class RecursivePatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = Recursive()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = RecursiveFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = RecursiveEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = RecursiveFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e796 in json_obj['remove']:
@@ -9119,11 +9384,17 @@ class RecursiveField1Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9135,7 +9406,7 @@ class RecursiveField1Patch:
       for _tmp_k808, _tmp_v809 in json_obj['assign'].items():
         _tmp_kp810 = _tmp_k808
         _struct811 = Recursive()
-        _struct811.readFromJson(_tmp_v809, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct811.readFromJson(_tmp_v809, is_text=False, **kwargs)
         self.assign[_tmp_kp810] = _struct811
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
@@ -9238,11 +9509,17 @@ class RecursiveFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9251,7 +9528,7 @@ class RecursiveFieldPatch:
       json_obj = loads(json)
     if 'nodes' in json_obj and json_obj['nodes'] is not None:
       self.nodes = RecursiveField1Patch()
-      self.nodes.readFromJson(json_obj['nodes'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.nodes.readFromJson(json_obj['nodes'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -9363,11 +9640,17 @@ class RecursiveEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9379,7 +9662,7 @@ class RecursiveEnsureStruct:
       for _tmp_k823, _tmp_v824 in json_obj['nodes'].items():
         _tmp_kp825 = _tmp_k823
         _struct826 = Recursive()
-        _struct826.readFromJson(_tmp_v824, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        _struct826.readFromJson(_tmp_v824, is_text=False, **kwargs)
         self.nodes[_tmp_kp825] = _struct826
 
   def __repr__(self):
@@ -9484,11 +9767,17 @@ class RecursiveSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9671,11 +9960,17 @@ class BarPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9684,18 +9979,18 @@ class BarPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = Bar()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = BarFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = BarEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = BarFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e835 in json_obj['remove']:
@@ -9821,11 +10116,17 @@ class BarFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9834,7 +10135,7 @@ class BarFieldPatch:
       json_obj = loads(json)
     if 'loop' in json_obj and json_obj['loop'] is not None:
       self.loop = LoopPatch()
-      self.loop.readFromJson(json_obj['loop'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.loop.readFromJson(json_obj['loop'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -9929,11 +10230,17 @@ class BarEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -9942,7 +10249,7 @@ class BarEnsureStruct:
       json_obj = loads(json)
     if 'loop' in json_obj and json_obj['loop'] is not None:
       self.loop = Loop()
-      self.loop.readFromJson(json_obj['loop'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.loop.readFromJson(json_obj['loop'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -10046,11 +10353,17 @@ class BarSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -10177,11 +10490,17 @@ class LoopPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -10190,7 +10509,7 @@ class LoopPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = Loop()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
 
@@ -10301,11 +10620,17 @@ class LoopSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -10488,11 +10813,17 @@ class RefFieldsPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -10501,18 +10832,18 @@ class RefFieldsPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = RefFields()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.assign.readFromJson(json_obj['assign'], is_text=False, **kwargs)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = RefFieldsFieldPatch()
-      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patchPrior.readFromJson(json_obj['patchPrior'], is_text=False, **kwargs)
     if 'ensure' in json_obj and json_obj['ensure'] is not None:
       self.ensure = RefFieldsEnsureStruct()
-      self.ensure.readFromJson(json_obj['ensure'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.ensure.readFromJson(json_obj['ensure'], is_text=False, **kwargs)
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = RefFieldsFieldPatch()
-      self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.patch.readFromJson(json_obj['patch'], is_text=False, **kwargs)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = []
       for _tmp_e844 in json_obj['remove']:
@@ -10711,11 +11042,17 @@ class RefFieldsField1Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -10924,11 +11261,17 @@ class RefFieldsField4Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -11137,11 +11480,17 @@ class RefFieldsField7Patch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -11299,11 +11648,17 @@ class RefFieldsFieldPatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -11312,13 +11667,13 @@ class RefFieldsFieldPatch:
       json_obj = loads(json)
     if 'unique' in json_obj and json_obj['unique'] is not None:
       self.unique = RefFieldsField1Patch()
-      self.unique.readFromJson(json_obj['unique'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.unique.readFromJson(json_obj['unique'], is_text=False, **kwargs)
     if 'opt_unique' in json_obj and json_obj['opt_unique'] is not None:
       self.opt_unique = RefFieldsField4Patch()
-      self.opt_unique.readFromJson(json_obj['opt_unique'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.opt_unique.readFromJson(json_obj['opt_unique'], is_text=False, **kwargs)
     if 'opt_box' in json_obj and json_obj['opt_box'] is not None:
       self.opt_box = RefFieldsField7Patch()
-      self.opt_box.readFromJson(json_obj['opt_box'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.opt_box.readFromJson(json_obj['opt_box'], is_text=False, **kwargs)
 
   def __repr__(self):
     L = []
@@ -11573,11 +11928,17 @@ class RefFieldsEnsureStruct:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )
@@ -11759,11 +12120,17 @@ class RefFieldsSafePatch:
     oprot.writeStructEnd()
 
   def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
+    kwargs_copy = dict(kwargs)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', False))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
         raise ValueError(
             'Unexpected keyword arguments: ' + extra_kwargs
         )

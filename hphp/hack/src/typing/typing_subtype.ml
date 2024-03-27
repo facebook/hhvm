@@ -768,20 +768,20 @@ end = struct
       ~subtype_env
       ~this_ty
       ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-      ~rhs:{ super_like; ty_super = lty_super; super_supportdyn }
+      ~lhs:{ sub_supportdyn; ty_sub }
+      ~rhs:{ super_like; ty_super; super_supportdyn }
       env =
-    match deref lty_sub with
+    match deref ty_sub with
     | (_, Tvar _) -> begin
-      match (subtype_env.Subtype_env.coerce, get_node lty_super) with
+      match (subtype_env.Subtype_env.coerce, get_node ty_super) with
       | (Some TL.CoerceToDynamic, Tdynamic) ->
-        let r = get_reason lty_super in
+        let r = get_reason ty_super in
         let ty_super = MakeType.supportdyn_mixed ~mixed_reason:r r in
         default_subtype_inner
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn; ty_super }
           env
       | (Some cd, _) ->
@@ -789,15 +789,15 @@ end = struct
           ~sub_supportdyn
           ~coerce:(Some cd)
           env
-          (LoclType lty_sub)
-          (LoclType lty_super)
+          (LoclType ty_sub)
+          (LoclType ty_super)
       | (None, _) ->
         default_subtype_inner
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn; ty_super = lty_super }
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn; ty_super }
           env
     end
     | (r_sub, Tprim Nast.Tvoid) ->
@@ -806,8 +806,7 @@ end = struct
         ~subtype_env
         ~this_ty
         ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.mixed r }
-        ~rhs:
-          { super_like = false; super_supportdyn = false; ty_super = lty_super }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
         env
       |> if_unsat (invalid ~fail)
     | (_, Tany _) ->
@@ -816,8 +815,8 @@ end = struct
           ~sub_supportdyn
           ~coerce:subtype_env.Subtype_env.coerce
           env
-          (LoclType lty_sub)
-          (LoclType lty_super)
+          (LoclType ty_sub)
+          (LoclType ty_super)
       else
         valid env
     | _ ->
@@ -825,8 +824,8 @@ end = struct
         ~subtype_env
         ~this_ty
         ~fail
-        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-        ~rhs:{ super_like; super_supportdyn; ty_super = lty_super }
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn; ty_super }
         env
 
   and default_subtype ~subtype_env ~this_ty ~fail ~lhs ~rhs env =

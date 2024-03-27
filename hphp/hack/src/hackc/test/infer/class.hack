@@ -454,7 +454,7 @@ function sets(): void {
 // TEST-CHECK-BAL: type TestFieldNamesWithTextualIdents
 // CHECK: type TestFieldNamesWithTextualIdents = .kind="class" {
 // CHECK:   n: .public *HackInt;
-// CHECK:   n0n: .public *HackInt;
+// CHECK:   mangled:::n0n: .public *HackInt;
 // CHECK:   mangled:::n10: .public *HackInt
 // CHECK: }
 class TestFieldNamesWithTextualIdents {

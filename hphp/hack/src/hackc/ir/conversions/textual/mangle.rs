@@ -17,10 +17,8 @@ pub(crate) trait Mangle {
     fn mangle(&self) -> String;
 }
 
-fn is_textual_ident(name: &[u8]) -> bool {
-    name.first().map_or(false, |&x| x == b'n')
-        && name.len() > 1
-        && name[1..].iter().all(|&x| x.is_ascii_digit())
+fn starts_like_a_textual_ident(name: &[u8]) -> bool {
+    name.first().map_or(false, |&x| x == b'n') && name.len() > 1 && name[1].is_ascii_digit()
 }
 
 //precondition: name should not contain non-utf8 chars
@@ -42,7 +40,7 @@ impl Mangle for [u8] {
             | b"handlers" | b"if" | b"int" | b"jmp" | b"load" | b"local" | b"null" | b"prune"
             | b"ret" | b"store" | b"then" | b"throw" | b"true" | b"type" | b"unreachable"
             | b"void" => add_mangling_prefix(self),
-            _ if is_textual_ident(self) => add_mangling_prefix(self),
+            _ if starts_like_a_textual_ident(self) => add_mangling_prefix(self),
             _ => {
                 // This mangling is terrible... but probably "good enough".
                 // If a digit is first then we prepend a '_'.

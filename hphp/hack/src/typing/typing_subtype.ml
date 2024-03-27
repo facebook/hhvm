@@ -7243,29 +7243,38 @@ and Subtype_ask : sig
     bool
 end = struct
   let is_sub_type_alt_i
-      ~require_completeness ~no_top_bottom ~coerce ~sub_supportdyn env ty1 ty2 =
+      ~require_completeness
+      ~no_top_bottom
+      ~coerce
+      ~sub_supportdyn
+      env
+      ity_sub
+      ity_super =
     let this_ty =
-      match ty1 with
+      match ity_sub with
       | LoclType ty1 -> Some ty1
       | ConstraintType _ -> None
+    in
+    let subtype_env =
+      Subtype_env.create
+        ~require_completeness
+        ~no_top_bottom
+        ~coerce
+        ~log_level:3
+        None
     in
     (* It is weird that this can cause errors, but I am wary to discard them.
      * Using the generic unify_error to maintain current behavior. *)
     let (_env, prop) =
-      Subtype.(
-        simplify_subtype_i
-          ~subtype_env:
-            (Subtype_env.create
-               ~require_completeness
-               ~no_top_bottom
-               ~coerce
-               ~log_level:3
-               None)
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = ty1 }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty2 }
-          env)
+      Common.dispatch_constraint
+        ~subtype_env
+        ~this_ty
+        ~sub_supportdyn
+        ity_sub
+        ity_super
+        env
     in
+
     if TL.is_valid prop then
       Some true
     else if TL.is_unsat prop then
@@ -7973,8 +7982,8 @@ end = struct
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ~(this_ty : locl_ty option)
-      (ty_sub : internal_type)
-      (ty_super : internal_type) : env * Typing_error.t option =
+      (ity_sub : internal_type)
+      (ity_super : internal_type) : env * Typing_error.t option =
     Logging.log_subtype_i
       ~level:1
       ~this_ty
@@ -7986,27 +7995,27 @@ end = struct
         | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
         | None -> "")
       env
-      ty_sub
-      ty_super;
+      ity_sub
+      ity_super;
     let (env, prop) =
-      Subtype.(
-        simplify_subtype_i
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-          env)
+      Common.dispatch_constraint
+        ~subtype_env
+        ~this_ty
+        ~sub_supportdyn
+        ity_sub
+        ity_super
+        env
     in
     if not (TL.is_valid prop) then
       Typing_log.log_prop
         1
-        (Reason.to_pos (reason ty_sub))
+        (Reason.to_pos (reason ity_sub))
         "sub_type_inner"
         env
         prop;
     Subtype_trans.prop_to_env
-      ty_sub
-      ty_super
+      ity_sub
+      ity_super
       env
       prop
       subtype_env.Subtype_env.on_error

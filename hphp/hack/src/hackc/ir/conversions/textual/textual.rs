@@ -1576,7 +1576,8 @@ impl FieldAttribute {
                     } => {
                         let mut i = parameters.iter();
                         let param = i.next().unwrap();
-                        write!(f, "= \"{param}\"")?;
+                        let escaped_param = str::replace(param, r#"""#, r#"\""#);
+                        write!(f, "= \"{escaped_param}\"")?;
                         for param in i {
                             write!(f, ", \"{param}\"")?;
                         }

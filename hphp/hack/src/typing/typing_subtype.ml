@@ -765,6 +765,34 @@ end = struct
     | Decl_entry.NotYetAvailable ->
       false
 
+  (* If it's clear from the syntax of the type that null isn't in ty, return true.
+ *)
+  let rec null_not_subtype ty =
+    match get_node ty with
+    | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
+    | Tgeneric _
+    | Tdynamic
+    | Tany _
+    | Toption _
+    | Tvar _
+    | Taccess _
+    | Tunapplied_alias _
+    | Tneg _
+    | Tintersection _ ->
+      false
+    | Tunion tys -> List.for_all tys ~f:null_not_subtype
+    | Tclass _
+    | Tprim _
+    | Tnonnull
+    | Tfun _
+    | Ttuple _
+    | Tshape _
+    | Tvec_or_dict _ ->
+      true
+    | Tdependent (_, bound)
+    | Tnewtype (_, _, bound) ->
+      null_not_subtype bound
+
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
       =
     if phys_equal ty_sub ty_super then
@@ -1064,16 +1092,115 @@ end = struct
         env
     in
     match deref ty_super with
-    | (r_super, Tvar var_super) ->
-      Subtype_var_r.simplify
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        ~fail
-        ty_sub
-        (r_super, var_super)
-        env
+    | (r_super, Tvar var_super) -> begin
+      match deref ty_sub with
+      | (_, Tunion _) ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tvar var_super);
+            }
+          env
+      | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tvar var_super);
+            }
+          env
+      (* We want to treat nullable as a union with the same rule as above.
+       * This is only needed for Tvar on right; other cases are dealt with specially as
+       * derived rules.
+       *)
+      | (r, Toption t) ->
+        let (env, t) = Env.expand_type env t in
+        (match get_node t with
+        (* We special case on `mixed <: Tvar _`, adding the entire `mixed` type
+           as a lower bound. This enables clearer error messages when upper bounds
+           are added to the type variable: transitive closure picks up the
+           entire `mixed` type, and not separately consider `null` and `nonnull` *)
+        | Tnonnull ->
+          mk_issubtype_prop
+            ~sub_supportdyn
+            ~coerce:subtype_env.Subtype_env.coerce
+            env
+            (LoclType ty_sub)
+            (LoclType ty_super)
+        | _ ->
+          let ty_null = MakeType.null r in
+          let lty_super = mk (r_super, Tvar var_super) in
+          env
+          |> Subtype.(
+               simplify_subtype
+                 ~subtype_env
+                 ~this_ty
+                 ~lhs:{ sub_supportdyn; ty_sub = t }
+                 ~rhs:
+                   {
+                     super_like;
+                     super_supportdyn = false;
+                     ty_super = lty_super;
+                   })
+          &&& Subtype.(
+                simplify_subtype
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn; ty_sub = ty_null }
+                  ~rhs:
+                    {
+                      super_like = false;
+                      super_supportdyn = false;
+                      ty_super = lty_super;
+                    }))
+      | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
+      | _ -> begin
+        let lty_super = mk (r_super, Tvar var_super) in
+        match subtype_env.Subtype_env.coerce with
+        | Some cd ->
+          mk_issubtype_prop
+            ~sub_supportdyn
+            ~coerce:(Some cd)
+            env
+            (LoclType ty_sub)
+            (LoclType lty_super)
+        | None ->
+          if super_like then
+            let (env, ty_sub) =
+              Typing_dynamic.strip_covariant_like env ty_sub
+            in
+            env
+            |> Subtype.(
+                 simplify_subtype
+                   ~subtype_env
+                   ~this_ty
+                   ~lhs:{ sub_supportdyn; ty_sub }
+                   ~rhs:
+                     {
+                       super_like = false;
+                       super_supportdyn = false;
+                       ty_super = lty_super;
+                     })
+          else
+            mk_issubtype_prop
+              ~sub_supportdyn
+              ~coerce:subtype_env.Subtype_env.coerce
+              env
+              (LoclType ty_sub)
+              (LoclType ty_super)
+      end
+    end
     | (_, Tintersection _) when is_union ty_sub -> default_subtype_help env
     | (_, Tintersection tyl) ->
       (* t <: (t1 & ... & tn)
@@ -1107,22 +1234,197 @@ end = struct
         ty_sub
         (r, tyl_super)
         env
-    | (r_super, Toption arg_ty_super) ->
-      let (env, ety) = Env.expand_type env arg_ty_super in
+    | (r_super, Toption lty_inner) ->
+      let (env, lty_inner) = Env.expand_type env lty_inner in
       (* Toption(Tnonnull) encodes mixed, which is our top type.
        * Everything subtypes mixed *)
-      if is_nonnull ety then
+      if is_nonnull lty_inner then
         valid env
-      else
-        Subtype_option_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ty_sub
-          (r_super, ety)
-          env
+      else (
+        match (deref ty_sub, get_node lty_inner) with
+        (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
+        | (_, Tnewtype (name, [tyarg], _))
+          when String.equal name SN.Classes.cSupportDyn ->
+          let tyarg = MakeType.nullable r_super tyarg in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:
+              {
+                super_like;
+                super_supportdyn = false;
+                ty_super = MakeType.supportdyn r_super tyarg;
+              }
+            env
+        (*   supportdyn<t> <: ?u   iff
+         *   nonnull & supportdyn<t> <: u   iff
+         *   supportdyn<nonnull & t> <: u
+         *)
+        | ((r, Tnewtype (name, [tyarg1], _)), _)
+          when String.equal name SN.Classes.cSupportDyn ->
+          let (env, ty_sub') =
+            Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
+          in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+            env
+        (* A <: ?B iff A & nonnull <: B
+           Only apply if B is a type variable or an intersection, to avoid oscillating
+           forever between this case and the previous one. *)
+        | ((_, Tintersection tyl), (Tintersection _ | Tvar _))
+          when let (_, non_ty_opt, _) =
+                 Subtype_negation.find_type_with_exact_negation env tyl
+               in
+               Option.is_none non_ty_opt ->
+          let (env, ty_sub') =
+            Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
+          in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+            env
+        (* null is the type of null and is a subtype of any option type. *)
+        | ((_, Tprim Nast.Tnull), _) -> valid env
+        (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
+         * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_sub' (widening) and transitivity
+         * of <: it follows that ty_sub' <: ?ty_super'.  Conversely, if ty_sub' <: ?ty_super', then
+         * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
+         * Therefore, this step preserves the set of solutions.
+         *)
+        | ((_, Toption ty_sub'), _) ->
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
+            ~rhs:
+              {
+                super_like;
+                super_supportdyn = false;
+                ty_super = mk (r_super, Toption lty_inner);
+              }
+            env
+        (* If the type on the left is disjoint from null, then the Toption on the right is not
+           doing anything helpful. *)
+        | ((_, (Tintersection _ | Tunion _)), _)
+          when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.Rnone)
+          ->
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+            env
+          (* We do not want to decompose Toption for these cases *)
+        | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
+          default_subtype
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:
+              {
+                super_like;
+                super_supportdyn = false;
+                ty_super = mk (r_super, Toption lty_inner);
+              }
+            env
+        | ((_, Tgeneric _), _) when subtype_env.Subtype_env.require_completeness
+          ->
+          (* TODO(T69551141) handle type arguments ? *)
+          default_subtype
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:
+              {
+                super_like;
+                super_supportdyn = false;
+                ty_super = mk (r_super, Toption lty_inner);
+              }
+            env
+        (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
+         * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
+         * true as well.  We can fold the case where t1 is unconstrained
+         * into the case analysis below.
+         *
+         * In the case where it's easy to determine that null isn't in t1,
+         * we need only check t1 <: t2.
+         *)
+        | ((_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)), _)
+          ->
+          (* TODO(T69551141) handle type arguments? *)
+          if null_not_subtype ty_sub then
+            env
+            |> simplify_subtype
+                 ~subtype_env
+                 ~this_ty
+                 ~lhs:{ sub_supportdyn; ty_sub }
+                 ~rhs:
+                   {
+                     super_like;
+                     super_supportdyn = false;
+                     ty_super = lty_inner;
+                   }
+          else
+            let ( ||| ) = ( ||| ) ~fail in
+            env
+            |> simplify_subtype
+                 ~subtype_env
+                 ~this_ty
+                 ~lhs:{ sub_supportdyn; ty_sub }
+                 ~rhs:
+                   {
+                     super_like;
+                     super_supportdyn = false;
+                     ty_super = lty_inner;
+                   }
+            ||| default_subtype
+                  ~subtype_env
+                  ~this_ty
+                  ~fail
+                  ~lhs:{ sub_supportdyn; ty_sub }
+                  ~rhs:
+                    {
+                      super_like;
+                      super_supportdyn = false;
+                      ty_super = mk (r_super, Toption lty_inner);
+                    }
+        (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
+         * must also have ty_sub <: ty_super'.  The converse follows by
+         * widening and transitivity.  Therefore, this step preserves the set
+         * of solutions.
+         *)
+        | ((_, Tunapplied_alias _), _) ->
+          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+        | ( ( _,
+              ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
+              | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ ) ),
+            _ ) ->
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+            env
+        (* This is treating the option as a union, and using the sound, but incomplete,
+           t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
+           TODO(T120921930): Don't do this if require_completeness is set.
+        *)
+        | ((_, Tneg _), _) ->
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+            env
+      )
     | (_r_super, Tdependent (dep_ty_sup, bound_sup)) -> begin
       let (env, bound_sup) = Env.expand_type env bound_sup in
       match (deref ty_sub, get_node bound_sup) with
@@ -2404,222 +2706,6 @@ end = struct
     end
 end
 
-and Subtype_option_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    locl_ty ->
-    locl_phase Reason.t_ * locl_phase ty ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  (* If it's clear from the syntax of the type that null isn't in ty, return true.
- *)
-  let rec null_not_subtype ty =
-    match get_node ty with
-    | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
-    | Tgeneric _
-    | Tdynamic
-    | Tany _
-    | Toption _
-    | Tvar _
-    | Taccess _
-    | Tunapplied_alias _
-    | Tneg _
-    | Tintersection _ ->
-      false
-    | Tunion tys -> List.for_all tys ~f:null_not_subtype
-    | Tclass _
-    | Tprim _
-    | Tnonnull
-    | Tfun _
-    | Ttuple _
-    | Tshape _
-    | Tvec_or_dict _ ->
-      true
-    | Tdependent (_, bound)
-    | Tnewtype (_, _, bound) ->
-      null_not_subtype bound
-
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      ~fail
-      lty_sub
-      (r_super, lty_inner)
-      env =
-    let ( ||| ) = ( ||| ) ~fail in
-    (* We *know* that the assertion is unsatisfiable *)
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Toption lty_inner);
-            }
-          env)
-    in
-    match (deref lty_sub, get_node lty_inner) with
-    (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
-    | (_, Tnewtype (name, [tyarg], _))
-      when String.equal name SN.Classes.cSupportDyn ->
-      let tyarg = MakeType.nullable r_super tyarg in
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = MakeType.supportdyn r_super tyarg;
-            }
-          env)
-    (*   supportdyn<t> <: ?u   iff
-     *   nonnull & supportdyn<t> <: u   iff
-     *   supportdyn<nonnull & t> <: u
-     *)
-    | ((r, Tnewtype (name, [tyarg1], _)), _)
-      when String.equal name SN.Classes.cSupportDyn ->
-      let (env, ty_sub') =
-        Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
-      in
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env)
-    (* A <: ?B iff A & nonnull <: B
-       Only apply if B is a type variable or an intersection, to avoid oscillating
-       forever between this case and the previous one. *)
-    | ((_, Tintersection tyl), (Tintersection _ | Tvar _))
-      when let (_, non_ty_opt, _) =
-             Subtype_negation.find_type_with_exact_negation env tyl
-           in
-           Option.is_none non_ty_opt ->
-      let (env, ty_sub') =
-        Inter.intersect env ~r:r_super lty_sub (MakeType.nonnull r_super)
-      in
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env)
-    (* null is the type of null and is a subtype of any option type. *)
-    | ((_, Tprim Nast.Tnull), _) -> valid env
-    (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
-     * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_sub' (widening) and transitivity
-     * of <: it follows that ty_sub' <: ?ty_super'.  Conversely, if ty_sub' <: ?ty_super', then
-     * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
-     * Therefore, this step preserves the set of solutions.
-     *)
-    | ((_, Toption ty_sub'), _) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Toption lty_inner);
-            }
-          env)
-    (* If the type on the left is disjoint from null, then the Toption on the right is not
-       doing anything helpful. *)
-    | ((_, (Tintersection _ | Tunion _)), _)
-      when TUtils.is_type_disjoint env lty_sub (MakeType.null Reason.Rnone) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env)
-      (* We do not want to decompose Toption for these cases *)
-    | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
-      default_subtype_help env
-    | ((_, Tgeneric _), _) when subtype_env.Subtype_env.require_completeness ->
-      (* TODO(T69551141) handle type arguments ? *)
-      default_subtype_help env
-    (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
-     * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
-     * true as well.  We can fold the case where t1 is unconstrained
-     * into the case analysis below.
-     *
-     * In the case where it's easy to determine that null isn't in t1,
-     * we need only check t1 <: t2.
-     *)
-    | ((_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)), _) ->
-      (* TODO(T69551141) handle type arguments? *)
-      if null_not_subtype lty_sub then
-        env
-        |> Subtype.(
-             simplify_subtype
-               ~subtype_env
-               ~this_ty
-               ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-               ~rhs:
-                 { super_like; super_supportdyn = false; ty_super = lty_inner })
-      else
-        env
-        |> Subtype.(
-             simplify_subtype
-               ~subtype_env
-               ~this_ty
-               ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-               ~rhs:
-                 { super_like; super_supportdyn = false; ty_super = lty_inner })
-        ||| default_subtype_help
-    (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
-     * must also have ty_sub <: ty_super'.  The converse follows by
-     * widening and transitivity.  Therefore, this step preserves the set
-     * of solutions.
-     *)
-    | ((_, Tunapplied_alias _), _) ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | ( ( _,
-          ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-          | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ ) ),
-        _ ) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env)
-    (* This is treating the option as a union, and using the sound, but incomplete,
-       t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
-       TODO(T120921930): Don't do this if require_completeness is set.
-    *)
-    | ((_, Tneg _), _) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env)
-end
-
 and Subtype_union_r : sig
   val simplify :
     subtype_env:Subtype_env.t ->
@@ -3128,120 +3214,6 @@ end = struct
             lty_sub
             (r_super, lty_supers)
             env))
-end
-
-and Subtype_var_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:locl_phase Reason.t_ option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    locl_ty ->
-    locl_phase Reason.t_ * Tvid.t ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      ~fail
-      lty_sub
-      (r_super, var_super)
-      env =
-    let default env =
-      mk_issubtype_prop
-        ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
-        env
-        (LoclType lty_sub)
-        (LoclType (mk (r_super, Tvar var_super)))
-    in
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tvar var_super);
-            }
-          env)
-    in
-
-    match deref lty_sub with
-    | (_, Tunion _) -> default_subtype_help env
-    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      default_subtype_help env
-    (* We want to treat nullable as a union with the same rule as above.
-     * This is only needed for Tvar on right; other cases are dealt with specially as
-     * derived rules.
-     *)
-    | (r, Toption t) ->
-      let (env, t) = Env.expand_type env t in
-      (match get_node t with
-      (* We special case on `mixed <: Tvar _`, adding the entire `mixed` type
-         as a lower bound. This enables clearer error messages when upper bounds
-         are added to the type variable: transitive closure picks up the
-         entire `mixed` type, and not separately consider `null` and `nonnull` *)
-      | Tnonnull -> default env
-      | _ ->
-        let ty_null = MakeType.null r in
-        let lty_super = mk (r_super, Tvar var_super) in
-        env
-        |> Subtype.(
-             simplify_subtype
-               ~subtype_env
-               ~this_ty
-               ~lhs:{ sub_supportdyn; ty_sub = t }
-               ~rhs:
-                 { super_like; super_supportdyn = false; ty_super = lty_super })
-        &&& Subtype.(
-              simplify_subtype
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn; ty_sub = ty_null }
-                ~rhs:
-                  {
-                    super_like = false;
-                    super_supportdyn = false;
-                    ty_super = lty_super;
-                  }))
-    | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
-    | _ -> begin
-      let lty_super = mk (r_super, Tvar var_super) in
-      match subtype_env.Subtype_env.coerce with
-      | Some cd ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:(Some cd)
-          env
-          (LoclType lty_sub)
-          (LoclType lty_super)
-      | None ->
-        if super_like then
-          let (env, ty_sub) = Typing_dynamic.strip_covariant_like env lty_sub in
-          env
-          |> Subtype.(
-               simplify_subtype
-                 ~subtype_env
-                 ~this_ty
-                 ~lhs:{ sub_supportdyn; ty_sub }
-                 ~rhs:
-                   {
-                     super_like = false;
-                     super_supportdyn = false;
-                     ty_super = lty_super;
-                   })
-        else
-          default env
-    end
 end
 
 and Subtype_class : sig

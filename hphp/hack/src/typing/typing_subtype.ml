@@ -981,12 +981,20 @@ end = struct
         env
     | _ -> invalid ~fail env
 
-  and simplify_subtype_locl_super
-      ~subtype_env
-      ~this_ty
-      ~lhs:{ sub_supportdyn; ty_sub }
-      ~rhs:{ super_supportdyn; super_like; ty_super }
-      env : env * TL.subtype_prop =
+  and simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env =
+    let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
+    let { sub_supportdyn; ty_sub } = lhs
+    and { super_supportdyn; super_like; ty_super } = rhs in
+    simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
+    let (env, ty_super) = Env.expand_type env ty_super in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
+    let subtype_env =
+      Subtype_env.possibly_add_violated_constraint
+        subtype_env
+        ~r_sub:(get_reason ty_sub)
+        ~r_super:(get_reason ty_super)
+    in
     let fail =
       Subtype_env.fail
         subtype_env
@@ -1295,27 +1303,6 @@ end = struct
         ty_sub
         (r_super, ((pos_super, class_name), exact_super, tyl_super))
         env
-
-  and simplify_subtype
-      ~subtype_env
-      ~this_ty
-      ~lhs:({ ty_sub; _ } as lhs)
-      ~rhs:({ ty_super; _ } as rhs)
-      env =
-    let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
-    simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
-    let (env, ty_super) = Env.expand_type env ty_super in
-    let (env, ty_sub) = Env.expand_type env ty_sub in
-    simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
-    let lhs = { lhs with ty_sub } and rhs = { rhs with ty_super } in
-    let subtype_env =
-      Subtype_env.possibly_add_violated_constraint
-        subtype_env
-        ~r_sub:(get_reason ty_sub)
-        ~r_super:(get_reason ty_super)
-    in
-
-    simplify_subtype_locl_super ~subtype_env ~this_ty ~lhs ~rhs env
 end
 
 and Subtype_class_r : sig

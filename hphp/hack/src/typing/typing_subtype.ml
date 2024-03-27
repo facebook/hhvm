@@ -1123,16 +1123,38 @@ end = struct
         env
     | (_, Tdynamic) when is_dynamic ty_sub -> valid env
     | (_, Tdynamic) -> default_subtype_help env
-    | (r_prim, Tprim prim_ty) ->
-      Subtype_prim_r.simplify
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        ~fail
-        ty_sub
-        (r_prim, prim_ty)
-        env
+    | (r_super, Tprim prim_sup) -> begin
+      match (deref ty_sub, prim_sup) with
+      | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
+      | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
+      | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_sup ->
+        valid env
+      | ((_, Toption arg_ty_sub), Nast.Tnull) ->
+        simplify_subtype
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = arg_ty_sub }
+          ~rhs:
+            {
+              super_like = false;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tprim prim_sup);
+            }
+          env
+      | (_, _) ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like;
+              super_supportdyn = false;
+              ty_super = mk (r_super, Tprim prim_sup);
+            }
+          env
+    end
     | (_, Tany _) ->
       (match deref ty_sub with
       | (_, Tany _) -> valid env
@@ -1667,61 +1689,6 @@ end = struct
         valid env
       | (_, _) -> default_subtype_help env)
     | _ -> default_subtype_help env
-end
-
-and Subtype_prim_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    locl_phase ty ->
-    locl_phase Reason.t_ * Ast_defs.tprim ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      ~fail
-      lty_sub
-      (r_super, prim_sup)
-      env =
-    match (deref lty_sub, prim_sup) with
-    | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
-    | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
-    | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_sup ->
-      valid env
-    | ((_, Toption arg_ty_sub), Nast.Tnull) ->
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = arg_ty_sub }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tprim prim_sup);
-            }
-          env)
-    | (_, _) ->
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tprim prim_sup);
-            }
-          env)
 end
 
 and Subtype_nonnull_r : sig

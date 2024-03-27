@@ -161,6 +161,10 @@ struct Adapter {
 
 #### Customizations
 
+:::warning
+Serialization and deserialization customization should be used with caution and only produce the same wire type as the unadapted thrift type. Failing to do so can result in breaking backward compatibility or losing polyglot support. Please use `binary` field if you plan to customize serialization to non-conforming arbitrary binary.
+:::
+
 Thrift Adapter allows further customization points to avoid calling `fromThrift` and `toThrift` for optimization. Assume `obj` has type `AdaptedType`.
 
 * Comparison and Equality

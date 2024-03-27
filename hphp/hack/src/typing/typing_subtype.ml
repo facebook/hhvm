@@ -1010,6 +1010,129 @@ end = struct
         env
     | _ -> invalid ~fail env
 
+  and simplify_subtype_variance_for_injective_loop
+      ~(subtype_env : Subtype_env.t)
+      ~(sub_supportdyn : Reason.t option)
+      ~super_like
+      (cid : string)
+      (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
+      (children_tyl : locl_ty list)
+      (super_tyl : locl_ty list)
+      env =
+    let simplify_subtype_help reify_kind ~sub_supportdyn ty_sub ty_super env =
+      (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
+         correct, except for the case when the generic isn't erased. When a generic is
+         reified it is enforced as if it is it's own separate class in the runtime. i.e.
+         In the code:
+
+           class Box<reify T> {}
+           function box_int(): Box<int> { return new Box<~int>(); }
+
+         If is enforced like:
+           class Box<reify T> {}
+           class Box_int extends Box<int> {}
+           class Box_like_int extends Box<~int> {}
+
+           function box_int(): Box_int { return new Box_like_int(); }
+
+         Thus we cannot push the like type to the outside of generic like we can
+         we erased generics.
+      *)
+      let subtype_env =
+        if
+          (not Aast.(equal_reify_kind reify_kind Erased))
+          && Subtype_env.coercing_from_dynamic subtype_env
+        then
+          Subtype_env.{ subtype_env with coerce = None }
+        else
+          subtype_env
+      in
+      Subtype.(
+        simplify_subtype
+          ~subtype_env
+          ~this_ty:None
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          env)
+    in
+    let simplify_subtype_variance_for_injective_loop_help =
+      simplify_subtype_variance_for_injective_loop
+        ~subtype_env
+        ~sub_supportdyn
+        ~super_like
+    in
+    match (variance_reifiedl, children_tyl, super_tyl) with
+    | ([], _, _)
+    | (_, [], _)
+    | (_, _, []) ->
+      valid env
+    | ( (variance, reify_kind) :: variance_reifiedl,
+        child :: childrenl,
+        super :: superl ) ->
+      let simplify_subtype_help = simplify_subtype_help reify_kind in
+      begin
+        match variance with
+        | Ast_defs.Covariant ->
+          let super = Sd.liken ~super_like env super in
+          simplify_subtype_help ~sub_supportdyn child super env
+        | Ast_defs.Contravariant ->
+          let super =
+            mk
+              ( Reason.Rcontravariant_generic (get_reason super, cid),
+                get_node super )
+          in
+          simplify_subtype_help ~sub_supportdyn super child env
+        | Ast_defs.Invariant ->
+          let super' =
+            mk
+              (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
+          in
+          env
+          |> simplify_subtype_help
+               ~sub_supportdyn
+               child
+               (Sd.liken ~super_like env super')
+          &&& simplify_subtype_help
+                ~sub_supportdyn
+                super'
+                (Sd.liken ~super_like env child)
+      end
+      &&& simplify_subtype_variance_for_injective_loop_help
+            cid
+            variance_reifiedl
+            childrenl
+            superl
+
+  and simplify_subtype_variance_for_injective
+      ~(subtype_env : Subtype_env.t)
+      ~(sub_supportdyn : Reason.t option)
+      ~super_like
+      (cid : string)
+      (class_sub : Cls.t option) =
+    (* Before looping through the generic arguments, check to see if we should push
+       supportdyn onto them. This depends on the generic class itself. *)
+    let sub_supportdyn =
+      match (sub_supportdyn, class_sub) with
+      | (None, _)
+      | (_, None) ->
+        None
+      | (Some _, Some class_sub) ->
+        if
+          String.equal cid SN.Collections.cTraversable
+          || String.equal cid SN.Collections.cKeyedTraversable
+          || String.equal cid SN.Collections.cContainer
+          || Cls.has_ancestor class_sub SN.Collections.cContainer
+        then
+          sub_supportdyn
+        else
+          None
+    in
+    simplify_subtype_variance_for_injective_loop
+      ~subtype_env
+      ~sub_supportdyn
+      ~super_like
+      cid
+
   and simplify_subtype_classes
       ~fail
       ~(subtype_env : Subtype_env.t)
@@ -1072,7 +1195,7 @@ end = struct
                 List.map (Cls.tparams class_sub) ~f:(fun t ->
                     (t.tp_variance, t.tp_reified))
           in
-          Subtype_injective_ctor.simplify_subtype_variance_for_injective
+          simplify_subtype_variance_for_injective
             ~subtype_env
             ~sub_supportdyn
             ~super_like
@@ -1225,7 +1348,7 @@ end = struct
       lty_super
       env =
     let ((env, p) as res) =
-      Subtype_injective_ctor.simplify_subtype_variance_for_injective
+      simplify_subtype_variance_for_injective
         ~subtype_env
         ~sub_supportdyn
         ~super_like
@@ -3646,148 +3769,6 @@ end = struct
             lty_sub
             (r_super, lty_supers)
             env))
-end
-
-and Subtype_injective_ctor : sig
-  (** Given an injective type constructor C (e.g., a class)
-    C<t1, .., tn> <: C<u1, .., un> iff
-    t1 <:v1> u1 /\ ... /\ tn <:vn> un
-    where vi is the variance of the i'th generic parameter of C,
-    and <:v denotes the appropriate direction of subtyping for variance v *)
-  val simplify_subtype_variance_for_injective :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
-    super_like:bool ->
-    string ->
-    Cls.t option ->
-    (Ast_defs.variance * Aast.reify_kind) list ->
-    Typing_defs.locl_ty list ->
-    Typing_defs.locl_ty list ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
-end = struct
-  let rec simplify_subtype_variance_for_injective_loop
-      ~(subtype_env : Subtype_env.t)
-      ~(sub_supportdyn : Reason.t option)
-      ~super_like
-      (cid : string)
-      (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
-      (children_tyl : locl_ty list)
-      (super_tyl : locl_ty list) : env -> env * TL.subtype_prop =
-   fun env ->
-    let simplify_subtype_help reify_kind ~sub_supportdyn ty_sub ty_super env =
-      (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
-         correct, except for the case when the generic isn't erased. When a generic is
-         reified it is enforced as if it is it's own separate class in the runtime. i.e.
-         In the code:
-
-           class Box<reify T> {}
-           function box_int(): Box<int> { return new Box<~int>(); }
-
-         If is enforced like:
-           class Box<reify T> {}
-           class Box_int extends Box<int> {}
-           class Box_like_int extends Box<~int> {}
-
-           function box_int(): Box_int { return new Box_like_int(); }
-
-         Thus we cannot push the like type to the outside of generic like we can
-         we erased generics.
-      *)
-      let subtype_env =
-        if
-          (not Aast.(equal_reify_kind reify_kind Erased))
-          && Subtype_env.coercing_from_dynamic subtype_env
-        then
-          Subtype_env.{ subtype_env with coerce = None }
-        else
-          subtype_env
-      in
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-          env)
-    in
-    let simplify_subtype_variance_for_injective_loop_help =
-      simplify_subtype_variance_for_injective_loop
-        ~subtype_env
-        ~sub_supportdyn
-        ~super_like
-    in
-    match (variance_reifiedl, children_tyl, super_tyl) with
-    | ([], _, _)
-    | (_, [], _)
-    | (_, _, []) ->
-      valid env
-    | ( (variance, reify_kind) :: variance_reifiedl,
-        child :: childrenl,
-        super :: superl ) ->
-      let simplify_subtype_help = simplify_subtype_help reify_kind in
-      begin
-        match variance with
-        | Ast_defs.Covariant ->
-          let super = Sd.liken ~super_like env super in
-          simplify_subtype_help ~sub_supportdyn child super env
-        | Ast_defs.Contravariant ->
-          let super =
-            mk
-              ( Reason.Rcontravariant_generic (get_reason super, cid),
-                get_node super )
-          in
-          simplify_subtype_help ~sub_supportdyn super child env
-        | Ast_defs.Invariant ->
-          let super' =
-            mk
-              (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
-          in
-          env
-          |> simplify_subtype_help
-               ~sub_supportdyn
-               child
-               (Sd.liken ~super_like env super')
-          &&& simplify_subtype_help
-                ~sub_supportdyn
-                super'
-                (Sd.liken ~super_like env child)
-      end
-      &&& simplify_subtype_variance_for_injective_loop_help
-            cid
-            variance_reifiedl
-            childrenl
-            superl
-
-  let simplify_subtype_variance_for_injective
-      ~(subtype_env : Subtype_env.t)
-      ~(sub_supportdyn : Reason.t option)
-      ~super_like
-      (cid : string)
-      (class_sub : Cls.t option) =
-    (* Before looping through the generic arguments, check to see if we should push
-       supportdyn onto them. This depends on the generic class itself. *)
-    let sub_supportdyn =
-      match (sub_supportdyn, class_sub) with
-      | (None, _)
-      | (_, None) ->
-        None
-      | (Some _, Some class_sub) ->
-        if
-          String.equal cid SN.Collections.cTraversable
-          || String.equal cid SN.Collections.cKeyedTraversable
-          || String.equal cid SN.Collections.cContainer
-          || Cls.has_ancestor class_sub SN.Collections.cContainer
-        then
-          sub_supportdyn
-        else
-          None
-    in
-    simplify_subtype_variance_for_injective_loop
-      ~subtype_env
-      ~sub_supportdyn
-      ~super_like
-      cid
 end
 
 and Subtype_fun : sig

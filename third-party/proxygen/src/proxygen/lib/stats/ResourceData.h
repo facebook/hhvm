@@ -328,38 +328,16 @@ struct ResourceData : public PeriodicStatsDataBase {
            pressureUdpMemLimit_ != 0 && minUdpMemLimit_ != 0;
   }
 
-  // Nearest rank, inclusive on upper boundary
-  static double computePercentile(std::vector<double>& sortedValues,
-                                  double percentile) {
-    size_t size = sortedValues.size();
-    if (size == 0) {
-      if (percentile < 0 || percentile > 100) {
-        XLOG(ERR) << "Invalid percentile " << percentile;
-      }
-
-      return 0.0;
-    }
-
-    // p100 is the largest value, as well as p(N-1/N)
-    size_t index =
-        std::min((size_t)((double)size * percentile / 100.0), size - 1);
-    XLOG(DBG4) << "index=" << index << ", percentile=" << percentile
-               << "values=" << sortedValues;
-
-    return sortedValues[index];
-  }
-
   void setCpuStats(double cpuUsageRatio,
                    std::vector<double>&& cpuCoreUsageRatios,
                    double cpuUtilPercentileConfigured,
+                   double cpuRatioUtilPercentile,
                    double cpuSoftIrqUsageRatio,
                    std::vector<double>&& softIrqCpuCoreRatioUtils) {
     cpuRatioUtil_ = cpuUsageRatio;
     cpuCoreUsageRatios_ = std::move(cpuCoreUsageRatios);
-    std::sort(cpuCoreUsageRatios_.begin(), cpuCoreUsageRatios_.end());
     cpuUtilPercentileConfigured_ = cpuUtilPercentileConfigured;
-    cpuRatioUtilPercentile_ =
-        computePercentile(cpuCoreUsageRatios_, cpuUtilPercentileConfigured_);
+    cpuRatioUtilPercentile_ = cpuRatioUtilPercentile;
     cpuSoftIrqRatioUtil_ = cpuSoftIrqUsageRatio;
     softIrqCpuCoreRatioUtils_ = softIrqCpuCoreRatioUtils;
   }

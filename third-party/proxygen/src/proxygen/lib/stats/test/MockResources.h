@@ -13,6 +13,7 @@
 #include <folly/portability/GTest.h>
 
 #include <proxygen/facebook/lib/statistics/ARLResourceStats.h>
+#include <proxygen/facebook/lib/statistics/HostResources.h>
 #include <proxygen/lib/stats/ResourceData.h>
 
 using namespace proxygen;
@@ -55,6 +56,7 @@ class MockResources : public Resources {
         params.cpuUtilRatio,
         std::vector<double>(params.numCpuCores, params.cpuUtilRatio),
         80,
+        params.cpuUtilRatio,
         params.cpuSoftIrqUtilRatio,
         std::vector<double>(params.numCpuCores, params.cpuSoftIrqUtilRatio));
     uint64_t totalMemBytes = 100;

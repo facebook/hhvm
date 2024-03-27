@@ -662,16 +662,16 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
     | _ -> TL.IsSubtype (coerce, ty1, ty2) )
 
 (* All of our constraints have a type with additional context to support <:D *)
-type 'a lhs = {
+type lhs = {
   sub_supportdyn: Reason.t option;
-  ty_sub: 'a;
+  ty_sub: locl_ty;
 }
 
 module rec Subtype : sig
-  type 'a rhs = {
+  type rhs = {
     super_supportdyn: bool;
     super_like: bool;
-    ty_super: 'a;
+    ty_super: locl_ty;
   }
 
   (** Given types ty_sub and ty_super, attempt to
@@ -686,18 +686,7 @@ module rec Subtype : sig
    The parameter defaults to false to guard against incorrectly propagating the option. When
    simplifying ty_sub only (e.g. reducing t|u <: v to t<:v && u<:v) it is correct to
    propagate it.
- *)
-  val simplify_subtype :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    lhs:Typing_defs.locl_ty lhs ->
-    rhs:Typing_defs.locl_ty rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
 
-  (** Attempt to "solve" a subtype assertion ty_sub <: ty_super.
-    Return a proposition that is logically stronger and simpler than
-    the original assertion
     The logical relationship between the original and returned proposition
     depends on the flags require_soundness and require_completeness.
     Fail with Unsat error_function if
@@ -711,11 +700,11 @@ module rec Subtype : sig
       vec<T> <: vec<I>    ==>  True
     This last one would be left as T <: I if subtype_env.require_completeness=true
    *)
-  val simplify_subtype_i :
+  val simplify_subtype :
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
-    lhs:Typing_defs.internal_type lhs ->
-    rhs:Typing_defs.internal_type rhs ->
+    lhs:lhs ->
+    rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 
@@ -723,32 +712,25 @@ module rec Subtype : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:Typing_defs.internal_type lhs ->
-    rhs:Typing_defs.internal_type rhs ->
+    lhs:lhs ->
+    rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
-  type 'a rhs = {
+  type rhs = {
     super_supportdyn: bool;
     super_like: bool;
-    ty_super: 'a;
+    ty_super: locl_ty;
   }
 
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
       =
-    match (ty_sub, ty_super) with
-    | (LoclType ty1, LoclType ty2) when phys_equal ty1 ty2 -> (env, TL.valid)
-    | _ -> simplify_subtype ()
+    if phys_equal ty_sub ty_super then
+      (env, TL.valid)
+    else
+      simplify_subtype ()
 
-  let rec simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env =
-    simplify_subtype_i
-      ~subtype_env
-      ~this_ty
-      ~lhs:{ lhs with ty_sub = LoclType lhs.ty_sub }
-      ~rhs:{ rhs with ty_super = LoclType rhs.ty_super }
-      env
-
-  and default_subtype_locl_ty_locl_ty
+  let rec default_subtype_locl_ty_locl_ty
       ~subtype_env
       ~this_ty
       ~fail
@@ -765,8 +747,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:{ super_like; super_supportdyn; ty_super = LoclType ty_super }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn; ty_super }
           env
       | (Some cd, _) ->
         mk_issubtype_prop
@@ -780,8 +762,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:{ super_like; super_supportdyn; ty_super = LoclType lty_super }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn; ty_super = lty_super }
           env
     end
     | (r_sub, Tprim Nast.Tvoid) ->
@@ -809,35 +791,19 @@ end = struct
         ~subtype_env
         ~this_ty
         ~fail
-        ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-        ~rhs:{ super_like; super_supportdyn; ty_super = LoclType lty_super }
+        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+        ~rhs:{ super_like; super_supportdyn; ty_super = lty_super }
         env
 
   and default_subtype ~subtype_env ~this_ty ~fail ~lhs ~rhs env =
-    let (env, ty_super) = Env.expand_internal_type env rhs.ty_super in
+    let (env, ty_super) = Env.expand_type env rhs.ty_super in
     let rhs = { rhs with ty_super } in
-    let (env, ty_sub) = Env.expand_internal_type env lhs.ty_sub in
+    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
     let lhs = { lhs with ty_sub } in
-    (* We further refine the default subtype case for rules that apply to all
-     * LoclTypes but not to ConstraintTypes
-     *)
-    match ty_super with
-    | LoclType lty_super ->
-      (match ty_sub with
-      | ConstraintType _ ->
-        default_subtype_inner ~subtype_env ~this_ty ~fail ~lhs ~rhs env
-      | LoclType lty_sub ->
-        default_subtype_locl_ty_locl_ty
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ lhs with ty_sub = lty_sub }
-          ~rhs:{ rhs with ty_super = lty_super }
-          env)
-    | ConstraintType _ ->
-      default_subtype_inner ~subtype_env ~this_ty ~fail ~lhs ~rhs env
 
-  and default_subtype_inner_locl_ty
+    default_subtype_locl_ty_locl_ty ~subtype_env ~this_ty ~fail ~lhs ~rhs env
+
+  and default_subtype_inner
       ~subtype_env
       ~this_ty
       ~fail
@@ -847,7 +813,7 @@ end = struct
     match deref lty_sub with
     | (_, Tunion tyl) ->
       let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
-        simplify_subtype_i ~subtype_env ~this_ty:None ~lhs ~rhs env
+        simplify_subtype ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
       Common.simplify_union_l
         ~subtype_env
@@ -867,7 +833,10 @@ end = struct
        * any other upper bound, we leave the subtyping query as it is.
        *)
       let (env, simplified_super_ty) =
-        Typing_solver_utils.remove_tyvar_from_upper_bound env id ty_super
+        Typing_solver_utils.remove_tyvar_from_upper_bound
+          env
+          id
+          (LoclType ty_super)
       in
       (* If the type is already in the upper bounds of the type variable,
        * then we already know that this subtype assertion is valid
@@ -886,43 +855,23 @@ end = struct
             ~coerce:subtype_env.Subtype_env.coerce
             env
             (LoclType lty_sub)
-            ty_super)
+            (LoclType ty_super))
     | (r_sub, Tintersection tyl) ->
       (* A & B <: C iif A <: C | !B *)
       (match Subtype_negation.find_type_with_exact_negation env tyl with
       | (env, Some non_ty, tyl) -> begin
-        match ty_super with
-        | LoclType ty_super ->
-          let (env, ty_super) = TUtils.union env ty_super non_ty in
-          let ty_sub = MakeType.intersection r_sub tyl in
-          simplify_subtype
-            ~subtype_env
-            ~this_ty:None
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            env
-        | ConstraintType cty_super ->
-          let (env, ty_fresh) = Env.fresh_type env Pos.none in
-          let (env, ty_super) = TUtils.union env ty_fresh non_ty in
-          let ty_sub = MakeType.intersection r_sub tyl in
-          simplify_subtype
-            ~subtype_env
-            ~this_ty:None
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            env
-          &&& Subtype_constraint_super.(
-                simplify
-                  ~subtype_env
-                  ~this_ty:None
-                  ~fail
-                  ~lhs:{ sub_supportdyn = None; ty_sub = LoclType ty_fresh }
-                  ~rhs:
-                    { super_like = false; super_supportdyn = false; cty_super })
+        let (env, ty_super) = TUtils.union env ty_super non_ty in
+        let ty_sub = MakeType.intersection r_sub tyl in
+        simplify_subtype
+          ~subtype_env
+          ~this_ty:None
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          env
       end
       | _ ->
         let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
-          simplify_subtype_i ~subtype_env ~this_ty:None ~lhs ~rhs env
+          simplify_subtype ~subtype_env ~this_ty:None ~lhs ~rhs env
         in
         (* Otherwise use the incomplete common case which doesn't require inspection of the rhs *)
         Common.simplify_intersection_l
@@ -939,12 +888,24 @@ end = struct
         ~coerce:subtype_env.Subtype_env.coerce
         env
         (LoclType lty_sub)
-        ty_super
+        (LoclType ty_super)
     | (r_generic, Tgeneric (name_sub, tyargs)) -> begin
-      match ty_super with
-      | ConstraintType _ ->
+      match
+        VisitedGoals.try_add_visited_generic_sub
+          subtype_env.Subtype_env.visited
+          name_sub
+          ty_super
+      with
+      | None ->
+        (* If we've seen this type parameter before then we must have gone
+             * round a cycle so we fail
+        *)
+        invalid ~fail env
+      | Some new_visited -> begin
+        let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+
         let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-          simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
+          simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
         in
         Common.simplify_generic_l
           ~subtype_env
@@ -955,41 +916,14 @@ end = struct
           { super_like; super_supportdyn = false; ty_super }
           { super_like = false; super_supportdyn = false; ty_super }
           env
-      | LoclType lty_super ->
-        (match
-           VisitedGoals.try_add_visited_generic_sub
-             subtype_env.Subtype_env.visited
-             name_sub
-             lty_super
-         with
-        | None ->
-          (* If we've seen this type parameter before then we must have gone
-               * round a cycle so we fail
-          *)
-          invalid ~fail env
-        | Some new_visited -> begin
-          let subtype_env = Subtype_env.set_visited subtype_env new_visited in
-
-          let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-            simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
-          in
-          Common.simplify_generic_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop
-            (sub_supportdyn, r_generic, name_sub, tyargs)
-            { super_like; super_supportdyn = false; ty_super }
-            { super_like = false; super_supportdyn = false; ty_super }
-            env
-        end)
+      end
     end
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env
     | (_, Taccess _) -> invalid ~fail env
     | (r, Tnewtype (n, _, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-        simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
+        simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
       in
       Common.simplify_newtype_l
         ~subtype_env
@@ -1001,7 +935,7 @@ end = struct
         env
     | (r, Tdependent (dep_ty, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-        simplify_subtype_i ~subtype_env ~this_ty ~lhs ~rhs env
+        simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
       in
       Common.simplify_dependent_l
         ~subtype_env
@@ -1013,44 +947,16 @@ end = struct
         env
     | _ -> invalid ~fail env
 
-  and default_subtype_inner_cty
-      ~subtype_env:_ ~this_ty:_ ~fail ~lhs:_ ~rhs:_ env =
-    invalid ~fail env
-
-  and default_subtype_inner
-      ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
-    (* This inner function contains typing rules that are based solely on the subtype
-     * if you need to pattern match on the super type it should NOT be included
-     * here
-     *)
-    match ty_sub with
-    | ConstraintType ty_sub ->
-      default_subtype_inner_cty
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs
-        env
-    | LoclType ty_sub ->
-      default_subtype_inner_locl_ty
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs
-        env
-
   and simplify_subtype_locl_super
       ~subtype_env
       ~this_ty
-      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
       ~rhs:{ super_supportdyn; super_like; ty_super = lty_super }
       env : env * TL.subtype_prop =
     let fail =
       Subtype_env.fail
         subtype_env
-        ~ty_sub:ity_sub
+        ~ty_sub:(LoclType lty_sub)
         ~ty_super:(LoclType lty_super)
     in
     (* We *know* that the assertion is unsatisfiable *)
@@ -1061,7 +967,7 @@ end = struct
         ~sub_supportdyn
         ~coerce:subtype_env.Subtype_env.coerce
         env
-        ity_sub
+        (LoclType lty_sub)
         (LoclType lty_super)
     in
     let default_subtype_help env =
@@ -1069,234 +975,167 @@ end = struct
         ~subtype_env
         ~this_ty
         ~fail
-        ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-        ~rhs:{ super_supportdyn; super_like; ty_super = LoclType lty_super }
+        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super = lty_super }
         env
     in
     match deref lty_super with
     | (r_super, Tvar var_super) ->
-      (match ity_sub with
-      | ConstraintType _ -> default env
-      | LoclType lty_sub ->
-        Subtype_var_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty_sub
-          (r_super, var_super)
-          env)
+      Subtype_var_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, var_super)
+        env
+    | (_, Tintersection _) when is_union lty_sub -> default_subtype_help env
     | (_, Tintersection tyl) ->
-      (match ity_sub with
-      | LoclType lty when is_union lty -> default_subtype_help env
       (* t <: (t1 & ... & tn)
        *   if and only if
        * t <: t1 /\  ... /\ t <: tn
        *)
-      | _ ->
-        List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
-            let ity_super = LoclType ty_super in
-            res
-            &&& simplify_subtype_i
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-                  ~rhs:
-                    {
-                      super_like = false;
-                      super_supportdyn = false;
-                      ty_super = ity_super;
-                    }))
+      List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
+          res
+          &&& simplify_subtype
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
     (* Empty union encodes the bottom type nothing *)
     | (_, Tunion []) -> default_subtype_help env
     (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
     | (_, Tunion [ty_super']) ->
-      simplify_subtype_i
+      simplify_subtype
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-        ~rhs:
-          {
-            super_like;
-            super_supportdyn = false;
-            ty_super = LoclType ty_super';
-          }
+        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super = ty_super' }
         env
     | (r, Tunion (_ :: _ as tyl_super)) ->
-      (match ity_sub with
-      | ConstraintType _ ->
-        Subtype_union_r.simplify_sub_union
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ity_sub
-          (r, tyl_super)
-          env
-      | LoclType lty_sub ->
-        Subtype_union_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty_sub
-          (r, tyl_super)
-          env)
+      Subtype_union_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r, tyl_super)
+        env
     | (r_super, Toption arg_ty_super) ->
       let (env, ety) = Env.expand_type env arg_ty_super in
       (* Toption(Tnonnull) encodes mixed, which is our top type.
        * Everything subtypes mixed *)
       if is_nonnull ety then
         valid env
-      else (
-        match ity_sub with
-        | ConstraintType _ -> default_subtype_help env
-        | LoclType lty_sub ->
-          Subtype_option_r.simplify
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~super_like
-            ~fail
-            lty_sub
-            (r_super, ety)
-            env
-      )
-    | (r_super, Tdependent (d_sup, bound_sup)) ->
-      let (env, bound_sup) = Env.expand_type env bound_sup in
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType ty_sub ->
-        Subtype_dependent_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ty_sub
-          (r_super, (d_sup, bound_sup))
-          env)
-    | (_, Taccess _) -> invalid_env env
-    | (r_super, Tgeneric (name_super, tyargs_super)) ->
-      (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
-         Env.get_lower_bounds *)
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      (* If subtype and supertype are the same generic parameter, we're done *)
-      | LoclType ty_sub ->
-        Subtype_generic_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ty_sub
-          (r_super, (name_super, tyargs_super))
-          env)
-    | (r_nonnull, Tnonnull) ->
-      (match ity_sub with
-      | ConstraintType cty -> begin
-        match deref_constraint_type cty with
-        | (_, (Thas_member _ | Tdestructure _)) -> valid env
-        | _ -> default_subtype_help env
-      end
-      | LoclType lty ->
-        Subtype_nonnull_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty
-          r_nonnull
-          env)
-    | (r_dynamic, Tdynamic)
-      when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-           && (Subtype_env.coercing_to_dynamic subtype_env
-              || Tast.is_under_dynamic_assumptions env.checked) ->
-      (match ity_sub with
-      | ConstraintType _cty ->
-        (* TODO *)
-        default_subtype_help env
-      | LoclType lty_sub ->
-        Subtype_sound_dynamic_r.simplify
+      else
+        Subtype_option_r.simplify
           ~subtype_env
           ~sub_supportdyn
           ~this_ty
           ~super_like
           ~fail
           lty_sub
-          r_dynamic
-          env)
-    | (_, Tdynamic) ->
-      (match ity_sub with
-      | LoclType lty when is_dynamic lty -> valid env
-      | ConstraintType _
-      | LoclType _ ->
-        default_subtype_help env)
+          (r_super, ety)
+          env
+    | (r_super, Tdependent (d_sup, bound_sup)) ->
+      let (env, bound_sup) = Env.expand_type env bound_sup in
+
+      Subtype_dependent_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        lty_sub
+        (r_super, (d_sup, bound_sup))
+        env
+    | (_, Taccess _) -> invalid_env env
+    | (r_super, Tgeneric (name_super, tyargs_super)) ->
+      (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
+         Env.get_lower_bounds *)
+      Subtype_generic_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, (name_super, tyargs_super))
+        env
+    | (r_nonnull, Tnonnull) ->
+      Subtype_nonnull_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        r_nonnull
+        env
+    | (r_dynamic, Tdynamic)
+      when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+           && (Subtype_env.coercing_to_dynamic subtype_env
+              || Tast.is_under_dynamic_assumptions env.checked) ->
+      Subtype_sound_dynamic_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        r_dynamic
+        env
+    | (_, Tdynamic) when is_dynamic lty_sub -> valid env
+    | (_, Tdynamic) -> default_subtype_help env
     | (r_prim, Tprim prim_ty) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        Subtype_prim_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty
-          (r_prim, prim_ty)
-          env)
+      Subtype_prim_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_prim, prim_ty)
+        env
     | (_, Tany _) ->
-      (match ity_sub with
-      | ConstraintType _ -> valid env
-      | LoclType ty_sub ->
-        (match deref ty_sub with
-        | (_, Tany _) -> valid env
-        | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype_help env
-        | _ when subtype_env.Subtype_env.no_top_bottom -> default env
-        | _ -> valid env))
+      (match deref lty_sub with
+      | (_, Tany _) -> valid env
+      | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype_help env
+      | _ when subtype_env.Subtype_env.no_top_bottom -> default env
+      | _ -> valid env)
     | (r_super, Tfun ft_super) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        (match deref lty with
-        | (r_sub, Tfun ft_sub) ->
-          Subtype_fun.simplify_subtype_funs
-            ~subtype_env
-            ~check_return:true
-            ~for_override:false
-            ~super_like
-            r_sub
-            ft_sub
-            r_super
-            ft_super
-            env
-        | _ -> default_subtype_help env))
+      (match deref lty_sub with
+      | (r_sub, Tfun ft_sub) ->
+        Subtype_fun.simplify_subtype_funs
+          ~subtype_env
+          ~check_return:true
+          ~for_override:false
+          ~super_like
+          r_sub
+          ft_sub
+          r_super
+          ft_super
+          env
+      | _ -> default_subtype_help env)
     | (_, Ttuple tyl_super) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
-      | LoclType lty ->
-        (match get_node lty with
-        | Ttuple tyl_sub
-          when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
-          wfold_left2
-            (fun res ty_sub ty_super ->
-              let ty_super = Sd.liken ~super_like env ty_super in
-              res
-              &&& simplify_subtype
-                    ~subtype_env
-                    ~this_ty:None
-                    ~lhs:{ sub_supportdyn; ty_sub }
-                    ~rhs:
-                      { super_like = false; super_supportdyn = false; ty_super })
-            (env, TL.valid)
-            tyl_sub
-            tyl_super
-        | _ -> default_subtype_help env))
+      (match get_node lty_sub with
+      | Ttuple tyl_sub
+        when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
+        wfold_left2
+          (fun res ty_sub ty_super ->
+            let ty_super = Sd.liken ~super_like env ty_super in
+            res
+            &&& simplify_subtype
+                  ~subtype_env
+                  ~this_ty:None
+                  ~lhs:{ sub_supportdyn; ty_sub }
+                  ~rhs:
+                    { super_like = false; super_supportdyn = false; ty_super })
+          (env, TL.valid)
+          tyl_sub
+          tyl_super
+      | _ -> default_subtype_help env)
     | ( r_super,
         Tshape
           {
@@ -1304,117 +1143,94 @@ end = struct
             s_unknown_value = shape_kind_super;
             s_fields = fdm_super;
           } ) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty in
-        let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
-        (match deref lty with
-        | ( r_sub,
-            Tshape
-              {
-                s_origin = origin_sub;
-                s_unknown_value = shape_kind_sub;
-                s_fields = fdm_sub;
-              } ) ->
-          if same_type_origin origin_super origin_sub then
-            (* Fast path for shape types: if they have the same origin,
-             * they are equal type. *)
-            valid env
-          else
-            Subtype_shape.simplify_subtype_shape
-              ~subtype_env
-              ~env
-              ~this_ty
-              ~super_like
-              (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
-              (super_supportdyn, r_super, shape_kind_super, fdm_super)
-        | _ -> default_subtype_help env))
+      let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty_sub in
+      let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
+      (match deref lty with
+      | ( r_sub,
+          Tshape
+            {
+              s_origin = origin_sub;
+              s_unknown_value = shape_kind_sub;
+              s_fields = fdm_sub;
+            } ) ->
+        if same_type_origin origin_super origin_sub then
+          (* Fast path for shape types: if they have the same origin,
+           * they are equal type. *)
+          valid env
+        else
+          Subtype_shape.simplify_subtype_shape
+            ~subtype_env
+            ~env
+            ~this_ty
+            ~super_like
+            (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
+            (super_supportdyn, r_super, shape_kind_super, fdm_super)
+      | _ -> default_subtype_help env)
     | (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup)) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        Subtype_vec_or_dict_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty
-          (r_super, (lty_key_sup, lty_val_sup))
-          env)
+      Subtype_vec_or_dict_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, (lty_key_sup, lty_val_sup))
+        env
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
     | (r_supportdyn, Tnewtype (name_super, [tyarg_super], bound_super))
       when String.equal name_super SN.Classes.cSupportDyn ->
-      (match ity_sub with
-      | ConstraintType _cty ->
-        (* TODO *)
-        default_subtype_help env
-      | LoclType lty_sub ->
-        Subtype_supportdyn_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty_sub
-          (r_supportdyn, (tyarg_super, bound_super))
-          env)
+      Subtype_supportdyn_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_supportdyn, (tyarg_super, bound_super))
+        env
     | (r_super, Tnewtype (name_super, tyl_super, bound_super)) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        Subtype_newtype_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          lty
-          (r_super, (name_super, tyl_super, bound_super))
-          env)
+      Subtype_newtype_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, (name_super, tyl_super, bound_super))
+        env
     | (_, Tunapplied_alias n_sup) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType lty ->
-        (match deref lty with
-        | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
-        | _ -> default_subtype_help env))
+      (match deref lty_sub with
+      | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
+      | _ -> default_subtype_help env)
     | (r_super, Tneg (Neg_prim tprim_super)) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType ty_sub ->
-        Subtype_neg_prim_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ty_sub
-          (r_super, tprim_super)
-          env)
+      Subtype_neg_prim_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, tprim_super)
+        env
     | (reason_super, Tneg (Neg_predicate predicate)) ->
       Type_switch.(
         simplify
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:{ reason_super; predicate; ty_super_opt = None; super_like }
           env)
     | (r_super, Tneg (Neg_class cls_id_super)) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType ty_sub ->
-        Subtype_neg_class_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ty_sub
-          (r_super, cls_id_super)
-          env)
+      Subtype_neg_class_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, cls_id_super)
+        env
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
       when (not (Class_refinement.is_empty cr_super))
            && (subtype_env.Subtype_env.require_soundness
@@ -1426,32 +1242,27 @@ end = struct
                   * only if we know for sure that we can discharge it on
                   * the spot; e.g., when ety_sub is a class-ish. This
                   * limits the information lost by skipping refinements. *)
-              TUtils.is_class_i ity_sub) ->
+              TUtils.is_class lty_sub) ->
       Subtype_class_r.simplify_with_refinements
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
         ~super_like
-        ity_sub
+        lty_sub
         (r_super, (x_super, cr_super, tyl_super))
         env
     | (r_super, Tclass ((pos_super, class_name), exact_super, tyl_super)) ->
-      (match ity_sub with
-      | ConstraintType _ -> default_subtype_help env
-      | LoclType ty_sub ->
-        Subtype_class_r.simplify
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          ~super_like
-          ~fail
-          ty_sub
-          (r_super, ((pos_super, class_name), exact_super, tyl_super))
-          env)
+      Subtype_class_r.simplify
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        lty_sub
+        (r_super, ((pos_super, class_name), exact_super, tyl_super))
+        env
 
-  and simplify_subtype_i
-      ~(subtype_env : Subtype_env.t) ~(this_ty : locl_ty option) ~lhs ~rhs env :
-      env * TL.subtype_prop =
+  and simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env =
     let { sub_supportdyn; ty_sub } = lhs
     and { super_supportdyn; super_like; ty_super } = rhs in
     Logging.log_subtype_i
@@ -1479,43 +1290,21 @@ end = struct
             " in_transitive_closure"
             subtype_env.Subtype_env.in_transitive_closure)
       env
-      ty_sub
-      ty_super;
+      (LoclType ty_sub)
+      (LoclType ty_super);
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
-    let (env, ty_super) = Env.expand_internal_type env ty_super in
-    let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+    let (env, ty_super) = Env.expand_type env ty_super in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
-    let lhs = { lhs with ty_sub } in
+    let lhs = { lhs with ty_sub } and rhs = { rhs with ty_super } in
     let subtype_env =
       Subtype_env.possibly_add_violated_constraint
         subtype_env
-        ~r_sub:(reason ty_sub)
-        ~r_super:(reason ty_super)
+        ~r_sub:(get_reason ty_sub)
+        ~r_super:(get_reason ty_super)
     in
-    match ty_super with
-    (* First deal with internal constraint types *)
-    | ConstraintType cty_super ->
-      Subtype_constraint_super.(
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~fail:(Subtype_env.fail subtype_env ~ty_sub ~ty_super)
-          ~lhs:{ ty_sub; sub_supportdyn = lhs.sub_supportdyn }
-          ~rhs:
-            {
-              super_like = rhs.super_like;
-              super_supportdyn = rhs.super_supportdyn;
-              cty_super;
-            }
-          env)
-      (* Next deal with all locl types *)
-    | LoclType lty_super ->
-      simplify_subtype_locl_super
-        ~subtype_env
-        ~this_ty
-        ~lhs
-        ~rhs:{ rhs with ty_super = lty_super }
-        env
+
+    simplify_subtype_locl_super ~subtype_env ~this_ty ~lhs ~rhs env
 end
 
 and Subtype_class_r : sig
@@ -1535,7 +1324,7 @@ and Subtype_class_r : sig
     sub_supportdyn:Reason.t option ->
     this_ty:locl_ty option ->
     super_like:bool ->
-    internal_type ->
+    locl_ty ->
     locl_phase Reason.t_ * (pos_id * locl_phase class_refinement * locl_ty list) ->
     env ->
     env * TL.subtype_prop
@@ -1545,7 +1334,7 @@ end = struct
       ~sub_supportdyn
       ~this_ty
       ~super_like
-      ity_sub
+      lty_sub
       (r_super, (class_id_super, cr_super, tyargs_super))
       env =
     (* We discharge class refinements before anything
@@ -1565,19 +1354,20 @@ end = struct
             (loty, upty)
         in
         let htm = { htm_id = type_id; htm_lower; htm_upper } in
-        let lhs = { sub_supportdyn; ty_sub = ity_sub }
+        let lhs = { sub_supportdyn; ty_sub = lty_sub }
         and rhs =
           Has_type_member.{ reason_super = r_super; has_type_member = htm }
         in
         let subtype_env =
           Subtype_env.possibly_add_violated_constraint
             subtype_env
-            ~r_sub:(reason ity_sub)
+            ~r_sub:(get_reason lty_sub)
             ~r_super
         in
         let ity_super =
           ConstraintType (mk_constraint_type (r_super, Thas_type_member htm))
         in
+        let ity_sub = LoclType lty_sub in
         let fail =
           Subtype_env.fail subtype_env ~ty_sub:ity_sub ~ty_super:ity_super
         in
@@ -1600,12 +1390,11 @@ end = struct
       mk (r_super, Tclass (class_id_super, nonexact, tyargs_super))
     in
     Subtype.(
-      simplify_subtype_i
+      simplify_subtype
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-        ~rhs:
-          { super_like; super_supportdyn = false; ty_super = LoclType ty_super })
+        ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super })
 
   let simplify
       ~subtype_env
@@ -1627,13 +1416,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = LoclType lty_super;
-            }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
           env)
     in
     match deref lty_sub with
@@ -1793,13 +1577,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super =
-                LoclType (mk (r_super, Tneg (Neg_class (pos_super, c_super))));
+              ty_super = mk (r_super, Tneg (Neg_class (pos_super, c_super)));
             }
           env)
 end
@@ -1867,12 +1650,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Tneg (Neg_prim prim_super)));
+              ty_super = mk (r_super, Tneg (Neg_prim prim_super));
             }
           env)
 end
@@ -1987,13 +1770,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super =
-                LoclType (mk (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup)));
+              ty_super = mk (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup));
             }
           env)
 end
@@ -2043,12 +1825,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Tprim prim_sup));
+              ty_super = mk (r_super, Tprim prim_sup);
             }
           env)
 end
@@ -2083,12 +1865,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_nonnull, Tnonnull));
+              ty_super = mk (r_nonnull, Tnonnull);
             }
           env)
     in
@@ -2152,13 +1934,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = LoclType lty_super;
-            }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
           env)
     in
     let (generic_lower_bounds, other_lower_bounds) =
@@ -2313,13 +2090,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = LoclType lty_super;
-            }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
           env)
     in
 
@@ -2415,17 +2187,16 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
               ty_super =
-                LoclType
-                  (mk
-                     ( r_supportdyn,
-                       Tnewtype
-                         (SN.Classes.cSupportDyn, [lty_inner], bound_super) ));
+                mk
+                  ( r_supportdyn,
+                    Tnewtype (SN.Classes.cSupportDyn, [lty_inner], bound_super)
+                  );
             }
           env)
     in
@@ -2558,13 +2329,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = LoclType lty_super;
-            }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
           env)
     in
     match deref lty_sub with
@@ -2758,13 +2524,8 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = LoclType lty_super;
-            }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
           env)
     in
     let dyn =
@@ -3182,12 +2943,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Toption lty_inner));
+              ty_super = mk (r_super, Toption lty_inner);
             }
           env)
     in
@@ -3342,17 +3103,6 @@ end = struct
 end
 
 and Subtype_union_r : sig
-  val simplify_sub_union :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    fail:Typing_error.t option ->
-    internal_type ->
-    locl_phase Reason.t_ * locl_ty list ->
-    env ->
-    env * TL.subtype_prop
-
   val simplify :
     subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
@@ -3395,15 +3145,15 @@ end = struct
         in
         let (env, props) =
           Subtype.(
-            simplify_subtype_i
+            simplify_subtype
               ~subtype_env
               ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = LoclType inter_ty }
+              ~lhs:{ sub_supportdyn; ty_sub = inter_ty }
               ~rhs:
                 {
                   super_like = false;
                   super_supportdyn = false;
-                  ty_super = LoclType (mk tvar_ty);
+                  ty_super = mk tvar_ty;
                 }
               env)
         in
@@ -3417,7 +3167,7 @@ end = struct
       ~this_ty
       ~super_like
       ~fail
-      ity_sub
+      lty_sub
       (r_super, lty_supers)
       env =
     let ( ||| ) = ( ||| ) ~fail in
@@ -3429,12 +3179,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Tunion lty_supers));
+              ty_super = mk (r_super, Tunion lty_supers);
             }
           env)
     in
@@ -3442,39 +3192,32 @@ end = struct
        t <: u with super-like set, and not also try t <: dynamic or run finish *)
     let avoid_disjunctions env ty =
       let (env, ty) = Env.expand_type env ty in
-      match (ity_sub, get_node ty) with
-      | (LoclType lty, Tnewtype (n2, _, _)) ->
-        (match get_node lty with
-        | Tnewtype (n1, _, _)
-          when String.equal n1 n2
-               && not (String.equal n1 SN.Classes.cSupportDyn) ->
-          (env, true)
-        | _ -> (env, false))
+      match (get_node lty_sub, get_node ty) with
+      | (Tnewtype (n1, _, _), Tnewtype (n2, _, _))
+        when String.equal n1 n2 && not (String.equal n1 SN.Classes.cSupportDyn)
+        ->
+        (env, true)
       | _ -> (env, false)
     in
     let finish env =
-      match ity_sub with
-      | LoclType lty -> begin
-        match get_node lty with
-        | Tnewtype _
-        | Tdependent _
-        | Tgeneric _ ->
-          default_subtype_help env
-        | _ -> invalid_env env
-      end
+      match get_node lty_sub with
+      | Tnewtype _
+      | Tdependent _
+      | Tgeneric _ ->
+        default_subtype_help env
       | _ -> invalid_env env
     in
     let simplify_subtype_of_dynamic env =
       Subtype.(
-        simplify_subtype_i
+        simplify_subtype
           ~subtype_env
           ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like = false;
               super_supportdyn = false;
-              ty_super = LoclType (MakeType.dynamic r_super);
+              ty_super = MakeType.dynamic r_super;
             }
           env)
     in
@@ -3596,15 +3339,15 @@ end = struct
             if istyvar then
               env
               |> Subtype.(
-                   simplify_subtype_i
+                   simplify_subtype
                      ~subtype_env
                      ~this_ty
-                     ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+                     ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
                      ~rhs:
                        {
                          super_like = true;
                          super_supportdyn = false;
-                         ty_super = LoclType ty;
+                         ty_super = ty;
                        })
               ||| dyn_finish ty
             else
@@ -3624,30 +3367,26 @@ end = struct
                     }
                   env)
               &&& Subtype.(
-                    simplify_subtype_i
+                    simplify_subtype
                       ~subtype_env
                       ~this_ty
-                      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+                      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
                       ~rhs:
                         {
                           super_like = false;
                           super_supportdyn = false;
-                          ty_super = LoclType ty;
+                          ty_super = ty;
                         })
             in
             env |> simplify_pushed_like ||| dyn_finish ty
       in
       Subtype.(
-        simplify_subtype_i
+        simplify_subtype
           ~subtype_env
           ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
-            {
-              super_like = delay_push;
-              super_supportdyn = false;
-              ty_super = LoclType ty;
-            }
+            { super_like = delay_push; super_supportdyn = false; ty_super = ty }
           env)
       ||| try_push
     | _ ->
@@ -3662,13 +3401,12 @@ end = struct
         match tys with
         | [] -> invalid_env env
         | ty :: tys ->
-          let ty = LoclType ty in
           env
           |> Subtype.(
-               simplify_subtype_i
+               simplify_subtype
                  ~subtype_env
                  ~this_ty
-                 ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+                 ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
                  ~rhs:{ super_like; super_supportdyn = false; ty_super = ty })
           ||| try_disjuncts tys
       in
@@ -3692,12 +3430,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Tunion lty_supers));
+              ty_super = mk (r_super, Tunion lty_supers);
             }
           env)
     in
@@ -3766,27 +3504,27 @@ end = struct
           if_unsat
             invalid_env
             Subtype.(
-              simplify_subtype_i
+              simplify_subtype
                 ~subtype_env
                 ~this_ty
-                ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_null }
+                ~lhs:{ sub_supportdyn; ty_sub = ty_null }
                 ~rhs:
                   {
                     super_like = false;
                     super_supportdyn = false;
-                    ty_super = LoclType lty_super;
+                    ty_super = lty_super;
                   }
                 env)
           &&& Subtype.(
-                simplify_subtype_i
+                simplify_subtype
                   ~subtype_env
                   ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
+                  ~lhs:{ sub_supportdyn; ty_sub = ty }
                   ~rhs:
                     {
                       super_like = false;
                       super_supportdyn = false;
-                      ty_super = LoclType lty_super;
+                      ty_super = lty_super;
                     })
         | (_, Tintersection tyl)
           when let (_, non_ty_opt, _) =
@@ -3804,10 +3542,9 @@ end = struct
               tyl_sub
               ~init:(env, TL.invalid ~fail)
               ~f:(fun res ty_sub ->
-                let ty_sub = LoclType ty_sub in
                 res
                 ||| Subtype.(
-                      simplify_subtype_i
+                      simplify_subtype
                         ~subtype_env
                         ~this_ty
                         ~lhs:{ sub_supportdyn; ty_sub }
@@ -3845,14 +3582,14 @@ end = struct
               ~this_ty
               ~super_like
               ~fail
-              (LoclType lty_sub)
+              lty_sub
               (r_super, lty_supers)
               env
           else if List.exists tyl_sub ~f:(TUtils.is_tunion env) then
             simplify_super_intersection
               env
               tyl_sub
-              (LoclType (mk (r_super, Tunion lty_supers)))
+              (mk (r_super, Tunion lty_supers))
           else
             simplify_sub_union
               ~subtype_env
@@ -3860,7 +3597,7 @@ end = struct
               ~this_ty
               ~super_like
               ~fail
-              (LoclType lty_sub)
+              lty_sub
               (r_super, lty_supers)
               env
         | _ ->
@@ -3870,7 +3607,7 @@ end = struct
             ~this_ty
             ~super_like
             ~fail
-            (LoclType lty_sub)
+            lty_sub
             (r_super, lty_supers)
             env))
 end
@@ -3910,12 +3647,12 @@ end = struct
           ~subtype_env
           ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType lty_sub }
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:
             {
               super_like;
               super_supportdyn = false;
-              ty_super = LoclType (mk (r_super, Tvar var_super));
+              ty_super = mk (r_super, Tvar var_super);
             }
           env)
     in
@@ -5164,136 +4901,6 @@ end = struct
 end
 
 (* -- Non-subtype constraints ----------------------------------------------- *)
-and Subtype_constraint_super : sig
-  (** Since [constraint_type]s may contain [locl_ty]s we must carry around the <:D
-    context here *)
-  type rhs = {
-    super_like: bool;
-    super_supportdyn: bool;
-    cty_super: Typing_defs.constraint_type;
-  }
-
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
-end = struct
-  type rhs = {
-    super_like: bool;
-    super_supportdyn: bool;
-    cty_super: Typing_defs.constraint_type;
-  }
-
-  let simplify
-      ~subtype_env
-      ~this_ty
-      ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-      ~rhs:{ super_like; cty_super; _ }
-      env =
-    let fail_snd_err =
-      let (ety_sub, ety_super, stripped_existential) =
-        match
-          Pretty.strip_existential ~ity_sub ~ity_sup:(ConstraintType cty_super)
-        with
-        | None -> (ity_sub, ConstraintType cty_super, false)
-        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
-      in
-      match subtype_env.Subtype_env.tparam_constraints with
-      | [] ->
-        Typing_error.Secondary.Subtyping_error
-          {
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-            stripped_existential;
-          }
-      | cstrs ->
-        Typing_error.Secondary.Violated_constraint
-          {
-            cstrs;
-            ty_sub = ety_sub;
-            ty_sup = ety_super;
-            is_coeffect = subtype_env.Subtype_env.is_coeffect;
-          }
-    in
-    begin
-      match deref_constraint_type cty_super with
-      | (r_super, Tdestructure destructure) ->
-        Destructure.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:{ reason_super = r_super; destructure }
-            env)
-      | (r, Tcan_index can_index) ->
-        Can_index.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:{ reason_super = r; can_index }
-            env)
-      | (r, Tcan_traverse can_traverse) ->
-        Can_traverse.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:{ reason_super = r; can_traverse }
-            env)
-      | (r, Thas_member has_member) ->
-        Has_member.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:{ reason_super = r; has_member }
-            env)
-      | (r, Thas_type_member has_type_member) ->
-        (* Contextualize errors that may be generated when
-         * checking refinement bounds. *)
-        let on_error =
-          Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-              let open Typing_error.Reasons_callback in
-              prepend_on_apply on_error fail_snd_err)
-        in
-        let subtype_env = Subtype_env.set_on_error subtype_env on_error in
-        Has_type_member.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:{ reason_super = r; has_type_member }
-            env)
-      | (reason_super, Ttype_switch { predicate; ty_true; ty_false }) ->
-        Type_switch.(
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:
-              {
-                reason_super;
-                predicate;
-                ty_super_opt = Some (ty_true, ty_false);
-                super_like;
-              }
-            env)
-    end
-end
-
 and Destructure : sig
   type rhs = {
     reason_super: Reason.t;
@@ -5304,7 +4911,7 @@ and Destructure : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -5566,171 +5173,158 @@ end = struct
       ~subtype_env
       ~this_ty
       ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = ety_sub }
+      ~lhs:{ sub_supportdyn; ty_sub }
       ~rhs:({ reason_super = r_super; destructure } as rhs)
       env =
     begin
-      let (env, ety_sub) = Env.expand_internal_type env ety_sub in
-      match ety_sub with
-      | ConstraintType _ -> invalid ~fail env
-      | LoclType ty_sub ->
-        (match (deref ty_sub, destructure.d_kind) with
-        | ((r, Ttuple tyl), _) ->
-          destructure_tuple
+      let (env, ty_sub) = Env.expand_type env ty_sub in
+      match (deref ty_sub, destructure.d_kind) with
+      | ((r, Ttuple tyl), _) ->
+        destructure_tuple ~subtype_env ~this_ty (sub_supportdyn, r, tyl) rhs env
+      | ((r, Tclass ((_, x), _, tyl)), _)
+        when String.equal x SN.Collections.cPair ->
+        destructure_tuple ~subtype_env ~this_ty (sub_supportdyn, r, tyl) rhs env
+      | ((_, Tclass ((_, x), _, [elt_type])), _)
+        when String.equal x SN.Collections.cVector
+             || String.equal x SN.Collections.cImmVector
+             || String.equal x SN.Collections.cVec
+             || String.equal x SN.Collections.cConstVector ->
+        destructure_array
+          ~subtype_env
+          ~this_ty
+          (sub_supportdyn, elt_type)
+          rhs
+          env
+      | ((_, Tdynamic), _) ->
+        destructure_dynamic
+          ~subtype_env
+          ~this_ty
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      | ((_, Tvar _), _) ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          (ConstraintType
+             (mk_constraint_type (r_super, Tdestructure destructure)))
+      | ((_, Tunion ty_subs), _) ->
+        Common.simplify_union_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      | ((r_sub, Tintersection ty_subs), _) ->
+        (* A & B <: C iif A <: C | !B *)
+        (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+        | (env, Some non_ty, tyl) ->
+          let ty_sub = MakeType.intersection r_sub tyl in
+          let mk_prop = simplify
+          and lift_rhs { reason_super; destructure } =
+            mk_constraint_type (reason_super, Tdestructure destructure)
+          and lhs = (sub_supportdyn, ty_sub)
+          and rhs_subtype =
+            Subtype.
+              {
+                super_supportdyn = false;
+                super_like = false;
+                ty_super = non_ty;
+              }
+          and rhs_destructure = { reason_super = r_super; destructure } in
+          let rhs = (r_super, rhs_subtype, rhs_destructure) in
+          Common.simplify_disj_r
             ~subtype_env
             ~this_ty
-            (sub_supportdyn, r, tyl)
+            ~fail
+            ~lift_rhs
+            ~mk_prop
+            lhs
             rhs
             env
-        | ((r, Tclass ((_, x), _, tyl)), _)
-          when String.equal x SN.Collections.cPair ->
-          destructure_tuple
-            ~subtype_env
-            ~this_ty
-            (sub_supportdyn, r, tyl)
-            rhs
-            env
-        | ((_, Tclass ((_, x), _, [elt_type])), _)
-          when String.equal x SN.Collections.cVector
-               || String.equal x SN.Collections.cImmVector
-               || String.equal x SN.Collections.cVec
-               || String.equal x SN.Collections.cConstVector ->
-          destructure_array
-            ~subtype_env
-            ~this_ty
-            (sub_supportdyn, elt_type)
-            rhs
-            env
-        | ((_, Tdynamic), _) ->
-          destructure_dynamic
-            ~subtype_env
-            ~this_ty
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        | ((_, Tvar _), _) ->
-          mk_issubtype_prop
-            ~sub_supportdyn
-            ~coerce:subtype_env.Subtype_env.coerce
-            env
-            (LoclType ty_sub)
-            (ConstraintType
-               (mk_constraint_type (r_super, Tdestructure destructure)))
-        | ((_, Tunion ty_subs), _) ->
-          Common.simplify_union_l
+        | _ ->
+          Common.simplify_intersection_l
             ~subtype_env
             ~this_ty
             ~fail
             ~mk_prop:simplify
             (sub_supportdyn, ty_subs)
             rhs
-            env
-        | ((r_sub, Tintersection ty_subs), _) ->
-          (* A & B <: C iif A <: C | !B *)
-          (match Subtype_negation.find_type_with_exact_negation env ty_subs with
-          | (env, Some non_ty, tyl) ->
-            let ty_sub = MakeType.intersection r_sub tyl in
-            let mk_prop = simplify
-            and lift_rhs { reason_super; destructure } =
-              mk_constraint_type (reason_super, Tdestructure destructure)
-            and lhs = (sub_supportdyn, LoclType ty_sub)
-            and rhs_subtype =
-              Subtype.
-                {
-                  super_supportdyn = false;
-                  super_like = false;
-                  ty_super = non_ty;
-                }
-            and rhs_destructure = { reason_super = r_super; destructure } in
-            let rhs = (r_super, rhs_subtype, rhs_destructure) in
-            Common.simplify_disj_r
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~lift_rhs
-              ~mk_prop
-              lhs
-              rhs
-              env
-          | _ ->
-            Common.simplify_intersection_l
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~mk_prop:simplify
-              (sub_supportdyn, ty_subs)
-              rhs
-              env)
-        | ((r_generic, Tgeneric (generic_nm, generic_ty_args)), _) ->
-          Common.simplify_generic_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop:simplify
-            (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
-            rhs
-            rhs
-            env
-        | (_, SplatUnpack) ->
-          (* Allow splatting of arbitrary Traversables *)
-          let (env, ty_inner) = Env.fresh_type env Pos.none in
-          let traversable = MakeType.traversable r_super ty_inner in
+            env)
+      | ((r_generic, Tgeneric (generic_nm, generic_ty_args)), _) ->
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+          rhs
+          rhs
           env
-          |> Subtype.(
-               simplify_subtype
-                 ~subtype_env
-                 ~this_ty
-                 ~lhs:{ sub_supportdyn; ty_sub }
-                 ~rhs:
-                   {
-                     super_like = false;
-                     super_supportdyn = false;
-                     ty_super = traversable;
-                   })
-          &&& destructure_array ~subtype_env ~this_ty (None, ty_inner) rhs
-        | ((r_newtype, Tnewtype (nm, _, ty_newtype)), ListDestructure) ->
-          Common.simplify_newtype_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop:simplify
-            (sub_supportdyn, r_newtype, nm, ty_newtype)
-            rhs
-            env
-        | ((r_dep, Tdependent (dep_ty, ty_inner_sub)), ListDestructure) ->
-          Common.simplify_dependent_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop:simplify
-            (sub_supportdyn, r_dep, dep_ty, ty_inner_sub)
-            rhs
-            env
-        | ( ( _,
-              ( Tany _ | Tnonnull | Toption _ | Tprim _ | Tfun _ | Tshape _
-              | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _
-              | Tunapplied_alias _ ) ),
-            ListDestructure ) ->
-          let ty_sub_descr =
-            lazy
-              (Typing_print.with_blank_tyvars (fun () ->
-                   Typing_print.full_strip_ns env ty_sub))
-          in
-          invalid
-            env
-            ~fail:
-              (Option.map
-                 subtype_env.Subtype_env.on_error
-                 ~f:
-                   Typing_error.(
-                     fun on_error ->
-                       apply_reasons ~on_error
-                       @@ Secondary.Invalid_destructure
-                            {
-                              pos = Reason.to_pos r_super;
-                              decl_pos = get_pos ty_sub;
-                              ty_name = ty_sub_descr;
-                            })))
+      | (_, SplatUnpack) ->
+        (* Allow splatting of arbitrary Traversables *)
+        let (env, ty_inner) = Env.fresh_type env Pos.none in
+        let traversable = MakeType.traversable r_super ty_inner in
+        env
+        |> Subtype.(
+             simplify_subtype
+               ~subtype_env
+               ~this_ty
+               ~lhs:{ sub_supportdyn; ty_sub }
+               ~rhs:
+                 {
+                   super_like = false;
+                   super_supportdyn = false;
+                   ty_super = traversable;
+                 })
+        &&& destructure_array ~subtype_env ~this_ty (None, ty_inner) rhs
+      | ((r_newtype, Tnewtype (nm, _, ty_newtype)), ListDestructure) ->
+        Common.simplify_newtype_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, r_newtype, nm, ty_newtype)
+          rhs
+          env
+      | ((r_dep, Tdependent (dep_ty, ty_inner_sub)), ListDestructure) ->
+        Common.simplify_dependent_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop:simplify
+          (sub_supportdyn, r_dep, dep_ty, ty_inner_sub)
+          rhs
+          env
+      | ( ( _,
+            ( Tany _ | Tnonnull | Toption _ | Tprim _ | Tfun _ | Tshape _
+            | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _
+            | Tunapplied_alias _ ) ),
+          ListDestructure ) ->
+        let ty_sub_descr =
+          lazy
+            (Typing_print.with_blank_tyvars (fun () ->
+                 Typing_print.full_strip_ns env ty_sub))
+        in
+        invalid
+          env
+          ~fail:
+            (Option.map
+               subtype_env.Subtype_env.on_error
+               ~f:
+                 Typing_error.(
+                   fun on_error ->
+                     apply_reasons ~on_error
+                     @@ Secondary.Invalid_destructure
+                          {
+                            pos = Reason.to_pos r_super;
+                            decl_pos = get_pos ty_sub;
+                            ty_name = ty_sub_descr;
+                          }))
     end
 end
 
@@ -5744,7 +5338,7 @@ and Can_index : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -5768,7 +5362,7 @@ and Can_traverse : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -5814,27 +5408,66 @@ end = struct
       ConstraintType
         (mk_constraint_type (reason_super, Tcan_traverse can_traverse))
     in
-    Subtype_env.fail subtype_env ~ty_sub ~ty_super
+    Subtype_env.fail subtype_env ~ty_sub:(LoclType ty_sub) ~ty_super
 
   let rec simplify
       ~subtype_env
       ~this_ty
       ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
       ~rhs:({ reason_super = r; can_traverse = ct } as rhs)
       env =
-    let (env, ity_sub) = Env.expand_internal_type env ity_sub in
+    let (env, lty_sub) = Env.expand_type env lty_sub in
     Logging.log_subtype_i
       ~level:2
       ~this_ty
       ~function_name:"simplify_subtype_can_traverse"
       env
-      ity_sub
+      (LoclType lty_sub)
       (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)));
-    match ity_sub with
-    | ConstraintType _ -> invalid ~fail env
-    | LoclType lty_sub ->
-      if TUtils.is_tyvar_error env lty_sub then
+
+    if TUtils.is_tyvar_error env lty_sub then
+      let trav_ty = can_traverse_to_iface ct in
+      Subtype.(
+        simplify_subtype
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ~rhs:
+            { super_like = false; super_supportdyn = false; ty_super = trav_ty }
+          env)
+    else
+      (* Originally this case called `simplify_subtype_i` which generates
+           a new [Typing_error.t] for error reporting so we have to wrap
+           our recursive all to preserve this behavior even though this is
+           likely a bug. *)
+      let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs =
+        let fail = mk_fail ~subtype_env ~lhs ~rhs in
+        simplify ~subtype_env ~this_ty ~fail ~lhs ~rhs
+      in
+
+      match get_node lty_sub with
+      | Tdynamic when Subtype_env.coercing_from_dynamic subtype_env -> valid env
+      | Tdynamic ->
+        subtype_with_dynamic
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ct
+          env
+      | _
+        when Option.is_some sub_supportdyn
+             && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+             && Tast.is_under_dynamic_assumptions env.checked ->
+        subtype_with_dynamic
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
+          ct
+          env
+      | Tclass _
+      | Tvec_or_dict _
+      | Tany _ ->
         let trav_ty = can_traverse_to_iface ct in
         Subtype.(
           simplify_subtype
@@ -5848,151 +5481,105 @@ end = struct
                 ty_super = trav_ty;
               }
             env)
-      else
-        (* Originally this case called `simplify_subtype_i` which generates
-             a new [Typing_error.t] for error reporting so we have to wrap
-             our recursive all to preserve this behavior even though this is
-             likely a bug. *)
-        let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs =
-          let fail = mk_fail ~subtype_env ~lhs ~rhs in
-          simplify ~subtype_env ~this_ty ~fail ~lhs ~rhs
-        in
-
-        (match get_node lty_sub with
-        | Tdynamic when Subtype_env.coercing_from_dynamic subtype_env ->
+      | Tunion ty_subs ->
+        Common.simplify_union_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, ty_subs)
+          rhs
+          env
+      | Tvar id ->
+        (* If the type is already in the upper bounds of the type variable,
+           * then we already know that this subtype assertion is valid
+        *)
+        let cty = ConstraintType (mk_constraint_type (r, Tcan_traverse ct)) in
+        if ITySet.mem cty (Env.get_tyvar_upper_bounds env id) then
           valid env
-        | Tdynamic ->
-          subtype_with_dynamic
+        else
+          mk_issubtype_prop
+            ~sub_supportdyn
+            ~coerce:subtype_env.Subtype_env.coerce
+            env
+            (LoclType lty_sub)
+            (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)))
+      | Tintersection ty_subs ->
+        let r_sub = get_reason lty_sub in
+        (* A & B <: C iif A <: C | !B *)
+        (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+        | (env, Some non_ty, tyl) ->
+          let ty_sub = MakeType.intersection r_sub tyl in
+
+          let mk_prop = simplify
+          and lift_rhs { reason_super; can_traverse } =
+            mk_constraint_type (reason_super, Tcan_traverse can_traverse)
+          and lhs = (sub_supportdyn, ty_sub)
+          and rhs_subtype =
+            Subtype.
+              {
+                super_supportdyn = false;
+                super_like = false;
+                ty_super = non_ty;
+              }
+          and rhs_destructure = { reason_super = r; can_traverse = ct } in
+          let rhs = (r, rhs_subtype, rhs_destructure) in
+          Common.simplify_disj_r
             ~subtype_env
             ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-            ct
+            ~fail
+            ~lift_rhs
+            ~mk_prop
+            lhs
+            rhs
             env
-        | _
-          when Option.is_some sub_supportdyn
-               && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-               && Tast.is_under_dynamic_assumptions env.checked ->
-          subtype_with_dynamic
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-            ct
-            env
-        | Tclass _
-        | Tvec_or_dict _
-        | Tany _ ->
-          let trav_ty = can_traverse_to_iface ct in
-          Subtype.(
-            simplify_subtype
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-              ~rhs:
-                {
-                  super_like = false;
-                  super_supportdyn = false;
-                  ty_super = trav_ty;
-                }
-              env)
-        | Tunion ty_subs ->
-          Common.simplify_union_l
+        | _ ->
+          Common.simplify_intersection_l
             ~subtype_env
             ~this_ty
             ~fail
             ~mk_prop
             (sub_supportdyn, ty_subs)
             rhs
-            env
-        | Tvar id ->
-          (* If the type is already in the upper bounds of the type variable,
-             * then we already know that this subtype assertion is valid
-          *)
-          let cty = ConstraintType (mk_constraint_type (r, Tcan_traverse ct)) in
-          if ITySet.mem cty (Env.get_tyvar_upper_bounds env id) then
-            valid env
-          else
-            mk_issubtype_prop
-              ~sub_supportdyn
-              ~coerce:subtype_env.Subtype_env.coerce
-              env
-              (LoclType lty_sub)
-              (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)))
-        | Tintersection ty_subs ->
-          let r_sub = get_reason lty_sub in
-          (* A & B <: C iif A <: C | !B *)
-          (match Subtype_negation.find_type_with_exact_negation env ty_subs with
-          | (env, Some non_ty, tyl) ->
-            let ty_sub = MakeType.intersection r_sub tyl in
-
-            let mk_prop = simplify
-            and lift_rhs { reason_super; can_traverse } =
-              mk_constraint_type (reason_super, Tcan_traverse can_traverse)
-            and lhs = (sub_supportdyn, LoclType ty_sub)
-            and rhs_subtype =
-              Subtype.
-                {
-                  super_supportdyn = false;
-                  super_like = false;
-                  ty_super = non_ty;
-                }
-            and rhs_destructure = { reason_super = r; can_traverse = ct } in
-            let rhs = (r, rhs_subtype, rhs_destructure) in
-            Common.simplify_disj_r
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~lift_rhs
-              ~mk_prop
-              lhs
-              rhs
-              env
-          | _ ->
-            Common.simplify_intersection_l
-              ~subtype_env
-              ~this_ty
-              ~fail
-              ~mk_prop
-              (sub_supportdyn, ty_subs)
-              rhs
-              env)
-        | Tgeneric (generic_nm, generic_ty_args) ->
-          Common.simplify_generic_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop
-            (sub_supportdyn, r, generic_nm, generic_ty_args)
-            rhs
-            rhs
-            env
-        | Tnewtype (alias_name, _, ty_newtype) ->
-          Common.simplify_newtype_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop
-            (sub_supportdyn, r, alias_name, ty_newtype)
-            rhs
-            env
-        | Tdependent (dep_ty, ty_inner) ->
-          Common.simplify_dependent_l
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~mk_prop
-            (sub_supportdyn, r, dep_ty, ty_inner)
-            rhs
-            env
-        | Toption _
-        | Tprim _
-        | Tnonnull
-        | Tneg _
-        | Tfun _
-        | Ttuple _
-        | Tshape _
-        | Taccess _
-        | Tunapplied_alias _ ->
-          invalid ~fail env)
+            env)
+      | Tgeneric (generic_nm, generic_ty_args) ->
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, r, generic_nm, generic_ty_args)
+          rhs
+          rhs
+          env
+      | Tnewtype (alias_name, _, ty_newtype) ->
+        Common.simplify_newtype_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, r, alias_name, ty_newtype)
+          rhs
+          env
+      | Tdependent (dep_ty, ty_inner) ->
+        Common.simplify_dependent_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, r, dep_ty, ty_inner)
+          rhs
+          env
+      | Toption _
+      | Tprim _
+      | Tnonnull
+      | Tneg _
+      | Tfun _
+      | Ttuple _
+      | Tshape _
+      | Taccess _
+      | Tunapplied_alias _ ->
+        invalid ~fail env
 end
 
 and Has_type_member : sig
@@ -6005,7 +5592,7 @@ and Has_type_member : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -6029,9 +5616,9 @@ end = struct
       ~this_ty
       ~function_name:"simplify_subtype_has_type_member"
       env
-      ty_sub
+      (LoclType ty_sub)
       htmty;
-    let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
 
     let simplify_subtype_bound kind ~bound ty env =
       let on_error =
@@ -6063,140 +5650,136 @@ end = struct
             ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty }
             env)
     in
-    match ety_sub with
-    | ConstraintType _ -> invalid ~fail env
-    | LoclType ty_sub ->
-      let concrete_rigid_tvar_access env ucckind bndtys =
-        (* First, we try to discharge the subtype query on the bound; if
-         * that fails, we mint a fresh rigid type variable to represent
-         * the concrete type constant and try to solve the query using it *)
-        let ( ||| ) = ( ||| ) ~fail in
-        let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn = None; ty_sub = LoclType bndty }
-          ~rhs
+
+    let concrete_rigid_tvar_access env ucckind bndtys =
+      (* First, we try to discharge the subtype query on the bound; if
+       * that fails, we mint a fresh rigid type variable to represent
+       * the concrete type constant and try to solve the query using it *)
+      let ( ||| ) = ( ||| ) ~fail in
+      let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn = None; ty_sub = bndty }
+        ~rhs
+        env
+      ||| fun env ->
+      (* TODO(refinements): The treatment of `this_ty` below is
+       * no good; see below. *)
+      let (env, dtmemty) =
+        Typing_type_member.make_type_member
           env
-        ||| fun env ->
-        (* TODO(refinements): The treatment of `this_ty` below is
-         * no good; see below. *)
-        let (env, dtmemty) =
-          Typing_type_member.make_type_member
-            env
-            ~this_ty:(Option.value this_ty ~default:ty_sub)
-            ~on_error:subtype_env.Subtype_env.on_error
-            ucckind
-            bndtys
-            (Reason.to_pos r, memid)
-        in
-        simplify_subtype_bound `As dtmemty ~bound:memupty env
-        &&& simplify_subtype_bound `Super ~bound:memloty dtmemty
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.Subtype_env.on_error
+          ucckind
+          bndtys
+          (Reason.to_pos r, memid)
       in
-      (match deref ty_sub with
-      | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
-        let (env, type_member) =
-          (* TODO(refinements): The treatment of `this_ty` below is
-           * no good; we should not default to `ty_sub`. `this_ty`
-           * will be used when a type constant refers to another
-           * constant either in its def or in its bounds.
-           * See related FIXME(T59448452) above. *)
-          Typing_type_member.lookup_class_type_member
-            env
-            ~this_ty:(Option.value this_ty ~default:ty_sub)
-            ~on_error:subtype_env.Subtype_env.on_error
-            (x_sub, exact_sub)
-            (Reason.to_pos r, memid)
-        in
-        (match type_member with
-        | Typing_type_member.NotYetAvailable ->
-          failwith "TODO(hverr): propagate decl_entry"
-        | Typing_type_member.Error err -> invalid ~fail:err env
-        | Typing_type_member.Exact ty ->
-          simplify_subtype_bound `As ty ~bound:memupty env
-          &&& simplify_subtype_bound `Super ~bound:memloty ty
-        | Typing_type_member.Abstract { name; lower = loty; upper = upty } ->
-          let r_bnd = Reason.Rtconst_no_cstr name in
-          let loty = Option.value ~default:(MakeType.nothing r_bnd) loty in
-          let upty = Option.value ~default:(MakeType.mixed r_bnd) upty in
-          (* In case the refinement is exact we check that upty <: loty;
-           * doing the check early gives us a better chance at generating
-           * good error messages. The unification errors we get when
-           * doing this check are usually unhelpful, so we drop them. *)
-          let is_exact = phys_equal memloty memupty in
-          (if is_exact then
-            let drop_sub_reasons =
-              Option.map
-                subtype_env.Subtype_env.on_error
-                ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
-            in
-            let subtype_env =
-              Subtype_env.set_on_error subtype_env drop_sub_reasons
-            in
-            Subtype.(
-              simplify_subtype
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn = None; ty_sub = upty }
-                ~rhs:
-                  {
-                    super_like = false;
-                    super_supportdyn = false;
-                    ty_super = loty;
-                  }
-                env)
-          else
-            valid env)
-          &&& simplify_subtype_bound `As upty ~bound:memupty
-          &&& simplify_subtype_bound `Super ~bound:memloty loty)
-      | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
-        concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
-      | (_r_sub, Tgeneric (s, ty_args)) when String.equal s SN.Typehints.this ->
-        let bnd_tys =
-          Typing_set.elements (Env.get_upper_bounds env s ty_args)
-        in
-        concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
-      | (_, Tvar _) ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+      simplify_subtype_bound `As dtmemty ~bound:memupty env
+      &&& simplify_subtype_bound `Super ~bound:memloty dtmemty
+    in
+    match deref ty_sub with
+    | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
+      let (env, type_member) =
+        (* TODO(refinements): The treatment of `this_ty` below is
+         * no good; we should not default to `ty_sub`. `this_ty`
+         * will be used when a type constant refers to another
+         * constant either in its def or in its bounds.
+         * See related FIXME(T59448452) above. *)
+        Typing_type_member.lookup_class_type_member
           env
-          (LoclType ty_sub)
-          htmty
-      | (_, Tunion ty_subs) ->
-        Common.simplify_union_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:simplify
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      | (_, Tintersection ty_subs) ->
-        Common.simplify_intersection_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:simplify
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
-        Common.simplify_generic_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:simplify
-          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
-          rhs
-          rhs
-          env
-      | ( _,
-          ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
-          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
-          | Tunapplied_alias _ ) ) ->
-        invalid ~fail env)
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.Subtype_env.on_error
+          (x_sub, exact_sub)
+          (Reason.to_pos r, memid)
+      in
+      (match type_member with
+      | Typing_type_member.NotYetAvailable ->
+        failwith "TODO(hverr): propagate decl_entry"
+      | Typing_type_member.Error err -> invalid ~fail:err env
+      | Typing_type_member.Exact ty ->
+        simplify_subtype_bound `As ty ~bound:memupty env
+        &&& simplify_subtype_bound `Super ~bound:memloty ty
+      | Typing_type_member.Abstract { name; lower = loty; upper = upty } ->
+        let r_bnd = Reason.Rtconst_no_cstr name in
+        let loty = Option.value ~default:(MakeType.nothing r_bnd) loty in
+        let upty = Option.value ~default:(MakeType.mixed r_bnd) upty in
+        (* In case the refinement is exact we check that upty <: loty;
+         * doing the check early gives us a better chance at generating
+         * good error messages. The unification errors we get when
+         * doing this check are usually unhelpful, so we drop them. *)
+        let is_exact = phys_equal memloty memupty in
+        (if is_exact then
+          let drop_sub_reasons =
+            Option.map
+              subtype_env.Subtype_env.on_error
+              ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
+          in
+          let subtype_env =
+            Subtype_env.set_on_error subtype_env drop_sub_reasons
+          in
+          Subtype.(
+            simplify_subtype
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn = None; ty_sub = upty }
+              ~rhs:
+                {
+                  super_like = false;
+                  super_supportdyn = false;
+                  ty_super = loty;
+                }
+              env)
+        else
+          valid env)
+        &&& simplify_subtype_bound `As upty ~bound:memupty
+        &&& simplify_subtype_bound `Super ~bound:memloty loty)
+    | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
+      concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
+    | (_r_sub, Tgeneric (s, ty_args)) when String.equal s SN.Typehints.this ->
+      let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
+      concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
+    | (_, Tvar _) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        htmty
+    | (_, Tunion ty_subs) ->
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:simplify
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (_, Tintersection ty_subs) ->
+      Common.simplify_intersection_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:simplify
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
+      Common.simplify_generic_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:simplify
+        (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+        rhs
+        rhs
+        env
+    | ( _,
+        ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
+        | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
+        | Tunapplied_alias _ ) ) ->
+      invalid ~fail env
 end
 
 and Has_member : sig
@@ -6209,7 +5792,7 @@ and Has_member : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -6351,149 +5934,77 @@ end = struct
       ~this_ty
       ~function_name:"simplify_subtype_has_member"
       env
-      ty_sub
+      (LoclType ty_sub)
       ity_super;
-    let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
 
-    match ety_sub with
-    | ConstraintType cty ->
-      (match deref_constraint_type cty with
-      | ( _,
-          Thas_member
-            {
-              hm_name = name_sub;
-              hm_type = ty_sub;
-              hm_class_id = cid_sub;
-              hm_explicit_targs = explicit_targs_sub;
-            } ) ->
-        if
-          let targ_equal (_, (_, hint1)) (_, (_, hint2)) =
-            Aast_defs.equal_hint_ hint1 hint2
-          in
-          String.equal (snd name_sub) name_
-          && class_id_equal cid_sub class_id
-          && Option.equal
-               (List.equal targ_equal)
-               explicit_targs_sub
-               explicit_targs
-        then
-          Subtype.(
-            simplify_subtype
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:
-                {
-                  super_like = false;
-                  super_supportdyn = false;
-                  ty_super = member_ty;
-                }
-              env)
-        else
-          invalid ~fail env
-      | _ -> invalid env ~fail)
-    | LoclType ty_sub ->
-      (match deref ty_sub with
-      | (_, Tvar _) ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
-          env
-          (LoclType ty_sub)
-          ity_super
-      | (_, Tunion ty_subs) ->
-        Common.simplify_union_l
+    match deref ty_sub with
+    | (_, Tvar _) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        ity_super
+    | (_, Tunion ty_subs) ->
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:simplify
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (r_inter, Tintersection []) ->
+      (* Tintersection [] = mixed *)
+      invalid
+        env
+        ~fail:
+          (Some
+             Typing_error.(
+               primary
+               @@ Primary.Top_member
+                    {
+                      pos = name_pos;
+                      name = name_;
+                      is_nullable = true;
+                      kind =
+                        (if is_method then
+                          `method_
+                        else
+                          `property);
+                      ctxt = `read;
+                      decl_pos = Reason.to_pos r_inter;
+                      ty_name = lazy (Typing_print.error env ty_sub);
+                      (* Subtyping already gives these reasons *)
+                      ty_reasons = lazy [];
+                    }))
+    | (r_sub, Tintersection ty_subs) ->
+      (* A & B <: C iif A <: C | !B *)
+      (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+      | (env, Some non_ty, tyl) ->
+        let ty_sub = MakeType.intersection r_sub tyl in
+        let mk_prop = simplify
+        and lift_rhs { reason_super; has_member } =
+          mk_constraint_type (reason_super, Thas_member has_member)
+        and lhs = (sub_supportdyn, ty_sub)
+        and rhs_subtype =
+          Subtype.
+            { super_supportdyn = false; super_like = false; ty_super = non_ty }
+        and rhs_destructure =
+          { reason_super = r; has_member = has_member_ty }
+        in
+        let rhs = (r, rhs_subtype, rhs_destructure) in
+        Common.simplify_disj_r
           ~subtype_env
           ~this_ty
           ~fail
-          ~mk_prop:simplify
-          (sub_supportdyn, ty_subs)
+          ~lift_rhs
+          ~mk_prop
+          lhs
           rhs
           env
-      | (r_inter, Tintersection []) ->
-        (* Tintersection [] = mixed *)
-        invalid
-          env
-          ~fail:
-            (Some
-               Typing_error.(
-                 primary
-                 @@ Primary.Top_member
-                      {
-                        pos = name_pos;
-                        name = name_;
-                        is_nullable = true;
-                        kind =
-                          (if is_method then
-                            `method_
-                          else
-                            `property);
-                        ctxt = `read;
-                        decl_pos = Reason.to_pos r_inter;
-                        ty_name = lazy (Typing_print.error env ty_sub);
-                        (* Subtyping already gives these reasons *)
-                        ty_reasons = lazy [];
-                      }))
-      | (r_sub, Tintersection ty_subs) ->
-        (* A & B <: C iif A <: C | !B *)
-        (match Subtype_negation.find_type_with_exact_negation env ty_subs with
-        | (env, Some non_ty, tyl) ->
-          let ty_sub = MakeType.intersection r_sub tyl in
-          let mk_prop = simplify
-          and lift_rhs { reason_super; has_member } =
-            mk_constraint_type (reason_super, Thas_member has_member)
-          and lhs = (sub_supportdyn, LoclType ty_sub)
-          and rhs_subtype =
-            Subtype.
-              {
-                super_supportdyn = false;
-                super_like = false;
-                ty_super = non_ty;
-              }
-          and rhs_destructure =
-            { reason_super = r; has_member = has_member_ty }
-          in
-          let rhs = (r, rhs_subtype, rhs_destructure) in
-          Common.simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            lhs
-            rhs
-            env
-        | _ ->
-          typing_obj_get
-            ~subtype_env
-            ~this_ty
-            ~class_id
-            ~member_id
-            ~explicit_targs
-            ~member_ty
-            ty_sub
-            env)
-      | (r1, Tnewtype (n, _, newtype_ty)) ->
-        let sub_supportdyn =
-          match sub_supportdyn with
-          | None ->
-            if String.equal n SN.Classes.cSupportDyn then
-              Some r1
-            else
-              None
-          | _ -> sub_supportdyn
-        in
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType newtype_ty }
-          ~rhs:{ reason_super = r; has_member = has_member_ty }
-          env
-      | ( _,
-          ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _
-          | Taccess _ | Tunapplied_alias _ | Tclass _ | Tneg _ ) ) ->
+      | _ ->
         typing_obj_get
           ~subtype_env
           ~this_ty
@@ -6503,6 +6014,36 @@ end = struct
           ~member_ty
           ty_sub
           env)
+    | (r1, Tnewtype (n, _, newtype_ty)) ->
+      let sub_supportdyn =
+        match sub_supportdyn with
+        | None ->
+          if String.equal n SN.Classes.cSupportDyn then
+            Some r1
+          else
+            None
+        | _ -> sub_supportdyn
+      in
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub = newtype_ty }
+        ~rhs:{ reason_super = r; has_member = has_member_ty }
+        env
+    | ( _,
+        ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _ | Ttuple _
+        | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _ | Taccess _
+        | Tunapplied_alias _ | Tclass _ | Tneg _ ) ) ->
+      typing_obj_get
+        ~subtype_env
+        ~this_ty
+        ~class_id
+        ~member_id
+        ~explicit_targs
+        ~member_ty
+        ty_sub
+        env
 end
 
 and Type_switch : sig
@@ -6517,7 +6058,7 @@ and Type_switch : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    lhs:Typing_defs.internal_type lhs ->
+    lhs:lhs ->
     rhs:rhs ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
@@ -6553,90 +6094,88 @@ end = struct
       ~this_ty
       ~function_name:"simplify_subtype_type_switch"
       env
-      ty_sub
+      (LoclType ty_sub)
       ty_super;
-    let (env, ety_sub) = Env.expand_internal_type env ty_sub in
-    match ety_sub with
-    | ConstraintType _ -> invalid ~fail env
-    | LoclType ty_sub ->
-      (match get_node ty_sub with
-      | Tvar _ ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
-          env
-          (LoclType ty_sub)
-          ty_super
-      | Tunion ty_subs ->
-        Common.simplify_union_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:simplify
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      | _ ->
-        let partition = Typing_refinement.partition_ty env ty_sub predicate in
-        let intersect tyl = MakeType.intersection reason_super tyl in
-        let simplify_subtype ~f tyl ty_super env =
-          Subtype.(
-            simplify_subtype
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub = f tyl }
-              ~rhs:{ super_supportdyn = false; super_like; ty_super }
-              env)
-        in
-        (* When we split a type we have some component that is a subset and
-           some component that is a span. For the component that is a subset
-           we need to ensure it is a subtype of the given super type, but
-           for the span we need to refine the type down to a type we know
-           would pass the given predicate. *)
-        let simplify_split
-            ~init
-            ~refine
-            (subset : Typing_refinement.dnf_ty)
-            (span : Typing_refinement.dnf_ty)
-            ty_sup =
-          let init =
-            List.fold_left subset ~init ~f:(fun res tyl ->
-                res &&& simplify_subtype ~f:intersect tyl ty_sup)
-          in
-          List.fold_left span ~init ~f:(fun res tyl ->
-              res &&& simplify_subtype ~f:refine tyl ty_sup)
-        in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
 
-        let refine_true tyl =
-          match predicate with
-          | IsBool -> intersect (MakeType.bool reason_super :: tyl)
+    match get_node ty_sub with
+    | Tvar _ ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        ty_super
+    | Tunion ty_subs ->
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:simplify
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | _ ->
+      let partition = Typing_refinement.partition_ty env ty_sub predicate in
+      let intersect tyl = MakeType.intersection reason_super tyl in
+      let simplify_subtype ~f tyl ty_super env =
+        Subtype.(
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = f tyl }
+            ~rhs:{ super_supportdyn = false; super_like; ty_super }
+            env)
+      in
+      (* When we split a type we have some component that is a subset and
+         some component that is a span. For the component that is a subset
+         we need to ensure it is a subtype of the given super type, but
+         for the span we need to refine the type down to a type we know
+         would pass the given predicate. *)
+      let simplify_split
+          ~init
+          ~refine
+          (subset : Typing_refinement.dnf_ty)
+          (span : Typing_refinement.dnf_ty)
+          ty_sup =
+        let init =
+          List.fold_left subset ~init ~f:(fun res tyl ->
+              res &&& simplify_subtype ~f:intersect tyl ty_sup)
         in
-        let refine_false tyl =
-          intersect (MakeType.neg reason_super (Neg_predicate predicate) :: tyl)
-        in
+        List.fold_left span ~init ~f:(fun res tyl ->
+            res &&& simplify_subtype ~f:refine tyl ty_sup)
+      in
 
-        let (ty_true, ty_false_opt) =
-          match ty_super_opt with
-          | None -> (MakeType.nothing reason_super, None)
-          | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
-        in
-        let (env, props) =
-          simplify_split
-            ~refine:refine_true
-            ~init:(env, TL.valid)
-            partition.Typing_refinement.left
-            partition.Typing_refinement.span
-            ty_true
-        in
-        let f init ty_false =
-          simplify_split
-            ~refine:refine_false
-            ~init
-            partition.Typing_refinement.right
-            partition.Typing_refinement.span
-            ty_false
-        in
-        Option.fold ty_false_opt ~init:(env, props) ~f)
+      let refine_true tyl =
+        match predicate with
+        | IsBool -> intersect (MakeType.bool reason_super :: tyl)
+      in
+      let refine_false tyl =
+        intersect (MakeType.neg reason_super (Neg_predicate predicate) :: tyl)
+      in
+
+      let (ty_true, ty_false_opt) =
+        match ty_super_opt with
+        | None -> (MakeType.nothing reason_super, None)
+        | Some (ty_true, ty_false) -> (ty_true, Some ty_false)
+      in
+      let (env, props) =
+        simplify_split
+          ~refine:refine_true
+          ~init:(env, TL.valid)
+          partition.Typing_refinement.left
+          partition.Typing_refinement.span
+          ty_true
+      in
+      let f init ty_false =
+        simplify_split
+          ~refine:refine_false
+          ~init
+          partition.Typing_refinement.right
+          partition.Typing_refinement.span
+          ty_false
+      in
+      Option.fold ty_false_opt ~init:(env, props) ~f
 end
 
 and Common : sig
@@ -6648,7 +6187,7 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
@@ -6665,7 +6204,7 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
@@ -6682,7 +6221,7 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_phase ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
@@ -6700,7 +6239,7 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
@@ -6717,7 +6256,7 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
@@ -6734,13 +6273,13 @@ and Common : sig
       (subtype_env:Subtype_env.t ->
       this_ty:locl_ty option ->
       fail:Typing_error.t option ->
-      lhs:internal_type lhs ->
+      lhs:lhs ->
       rhs:'rhs ->
       env ->
       env * Typing_logic.subtype_prop) ->
     lift_rhs:('rhs -> constraint_type) ->
-    Reason.t option * internal_type ->
-    Reason.t * locl_ty Subtype.rhs * 'rhs ->
+    Reason.t option * locl_ty ->
+    Reason.t * Subtype.rhs * 'rhs ->
     env ->
     env * Typing_logic.subtype_prop
 
@@ -6767,7 +6306,6 @@ end = struct
   let simplify_union_l
       ~subtype_env ~this_ty ~fail ~mk_prop (sub_supportdyn, ty_subs) rhs env =
     let f res ty_sub =
-      let ty_sub = LoclType ty_sub in
       res
       &&& mk_prop
             ~subtype_env
@@ -6800,7 +6338,7 @@ end = struct
               ~subtype_env
               ~this_ty
               ~fail
-              ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
+              ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs)
 
   let simplify_generic_l
@@ -6845,7 +6383,7 @@ end = struct
             let r =
               Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
             in
-            let tmixed = LoclType (MakeType.mixed r) in
+            let tmixed = MakeType.mixed r in
             mk_prop
               ~subtype_env
               ~this_ty
@@ -6858,7 +6396,7 @@ end = struct
               ~subtype_env
               ~this_ty
               ~fail
-              ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
+              ~lhs:{ sub_supportdyn; ty_sub = ty }
               ~rhs
               env
           | ty :: tyl ->
@@ -6867,7 +6405,7 @@ end = struct
                   ~subtype_env
                   ~this_ty
                   ~fail
-                  ~lhs:{ sub_supportdyn; ty_sub = LoclType ty }
+                  ~lhs:{ sub_supportdyn; ty_sub = ty }
                   ~rhs
         in
         let bounds =
@@ -6901,7 +6439,7 @@ end = struct
       ~subtype_env
       ~this_ty
       ~fail
-      ~lhs:{ sub_supportdyn; ty_sub = LoclType newtype_ty }
+      ~lhs:{ sub_supportdyn; ty_sub = newtype_ty }
       ~rhs
       env
 
@@ -6918,7 +6456,7 @@ end = struct
         this_ty
         (Some (mk (reason_dep, Tdependent (dep_ty, ty_inner_sub))))
     in
-    let lhs = { sub_supportdyn; ty_sub = LoclType ty_inner_sub } in
+    let lhs = { sub_supportdyn; ty_sub = ty_inner_sub } in
 
     mk_prop ~subtype_env ~this_ty ~fail ~lhs ~rhs env
 
@@ -6931,204 +6469,197 @@ end = struct
       (sub_supportdyn, ty_sub)
       ((reason_super, rhs_subtype, rhs_other) as rhs)
       env =
-    let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
     let ( ||| ) = ( ||| ) ~fail in
-    match ty_sub with
-    | ConstraintType _ -> invalid ~fail env
-    | LoclType ty_sub ->
-      (match deref ty_sub with
-      | (r, Toption ty) ->
-        let ty_null = MakeType.null r in
-        if_unsat
-          (invalid ~fail)
-          (simplify_disj_r
-             ~subtype_env
-             ~this_ty
-             ~fail
-             ~lift_rhs
-             ~mk_prop
-             (sub_supportdyn, LoclType ty_null)
-             rhs
-             env
-          &&& simplify_disj_r
-                ~subtype_env
-                ~this_ty
-                ~fail
-                ~lift_rhs
-                ~mk_prop
-                (sub_supportdyn, LoclType ty)
-                rhs)
-      | (_, Tintersection ty_subs) ->
-        let mk_prop_intersection
-            ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
-            =
-          simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        in
-        simplify_intersection_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:mk_prop_intersection
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      | (_, Tunion ty_subs) ->
-        let mk_prop_union
-            ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
-            =
-          simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        in
-        simplify_union_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:mk_prop_union
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      | (_, Tvar _) ->
-        let (env, ty_fresh) = Env.fresh_type env Pos.none in
-        let mk_cstr_prop env =
-          mk_prop
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn = None; ty_sub = LoclType ty_fresh }
-            ~rhs:rhs_other
-            env
-        in
-        let mk_subty_prop env =
-          Subtype.(
-            simplify_subtype
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:
-                {
-                  super_like = false;
-                  super_supportdyn = false;
-                  ty_super =
-                    Typing_make_type.union
-                      reason_super
-                      [rhs_subtype.Subtype.ty_super; ty_fresh];
-                }
-              env)
-        in
-        mk_subty_prop env &&& mk_cstr_prop
-      | (r_generic, Tgeneric (nm, tyargs)) ->
-        let mk_prop_generic
-            ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
-            =
-          simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        in
-        simplify_generic_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:mk_prop_generic
-          (sub_supportdyn, r_generic, nm, tyargs)
-          rhs
-          rhs
-          env
-      | (r_dep, Tdependent (dep_ty, ty_sub_inner)) ->
-        let mk_prop_dependent
-            ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
-            =
-          simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        in
-        simplify_dependent_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop:mk_prop_dependent
-          (sub_supportdyn, r_dep, dep_ty, ty_sub_inner)
-          rhs
-          env
-      | (r_newtype, Tnewtype (nm, _, ty_newtype)) ->
-        let mk_prop_newtype
-            ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
-            =
-          simplify_disj_r
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lift_rhs
-            ~mk_prop
-            (sub_supportdyn, ty_sub)
-            rhs
-            env
-        in
-        mk_prop
-          ~subtype_env
-          ~this_ty:None
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
-          ~rhs:rhs_other
-          env
-        ||| Subtype.(
-              simplify_subtype
-                ~subtype_env
-                ~this_ty:None
-                ~lhs:{ sub_supportdyn; ty_sub }
-                ~rhs:rhs_subtype)
-        ||| simplify_newtype_l
+
+    match deref ty_sub with
+    | (r, Toption ty) ->
+      let ty_null = MakeType.null r in
+      if_unsat
+        (invalid ~fail)
+        (simplify_disj_r
+           ~subtype_env
+           ~this_ty
+           ~fail
+           ~lift_rhs
+           ~mk_prop
+           (sub_supportdyn, ty_null)
+           rhs
+           env
+        &&& simplify_disj_r
               ~subtype_env
               ~this_ty
               ~fail
-              ~mk_prop:mk_prop_newtype
-              (sub_supportdyn, r_newtype, nm, ty_newtype)
-              rhs
-      | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-        valid env
-      | ( _,
-          ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tunapplied_alias _
-          | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _
-            ) ) ->
+              ~lift_rhs
+              ~mk_prop
+              (sub_supportdyn, ty)
+              rhs)
+    | (_, Tintersection ty_subs) ->
+      let mk_prop_intersection
+          ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      in
+      simplify_intersection_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:mk_prop_intersection
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (_, Tunion ty_subs) ->
+      let mk_prop_union
+          ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      in
+      simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:mk_prop_union
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (_, Tvar _) ->
+      let (env, ty_fresh) = Env.fresh_type env Pos.none in
+      let mk_cstr_prop env =
         mk_prop
           ~subtype_env
-          ~this_ty:None
+          ~this_ty
           ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = LoclType ty_sub }
+          ~lhs:{ sub_supportdyn = None; ty_sub = ty_fresh }
           ~rhs:rhs_other
           env
-        ||| Subtype.(
-              simplify_subtype
-                ~subtype_env
-                ~this_ty:None
-                ~lhs:{ sub_supportdyn; ty_sub }
-                ~rhs:rhs_subtype))
+      in
+      let mk_subty_prop env =
+        Subtype.(
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super =
+                  Typing_make_type.union
+                    reason_super
+                    [rhs_subtype.Subtype.ty_super; ty_fresh];
+              }
+            env)
+      in
+      mk_subty_prop env &&& mk_cstr_prop
+    | (r_generic, Tgeneric (nm, tyargs)) ->
+      let mk_prop_generic
+          ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      in
+      simplify_generic_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:mk_prop_generic
+        (sub_supportdyn, r_generic, nm, tyargs)
+        rhs
+        rhs
+        env
+    | (r_dep, Tdependent (dep_ty, ty_sub_inner)) ->
+      let mk_prop_dependent
+          ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      in
+      simplify_dependent_l
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~mk_prop:mk_prop_dependent
+        (sub_supportdyn, r_dep, dep_ty, ty_sub_inner)
+        rhs
+        env
+    | (r_newtype, Tnewtype (nm, _, ty_newtype)) ->
+      let mk_prop_newtype
+          ~subtype_env ~this_ty ~fail ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+        simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          (sub_supportdyn, ty_sub)
+          rhs
+          env
+      in
+      mk_prop
+        ~subtype_env
+        ~this_ty:None
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:rhs_other
+        env
+      ||| Subtype.(
+            simplify_subtype
+              ~subtype_env
+              ~this_ty:None
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:rhs_subtype)
+      ||| simplify_newtype_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop:mk_prop_newtype
+            (sub_supportdyn, r_newtype, nm, ty_newtype)
+            rhs
+    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+      valid env
+    | ( _,
+        ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tunapplied_alias _
+        | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _
+          ) ) ->
+      mk_prop
+        ~subtype_env
+        ~this_ty:None
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:rhs_other
+        env
+      ||| Subtype.(
+            simplify_subtype
+              ~subtype_env
+              ~this_ty:None
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:rhs_subtype)
 
   let dispatch_constraint
       ~subtype_env ~this_ty ~sub_supportdyn ity_sub ity_super env =
@@ -7141,7 +6672,7 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
           env)
-    | (LoclType _ty_sub, ConstraintType cstr) ->
+    | (LoclType ty_sub, ConstraintType cstr) ->
       let subtype_env =
         Subtype_env.possibly_add_violated_constraint
           subtype_env
@@ -7158,7 +6689,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r_super; destructure }
             env)
       | (r, Tcan_index can_index) ->
@@ -7167,7 +6698,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r; can_index }
             env)
       | (r, Tcan_traverse can_traverse) ->
@@ -7176,7 +6707,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r; can_traverse }
             env)
       | (r, Thas_member has_member) ->
@@ -7185,7 +6716,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r; has_member }
             env)
       | (r, Thas_type_member has_type_member) ->
@@ -7206,7 +6737,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ reason_super = r; has_type_member }
             env)
       | (reason_super, Ttype_switch { predicate; ty_true; ty_false }) ->
@@ -7215,7 +6746,7 @@ end = struct
             ~subtype_env
             ~this_ty
             ~fail
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:
               {
                 reason_super;

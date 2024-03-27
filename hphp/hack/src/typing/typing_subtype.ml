@@ -667,6 +667,19 @@ type lhs = {
   ty_sub: locl_ty;
 }
 
+module type Constraint_handler = sig
+  type rhs
+
+  val simplify :
+    subtype_env:Subtype_env.t ->
+    this_ty:Typing_defs.locl_ty option ->
+    fail:Typing_error.t option ->
+    lhs:lhs ->
+    rhs:rhs ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end
+
 module rec Subtype : sig
   type rhs = {
     super_supportdyn: bool;
@@ -4357,14 +4370,7 @@ and Destructure : sig
     destructure: destructure;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     reason_super: Reason.t;
@@ -4784,14 +4790,7 @@ and Can_index : sig
     can_index: can_index;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     reason_super: Reason.t;
@@ -4808,14 +4807,7 @@ and Can_traverse : sig
     can_traverse: can_traverse;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     reason_super: Reason.t;
@@ -5038,14 +5030,7 @@ and Has_type_member : sig
     has_type_member: has_type_member;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     reason_super: Reason.t;
@@ -5238,14 +5223,7 @@ and Has_member : sig
     has_member: has_member;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     reason_super: Reason.t;
@@ -5504,14 +5482,7 @@ and Type_switch : sig
     ty_super_opt: (Typing_defs.locl_ty * Typing_defs.locl_ty) option;
   }
 
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
+  include Constraint_handler with type rhs := rhs
 end = struct
   type rhs = {
     super_like: bool;

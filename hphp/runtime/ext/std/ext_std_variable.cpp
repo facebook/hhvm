@@ -563,6 +563,24 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
   );
 }
 
+Variant HHVM_FUNCTION(unserialize_slice, const String& str, int64_t start, int64_t length,
+                                   const Array& options) {
+  // unserialize_from_buffer accepts empty strings. We ban them here to guarantee behavior
+  // consistent with other apis.
+  if (start < 0 || length <= 0 || (size_t)start + (size_t)length > (size_t)str.size()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid start or length"
+    );
+  }
+  return unserialize_from_buffer(
+    str.data()+start,
+    length,
+    VariableUnserializer::Type::Serialize,
+    options,
+    false
+    );
+}
+
 Variant HHVM_FUNCTION(unserialize_pure, const String& str,
                                         const Array& options) {
   return unserialize_from_string(
@@ -681,6 +699,7 @@ void StandardExtension::registerNativeVariable() {
   HHVM_FE(serialize_pure);
   HHVM_FE(unserialize);
   HHVM_FE(unserialize_pure);
+  HHVM_FE(unserialize_slice);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);

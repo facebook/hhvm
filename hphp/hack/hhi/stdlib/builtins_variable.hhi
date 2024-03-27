@@ -77,6 +77,13 @@ namespace {
     darray<arraykey, mixed> $options = dict[],
   )[defaults]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
+  function unserialize_slice(
+    string $str,
+    int $start,
+    int $length,
+    darray<arraykey, mixed> $options = dict[],
+  )[defaults]: mixed;
+  <<__PHPStdLib>>
   function unserialize_pure(
     string $str,
     darray<arraykey, mixed> $options = dict[],

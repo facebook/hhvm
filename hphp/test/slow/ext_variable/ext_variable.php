@@ -131,6 +131,11 @@ function main_ext_variable() :mixed{
     VS($v->name, "value");
   }
   {
+    $v = unserialize_slice("prefixO:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}suffix", 6, 48);
+    VERIFY(is_object($v));
+    VS($v->name, "value");
+  }
+  {
     $v = unserialize("O:8:\"stdClass\":1:{s:7:\"\0*\0name\";s:5:\"value\";}");
     VERIFY(is_object($v));
     try {

@@ -184,6 +184,17 @@ function unserialize(
 ): mixed;
 
 /**
+ * Unserializes a string beginning at the specified offset.
+ */
+<<__Native>>
+function unserialize_slice(
+  string $str,
+  int $start,
+  int $length,
+  darray<string, mixed> $options = dict[],
+): mixed;
+
+/**
  * Pure variant of unserialize.
  * Unserializing objects with impure implementations of the `__wakeup` method
  * will result in coeffect violations.

@@ -74,5 +74,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
 string(35) "Undefined property: stdClass::$name"
 bool(true)

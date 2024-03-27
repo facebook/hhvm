@@ -1564,21 +1564,35 @@ end = struct
             let upty = MakeType.intersection r_super tr_upper in
             (loty, upty)
         in
-        let htm_ty =
-          let htm = { htm_id = type_id; htm_lower; htm_upper } in
-          mk_constraint_type (r_super, Thas_type_member htm)
+        let htm = { htm_id = type_id; htm_lower; htm_upper } in
+        let lhs = { sub_supportdyn; ty_sub = ity_sub }
+        and rhs =
+          Has_type_member.{ reason_super = r_super; has_type_member = htm }
         in
-        Subtype.(
-          simplify_subtype_i
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = ity_sub }
-            ~rhs:
-              {
-                super_like;
-                super_supportdyn = false;
-                ty_super = ConstraintType htm_ty;
-              }))
+        let subtype_env =
+          Subtype_env.possibly_add_violated_constraint
+            subtype_env
+            ~r_sub:(reason ity_sub)
+            ~r_super
+        in
+        let ity_super =
+          ConstraintType (mk_constraint_type (r_super, Thas_type_member htm))
+        in
+        let fail =
+          Subtype_env.fail subtype_env ~ty_sub:ity_sub ~ty_super:ity_super
+        in
+        let secondary_error =
+          Subtype_env.mk_secondary_error subtype_env ity_sub ity_super
+        in
+        (* Contextualize errors that may be generated when
+                             * checking refinement bounds. *)
+        let on_error =
+          Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+              let open Typing_error.Reasons_callback in
+              prepend_on_apply on_error secondary_error)
+        in
+        let subtype_env = Subtype_env.{ subtype_env with on_error } in
+        Has_type_member.simplify ~subtype_env ~this_ty ~fail ~lhs ~rhs)
     &&&
     (* then recursively check the class with all the
        refinements dropped. *)

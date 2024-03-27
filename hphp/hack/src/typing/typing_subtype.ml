@@ -708,15 +708,6 @@ module rec Subtype : sig
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 
-  val default_subtype :
-    subtype_env:Subtype_env.t ->
-    this_ty:Typing_defs.locl_ty option ->
-    fail:Typing_error.t option ->
-    lhs:lhs ->
-    rhs:rhs ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
-
   val simplify_subtype_funs :
     subtype_env:Subtype_env.t ->
     check_return:bool ->

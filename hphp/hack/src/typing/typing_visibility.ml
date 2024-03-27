@@ -160,47 +160,47 @@ let check_public_access env use_pos def_pos target =
       ~target
   with
   | `Yes -> None
-  | `PackageNotSatisfied (package_pos, module_pos) ->
-    let current_module = Env.get_current_module env in
+  | `PackageNotSatisfied
+      Typing_modules.
+        {
+          current_module_pos;
+          current_package_pos;
+          current_package_name;
+          target_package_name;
+        } ->
     Some
       (Typing_error.modules
          (Module_cross_pkg_access
             {
               pos = use_pos;
               decl_pos = def_pos;
-              module_pos;
-              package_pos;
-              current_module_opt = current_module;
+              module_pos = current_module_pos;
+              package_pos = current_package_pos;
+              current_module_opt = Env.get_current_module env;
               target_module_opt = target;
-              current_package_opt =
-                Option.bind current_module ~f:(fun md ->
-                    Env.get_package_for_module env md
-                    |> Option.map ~f:Package.get_package_name);
-              target_package_opt =
-                Option.bind target ~f:(fun md ->
-                    Env.get_package_for_module env md
-                    |> Option.map ~f:Package.get_package_name);
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
             }))
-  | `PackageSoftIncludes (package_pos, module_pos) ->
-    let current_module = Env.get_current_module env in
+  | `PackageSoftIncludes
+      Typing_modules.
+        {
+          current_module_pos;
+          current_package_pos;
+          current_package_name;
+          target_package_name;
+        } ->
     Some
       (Typing_error.modules
          (Module_soft_included_access
             {
               pos = use_pos;
               decl_pos = def_pos;
-              module_pos;
-              package_pos;
-              current_module_opt = current_module;
+              module_pos = current_module_pos;
+              package_pos = current_package_pos;
+              current_module_opt = Env.get_current_module env;
               target_module_opt = target;
-              current_package_opt =
-                Option.bind current_module ~f:(fun md ->
-                    Env.get_package_for_module env md
-                    |> Option.map ~f:Package.get_package_name);
-              target_package_opt =
-                Option.bind target ~f:(fun md ->
-                    Env.get_package_for_module env md
-                    |> Option.map ~f:Package.get_package_name);
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
             }))
 
 let is_visible_for_obj ~is_method env vis =
@@ -363,7 +363,7 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
       Option.bind ~f:(Env.get_package_for_module env) current_module
     in
     let target_pkg = Env.get_package_by_name env target in
-    (match Typing_modules.satisfies_package_deps env current_pkg target_pkg with
+    (match Typing_modules.get_package_violation env current_pkg target_pkg with
     | Some _ ->
       Some
         (Typing_error.modules

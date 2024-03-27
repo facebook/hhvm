@@ -47,14 +47,14 @@ let get_module_pos env name =
   | Some m -> m.mdt_pos
   | None -> Pos_or_decl.none
 
-let satisfies_package_deps env current_pkg target_pkg =
+let get_package_violation env current_pkg target_pkg =
   match (current_pkg, target_pkg) with
   | (_, None) -> None
   | (None, Some target_pkg_info) ->
     if Env.is_package_loaded env (Package.get_package_name target_pkg_info) then
       None
     else
-      Some (Pos.none, Package.Unrelated)
+      Some Package.Unrelated
   (* Anyone can call code outside of a package *)
   | (Some current_pkg_info, Some target_pkg_info) ->
     Package.(
@@ -63,11 +63,17 @@ let satisfies_package_deps env current_pkg target_pkg =
       | Includes ->
         None
       | (Soft_includes | Unrelated) as r ->
-        if Env.is_package_loaded env (Package.get_package_name target_pkg_info)
-        then
+        if Env.is_package_loaded env (get_package_name target_pkg_info) then
           None
         else
-          Some (get_package_pos current_pkg_info, r)))
+          Some r))
+
+type package_error_info = {
+  current_module_pos: Pos_or_decl.t;
+  current_package_pos: Pos.t;
+  current_package_name: string option;
+  target_package_name: string option;
+}
 
 let satisfies_pkg_rules env current target =
   let current_name = declared_module_name_with_default current in
@@ -79,12 +85,28 @@ let satisfies_pkg_rules env current target =
   *)
   let current_pkg = Env.get_package_for_module env current_name in
   let target_pkg = Env.get_package_for_module env target_name in
-  match satisfies_package_deps env current_pkg target_pkg with
+  match get_package_violation env current_pkg target_pkg with
   | None -> None
-  | Some (current_package_pos, r) ->
+  | Some r ->
     (* Some package error, get the module pos *)
     let current_module_pos = get_module_pos env current_name in
-    Some ((current_package_pos, current_module_pos), r)
+    let (current_package_pos, current_package_name) =
+      match current_pkg with
+      | Some pkg ->
+        (Package.get_package_pos pkg, Some (Package.get_package_name pkg))
+      | None -> (Pos.none, None)
+    in
+    let target_package_name =
+      Option.map ~f:Package.get_package_name target_pkg
+    in
+    Some
+      ( {
+          current_module_pos;
+          current_package_pos;
+          current_package_name;
+          target_package_name;
+        },
+        r )
 
 let can_access_public
     ~(env : Typing_env_types.env)
@@ -94,10 +116,8 @@ let can_access_public
     `Yes
   else
     match satisfies_pkg_rules env current target with
-    | Some (current_module, Package.Soft_includes) ->
-      `PackageSoftIncludes current_module
-    | Some (current_module, Package.Unrelated) ->
-      `PackageNotSatisfied current_module
+    | Some (err_info, Package.Soft_includes) -> `PackageSoftIncludes err_info
+    | Some (err_info, Package.Unrelated) -> `PackageNotSatisfied err_info
     | Some (_, Package.(Equal | Includes)) ->
       Utils.assert_false_log_backtrace
         (Some "Package constraints are satisfied with equal and includes")

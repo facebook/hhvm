@@ -32,6 +32,7 @@ use crate::mangle::TypeName;
 use crate::mangle::VarName;
 
 pub(crate) const INDENT: &str = "  ";
+pub(crate) const NOTNULL: &str = ".notnull";
 pub(crate) const VARIADIC: &str = ".variadic";
 pub(crate) const TYPEVAR: &str = ".typevar";
 
@@ -625,6 +626,21 @@ impl SpecialTy {
     fn user_type(&self) -> TypeName {
         TypeName::UnmangledRef(self.get_str("UserType").unwrap())
     }
+
+    fn nullable(&self) -> ThreeValuedBool {
+        match self {
+            SpecialTy::Mixed => ThreeValuedBool::Yes,
+            SpecialTy::Arraykey
+            | SpecialTy::Bool
+            | SpecialTy::Dict
+            | SpecialTy::Float
+            | SpecialTy::Int
+            | SpecialTy::Keyset
+            | SpecialTy::Num
+            | SpecialTy::String
+            | SpecialTy::Vec => ThreeValuedBool::No,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
@@ -641,6 +657,12 @@ pub(crate) enum Ty {
     Unknown,
     Void,
     VoidPtr,
+}
+
+pub(crate) enum ThreeValuedBool {
+    Yes,
+    No,
+    DontKnow,
 }
 
 impl Ty {
@@ -686,6 +708,15 @@ impl Ty {
 
     pub(crate) fn unknown() -> Ty {
         Ty::Unknown
+    }
+
+    pub(crate) fn nullable(&self) -> ThreeValuedBool {
+        match self {
+            Ty::Ptr(_) | Ty::Type(_) => ThreeValuedBool::DontKnow,
+            Ty::VoidPtr | Ty::Unknown | Ty::Void | Ty::Ellipsis => ThreeValuedBool::Yes,
+            Ty::Special(special) | Ty::SpecialPtr(special) => special.nullable(),
+            Ty::Float | Ty::Int | Ty::Noreturn | Ty::String => ThreeValuedBool::No,
+        }
     }
 }
 

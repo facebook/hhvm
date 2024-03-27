@@ -2,7 +2,7 @@
 
 class D extends B {
   // TEST-CHECK-BAL: define D.inst_fcall_self
-  // CHECK: define D.inst_fcall_self($this: *D) : *void {
+  // CHECK: define D.inst_fcall_self($this: .notnull *D) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = D.bar(n0)
@@ -13,7 +13,7 @@ class D extends B {
   }
 
   // TEST-CHECK-BAL: define D$static.static_fcall_self
-  // CHECK: define D$static.static_fcall_self($this: *D$static) : *void {
+  // CHECK: define D$static.static_fcall_self($this: .notnull *D$static) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = D$static.bar(n0)
@@ -24,7 +24,7 @@ class D extends B {
   }
 
   // TEST-CHECK-BAL: define D.inst_fcall_static
-  // CHECK: define D.inst_fcall_static($this: *D) : *void {
+  // CHECK: define D.inst_fcall_static($this: .notnull *D) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = n0.?.bar()
@@ -35,7 +35,7 @@ class D extends B {
   }
 
   // TEST-CHECK-BAL: define D$static.static_fcall_static
-  // CHECK: define D$static.static_fcall_static($this: *D$static) : *void {
+  // CHECK: define D$static.static_fcall_static($this: .notnull *D$static) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = n0.?.bar()
@@ -46,7 +46,7 @@ class D extends B {
   }
 
   // TEST-CHECK-BAL: define D.inst_fcall_parent
-  // CHECK: define D.inst_fcall_parent($this: *D) : *void {
+  // CHECK: define D.inst_fcall_parent($this: .notnull *D) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = B.bar(n0)
@@ -57,7 +57,7 @@ class D extends B {
   }
 
   // TEST-CHECK-BAL: define D$static.static_fcall_parent
-  // CHECK: define D$static.static_fcall_parent($this: *D$static) : *void {
+  // CHECK: define D$static.static_fcall_parent($this: .notnull *D$static) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = B$static.bar(n0)

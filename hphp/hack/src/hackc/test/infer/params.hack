@@ -5,7 +5,7 @@ class Internal {}
 class InternalGeneric<T> {}
 
 // TEST-CHECK-BAL: define $root.internalClassParam
-// CHECK: define $root.internalClassParam($this: *void, $a: *HackInt, $b: *Internal) : *Internal {
+// CHECK: define $root.internalClassParam($this: *void, $a: .notnull *HackInt, $b: *Internal) : *Internal {
 // CHECK: local $0: *void, $1: *void, $2: *void
 // CHECK: #b0:
 // CHECK:   n0 = __sil_lazy_class_initialize(<Internal>)
@@ -38,7 +38,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 }
 
 // TEST-CHECK-BAL: define $root.externalClassParam
-// CHECK: define $root.externalClassParam($this: *void, $a: *HackBool, $b: *External) : *External {
+// CHECK: define $root.externalClassParam($this: *void, $a: .notnull *HackBool, $b: *External) : *External {
 // CHECK: local $0: *void, $1: *void, $2: *void
 // CHECK: #b0:
 // CHECK:   n0 = __sil_lazy_class_initialize(<External>)
@@ -71,7 +71,7 @@ function externalClassParam(bool $a, External $b): External {
 }
 
 // TEST-CHECK-BAL: define .async $root.genericParams
-// CHECK: define .async $root.genericParams($this: *void, $a: *HackString, $b: *InternalGeneric) : .awaitable *HackInt {
+// CHECK: define .async $root.genericParams($this: *void, $a: .notnull *HackString, $b: *InternalGeneric) : .awaitable .notnull *HackInt {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("InternalGeneric"), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4))))
 // CHECK:   n1: *HackMixed = load &$b
@@ -96,7 +96,7 @@ function softParam(<<__Soft>> string $a): void {
 }
 
 // TEST-CHECK-BAL: define $root.likeParam
-// CHECK: define $root.likeParam($this: *void, $a: *HackString) : *void {
+// CHECK: define $root.likeParam($this: *void, $a: .notnull *HackString) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1 = $builtins.hhbc_print(n0)

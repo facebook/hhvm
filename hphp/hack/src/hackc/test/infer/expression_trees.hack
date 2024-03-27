@@ -24,7 +24,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
-// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, this: *HackMixed, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
+// CHECK: define Closure$basic1232.__construct($this: .notnull *Closure$basic1232, this: *HackMixed, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this

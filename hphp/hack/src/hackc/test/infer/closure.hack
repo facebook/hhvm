@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.closure1
-// CHECK: define $root.closure1($this: *void, $x: *HackString) : *HackMixed {
+// CHECK: define $root.closure1($this: *void, $x: .notnull *HackString) : *HackMixed {
 // CHECK: local $y: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$x
@@ -13,7 +13,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__construct
-// CHECK: define Closure$closure1.__construct($this: *Closure$closure1, this: *HackMixed, x: *HackMixed) : *HackMixed {
+// CHECK: define Closure$closure1.__construct($this: .notnull *Closure$closure1, this: *HackMixed, x: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -25,7 +25,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__invoke
-// CHECK: define Closure$closure1.__invoke($this: *Closure$closure1) : *HackMixed {
+// CHECK: define Closure$closure1.__invoke($this: .notnull *Closure$closure1) : *HackMixed {
 // CHECK: local $x: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this

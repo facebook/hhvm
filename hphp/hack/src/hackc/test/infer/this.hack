@@ -3,7 +3,7 @@
 class ReturnType {
 
   // TEST-CHECK-BAL: define ReturnType.f
-  // CHECK: define ReturnType.f($this: *ReturnType) : .this *HackMixed {
+  // CHECK: define ReturnType.f($this: .notnull *ReturnType) : .this *HackMixed {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_is_late_bound_cls(n0)

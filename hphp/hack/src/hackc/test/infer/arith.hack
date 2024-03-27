@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.setop_l
-// CHECK: define $root.setop_l($this: *void, $i: *HackInt, $s: *HackString, $f: *HackFloat) : *void {
+// CHECK: define $root.setop_l($this: *void, $i: .notnull *HackInt, $s: .notnull *HackString, $f: .notnull *HackFloat) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$i
 // CHECK:   n1 = $builtins.hhbc_bit_and(n0, $builtins.hack_int(5))

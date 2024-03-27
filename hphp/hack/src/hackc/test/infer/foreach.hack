@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.check_foreach
-// CHECK: define $root.check_foreach($this: *void, $x: *HackVec) : *void {
+// CHECK: define $root.check_foreach($this: *void, $x: .notnull *HackVec) : *void {
 // CHECK: local $index: *void, iter0: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4))))

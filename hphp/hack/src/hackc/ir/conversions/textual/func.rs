@@ -52,6 +52,7 @@ use crate::textual;
 use crate::textual::Expr;
 use crate::textual::Sid;
 use crate::textual::TextualFile;
+use crate::textual::NOTNULL;
 use crate::typed_value;
 use crate::types::convert_ty;
 use crate::util;
@@ -122,6 +123,18 @@ fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) 
     if enforced.is_this() {
         add_attr(attr, ".this")
     }
+    let is_nullable = enforced
+        .modifiers
+        .contains(ir::TypeConstraintFlags::Nullable);
+    let ty = convert_ty(&enforced);
+    let base_is_notnull = match ty.nullable() {
+        textual::ThreeValuedBool::No => true,
+        _ => false,
+    };
+    if !is_nullable && base_is_notnull {
+        add_attr(attr, NOTNULL);
+        // because of type aliases, it is difficult to assert nonnullness on other types
+    }
     let is_typevar = enforced
         .modifiers
         .contains(ir::TypeConstraintFlags::TypeVar);
@@ -144,11 +157,21 @@ fn compute_func_params<'a, 'b>(
 ) -> Vec<(textual::Param<'b>, LocalId)> {
     let mut result = Vec::new();
 
+    let this_ty_is_void_ptr = match this_ty {
+        textual::Ty::VoidPtr => true,
+        _ => false,
+    };
+
     let this_lid = LocalId::Named(ir::intern(special_idents::THIS));
     // Prepend the 'this' parameter.
+    let this_attrs = if this_ty_is_void_ptr {
+        None
+    } else {
+        Some(vec![Cow::Borrowed(NOTNULL)].into_boxed_slice())
+    };
     let this_param = textual::Param {
         name: VarName::Local(this_lid),
-        attrs: None,
+        attrs: this_attrs,
         ty: this_ty,
     };
     result.push((this_param, this_lid));

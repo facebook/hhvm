@@ -5,7 +5,7 @@ abstract class Base {
   public abstract static function helper(mixed ...$x): mixed;
 
 // TEST-CHECK-BAL: "define Base.checkInstance0("
-// CHECK: define Base.checkInstance0($this: *Base, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define Base.checkInstance0($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -25,7 +25,7 @@ abstract class Base {
   }
 
 // TEST-CHECK-BAL: "define Base.checkInstance1("
-// CHECK: define Base.checkInstance1($this: *Base, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define Base.checkInstance1($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -45,7 +45,7 @@ abstract class Base {
   }
 
 // TEST-CHECK-BAL: "define Base$static.checkStatic0("
-// CHECK: define Base$static.checkStatic0($this: *Base$static, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define Base$static.checkStatic0($this: .notnull *Base$static, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -65,7 +65,7 @@ abstract class Base {
   }
 
 // TEST-CHECK-BAL: "define Base$static.checkStatic1("
-// CHECK: define Base$static.checkStatic1($this: *Base$static, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define Base$static.checkStatic1($this: .notnull *Base$static, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -85,7 +85,7 @@ abstract class Base {
   }
 
 // TEST-CHECK-BAL: "define Base.checkNested("
-// CHECK: define Base.checkNested($this: *Base, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define Base.checkNested($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -116,7 +116,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance0.__construct"
-// CHECK: define Closure$Base::checkInstance0.__construct($this: *Closure$Base::checkInstance0, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkInstance0.__construct($this: .notnull *Closure$Base::checkInstance0, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -131,7 +131,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance0.__invoke"
-// CHECK: define Closure$Base::checkInstance0.__invoke($this: *Closure$Base::checkInstance0) : *HackMixed {
+// CHECK: define Closure$Base::checkInstance0.__invoke($this: .notnull *Closure$Base::checkInstance0) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -158,7 +158,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance1.__construct"
-// CHECK: define Closure$Base::checkInstance1.__construct($this: *Closure$Base::checkInstance1, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkInstance1.__construct($this: .notnull *Closure$Base::checkInstance1, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -173,7 +173,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance1.__invoke"
-// CHECK: define Closure$Base::checkInstance1.__invoke($this: *Closure$Base::checkInstance1) : *HackMixed {
+// CHECK: define Closure$Base::checkInstance1.__invoke($this: .notnull *Closure$Base::checkInstance1) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -199,7 +199,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic0.__construct"
-// CHECK: define Closure$Base::checkStatic0.__construct($this: *Closure$Base::checkStatic0, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkStatic0.__construct($this: .notnull *Closure$Base::checkStatic0, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -214,7 +214,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic0.__invoke"
-// CHECK: define Closure$Base::checkStatic0.__invoke($this: *Closure$Base::checkStatic0) : *HackMixed {
+// CHECK: define Closure$Base::checkStatic0.__invoke($this: .notnull *Closure$Base::checkStatic0) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -241,7 +241,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic1.__construct"
-// CHECK: define Closure$Base::checkStatic1.__construct($this: *Closure$Base::checkStatic1, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkStatic1.__construct($this: .notnull *Closure$Base::checkStatic1, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -256,7 +256,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic1.__invoke"
-// CHECK: define Closure$Base::checkStatic1.__invoke($this: *Closure$Base::checkStatic1) : *HackMixed {
+// CHECK: define Closure$Base::checkStatic1.__invoke($this: .notnull *Closure$Base::checkStatic1) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -282,7 +282,7 @@ abstract class Base {
   // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested232.__construct"
-// CHECK: define Closure$Base::checkNested232.__construct($this: *Closure$Base::checkNested232, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkNested232.__construct($this: .notnull *Closure$Base::checkNested232, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -297,7 +297,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested232.__invoke"
-// CHECK: define Closure$Base::checkNested232.__invoke($this: *Closure$Base::checkNested232) : *HackMixed {
+// CHECK: define Closure$Base::checkNested232.__invoke($this: .notnull *Closure$Base::checkNested232) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -326,7 +326,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested.__construct"
-// CHECK: define Closure$Base::checkNested.__construct($this: *Closure$Base::checkNested, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$Base::checkNested.__construct($this: .notnull *Closure$Base::checkNested, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -341,7 +341,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested.__invoke"
-// CHECK: define Closure$Base::checkNested.__invoke($this: *Closure$Base::checkNested) : *HackMixed {
+// CHECK: define Closure$Base::checkNested.__invoke($this: .notnull *Closure$Base::checkNested) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
@@ -362,7 +362,7 @@ abstract class Base {
 }
 
 // TEST-CHECK-BAL: "define $root.checkFunc("
-// CHECK: define $root.checkFunc($this: *void, $arg1: *HackInt, $zarg1: *HackInt) : *void {
+// CHECK: define $root.checkFunc($this: *void, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$zarg1
 // CHECK:   n1: *HackMixed = load &$arg1
@@ -380,7 +380,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$checkFunc.__construct"
-// CHECK: define Closure$checkFunc.__construct($this: *Closure$checkFunc, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
+// CHECK: define Closure$checkFunc.__construct($this: .notnull *Closure$checkFunc, this: *HackMixed, zarg1: *HackMixed, arg1: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -395,7 +395,7 @@ abstract class Base {
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$checkFunc.__invoke"
-// CHECK: define Closure$checkFunc.__invoke($this: *Closure$checkFunc) : *HackMixed {
+// CHECK: define Closure$checkFunc.__invoke($this: .notnull *Closure$checkFunc) : *HackMixed {
 // CHECK: local $arg1: *void, $zarg1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this

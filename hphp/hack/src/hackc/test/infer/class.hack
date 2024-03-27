@@ -23,7 +23,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define C._86pinit
-// CHECK: define C._86pinit($this: *C) : *HackMixed {
+// CHECK: define C._86pinit($this: .notnull *C) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$this
 // CHECK:   n1 = $builtins.hack_int(42)
@@ -45,7 +45,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define C$static._86sinit
-// CHECK: define C$static._86sinit($this: *C$static) : *HackMixed {
+// CHECK: define C$static._86sinit($this: .notnull *C$static) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
 // CHECK:   n1 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), $builtins.hack_float(3.14))
@@ -69,7 +69,7 @@ class C {
   public int $type = 2;
 
   // TEST-CHECK-BAL: define C.__construct
-  // CHECK: define C.__construct($this: *C, $a: *HackInt, $b: *HackString, $c: *HackInt) : *HackMixed {
+  // CHECK: define C.__construct($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackString, $c: .notnull *HackInt) : *HackMixed {
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
@@ -78,7 +78,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_static
-  // CHECK: define C.cons_static($this: *C) : *void {
+  // CHECK: define C.cons_static($this: .notnull *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0: *C = load &$this
@@ -113,7 +113,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_self
-  // CHECK: define C.cons_self($this: *C) : *void {
+  // CHECK: define C.cons_self($this: .notnull *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0: *C = load &$this
@@ -146,7 +146,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_inst
-  // CHECK: define C.cons_inst($this: *C) : *void {
+  // CHECK: define C.cons_inst($this: .notnull *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0: *C = load &$this
@@ -179,7 +179,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C$static.static_signature
-  // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
+  // CHECK: define C$static.static_signature($this: .notnull *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$b
   // CHECK:   n1: *HackMixed = load &$a
@@ -198,7 +198,7 @@ class C {
   // CHECK: }
 
   // TEST-CHECK-BAL: define .wrapper C.static_signature
-  // CHECK: define .wrapper C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *void {
+  // CHECK: define .wrapper C.static_signature($this: .notnull *C, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *C = load &$this
@@ -217,7 +217,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define .final C.test_const
-  // CHECK: define .final C.test_const($this: *C) : *void {
+  // CHECK: define .final C.test_const($this: .notnull *C) : *void {
   // CHECK: local $x: *void
   // CHECK: #b0:
   // CHECK:   n0: *C = load &$this
@@ -235,7 +235,8 @@ class C {
 }
 
 // TEST-CHECK-BAL: type AbstractClass
-// CHECK: type AbstractClass = .kind="class" .abstract
+// CHECK: type AbstractClass = .kind="class" .abstract {
+// CHECK: }
 abstract class AbstractClass {
   // TEST-CHECK-BAL: declare .abstract AbstractClass$static.abs_static_func
   // CHECK: declare .abstract AbstractClass$static.abs_static_func(*AbstractClass$static, *HackInt, *HackFloat): *HackString
@@ -248,7 +249,7 @@ abstract class AbstractClass {
 
 trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
-  // CHECK: define T0.trait_parent_caller($this: *T0, self: *HackMixed) : *void {
+  // CHECK: define T0.trait_parent_caller($this: .notnull *T0, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -260,7 +261,7 @@ trait T0 {
   }
 
   // TEST-CHECK-BAL: define .wrapper T0$static.with_optional_argument
-  // CHECK: define .wrapper T0$static.with_optional_argument($this: *T0$static, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, self: *HackMixed) : *void {
   // CHECK: local $opt1: *void, $opt2: *void
   // CHECK: #b0:
   // CHECK:   store &$opt1 <- $builtins.hack_int(0): *HackMixed
@@ -274,7 +275,7 @@ trait T0 {
   // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
-  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *T0 = load &$this
@@ -283,7 +284,7 @@ trait T0 {
   // CHECK:   ret n2
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0$static.with_optional_argument
-  // CHECK: define .wrapper T0$static.with_optional_argument($this: *T0$static, $opt1: *HackInt, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: local $opt2: *void
   // CHECK: #b0:
   // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
@@ -296,7 +297,7 @@ trait T0 {
   // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
-  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, $opt1: *HackInt, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *T0 = load &$this
@@ -306,12 +307,12 @@ trait T0 {
   // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define T0$static.with_optional_argument
-  // CHECK: define T0$static.with_optional_argument($this: *T0$static, $opt1: *HackInt, $opt2: *HackInt, self: *HackMixed) : *void {
+  // CHECK: define T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, $opt2: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
-  // CHECK: define .wrapper T0.with_optional_argument($this: *T0, $opt1: *HackInt, $opt2: *HackInt, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, $opt1: .notnull *HackInt, $opt2: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *T0 = load &$this
@@ -329,7 +330,7 @@ trait T1 {
   require extends C;
 
   // TEST-CHECK-BAL: define T1.trait_parent_caller
-  // CHECK: define T1.trait_parent_caller($this: *T1, self: *HackMixed) : *void {
+  // CHECK: define T1.trait_parent_caller($this: .notnull *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -340,7 +341,7 @@ trait T1 {
   }
 
   // TEST-CHECK-BAL: define T1.trait_parent_static_caller
-  // CHECK: define T1.trait_parent_static_caller($this: *T1, self: *HackMixed) : *void {
+  // CHECK: define T1.trait_parent_static_caller($this: .notnull *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_static(n0)
@@ -353,7 +354,7 @@ trait T1 {
 
 trait T2 {
   // TEST-CHECK-BAL: define T2$static.trait_self_caller
-  // CHECK: define T2$static.trait_self_caller($this: *T2$static, self: *HackMixed) : *void {
+  // CHECK: define T2$static.trait_self_caller($this: .notnull *T2$static, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T2$static = load &$this
   // CHECK:   n1 = __self__$static.f(n0)
@@ -361,7 +362,7 @@ trait T2 {
   // CHECK: }
 
   // TEST-CHECK-BAL: define .wrapper T2.trait_self_caller
-  // CHECK: define .wrapper T2.trait_self_caller($this: *T2, self: *HackMixed) : *void {
+  // CHECK: define .wrapper T2.trait_self_caller($this: .notnull *T2, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *T2 = load &$this
@@ -378,7 +379,7 @@ trait T2 {
 
 trait T3 {
   // TEST-CHECK-BAL: define T3.trait_self_caller
-  // CHECK: define T3.trait_self_caller($this: *T3, self: *HackMixed) : *void {
+  // CHECK: define T3.trait_self_caller($this: .notnull *T3, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T3 = load &$this
   // CHECK:   n1 = __self__.f(n0)

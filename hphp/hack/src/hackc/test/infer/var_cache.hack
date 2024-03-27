@@ -20,7 +20,7 @@ function check1(mixed $a, mixed $b, mixed $c): void {
 }
 
 // TEST-CHECK-BAL: define $root.check2
-// CHECK: define $root.check2($this: *void, $c: *HackInt) : *void {
+// CHECK: define $root.check2($this: *void, $c: .notnull *HackInt) : *void {
 // CHECK: local $a: *void
 // CHECK: #b0:
 // CHECK:   store &$a <- $builtins.hack_int(2): *HackMixed

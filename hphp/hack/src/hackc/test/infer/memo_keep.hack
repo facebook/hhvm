@@ -2,7 +2,7 @@
 
 class C {
   // TEST-CHECK-BAL: define C.memometh_inst
-  // CHECK: define C.memometh_inst($this: *C, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C.memometh_inst($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: local memocache::_C_2ememometh__inst: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
@@ -40,7 +40,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C$static.memometh_static
-  // CHECK: define C$static.memometh_static($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C$static.memometh_static($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: local memocache::_C$static_2ememometh__static: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$a
@@ -76,10 +76,10 @@ class C {
   }
 
   // TEST-CHECK-1: define C$static.memometh_static$memoize_impl
-  // CHECK: define C$static.memometh_static$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C$static.memometh_static$memoize_impl($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
 
   // TEST-CHECK-BAL: define C$static.memometh_lsb
-  // CHECK: define C$static.memometh_lsb($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C$static.memometh_lsb($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: local memocache::_C$static_2ememometh__lsb: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$a
@@ -116,10 +116,10 @@ class C {
 }
 
 // TEST-CHECK-1: define C$static.memometh_lsb$memoize_impl
-// CHECK: define C$static.memometh_lsb$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define C$static.memometh_lsb$memoize_impl($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
 
 // TEST-CHECK-BAL: define $root.memofunc
-// CHECK: define $root.memofunc($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define $root.memofunc($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
 // CHECK: local memocache::_$root_2ememofunc: *void, $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
@@ -153,10 +153,10 @@ function memofunc(int $a, int $b)[]: int {
 }
 
 // TEST-CHECK-1: define $root.memofunc$memoize_impl
-// CHECK: define $root.memofunc$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define $root.memofunc$memoize_impl($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
 
 // TEST-CHECK-BAL: define .async $root.memo_async_func
-// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {
+// CHECK: define .async $root.memo_async_func($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .awaitable .notnull *HackInt {
 // CHECK: local memocache::_$root_2ememo__async__func: *void, $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
@@ -191,4 +191,4 @@ async function memo_async_func(int $a, int $b)[]: Awaitable<int> {
 }
 
 // TEST-CHECK-1: define .async $root.memo_async_func$memoize_impl
-// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {
+// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .awaitable .notnull *HackInt {

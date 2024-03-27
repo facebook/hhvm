@@ -7,7 +7,7 @@ class A {
 }
 
 // TEST-CHECK-BAL: define $root.NullCheck::f1_nonnull
-// CHECK: define $root.NullCheck::f1_nonnull($this: *void, $arg: *NullCheck::A) : *HackString {
+// CHECK: define $root.NullCheck::f1_nonnull($this: *void, $arg: *NullCheck::A) : .notnull *HackString {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$arg
 // CHECK:   n1 = $builtins.hhbc_is_type_null(n0)
@@ -35,7 +35,7 @@ function f1_nonnull(?A $arg): string {
 }
 
 // TEST-CHECK-BAL: define $root.NullCheck::f2_null
-// CHECK: define $root.NullCheck::f2_null($this: *void, $arg: *NullCheck::A) : *HackString {
+// CHECK: define $root.NullCheck::f2_null($this: *void, $arg: *NullCheck::A) : .notnull *HackString {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$arg
 // CHECK:   n1 = $builtins.hhbc_is_type_null(n0)
@@ -62,7 +62,7 @@ function f2_null(?A $arg): string {
 }
 
 // TEST-CHECK-BAL: define $root.NullCheck::f3_as_nonnull
-// CHECK: define $root.NullCheck::f3_as_nonnull($this: *void, $arg: *NullCheck::A) : *HackString {
+// CHECK: define $root.NullCheck::f3_as_nonnull($this: *void, $arg: *NullCheck::A) : .notnull *HackString {
 // CHECK: local $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(23))

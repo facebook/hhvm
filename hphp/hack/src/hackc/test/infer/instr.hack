@@ -3,7 +3,7 @@
 // Random instruction tests.
 
 // TEST-CHECK-1: define $root.binops
-// CHECK: define $root.binops($this: *void, $a: *HackInt, $b: *HackInt) : *void {
+// CHECK: define $root.binops($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : *void {
 function binops(int $a, int $b): void {
   // TEST-CHECK-1*: $builtins.hhbc_add
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
@@ -50,7 +50,7 @@ function binops(int $a, int $b): void {
 }
 
 // TEST-CHECK-1: define $root.unops
-// CHECK: define $root.unops($this: *void, $a: *HackInt) : *void {
+// CHECK: define $root.unops($this: *void, $a: .notnull *HackInt) : *void {
 function unops(int $a): void {
   // TEST-CHECK-1*: $builtins.hhbc_not
   // CHECK:   n1 = $builtins.hhbc_not(n0)
@@ -71,7 +71,7 @@ function check_shape(): void {
 }
 
 // TEST-CHECK-BAL: define $root.check_closure
-// CHECK: define $root.check_closure($this: *void, $x: *HackInt) : *void {
+// CHECK: define $root.check_closure($this: *void, $x: .notnull *HackInt) : *void {
 // CHECK: local $impl: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$x
@@ -85,7 +85,7 @@ function check_closure(int $x): void {
 }
 
 // TEST-CHECK-BAL: define $root.add_elem
-// CHECK: define $root.add_elem($this: *void, $s1: *HackString, $s2: *HackString) : *void {
+// CHECK: define $root.add_elem($this: *void, $s1: .notnull *HackString, $s2: .notnull *HackString) : *void {
 // CHECK: local $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_dict()
@@ -101,7 +101,7 @@ function add_elem(string $s1, string $s2) : void {
 }
 
 // TEST-CHECK-BAL: define $root.col_from_array
-// CHECK: define $root.col_from_array($this: *void, $s1: *HackString, $s2: *HackString) : *void {
+// CHECK: define $root.col_from_array($this: *void, $s1: .notnull *HackString, $s2: .notnull *HackString) : *void {
 // CHECK: local $c1: *void, $c2: *void, $c3: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_dict()
@@ -132,7 +132,7 @@ function col_from_array(string $s1, string $s2) : void {
 }
 
 // TEST-CHECK-BAL: define $root.check_switch
-// CHECK: define $root.check_switch($this: *void, $x: *HackInt) : *void {
+// CHECK: define $root.check_switch($this: *void, $x: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$x
 // CHECK:   n1 = $builtins.hhbc_cmp_eq(n0, $builtins.hack_int(5))

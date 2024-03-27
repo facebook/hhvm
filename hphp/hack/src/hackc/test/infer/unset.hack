@@ -4,7 +4,7 @@ class C {
   public function __construct(private dict<int, mixed> $dict) {}
 
   // TEST-CHECK-BAL: define C.test1
-  // CHECK: define C.test1($this: *C, $idx: *HackInt) : .this *HackMixed {
+  // CHECK: define C.test1($this: .notnull *C, $idx: .notnull *HackInt) : .this *HackMixed {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_check_this(n0)
@@ -25,7 +25,7 @@ class C {
 }
 
 // TEST-CHECK-BAL: define $root.test2
-// CHECK: define $root.test2($this: *void, $dict: *HackDict, $idx: *HackInt) : *void {
+// CHECK: define $root.test2($this: *void, $dict: .notnull *HackDict, $idx: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(9))))
 // CHECK:   n1: *HackMixed = load &$dict

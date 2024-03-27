@@ -5,7 +5,7 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define A$static._86sinit
-// CHECK: define A$static._86sinit($this: *A$static) : *HackMixed {
+// CHECK: define A$static._86sinit($this: .notnull *A$static) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *A$static = load &$this
 // CHECK:   n1 = HH::BuiltinEnum$static._86sinit(n0)

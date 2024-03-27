@@ -3,7 +3,7 @@
 // Random instruction tests.
 
 // TEST-CHECK-BAL: define $root.multi_ret
-// CHECK: define $root.multi_ret($this: *void, $a: *HackInt) : *HackInt {
+// CHECK: define $root.multi_ret($this: *void, $a: .notnull *HackInt) : .notnull *HackInt {
 // CHECK: #b0:
 // CHECK:   store &$a <- $builtins.hack_int(7): *HackMixed
 // CHECK:   n0 = $builtins.hhbc_is_type_int($builtins.hack_int(5))

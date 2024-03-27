@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --hide-static-coeffects --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define C._86pinit
-// CHECK: define C._86pinit($this: *C) : *HackMixed {
+// CHECK: define C._86pinit($this: .notnull *C) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   ret null
 // CHECK: }
@@ -11,7 +11,7 @@ class C {
 }
 
 // TEST-CHECK-BAL: define D._86pinit
-// CHECK: define D._86pinit($this: *D) : *HackMixed {
+// CHECK: define D._86pinit($this: .notnull *D) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *D = load &$this
 // CHECK:   n1 = C._86pinit(n0)
@@ -21,7 +21,7 @@ class C {
 class D extends C { }
 
 // TEST-CHECK-BAL: define E._86pinit
-// CHECK: define E._86pinit($this: *E) : *HackMixed {
+// CHECK: define E._86pinit($this: .notnull *E) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *E = load &$this
 // CHECK:   n1 = D._86pinit(n0)

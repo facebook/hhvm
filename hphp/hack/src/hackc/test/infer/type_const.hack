@@ -10,7 +10,7 @@ abstract class C {
   abstract const type TMyShape;
 
   // TEST-CHECK-BAL: define C$static.check2
-  // CHECK: define C$static.check2($this: *C$static, $a: *HackMixed) : *HackBool {
+  // CHECK: define C$static.check2($this: .notnull *C$static, $a: *HackMixed) : .notnull *HackBool {
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("self"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
   // CHECK:   n1: *HackMixed = load &$a
@@ -36,7 +36,7 @@ class D extends C {
   );
 
   // TEST-CHECK-BAL: define D$static.check3
-  // CHECK: define D$static.check3($this: *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {
+  // CHECK: define D$static.check3($this: .notnull *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
@@ -46,7 +46,7 @@ class D extends C {
 
 
 // TEST-CHECK-BAL: define $root.check1
-// CHECK: define $root.check1($this: *void, $a: *HackMixed) : *HackBool {
+// CHECK: define $root.check1($this: *void, $a: *HackMixed) : .notnull *HackBool {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("D"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
 // CHECK:   n1: *HackMixed = load &$a

@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.no_locals
-// CHECK: define $root.no_locals($this: *void, $a: *HackInt) : *void {
+// CHECK: define $root.no_locals($this: *void, $a: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   ret null
 // CHECK: }
@@ -22,7 +22,7 @@ function only_locals() : void {
 }
 
 // TEST-CHECK-BAL: define $root.params_and_locals
-// CHECK: define $root.params_and_locals($this: *void, $a: *HackInt) : *void {
+// CHECK: define $root.params_and_locals($this: *void, $a: .notnull *HackInt) : *void {
 // CHECK: local $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
@@ -35,7 +35,7 @@ function params_and_locals(int $a) : void {
 }
 
 // TEST-CHECK-BAL: define $root.locals_for_iter
-// CHECK: define $root.locals_for_iter($this: *void, $d: *HackDict) : *void {
+// CHECK: define $root.locals_for_iter($this: *void, $d: .notnull *HackDict) : *void {
 // CHECK: local $k: *void, $v: *void, iter0: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))

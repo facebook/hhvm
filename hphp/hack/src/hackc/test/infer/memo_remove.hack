@@ -2,7 +2,7 @@
 
 class C {
   // TEST-CHECK-BAL: define C.memometh_inst
-  // CHECK: define C.memometh_inst($this: *C, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C.memometh_inst($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$b
   // CHECK:   n1: *HackMixed = load &$a
@@ -17,7 +17,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C$static.memometh_static
-  // CHECK: define C$static.memometh_static($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C$static.memometh_static($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$b
   // CHECK:   n1: *HackMixed = load &$a
@@ -32,7 +32,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C$static.memometh_lsb
-  // CHECK: define C$static.memometh_lsb($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+  // CHECK: define C$static.memometh_lsb($this: .notnull *C$static, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$b
   // CHECK:   n1: *HackMixed = load &$a
@@ -48,7 +48,7 @@ class C {
 }
 
 // TEST-CHECK-BAL: define $root.memofunc
-// CHECK: define $root.memofunc($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define $root.memofunc($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .notnull *HackInt {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a
@@ -64,7 +64,7 @@ function memofunc(int $a, int $b)[]: int {
 }
 
 // TEST-CHECK-BAL: define .async $root.memo_async_func
-// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {
+// CHECK: define .async $root.memo_async_func($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : .awaitable .notnull *HackInt {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a

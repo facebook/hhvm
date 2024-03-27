@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define C$static._86cinit
-// CHECK: define C$static._86cinit($this: *C$static, $constName: *HackMixed) : *HackMixed {
+// CHECK: define C$static._86cinit($this: .notnull *C$static, $constName: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$constName
 // CHECK:   n1 = $builtins.hhbc_cmp_same($builtins.hack_string("CONST_REQUIRES_CINIT"), n0)

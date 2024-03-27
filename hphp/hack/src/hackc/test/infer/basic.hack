@@ -50,7 +50,7 @@ function cmp(mixed $a, mixed $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.cmp2
-// CHECK: define $root.cmp2($this: *void, $a: *HackInt, $b: *HackInt) : *void {
+// CHECK: define $root.cmp2($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a
@@ -76,7 +76,7 @@ function cmp2(int $a, int $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.ret_str
-// CHECK: define $root.ret_str($this: *void) : *HackString {
+// CHECK: define $root.ret_str($this: *void) : .notnull *HackString {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
 // CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello, world\n"), n0)
@@ -129,7 +129,7 @@ function float_arg(): void {
 }
 
 // TEST-CHECK-BAL: define $root.check_param_types
-// CHECK: define $root.check_param_types($this: *void, $a: *HackInt, $b: *HackFloat, $c: *HackString) : *void {
+// CHECK: define $root.check_param_types($this: *void, $a: .notnull *HackInt, $b: .notnull *HackFloat, $c: .notnull *HackString) : *void {
 // CHECK: #b0:
 // CHECK:   ret null
 // CHECK: }
@@ -137,7 +137,7 @@ function check_param_types(int $a, float $b, string $c): void {
 }
 
 // TEST-CHECK-BAL: define $root.check_is_class
-// CHECK: define $root.check_is_class($this: *void, $a: *HackMixed) : *HackBool {
+// CHECK: define $root.check_is_class($this: *void, $a: *HackMixed) : .notnull *HackBool {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>))
@@ -195,6 +195,26 @@ function check_file(): void {
 function check_nothing(): nothing {
   invariant(false, "bad");
 }
+
+
+// TEST-CHECK-BAL: define $root.check_nullable_types
+// CHECK: define $root.check_nullable_types($this: *void, $i: .notnull *HackInt, $j: *HackInt, $f: .notnull *HackFloat, $g: *HackFloat, $u: .notnull *HackString, $v: *HackString) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("i: %d, j: %d, f: %f, g: %f, u: %s, v: %s\n")
+// CHECK:   n1: *HackMixed = load &$i
+// CHECK:   n2: *HackMixed = load &$j
+// CHECK:   n3: *HackMixed = load &$f
+// CHECK:   n4: *HackMixed = load &$g
+// CHECK:   n5: *HackMixed = load &$u
+// CHECK:   n6: *HackMixed = load &$v
+// CHECK:   n7 = $root.printf(null, n0, n1, n2, n3, n4, n5, n6)
+// CHECK:   ret null
+// CHECK: }
+function check_nullable_types(int $i, ?int $j, float $f, ?float $g, string $u, ?string $v): void {
+  printf("i: %d, j: %d, f: %f, g: %f, u: %s, v: %s\n", $i, $j, $f, $g, $u, $v);
+}
+
+
 
 // TEST-CHECK-BAL: define $root.check_noreturn
 // CHECK: define $root.check_noreturn($this: *void) : *noreturn {

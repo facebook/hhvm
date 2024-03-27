@@ -163,11 +163,24 @@ EncodeError StructuredHeadersEncoder::encodeString(const std::string& input) {
   }
 
   outputStream_ << "\"";
+
+  size_t l = 0;
+  size_t r = 0;
   for (char c : input) {
     if (c == '"' || c == '\\') {
-      outputStream_ << "\\";
+      if (r > l) {
+        outputStream_ << input.substr(l, r - l) << "\\" << c;
+      } else {
+        outputStream_ << "\\" << c;
+      }
+      ++r;
+      l = r;
+    } else {
+      ++r;
     }
-    outputStream_ << c;
+  }
+  if (l < r) {
+    outputStream_ << input.substr(l, r - l + 1);
   }
 
   outputStream_ << "\"";

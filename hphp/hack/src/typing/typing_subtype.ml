@@ -723,6 +723,40 @@ end = struct
     ty_super: locl_ty;
   }
 
+  let log_simplify
+      subtype_env
+      this_ty
+      ~lhs:{ sub_supportdyn; ty_sub }
+      ~rhs:{ super_like; super_supportdyn; ty_super }
+      env =
+    Logging.log_subtype_i
+      ~level:subtype_env.Subtype_env.log_level
+      ~this_ty
+      ~function_name:
+        ("simplify_subtype"
+        ^ (match subtype_env.Subtype_env.coerce with
+          | None -> ""
+          | Some TL.CoerceToDynamic -> " <:D"
+          | Some TL.CoerceFromDynamic -> " D<:")
+        ^
+        let flag str = function
+          | true -> str
+          | false -> ""
+        in
+        flag " sub_supportdyn" (Option.is_some sub_supportdyn)
+        ^ flag " super_supportdyn" super_supportdyn
+        ^ flag " super_like" super_like
+        ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
+        ^ flag
+            " require_completeness"
+            subtype_env.Subtype_env.require_completeness
+        ^ flag
+            " in_transitive_closure"
+            subtype_env.Subtype_env.in_transitive_closure)
+      env
+      (LoclType ty_sub)
+      (LoclType ty_super)
+
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
       =
     if phys_equal ty_sub ty_super then
@@ -1262,36 +1296,13 @@ end = struct
         (r_super, ((pos_super, class_name), exact_super, tyl_super))
         env
 
-  and simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env =
-    let { sub_supportdyn; ty_sub } = lhs
-    and { super_supportdyn; super_like; ty_super } = rhs in
-    Logging.log_subtype_i
-      ~level:subtype_env.Subtype_env.log_level
+  and simplify_subtype
+      ~subtype_env
       ~this_ty
-      ~function_name:
-        ("simplify_subtype"
-        ^ (match subtype_env.Subtype_env.coerce with
-          | None -> ""
-          | Some TL.CoerceToDynamic -> " <:D"
-          | Some TL.CoerceFromDynamic -> " D<:")
-        ^
-        let flag str = function
-          | true -> str
-          | false -> ""
-        in
-        flag " sub_supportdyn" (Option.is_some sub_supportdyn)
-        ^ flag " super_supportdyn" super_supportdyn
-        ^ flag " super_like" super_like
-        ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
-        ^ flag
-            " require_completeness"
-            subtype_env.Subtype_env.require_completeness
-        ^ flag
-            " in_transitive_closure"
-            subtype_env.Subtype_env.in_transitive_closure)
-      env
-      (LoclType ty_sub)
-      (LoclType ty_super);
+      ~lhs:({ ty_sub; _ } as lhs)
+      ~rhs:({ ty_super; _ } as rhs)
+      env =
+    let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
     let (env, ty_super) = Env.expand_type env ty_super in
     let (env, ty_sub) = Env.expand_type env ty_sub in

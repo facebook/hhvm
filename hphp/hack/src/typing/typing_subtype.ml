@@ -700,7 +700,7 @@ module rec Subtype : sig
       vec<T> <: vec<I>    ==>  True
     This last one would be left as T <: I if subtype_env.require_completeness=true
    *)
-  val simplify_subtype :
+  val simplify :
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     lhs:lhs ->
@@ -708,7 +708,7 @@ module rec Subtype : sig
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 
-  val simplify_subtype_funs :
+  val simplify_funs :
     subtype_env:Subtype_env.t ->
     check_return:bool ->
     for_override:bool ->
@@ -796,12 +796,11 @@ end = struct
     | Tnewtype (_, _, bound) ->
       null_not_subtype bound
 
-  let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
-      =
+  let simplify_subtype_by_physical_equality env ty_sub ty_super simplify =
     if phys_equal ty_sub ty_super then
       (env, TL.valid)
     else
-      simplify_subtype ()
+      simplify ()
 
   let rec default_subtype
       ~subtype_env
@@ -843,7 +842,7 @@ end = struct
     end
     | (r_sub, Tprim Nast.Tvoid) ->
       let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
-      simplify_subtype
+      simplify
         ~subtype_env
         ~this_ty
         ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.mixed r }
@@ -879,7 +878,7 @@ end = struct
     match deref lty_sub with
     | (_, Tunion tyl) ->
       let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
-        simplify_subtype ~subtype_env ~this_ty:None ~lhs ~rhs env
+        simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
       in
       Common.simplify_union_l
         ~subtype_env
@@ -928,7 +927,7 @@ end = struct
       | (env, Some non_ty, tyl) -> begin
         let (env, ty_super) = TUtils.union env ty_super non_ty in
         let ty_sub = MakeType.intersection r_sub tyl in
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty:None
           ~lhs:{ sub_supportdyn; ty_sub }
@@ -937,7 +936,7 @@ end = struct
       end
       | _ ->
         let mk_prop ~subtype_env ~this_ty:_ ~fail:_ ~lhs ~rhs env =
-          simplify_subtype ~subtype_env ~this_ty:None ~lhs ~rhs env
+          simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
         in
         (* Otherwise use the incomplete common case which doesn't require inspection of the rhs *)
         Common.simplify_intersection_l
@@ -971,7 +970,7 @@ end = struct
         let subtype_env = Subtype_env.set_visited subtype_env new_visited in
 
         let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-          simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
+          simplify ~subtype_env ~this_ty ~lhs ~rhs env
         in
         Common.simplify_generic_l
           ~subtype_env
@@ -989,7 +988,7 @@ end = struct
     | (_, Taccess _) -> invalid ~fail env
     | (r, Tnewtype (n, _, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-        simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
+        simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
       Common.simplify_newtype_l
         ~subtype_env
@@ -1001,7 +1000,7 @@ end = struct
         env
     | (r, Tdependent (dep_ty, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~fail:_ ~lhs ~rhs env =
-        simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env
+        simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
       Common.simplify_dependent_l
         ~subtype_env
@@ -1044,7 +1043,7 @@ end = struct
         in
         let (env, props) =
           Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = inter_ty }
@@ -1108,7 +1107,7 @@ end = struct
     in
     let simplify_subtype_of_dynamic env =
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -1238,7 +1237,7 @@ end = struct
             if istyvar then
               env
               |> Subtype.(
-                   simplify_subtype
+                   simplify
                      ~subtype_env
                      ~this_ty
                      ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -1254,7 +1253,7 @@ end = struct
           | Some ty ->
             let simplify_pushed_like env =
               Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
                   ~this_ty
                   ~lhs:{ sub_supportdyn = None; ty_sub = ty }
@@ -1266,7 +1265,7 @@ end = struct
                     }
                   env)
               &&& Subtype.(
-                    simplify_subtype
+                    simplify
                       ~subtype_env
                       ~this_ty
                       ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -1280,7 +1279,7 @@ end = struct
             env |> simplify_pushed_like ||| dyn_finish ty
       in
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -1302,7 +1301,7 @@ end = struct
         | ty :: tys ->
           env
           |> Subtype.(
-               simplify_subtype
+               simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -1324,7 +1323,7 @@ end = struct
     | { fp_type = sub; _ } :: subl ->
       env
       |> Subtype.(
-           simplify_subtype
+           simplify
              ~subtype_env
              ~this_ty:None
              ~lhs:{ sub_supportdyn = None; ty_sub = sub }
@@ -1359,7 +1358,7 @@ end = struct
       match (sub_cap, super_cap) with
       | (CapTy sub, CapTy super) ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn = None; ty_sub = sub }
@@ -1368,7 +1367,7 @@ end = struct
             env)
       | (CapTy sub, CapDefaults _p) ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn = None; ty_sub = sub }
@@ -1377,7 +1376,7 @@ end = struct
             env)
       | (CapDefaults _p, CapTy super) ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn = None; ty_sub = expected }
@@ -1401,7 +1400,7 @@ end = struct
     | { fp_type = super; _ } :: superl ->
       env
       |> Subtype.(
-           simplify_subtype
+           simplify
              ~subtype_env
              ~this_ty:None
              ~lhs:{ sub_supportdyn = None; ty_sub = variadic_ty }
@@ -1786,7 +1785,7 @@ end = struct
       in
       let simplify_subtype_for_param ty_sub ty_super env =
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env:subtype_env_for_param
             ~this_ty:None
             ~lhs:{ sub_supportdyn = None; ty_sub }
@@ -1814,7 +1813,7 @@ end = struct
             variadic_sub_ty
             variadic_super_ty
 
-  and simplify_subtype_funs
+  and simplify_funs
       ~(subtype_env : Subtype_env.t)
       ~(check_return : bool)
       ~(for_override : bool)
@@ -1873,7 +1872,7 @@ end = struct
           subtype_env
       in
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty:None
           ~lhs:{ sub_supportdyn = None; ty_sub = ft_sub.ft_ret }
@@ -1924,7 +1923,7 @@ end = struct
           subtype_env
       in
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty:None
           ~lhs:{ sub_supportdyn; ty_sub }
@@ -2327,7 +2326,7 @@ end = struct
 
         res
         &&& Subtype.(
-              simplify_subtype
+              simplify
                 ~subtype_env
                 ~this_ty
                 ~lhs:
@@ -2479,7 +2478,7 @@ end = struct
         (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
         (env, TL.valid)
 
-  and simplify_subtype ~subtype_env ~this_ty ~lhs ~rhs env =
+  and simplify ~subtype_env ~this_ty ~lhs ~rhs env =
     let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
     let { sub_supportdyn; ty_sub } = lhs
     and { super_supportdyn; super_like; ty_super } = rhs in
@@ -2571,7 +2570,7 @@ end = struct
           let lty_super = mk (r_super, Tvar var_super) in
           env
           |> Subtype.(
-               simplify_subtype
+               simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub = t }
@@ -2582,7 +2581,7 @@ end = struct
                      ty_super = lty_super;
                    })
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty_null }
@@ -2610,7 +2609,7 @@ end = struct
             in
             env
             |> Subtype.(
-                 simplify_subtype
+                 simplify
                    ~subtype_env
                    ~this_ty
                    ~lhs:{ sub_supportdyn; ty_sub }
@@ -2637,7 +2636,7 @@ end = struct
        *)
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
           res
-          &&& simplify_subtype
+          &&& simplify
                 ~subtype_env
                 ~this_ty
                 ~lhs:{ sub_supportdyn; ty_sub }
@@ -2646,7 +2645,7 @@ end = struct
     | (_, Tunion []) -> default_subtype_help env
     (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
     | (_, Tunion [ty_super']) ->
-      simplify_subtype
+      simplify
         ~subtype_env
         ~this_ty
         ~lhs:{ sub_supportdyn; ty_sub }
@@ -2672,7 +2671,7 @@ end = struct
       (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
       | lty_super :: [] ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -2728,7 +2727,7 @@ end = struct
             let lty_super = mk (r_super, Tunion lty_supers) in
             env
             |> Subtype.(
-                 simplify_subtype
+                 simplify
                    ~subtype_env
                    ~this_ty
                    ~lhs:{ sub_supportdyn = None; ty_sub = ty_float }
@@ -2739,7 +2738,7 @@ end = struct
                        ty_super = lty_super;
                      })
             &&& Subtype.(
-                  simplify_subtype
+                  simplify
                     ~subtype_env
                     ~this_ty
                     ~lhs:{ sub_supportdyn = None; ty_sub = ty_int }
@@ -2756,7 +2755,7 @@ end = struct
             if_unsat
               (invalid ~fail)
               Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty_null }
@@ -2768,7 +2767,7 @@ end = struct
                     }
                   env)
             &&& Subtype.(
-                  simplify_subtype
+                  simplify
                     ~subtype_env
                     ~this_ty
                     ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -2809,7 +2808,7 @@ end = struct
                 ~f:(fun res ty_sub ->
                   res
                   ||| Subtype.(
-                        simplify_subtype
+                        simplify
                           ~subtype_env
                           ~this_ty
                           ~lhs:{ sub_supportdyn; ty_sub }
@@ -2888,7 +2887,7 @@ end = struct
         | (_, Tnewtype (name, [tyarg], _))
           when String.equal name SN.Classes.cSupportDyn ->
           let tyarg = MakeType.nullable r_super tyarg in
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -2908,7 +2907,7 @@ end = struct
           let (env, ty_sub') =
             Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
           in
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
@@ -2925,7 +2924,7 @@ end = struct
           let (env, ty_sub') =
             Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
           in
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
@@ -2940,7 +2939,7 @@ end = struct
          * Therefore, this step preserves the set of solutions.
          *)
         | ((_, Toption ty_sub'), _) ->
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
@@ -2956,7 +2955,7 @@ end = struct
         | ((_, (Tintersection _ | Tunion _)), _)
           when TUtils.is_type_disjoint env ty_sub (MakeType.null Reason.Rnone)
           ->
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -3004,7 +3003,7 @@ end = struct
           (* TODO(T69551141) handle type arguments? *)
           if null_not_subtype ty_sub then
             env
-            |> simplify_subtype
+            |> simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub }
@@ -3017,7 +3016,7 @@ end = struct
           else
             let ( ||| ) = ( ||| ) ~fail in
             env
-            |> simplify_subtype
+            |> simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub }
@@ -3049,7 +3048,7 @@ end = struct
               ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
               | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ ) ),
             _ ) ->
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -3060,7 +3059,7 @@ end = struct
            TODO(T120921930): Don't do this if require_completeness is set.
         *)
         | ((_, Tneg _), _) ->
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -3077,7 +3076,7 @@ end = struct
          * But we need to take care with variant classes, since we can't
          * statically guarantee their runtime type.
          *)
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub }
@@ -3111,7 +3110,7 @@ end = struct
         let this_ty = Option.first_some this_ty (Some ty_sub) in
         (* Dependent types are identical but bound might be different *)
         if equal_dependent_type d_sub dep_ty_sup then
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
@@ -3123,7 +3122,7 @@ end = struct
               }
             env
         else
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
@@ -3245,7 +3244,7 @@ end = struct
               | ty :: tyl ->
                 env
                 |> Subtype.(
-                     simplify_subtype
+                     simplify
                        ~subtype_env
                        ~this_ty
                        ~lhs:{ sub_supportdyn; ty_sub }
@@ -3272,7 +3271,7 @@ end = struct
       | (r, Tnewtype (name, [tyarg], _))
         when String.equal name SN.Classes.cSupportDyn ->
         env
-        |> simplify_subtype
+        |> simplify
              ~subtype_env
              ~this_ty
              ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg }
@@ -3348,7 +3347,7 @@ end = struct
           (* Special case mixed <: dynamic for better error message *)
           | (_, Tnonnull) -> invalid env ~fail
           | _ ->
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty:None
               ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -3373,7 +3372,7 @@ end = struct
             ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env
         | (_, Tvec_or_dict (_, ty)) ->
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty:None
             ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -3396,7 +3395,7 @@ end = struct
                  ft_sub.ft_params
                  ty_dyn_enf
             &&& (* Finally do covariant subtryping on return type *)
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty:None
               ~lhs:{ sub_supportdyn; ty_sub = ft_sub.ft_ret }
@@ -3406,7 +3405,7 @@ end = struct
             ~init:(env, TL.valid)
             ~f:(fun res ty_sub ->
               res
-              &&& simplify_subtype
+              &&& simplify
                     ~subtype_env
                     ~this_ty:None
                     ~lhs:{ sub_supportdyn; ty_sub }
@@ -3424,14 +3423,14 @@ end = struct
             ~init:(env, TL.valid)
             ~f:(fun res sft ->
               res
-              &&& simplify_subtype
+              &&& simplify
                     ~subtype_env
                     ~this_ty:None
                     ~lhs:{ sub_supportdyn; ty_sub = sft.sft_ty }
                     ~rhs:
                       { super_like = false; super_supportdyn = false; ty_super })
             (TShapeMap.values sftl)
-          &&& simplify_subtype
+          &&& simplify
                 ~subtype_env
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn; ty_sub = unknown_fields_type }
@@ -3496,7 +3495,7 @@ end = struct
                     in
                     match tp.tp_variance with
                     | Ast_defs.Covariant ->
-                      simplify_subtype
+                      simplify
                         ~subtype_env
                         ~this_ty:None
                         ~lhs:{ sub_supportdyn = None; ty_sub = tyarg }
@@ -3508,7 +3507,7 @@ end = struct
                           }
                         env
                     | Ast_defs.Contravariant ->
-                      simplify_subtype
+                      simplify
                         ~subtype_env
                         ~this_ty:None
                         ~lhs:{ sub_supportdyn = None; ty_sub = super }
@@ -3520,7 +3519,7 @@ end = struct
                           }
                         env
                     | Ast_defs.Invariant ->
-                      simplify_subtype
+                      simplify
                         ~subtype_env
                         ~this_ty:None
                         ~lhs:{ sub_supportdyn = None; ty_sub = tyarg }
@@ -3531,7 +3530,7 @@ end = struct
                             ty_super = super;
                           }
                         env
-                      &&& simplify_subtype
+                      &&& simplify
                             ~subtype_env
                             ~this_ty:None
                             ~lhs:{ sub_supportdyn = None; ty_sub = super }
@@ -3549,7 +3548,7 @@ end = struct
                     match tp.tp_variance with
                     | Ast_defs.Covariant
                     | Ast_defs.Invariant ->
-                      simplify_subtype
+                      simplify
                         ~subtype_env
                         ~this_ty:None
                         ~lhs:{ sub_supportdyn = None; ty_sub = tyarg }
@@ -3588,7 +3587,7 @@ end = struct
                       | [] -> valid env
                       | _ ->
                         let sub = MakeType.union r_dynamic lower_bounds in
-                        simplify_subtype
+                        simplify
                           ~subtype_env
                           ~this_ty:None
                           ~lhs:{ sub_supportdyn = None; ty_sub = sub }
@@ -3613,7 +3612,7 @@ end = struct
                       env
                       enum_type.te_base
                   in
-                  simplify_subtype
+                  simplify
                     ~subtype_env
                     ~this_ty:None
                     ~lhs:{ sub_supportdyn = None; ty_sub = subtype }
@@ -3647,7 +3646,7 @@ end = struct
       | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_sup ->
         valid env
       | ((_, Toption arg_ty_sub), Nast.Tnull) ->
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = arg_ty_sub }
@@ -3681,7 +3680,7 @@ end = struct
     | (r_super, Tfun ft_super) ->
       (match deref ty_sub with
       | (r_sub, Tfun ft_sub) ->
-        simplify_subtype_funs
+        simplify_funs
           ~subtype_env
           ~check_return:true
           ~for_override:false
@@ -3700,7 +3699,7 @@ end = struct
           (fun res ty_sub ty_super ->
             let ty_super = Sd.liken ~super_like env ty_super in
             res
-            &&& simplify_subtype
+            &&& simplify
                   ~subtype_env
                   ~this_ty:None
                   ~lhs:{ sub_supportdyn; ty_sub }
@@ -3746,7 +3745,7 @@ end = struct
         let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
         let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
         env
-        |> simplify_subtype
+        |> simplify
              ~subtype_env
              ~this_ty
              ~lhs:{ sub_supportdyn; ty_sub = lty_key_sub }
@@ -3756,7 +3755,7 @@ end = struct
                  super_supportdyn = false;
                  ty_super = lty_key_sup;
                }
-        &&& simplify_subtype
+        &&& simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = lty_val_sub }
@@ -3771,7 +3770,7 @@ end = struct
         let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
         let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
         env
-        |> simplify_subtype
+        |> simplify
              ~subtype_env
              ~this_ty
              ~lhs:{ sub_supportdyn; ty_sub = lty_key_sub }
@@ -3781,7 +3780,7 @@ end = struct
                  super_supportdyn = false;
                  ty_super = lty_key_sup;
                }
-        &&& simplify_subtype
+        &&& simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = lty_val_sub }
@@ -3798,7 +3797,7 @@ end = struct
         let lty_val_sup = Sd.liken ~super_like env lty_val_sup in
         let lty_key_sup = Sd.liken ~super_like env lty_key_sup in
         env
-        |> simplify_subtype
+        |> simplify
              ~subtype_env
              ~this_ty
              ~lhs:{ sub_supportdyn; ty_sub = lty_key_sub }
@@ -3808,7 +3807,7 @@ end = struct
                  super_supportdyn = false;
                  ty_super = lty_key_sup;
                }
-        &&& simplify_subtype
+        &&& simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = lty_val_sub }
@@ -3838,7 +3837,7 @@ end = struct
       match deref ty_sub with
       | (r, Tnewtype (name_sub, [tyarg_sub], _))
         when String.equal name_sub SN.Classes.cSupportDyn ->
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg_sub }
@@ -3863,13 +3862,13 @@ end = struct
           env
       | _ ->
         let ty_dyn = MakeType.dynamic r_supportdyn in
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = true; ty_super = lty_inner }
           env
-        &&& simplify_subtype
+        &&& simplify
               ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub }
@@ -3921,13 +3920,13 @@ end = struct
         (* Errors due to `null` should refer to full option type *)
         if_unsat
           (invalid ~fail)
-          (simplify_subtype
+          (simplify
              ~subtype_env
              ~this_ty
              ~lhs:{ sub_supportdyn; ty_sub = ty_null }
              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
              env)
-        &&& simplify_subtype
+        &&& simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub }
@@ -3939,12 +3938,12 @@ end = struct
           (invalid ~fail)
           begin
             env
-            |> simplify_subtype
+            |> simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub = ty_string }
                  ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            &&& simplify_subtype
+            &&& simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty_int }
@@ -4009,7 +4008,7 @@ end = struct
             if Option.is_some cycle then
               invalid env ~fail
             else
-              simplify_subtype
+              simplify
                 ~subtype_env
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn = None; ty_sub }
@@ -4047,7 +4046,7 @@ end = struct
       match deref ty_sub with
       | (r_sub, Tneg (Neg_prim prim_sub)) ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:
@@ -4200,7 +4199,7 @@ end = struct
         mk (r_super, Tclass (class_id_super, nonexact, tyargs_super))
       in
 
-      simplify_subtype
+      simplify
         ~subtype_env
         ~this_ty
         ~lhs:{ sub_supportdyn; ty_sub }
@@ -4221,7 +4220,7 @@ end = struct
         (match tyargs_super with
         | [lty_super'] ->
           env
-          |> simplify_subtype
+          |> simplify
                ~subtype_env
                ~this_ty
                ~lhs:{ sub_supportdyn; ty_sub }
@@ -4280,7 +4279,7 @@ end = struct
            *          and map<_,tv> <: Traversable<tv_super>
            *          and map<_,tv> <: Container<tv_super>
            *)
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = tv }
@@ -4298,7 +4297,7 @@ end = struct
           (match get_node ty_sub with
           | Tvec_or_dict (tk, _) ->
             env
-            |> simplify_subtype
+            |> simplify
                  ~subtype_env
                  ~this_ty
                  ~lhs:{ sub_supportdyn; ty_sub = tk }
@@ -4308,7 +4307,7 @@ end = struct
                      super_supportdyn = false;
                      ty_super = tk_super;
                    }
-            &&& simplify_subtype
+            &&& simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = tv }
@@ -4420,7 +4419,7 @@ end = struct
       List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty_sub_inner }
@@ -4434,7 +4433,7 @@ end = struct
       List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty_sub_inner }
@@ -4447,7 +4446,7 @@ end = struct
       &&& fun env ->
       Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
           Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub = ty_sub_inner }
@@ -4465,7 +4464,7 @@ end = struct
       List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub }
@@ -4479,7 +4478,7 @@ end = struct
       List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub }
@@ -4492,7 +4491,7 @@ end = struct
       &&& fun env ->
       Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
           Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub }
@@ -4559,7 +4558,7 @@ end = struct
         ~f:(fun res ty ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -4584,7 +4583,7 @@ end = struct
         ~f:(fun res ty ty_dest ->
           res
           &&& Subtype.(
-                simplify_subtype
+                simplify
                   ~subtype_env
                   ~this_ty
                   ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -4600,7 +4599,7 @@ end = struct
         List.fold vars ~init:(env, TL.valid) ~f:(fun res ty ->
             res
             &&& Subtype.(
-                  simplify_subtype
+                  simplify
                     ~subtype_env
                     ~this_ty
                     ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -4722,7 +4721,7 @@ end = struct
         let traversable = MakeType.traversable r_super ty_inner in
         env
         |> Subtype.(
-             simplify_subtype
+             simplify
                ~subtype_env
                ~this_ty
                ~lhs:{ sub_supportdyn; ty_sub }
@@ -4827,7 +4826,7 @@ end = struct
       =
     let subty_prop_val env =
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs
@@ -4839,7 +4838,7 @@ end = struct
       | None -> valid env
       | Some ct_key ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs
@@ -4880,7 +4879,7 @@ end = struct
     if TUtils.is_tyvar_error env lty_sub then
       let trav_ty = can_traverse_to_iface ct in
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -4921,7 +4920,7 @@ end = struct
       | Tany _ ->
         let trav_ty = can_traverse_to_iface ct in
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -5085,7 +5084,7 @@ end = struct
       match kind with
       | `As ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn = None; ty_sub = ty }
@@ -5094,7 +5093,7 @@ end = struct
             env)
       | `Super ->
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn = None; ty_sub = bound }
@@ -5171,7 +5170,7 @@ end = struct
             Subtype_env.set_on_error subtype_env drop_sub_reasons
           in
           Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty
               ~lhs:{ sub_supportdyn = None; ty_sub = upty }
@@ -5350,7 +5349,7 @@ end = struct
 
     prop
     &&& Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn = None; ty_sub = obj_get_ty }
@@ -5571,7 +5570,7 @@ end = struct
       let intersect tyl = MakeType.intersection reason_super tyl in
       let simplify_subtype ~f tyl ty_super env =
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub = f tyl }
@@ -6000,7 +5999,7 @@ end = struct
       in
       let mk_subty_prop env =
         Subtype.(
-          simplify_subtype
+          simplify
             ~subtype_env
             ~this_ty
             ~lhs:{ sub_supportdyn; ty_sub }
@@ -6080,7 +6079,7 @@ end = struct
         ~rhs:rhs_other
         env
       ||| Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty:None
               ~lhs:{ sub_supportdyn; ty_sub }
@@ -6106,7 +6105,7 @@ end = struct
         ~rhs:rhs_other
         env
       ||| Subtype.(
-            simplify_subtype
+            simplify
               ~subtype_env
               ~this_ty:None
               ~lhs:{ sub_supportdyn; ty_sub }
@@ -6117,7 +6116,7 @@ end = struct
     match (ity_sub, ity_super) with
     | (LoclType ty_sub, LoclType ty_super) ->
       Subtype.(
-        simplify_subtype
+        simplify
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub }
@@ -6590,7 +6589,7 @@ end = struct
             ~f:(fun (env, prop1) lower_bound ->
               let (env, prop2) =
                 Subtype.(
-                  simplify_subtype
+                  simplify
                     ~subtype_env
                     ~this_ty:None
                     ~lhs:{ sub_supportdyn = None; ty_sub = lower_bound }
@@ -7194,7 +7193,7 @@ let decompose_subtype
     ty_super;
   let (env, prop) =
     Subtype.(
-      simplify_subtype
+      simplify
         ~subtype_env:
           (Subtype_env.create
              ~require_soundness:false
@@ -7345,7 +7344,7 @@ let subtype_funs
    *)
   let old_env = env in
   let (env, prop) =
-    Subtype.simplify_subtype_funs
+    Subtype.simplify_funs
       ~subtype_env:(Subtype_env.create ~log_level:2 ~coerce:None on_error)
       ~check_return
       ~for_override

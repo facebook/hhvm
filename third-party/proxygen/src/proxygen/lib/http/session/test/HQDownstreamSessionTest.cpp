@@ -330,6 +330,25 @@ TEST_P(HQDownstreamSessionTest, PriorityUpdateIntoTransport) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQDownstreamSessionTest, DisableEgressPrioritization) {
+  hqSession_->setEnableEgressPrioritization(false);
+  auto request = getProgressiveGetRequest();
+  sendRequest(request);
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders(
+      [&]() { handler->txn_->updateAndSendPriority(HTTPPriority(2, false)); });
+  handler->expectEOM([&]() {
+    auto resp = makeResponse(200, 0);
+    std::get<0>(resp)->getHeaders().add(HTTP_HEADER_PRIORITY, "u=2");
+    handler->sendRequest(*std::get<0>(resp));
+  });
+
+  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, _)).Times(0);
+  handler->expectDetachTransaction();
+  flushRequestsAndLoop();
+  hqSession_->closeWhenIdle();
+}
+
 TEST_P(HQDownstreamSessionTest, ReplyResponsePriority) {
   auto request = getProgressiveGetRequest();
   sendRequest(request);

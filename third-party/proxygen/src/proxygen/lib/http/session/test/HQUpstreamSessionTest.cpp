@@ -324,6 +324,30 @@ TEST_P(HQUpstreamSessionTest, PriorityUpdateIntoTransport) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQUpstreamSessionTest, DisableEgressPrioritization) {
+  hqSession_->setEnableEgressPrioritization(false);
+  auto handler = openTransaction();
+  auto req = getGetRequest();
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, i");
+  handler->txn_->sendHeadersWithEOM(req);
+
+  handler->expectHeaders();
+  handler->expectBody(
+      [&]() { handler->txn_->updateAndSendPriority(HTTPPriority(5, true)); });
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  std::get<0>(resp)->getHeaders().add(HTTP_HEADER_PRIORITY, "u=5");
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+
+  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, _)).Times(0);
+  flushAndLoop();
+  hqSession_->closeWhenIdle();
+}
+
 TEST_P(HQUpstreamSessionTest, TestSupportsMoreTransactions) {
   auto infoCb = std::make_unique<
       testing::NiceMock<proxygen::MockHTTPSessionInfoCallback>>();

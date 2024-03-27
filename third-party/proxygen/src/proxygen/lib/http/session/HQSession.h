@@ -166,6 +166,10 @@ class HQSession
     strictValidation_ = strictValidation;
   }
 
+  void setEnableEgressPrioritization(bool enableEgressPrioritization) {
+    enableEgressPrioritization_ = enableEgressPrioritization;
+  }
+
   void setSessionStats(HTTPSessionStats* stats) override;
 
   void onNewBidirectionalStream(quic::StreamId id) noexcept override;
@@ -758,6 +762,9 @@ class HQSession
   // Callback pointer used for correctness testing. Not used
   // for session logic.
   ServerPushLifecycleCallback* serverPushLifecycleCb_{nullptr};
+
+  // Debug feature to test the impact of request body prioritization.
+  bool enableEgressPrioritization_{true};
 
  private:
   std::unique_ptr<HTTPCodec> createStreamCodec(quic::StreamId streamId);

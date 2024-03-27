@@ -566,7 +566,9 @@ size_t HQSession::sendPriority(HTTPCodec::StreamID id, HTTPPriority priority) {
   if (streams_.find(id) == streams_.end() && !findPushStream(id)) {
     return 0;
   }
-  sock_->setStreamPriority(id, toQuicPriority(priority));
+  if (enableEgressPrioritization_) {
+    sock_->setStreamPriority(id, toQuicPriority(priority));
+  }
   // PRIORITY_UPDATE frames are sent by clients on the control stream.
   // Servers do not send PRIORITY_UPDATE
   if (direction_ == TransportDirection::DOWNSTREAM) {
@@ -594,7 +596,10 @@ size_t HQSession::sendPushPriority(hq::PushId pushId, HTTPPriority priority) {
                << " with pushId=" << pushId << " presented in id map";
     return 0;
   }
-  sock_->setStreamPriority(streamId, toQuicPriority(priority));
+
+  if (enableEgressPrioritization_) {
+    sock_->setStreamPriority(streamId, toQuicPriority(priority));
+  }
   auto controlStream = findControlStream(UnidirectionalStreamType::CONTROL);
   if (!controlStream) {
     return 0;
@@ -1584,7 +1589,9 @@ void HQSession::onPriority(quic::StreamId streamId, const HTTPPriority& pri) {
     priorityUpdatesBuffer_.insert(streamId, pri);
     return;
   }
-  sock_->setStreamPriority(streamId, toQuicPriority(pri));
+  if (enableEgressPrioritization_) {
+    sock_->setStreamPriority(streamId, toQuicPriority(pri));
+  }
 }
 
 void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
@@ -1612,7 +1619,9 @@ void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
   if (!stream) {
     return;
   }
-  sock_->setStreamPriority(streamId, toQuicPriority(pri));
+  if (enableEgressPrioritization_) {
+    sock_->setStreamPriority(streamId, toQuicPriority(pri));
+  }
 }
 
 void HQSession::notifyEgressBodyBuffered(int64_t bytes) {
@@ -2562,7 +2571,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
 
   // In case a priority update was received on the control stream before
   // getting here that overrides the initial priority received in the headers
-  if (sock) {
+  if (sock && session_.enableEgressPrioritization_) {
     auto itr = session_.priorityUpdatesBuffer_.find(streamId);
     if (itr != session_.priorityUpdatesBuffer_.end()) {
       sock->setStreamPriority(streamId, toQuicPriority(itr->second));
@@ -2707,7 +2716,7 @@ void HQSession::HQStreamTransportBase::updatePriority(
   const auto& sock = session_.sock_;
   auto streamId = getStreamId();
   auto httpPriority = httpPriorityFromHTTPMessage(headers);
-  if (sock && httpPriority) {
+  if (sock && httpPriority && session_.enableEgressPrioritization_) {
     sock->setStreamPriority(streamId, toQuicPriority(httpPriority.value()));
   }
 }

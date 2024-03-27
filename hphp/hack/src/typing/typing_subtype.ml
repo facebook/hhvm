@@ -764,13 +764,15 @@ end = struct
     else
       simplify_subtype ()
 
-  let rec default_subtype_locl_ty_locl_ty
+  let rec default_subtype
       ~subtype_env
       ~this_ty
       ~fail
       ~lhs:{ sub_supportdyn; ty_sub }
       ~rhs:{ super_like; ty_super; super_supportdyn }
       env =
+    let (env, ty_super) = Env.expand_type env ty_super in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
     match deref ty_sub with
     | (_, Tvar _) -> begin
       match (subtype_env.Subtype_env.coerce, get_node ty_super) with
@@ -827,14 +829,6 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn; ty_super }
         env
-
-  and default_subtype ~subtype_env ~this_ty ~fail ~lhs ~rhs env =
-    let (env, ty_super) = Env.expand_type env rhs.ty_super in
-    let rhs = { rhs with ty_super } in
-    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
-    let lhs = { lhs with ty_sub } in
-
-    default_subtype_locl_ty_locl_ty ~subtype_env ~this_ty ~fail ~lhs ~rhs env
 
   and default_subtype_inner
       ~subtype_env

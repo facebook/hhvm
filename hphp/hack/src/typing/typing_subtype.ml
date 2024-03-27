@@ -757,6 +757,14 @@ end = struct
       (LoclType ty_sub)
       (LoclType ty_super)
 
+  let is_final_and_invariant env id =
+    let class_def = Env.get_class env id in
+    match class_def with
+    | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false
+
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
       =
     if phys_equal ty_sub ty_super then
@@ -1074,17 +1082,77 @@ end = struct
           ty_sub
           (r_super, ety)
           env
-    | (r_super, Tdependent (d_sup, bound_sup)) ->
+    | (_r_super, Tdependent (dep_ty_sup, bound_sup)) -> begin
       let (env, bound_sup) = Env.expand_type env bound_sup in
-
-      Subtype_dependent_r.simplify
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~super_like
-        ty_sub
-        (r_super, (d_sup, bound_sup))
-        env
+      match (deref ty_sub, get_node bound_sup) with
+      | ((_, Tclass _), Tclass ((_, x), _, _)) when is_final_and_invariant env x
+        ->
+        (* For final class C, there is no difference between `this as X` and `X`,
+         * and `expr<#n> as X` and `X`.
+         * But we need to take care with variant classes, since we can't
+         * statically guarantee their runtime type.
+         *)
+        simplify_subtype
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:
+            {
+              super_like = false;
+              super_supportdyn = false;
+              ty_super = bound_sup;
+            }
+          env
+      | ((r_sub, Tclass ((_, y), _, _)), Tclass (((_, x) as id), _, _tyl_super))
+        ->
+        let fail =
+          if String.equal x y then
+            let p = Reason.to_pos r_sub in
+            let (pos_super, class_name) = id in
+            Subtype_env.fail_with_suffix
+              subtype_env
+              ~ty_sub:(LoclType ty_sub)
+              ~ty_super:(LoclType ty_super)
+              (Typing_error.Secondary.This_final
+                 { pos_super; class_name; pos_sub = p })
+          else
+            Subtype_env.fail
+              subtype_env
+              ~ty_sub:(LoclType ty_sub)
+              ~ty_super:(LoclType ty_super)
+        in
+        invalid env ~fail
+      | ((_, Tdependent (d_sub, bound_sub)), _) ->
+        let this_ty = Option.first_some this_ty (Some ty_sub) in
+        (* Dependent types are identical but bound might be different *)
+        if equal_dependent_type d_sub dep_ty_sup then
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = bound_sup;
+              }
+            env
+        else
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
+            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            env
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
+    end
     | (_, Taccess _) -> invalid_env env
     | (_r_super, Tgeneric (name_super, tyargs_super)) -> begin
       let (generic_lower_bounds, other_lower_bounds) =
@@ -1781,123 +1849,6 @@ end = struct
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
     end
-end
-
-and Subtype_dependent_r : sig
-  val simplify :
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:locl_ty option ->
-    super_like:bool ->
-    locl_ty ->
-    locl_phase Reason.t_ * (dependent_type * locl_ty) ->
-    env ->
-    env * TL.subtype_prop
-end = struct
-  let is_final_and_invariant env id =
-    let class_def = Env.get_class env id in
-    match class_def with
-    | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      false
-
-  let simplify
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~super_like
-      lty_sub
-      (r_super, (dep_ty_sup, bound_sup))
-      env =
-    let lty_super = mk (r_super, Tdependent (dep_ty_sup, bound_sup)) in
-    let fail =
-      Subtype_env.fail
-        subtype_env
-        ~ty_sub:(LoclType lty_sub)
-        ~ty_super:(LoclType lty_super)
-    and fail_with_suffix suffix =
-      Subtype_env.fail_with_suffix
-        subtype_env
-        ~ty_sub:(LoclType lty_sub)
-        ~ty_super:(LoclType lty_super)
-        suffix
-    in
-
-    let default_subtype_help env =
-      Subtype.(
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_super }
-          env)
-    in
-
-    match (deref lty_sub, get_node bound_sup) with
-    | ((_, Tclass _), Tclass ((_, x), _, _)) when is_final_and_invariant env x
-      ->
-      (* For final class C, there is no difference between `this as X` and `X`,
-       * and `expr<#n> as X` and `X`.
-       * But we need to take care with variant classes, since we can't
-       * statically guarantee their runtime type.
-       *)
-      Subtype.(
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = bound_sup;
-            }
-          env)
-    | ((r_sub, Tclass ((_, y), _, _)), Tclass (((_, x) as id), _, _tyl_super))
-      ->
-      let fail =
-        if String.equal x y then
-          let p = Reason.to_pos r_sub in
-          let (pos_super, class_name) = id in
-          fail_with_suffix
-            (Typing_error.Secondary.This_final
-               { pos_super; class_name; pos_sub = p })
-        else
-          fail
-      in
-      invalid env ~fail
-    | ((_, Tdependent (d_sub, bound_sub)), _) ->
-      let this_ty = Option.first_some this_ty (Some lty_sub) in
-      (* Dependent types are identical but bound might be different *)
-      if equal_dependent_type d_sub dep_ty_sup then
-        Subtype.(
-          simplify_subtype
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = bound_sup;
-              }
-            env)
-      else
-        Subtype.(
-          simplify_subtype
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = lty_super;
-              }
-            env)
-    | _ -> default_subtype_help env
 end
 
 and Subtype_supportdyn_r : sig

@@ -60,6 +60,8 @@
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/RequestDebugLog.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
+#include <thrift/lib/cpp2/server/ResourcePool.h>
+#include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>
@@ -156,7 +158,175 @@ class ThriftServerStopController final {
 
 class ThriftServer : public apache::thrift::BaseThriftServer,
                      public wangle::ServerBootstrap<Pipeline> {
+ public:
+  bool resourcePoolEnabled() const override {
+    return getRuntimeServerActions().resourcePoolEnabled;
+  }
+
+  /**
+   * Get the ResourcePoolSet used by this ThriftServer. There is always one, but
+   * it may be empty if ResourcePools are not in use.
+   */
+  const ResourcePoolSet& resourcePoolSet() const override {
+    return resourcePoolSet_;
+  }
+
+  /**
+   * Get the ResourcePoolSet used by this ThriftServer. There is always one, but
+   * it may be empty if ResourcePools are not in use.
+   */
+  ResourcePoolSet& resourcePoolSet() override { return resourcePoolSet_; }
+
+  // Used to disable resource pool at run time. This
+  // should only be used by thrift team.
+  void runtimeDisableResourcePoolsDeprecated() {
+    if (runtimeServerActions_.resourcePoolRuntimeDisabled) {
+      return;
+    }
+    if (runtimeServerActions_.resourcePoolEnablementLocked &&
+        runtimeServerActions_.resourcePoolEnabled) {
+      LOG(FATAL)
+          << "Trying to disable ResourcePool after it's locked (enabled)";
+      return;
+    }
+    runtimeServerActions_.resourcePoolRuntimeDisabled = true;
+  }
+
+  bool runtimeDisableResourcePoolsSet() {
+    return runtimeServerActions_.resourcePoolRuntimeDisabled;
+  }
+
+  // Used to enable resource pool at run time. If resource
+  // pools cannot be enabled (due to run-time conditions) the
+  // process will be aborted during server startup.
+  void requireResourcePools() {
+    if (runtimeServerActions_.resourcePoolRuntimeRequested) {
+      return;
+    }
+    if (runtimeServerActions_.resourcePoolEnablementLocked &&
+        !runtimeServerActions_.resourcePoolEnabled) {
+      LOG(FATAL)
+          << "Trying to enable ResourcePool after it's locked (disabled)";
+      return;
+    }
+    if (FLAGS_thrift_disable_resource_pools) {
+      LOG(FATAL)
+          << "--thrift_disable_resource_pools flag set and requireResourcePools() called";
+      return;
+    }
+    runtimeServerActions_.resourcePoolRuntimeRequested = true;
+  }
+
+  bool useResourcePools() {
+    if (!runtimeServerActions_.resourcePoolEnablementLocked) {
+      runtimeServerActions_.resourcePoolEnablementLocked = true;
+      bool flagSet = useResourcePoolsFlagsSet();
+      bool runtimeRequested =
+          runtimeServerActions_.resourcePoolRuntimeRequested;
+      bool runtimeDisabled = runtimeServerActions_.resourcePoolRuntimeDisabled;
+      runtimeServerActions_.resourcePoolEnabled =
+          (flagSet || runtimeRequested) && !runtimeDisabled;
+
+      // Enforce requireResourcePools.
+      if (runtimeServerActions_.resourcePoolRuntimeRequested &&
+          !runtimeServerActions_.resourcePoolEnabled) {
+        LOG(FATAL) << "requireResourcePools() failed "
+                   << runtimeServerActions_.explain();
+      }
+    }
+
+    return runtimeServerActions_.resourcePoolEnabled;
+  }
+
+  /**
+   * Set Thread Manager (for queuing mode).
+   * If not set, defaults to the number of worker threads.
+   * This is meant to be used as an external API
+   *
+   * @param threadManager a shared pointer to the thread manager
+   */
+  void setThreadManager(
+      std::shared_ptr<apache::thrift::concurrency::ThreadManager>
+          threadManager) {
+    setThreadManagerInternal(threadManager);
+    if (!THRIFT_FLAG(allow_set_thread_manager_resource_pools)) {
+      runtimeDisableResourcePoolsDeprecated();
+    }
+    runtimeServerActions_.userSuppliedThreadManager = true;
+  }
+
+  /**
+   * This an equivalent entry point to setThreadManager. During deprecation
+   * there will be places where we have to continue to call setThreadManager
+   * from user code - where we decide to migrate them by adding resource pools
+   * specific paths to the service code. When we do we'll use
+   * setThreadManager_deprecated instead of setThreadManager so we can track
+   * when all instances of setThreadManager have been removed.
+   */
+  void setThreadManager_deprecated(
+      std::shared_ptr<apache::thrift::concurrency::ThreadManager>
+          threadManager) {
+    setThreadManagerInternal(threadManager);
+    runtimeDisableResourcePoolsDeprecated();
+    runtimeServerActions_.userSuppliedThreadManager = true;
+  }
+
+  /**
+   * Set Thread Manager from an executor.
+   *
+   * @param executor folly::Executor to be set as the threadManager
+   */
+  void setThreadManagerFromExecutor(
+      folly::Executor* executor, std::string name = "") {
+    if (THRIFT_FLAG(allow_resource_pools_set_thread_manager_from_executor)) {
+      setThreadManagerType(ThreadManagerType::EXECUTOR_ADAPTER);
+      setThreadManagerExecutor(executor);
+    } else {
+      concurrency::ThreadManagerExecutorAdapter::Options opts(std::move(name));
+      setThreadManagerInternal(
+          std::make_shared<concurrency::ThreadManagerExecutorAdapter>(
+              folly::getKeepAliveToken(executor), std::move(opts)));
+      runtimeDisableResourcePoolsDeprecated();
+      runtimeServerActions_.userSuppliedThreadManager = true;
+    }
+  }
+
+  /**
+   * Get the executor for the default executor used to execute requests.
+   *
+   * @return a shared pointer to the executor
+   */
+  std::shared_ptr<folly::Executor> getHandlerExecutor_deprecated()
+      const override {
+    if (!runtimeServerActions_.userSuppliedThreadManager &&
+        !resourcePoolSet().empty()) {
+      return resourcePoolSet()
+          .resourcePool(ResourcePoolHandle::defaultAsync())
+          .sharedPtrExecutor()
+          .value();
+    }
+    std::shared_lock lock(threadManagerMutex_);
+    return threadManager_;
+  }
+
+  folly::Executor::KeepAlive<> getHandlerExecutorKeepAlive() const override {
+    if (!runtimeServerActions_.userSuppliedThreadManager &&
+        !resourcePoolSet().empty()) {
+      return resourcePoolSet()
+          .resourcePool(ResourcePoolHandle::defaultAsync())
+          .sharedPtrExecutor()
+          .value()
+          .get();
+    }
+    std::shared_lock lock(threadManagerMutex_);
+    return threadManager_.get();
+  }
+
  private:
+  //! The ResourcePoolsSet used by this ThriftServer (if in ResourcePools
+  //! are enabled).
+  ResourcePoolSet resourcePoolSet_;
+
   AdaptiveConcurrencyController adaptiveConcurrencyController_;
 
   folly::observer::SimpleObservable<

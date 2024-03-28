@@ -4,27 +4,26 @@
 
 // TEST-CHECK-BAL: define $root.basic1
 // CHECK: define $root.basic1($this: *void, $b: *A) : *HackMixed {
-// CHECK: local $0splice0: *void, $0: *void
+// CHECK: local $0: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
-// CHECK:   n1: *HackMixed = load &$0splice0
-// CHECK:   n2 = __sil_allocate(<Closure$basic1232>)
-// CHECK:   n3 = Closure$basic1232.__construct(n2, null, n0, n1)
-// CHECK:   store &$0 <- n2: *HackMixed
-// CHECK:   n4: *HackMixed = load &$0
-// CHECK:   n5 = n4.?.__invoke()
+// CHECK:   n1 = __sil_allocate(<Closure$basic1232>)
+// CHECK:   n2 = Closure$basic1232.__construct(n1, null, n0)
+// CHECK:   store &$0 <- n1: *HackMixed
+// CHECK:   n3: *HackMixed = load &$0
+// CHECK:   n4 = n3.?.__invoke()
 // CHECK:   jmp b2
 // CHECK:   .handlers b1
-// CHECK: #b1(n6: *HackMixed):
+// CHECK: #b1(n5: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   throw n6
+// CHECK:   throw n5
 // CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   ret n5
+// CHECK:   ret n4
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
-// CHECK: define Closure$basic1232.__construct($this: .notnull *Closure$basic1232, this: *HackMixed, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
+// CHECK: define Closure$basic1232.__construct($this: .notnull *Closure$basic1232, this: *HackMixed, b: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
@@ -32,9 +31,6 @@
 // CHECK:   n2: *HackMixed = load &b
 // CHECK:   n3: *HackMixed = load &$this
 // CHECK:   store n3.?.b <- n2: *HackMixed
-// CHECK:   n4: *HackMixed = load &_0splice0
-// CHECK:   n5: *HackMixed = load &$this
-// CHECK:   store n5.?._0splice0 <- n4: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function basic1(A $b): mixed {

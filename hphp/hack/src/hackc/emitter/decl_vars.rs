@@ -190,6 +190,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 Ok(())
             }
+            Expr_::ExpressionTree(box oxidized::ast::ExpressionTree { runtime_expr, .. }) => {
+                self.visit_expr(env, runtime_expr)
+            }
 
             e => e.recurse(env, self.object()),
         }

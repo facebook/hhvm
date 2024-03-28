@@ -11,7 +11,6 @@
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/ssl/Init.h>
 #include <folly/system/ThreadName.h>
 #include <gflags/gflags.h>
 #include <mysql.h>

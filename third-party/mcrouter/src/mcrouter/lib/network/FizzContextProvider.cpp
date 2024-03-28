@@ -15,7 +15,6 @@
 #include <fizz/server/TicketCodec.h>
 #include <fizz/server/TicketTypes.h>
 #include <folly/Singleton.h>
-#include <folly/ssl/Init.h>
 #include <folly/synchronization/CallOnce.h>
 
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"

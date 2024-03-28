@@ -6,10 +6,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/ssl/Init.h>
-
-#include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/Connection.h"
 
 namespace {
 

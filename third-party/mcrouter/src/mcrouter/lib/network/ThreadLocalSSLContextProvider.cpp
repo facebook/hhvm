@@ -14,7 +14,6 @@
 #include <folly/io/async/SSLContext.h>
 #include <folly/io/async/SSLOptions.h>
 #include <folly/portability/OpenSSL.h>
-#include <folly/ssl/Init.h>
 #include <wangle/client/ssl/SSLSessionCacheData.h>
 #include <wangle/client/ssl/SSLSessionPersistentCache.h>
 #include <wangle/ssl/SSLCacheOptions.h>

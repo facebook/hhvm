@@ -16,7 +16,6 @@
 #include <folly/fibers/FiberManager.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
 
 #include "mcrouter/lib/network/McSSLUtil.h"
 #include "mcrouter/lib/network/SecurityOptions.h"

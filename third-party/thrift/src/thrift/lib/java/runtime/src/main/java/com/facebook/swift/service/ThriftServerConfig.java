@@ -108,6 +108,15 @@ public class ThriftServerConfig {
     return bindAddress;
   }
 
+  /**
+   * The address on which the server will bind onto.
+   *
+   * <p>This will be directly passed onto the `bind` syscall on Unix, for more details see `man 2
+   * bind`. Note that setBindAddressEnabled(true) must also be called for the bind address to be
+   * effective.
+   *
+   * <p>Not setting this will lead to a Thrift service listening to external connections.
+   */
   @Config("thrift.bind-address")
   public ThriftServerConfig setBindAddress(String bindAddress) {
     this.bindAddress = bindAddress;

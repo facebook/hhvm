@@ -711,8 +711,10 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context) {
     return nullptr;
   }
   const OptResource& resource = stream_or_context.asCResRef();
-  auto context = dyn_cast_or_null<StreamContext>(resource);
-  if (context) return context;
+  {
+    auto context = dyn_cast_or_null<StreamContext>(resource);
+    if (context) return context;
+  }
   auto file = dyn_cast_or_null<File>(resource);
   if (file != nullptr) {
     auto context = file->getStreamContext();

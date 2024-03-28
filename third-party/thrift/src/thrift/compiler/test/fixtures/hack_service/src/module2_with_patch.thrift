@@ -16,12 +16,17 @@
 
 include "module.thrift"
 
+include "thrift/lib/thrift/patch.thrift"
+
+package "test.dev/hack/ns2"
+
 namespace hack hack_ns2
 
 enum Status {
   Unknown = 0,
 }
 
+@patch.GeneratePatch
 struct FBStruct {
   1: string str_value;
 }

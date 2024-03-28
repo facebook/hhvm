@@ -17,5 +17,6 @@ cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache:
     cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
         BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"
         COMPACT_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
+        DEPRECATED_VERBOSE_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
         COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
         JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"

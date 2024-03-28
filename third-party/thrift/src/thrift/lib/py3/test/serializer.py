@@ -163,7 +163,7 @@ class SerializerTests(unittest.TestCase):
             b"\x04\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00"
             b"\x00\x00\x04\x0c\x00\x04\x00\n\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00",
             Protocol.JSON: b'{"val":5,"val_list":[1,2,3,4],"an_int":{},"py3_hidden":0}',
-            Protocol.COMPACT_JSON: b'{"1":{"i32":5},"2":{"lst":["i32",4,1,2,3,4]},"4"'
+            Protocol.DEPRECATED_VERBOSE_JSON: b'{"1":{"i32":5},"2":{"lst":["i32",4,1,2,3,4]},"4"'
             b':{"rec":{}},"5":{"i64":0}}',
         }
         self.thrift_serialization_round_robin(control, fixtures)
@@ -186,7 +186,7 @@ class SerializerTests(unittest.TestCase):
             b"ault\x00",
             Protocol.JSON: b'{"val":0,"val_list":[1,2,3,4],"name":"foo","an_int":{"tiny'
             b'":1},"other":"some default"}',
-            Protocol.COMPACT_JSON: b'{"1":{"i32":0},"2":{"lst":["i32",4,1,2,3,4]},"3":'
+            Protocol.DEPRECATED_VERBOSE_JSON: b'{"1":{"i32":0},"2":{"lst":["i32",4,1,2,3,4]},"3":'
             b'{"str":"foo"},"4":{"rec":{"1":{"i8":1}}},"5":{"str":"some default"}}',
         }
         self.thrift_serialization_round_robin(control, fixtures)
@@ -203,7 +203,7 @@ class SerializerTests(unittest.TestCase):
             Protocol.COMPACT: b"5\xf2\x14\x00",
             Protocol.BINARY: b"\x08\x00\x03\x00\x00\x059\x00",
             Protocol.JSON: b'{"medium":1337}',
-            Protocol.COMPACT_JSON: b'{"3":{"i32":1337}}',
+            Protocol.DEPRECATED_VERBOSE_JSON: b'{"3":{"i32":1337}}',
         }
 
         self.thrift_serialization_round_robin(control, fixtures)

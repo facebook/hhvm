@@ -65,45 +65,6 @@ BaseThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   return result;
 }
 
-void BaseThriftServer::CumulativeFailureInjection::set(
-    const FailureInjection& fi) {
-  CHECK_GE(fi.errorFraction, 0);
-  CHECK_GE(fi.dropFraction, 0);
-  CHECK_GE(fi.disconnectFraction, 0);
-  CHECK_LE(fi.errorFraction + fi.dropFraction + fi.disconnectFraction, 1);
-
-  std::lock_guard lock(mutex_);
-  errorThreshold_ = fi.errorFraction;
-  dropThreshold_ = errorThreshold_ + fi.dropFraction;
-  disconnectThreshold_ = dropThreshold_ + fi.disconnectFraction;
-  empty_.store((disconnectThreshold_ == 0), std::memory_order_relaxed);
-}
-
-BaseThriftServer::InjectedFailure
-BaseThriftServer::CumulativeFailureInjection::test() const {
-  if (empty_.load(std::memory_order_relaxed)) {
-    return InjectedFailure::NONE;
-  }
-
-  static folly::ThreadLocalPtr<std::mt19937> rng;
-  if (!rng) {
-    rng.reset(new std::mt19937(folly::randomNumberSeed()));
-  }
-
-  std::uniform_real_distribution<float> dist(0, 1);
-  float val = dist(*rng);
-
-  std::shared_lock lock(mutex_);
-  if (val <= errorThreshold_) {
-    return InjectedFailure::ERROR;
-  } else if (val <= dropThreshold_) {
-    return InjectedFailure::DROP;
-  } else if (val <= disconnectThreshold_) {
-    return InjectedFailure::DISCONNECT;
-  }
-  return InjectedFailure::NONE;
-}
-
 bool BaseThriftServer::getTaskExpireTimeForRequest(
     const apache::thrift::transport::THeader& requestHeader,
     std::chrono::milliseconds& queueTimeout,

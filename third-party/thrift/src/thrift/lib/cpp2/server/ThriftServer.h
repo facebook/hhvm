@@ -1597,6 +1597,68 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
  private:
   using ServerBootstrap::acceptConnection;
+
+ public:
+  struct FailureInjection {
+    FailureInjection()
+        : errorFraction(0), dropFraction(0), disconnectFraction(0) {}
+
+    // Cause a fraction of requests to fail
+    float errorFraction;
+
+    // Cause a fraction of requests to be dropped (and presumably time out
+    // on the client)
+    float dropFraction;
+
+    // Cause a fraction of requests to cause the channel to be disconnected,
+    // possibly failing other requests as well.
+    float disconnectFraction;
+
+    bool operator==(const FailureInjection& other) const {
+      return errorFraction == other.errorFraction &&
+          dropFraction == other.dropFraction &&
+          disconnectFraction == other.disconnectFraction;
+    }
+
+    bool operator!=(const FailureInjection& other) const {
+      return !(*this == other);
+    }
+  };
+
+  /**
+   * Set failure injection parameters.
+   */
+  void setFailureInjection(FailureInjection fi) { failureInjection_.set(fi); }
+
+ protected:
+  enum class InjectedFailure { NONE, ERROR, DROP, DISCONNECT };
+
+  class CumulativeFailureInjection {
+   public:
+    CumulativeFailureInjection()
+        : empty_(true),
+          errorThreshold_(0),
+          dropThreshold_(0),
+          disconnectThreshold_(0) {}
+
+    InjectedFailure test() const;
+
+    void set(const FailureInjection& fi);
+
+   private:
+    std::atomic<bool> empty_;
+    mutable folly::SharedMutex mutex_;
+    float errorThreshold_;
+    float dropThreshold_;
+    float disconnectThreshold_;
+  };
+
+  // Unlike FailureInjection, this is cumulative and thread-safe
+  CumulativeFailureInjection failureInjection_;
+
+  InjectedFailure maybeInjectFailure() const {
+    return failureInjection_.test();
+  }
 };
 
 template <typename AcceptorClass, typename SharedSSLContextManagerClass>

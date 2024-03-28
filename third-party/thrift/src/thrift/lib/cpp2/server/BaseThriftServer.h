@@ -114,32 +114,6 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
  public:
-  struct FailureInjection {
-    FailureInjection()
-        : errorFraction(0), dropFraction(0), disconnectFraction(0) {}
-
-    // Cause a fraction of requests to fail
-    float errorFraction;
-
-    // Cause a fraction of requests to be dropped (and presumably time out
-    // on the client)
-    float dropFraction;
-
-    // Cause a fraction of requests to cause the channel to be disconnected,
-    // possibly failing other requests as well.
-    float disconnectFraction;
-
-    bool operator==(const FailureInjection& other) const {
-      return errorFraction == other.errorFraction &&
-          dropFraction == other.dropFraction &&
-          disconnectFraction == other.disconnectFraction;
-    }
-
-    bool operator!=(const FailureInjection& other) const {
-      return !(*this == other);
-    }
-  };
-
   struct Metadata {
     std::string configPath;
     std::optional<std::string> serviceFramework;
@@ -329,35 +303,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   IsOverloadedFunc isOverloaded_;
   PreprocessFunc preprocess_;
   std::function<int64_t(const std::string&)> getLoad_;
-
-  enum class InjectedFailure { NONE, ERROR, DROP, DISCONNECT };
-
-  class CumulativeFailureInjection {
-   public:
-    CumulativeFailureInjection()
-        : empty_(true),
-          errorThreshold_(0),
-          dropThreshold_(0),
-          disconnectThreshold_(0) {}
-
-    InjectedFailure test() const;
-
-    void set(const FailureInjection& fi);
-
-   private:
-    std::atomic<bool> empty_;
-    mutable folly::SharedMutex mutex_;
-    float errorThreshold_;
-    float dropThreshold_;
-    float disconnectThreshold_;
-  };
-
-  // Unlike FailureInjection, this is cumulative and thread-safe
-  CumulativeFailureInjection failureInjection_;
-
-  InjectedFailure maybeInjectFailure() const {
-    return failureInjection_.test();
-  }
 
   // This is meant to be used internally
   // We separate setThreadManager and configureThreadManager
@@ -1197,13 +1142,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::function<int64_t(const std::string&)> getGetLoad() const {
     return getLoad_;
-  }
-
-  /**
-   * Set failure injection parameters.
-   */
-  virtual void setFailureInjection(FailureInjection fi) {
-    failureInjection_.set(fi);
   }
 
   void setGetHandler(getHandlerFunc func) { getHandler_ = func; }

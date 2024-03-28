@@ -2359,7 +2359,7 @@ TEST_P(HeaderOrRocket, FailureInjection) {
   folly::EventBase base;
   auto client = makeClient(sst, &base);
 
-  auto& server = sst.getThriftServer();
+  auto& server = dynamic_cast<ThriftServer&>(sst.getThriftServer());
   SCOPE_EXIT { server.setFailureInjection(ThriftServer::FailureInjection()); };
 
   RpcOptions rpcOptions;

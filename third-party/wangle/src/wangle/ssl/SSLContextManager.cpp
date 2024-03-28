@@ -317,12 +317,10 @@ class SSLContextManager::SslContexts
    * Callback function from openssl to find the right X509 to
    * use during SSL handshake
    */
-#if FOLLY_OPENSSL_HAS_SNI
   static folly::SSLContext::ServerNameCallbackResult serverNameCallback(
       SSL* ssl,
       ClientHelloExtStats* stats,
       const std::shared_ptr<SslContexts>& contexts);
-#endif
 
  private:
   SslContexts(bool strict);
@@ -860,7 +858,6 @@ void SSLContextManager::verifyCertNames(
   }
 }
 
-#if FOLLY_OPENSSL_HAS_SNI
 /*static*/ SSLContext::ServerNameCallbackResult
 SSLContextManager::SslContexts::serverNameCallback(
     SSL* ssl,
@@ -914,7 +911,6 @@ SSLContextManager::SslContexts::serverNameCallback(
   }
   return SSLContext::SERVER_NAME_NOT_FOUND;
 }
-#endif
 
 // Consolidate all SSL_CTX setup which depends on openssl version/feature
 void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
@@ -959,7 +955,6 @@ void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
   }
 
   // SNI
-#if FOLLY_OPENSSL_HAS_SNI
   if (ctxConfig.isDefault) {
     if (newDefault) {
       throw std::runtime_error("More than 1 X509 is set as default");
@@ -973,18 +968,7 @@ void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
           });
     }
   }
-#else
-  // without SNI support, we expect only a single cert. set it as default and
-  // error if we go to another.
-  if (newDefault) {
-    OPENSSL_MISSING_FEATURE(SNI);
-  }
 
-  newDefault = sslCtx;
-
-  // Silence unused parameter warning
-  (mgr);
-#endif
 #ifdef SSL_OP_NO_RENEGOTIATION
   // Disable renegotiation at the OpenSSL layer
   sslCtx->setOptions(SSL_OP_NO_RENEGOTIATION);

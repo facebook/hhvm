@@ -297,8 +297,6 @@ TEST(SSLContextManagerTest, Test1) {
       sslCtxMgr.getSSLCtxBySuffix(SSLContextKey("abc.xyz.example.com")));
 }
 
-// This test uses multiple contexts, which requires SNI support to work at all.
-#if FOLLY_OPENSSL_HAS_SNI
 TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
   SSLContextManagerForTest sslCtxMgr(
       "vip_ssl_context_manager_test_", getSettings(), nullptr);
@@ -440,7 +438,6 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
   checkSeeds(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")), seeds2);
 }
-#endif
 
 TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
   SSLContextManagerForTest sslCtxMgr(

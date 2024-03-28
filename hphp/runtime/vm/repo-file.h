@@ -332,15 +332,7 @@ struct TypeNameCompare {
   }
 };
 
-struct FuncNameCompare {
-  bool equal(const std::string& s1, const std::string& s2) const {
-    return fstrcmp_slice(s1, s2) == 0;
-  }
-  size_t hash(const std::string& s) const {
-    return hash_string_i_software(s.c_str(), s.size());
-  }
-};
-
+using FuncNameCompare = CaseSensitiveCompare;
 using CaseSensitiveHashMapIndex = Blob::HashMapIndex<CaseSensitiveCompare>;
 using HashMapTypeIndex = Blob::HashMapIndex<TypeNameCompare>;
 using HashMapFuncIndex = Blob::HashMapIndex<FuncNameCompare>;

@@ -15207,12 +15207,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
   // Temporarily suppress case collision logging
   auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-  auto oldFuncLogLevel = RuntimeOption::EvalLogFsameCollisions;
   RuntimeOption::EvalLogTsameCollisions = 0;
-  RuntimeOption::EvalLogFsameCollisions = 0;
   SCOPE_EXIT {
     RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
-    RuntimeOption::EvalLogFsameCollisions = oldFuncLogLevel;
   };
 
   for (auto& work : typeBuckets) {
@@ -16591,12 +16588,9 @@ void make_local(IndexData& index) {
   {
     // Temporarily suppress case collision logging
     auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-    auto oldFuncLogLevel = RuntimeOption::EvalLogFsameCollisions;
     RuntimeOption::EvalLogTsameCollisions = 0;
-    RuntimeOption::EvalLogFsameCollisions = 0;
     SCOPE_EXIT {
       RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
-      RuntimeOption::EvalLogFsameCollisions = oldFuncLogLevel;
     };
 
     coro::blockingWait(coro::collectAllRange(

@@ -294,7 +294,6 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
   gd.LogTsameCollisions = RuntimeOption::EvalLogTsameCollisions;
-  gd.LogFsameCollisions = RuntimeOption::EvalLogFsameCollisions;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

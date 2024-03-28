@@ -1,4 +1,3 @@
--vRuntime.Eval.LogFsameCollisions=2
 --inputs=__DIR__/1240-1.inc
 --inputs=__DIR__/1240-2.inc
 --inputs=__DIR__/1240-3.inc

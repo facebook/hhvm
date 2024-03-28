@@ -101,12 +101,7 @@ struct StringData {
     return lower(m_impl) == lower(o.m_impl);
   }
   bool fsame(const StringData& o) const noexcept {
-    auto lower = [](const std::string& _s) {
-      std::string s = _s;
-      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-      return s;
-    };
-    return lower(m_impl) == lower(o.m_impl);
+    return same(o);
   }
 
  private:
@@ -167,19 +162,7 @@ bool StringPtr::StringPtr::tsame(const StringPtr& s) const noexcept {
 }
 
 bool StringPtr::StringPtr::fsame(const StringPtr& s) const noexcept {
-  if (m_impl->impl() == s.m_impl->impl()) {
-    return true;
-  }
-  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
-    return false;
-  }
-  if (m_impl->impl()->size() != s.m_impl->impl()->size()) {
-    return false;
-  }
-  return bstrcaseeq(
-      m_impl->impl()->c_str(),
-      s.m_impl->impl()->c_str(),
-      m_impl->impl()->size());
+  return same(s);
 }
 
 bool StringPtr::tsame_slice(std::string_view a, std::string_view b) noexcept {
@@ -866,10 +849,10 @@ TEST_F(SymbolMapTest, addPaths) {
 
   // Check for case insensitivity
   EXPECT_EQ(m.getTypeFile("someclass"), path1.native());
-  EXPECT_EQ(m.getFunctionFile("SOME_FN"), path1.native());
   EXPECT_EQ(m.getTypeAliasFile("sometypealias"), path1.native());
 
   // Check for case sensitivity
+  EXPECT_EQ(m.getFunctionFile("SOME_FN"), nullptr);
   EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
   EXPECT_EQ(m.getModuleFile("Some_Module"), nullptr);
 
@@ -1100,7 +1083,7 @@ TEST_F(SymbolMapTest, MaintainCorrectCase) {
   EXPECT_EQ(m2.getTypeFile("camelcasedtype"), path.native());
   EXPECT_EQ(m2.getFileTypes(path).at(0).slice(), "CamelCasedType");
 
-  EXPECT_EQ(m2.getFunctionFile("camelcasedfunction"), path.native());
+  EXPECT_EQ(m2.getFunctionFile("camelcasedfunction"), nullptr);
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "CamelCasedFunction");
 
   EXPECT_EQ(m2.getConstantFile("camelcasedconstant"), nullptr);

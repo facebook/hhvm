@@ -53,8 +53,8 @@ constexpr std::string_view toString(SymKind k) {
 constexpr bool isCaseSensitive(SymKind k) {
   switch (k) {
     case SymKind::Type:
-    case SymKind::Function:
       return false;
+    case SymKind::Function:
     case SymKind::Constant:
     case SymKind::Module:
     case SymKind::Method:
@@ -123,9 +123,8 @@ struct Symbol {
   explicit Symbol(const std::string_view name) : Symbol{makeStringPtr(name)} {}
 
   /**
-   * This operation is case-insensitive for Types, Functions, and Type Aliases,
-   * but not Constants. This mirrors the case-insensitivity of PHP's runtime and
-   * autoloader.
+   * This operation is case-insensitive for Types and Type Aliases,
+   * but not Functions, Constants, or Modules.
    */
   bool operator==(const Symbol<k>& o) const noexcept {
     switch (k) {

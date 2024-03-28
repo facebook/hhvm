@@ -156,7 +156,7 @@ void createSchema(SQLiteTxn& txn) {
   txn.exec(
       "CREATE TABLE IF NOT EXISTS function_paths ("
       " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-      " function TEXT NOT NULL COLLATE NOCASE,"
+      " function TEXT NOT NULL,"
       " UNIQUE (pathid, function)"
       ")");
 

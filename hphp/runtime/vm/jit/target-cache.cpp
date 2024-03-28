@@ -400,9 +400,7 @@ handleStaticCall(const Class* cls, const StringData* name,
   // If the candidate has the same name, its probably the right
   // function.  Try to prove it.
   //
-  // We can use the invoked name `name' to compare with cand, but note
-  // that function names are case insensitive, so it's not necessarily
-  // true that oldFunc->name() == name bitwise.
+  // We can use the invoked name `name' to compare with cand.
   assertx(oldFunc->name()->fsame(name));
   if (LIKELY(cand->name() == name)) {
     if (LIKELY((cand->attrs() & AttrPublic) && !cand->hasPrivateAncestor())) {

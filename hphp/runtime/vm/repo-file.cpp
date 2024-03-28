@@ -587,10 +587,6 @@ template
 const RepoUnitInfo* RepoFile::findUnitInfo(
   const HashMapTypeIndex& map, const StringData* key);
 
-template
-const RepoUnitInfo* RepoFile::findUnitInfo(
-  const HashMapFuncIndex& map, const StringData* key);
-
 
 const RepoUnitSymbols* RepoFile::findUnitSymbols(const StringData* path) {
   assertx(s_repoFileData);

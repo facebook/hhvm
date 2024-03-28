@@ -184,9 +184,8 @@ struct RepoGlobalData {
   std::set<std::string> RenamableFunctions;
   std::set<std::string> NonInterceptableFunctions;
 
-  // see RuntimeOptions::EvalLog{T,F}sameCollisions
+  // see RuntimeOptions::EvalLogTsameCollisions
   int LogTsameCollisions = 0;
-  int LogFsameCollisions = 0;
 
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
@@ -233,7 +232,6 @@ struct RepoGlobalData {
       (ModuleLevelTraits)
       (TreatCaseTypesAsMixed)
       (LogTsameCollisions)
-      (LogFsameCollisions)
       ;
 
 #define C(_, Name, ...) sd(Name);

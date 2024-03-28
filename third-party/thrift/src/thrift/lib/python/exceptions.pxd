@@ -19,7 +19,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from thrift.py3.common cimport RpcOptions
 
-from thrift.python.serializer cimport Protocol
+from thrift.python.protocol cimport Protocol
 
 
 cdef extern from "thrift/lib/cpp/Thrift.h" namespace "apache::thrift":

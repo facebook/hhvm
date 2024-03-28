@@ -57,13 +57,13 @@ PyObject* deserialize_type(
 std::unique_ptr<folly::IOBuf> serialize_type(
     const detail::TypeInfo& typeInfo,
     const PyObject* object,
-    PROTOCOL_TYPES protocol) {
+    protocol::PROTOCOL_TYPES protocol) {
   switch (protocol) {
-    case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
       return serialize_type<CompactProtocolWriter>(typeInfo, object);
-    case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL:
       return serialize_type<BinaryProtocolWriter>(typeInfo, object);
-    case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
       return serialize_type<SimpleJSONProtocolWriter>(typeInfo, object);
     default:
       throw TProtocolException(
@@ -74,13 +74,13 @@ std::unique_ptr<folly::IOBuf> serialize_type(
 PyObject* deserialize_type(
     const detail::TypeInfo& typeInfo,
     const folly::IOBuf* buf,
-    PROTOCOL_TYPES protocol) {
+    protocol::PROTOCOL_TYPES protocol) {
   switch (protocol) {
-    case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
       return deserialize_type<CompactProtocolReader>(typeInfo, buf);
-    case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL:
       return deserialize_type<BinaryProtocolReader>(typeInfo, buf);
-    case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
+    case protocol::PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
       return deserialize_type<SimpleJSONProtocolReader>(typeInfo, buf);
     default:
       throw TProtocolException(

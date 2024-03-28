@@ -17,7 +17,7 @@ from libc.stdint cimport uint16_t, uint32_t
 from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
 from thrift.python.client.ssl cimport cSSLContext
-from thrift.python.serializer cimport Protocol as cProtocol
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef extern from "thrift/lib/cpp/transport/THeader.h":

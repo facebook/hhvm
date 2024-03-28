@@ -12,20 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from thrift.python.client cimport ssl as thrift_ssl
-from thrift.python.client.request_channel cimport (
-    ClientType as cClientType,
-    RequestChannel,
-)
-from thrift.python.protocol cimport Protocol as cProtocol
-
-cdef RequestChannel create_channel(
-    object host,
-    object port,
-    object path,
-    double timeout,
-    cClientType client_type,
-    cProtocol protocol,
-    thrift_ssl.SSLContext ssl_context,
-    double ssl_timeout,
-)
+# JSON_COMPACT IS DEPRECATED AND WILL BE REMOVED AFTER THRIFT-PYTHON UNIFICATION
+cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache::thrift::protocol":
+    cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
+        BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"
+        COMPACT_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
+        COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
+        JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"

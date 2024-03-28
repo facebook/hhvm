@@ -12,20 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from thrift.python.client cimport ssl as thrift_ssl
-from thrift.python.client.request_channel cimport (
-    ClientType as cClientType,
-    RequestChannel,
-)
-from thrift.python.protocol cimport Protocol as cProtocol
-
-cdef RequestChannel create_channel(
-    object host,
-    object port,
-    object path,
-    double timeout,
-    cClientType client_type,
-    cProtocol protocol,
-    thrift_ssl.SSLContext ssl_context,
-    double ssl_timeout,
-)
+# blank to allowing Protocol python import

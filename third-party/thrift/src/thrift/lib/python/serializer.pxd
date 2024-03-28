@@ -17,17 +17,9 @@ from libc.stdint cimport uint32_t
 from libcpp.memory cimport unique_ptr
 
 from thrift.python.types cimport cDynamicStructInfo
-
-
-# JSON_COMPACT IS DEPRECATED AND WILL BE REMOVED AFTER THRIFT-PYTHON UNIFICATION
-cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache::thrift::protocol":
-    cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
-        BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"
-        COMPACT_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
-        COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
-        JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef extern from "<thrift/lib/python/Serializer.h>" namespace "::apache::thrift::python":
-    cdef unique_ptr[folly.iobuf.cIOBuf] cserialize "::apache::thrift::python::serialize"(const cDynamicStructInfo& structInfo, obj, Protocol proto) except +
-    cdef uint32_t cdeserialize "::apache::thrift::python::deserialize"(const cDynamicStructInfo& structInfo, const folly.iobuf.cIOBuf* buf, obj, Protocol proto) except +
+    cdef unique_ptr[folly.iobuf.cIOBuf] cserialize "::apache::thrift::python::serialize"(const cDynamicStructInfo& structInfo, obj, cProtocol proto) except +
+    cdef uint32_t cdeserialize "::apache::thrift::python::deserialize"(const cDynamicStructInfo& structInfo, const folly.iobuf.cIOBuf* buf, obj, cProtocol proto) except +

@@ -18,7 +18,7 @@ cimport folly.iobuf
 from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
 
-from thrift.python.serializer cimport Protocol
+from thrift.python.protocol cimport Protocol
 
 
 cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "::apache::thrift::detail":

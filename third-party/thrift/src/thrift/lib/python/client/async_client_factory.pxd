@@ -21,7 +21,7 @@ from thrift.python.client.request_channel cimport (
     ClientType as cClientType,
     ChannelFactory,
 )
-from thrift.python.serializer cimport Protocol as cProtocol
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef void requestchannel_callback(

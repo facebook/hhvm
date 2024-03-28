@@ -16,7 +16,7 @@ from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
 from libc.stdint cimport uint64_t, uint32_t, uint16_t
 from folly cimport cFollyFuture
-from thrift.python.serializer cimport Protocol as cProtocol
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef extern from "folly/io/async/SSLContext.h":

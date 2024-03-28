@@ -17,7 +17,7 @@ from libcpp.memory cimport unique_ptr
 from folly cimport cFollyExecutor
 from folly.iobuf cimport cIOBuf
 from thrift.py3.stream cimport cClientBufferedStreamWrapper, cClientBufferedStream
-from thrift.python.serializer cimport Protocol
+from thrift.python.protocol cimport Protocol
 
 
 ctypedef cClientBufferedStream[cIOBuf] cIOBufClientBufferedStream

@@ -17,16 +17,12 @@ from enum import Enum
 
 from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError
+from thrift.python.protocol import Protocol
 from thrift.python.types import StructOrUnion
 
-sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
+Protocol = Protocol
 
-class Protocol(Enum):
-    BINARY: Protocol = ...
-    # DO NOT USE COMPACT_JSON, is is neither compact nor json
-    COMPACT_JSON: Protocol = ...
-    COMPACT: Protocol = ...
-    JSON: Protocol = ...
+sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
 
 def serialize_iobuf(strct: sT, protocol: Protocol = Protocol.COMPACT) -> IOBuf: ...
 def serialize(struct: sT, protocol: Protocol = Protocol.COMPACT) -> bytes: ...

@@ -35,7 +35,7 @@ from thrift.py3.server cimport Cpp2RequestContext, RequestContext, THRIFT_REQUES
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, ServerStream
 from thrift.python.types cimport ServiceInterface as cServiceInterface
-from thrift.python.serializer cimport Protocol
+from thrift.python.protocol cimport Protocol
 from folly cimport (
   cFollyPromise,
   cFollyUnit,

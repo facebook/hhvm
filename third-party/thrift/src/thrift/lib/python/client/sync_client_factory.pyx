@@ -19,7 +19,7 @@ from thrift.python.client.request_channel cimport ClientType as cClientType
 from thrift.python.client.request_channel import ClientType
 from thrift.python.client.sync_channel_factory cimport create_channel
 from thrift.python.exceptions import TransportError, TransportErrorType
-from thrift.python.serializer cimport Protocol as cProtocol
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 def get_client(

@@ -52,7 +52,9 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
+#include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/BaseThriftServer.h>
+#include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/PolledServiceHealth.h>
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
@@ -154,6 +156,65 @@ class ThriftServerStopController final {
 
 class ThriftServer : public apache::thrift::BaseThriftServer,
                      public wangle::ServerBootstrap<Pipeline> {
+ private:
+  AdaptiveConcurrencyController adaptiveConcurrencyController_;
+
+  folly::observer::SimpleObservable<
+      std::optional<CPUConcurrencyController::Config>>
+      mockCPUConcurrencyControllerConfig_{std::nullopt};
+  folly::observer::Observer<CPUConcurrencyController::Config>
+  makeCPUConcurrencyControllerConfigInternal();
+  CPUConcurrencyController cpuConcurrencyController_;
+
+ public:
+  AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {
+    return adaptiveConcurrencyController_;
+  }
+
+  const AdaptiveConcurrencyController& getAdaptiveConcurrencyController()
+      const final {
+    return adaptiveConcurrencyController_;
+  }
+
+  const auto& adaptiveConcurrencyController() const {
+    return adaptiveConcurrencyController_;
+  }
+
+  CPUConcurrencyController& getCPUConcurrencyController() final {
+    return cpuConcurrencyController_;
+  }
+
+  const CPUConcurrencyController& getCPUConcurrencyController() const final {
+    return cpuConcurrencyController_;
+  }
+
+  void setMockCPUConcurrencyControllerConfig(
+      CPUConcurrencyController::Config config) {
+    mockCPUConcurrencyControllerConfig_.setValue(config);
+  }
+
+  /**
+   * Get the maximum # of requests being processed in handler before overload.
+   *
+   * @return current setting.
+   */
+  uint32_t getMaxRequests() const override {
+    return adaptiveConcurrencyController_.enabled()
+        ? static_cast<uint32_t>(adaptiveConcurrencyController_.getMaxRequests())
+        : thriftConfig_.getMaxRequests().get();
+  }
+
+  /**
+   * Set the maximum # of requests being processed in handler before overload.
+   *
+   * @param maxRequests new setting for maximum # of active requests.
+   */
+  void setMaxRequests(uint32_t maxRequests) override {
+    thriftConfig_.setMaxRequests(
+        folly::observer::makeStaticObserver(std::optional{maxRequests}),
+        AttributeSource::OVERRIDE);
+  }
+
  private:
   void configureIOUring();
 

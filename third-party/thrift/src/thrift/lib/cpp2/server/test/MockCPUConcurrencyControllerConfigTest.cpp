@@ -29,7 +29,7 @@ namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET(
     folly::observer::Observer<apache::thrift::CPUConcurrencyController::Config>,
     makeCPUConcurrencyControllerConfig,
-    BaseThriftServer*) {
+    ThriftServer*) {
   kMakeCPUConcurrencyControllerConfigCalled = true;
 
   return folly::observer::makeObserver([]() {

@@ -132,6 +132,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return ThriftServer::UnimplementedExtraInterfacesResult::UNRECOGNIZED;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    folly::observer::Observer<AdaptiveConcurrencyController::Config>,
+    makeAdaptiveConcurrencyConfig) {
+  return folly::observer::makeStaticObserver(
+      AdaptiveConcurrencyController::Config{});
+}
 } // namespace apache::thrift::detail
 
 namespace {
@@ -244,6 +250,14 @@ TLSCredentialWatcher::TLSCredentialWatcher(ThriftServer* server)
 
 ThriftServer::ThriftServer()
     : BaseThriftServer(),
+      adaptiveConcurrencyController_{
+          apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
+          thriftConfig_.getMaxRequests().getObserver(),
+          detail::getThriftServerConfig(*this)},
+      cpuConcurrencyController_{
+          makeCPUConcurrencyControllerConfigInternal(),
+          *this,
+          detail::getThriftServerConfig(*this)},
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
           std::chrono::steady_clock::now().time_since_epoch().count()) {
@@ -253,6 +267,14 @@ ThriftServer::ThriftServer()
 
 ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
     : BaseThriftServer(initialConfig),
+      adaptiveConcurrencyController_{
+          apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
+          thriftConfig_.getMaxRequests().getObserver(),
+          detail::getThriftServerConfig(*this)},
+      cpuConcurrencyController_{
+          detail::makeCPUConcurrencyControllerConfig(this),
+          *this,
+          detail::getThriftServerConfig(*this)},
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
           std::chrono::steady_clock::now().time_since_epoch().count()) {
@@ -2195,6 +2217,19 @@ serverdbginfo::ResourcePoolsDbgInfo ThriftServer::getResourcePoolsDbgInfo()
   });
 
   return info;
+}
+
+folly::observer::Observer<CPUConcurrencyController::Config>
+ThriftServer::makeCPUConcurrencyControllerConfigInternal() {
+  return folly::observer::makeObserver(
+      [mockConfig = mockCPUConcurrencyControllerConfig_.getObserver(),
+       config = detail::makeCPUConcurrencyControllerConfig(
+           this)]() -> CPUConcurrencyController::Config {
+        if (auto config_2 = **mockConfig) {
+          return *config_2;
+        }
+        return **config;
+      });
 }
 
 } // namespace thrift

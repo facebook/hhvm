@@ -3963,7 +3963,8 @@ TEST_P(HeaderOrRocket, AdaptiveConcurrencyConfig) {
   ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
   runner.getThriftServer().setMaxRequests(5000);
   EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 5000);
-  auto& controller = runner.getThriftServer().adaptiveConcurrencyController();
+  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& controller = thriftServer.adaptiveConcurrencyController();
   EXPECT_FALSE(controller.enabled());
   auto client = makeClient(runner, &base);
 

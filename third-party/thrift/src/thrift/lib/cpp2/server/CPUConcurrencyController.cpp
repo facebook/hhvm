@@ -29,7 +29,7 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     folly::observer::Observer<CPUConcurrencyController::Config>,
     makeCPUConcurrencyControllerConfig,
-    BaseThriftServer*) {
+    ThriftServer*) {
   return folly::observer::makeStaticObserver(
       CPUConcurrencyController::Config{});
 }

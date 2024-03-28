@@ -211,12 +211,12 @@ class CPUConcurrencyController {
       std::chrono::steady_clock::now()};
 };
 
-class BaseThriftServer;
+class ThriftServer;
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     folly::observer::Observer<CPUConcurrencyController::Config>,
     makeCPUConcurrencyControllerConfig,
-    BaseThriftServer*);
+    ThriftServer*);
 } // namespace detail
 } // namespace apache::thrift

@@ -43,8 +43,6 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
-#include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
-#include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ControlServerInterface.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
@@ -325,24 +323,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    */
   bool isPrimaryServer_{false};
 
- private:
-  AdaptiveConcurrencyController adaptiveConcurrencyController_;
-
-  folly::observer::SimpleObservable<
-      std::optional<CPUConcurrencyController::Config>>
-      mockCPUConcurrencyControllerConfig_{std::nullopt};
-  folly::observer::Observer<CPUConcurrencyController::Config>
-  makeCPUConcurrencyControllerConfigInternal();
-  CPUConcurrencyController cpuConcurrencyController_;
-
  public:
   void setAsPrimaryServer() { isPrimaryServer_ = true; }
   bool isPrimaryServer() const { return isPrimaryServer_; }
-
-  void setMockCPUConcurrencyControllerConfig(
-      CPUConcurrencyController::Config config) {
-    mockCPUConcurrencyControllerConfig_.setValue(config);
-  }
 
  protected:
   //! The server's listening addresses
@@ -825,28 +808,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return thriftConfig_.getWorkersJoinTimeout();
   }
 
-  /**
-   * Get the maximum # of requests being processed in handler before overload.
-   *
-   * @return current setting.
-   */
-  uint32_t getMaxRequests() const override {
-    return adaptiveConcurrencyController_.enabled()
-        ? static_cast<uint32_t>(adaptiveConcurrencyController_.getMaxRequests())
-        : thriftConfig_.getMaxRequests().get();
-  }
-
-  /**
-   * Set the maximum # of requests being processed in handler before overload.
-   *
-   * @param maxRequests new setting for maximum # of active requests.
-   */
-  void setMaxRequests(uint32_t maxRequests) override {
-    thriftConfig_.setMaxRequests(
-        folly::observer::makeStaticObserver(std::optional{maxRequests}),
-        AttributeSource::OVERRIDE);
-  }
-
   uint64_t getMaxResponseSize() const final {
     return thriftConfig_.getMaxResponseSize().get();
   }
@@ -885,23 +846,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   server::TServerObserver* getObserver() const final {
     return observerPtr_.load(std::memory_order_relaxed);
-  }
-
-  AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {
-    return adaptiveConcurrencyController_;
-  }
-
-  const AdaptiveConcurrencyController& getAdaptiveConcurrencyController()
-      const final {
-    return adaptiveConcurrencyController_;
-  }
-
-  CPUConcurrencyController& getCPUConcurrencyController() final {
-    return cpuConcurrencyController_;
-  }
-
-  const CPUConcurrencyController& getCPUConcurrencyController() const final {
-    return cpuConcurrencyController_;
   }
 
   std::shared_ptr<server::TServerObserver> getObserverShared() const {
@@ -1665,10 +1609,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
       AttributeSource source = AttributeSource::OVERRIDE) {
     thriftConfig_.setPolledServiceHealthLiveness(
         folly::observer::makeStaticObserver(std::optional{liveness}), source);
-  }
-
-  const auto& adaptiveConcurrencyController() const {
-    return adaptiveConcurrencyController_;
   }
 
   // Define Server behavior to allow or reject header traffic

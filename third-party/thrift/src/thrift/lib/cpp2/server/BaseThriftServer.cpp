@@ -34,56 +34,11 @@
 
 namespace apache {
 namespace thrift {
-
-namespace detail {
-
-THRIFT_PLUGGABLE_FUNC_REGISTER(
-    folly::observer::Observer<AdaptiveConcurrencyController::Config>,
-    makeAdaptiveConcurrencyConfig) {
-  return folly::observer::makeStaticObserver(
-      AdaptiveConcurrencyController::Config{});
-}
-} // namespace detail
-
-using namespace std;
-
-folly::observer::Observer<CPUConcurrencyController::Config>
-BaseThriftServer::makeCPUConcurrencyControllerConfigInternal() {
-  return folly::observer::makeObserver(
-      [mockConfig = mockCPUConcurrencyControllerConfig_.getObserver(),
-       config = detail::makeCPUConcurrencyControllerConfig(
-           this)]() -> CPUConcurrencyController::Config {
-        if (auto config_2 = **mockConfig) {
-          return *config_2;
-        }
-        return **config;
-      });
-}
-
-BaseThriftServer::BaseThriftServer()
-    : thriftConfig_(),
-      adaptiveConcurrencyController_{
-          apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
-          thriftConfig_.getMaxRequests().getObserver(),
-          detail::getThriftServerConfig(*this)},
-      cpuConcurrencyController_{
-          makeCPUConcurrencyControllerConfigInternal(),
-          *this,
-          detail::getThriftServerConfig(*this)},
-      addresses_(1) {}
+BaseThriftServer::BaseThriftServer() : thriftConfig_(), addresses_(1) {}
 
 BaseThriftServer::BaseThriftServer(
     const ThriftServerInitialConfig& initialConfig)
-    : thriftConfig_(initialConfig),
-      adaptiveConcurrencyController_{
-          apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
-          thriftConfig_.getMaxRequests().getObserver(),
-          detail::getThriftServerConfig(*this)},
-      cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(this),
-          *this,
-          detail::getThriftServerConfig(*this)},
-      addresses_(1) {}
+    : thriftConfig_(initialConfig), addresses_(1) {}
 
 /* static */ BaseThriftServer::ProcessedModuleSet
 BaseThriftServer::processModulesSpecification(ModulesSpecification&& specs) {

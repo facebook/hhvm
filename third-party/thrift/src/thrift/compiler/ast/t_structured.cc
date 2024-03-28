@@ -27,7 +27,7 @@ namespace {
 
 template <typename C>
 // Returns a pair<iterator, bool> of (lower bound iterator, id found?).
-auto find_by_id(const C& fields_id_order, int32_t id) {
+auto find_by_id(const C& fields_id_order, t_field_id id) {
   auto lower = std::partition_point(
       fields_id_order.begin(), fields_id_order.end(), [id](const auto& field) {
         return field->id() < id;
@@ -66,7 +66,7 @@ void t_structured::append_field(std::unique_ptr<t_field> field) {
   }
 }
 
-const t_field* t_structured::get_field_by_id(int32_t id) const {
+const t_field* t_structured::get_field_by_id(t_field_id id) const {
   auto existing = find_by_id(fields_id_order_, id);
   return existing.second ? *existing.first : nullptr;
 }

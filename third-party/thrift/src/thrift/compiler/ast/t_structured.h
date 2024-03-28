@@ -68,7 +68,7 @@ class t_structured : public t_type {
   }
 
   // Access the field by id or name.
-  const t_field* get_field_by_id(int32_t id) const;
+  const t_field* get_field_by_id(t_field_id id) const;
   const t_field* get_field_by_name(std::string_view name) const {
     auto it = fields_by_name_.find(name);
     return it != fields_by_name_.end() ? it->second : nullptr;

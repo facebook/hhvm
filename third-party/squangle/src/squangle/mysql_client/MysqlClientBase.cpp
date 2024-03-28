@@ -17,7 +17,6 @@ namespace {
 class InitMysqlLibrary {
  public:
   InitMysqlLibrary() {
-    folly::ssl::init();
     mysql_library_init(-1, nullptr, nullptr);
   }
 };

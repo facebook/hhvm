@@ -232,20 +232,28 @@ struct ArrayLayout : public LayoutBase {
       using difference_type = ptrdiff_t;
       using value_type = ItemView;
       using pointer = const value_type*;
-      using reference = const value_type&;
+      using reference = value_type;
       using iterator_category = std::random_access_iterator_tag;
 
       Iterator() {}
 
-      Iterator(const View& outer, size_t index) : outer_(outer), index_(index) {
-        updateItemView();
-      }
+      Iterator(const View& outer, size_t index)
+          : outer_(outer), index_(index) {}
 
       explicit Iterator(const View& outer)
           : outer_(outer), index_(outer.count_) {}
 
-      const ItemView& operator*() const { return item_; }
-      const ItemView* operator->() const { return &item_; }
+      ItemView operator*() const {
+        DCHECK_LT(index_, outer_.count_);
+        return outer_.itemLayout().view(position());
+      }
+
+      struct ArrowProxy {
+        explicit ArrowProxy(ItemView item) : item_(std::move(item)) {}
+        const ItemView* operator->() const { return &item_; }
+        ItemView item_;
+      };
+      ArrowProxy operator->() const { return ArrowProxy(operator*()); }
 
       Item thaw() const {
         Item item;
@@ -259,22 +267,18 @@ struct ArrayLayout : public LayoutBase {
 
       Iterator& operator++() {
         ++index_;
-        updateItemView();
         return *this;
       }
       Iterator& operator+=(ptrdiff_t delta) {
         index_ += delta;
-        updateItemView();
         return *this;
       }
       Iterator& operator--() {
         --index_;
-        updateItemView();
         return *this;
       }
       Iterator& operator-=(ptrdiff_t delta) {
         index_ -= delta;
-        updateItemView();
         return *this;
       }
       Iterator operator++(int) {
@@ -329,12 +333,6 @@ struct ArrayLayout : public LayoutBase {
       // NB: Begin/End addresses won't work with Frozen because of the
       // possibility of zero-byte items.
       size_t index_{0};
-      ItemView item_;
-      void updateItemView() {
-        if (index_ < outer_.count_) {
-          item_ = outer_.itemLayout().view(position());
-        }
-      }
     };
 
     const byte* data_{nullptr};

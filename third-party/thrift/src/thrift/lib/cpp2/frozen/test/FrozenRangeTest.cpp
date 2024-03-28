@@ -143,7 +143,7 @@ TYPED_TEST_P(FrozenRange, Zeros) {
   EXPECT_EQ(*it++, 0);
   EXPECT_EQ(*it++, 0);
   size_t n = 0;
-  for (auto& item : fv) {
+  for (const auto& item : fv) {
     (void)item;
     ++n; // ensure iteration still works despite zero-byte items
   }

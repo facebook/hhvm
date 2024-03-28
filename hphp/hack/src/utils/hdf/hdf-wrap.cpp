@@ -34,6 +34,10 @@ rust::Vec<rust::String> hdf_child_names(const Hdf& hdf) {
   return keys;
 }
 
+bool hdf_has_child_nodes(const Hdf& hdf) {
+  return hdf.firstChild(false).exists();
+}
+
 rust::Vec<rust::String> hdf_get_string_vec(const Hdf& hdf) {
   auto values = std::vector<std::string>{};
   hdf.configGet(values);

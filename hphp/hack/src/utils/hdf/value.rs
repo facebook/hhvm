@@ -230,6 +230,10 @@ impl Value {
         }
     }
 
+    pub fn has_child_nodes(&self) -> bool {
+        ffi::hdf_has_child_nodes(&self.inner)
+    }
+
     /// Return the string values of child nodes.
     /// Fails on internal Hdf parsing errors or Utf8 validation checks.
     pub fn values(self) -> Result<Vec<String>> {
@@ -555,6 +559,34 @@ a.b.c="d;e"
         );
         assert_eq!(hdf.get_str_vec_or("none", vec![])?, empty_vec);
         assert_eq!(hdf.get_str_vec_or("foo.1", vec![])?, empty_vec);
+        Ok(())
+    }
+
+    #[test]
+    fn test_has_children() -> Result<()> {
+        let mut hdf = Value::default();
+        hdf.set_hdf(
+            r#"
+            foo {
+                * = zero
+                * = one
+                # This is a dangerous config because if next after this if * = three
+                # occurs foo.2 will be replaced with three
+                2 = two
+            }
+            bar.* = two
+            bar.* = three
+            bar.4 = four
+        }
+        "#,
+        )?;
+
+        assert!(hdf.has_child_nodes());
+        assert!(hdf.get("foo")?.unwrap().has_child_nodes());
+        assert!(!hdf.get("foo.2")?.unwrap().has_child_nodes());
+        assert!(hdf.get("bar")?.unwrap().has_child_nodes());
+        assert!(!hdf.get("bar.4")?.unwrap().has_child_nodes());
+
         Ok(())
     }
 }

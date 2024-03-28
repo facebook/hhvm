@@ -409,8 +409,7 @@ void recordDependencies(Env& env) {
     assertx(type <= TCell);
     auto const gc = folly::get_default(guards, guard);
     auto gcToRelax = gc;
-    if (env.profiling &&
-        DataTypeGeneric < gc.category && gc.category < DataTypeSpecific) {
+    if (DataTypeGeneric < gc.category && gc.category < DataTypeSpecific) {
       gcToRelax = DataTypeSpecific;
     }
     auto const relaxedType = relaxToConstraint(type, gcToRelax);

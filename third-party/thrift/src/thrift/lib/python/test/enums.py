@@ -64,6 +64,12 @@ class EnumTests(unittest.TestCase):
         x = deserialize(File, b'{"name":"blah", "type":0}', Protocol.JSON)
         self.assertEqual(x.type, Kind.None_)
 
+    def test_protocol_int_conversion(self) -> None:
+        self.assertEqual(Protocol.BINARY.value, 0)
+        self.assertEqual(Protocol.COMPACT_JSON.value, 1)
+        self.assertEqual(Protocol.COMPACT.value, 2)
+        self.assertEqual(Protocol.JSON.value, 5)
+
     def test_bad_enum_hash_same(self) -> None:
         x = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
         y = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)

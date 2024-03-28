@@ -19,9 +19,11 @@ from libcpp.memory cimport unique_ptr
 from thrift.python.types cimport cDynamicStructInfo
 
 
+# JSON_COMPACT IS DEPRECATED AND WILL BE REMOVED AFTER THRIFT-PYTHON UNIFICATION
 cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache::thrift::protocol":
     cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
         BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"
+        COMPACT_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
         COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
         JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"
 

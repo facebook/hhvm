@@ -254,7 +254,7 @@ using uses_one_thread_ = typename T::uses_one_thread;
 } // namespace detail
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool uses_one_thread_v =
+constexpr bool uses_one_thread_v =
     folly::is_detected_v<detail::uses_one_thread_, T>;
 template <typename T>
 struct uses_one_thread_ : folly::bool_constant<uses_one_thread_v<T>> {};

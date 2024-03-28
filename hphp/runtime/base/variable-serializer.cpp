@@ -198,7 +198,8 @@ void VariableSerializer::popResourceInfo() {
 }
 
 String VariableSerializer::serialize(const_variant_ref v, bool ret,
-                                     bool keepCount /* = false */) {
+                                     bool keepCount /* = false */,
+                                     bool outputHookOnly /* = false */) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
@@ -209,10 +210,11 @@ String VariableSerializer::serialize(const_variant_ref v, bool ret,
   m_valueCount = keepCount ? m_valueCount + 1 : 1;
   write(v);
   if (ret) {
+    assertx(!outputHookOnly);
     return m_buf->detach();
   } else {
     String str = m_buf->detach();
-    g_context->write(str);
+    g_context->write(str, outputHookOnly);
   }
   return String();
 }

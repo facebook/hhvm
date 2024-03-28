@@ -12,6 +12,7 @@ function innerFunc() {
   $a = new A();
 
   echo "lol\n";
+  debugger_dump($a);
 }
 <<__EntryPoint>> function main() {
 innerFunc();

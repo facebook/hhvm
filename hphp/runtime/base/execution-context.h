@@ -204,8 +204,8 @@ public:
   /**
    * Write to output.
    */
-  void write(const String&);
-  void write(const char* s, int len);
+  void write(const String&, bool outputHookOnly = false);
+  void write(const char* s, int len, bool outputHookOnly = false);
   void write(const char*);
 
   void writeStdout(const char* s, int len, bool skipHooks = false);

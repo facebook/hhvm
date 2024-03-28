@@ -45,7 +45,7 @@ checkObjEqualRecursively($msg, dict[
         dict[
           "source" => dict["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 2,
-          "line" => 17,
+          "line" => 18,
           "name" => "main"
         ]
       ]
@@ -126,6 +126,7 @@ checkObjEqualRecursively($msg, dict[
 resumeTarget();
 
 checkForOutput($testProcess, "lol\n", "stdout");
+checkForOutput($testProcess, "A(42)", "stdout");
 checkForOutput($testProcess, "hello world 2\n", "stdout");
 vsDebugCleanup($testProcess);
 

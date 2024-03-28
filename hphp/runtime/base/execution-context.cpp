@@ -217,8 +217,8 @@ void ExecutionContext::setContentType(const String& mimetype,
 ///////////////////////////////////////////////////////////////////////////////
 // write()
 
-void ExecutionContext::write(const String& s) {
-  write(s.data(), s.size());
+void ExecutionContext::write(const String& s, bool outputHookOnly) {
+  write(s.data(), s.size(), outputHookOnly);
 }
 
 void ExecutionContext::addStdoutHook(StdoutHook* hook) {
@@ -274,7 +274,14 @@ size_t ExecutionContext::getStdoutBytesWritten() const {
   return m_stdoutBytesWritten;
 }
 
-void ExecutionContext::write(const char *s, int len) {
+void ExecutionContext::write(const char *s, int len, bool outputHookOnly) {
+  if (outputHookOnly) {
+    for (auto const hook : m_stdoutHooks) {
+      assertx(hook != nullptr);
+      (*hook)(s, len);
+    }
+    return;
+  }
   if (m_sb) {
     m_sb->append(s, len);
     if (m_out && m_out->chunk_size > 0) {

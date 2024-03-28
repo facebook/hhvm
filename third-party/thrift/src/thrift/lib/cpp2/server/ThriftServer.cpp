@@ -1822,7 +1822,9 @@ ThriftServer::checkOverload(
           isOverloaded_(readHeaders, method))) {
     return {std::make_pair(
         kAppOverloadedErrorCode,
-        "load shedding due to custom isOverloaded() callback")};
+        fmt::format(
+            "Host {} is load shedding due to custom isOverloaded() callback.",
+            getAddressAsString()))};
   }
 
   // If active request tracking is disabled or we are using resource pools,

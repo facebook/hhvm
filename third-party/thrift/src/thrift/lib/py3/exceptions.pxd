@@ -20,8 +20,9 @@ from folly cimport cFollyExceptionWrapper
 from folly.iobuf cimport IOBuf, cIOBuf
 from libc.stdint cimport uint32_t
 from libcpp.memory cimport shared_ptr
-from thrift.py3.common cimport Protocol, RpcOptions, cThriftMetadata
+from thrift.py3.common cimport RpcOptions, cThriftMetadata
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
+from thrift.python.protocol cimport Protocol
 
 cdef extern from * namespace "std":
     cdef cppclass cException "std::exception":

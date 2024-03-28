@@ -26,7 +26,6 @@ from thrift.py3.exceptions cimport cTException
 cimport folly.iobuf as _fbthrift_iobuf
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
-from thrift.py3.common cimport Protocol as __Protocol
 from thrift.py3.std_libcpp cimport string_view as __cstring_view
 from thrift.py3.types cimport (
     bstring,
@@ -37,6 +36,7 @@ from thrift.py3.types cimport (
     terse_field_ref as __terse_field_ref,
     StructFieldsSetter as __StructFieldsSetter
 )
+from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport foo.types as _foo_types

@@ -25,7 +25,8 @@ from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
-from thrift.py3.common cimport Protocol, cThriftMetadata
+from thrift.py3.common cimport cThriftMetadata
+from thrift.python.protocol cimport Protocol
 
 # This was changed in cython to have except+ which breaks thrift-py3
 cdef extern from "<memory>" namespace "std" nogil:

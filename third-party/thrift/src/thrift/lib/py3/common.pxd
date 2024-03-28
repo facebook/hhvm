@@ -22,14 +22,6 @@ from thrift.py3.std_libcpp cimport milliseconds
 from libcpp cimport bool as cpp_bool
 
 
-cdef extern from "thrift/lib/cpp/protocol/TProtocolTypes.h" namespace "apache::thrift::protocol":
-    cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
-        BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"
-        COMPACT_JSON "apache::thrift::protocol::T_JSON_PROTOCOL"
-        COMPACT "apache::thrift::protocol::T_COMPACT_PROTOCOL"
-        JSON "apache::thrift::protocol::T_SIMPLE_JSON_PROTOCOL"
-
-
 cdef extern from "thrift/lib/cpp/concurrency/Thread.h":
 
     enum cPriority "apache::thrift::concurrency::PRIORITY":

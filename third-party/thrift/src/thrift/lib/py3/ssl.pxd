@@ -17,7 +17,7 @@ from libcpp.memory cimport shared_ptr
 from libc.stdint cimport uint64_t, uint32_t, uint16_t
 from folly cimport cFollyFuture
 from thrift.py3.client cimport cRequestChannel_ptr, ClientType
-from thrift.py3.common cimport Protocol
+from thrift.python.protocol cimport Protocol
 
 
 cdef extern from "folly/io/async/SSLContext.h":

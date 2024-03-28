@@ -20,6 +20,8 @@ from enum import Enum
 from collections.abc import Mapping
 from functools import total_ordering
 
+from thrift.python.protocol import Protocol
+
 
 class Priority(Enum):
     HIGH_IMPORTANCE = cHIGH_IMPORTANT

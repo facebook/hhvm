@@ -18,7 +18,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from libc.stdint cimport uint32_t, uint16_t
 from folly.iobuf cimport cIOBuf, cIOBufQueue
-from thrift.py3.common cimport Protocol as cProtocol
+from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef extern from "thrift/lib/py3/serializer.h" namespace "::thrift::py3" nogil:

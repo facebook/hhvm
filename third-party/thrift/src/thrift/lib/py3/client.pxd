@@ -33,7 +33,8 @@ from libcpp cimport bool
 
 # This is just here to make the cython compile happy.
 from asyncio import InvalidStateError as asyncio_InvalidStateError
-from thrift.py3.common cimport Protocol as cProtocol, cThriftMetadata
+from thrift.py3.common cimport cThriftMetadata
+from thrift.python.protocol cimport Protocol as cProtocol
 from folly.executor cimport AsyncioExecutor
 
 cdef extern from "thrift/lib/cpp/transport/THeader.h":

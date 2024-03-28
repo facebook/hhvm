@@ -36,10 +36,10 @@ from thrift.py3.types cimport (
 )
 from thrift.py3.common cimport (
     RpcOptions as __RpcOptions,
-    Protocol as __Protocol,
     cThriftMetadata as __fbthrift_cThriftMetadata,
     MetadataBox as __MetadataBox,
 )
+from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 

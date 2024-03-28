@@ -507,8 +507,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       OpInfo<bc::opcode> data{inst.opcode};                      \
       if (RuntimeOption::EnableIntrinsicsExtension) {            \
         if (Op::opcode == Op::FCallFuncD &&                      \
-            inst.FCallFuncD.str2->fsame(                         \
-              s_hhbbc_fail_verification.get())) {                \
+            inst.FCallFuncD.str2 == s_hhbbc_fail_verification.get()) {\
           fe.emitOp(Op::CheckProp);                              \
           fe.emitInt32(                                          \
             ue.mergeLitstr(inst.FCallFuncD.str2));               \

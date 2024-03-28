@@ -105,8 +105,8 @@ const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 
 Array hhvm_get_frame_args(const ActRec* ar) {
-  while (ar && (ar->func()->name()->fsame(s_call_user_func.get()) ||
-                ar->func()->name()->fsame(s_call_user_func_array.get()))) {
+  while (ar && (ar->func()->name() == s_call_user_func.get() ||
+                ar->func()->name() == s_call_user_func_array.get())) {
     ar = g_context->getPrevVMState(ar);
   }
 

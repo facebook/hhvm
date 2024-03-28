@@ -191,7 +191,7 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * One-to-one case insensitive maps for types and funcs, where the keys
+ * One-to-one case insensitive maps for types, where the keys
  * are static strings and the values are some T.
  *
  * Elements are not stable under insert/erase.
@@ -202,13 +202,6 @@ template<class T> using TSStringToOneT =
     T,
     string_data_hash,
     string_data_tsame
-  >;
-template<class T> using FSStringToOneT =
-  hphp_fast_map<
-    SString,
-    T,
-    string_data_hash,
-    string_data_fsame
   >;
 
 /*
@@ -221,17 +214,16 @@ template<class T> using FSStringToOneT =
  * pointer hashing/comparison is sufficient.
  */
 template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
+template<class T> using FSStringToOneT = SStringToOneT<T>;
 
 /*
- * One-to-one case sensitive map, where the keys are static strings
+ * One-to-one case insensitive map, where the keys are static strings
  * and the values are some T.
  *
  * Elements are stable under insert/erase.
  */
 template<typename T> using TSStringToOneNodeT =
   hphp_hash_map<SString, T, string_data_hash, string_data_tsame>;
-template<typename T> using FSStringToOneNodeT =
-  hphp_hash_map<SString, T, string_data_hash, string_data_fsame>;
 
 /*
  * One-to-one case sensitive map, where the keys are static strings
@@ -243,6 +235,7 @@ template<typename T> using FSStringToOneNodeT =
  * pointer hashing/comparison is sufficient.
  */
 template<typename T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
+template<typename T> using FSStringToOneNodeT = SStringToOneNodeT<T>;
 
 /*
  * One-to-one case sensitive concurrent map, where the keys are static
@@ -255,6 +248,7 @@ template<typename T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
  */
 template<class T> using SStringToOneConcurrentT =
   folly_concurrent_hash_map_simd<SString, T>;
+template<class T> using FSStringToOneConcurrentT = SStringToOneConcurrentT<T>;
 
 /*
  * One-to-one case insensitive concurrent map, where the keys are
@@ -265,9 +259,6 @@ template<class T> using SStringToOneConcurrentT =
 template<class T> using TSStringToOneConcurrentT =
   folly_concurrent_hash_map_simd<SString, T,
                                  string_data_hash, string_data_tsame>;
-template<class T> using FSStringToOneConcurrentT =
-  folly_concurrent_hash_map_simd<SString, T,
-                                 string_data_hash, string_data_fsame>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -275,11 +266,12 @@ template<class T> using FSStringToOneConcurrentT =
  * Case sensitive static string set.
  */
 using SStringSet = hphp_fast_set<SString>;
+using FSStringSet = SStringSet;
+
 /*
  * Case insensitive static string set.
  */
 using TSStringSet = hphp_fast_set<SString, string_data_hash, string_data_tsame>;
-using FSStringSet = hphp_fast_set<SString, string_data_hash, string_data_fsame>;
 
 //////////////////////////////////////////////////////////////////////
 

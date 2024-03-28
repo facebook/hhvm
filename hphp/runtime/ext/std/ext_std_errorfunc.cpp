@@ -84,8 +84,8 @@ bool hphp_debug_caller_info_impl(
     return false;
   }
 
-  if (func->name()->fsame(s_call_user_func.get())) return false;
-  if (func->name()->fsame(s_call_user_func_array.get())) return false;
+  if (func->name() == s_call_user_func.get()) return false;
+  if (func->name() == s_call_user_func_array.get()) return false;
 
   auto const line = func->getLineNumber(offset);
   if (line == -1) return false;

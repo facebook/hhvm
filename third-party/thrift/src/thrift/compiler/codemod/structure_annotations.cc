@@ -436,14 +436,6 @@ class structure_annotations {
       }
     }
 
-    if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {
-      fm_.remove_all_annotations(node);
-    } else {
-      for (const auto& annot : to_remove) {
-        fm_.remove(annot);
-      }
-    }
-
     if (!to_add.empty()) {
       fm_.add(
           {node.src_range().begin.offset(),

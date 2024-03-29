@@ -151,6 +151,9 @@ class ThriftServerStopController final {
   folly::once_flag stopped_;
 };
 
+using IsOverloadedFunc = folly::Function<bool(
+    const transport::THeader::StringToStringMap*, const std::string*) const>;
+
 /**
  *   This is yet another thrift server.
  *   Uses cpp2 style generated code.
@@ -335,6 +338,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   folly::observer::Observer<CPUConcurrencyController::Config>
   makeCPUConcurrencyControllerConfigInternal();
   CPUConcurrencyController cpuConcurrencyController_;
+
+  IsOverloadedFunc isOverloaded_;
 
  public:
   AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {
@@ -1245,9 +1250,11 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
   [[deprecated("Use setPreprocess instead")]] void setIsOverloaded(
-      IsOverloadedFunc isOverloaded) override final {
+      IsOverloadedFunc isOverloaded) {
     THRIFT_SERVER_EVENT(call.setIsOverloaded).log(*this);
-    BaseThriftServer::setIsOverloaded(std::move(isOverloaded));
+    isOverloaded_ = std::move(isOverloaded);
+    runtimeServerActions_.setIsOverloaded = true;
+    LOG(INFO) << "thrift server: isOverloaded() set.";
   }
 
   void setPreprocess(PreprocessFunc preprocess) override final {

@@ -73,9 +73,6 @@ typedef std::function<void(
     const apache::thrift::transport::THeader*, const folly::SocketAddress*)>
     GetHeaderHandlerFunc;
 
-using IsOverloadedFunc = folly::Function<bool(
-    const transport::THeader::StringToStringMap*, const std::string*) const>;
-
 using PreprocessFunc =
     folly::Function<PreprocessResult(const server::PreprocessParams&) const>;
 
@@ -300,7 +297,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
 
-  IsOverloadedFunc isOverloaded_;
   PreprocessFunc preprocess_;
   std::function<int64_t(const std::string&)> getLoad_;
 
@@ -1105,16 +1101,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return listen backlog.
    */
   int getListenBacklog() const { return thriftConfig_.getListenBacklog(); }
-
-  // Do not try to access ThreadManager in this function as
-  // ThreadManagers are being deprecated from thrift server
-  // e.g. don't call getThreadManager() inside this
-  [[deprecated("Use setPreprocess instead")]] virtual void setIsOverloaded(
-      IsOverloadedFunc isOverloaded) {
-    isOverloaded_ = std::move(isOverloaded);
-    runtimeServerActions_.setIsOverloaded = true;
-    LOG(INFO) << "thrift server: isOverloaded() set.";
-  }
 
   // Do not try to access ThreadManager in this function as
   // ThreadManagers are being deprecated from thrift server

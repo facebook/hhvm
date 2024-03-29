@@ -75,16 +75,11 @@ void RequestWorkerThread::setup() {
 }
 
 void RequestWorkerThread::forceStop() {
-  forceStopped_.store(true);
   evb_->terminateLoopSoon();
 }
 
 void RequestWorkerThread::cleanup() {
   LOG(INFO) << "Worker " << unsigned(getWorkerId()) << " in cleanup";
-  if (!forceStopped_.load()) {
-    LOG(INFO) << "Looping to finish pending work";
-    evb_->loop();
-  }
   callback_.workerFinished(this);
 }
 

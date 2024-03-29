@@ -125,8 +125,6 @@ class RequestWorkerThread {
   folly::EventBase* evb_{nullptr};
 
   static thread_local RequestWorkerThread* currentRequestWorker_;
-
-  std::atomic_bool forceStopped_{false};
 };
 
 } // namespace proxygen

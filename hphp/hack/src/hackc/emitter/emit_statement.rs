@@ -285,7 +285,7 @@ fn emit_call<'a, 'd>(
     {
         let ft = hhbc::FunctionName::from_ast_name(&sid.1);
         let fname = ft.as_str();
-        if fname.eq_ignore_ascii_case("unset") {
+        if fname == "unset" {
             Ok(InstrSeq::gather(
                 args.iter()
                     .map(|ex| {

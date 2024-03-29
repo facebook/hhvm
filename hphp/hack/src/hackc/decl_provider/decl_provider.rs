@@ -156,13 +156,7 @@ pub fn find_type_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<TypeDecl<'a
 pub fn find_func_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a FunDecl<'a>> {
     decls
         .funs()
-        .find_map(|(name, decl)| {
-            if needle.eq_ignore_ascii_case(name) {
-                Some(decl)
-            } else {
-                None
-            }
-        })
+        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
         .ok_or(Error::NotFound)
 }
 

@@ -233,7 +233,7 @@ const _86CINIT: &str = "86cinit";
 const _86PINIT: &str = "86pinit";
 const _86SINIT: &str = "86sinit";
 
-#[derive(Copy, Clone, Eq, Hash, Serialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct FunctionName(StringId);
 
@@ -243,27 +243,6 @@ impl_intern_add_suffix!(FunctionName);
 impl FunctionName {
     pub fn from_ast_name(s: &str) -> Self {
         Self::intern(hhbc_string_utils::strip_global_ns(s))
-    }
-}
-
-impl PartialEq for FunctionName {
-    fn eq(&self, other: &Self) -> bool {
-        self.as_str().eq_ignore_ascii_case(other.as_str())
-    }
-}
-
-impl Ord for FunctionName {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        if self.eq(other) {
-            return std::cmp::Ordering::Equal;
-        }
-        self.0.cmp(&other.0)
-    }
-}
-
-impl PartialOrd for FunctionName {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
     }
 }
 
@@ -307,7 +286,7 @@ mod tests {
     fn test_eq_function_name() {
         let id1 = FunctionName::from_ast_name("foo2$memoize_impl");
         let id2 = FunctionName::from_ast_name("Foo2$memoize_impl");
-        assert_eq!(id1, id2);
+        assert_ne!(id1, id2);
     }
 
     #[test]
@@ -318,7 +297,7 @@ mod tests {
         ids.insert(FunctionName::from_ast_name("foo2"));
         ids.insert(FunctionName::from_ast_name("Bar"));
         ids.insert(FunctionName::from_ast_name("bar"));
-        let expected = ["Bar", "foo", "foo2"];
+        let expected = ["Bar", "Foo", "bar", "foo", "foo2"];
         let ids: Vec<&str> = ids.into_iter().map(|id| id.as_str()).collect();
         assert_eq!(expected, ids.as_slice());
     }

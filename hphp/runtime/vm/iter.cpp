@@ -251,20 +251,11 @@ TypedValue IterImpl::secondVal() const {
 //////////////////////////////////////////////////////////////////////
 
 bool Iter::init(TypedValue* base) {
-  // Get easy cases out of the way. Class methods promote to arrays and both
-  // of them are just an IterImpl contructor. end() never throws for arrays.
-  if (isClsMethType(base->m_type)) {
-    new (&m_iter) IterImpl(tvAsVariant(base).toArray().get());
-    return !m_iter.end();
-  }
-  if (isArrayLikeType(base->m_type)) {
-    new (&m_iter) IterImpl(base->m_data.parr);
-    return !m_iter.end();
-  }
+  assertx(!isArrayLikeType(type(base)));
 
   // Get more easy cases out of the way: non-objects are not iterable.
   // For these cases, we warn and branch to done.
-  if (!isObjectType(base->m_type)) {
+  if (!isObjectType(type(base))) {
     SystemLib::throwInvalidForeachArgumentExceptionObject();
   }
 

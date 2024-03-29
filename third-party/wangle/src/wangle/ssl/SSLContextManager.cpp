@@ -34,11 +34,6 @@
 #include <folly/io/async/EventBase.h>
 #include <string>
 
-#define OPENSSL_MISSING_FEATURE(name)                                 \
-  do {                                                                \
-    throw std::runtime_error("missing " #name " support in openssl"); \
-  } while (0)
-
 using folly::SSLContext;
 using std::shared_ptr;
 using std::string;
@@ -200,7 +195,6 @@ void configureTicketResumption(
     const TLSTicketKeySeeds* ticketSeeds,
     const SSLContextConfig& ctxConfig,
     SSLStats* stats) {
-#ifdef SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB
   if (ticketSeeds && ticketSeeds->isNotEmpty() &&
       ctxConfig.sessionTicketEnabled) {
     auto handler = TicketSeedHandler::fromSeeds(ticketSeeds);
@@ -209,11 +203,6 @@ void configureTicketResumption(
   } else {
     sslCtx->setOptions(SSL_OP_NO_TICKET);
   }
-#else
-  if (ticketSeeds && ctxConfig.sessionTicketEnabled) {
-    OPENSSL_MISSING_FEATURE(TLSTicket);
-  }
-#endif
 }
 
 TicketSeedHandler* getTicketSeedHandler(

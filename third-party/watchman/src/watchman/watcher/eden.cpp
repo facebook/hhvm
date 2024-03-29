@@ -1446,7 +1446,7 @@ std::shared_ptr<QueryableView> detectEden(
 #else
   if (!is_edenfs_fs_type(fstype) && fstype != "fuse" &&
       fstype != "osxfuse_eden" && fstype != "macfuse_eden" &&
-      fstype != "edenfs_eden") {
+      fstype != "edenfs_eden" && fstype != "fuse.edenfs") {
     // Not an active EdenFS mount.  Perhaps it isn't mounted yet?
     auto readme = fmt::format("{}/README_EDEN.txt", root_path);
     try {

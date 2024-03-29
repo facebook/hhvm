@@ -21,6 +21,7 @@ rust::String hdf_name(const Hdf& hdf);
 // iterate from the document (config) root.
 rust::Vec<rust::String> hdf_child_names(const Hdf& hdf);
 bool hdf_has_child_nodes(const Hdf& hdf);
+bool hdf_is_list(const Hdf& hdf);
 
 rust::Vec<rust::String> hdf_get_string_vec(const Hdf& hdf);
 

@@ -234,6 +234,10 @@ impl Value {
         ffi::hdf_has_child_nodes(&self.inner)
     }
 
+    pub fn is_list(&self) -> bool {
+        ffi::hdf_is_list(&self.inner)
+    }
+
     /// Return the string values of child nodes.
     /// Fails on internal Hdf parsing errors or Utf8 validation checks.
     pub fn values(self) -> Result<Vec<String>> {
@@ -563,7 +567,7 @@ a.b.c="d;e"
     }
 
     #[test]
-    fn test_has_children() -> Result<()> {
+    fn test_has_children_and_is_list() -> Result<()> {
         let mut hdf = Value::default();
         hdf.set_hdf(
             r#"
@@ -576,17 +580,21 @@ a.b.c="d;e"
             }
             bar.* = two
             bar.* = three
-            bar.4 = four
+            bar.* = four
         }
         "#,
         )?;
 
         assert!(hdf.has_child_nodes());
+        assert!(!hdf.is_list());
         assert!(hdf.get("foo")?.unwrap().has_child_nodes());
+        assert!(!hdf.get("foo")?.unwrap().is_list());
         assert!(!hdf.get("foo.2")?.unwrap().has_child_nodes());
+        assert!(!hdf.get("foo.2")?.unwrap().is_list());
         assert!(hdf.get("bar")?.unwrap().has_child_nodes());
+        assert!(hdf.get("bar")?.unwrap().is_list());
         assert!(!hdf.get("bar.4")?.unwrap().has_child_nodes());
-
+        assert!(!hdf.get("bar.4")?.unwrap().is_list());
         Ok(())
     }
 }

@@ -38,6 +38,15 @@ bool hdf_has_child_nodes(const Hdf& hdf) {
   return hdf.firstChild(false).exists();
 }
 
+bool hdf_is_list(const Hdf& hdf) {
+  for (auto child = hdf.firstChild(false); child.exists(); child = child.next(false)) {
+    if (!child.isWildcardName()) {
+      return false;
+    }
+  }
+  return hdf.firstChild(false).exists();
+}
+
 rust::Vec<rust::String> hdf_get_string_vec(const Hdf& hdf) {
   auto values = std::vector<std::string>{};
   hdf.configGet(values);

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# JSON_COMPACT IS DEPRECATED AND WILL BE REMOVED AFTER THRIFT-PYTHON UNIFICATION
+# DERPECATED_VERBOSE_JSON IS DEPRECATED AND WILL BE REMOVED AFTER THRIFT-PYTHON UNIFICATION
 cdef extern from "<thrift/lib/cpp/protocol/TProtocolTypes.h>" namespace "apache::thrift::protocol":
     cpdef enum Protocol "apache::thrift::protocol::PROTOCOL_TYPES":
         BINARY "apache::thrift::protocol::T_BINARY_PROTOCOL"

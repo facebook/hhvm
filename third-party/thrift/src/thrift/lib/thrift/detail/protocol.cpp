@@ -23,6 +23,8 @@
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_detail_types.h>
 
+#include <xxhash.h>
+
 namespace apache::thrift::protocol::detail {
 
 template <class Base>
@@ -37,7 +39,16 @@ const char* ValueWrapper<Base>::__fbthrift_thrift_uri() {
   return ret->c_str();
 }
 
-std::optional<std::size_t> hash_value(const Value& s) {
+static std::size_t hashVector(const std::vector<std::size_t>& a) {
+  return XXH3_64bits(a.data(), a.size() * sizeof(a[0]));
+}
+
+static std::size_t sortAndHash(std::vector<std::size_t>& a) {
+  std::sort(a.begin(), a.end());
+  return hashVector(a);
+}
+
+std::size_t hash_value(const Value& s) {
   auto value_type = s.getType();
   switch (value_type) {
     case Value::Type::boolValue:
@@ -59,18 +70,54 @@ std::optional<std::size_t> hash_value(const Value& s) {
     case Value::Type::binaryValue:
       return folly::hash::hash_combine(
           value_type, folly::IOBufHash()(s.as_binary()));
-    case Value::Type::listValue:
-      [[fallthrough]];
-    case Value::Type::setValue:
-      [[fallthrough]];
-    case Value::Type::mapValue:
-      [[fallthrough]];
-    case Value::Type::objectValue:
-      [[fallthrough]];
-    case Value::Type::__EMPTY__:
-      return std::nullopt;
+    case Value::Type::listValue: {
+      const auto& list = *s.listValue_ref();
+      std::vector<std::size_t> hashes;
+      hashes.reserve(list.size() + 1);
+      hashes.push_back(static_cast<std::size_t>(value_type));
+      for (auto&& v : list) {
+        hashes.push_back(hash_value(v));
+      }
+      return hashVector(hashes);
+    }
+    case Value::Type::setValue: {
+      const auto& set = *s.setValue_ref();
+      std::vector<std::size_t> hashes;
+      hashes.reserve(set.size() + 1);
+      hashes.push_back(static_cast<std::size_t>(value_type));
+      for (auto&& v : set) {
+        hashes.push_back(hash_value(v));
+      }
+      return sortAndHash(hashes);
+    }
+    case Value::Type::mapValue: {
+      const auto& map = *s.mapValue_ref();
+      std::vector<std::size_t> hashes;
+      hashes.reserve(map.size() * 2 + 1);
+      hashes.push_back(static_cast<std::size_t>(value_type));
+      for (auto&& [k, v] : map) {
+        hashes.push_back(hash_value(k));
+        hashes.push_back(hash_value(v));
+      }
+      return sortAndHash(hashes);
+    }
+    case Value::Type::objectValue: {
+      const Object& object = *s.objectValue_ref();
+      std::vector<std::size_t> hashes;
+      hashes.reserve(object.size() * 2 + 2);
+      hashes.push_back(static_cast<std::size_t>(value_type));
+      hashes.push_back(std::hash<std::string>{}(*object.type()));
+      for (auto&& [k, v] : object) {
+        hashes.push_back(k);
+        hashes.push_back(hash_value(v));
+      }
+      return sortAndHash(hashes);
+    }
+    case Value::Type::__EMPTY__: {
+      return 0;
+    }
   }
-  return std::nullopt;
+  return 0;
 }
 
 template const char* ObjectWrapper<detail::Object>::__fbthrift_thrift_uri();

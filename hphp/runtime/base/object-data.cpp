@@ -619,7 +619,7 @@ size_t getPropertyIfAccessible(ObjectData* obj,
 
 }
 
-Array ObjectData::o_toIterArray(const String& context) {
+Array ObjectData::o_toIterArray(const Class* ctx) {
   if (!m_cls->numDeclProperties()) {
     if (getAttribute(HasDynPropArr)) {
       auto const props = dynPropArray();
@@ -642,10 +642,6 @@ Array ObjectData::o_toIterArray(const String& context) {
   }
   Array retArray { Array::attach(VanillaDict::MakeReserveDict(size)) };
 
-  Class* ctx = nullptr;
-  if (!context.empty()) {
-    ctx = Class::lookup(context.get());
-  }
   auto const propCtx =
     ctx ? MemberLookupContext(ctx, ctx->moduleName()) : nullctx;
 

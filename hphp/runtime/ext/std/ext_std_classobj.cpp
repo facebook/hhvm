@@ -39,12 +39,11 @@ static const Class* clsFromCallerSkipBuiltins() {
   );
 }
 
-static StrNR ctxClassName() {
-  auto const ctx = fromCaller(
+static const Class* ctxClass() {
+  return fromCaller(
     [] (const BTFrame& frm) { return frm.func()->cls(); },
     [] (const BTFrame& frm) { return !frm.func()->isSkipFrame(); }
   );
-  return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
 
 static const Class* get_cls(const Variant& class_or_object) {
@@ -369,7 +368,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
 }
 
 Array HHVM_FUNCTION(get_object_vars, const Object& object) {
-  return object->o_toIterArray(ctxClassName()).toDict();
+  return object->o_toIterArray(ctxClass()).toDict();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

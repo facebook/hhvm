@@ -268,8 +268,7 @@ bool Iter::init(TypedValue* base) {
       new (&m_iter) IterImpl(obj.detach(), IterImpl::noInc);
     } else {
       Class* ctx = arGetContextClass(vmfp());
-      auto ctxStr = ctx ? ctx->nameStr() : StrNR();
-      Array iterArray(obj->o_toIterArray(ctxStr));
+      Array iterArray(obj->o_toIterArray(ctx));
       ArrayData* ad = iterArray.get();
       new (&m_iter) IterImpl(ad);
     }
@@ -664,8 +663,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
-        auto ctxStr = ctx ? ctx->nameStr() : StrNR();
-        Array iterArray(itObj->o_toIterArray(ctxStr));
+        Array iterArray(itObj->o_toIterArray(ctx));
         ArrayData* ad = iterArray.get();
         new (iter) IterImpl(ad);
         object_base = false;

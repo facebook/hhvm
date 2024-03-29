@@ -345,7 +345,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
 
-  Array o_toIterArray(const String& context);
+  Array o_toIterArray(const Class* ctx);
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);

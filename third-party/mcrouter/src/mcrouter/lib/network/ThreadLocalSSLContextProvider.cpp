@@ -282,11 +282,9 @@ std::shared_ptr<SSLContext> createServerSSLContext(
     sslContext->setVerificationOption(
         folly::SSLContext::VerifyClientCertificate::IF_PRESENTED);
   }
-#if FOLLY_OPENSSL_HAS_ALPN
   // servers can always negotiate this - it is up to the client to do so.
   sslContext->setAdvertisedNextProtocols(
       {kMcSecurityTlsToPlaintextProto.str()});
-#endif
   return sslContext;
 }
 
@@ -318,7 +316,6 @@ std::shared_ptr<SSLContext> createClientSSLContext(
   // TODO: When enabling TLS 1.3, set TLS 1.3 ciphersuites from SSLCommonOptions
   auto ciphers = folly::ssl::SSLCommonOptions::ciphers();
   std::vector<std::string> cVec(ciphers.begin(), ciphers.end());
-#if FOLLY_OPENSSL_HAS_ALPN
   if (mech == SecurityMech::TLS_TO_PLAINTEXT) {
     // Prepend ECDHE-RSA-NULL-SHA to make it obvious from the ClientHello
     // that we may not be using encryption. For this to work, we must set
@@ -333,7 +330,6 @@ std::shared_ptr<SSLContext> createClientSSLContext(
     // Thrift's Rocket transport requires an ALPN
     context->setAdvertisedNextProtocols({"rs"});
   }
-#endif
   // note we use setCipherSuites instead of setClientOptions since client
   // options will enable false start by default.
   folly::ssl::setCipherSuites(*context, cVec);

@@ -947,11 +947,7 @@ void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
 
   // NPN (Next Protocol Negotiation)
   if (!ctxConfig.nextProtocols.empty()) {
-#if FOLLY_OPENSSL_HAS_ALPN
     sslCtx->setRandomizedAdvertisedNextProtocols(ctxConfig.nextProtocols);
-#else
-    OPENSSL_MISSING_FEATURE(NPN);
-#endif
   }
 
   // SNI

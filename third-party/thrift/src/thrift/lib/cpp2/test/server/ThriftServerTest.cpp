@@ -3120,7 +3120,7 @@ class ServerResponseEnqueuedInterface : public TestInterface {
     callback->getEventBase()->runInEventBaseThread(
         [&]() mutable { responseEnqueuedBaton_.post(); });
 
-    callback->result(folly::make_unique<std::string>("done"));
+    callback->result(std::make_unique<std::string>("done"));
   }
 
   folly::Baton<>& responseEnqueuedBaton_;
@@ -3140,7 +3140,7 @@ class WriteBatchingTest : public testing::Test {
       size_t tearDownDummyRequestCount) {
     tearDownDummyRequestCount_ = tearDownDummyRequestCount;
 
-    runner_ = folly::make_unique<ScopedServerInterfaceThread>(
+    runner_ = std::make_unique<ScopedServerInterfaceThread>(
         std::make_shared<ServerResponseEnqueuedInterface>(baton_));
     runner_->getThriftServer().setWriteBatchingInterval(batchingInterval);
     runner_->getThriftServer().setWriteBatchingSize(batchingSize);

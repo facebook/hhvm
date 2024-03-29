@@ -75,7 +75,10 @@ CpuStatsWorker::CpuStatsWorker(
     : timeInterval_(timeInterval),
       scheduler_(scheduler),
       startMs_(std::chrono::steady_clock::time_point::min()),
-      proxyThreads_(proxyThreads) {}
+      proxyThreads_(proxyThreads) {
+  static std::atomic<int> uniqueId(0);
+  name_ = folly::sformat("{}{}", kCpuStatsWorkerName_, uniqueId++);
+}
 
 void CpuStatsWorker::schedule(bool enable) {
   std::lock_guard<std::mutex> lock(mx_);
@@ -88,13 +91,13 @@ void CpuStatsWorker::schedule(bool enable) {
                 ? timeInterval_
                 : std::chrono::seconds(
                       kMinSchedulingInterval), /* monitoring interval in ms */
-            kCpuStatsWorkerName_,
+            name_,
             std::chrono::milliseconds{
                 kWorkerStartDelayMs_} /* start delay in ms */);
       }
     } else {
       if (scheduled_.exchange(false)) {
-        scheduler->cancelFunctionAndWait(kCpuStatsWorkerName_);
+        scheduler->cancelFunctionAndWait(name_);
         avgCpu_ = 0;
         firstRun_ = true;
       }

@@ -80,9 +80,10 @@ class CpuStatsWorker {
   std::weak_ptr<folly::FunctionScheduler> scheduler_;
   std::chrono::steady_clock::time_point startMs_;
   std::chrono::nanoseconds usedCpuTime_{0};
+  std::string name_;
   const folly::IOThreadPoolExecutorBase& proxyThreads_;
   static constexpr int kWorkerStartDelayMs_ = 1000;
-  static constexpr std::string_view kCpuStatsWorkerName_ = "cpu-stats_worker";
+  static constexpr std::string_view kCpuStatsWorkerName_ = "mcrcpu_stat";
   static constexpr int kMinSchedulingInterval = 10;
 
   void calculateCpuStats();

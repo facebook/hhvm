@@ -169,7 +169,7 @@ class SharedServerTests
   std::unique_ptr<TestServerFactory> serverFactory{nullptr};
   std::shared_ptr<TestHeaderClientChannelFactory> channelFactory{nullptr};
 
-  std::shared_ptr<BaseThriftServer> server{nullptr};
+  std::shared_ptr<ThriftServer> server{nullptr};
   std::unique_ptr<ScopedServerThread> sst{nullptr};
 
   folly::AsyncTransport::UniquePtr socket{nullptr};

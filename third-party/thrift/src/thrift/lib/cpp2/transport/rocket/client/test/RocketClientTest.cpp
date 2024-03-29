@@ -42,8 +42,8 @@
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/AsyncProcessor_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Service_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>

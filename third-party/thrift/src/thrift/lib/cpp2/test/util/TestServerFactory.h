@@ -16,19 +16,19 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 
 struct TestServerFactory {
  public:
   TestServerFactory() {}
   virtual ~TestServerFactory() {}
 
-  virtual std::shared_ptr<apache::thrift::BaseThriftServer> create() = 0;
+  virtual std::shared_ptr<apache::thrift::ThriftServer> create() = 0;
 
   virtual TestServerFactory& useSimpleThreadManager(bool use) = 0;
 
   virtual TestServerFactory& setServerSetupFunction(
-      std::function<void(apache::thrift::BaseThriftServer&)> setupFunction) = 0;
+      std::function<void(apache::thrift::ThriftServer&)> setupFunction) = 0;
 
   TestServerFactory& setServerEventHandler(
       std::shared_ptr<apache::thrift::server::TServerEventHandler>

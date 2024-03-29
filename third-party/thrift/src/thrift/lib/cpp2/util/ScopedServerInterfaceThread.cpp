@@ -19,7 +19,6 @@
 #include <folly/SocketAddress.h>
 
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 using namespace std;
@@ -72,12 +71,12 @@ ScopedServerInterfaceThread::ScopedServerInterfaceThread(
           std::move(apf), "::1", 0, std::move(configCb)) {}
 
 ScopedServerInterfaceThread::ScopedServerInterfaceThread(
-    shared_ptr<BaseThriftServer> bts) {
+    shared_ptr<ThriftServer> bts) {
   ts_ = bts;
   sst_.start(ts_);
 }
 
-BaseThriftServer& ScopedServerInterfaceThread::getThriftServer() const {
+ThriftServer& ScopedServerInterfaceThread::getThriftServer() const {
   return *ts_;
 }
 

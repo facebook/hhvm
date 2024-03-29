@@ -23,7 +23,6 @@
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>

@@ -272,7 +272,7 @@ TEST(RoundRobinRequestPileTest, requestCount) {
   ScopedServerInterfaceThread runner(
       std::make_shared<BlockingCallTestService>());
 
-  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& thriftServer = runner.getThriftServer();
 
   // grab the resource pool
   // and set the number to 0

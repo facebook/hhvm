@@ -32,7 +32,6 @@ namespace apache {
 namespace thrift {
 
 class AsyncProcessorFactory;
-class BaseThriftServer;
 class ThriftServer;
 
 /**
@@ -65,9 +64,9 @@ class ScopedServerInterfaceThread {
   explicit ScopedServerInterfaceThread(
       std::shared_ptr<AsyncProcessorFactory> apf, ServerConfigCb configCb);
 
-  explicit ScopedServerInterfaceThread(std::shared_ptr<BaseThriftServer> ts);
+  explicit ScopedServerInterfaceThread(std::shared_ptr<ThriftServer> ts);
 
-  BaseThriftServer& getThriftServer() const;
+  ThriftServer& getThriftServer() const;
   const folly::SocketAddress& getAddress() const;
   uint16_t getPort() const;
 
@@ -113,7 +112,7 @@ class ScopedServerInterfaceThread {
           nullptr);
 
  private:
-  std::shared_ptr<BaseThriftServer> ts_;
+  std::shared_ptr<ThriftServer> ts_;
   util::ScopedServerThread sst_;
 
   RequestChannel::Ptr newChannel(

@@ -127,7 +127,7 @@ TEST(ThriftServer, H2ClientAddressTest) {
 
   ScopedServerInterfaceThread runner(
       std::make_shared<EchoClientAddrTestInterface>());
-  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& thriftServer = runner.getThriftServer();
   thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
 
   folly::EventBase base;
@@ -663,11 +663,10 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
   // Allocate server
   auto handler = std::make_shared<TestServiceHandler>();
   auto runner = std::make_shared<ScopedServerInterfaceThread>(handler);
-  auto& server = runner->getThriftServer();
-  auto& thriftServer = dynamic_cast<ThriftServer&>(server);
+  auto& thriftServer = runner->getThriftServer();
   const auto kChunkSize = 1ul << 20; // (1 MiB)
-  server.setEgressMemoryLimit(kChunkSize * 4); // (4 MiB)
-  server.setWriteBatchingInterval(std::chrono::milliseconds::zero());
+  thriftServer.setEgressMemoryLimit(kChunkSize * 4); // (4 MiB)
+  thriftServer.setWriteBatchingInterval(std::chrono::milliseconds::zero());
 
   // Allocate client
   folly::EventBase evb;
@@ -711,7 +710,7 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
   // Reach the egress buffer limit. Notice that the server will report a bit
   // less memory than expected because a small portion of the response data will
   // be buffered in the kernel.
-  for (size_t b = 0; b + kChunkSize < server.getEgressMemoryLimit();
+  for (size_t b = 0; b + kChunkSize < thriftServer.getEgressMemoryLimit();
        b += kChunkSize) {
     std::string data(kChunkSize, 'a');
     fv.emplace_back(client.semifuture_echoRequest(std::move(data)));
@@ -2359,7 +2358,7 @@ TEST_P(HeaderOrRocket, FailureInjection) {
   folly::EventBase base;
   auto client = makeClient(sst, &base);
 
-  auto& server = dynamic_cast<ThriftServer&>(sst.getThriftServer());
+  auto& server = sst.getThriftServer();
   SCOPE_EXIT { server.setFailureInjection(ThriftServer::FailureInjection()); };
 
   RpcOptions rpcOptions;
@@ -3014,7 +3013,7 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
       &eb, RocketClientChannel::newChannel);
   // Queue a task on the runner's ThreadManager to block it from
   // executing the Thrift request.
-  auto tServer = dynamic_cast<ThriftServer*>(&runner.getThriftServer());
+  auto tServer = &runner.getThriftServer();
   tServer->setQueueTimeout(kDefaultQueueTimeout);
   auto threadManager = tServer->getThreadManager();
 
@@ -3072,7 +3071,7 @@ TEST(ThriftServer, QueueTimeoutStressTest) {
   {
     ScopedServerInterfaceThread runner(
         std::make_shared<SendResponseInterface>());
-    auto tServer = dynamic_cast<ThriftServer*>(&runner.getThriftServer());
+    auto tServer = &runner.getThriftServer();
     tServer->setQueueTimeout(10ms);
     auto client = runner.newStickyClient<TestServiceAsyncClient>(
         nullptr /* executor */, [](auto socket) mutable {
@@ -3808,10 +3807,10 @@ TEST(ThriftServer, acceptConnection) {
   folly::NetworkSocket fds_header[2];
   CHECK(!folly::netops::socketpair(PF_UNIX, SOCK_STREAM, 0, fds_header));
 
-  dynamic_cast<ThriftServer&>(runner.getThriftServer())
-      .acceptConnection(fds_rocket[0], {}, {}, std::make_shared<Interface2>());
-  dynamic_cast<ThriftServer&>(runner.getThriftServer())
-      .acceptConnection(fds_header[0], {}, {}, std::make_shared<Interface2>());
+  runner.getThriftServer().acceptConnection(
+      fds_rocket[0], {}, {}, std::make_shared<Interface2>());
+  runner.getThriftServer().acceptConnection(
+      fds_header[0], {}, {}, std::make_shared<Interface2>());
 
   auto client2_rocket =
       std::make_unique<TestServiceAsyncClient>(PooledRequestChannel::newChannel(
@@ -3963,7 +3962,7 @@ TEST_P(HeaderOrRocket, AdaptiveConcurrencyConfig) {
   ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
   runner.getThriftServer().setMaxRequests(5000);
   EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 5000);
-  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& thriftServer = runner.getThriftServer();
   auto& controller = thriftServer.adaptiveConcurrencyController();
   EXPECT_FALSE(controller.enabled());
   auto client = makeClient(runner, &base);
@@ -4447,7 +4446,7 @@ TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
       });
 
   // Act
-  auto& thriftServer = dynamic_cast<ThriftServer&>(server->getThriftServer());
+  auto& thriftServer = server->getThriftServer();
   auto result = thriftServer.getResourcePoolsDbgInfo();
 
   // Assert

@@ -521,7 +521,7 @@ TEST_P(ParallelConcurrencyControllerTest, InternalPrioritization) {
   {
     ScopedServerInterfaceThread runner(handler, config);
 
-    auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+    auto& thriftServer = runner.getThriftServer();
 
     auto ka = thriftServer.getHandlerExecutorKeepAlive();
 
@@ -630,7 +630,7 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
 
   auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
-  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& thriftServer = runner.getThriftServer();
   auto& rpSet = thriftServer.resourcePoolSet();
   auto& rp = rpSet.resourcePool(ResourcePoolHandle::defaultAsync());
   ConcurrencyControllerInterface& cc = *rp.concurrencyController();

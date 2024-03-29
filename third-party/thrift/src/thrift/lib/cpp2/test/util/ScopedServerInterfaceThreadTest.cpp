@@ -33,7 +33,6 @@
 #include <folly/test/TestUtils.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/util/gen-cpp2/OtherService.h>
 #include <thrift/lib/cpp2/test/util/gen-cpp2/SimpleService.h>

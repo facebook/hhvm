@@ -342,7 +342,7 @@ fn emit_reified_extends_params<'a, 'd>(
         },
         _ => {}
     }
-    let tv = TypedValue::Vec(Default::default());
+    let tv = TypedValue::vec(Default::default());
     emit_adata::typed_value_into_instr(e, tv)
 }
 

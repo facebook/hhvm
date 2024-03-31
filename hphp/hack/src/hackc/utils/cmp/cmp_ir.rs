@@ -1450,7 +1450,7 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
             cmp_eq(*a, *b).qualified("lazy_class")?
         }
         (TypedValue::Vec(a), TypedValue::Vec(b)) => {
-            cmp_slice(a, b, cmp_typed_value).qualified("vec")?;
+            cmp_slice(a.iter(), b.iter(), cmp_typed_value).qualified("vec")?;
         }
         (TypedValue::Keyset(a), TypedValue::Keyset(b)) => {
             cmp_slice(a.iter(), b.iter(), cmp_typed_value).qualified("keyset")?;

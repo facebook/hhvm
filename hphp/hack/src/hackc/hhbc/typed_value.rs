@@ -3,9 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::ops::Deref;
+
 use ffi::Vector;
 use intern::string::BytesId;
 use serde::Serialize;
+use serde::Serializer;
+use triomphe::Arc;
+use triomphe::OffsetArc;
 
 use crate::ClassName;
 
@@ -47,30 +54,70 @@ impl From<f64> for FloatBits {
 }
 
 /// We introduce a type for Hack/PHP values, mimicking what happens at
-/// runtime. Currently this is used for constant folding. By defining
-/// a special type, we ensure independence from usage: for example, it
-/// can be used for optimization on ASTs, or on bytecode, or (in
-/// future) on a compiler intermediate language. HHVM takes a similar
-/// approach: see runtime/base/typed-value.h
+/// runtime. Currently this is used for constant folding.
+/// These convert to HHVM TypedValue - see runtime/base/typed-value.h
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 #[repr(C)]
 pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
+
     /// Hack/PHP integers are signed 64-bit
     Int(i64),
+
+    /// Hack bool
     Bool(bool),
+
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
     Float(FloatBits),
+
     /// Hack strings are plain bytes with no utf-8 guarantee
     String(BytesId),
+
     /// Hack source code including identifiers must be valid utf-8
     LazyClass(ClassName),
+
+    /// Hack null
     Null,
-    // Hack arrays: vectors, keysets, and dictionaries
-    Vec(Vector<TypedValue>),
-    Keyset(Vector<TypedValue>),
-    Dict(Vector<Entry<TypedValue, TypedValue>>),
+
+    /// Hack vec<T>
+    Vec(ArcVec<TypedValue>),
+
+    /// Hack keyset<T>
+    Keyset(ArcVec<TypedValue>),
+
+    /// Hack dict<T>
+    Dict(ArcVec<Entry<TypedValue, TypedValue>>),
+}
+
+/// A reference counted Vector<T>
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[repr(C)]
+pub struct ArcVec<T>(OffsetArc<Vector<T>>);
+
+impl<T: Hash> Hash for ArcVec<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state)
+    }
+}
+
+impl<T: Serialize> Serialize for ArcVec<T> {
+    fn serialize<S: Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
+        self.0.serialize(ser)
+    }
+}
+
+impl<T> Deref for ArcVec<T> {
+    type Target = Vector<T>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T: Clone> ArcVec<T> {
+    pub fn into_vec(self) -> Vec<T> {
+        Arc::unwrap_or_clone(Arc::from_raw_offset(self.0)).into()
+    }
 }
 
 // This is declared as a generic type to work around cbindgen's topo-sort,
@@ -95,15 +142,15 @@ impl TypedValue {
     }
 
     pub fn vec(x: Vec<TypedValue>) -> Self {
-        Self::Vec(x.into())
+        Self::Vec(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
     pub fn keyset(x: Vec<TypedValue>) -> Self {
-        Self::Keyset(x.into())
+        Self::Keyset(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
     pub fn dict(x: Vec<DictEntry>) -> Self {
-        Self::Dict(x.into())
+        Self::Dict(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
     pub fn float(f: f64) -> Self {
@@ -126,7 +173,7 @@ impl TypedValue {
 
     pub fn get_dict(&self) -> Option<&[DictEntry]> {
         match self {
-            TypedValue::Dict(dv) => Some(dv),
+            TypedValue::Dict(dv) => Some(&dv.0),
             _ => None,
         }
     }

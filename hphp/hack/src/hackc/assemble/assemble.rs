@@ -913,8 +913,8 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
 
             pub fn build(&self, content: Vec<hhbc::TypedValue>) -> hhbc::TypedValue {
                 match self {
-                    VecOrKeyset::Vec => hhbc::TypedValue::Vec(content.into()),
-                    VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content.into()),
+                    VecOrKeyset::Vec => hhbc::TypedValue::vec(content),
+                    VecOrKeyset::Keyset => hhbc::TypedValue::keyset(content),
                 }
             }
         }
@@ -954,7 +954,7 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
                 tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
-            Ok((src, hhbc::TypedValue::Dict(tv_vec.into())))
+            Ok((src, hhbc::TypedValue::dict(tv_vec)))
         }
 
         fn deserialize_tv<'a>(src: &'a [u8]) -> Result<(&'a [u8], hhbc::TypedValue)> {
@@ -1205,7 +1205,7 @@ fn assemble_user_attr(token_iter: &mut Lexer<'_>) -> Result<Attribute> {
 fn assemble_user_attr_args(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::TypedValue>> {
     let tok = token_iter.peek().copied();
     if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter)? {
-        Ok(vals.into())
+        Ok(vals.into_vec())
     } else {
         Err(tok
             .unwrap()

@@ -130,7 +130,7 @@ struct TranslationState {
 // hhbc::Vector helpers
 
 template <class T>
-folly::Range<const T*> range(Vector<T> const& s) {
+folly::Range<const T*> range(const Vector<T>& s) {
   return folly::range(s.data, s.data + s.len);
 }
 
@@ -257,8 +257,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
       case kind::Null:
         return make_tv<KindOfNull>();
       case kind::Vec: {
-        VecInit v(tv.Vec._0.len);
-        auto set = range(tv.Vec._0);
+        VecInit v(tv.Vec._0._0->len);
+        auto set = range(*tv.Vec._0._0);
         for (auto const& elt : set) {
           v.append(toTypedValue(elt));
         }
@@ -267,8 +267,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfVec>(tv);
       }
       case kind::Dict: {
-        DictInit d(tv.Dict._0.len);
-        auto set = range(tv.Dict._0);
+        DictInit d(tv.Dict._0._0->len);
+        auto set = range(*tv.Dict._0._0);
         for (auto const& elt : set) {
           switch (elt.key.tag) {
             case kind::Int:
@@ -297,8 +297,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfDict>(tv);
       }
       case kind::Keyset: {
-        KeysetInit k(tv.Keyset._0.len);
-        auto set = range(tv.Keyset._0);
+        KeysetInit k(tv.Keyset._0._0->len);
+        auto set = range(*tv.Keyset._0._0);
         for (auto const& elt : set) {
           k.add(toTypedValue(elt));
         }

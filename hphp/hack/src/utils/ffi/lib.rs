@@ -16,6 +16,8 @@
 
 pub mod ffi;
 
+pub use triomphe::OffsetArc;
+
 pub use crate::ffi::Maybe;
 pub use crate::ffi::Maybe::*;
 pub use crate::ffi::Vector;

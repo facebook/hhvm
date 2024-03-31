@@ -756,7 +756,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
                 Ok((k, v))
             }
             parse!(tokenizer, "[" <values:parse_arrow_tuple,*> "]");
-            TypedValue::Dict(
+            TypedValue::dict(
                 values
                     .into_iter()
                     .map(|(key, value)| DictEntry { key, value })
@@ -767,7 +767,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
         Token::Identifier(s, _) if s == "inf" => TypedValue::Float(FloatBits(f64::INFINITY)),
         Token::Identifier(s, _) if s == "keyset" => {
             parse!(tokenizer, "[" <values:parse_array_key,*> "]");
-            TypedValue::Keyset(values.into())
+            TypedValue::keyset(values)
         }
         Token::Identifier(s, _) if s == "lazy" => {
             parse!(tokenizer, "(" <id:parse_class_name> ")");
@@ -779,7 +779,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
         Token::Identifier(s, _) if s == "uninit" => TypedValue::Uninit,
         Token::Identifier(s, _) if s == "vec" => {
             parse!(tokenizer, "[" <values:parse_typed_value,*> "]");
-            TypedValue::Vec(values.into())
+            TypedValue::vec(values)
         }
         Token::Identifier(s, _) if s == "-" && tokenizer.next_is_identifier("inf")? => {
             TypedValue::Float(FloatBits(f64::NEG_INFINITY))

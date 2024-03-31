@@ -24,39 +24,30 @@ impl TypeStruct {
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
                 let classname_key = TypedValue::String(bytes_id!(b"classname"));
                 let name = TypedValue::String(cid.as_bytes_id());
-                TypedValue::Dict(
-                    vec![
-                        DictEntry {
-                            key: kind_key,
-                            value: kind,
-                        },
-                        DictEntry {
-                            key: classname_key,
-                            value: name,
-                        },
-                    ]
-                    .into(),
-                )
+                TypedValue::dict(vec![
+                    DictEntry {
+                        key: kind_key,
+                        value: kind,
+                    },
+                    DictEntry {
+                        key: classname_key,
+                        value: name,
+                    },
+                ])
             }
             TypeStruct::Null => {
                 let kind = TypedValue::Int(TypeStructureKind::T_null.repr as i64);
-                TypedValue::Dict(
-                    vec![DictEntry {
-                        key: kind_key,
-                        value: kind,
-                    }]
-                    .into(),
-                )
+                TypedValue::dict(vec![DictEntry {
+                    key: kind_key,
+                    value: kind,
+                }])
             }
             TypeStruct::Nonnull => {
                 let kind = TypedValue::Int(TypeStructureKind::T_nonnull.repr as i64);
-                TypedValue::Dict(
-                    vec![DictEntry {
-                        key: kind_key,
-                        value: kind,
-                    }]
-                    .into(),
-                )
+                TypedValue::dict(vec![DictEntry {
+                    key: kind_key,
+                    value: kind,
+                }])
             }
         }
     }

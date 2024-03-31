@@ -1781,6 +1781,7 @@ name = "ffi"
 version = "0.0.0"
 dependencies = [
  "serde",
+ "triomphe",
 ]
 
 [[package]]
@@ -2388,6 +2389,7 @@ dependencies = [
  "oxidized",
  "relative_path",
  "serde",
+ "triomphe",
  "write_bytes",
 ]
 
@@ -5185,6 +5187,10 @@ name = "triomphe"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "859eb650cfee7434994602c3a68b25d77ad9e68c8a6cd491616ef86661382eb3"
+dependencies = [
+ "serde",
+ "stable_deref_trait",
+]
 
 [[package]]
 name = "try_from"

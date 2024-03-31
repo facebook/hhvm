@@ -86,7 +86,7 @@ fn extract_awaitable_and_type_constant(user_type: StringId) -> (bool, Option<Str
     let user_string = user_type.as_str();
 
     let (is_awaitable, type_string) = {
-        if let Some(captures) = awaitable_pattern.captures(&user_string) {
+        if let Some(captures) = awaitable_pattern.captures(user_string) {
             if let Some(matched) = captures.get(1) {
                 (true, matched.as_str())
             } else {
@@ -151,7 +151,7 @@ fn compute_func_ty<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, ty: &ir::TypeInfo) 
     }
 }
 
-fn compute_func_params<'a, 'b>(
+fn compute_func_params<'b>(
     params: &[(ir::Param, Option<ir::DefaultValue>)],
     this_ty: textual::Ty,
 ) -> Vec<(textual::Param<'b>, LocalId)> {
@@ -292,9 +292,8 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
-                let new_vec = func.alloc_imm(Immediate::Array(Arc::new(ir::TypedValue::Vec(
-                    vec![].into(),
-                ))));
+                let new_vec =
+                    func.alloc_imm(Immediate::Array(Arc::new(ir::TypedValue::vec(vec![]))));
                 let lid = LocalId::Named(orig_func.params[variadic_idx].0.name);
                 let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);

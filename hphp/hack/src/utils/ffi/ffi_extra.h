@@ -9,3 +9,9 @@
 struct Bump;
 using BytesId = uint32_t;
 using StringId = BytesId;
+
+namespace HPHP::hackc {
+  // OffsetArc<T> is defined to have the layout of const T*
+  // https://docs.rs/triomphe/latest/triomphe/struct.OffsetArc.html
+  template<typename T> using OffsetArc = const T*;
+}

@@ -74,7 +74,7 @@ static ServerPtr runServer() {
       server->start();
       return server;
 
-    } catch (const FailedToListenException& e) {
+    } catch (const FailedToListenException&) {
       if (s_server_port == PORT_MAX) throw;
     }
   }

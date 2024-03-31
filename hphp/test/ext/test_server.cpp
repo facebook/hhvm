@@ -277,7 +277,7 @@ static int find_server_port(const std::string &serverType) {
       server->stop();
       server->waitForEnd();
       return port;
-    } catch (const FailedToListenException& e) {
+    } catch (const FailedToListenException&) {
       if (tries >= 100) throw;
     }
   }
@@ -714,7 +714,7 @@ bool TestServer::TestHttpClient() {
       server->setRequestHandlerFactory<EchoHandler>(0);
       server->start();
       break;
-    } catch (const FailedToListenException& e) {
+    } catch (const FailedToListenException&) {
       if (s_server_port == PORT_MAX) throw;
     }
   }

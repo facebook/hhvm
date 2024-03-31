@@ -126,7 +126,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
         v.setEvalScalar();
         RuntimeOption::ConstantFunctions[func] = *v.asTypedValue();
         continue;
-      } catch (const Exception& e) {
+      } catch (const Exception&) {
         // fall through and log
       }
     }

@@ -45,7 +45,7 @@ void test_json(const char* json) {
       ASSERT_FALSE(getSurpriseFlag(MemExceededFlag));
       buf.push_back(z);
     }
-  } catch (RequestMemoryExceededException& e) {
+  } catch (RequestMemoryExceededException&) {
     caught = true;
   }
   EXPECT_TRUE(caught);

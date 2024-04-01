@@ -105,6 +105,7 @@ THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
 THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
 
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
+THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 
 THRIFT_FLAG_DEFINE_bool(fizz_deprecate_draft_versions, true);
 
@@ -2194,6 +2195,10 @@ folly::observer::Observer<bool> ThriftServer::enableHybridKex() {
 
 folly::observer::Observer<bool> ThriftServer::enableAegis() {
   return THRIFT_FLAG_OBSERVE(server_fizz_enable_aegis);
+}
+
+folly::observer::Observer<bool> ThriftServer::preferPskKe() {
+  return THRIFT_FLAG_OBSERVE(server_fizz_prefer_psk_ke);
 }
 
 serverdbginfo::ResourcePoolsDbgInfo ThriftServer::getResourcePoolsDbgInfo()

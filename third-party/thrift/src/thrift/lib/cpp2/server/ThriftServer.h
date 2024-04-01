@@ -899,11 +899,13 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
          tlsRevocationObserver = enableTLSCertRevocation(),
          tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
          hybridKexObserver = enableHybridKex(),
-         aegisObserver = enableAegis()]() {
+         aegisObserver = enableAegis(),
+         pskModeObserver = preferPskKe()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
           (void)**hybridKexObserver;
           (void)**aegisObserver;
+          (void)**pskModeObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -1439,6 +1441,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   static folly::observer::Observer<bool> enableHybridKex();
 
   static folly::observer::Observer<bool> enableAegis();
+
+  static folly::observer::Observer<bool> preferPskKe();
 
   /**
    * For each request debug stub, a snapshot information can be constructed to

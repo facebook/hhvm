@@ -10,13 +10,13 @@ open Hh_prelude
 type t = {
   title: string;
   text: string;
-  name: string;
+  class_name: string;
 }
 
 let stub_method_action
     ~(is_static : bool)
-    (name : string)
-    (parent_name : string)
+    ~(class_name : string)
+    ~(parent_name : string)
     ((meth_name, meth) : string * Typing_defs.class_elt) : t =
   let text =
     Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth ^ "\n"
@@ -27,7 +27,7 @@ let stub_method_action
       (Utils.strip_ns parent_name)
       meth_name
   in
-  { title; text; name }
+  { title; text; class_name }
 
 (* Return a list of quickfixes for [cls] which add a method that
    overrides one in [parent_name]. *)
@@ -47,7 +47,7 @@ let override_method_quickfixes
       |> List.filter ~f:(fun (name, meth) ->
              (not (SSet.mem name existing_methods))
              && not (Typing_defs.get_ce_final meth))
-      |> List.map ~f:(stub_method_action ~is_static class_name parent_name)
+      |> List.map ~f:(stub_method_action ~is_static ~class_name ~parent_name)
     in
     actions_for_methods ~is_static:false (Decl_provider.Class.methods decl)
     @ actions_for_methods ~is_static:true (Decl_provider.Class.smethods decl)
@@ -89,7 +89,7 @@ let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
     Code_action_types.edit list =
   match
     Classish_positions.find
-      (Classish_positions_types.Classish_start_of_body quickfix.name)
+      (Classish_positions_types.Classish_start_of_body quickfix.class_name)
       classish_positions
   with
   | Some classish_start ->
@@ -97,7 +97,7 @@ let to_edits (classish_positions : Pos.t Classish_positions.t) (quickfix : t) :
   | None ->
     let () =
       HackEventLogger.invariant_violation_bug
-        ~data:quickfix.name
+        ~data:quickfix.class_name
         "Could not find class position for quickfix"
     in
     []

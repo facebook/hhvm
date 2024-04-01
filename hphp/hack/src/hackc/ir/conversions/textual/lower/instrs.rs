@@ -975,7 +975,10 @@ fn rewrite_constant_type_check(
 ) -> Option<Instr> {
     let typestruct = lookup_constant(&builder.func, typestruct)?;
     let typestruct = match typestruct {
-        Immediate::Array(tv) => TypeStruct::try_from_typed_value(tv)?,
+        Immediate::Vec(_) | Immediate::Dict(_) | Immediate::Keyset(_) => {
+            let tv = typestruct.clone().try_into().unwrap();
+            TypeStruct::try_from_typed_value(&tv)?
+        }
         _ => return None,
     };
     match typestruct {

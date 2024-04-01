@@ -292,8 +292,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
-                let new_vec =
-                    func.alloc_imm(Immediate::Array(Arc::new(ir::TypedValue::vec(vec![]))));
+                let new_vec = func.alloc_imm(ir::TypedValue::vec(vec![]).into());
                 let lid = LocalId::Named(orig_func.params[variadic_idx].0.name);
                 let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);
@@ -845,7 +844,6 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
         ir::FullInstrId::Imm(cid) => {
             let imm = state.func.imm(cid);
             let expr = match imm {
-                Immediate::Array(tv) => typed_value_expr(tv),
                 Immediate::Bool(false) => Expr::Const(Const::False),
                 Immediate::Bool(true) => Expr::Const(Const::True),
                 Immediate::Dir => todo!(),
@@ -866,6 +864,9 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                     hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
                 }
                 Immediate::Uninit => Expr::Const(Const::Null),
+                Immediate::Vec(_) | Immediate::Dict(_) | Immediate::Keyset(_) => {
+                    typed_value_expr(&imm.clone().try_into().unwrap())
+                }
             };
 
             let expr = state.fb.write_expr_stmt(expr)?;
@@ -1369,7 +1370,9 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                         hack::expr_builtin(Builtin::String, [s])
                     }
                     Immediate::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
-                    Immediate::Array(..) => textual_todo! { textual::Expr::null() },
+                    Immediate::Vec(_) | Immediate::Dict(_) | Immediate::Keyset(_) => {
+                        textual_todo! { textual::Expr::null() }
+                    }
                     Immediate::Dir => textual_todo! { textual::Expr::null() },
                     Immediate::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
                     Immediate::File => textual_todo! { textual::Expr::null() },

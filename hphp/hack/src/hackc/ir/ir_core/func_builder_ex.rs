@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use crate::instr::Hhbc;
 use crate::instr::Predicate;
 use crate::type_struct::TypeStruct;
@@ -215,8 +213,7 @@ impl FuncBuilderEx for FuncBuilder {
                 BaseType::VecOrDict => is_type_op(IsTypeOp::Dict, vid, loc),
 
                 BaseType::Class(cid) => {
-                    let constant =
-                        Immediate::Array(Arc::new(TypeStruct::Unresolved(cid).into_typed_value()));
+                    let constant = Immediate::from(TypeStruct::Unresolved(cid).into_typed_value());
                     let adata = self.emit_imm(constant);
                     Instr::Hhbc(Hhbc::IsTypeStructC(
                         [vid, adata],

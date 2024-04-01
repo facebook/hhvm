@@ -18,12 +18,12 @@ use ir::instr;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::IrToBc;
-use ir::newtype::ImmIdMap;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
 use ir::BlockId;
 use ir::BlockIdMap;
 use ir::FCallArgsFlags;
+use ir::Immediate;
 use ir::LocalId;
 use ir::StringId;
 use itertools::Itertools;
@@ -37,29 +37,30 @@ pub(crate) fn emit_func(
     labeler: &mut Labeler,
     adata_cache: &mut AdataState,
 ) -> (InstrSeq, Vec<StringId>) {
-    let adata_id_map = func
-        .imms
-        .iter()
-        .enumerate()
-        .filter_map(|(idx, constant)| {
-            let cid = ir::ImmId::from_usize(idx);
-            match constant {
-                ir::Immediate::Array(tv) => {
-                    let id = adata_cache.intern((**tv).clone());
-                    let kind = match **tv {
-                        ir::TypedValue::Dict(_) => AdataKind::Dict,
-                        ir::TypedValue::Keyset(_) => AdataKind::Keyset,
-                        ir::TypedValue::Vec(_) => AdataKind::Vec,
-                        _ => unreachable!(),
-                    };
-                    Some((cid, (id, kind)))
-                }
-                _ => None,
-            }
-        })
-        .collect();
+    let mut intern_adata = |imm: &Immediate| adata_cache.intern(imm.clone().try_into().unwrap());
+    let imm_to_opcode =
+        ImmToOpcode::new_from_vec(Vec::from_iter(func.imms.iter().map(|imm| match imm {
+            Immediate::Bool(false) => Opcode::False,
+            Immediate::Bool(true) => Opcode::True,
+            Immediate::Dir => Opcode::Dir,
+            Immediate::EnumClassLabel(v) => Opcode::EnumClassLabel(*v),
+            Immediate::Float(v) => Opcode::Double(*v),
+            Immediate::File => Opcode::File,
+            Immediate::FuncCred => Opcode::FuncCred,
+            Immediate::Int(v) => Opcode::Int(*v),
+            Immediate::LazyClass(cid) => Opcode::LazyClass(*cid),
+            Immediate::Method => Opcode::Method,
+            Immediate::Named(name) => Opcode::CnsE(*name),
+            Immediate::NewCol(k) => Opcode::NewCol(*k),
+            Immediate::Null => Opcode::Null,
+            Immediate::String(v) => Opcode::String(*v),
+            Immediate::Uninit => Opcode::NullUninit,
+            Immediate::Vec(_) => Opcode::Vec(intern_adata(imm)),
+            Immediate::Dict(_) => Opcode::Dict(intern_adata(imm)),
+            Immediate::Keyset(_) => Opcode::Keyset(intern_adata(imm)),
+        })));
 
-    let mut ctx = InstrEmitter::new(func, labeler, &adata_id_map);
+    let mut ctx = InstrEmitter::new(func, labeler, &imm_to_opcode);
 
     // Collect the Blocks, grouping them into TryCatch sections.
     let root = crate::ex_frame::collect_tc_sections(func);
@@ -80,17 +81,8 @@ pub(crate) fn emit_func(
     (InstrSeq::List(ctx.instrs), decl_vars)
 }
 
-/// Use to look up a ImmId and get the AdataId and AdataKind
-type AdataIdMap = ImmIdMap<(hhbc::AdataId, AdataKind)>;
-
-/// Used for adata_id_map - the kind of the underlying array. Storing this in
-/// AdataIdMap means we don't have to pass around a &Unit just to look up what
-/// kind of array it represents.
-enum AdataKind {
-    Dict,
-    Keyset,
-    Vec,
-}
+/// Use to look up a ImmId and get the opcode Opcode that will construct it
+type ImmToOpcode = ir::IdVec<ir::ImmId, Opcode>;
 
 /// Helper struct for converting ir::BlockId to hhbc::Label.
 pub(crate) struct Labeler {
@@ -184,7 +176,7 @@ pub(crate) struct InstrEmitter<'b> {
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
     locals: HashMap<LocalId, hhbc::Local>,
-    adata_id_map: &'b AdataIdMap,
+    imm_to_opcode: &'b ImmToOpcode,
 }
 
 fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bool> {
@@ -201,7 +193,7 @@ fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bo
 }
 
 impl<'b> InstrEmitter<'b> {
-    fn new(func: &'b ir::Func, labeler: &'b mut Labeler, adata_id_map: &'b AdataIdMap) -> Self {
+    fn new(func: &'b ir::Func, labeler: &'b mut Labeler, imm_to_opcode: &'b ImmToOpcode) -> Self {
         let locals = Self::prealloc_locals(func);
 
         Self {
@@ -211,7 +203,7 @@ impl<'b> InstrEmitter<'b> {
             labeler,
             loc_id: ir::LocId::NONE,
             locals,
-            adata_id_map,
+            imm_to_opcode,
         }
     }
 
@@ -619,37 +611,8 @@ impl<'b> InstrEmitter<'b> {
         }
     }
 
-    fn emit_constant(&mut self, cid: ir::ImmId) {
-        use ir::Immediate;
-
-        let i = if let Some((id, kind)) = self.adata_id_map.get(&cid) {
-            match kind {
-                AdataKind::Dict => Opcode::Dict(*id),
-                AdataKind::Keyset => Opcode::Keyset(*id),
-                AdataKind::Vec => Opcode::Vec(*id),
-            }
-        } else {
-            let lc = self.func.imm(cid);
-            match lc {
-                Immediate::Array(_) => unreachable!(),
-                Immediate::Bool(false) => Opcode::False,
-                Immediate::Bool(true) => Opcode::True,
-                Immediate::Dir => Opcode::Dir,
-                Immediate::EnumClassLabel(v) => Opcode::EnumClassLabel(*v),
-                Immediate::Float(v) => Opcode::Double(*v),
-                Immediate::File => Opcode::File,
-                Immediate::FuncCred => Opcode::FuncCred,
-                Immediate::Int(v) => Opcode::Int(*v),
-                Immediate::LazyClass(cid) => Opcode::LazyClass(*cid),
-                Immediate::Method => Opcode::Method,
-                Immediate::Named(name) => Opcode::CnsE(*name),
-                Immediate::NewCol(k) => Opcode::NewCol(*k),
-                Immediate::Null => Opcode::Null,
-                Immediate::String(v) => Opcode::String(*v),
-                Immediate::Uninit => Opcode::NullUninit,
-            }
-        };
-        self.push_opcode(i);
+    fn emit_constant(&mut self, imm: ir::ImmId) {
+        self.push_opcode(self.imm_to_opcode[imm].clone());
     }
 
     fn emit_loc(&mut self, loc_id: ir::LocId) {

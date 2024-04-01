@@ -5,7 +5,6 @@
 
 use std::cmp::Ordering;
 use std::fmt::Display;
-use std::sync::Arc;
 
 use hhbc::Instruct;
 use hhbc::Opcode;
@@ -929,20 +928,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             ))
         }
 
-        Opcode::Dict(name) => {
-            let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, ir::TypedValue::Dict(_)));
-            Action::Immediate(Immediate::Array(tv))
-        }
-        Opcode::Keyset(name) => {
-            let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, ir::TypedValue::Keyset(_)));
-            Action::Immediate(Immediate::Array(tv))
-        }
-        Opcode::Vec(name) => {
-            let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, ir::TypedValue::Vec(_)));
-            Action::Immediate(Immediate::Array(tv))
+        Opcode::Vec(id) | Opcode::Dict(id) | Opcode::Keyset(id) => {
+            Action::Immediate(ctx.adata[id.index()].clone().into())
         }
 
         Opcode::AKExists => simple!(Hhbc::AKExists),

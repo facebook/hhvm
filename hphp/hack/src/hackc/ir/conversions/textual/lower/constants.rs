@@ -156,7 +156,7 @@ fn sort_and_filter_constants(func: &Func, constants: ImmIdSet) -> Vec<ImmId> {
             | Immediate::Null
             | Immediate::Uninit => {}
 
-            Immediate::Array(_) => {
+            Immediate::Vec(_) | Immediate::Dict(_) | Immediate::Keyset(_) => {
                 arrays.push(cid);
             }
             Immediate::Named(..) => {
@@ -194,9 +194,11 @@ fn write_constant(builder: &mut FuncBuilder, cid: ImmId) -> (ValueId, bool) {
         | Immediate::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Immediate::Array(_) | Immediate::String(_) | Immediate::EnumClassLabel(_) => {
-            (builder.emit(Instr::tombstone()), true)
-        }
+        Immediate::Vec(_)
+        | Immediate::Dict(_)
+        | Immediate::Keyset(_)
+        | Immediate::String(_)
+        | Immediate::EnumClassLabel(_) => (builder.emit(Instr::tombstone()), true),
 
         Immediate::Named(name) => {
             let id = ir::GlobalId::new(name.as_string_id());

@@ -11,17 +11,17 @@ use ir::func::DefaultValue;
 use ir::instr::Terminator;
 use ir::Instr;
 use ir::LocalId;
+use ir::TypedValue;
 use log::trace;
 use newtype::IdVec;
 
 use crate::context::Context;
-use crate::convert::UnitState;
 
 /// Convert a hhbc::Function to an ir::Function
-pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, unit_state: &UnitState) {
+pub(crate) fn convert_function(unit: &mut ir::Unit, src: &Function, adata: &[TypedValue]) {
     trace!("--- convert_function {}", src.name.as_str());
 
-    let func = convert_body(&src.body, unit_state);
+    let func = convert_body(&src.body, adata);
     ir::verify::verify_func(&func, &Default::default());
 
     let function = ir::Function {
@@ -38,11 +38,11 @@ pub(crate) fn convert_method(
     unit: &mut ir::Unit,
     clsidx: usize,
     src: &Method,
-    unit_state: &UnitState,
+    adata: &[TypedValue],
 ) {
     trace!("--- convert_method {}", src.name.as_str());
 
-    let func = convert_body(&src.body, unit_state);
+    let func = convert_body(&src.body, adata);
     ir::verify::verify_func(&func, &Default::default());
 
     let method = ir::Method {
@@ -56,7 +56,7 @@ pub(crate) fn convert_method(
 }
 
 /// Convert a hhbc::Body to an ir::Func
-fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
+fn convert_body(body: &Body, adata: &[TypedValue]) -> ir::Func {
     let Body {
         ref attributes,
         attrs,
@@ -97,7 +97,7 @@ fn convert_body(body: &Body, unit_state: &UnitState) -> ir::Func {
         upper_bounds: upper_bounds.clone().into(),
     };
 
-    let mut ctx = Context::new(func, body_instrs, unit_state);
+    let mut ctx = Context::new(func, body_instrs, adata);
 
     for e in params.as_ref() {
         let ir_param = convert_param(&mut ctx, e);

@@ -200,45 +200,20 @@ fn cmp_imm(a_const: &Immediate, b_const: &Immediate) -> Result {
     )?;
 
     match (a_const, b_const) {
-        (Immediate::Array(a), Immediate::Array(b)) => cmp_typed_value(a, b).qualified("array")?,
-        (Immediate::Bool(a), Immediate::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (Immediate::EnumClassLabel(a), Immediate::EnumClassLabel(b)) => {
             cmp_eq(*a, *b).qualified("enum_class_label")?
         }
-        (Immediate::Float(a), Immediate::Float(b)) => cmp_eq(a, b).qualified("float")?,
-        (Immediate::Int(a), Immediate::Int(b)) => cmp_eq(a, b).qualified("int")?,
-        (Immediate::LazyClass(a), Immediate::LazyClass(b)) => {
-            cmp_eq(a, b).qualified("lazy_class")?
-        }
         (Immediate::Named(a), Immediate::Named(b)) => cmp_eq(a, b).qualified("named")?,
         (Immediate::NewCol(a), Immediate::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
-        (Immediate::String(a), Immediate::String(b)) => cmp_eq(*a, *b).qualified("string")?,
         (Immediate::Dir, Immediate::Dir)
         | (Immediate::File, Immediate::File)
         | (Immediate::FuncCred, Immediate::FuncCred)
-        | (Immediate::Method, Immediate::Method)
-        | (Immediate::Null, Immediate::Null)
-        | (Immediate::Uninit, Immediate::Uninit) => {}
-
-        // these should never happen
-        (
-            Immediate::Array(_)
-            | Immediate::Bool(_)
-            | Immediate::EnumClassLabel(_)
-            | Immediate::Float(_)
-            | Immediate::Int(_)
-            | Immediate::LazyClass(_)
-            | Immediate::Named(_)
-            | Immediate::NewCol(_)
-            | Immediate::String(_)
-            | Immediate::Dir
-            | Immediate::File
-            | Immediate::FuncCred
-            | Immediate::Method
-            | Immediate::Null
-            | Immediate::Uninit,
-            _,
-        ) => unreachable!(),
+        | (Immediate::Method, Immediate::Method) => {}
+        (a, b) => cmp_typed_value(
+            &a.clone().try_into().unwrap(),
+            &b.clone().try_into().unwrap(),
+        )
+        .qualified("typed_value")?,
     }
 
     Ok(())

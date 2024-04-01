@@ -38,11 +38,13 @@ pub mod unit;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+pub use ::newtype::IdVec;
 pub use ffi::Maybe;
 pub use hhbc::dict_get;
 pub use hhbc::intern;
 pub use hhbc::intern_bytes;
 pub use hhbc::string_id;
+pub use hhbc::ArcVec;
 pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::Attribute;
 pub use hhbc::BareThisOp;

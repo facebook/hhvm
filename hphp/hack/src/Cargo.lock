@@ -378,7 +378,6 @@ version = "0.0.0"
 dependencies = [
  "b2i_macros",
  "ffi",
- "hash",
  "hhbc",
  "ir",
  "log",

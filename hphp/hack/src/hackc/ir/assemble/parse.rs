@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use anyhow::Result;
 use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
@@ -287,31 +285,36 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
 }
 
 pub(crate) fn parse_imm(tokenizer: &mut Tokenizer<'_>) -> Result<Immediate> {
-    Ok(match tokenizer.expect_any_token()? {
-        t @ Token::QuotedString(..) => {
+    Ok(match tokenizer.peek_token()? {
+        Some(Token::QuotedString(..)) => {
+            let t = tokenizer.expect_any_token()?;
             let id = ir_core::intern_bytes(t.unescaped_string()?);
             Immediate::String(id)
         }
-        ref t @ Token::Identifier(ref s, _) => match s.as_str() {
-            "array" => {
-                parse!(tokenizer, "(" <tv:parse_typed_value> ")");
-                Immediate::Array(Arc::new(tv))
-            }
+        Some(Token::Identifier(s, _)) => match s.as_str() {
             "constant" => {
+                tokenizer.expect_any_token()?;
                 parse!(tokenizer, "(" <value:parse_user_id> ")");
                 Immediate::Named(ConstName::intern(std::str::from_utf8(&value.0)?))
             }
-            "dir" => Immediate::Dir,
-            "false" => Immediate::Bool(false),
-            "file" => Immediate::File,
-            "func_cred" => Immediate::FuncCred,
-            "inf" => Immediate::Float(FloatBits(f64::INFINITY)),
-            "lazy_class" => {
-                parse!(tokenizer, "(" <value:parse_class_name> ")");
-                Immediate::LazyClass(value)
+            "dir" => {
+                tokenizer.expect_any_token()?;
+                Immediate::Dir
             }
-            "method" => Immediate::Method,
+            "file" => {
+                tokenizer.expect_any_token()?;
+                Immediate::File
+            }
+            "func_cred" => {
+                tokenizer.expect_any_token()?;
+                Immediate::FuncCred
+            }
+            "method" => {
+                tokenizer.expect_any_token()?;
+                Immediate::Method
+            }
             "new_col" => {
+                tokenizer.expect_any_token()?;
                 parse!(tokenizer, "(" <kind:id> ")");
                 let kind = match kind.identifier() {
                     "Vector" => CollectionType::Vector,
@@ -325,26 +328,9 @@ pub(crate) fn parse_imm(tokenizer: &mut Tokenizer<'_>) -> Result<Immediate> {
                 };
                 Immediate::NewCol(kind)
             }
-            "null" => Immediate::Null,
-            "true" => Immediate::Bool(true),
-            "uninit" => Immediate::Uninit,
-            "nan" => Immediate::Float(FloatBits(f64::NAN)),
-            "-" => {
-                let next = tokenizer.expect_any_identifier()?;
-                match next.identifier() {
-                    "inf" => Immediate::Float(FloatBits(f64::NEG_INFINITY)),
-                    _ => return Err(next.bail(format!("Invalid constant following '-': '{next}'"))),
-                }
-            }
-            s if is_num_lead(s.as_bytes()[0]) => match convert_num(t)? {
-                Num::Int(i) => Immediate::Int(i),
-                Num::Float(f) => Immediate::Float(FloatBits(f)),
-            },
-            _ => {
-                return Err(t.bail(format!("Expected constant but got '{t}'")));
-            }
+            _ => parse_typed_value(tokenizer)?.into(),
         },
-        t => return Err(t.bail(format!("Unexpected token reading constant '{t}'"))),
+        _ => parse_typed_value(tokenizer)?.into(),
     })
 }
 

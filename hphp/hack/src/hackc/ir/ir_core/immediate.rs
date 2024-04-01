@@ -1,12 +1,12 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use std::sync::Arc;
-
 use crate::instr::HasOperands;
+use crate::ArcVec;
 use crate::BytesId;
 use crate::ClassName;
 use crate::CollectionType;
 use crate::ConstName;
+use crate::DictEntry;
 use crate::FloatBits;
 use crate::TypedValue;
 use crate::ValueId;
@@ -14,7 +14,6 @@ use crate::ValueId;
 /// An immediate constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Immediate {
-    Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
     EnumClassLabel(BytesId),
@@ -29,6 +28,9 @@ pub enum Immediate {
     Null,
     String(BytesId),
     Uninit,
+    Vec(ArcVec<TypedValue>),
+    Dict(ArcVec<DictEntry>),
+    Keyset(ArcVec<TypedValue>),
 }
 
 impl HasOperands for Immediate {
@@ -49,13 +51,42 @@ impl From<TypedValue> for Immediate {
             TypedValue::Bool(b) => Self::Bool(b),
             TypedValue::Float(f) => Self::Float(f),
             TypedValue::Int(i) => Self::Int(i),
-            TypedValue::LazyClass(id) => Self::String(id.as_bytes_id()),
+            TypedValue::LazyClass(id) => Self::LazyClass(id),
             TypedValue::Null => Self::Null,
             TypedValue::String(id) => Self::String(id),
             TypedValue::Uninit => Self::Uninit,
-            TypedValue::Dict(_) | TypedValue::Keyset(_) | TypedValue::Vec(_) => {
-                Self::Array(Arc::new(tv))
-            }
+            TypedValue::Vec(v) => Self::Vec(v),
+            TypedValue::Dict(v) => Self::Dict(v),
+            TypedValue::Keyset(v) => Self::Keyset(v),
+        }
+    }
+}
+
+impl TryFrom<Immediate> for TypedValue {
+    type Error = Immediate;
+
+    /// Convert Immediate->TypedValue for all the TypedValue variants,
+    /// otherwise return the original Immediate.
+    fn try_from(imm: Immediate) -> Result<Self, Self::Error> {
+        match imm {
+            Immediate::Bool(b) => Ok(Self::Bool(b)),
+            Immediate::Float(f) => Ok(Self::Float(f)),
+            Immediate::Int(i) => Ok(Self::Int(i)),
+            Immediate::LazyClass(id) => Ok(Self::LazyClass(id)),
+            Immediate::Null => Ok(Self::Null),
+            Immediate::String(id) => Ok(Self::String(id)),
+            Immediate::Uninit => Ok(Self::Uninit),
+            Immediate::Vec(v) => Ok(Self::Vec(v)),
+            Immediate::Dict(v) => Ok(Self::Dict(v)),
+            Immediate::Keyset(v) => Ok(Self::Keyset(v)),
+
+            imm @ (Immediate::Dir
+            | Immediate::EnumClassLabel(_)
+            | Immediate::File
+            | Immediate::FuncCred
+            | Immediate::Method
+            | Immediate::Named(_)
+            | Immediate::NewCol(_)) => Err(imm),
         }
     }
 }

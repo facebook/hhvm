@@ -349,27 +349,29 @@ pub(crate) struct FmtImmediate<'a>(pub(crate) &'a Immediate);
 
 impl Display for FmtImmediate<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtImmediate(imm) = self;
-        match imm {
-            Immediate::Array(tv) => write!(f, "array({})", FmtTypedValue(tv)),
-            Immediate::Bool(b) => write!(f, "{b}"),
+        match self.0 {
             Immediate::Dir => write!(f, "dir"),
             Immediate::EnumClassLabel(value) => {
                 write!(f, "enum_class_label({})", FmtQuotedStringId(*value))
             }
-            Immediate::Float(value) => FmtFloat(value.to_f64()).fmt(f),
             Immediate::File => write!(f, "file"),
             Immediate::FuncCred => write!(f, "func_cred"),
-            Immediate::Int(value) => write!(f, "{}", value),
-            Immediate::LazyClass(cid) => {
-                write!(f, "lazy_class({})", FmtIdentifierId(cid.as_bytes_id()))
-            }
             Immediate::Method => write!(f, "method"),
             Immediate::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
             Immediate::NewCol(k) => write!(f, "new_col({:?})", k),
-            Immediate::Null => write!(f, "null"),
-            Immediate::String(value) => FmtQuotedStringId(*value).fmt(f),
-            Immediate::Uninit => write!(f, "uninit"),
+            Immediate::Bool(_)
+            | Immediate::Float(_)
+            | Immediate::Int(_)
+            | Immediate::LazyClass(_)
+            | Immediate::Null
+            | Immediate::String(_)
+            | Immediate::Uninit
+            | Immediate::Vec(_)
+            | Immediate::Dict(_)
+            | Immediate::Keyset(_) => {
+                let tv: TypedValue = self.0.clone().try_into().unwrap();
+                FmtTypedValue(&tv).fmt(f)
+            }
         }
     }
 }

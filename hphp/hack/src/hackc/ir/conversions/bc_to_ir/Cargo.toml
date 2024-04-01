@@ -13,7 +13,6 @@ path = "lib.rs"
 [dependencies]
 b2i_macros = { version = "0.0.0", path = "b2i_macros" }
 ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 ir = { version = "0.0.0", path = "../.." }
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }

@@ -127,6 +127,10 @@ impl AdataId {
     pub fn id(&self) -> u32 {
         self.id
     }
+
+    pub fn index(&self) -> usize {
+        self.id as usize
+    }
 }
 
 impl std::fmt::Display for AdataId {

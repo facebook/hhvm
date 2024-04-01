@@ -20,8 +20,12 @@ from folly.iobuf import IOBuf
 from thrift.py3.common import Protocol as Protocol
 from thrift.py3.exceptions import GeneratedError
 from thrift.py3.types import Struct
+from thrift.python.exceptions import GeneratedError as PythonGeneratedError
+from thrift.python.types import StructOrUnion as PythonStruct
 
-sT = TypeVar("sT", bound=Union[Struct, GeneratedError])
+sT = TypeVar(
+    "sT", bound=Union[Struct, GeneratedError, PythonGeneratedError, PythonStruct]
+)
 
 class Transform(Enum):
     NONE: Transform = ...

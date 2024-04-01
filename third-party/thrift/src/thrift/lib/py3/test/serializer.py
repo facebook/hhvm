@@ -28,6 +28,7 @@ from apache.thrift.test.terse_write.terse_write.types import (
     MyStructWithCustomDefault,
     TerseStructWithCustomDefault,
 )
+from testing.thrift_types import easy as python_easy, hard as python_hard
 from testing.types import (
     Digits,
     easy,
@@ -51,34 +52,60 @@ from thrift.py3.serializer import (
     Transform,
 )
 from thrift.py3.types import Struct
+from thrift.python.types import Struct as PythonStruct
 
 
-class SerializerTests(unittest.TestCase):
-    def test_with_header_bytes(self) -> None:
+class SerializerTestBase(unittest.TestCase):
+    def thrift_serialization_round_robin(
+        self, control: Union[Struct, PythonStruct], fixtures: Mapping[Protocol, bytes]
+    ) -> None:
+        for proto in Protocol:
+            encoded = serialize(control, protocol=proto)
+            self.assertIsInstance(encoded, bytes)
+            decoded = deserialize(type(control), encoded, protocol=proto)
+            self.assertIsInstance(decoded, type(control))
+            self.assertEqual(control, decoded)
+            self.assertEqual((proto, encoded), (proto, fixtures.get(proto)))
+
+    def header_serialize_round_robin(
+        self,
+        control: Union[Struct, PythonStruct],
+    ) -> None:
+        for proto in Protocol:
+            for transform in Transform:
+                if (
+                    proto == Protocol.DEPRECATED_VERBOSE_JSON
+                    and Transform != Transform.NONE
+                ):
+                    continue
+                buf = serialize_with_header(
+                    control, protocol=proto, transform=transform
+                )
+                decoded = deserialize_from_header(type(control), buf)
+                self.assertEqual(control, decoded)
+                iobuf = serialize_with_header_iobuf(
+                    control, protocol=proto, transform=transform
+                )
+                self.assertEqual(control, deserialize_from_header(type(control), iobuf))
+
+    def with_length_round_robin(
+        self,
+        control: Union[Struct, PythonStruct],
+    ) -> None:
+        for proto in Protocol:
+            encoded = serialize(control, protocol=proto)
+            decoded, length = deserialize_with_length(
+                type(control), encoded, protocol=proto
+            )
+            self.assertIsInstance(decoded, type(control))
+            self.assertEqual(decoded, control)
+            self.assertEqual(length, len(encoded))
+
+
+class SerializerTests(SerializerTestBase):
+    def test_with_header(self) -> None:
         control = easy(val=5, val_list=[4, 3, 2, 1])
-        buf = serialize_with_header(control, transform=Transform.ZSTD_TRANSFORM)
-        decoded = deserialize_from_header(easy, buf)
-        self.assertEqual(control, decoded)
-
-    def test_with_header_iobuf(self) -> None:
-        control = easy(val=5, val_list=[4, 3, 2, 1])
-        iobuf = serialize_with_header_iobuf(control, transform=Transform.ZSTD_TRANSFORM)
-        decoded = deserialize_from_header(easy, iobuf)
-        self.assertEqual(control, decoded)
-
-    def test_with_header_iobuf_binary(self) -> None:
-        control = easy(val=6, val_list=[5, 4, 3, 2, 1])
-        iobuf = serialize_with_header_iobuf(
-            control, protocol=Protocol.BINARY, transform=Transform.ZLIB_TRANSFORM
-        )
-        decoded = deserialize_from_header(easy, iobuf)
-        self.assertEqual(control, decoded)
-
-    def test_with_header_iobuf_json(self) -> None:
-        control = easy(val=4, val_list=[3, 2, 1])
-        iobuf = serialize_with_header_iobuf(control, protocol=Protocol.JSON)
-        decoded = deserialize_from_header(easy, iobuf)
-        self.assertEqual(control, decoded)
+        self.header_serialize_round_robin(control)
 
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
@@ -128,23 +155,12 @@ class SerializerTests(unittest.TestCase):
             deserialize(easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY)
         with self.assertRaises(BufferError):
             deserialize_from_header(easy, b"\x02\xDE\xAD\xBE\xEF")
+        control = easy(val=5, val_list=[4, 3, 2, 1])
+        buf = serialize_with_header(control, transform=Transform.ZSTD_TRANSFORM)
+        newBytes = bytearray(buf)
+        newBytes[4] += 1
         with self.assertRaises(Error):
-            control = easy(val=5, val_list=[4, 3, 2, 1])
-            buf = serialize_with_header(control, transform=Transform.ZSTD_TRANSFORM)
-            newBytes = bytearray(buf)
-            newBytes[4] += 1
             deserialize_from_header(easy, bytes(newBytes))
-
-    def thrift_serialization_round_robin(
-        self, control: Struct, fixtures: Mapping[Protocol, bytes]
-    ) -> None:
-        for proto in Protocol:
-            encoded = serialize(control, protocol=proto)
-            self.assertIsInstance(encoded, bytes)
-            decoded = deserialize(type(control), encoded, protocol=proto)
-            self.assertIsInstance(decoded, type(control))
-            self.assertEqual(control, decoded)
-            self.assertEqual((proto, encoded), (proto, fixtures.get(proto)))
 
     def pickle_round_robin(
         self,
@@ -231,14 +247,7 @@ class SerializerTests(unittest.TestCase):
 
     def test_deserialize_with_length(self) -> None:
         control = easy(val=5, val_list=[1, 2, 3, 4, 5])
-        for proto in Protocol:
-            encoded = serialize(control, protocol=proto)
-            decoded, length = deserialize_with_length(
-                type(control), encoded, protocol=proto
-            )
-            self.assertIsInstance(decoded, type(control))
-            self.assertEqual(decoded, control)
-            self.assertEqual(length, len(encoded))
+        self.with_length_round_robin(control)
 
     def test_string_with_non_utf8_data(self) -> None:
         encoded = b"\x0b\x00\x01\x00\x00\x00\x03foo\x00"
@@ -324,3 +333,46 @@ class SerializerTests(unittest.TestCase):
             self.assertEqual(decoded.set_field, set())
             self.assertEqual(decoded.map_field, {})
             self.assertEqual(decoded.struct_field, MyStructWithCustomDefault(field1=0))
+
+
+class SerializerForwardCompat(SerializerTestBase):
+    def test_with_header(self) -> None:
+        control = python_easy(val=5, val_list=[4, 3, 2, 1])
+        self.header_serialize_round_robin(control)
+
+    def test_serialize_easy_struct_python_forward_compat(self) -> None:
+        control = python_easy(val=5, val_list=[1, 2, 3, 4])
+        fixtures: Mapping[Protocol, bytes] = {
+            Protocol.COMPACT: b"\x15\n\x19E\x02\x04\x06\x08,\x00\x16\x00\x00",
+            Protocol.BINARY: b"\x08\x00\x01\x00\x00\x00\x05\x0f\x00\x02\x08\x00\x00\x00"
+            b"\x04\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00"
+            b"\x00\x00\x04\x0c\x00\x04\x00\n\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            Protocol.JSON: b'{"val":5,"val_list":[1,2,3,4],"an_int":{},"py3_hidden":0}',
+            Protocol.DEPRECATED_VERBOSE_JSON: b'{"1":{"i32":5},"2":{"lst":["i32",4,1,2,3,4]},"4"'
+            b':{"rec":{}},"5":{"i64":0}}',
+        }
+        self.thrift_serialization_round_robin(control, fixtures)
+
+    def test_serialize_hard_struct_python_forward_compat(self) -> None:
+        # note the implicit conversion from py3 Integers to python integers on creation
+        control = python_hard(
+            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=Integers(tiny=1)
+        )
+        fixtures: Mapping[Protocol, bytes] = {
+            Protocol.COMPACT: b"\x15\x00\x19E\x02\x04\x06\x08\x18\x03foo\x1c\x13\x01"
+            b"\x00\x18\x0csome default\x00",
+            Protocol.BINARY: b"\x08\x00\x01\x00\x00\x00\x00\x0f\x00\x02\x08\x00\x00\x00"
+            b"\x04\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00"
+            b"\x00\x00\x04\x0b\x00\x03\x00\x00\x00\x03foo\x0c\x00\x04"
+            b"\x03\x00\x01\x01\x00\x0b\x00\x05\x00\x00\x00\x0csome def"
+            b"ault\x00",
+            Protocol.JSON: b'{"val":0,"val_list":[1,2,3,4],"name":"foo","an_int":{"tiny'
+            b'":1},"other":"some default"}',
+            Protocol.DEPRECATED_VERBOSE_JSON: b'{"1":{"i32":0},"2":{"lst":["i32",4,1,2,3,4]},"3":'
+            b'{"str":"foo"},"4":{"rec":{"1":{"i8":1}}},"5":{"str":"some default"}}',
+        }
+        self.thrift_serialization_round_robin(control, fixtures)
+
+    def test_deserialize_with_length(self) -> None:
+        control = python_easy(val=5, val_list=[1, 2, 3, 4, 5])
+        self.with_length_round_robin(control)

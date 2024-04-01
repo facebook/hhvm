@@ -203,19 +203,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataByKey0', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
-    } else {
-      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataByKey0', $args);
+    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
@@ -226,40 +214,12 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataByKey0', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataByKey0', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataByKey0', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataByKey0", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataByKey0', $result);
+    $this->writeHelper($result, 'getDataByKey0', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getDataByKey1(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey1');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataByKey1', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
-    } else {
-      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataByKey1', $args);
+    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
@@ -270,23 +230,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataByKey1', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataByKey1', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataByKey1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataByKey1", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataByKey1', $result);
+    $this->writeHelper($result, 'getDataByKey1', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, DbMixedStackArgumentsStaticMetadata::class);
@@ -305,19 +249,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
   protected function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataByKey0', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args');
-    } else {
-      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataByKey0', $args);
+    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
@@ -328,40 +260,12 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataByKey0', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataByKey0', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataByKey0', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataByKey0", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataByKey0', $result);
+    $this->writeHelper($result, 'getDataByKey0', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getDataByKey1(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey1');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataByKey1', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args');
-    } else {
-      $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataByKey1', $args);
+    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
@@ -372,23 +276,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataByKey1', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataByKey1', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataByKey1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataByKey1", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataByKey1', $result);
+    $this->writeHelper($result, 'getDataByKey1', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, DbMixedStackArgumentsStaticMetadata::class);

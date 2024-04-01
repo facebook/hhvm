@@ -128,19 +128,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'second', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_second_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_second_args');
-    } else {
-      $args = MyService_second_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'second', $args);
+    $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
     $result = MyService_second_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
@@ -151,23 +139,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'second', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'second', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'second', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'second', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("second", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'second', $result);
+    $this->writeHelper($result, 'second', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);
@@ -186,19 +158,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_second(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'second', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_second_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_second_args');
-    } else {
-      $args = MyService_second_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'second', $args);
+    $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
     $result = MyService_second_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
@@ -209,23 +169,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'second', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'second', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'second', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'second', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("second", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'second', $result);
+    $this->writeHelper($result, 'second', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);

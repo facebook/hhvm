@@ -430,19 +430,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'mapList', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_mapList_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_mapList_args');
-    } else {
-      $args = NestedContainers_mapList_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'mapList', $args);
+    $args = $this->readHelper(NestedContainers_mapList_args::class, $input, 'mapList', $handler_ctx);
     $result = NestedContainers_mapList_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
@@ -453,40 +441,12 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'mapList', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'mapList', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'mapList', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'mapList', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("mapList", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'mapList', $result);
+    $this->writeHelper($result, 'mapList', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_mapSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapSet');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'mapSet', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_mapSet_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_mapSet_args');
-    } else {
-      $args = NestedContainers_mapSet_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'mapSet', $args);
+    $args = $this->readHelper(NestedContainers_mapSet_args::class, $input, 'mapSet', $handler_ctx);
     $result = NestedContainers_mapSet_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
@@ -497,40 +457,12 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'mapSet', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'mapSet', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'mapSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("mapSet", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'mapSet', $result);
+    $this->writeHelper($result, 'mapSet', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_listMap(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listMap');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'listMap', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_listMap_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_listMap_args');
-    } else {
-      $args = NestedContainers_listMap_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'listMap', $args);
+    $args = $this->readHelper(NestedContainers_listMap_args::class, $input, 'listMap', $handler_ctx);
     $result = NestedContainers_listMap_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
@@ -541,40 +473,12 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'listMap', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'listMap', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'listMap', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'listMap', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("listMap", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'listMap', $result);
+    $this->writeHelper($result, 'listMap', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_listSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listSet');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'listSet', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_listSet_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_listSet_args');
-    } else {
-      $args = NestedContainers_listSet_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'listSet', $args);
+    $args = $this->readHelper(NestedContainers_listSet_args::class, $input, 'listSet', $handler_ctx);
     $result = NestedContainers_listSet_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
@@ -585,40 +489,12 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'listSet', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'listSet', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'listSet', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'listSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("listSet", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'listSet', $result);
+    $this->writeHelper($result, 'listSet', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_turtles(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('turtles');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'turtles', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_turtles_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_turtles_args');
-    } else {
-      $args = NestedContainers_turtles_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'turtles', $args);
+    $args = $this->readHelper(NestedContainers_turtles_args::class, $input, 'turtles', $handler_ctx);
     $result = NestedContainers_turtles_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
@@ -629,23 +505,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'turtles', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'turtles', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'turtles', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'turtles', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("turtles", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'turtles', $result);
+    $this->writeHelper($result, 'turtles', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, NestedContainersStaticMetadata::class);
@@ -664,19 +524,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'mapList', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_mapList_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_mapList_args');
-    } else {
-      $args = NestedContainers_mapList_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'mapList', $args);
+    $args = $this->readHelper(NestedContainers_mapList_args::class, $input, 'mapList', $handler_ctx);
     $result = NestedContainers_mapList_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
@@ -687,40 +535,12 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'mapList', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'mapList', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'mapList', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'mapList', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("mapList", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'mapList', $result);
+    $this->writeHelper($result, 'mapList', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_mapSet(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapSet');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'mapSet', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_mapSet_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_mapSet_args');
-    } else {
-      $args = NestedContainers_mapSet_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'mapSet', $args);
+    $args = $this->readHelper(NestedContainers_mapSet_args::class, $input, 'mapSet', $handler_ctx);
     $result = NestedContainers_mapSet_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
@@ -731,40 +551,12 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'mapSet', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'mapSet', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'mapSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("mapSet", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'mapSet', $result);
+    $this->writeHelper($result, 'mapSet', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_listMap(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listMap');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'listMap', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_listMap_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_listMap_args');
-    } else {
-      $args = NestedContainers_listMap_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'listMap', $args);
+    $args = $this->readHelper(NestedContainers_listMap_args::class, $input, 'listMap', $handler_ctx);
     $result = NestedContainers_listMap_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
@@ -775,40 +567,12 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'listMap', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'listMap', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'listMap', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'listMap', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("listMap", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'listMap', $result);
+    $this->writeHelper($result, 'listMap', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_listSet(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listSet');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'listSet', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_listSet_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_listSet_args');
-    } else {
-      $args = NestedContainers_listSet_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'listSet', $args);
+    $args = $this->readHelper(NestedContainers_listSet_args::class, $input, 'listSet', $handler_ctx);
     $result = NestedContainers_listSet_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
@@ -819,40 +583,12 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'listSet', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'listSet', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'listSet', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'listSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("listSet", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'listSet', $result);
+    $this->writeHelper($result, 'listSet', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_turtles(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('turtles');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'turtles', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'NestedContainers_turtles_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'NestedContainers_turtles_args');
-    } else {
-      $args = NestedContainers_turtles_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'turtles', $args);
+    $args = $this->readHelper(NestedContainers_turtles_args::class, $input, 'turtles', $handler_ctx);
     $result = NestedContainers_turtles_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
@@ -863,23 +599,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'turtles', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'turtles', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'turtles', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'turtles', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("turtles", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'turtles', $result);
+    $this->writeHelper($result, 'turtles', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, NestedContainersStaticMetadata::class);

@@ -536,19 +536,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_ping_args');
-    } else {
-      $args = MyService_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyService_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'ping', $args);
@@ -562,40 +550,12 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getRandomData', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_getRandomData_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_getRandomData_args');
-    } else {
-      $args = MyService_getRandomData_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getRandomData', $args);
+    $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
     $result = MyService_getRandomData_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getRandomData', $args);
@@ -606,40 +566,12 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getRandomData', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getRandomData', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getRandomData', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getRandomData", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getRandomData', $result);
+    $this->writeHelper($result, 'getRandomData', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'hasDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_hasDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_hasDataById_args');
-    } else {
-      $args = MyService_hasDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'hasDataById', $args);
+    $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
     $result = MyService_hasDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'hasDataById', $args);
@@ -650,40 +582,12 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'hasDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'hasDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'hasDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("hasDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'hasDataById', $result);
+    $this->writeHelper($result, 'hasDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_getDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_getDataById_args');
-    } else {
-      $args = MyService_getDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataById', $args);
+    $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
     $result = MyService_getDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getDataById', $args);
@@ -694,40 +598,12 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataById', $result);
+    $this->writeHelper($result, 'getDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'putDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_putDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_putDataById_args');
-    } else {
-      $args = MyService_putDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'putDataById', $args);
+    $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
     $result = MyService_putDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'putDataById', $args);
@@ -738,40 +614,12 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'putDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'putDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'putDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("putDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'putDataById', $result);
+    $this->writeHelper($result, 'putDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_lobDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'lobDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_lobDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_lobDataById_args');
-    } else {
-      $args = MyService_lobDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'lobDataById', $args);
+    $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
@@ -785,19 +633,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_doNothing(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('doNothing');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'doNothing', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_doNothing_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_doNothing_args');
-    } else {
-      $args = MyService_doNothing_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'doNothing', $args);
+    $args = $this->readHelper(MyService_doNothing_args::class, $input, 'doNothing', $handler_ctx);
     $result = MyService_doNothing_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'doNothing', $args);
@@ -808,23 +644,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'doNothing', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'doNothing', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'doNothing', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'doNothing', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("doNothing", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'doNothing', $result);
+    $this->writeHelper($result, 'doNothing', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);
@@ -843,19 +663,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_ping_args');
-    } else {
-      $args = MyService_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyService_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'ping', $args);
@@ -869,40 +677,12 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getRandomData', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_getRandomData_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_getRandomData_args');
-    } else {
-      $args = MyService_getRandomData_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getRandomData', $args);
+    $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
     $result = MyService_getRandomData_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getRandomData', $args);
@@ -913,40 +693,12 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getRandomData', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getRandomData', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getRandomData', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getRandomData", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getRandomData', $result);
+    $this->writeHelper($result, 'getRandomData', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'hasDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_hasDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_hasDataById_args');
-    } else {
-      $args = MyService_hasDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'hasDataById', $args);
+    $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
     $result = MyService_hasDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'hasDataById', $args);
@@ -957,40 +709,12 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'hasDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'hasDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'hasDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("hasDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'hasDataById', $result);
+    $this->writeHelper($result, 'hasDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'getDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_getDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_getDataById_args');
-    } else {
-      $args = MyService_getDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'getDataById', $args);
+    $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
     $result = MyService_getDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getDataById', $args);
@@ -1001,40 +725,12 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'getDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'getDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'getDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("getDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'getDataById', $result);
+    $this->writeHelper($result, 'getDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'putDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_putDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_putDataById_args');
-    } else {
-      $args = MyService_putDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'putDataById', $args);
+    $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
     $result = MyService_putDataById_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'putDataById', $args);
@@ -1045,40 +741,12 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'putDataById', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'putDataById', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'putDataById', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("putDataById", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'putDataById', $result);
+    $this->writeHelper($result, 'putDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_lobDataById(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'lobDataById', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_lobDataById_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_lobDataById_args');
-    } else {
-      $args = MyService_lobDataById_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'lobDataById', $args);
+    $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'lobDataById', $args);
       $this->handler->lobDataById($args->id, $args->data);
@@ -1092,19 +760,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_doNothing(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('doNothing');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'doNothing', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyService_doNothing_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyService_doNothing_args');
-    } else {
-      $args = MyService_doNothing_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'doNothing', $args);
+    $args = $this->readHelper(MyService_doNothing_args::class, $input, 'doNothing', $handler_ctx);
     $result = MyService_doNothing_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'doNothing', $args);
@@ -1115,23 +771,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'doNothing', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'doNothing', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'doNothing', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'doNothing', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("doNothing", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'doNothing', $result);
+    $this->writeHelper($result, 'doNothing', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);

@@ -135,19 +135,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'renamed_rpc', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
-    } else {
-      $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'renamed_rpc', $args);
+    $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
     $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
@@ -158,23 +146,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'renamed_rpc', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'renamed_rpc', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'renamed_rpc', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("renamed_rpc", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'renamed_rpc', $result);
+    $this->writeHelper($result, 'renamed_rpc', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FB303ServiceStaticMetadata::class);
@@ -193,19 +165,7 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'renamed_rpc', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\test\fixtures\basic\FB303Service_renamed_rpc_args');
-    } else {
-      $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'renamed_rpc', $args);
+    $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
     $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
@@ -216,23 +176,7 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'renamed_rpc', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'renamed_rpc', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'renamed_rpc', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("renamed_rpc", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'renamed_rpc', $result);
+    $this->writeHelper($result, 'renamed_rpc', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FB303ServiceStaticMetadata::class);

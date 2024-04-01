@@ -246,19 +246,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'foo', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_foo_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_foo_args');
-    } else {
-      $args = FooBarBazService_foo_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'foo', $args);
+    $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
     $result = FooBarBazService_foo_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
@@ -269,40 +257,12 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'foo', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'foo', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'foo', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'foo', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("foo", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'foo', $result);
+    $this->writeHelper($result, 'foo', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'bar', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_bar_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_bar_args');
-    } else {
-      $args = FooBarBazService_bar_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'bar', $args);
+    $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
     $result = FooBarBazService_bar_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
@@ -313,40 +273,12 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'bar', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'bar', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'bar', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("bar", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'bar', $result);
+    $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'baz', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_baz_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_baz_args');
-    } else {
-      $args = FooBarBazService_baz_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'baz', $args);
+    $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
     $result = FooBarBazService_baz_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
@@ -357,23 +289,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'baz', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'baz', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'baz', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("baz", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'baz', $result);
+    $this->writeHelper($result, 'baz', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooBarBazServiceStaticMetadata::class);
@@ -392,19 +308,7 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
   protected function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'foo', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_foo_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_foo_args');
-    } else {
-      $args = FooBarBazService_foo_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'foo', $args);
+    $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
     $result = FooBarBazService_foo_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
@@ -415,40 +319,12 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'foo', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'foo', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'foo', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'foo', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("foo", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'foo', $result);
+    $this->writeHelper($result, 'foo', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'bar', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_bar_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_bar_args');
-    } else {
-      $args = FooBarBazService_bar_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'bar', $args);
+    $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
     $result = FooBarBazService_bar_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
@@ -459,40 +335,12 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'bar', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'bar', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'bar', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("bar", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'bar', $result);
+    $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'baz', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'FooBarBazService_baz_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'FooBarBazService_baz_args');
-    } else {
-      $args = FooBarBazService_baz_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'baz', $args);
+    $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
     $result = FooBarBazService_baz_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
@@ -503,23 +351,7 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'baz', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'baz', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'baz', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("baz", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'baz', $result);
+    $this->writeHelper($result, 'baz', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooBarBazServiceStaticMetadata::class);

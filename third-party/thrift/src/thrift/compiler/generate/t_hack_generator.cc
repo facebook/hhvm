@@ -5710,28 +5710,10 @@ void t_hack_generator::generate_process_function(
   f_service_ << indent()
              << "$handler_ctx = $this->eventHandler_->getHandlerContext('"
              << fn_name << "');\n"
-             << indent() << "$reply_type = \\TMessageType::REPLY;\n"
-             << "\n"
-             << indent() << "$this->eventHandler_->preRead($handler_ctx, '"
-             << fn_name << "', dict[]);\n"
-             << "\n"
-             << indent() << "if ($input is \\TBinaryProtocolAccelerated) {\n"
-             << indent() << "  $args = \\thrift_protocol_read_binary_struct("
-             << "$input, '" << argsname << "');\n"
-             << indent()
-             << "} else if ($input is \\TCompactProtocolAccelerated) {"
-             << "\n"
-             << indent()
-             << "  $args = \\thrift_protocol_read_compact_struct($input, '"
-             << argsname << "');\n"
-             << indent() << "} else {\n"
-             << indent() << "  $args = " << argsname
-             << "::withDefaultValues();\n"
-             << indent() << "  $args->read($input);\n"
-             << indent() << "}\n";
-  f_service_ << indent() << "$input->readMessageEnd();\n";
-  f_service_ << indent() << "$this->eventHandler_->postRead($handler_ctx, '"
-             << fn_name << "', $args);\n";
+             << indent() << "$reply_type = \\TMessageType::REPLY;\n";
+
+  f_service_ << indent() << "$args = $this->readHelper(" << argsname
+             << "::class, $input, '" << fn_name << "', $handler_ctx);\n";
 
   // Declare result for non oneway function
   if (tfunction->qualifier() != t_function_qualifier::oneway) {
@@ -5806,41 +5788,8 @@ void t_hack_generator::generate_process_function(
     return;
   }
 
-  f_service_ << indent() << "$this->eventHandler_->preWrite($handler_ctx, '"
-             << fn_name << "', $result);\n";
-
-  f_service_ << indent() << "if ($output is \\TBinaryProtocolAccelerated)\n";
-  scope_up(f_service_);
-
-  f_service_ << indent() << "\\thrift_protocol_write_binary($output, '"
-             << find_hack_name(tfunction)
-             << "', $reply_type, $result, $seqid, $output->isStrictWrite());\n";
-
-  scope_down(f_service_);
-  f_service_ << indent()
-             << "else if ($output is \\TCompactProtocolAccelerated)\n";
-  scope_up(f_service_);
-
-  f_service_ << indent() << "\\thrift_protocol_write_compact2($output, '"
-             << find_hack_name(tfunction)
-             << "', $reply_type, $result, $seqid, false, "
-             << "\\TCompactProtocolBase::VERSION);\n";
-
-  scope_down(f_service_);
-  f_service_ << indent() << "else\n";
-  scope_up(f_service_);
-
-  // Serialize the request header
-  f_service_ << indent() << "$output->writeMessageBegin(\""
-             << find_hack_name(tfunction) << "\", $reply_type, $seqid);\n"
-             << indent() << "$result->write($output);\n"
-             << indent() << "$output->writeMessageEnd();\n"
-             << indent() << "$output->getTransport()->flush();\n";
-
-  scope_down(f_service_);
-
-  f_service_ << indent() << "$this->eventHandler_->postWrite($handler_ctx, '"
-             << fn_name << "', $result);\n";
+  f_service_ << indent() << "$this->writeHelper($result, '" << fn_name
+             << "', $seqid, $handler_ctx, $output, $reply_type);\n";
 
   // Close function
   indent_down();

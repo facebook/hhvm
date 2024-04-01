@@ -135,19 +135,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\hack_ns2\TestService_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\hack_ns2\TestService_ping_args');
-    } else {
-      $args = \hack_ns2\TestService_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(\hack_ns2\TestService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = \hack_ns2\TestService_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
@@ -161,23 +149,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
@@ -196,19 +168,7 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, '\hack_ns2\TestService_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, '\hack_ns2\TestService_ping_args');
-    } else {
-      $args = \hack_ns2\TestService_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(\hack_ns2\TestService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = \hack_ns2\TestService_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
@@ -222,23 +182,7 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);

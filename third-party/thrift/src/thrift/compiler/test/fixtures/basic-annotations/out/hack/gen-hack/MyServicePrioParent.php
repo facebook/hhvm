@@ -184,19 +184,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyServicePrioParent_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyServicePrioParent_ping_args');
-    } else {
-      $args = MyServicePrioParent_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyServicePrioParent_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
@@ -207,40 +195,12 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pong');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'pong', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyServicePrioParent_pong_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyServicePrioParent_pong_args');
-    } else {
-      $args = MyServicePrioParent_pong_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'pong', $args);
+    $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
     $result = MyServicePrioParent_pong_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
@@ -251,23 +211,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $this->eventHandler_->handlerError($handler_ctx, 'pong', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'pong', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'pong', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'pong', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("pong", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'pong', $result);
+    $this->writeHelper($result, 'pong', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioParentStaticMetadata::class);
@@ -286,19 +230,7 @@ abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyServicePrioParent_ping_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyServicePrioParent_ping_args');
-    } else {
-      $args = MyServicePrioParent_ping_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyServicePrioParent_ping_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
@@ -309,40 +241,12 @@ abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("ping", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+    $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pong');
     $reply_type = \TMessageType::REPLY;
-
-    $this->eventHandler_->preRead($handler_ctx, 'pong', dict[]);
-
-    if ($input is \TBinaryProtocolAccelerated) {
-      $args = \thrift_protocol_read_binary_struct($input, 'MyServicePrioParent_pong_args');
-    } else if ($input is \TCompactProtocolAccelerated) {
-      $args = \thrift_protocol_read_compact_struct($input, 'MyServicePrioParent_pong_args');
-    } else {
-      $args = MyServicePrioParent_pong_args::withDefaultValues();
-      $args->read($input);
-    }
-    $input->readMessageEnd();
-    $this->eventHandler_->postRead($handler_ctx, 'pong', $args);
+    $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
     $result = MyServicePrioParent_pong_result::withDefaultValues();
     try {
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
@@ -353,23 +257,7 @@ abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor
       $this->eventHandler_->handlerError($handler_ctx, 'pong', $ex);
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
-    $this->eventHandler_->preWrite($handler_ctx, 'pong', $result);
-    if ($output is \TBinaryProtocolAccelerated)
-    {
-      \thrift_protocol_write_binary($output, 'pong', $reply_type, $result, $seqid, $output->isStrictWrite());
-    }
-    else if ($output is \TCompactProtocolAccelerated)
-    {
-      \thrift_protocol_write_compact2($output, 'pong', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
-    }
-    else
-    {
-      $output->writeMessageBegin("pong", $reply_type, $seqid);
-      $result->write($output);
-      $output->writeMessageEnd();
-      $output->getTransport()->flush();
-    }
-    $this->eventHandler_->postWrite($handler_ctx, 'pong', $result);
+    $this->writeHelper($result, 'pong', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioParentStaticMetadata::class);

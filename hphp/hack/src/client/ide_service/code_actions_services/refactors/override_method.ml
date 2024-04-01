@@ -55,10 +55,10 @@ let override_method_quickfixes
   | Decl_entry.NotYetAvailable ->
     []
 
-(* Quickfixes available at cursor position [start_line] and
-   [start_col]. These aren't associated with errors, rather they
+(* Quickfixes available at cursor position [cursor_line] and
+   [cursor_col]. These aren't associated with errors, rather they
    transform code from one valid state to another. *)
-let override_method_refactorings_at ~start_line ~start_col =
+let override_method_refactorings_at ~cursor_line ~cursor_col =
   object
     inherit [_] Tast_visitor.reduce as super
 
@@ -72,7 +72,7 @@ let override_method_refactorings_at ~start_line ~start_col =
         match c.Aast.c_kind with
         | Ast_defs.Cclass _ ->
           List.map c.Aast.c_extends ~f:(fun (parent_id_pos, parent_hint) ->
-              if Pos.inside parent_id_pos start_line start_col then
+              if Pos.inside parent_id_pos cursor_line cursor_col then
                 match parent_hint with
                 | Aast.Happly ((_, parent_name), _) ->
                   override_method_quickfixes env c parent_name
@@ -113,7 +113,7 @@ let refactor_action
   Code_action_types.{ title = quickfix.title; edits; kind = `Refactor }
 
 let find ~entry pos ctx =
-  let (start_line, start_col) = Pos.line_column pos in
+  let (cursor_line, cursor_col) = Pos.line_column pos in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
   let path = entry.Provider_context.path in
@@ -126,7 +126,7 @@ let find ~entry pos ctx =
   in
 
   let override_method_refactorings =
-    (override_method_refactorings_at ~start_line ~start_col)#go
+    (override_method_refactorings_at ~cursor_line ~cursor_col)#go
       ctx
       tast.Tast_with_dynamic.under_normal_assumptions
   in

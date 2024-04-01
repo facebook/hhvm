@@ -190,22 +190,22 @@ enum Strmap<X> {
 impl<X> Strmap<X> {
     fn mem(&self, k: &str) -> bool {
         match &self {
-            FuncCase(m) | TypeCase(m) | NsCase(m) => m.contains_key(&k.to_ascii_lowercase()),
-            ConstCase(m) | AttrCase(m) => m.contains_key(k),
+            TypeCase(m) | NsCase(m) => m.contains_key(&k.to_ascii_lowercase()),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.contains_key(k),
         }
     }
 
     fn add(&mut self, k: &str, v: X) {
         match self {
-            FuncCase(m) | TypeCase(m) | NsCase(m) => m.insert(k.to_ascii_lowercase(), v),
-            ConstCase(m) | AttrCase(m) => m.insert(k.to_string(), v),
+            TypeCase(m) | NsCase(m) => m.insert(k.to_ascii_lowercase(), v),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.insert(k.to_string(), v),
         };
     }
 
     fn get(&self, k: &str) -> Option<&X> {
         match &self {
-            FuncCase(m) | TypeCase(m) | NsCase(m) => m.get(&k.to_ascii_lowercase()),
-            ConstCase(m) | AttrCase(m) => m.get(k),
+            TypeCase(m) | NsCase(m) => m.get(&k.to_ascii_lowercase()),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.get(k),
         }
     }
 
@@ -2796,7 +2796,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn rec_walk_impl<F, X>(&self, parents: &mut Vec<S<'a>>, f: &F, node: S<'a>, mut acc: X) -> X
+    fn rec_walk_impl<F, X>(parents: &mut Vec<S<'a>>, f: &F, node: S<'a>, mut acc: X) -> X
     where
         F: Fn(S<'a>, &Vec<S<'a>>, X) -> (bool, X),
     {
@@ -2805,7 +2805,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if continue_walk {
             parents.push(node);
             for child in node.iter_children() {
-                acc = self.rec_walk_impl(parents, f, child, acc);
+                acc = Self::rec_walk_impl(parents, f, child, acc);
             }
             parents.pop();
         }
@@ -2816,7 +2816,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         F: Fn(S<'a>, &Vec<S<'a>>, X) -> (bool, X),
     {
-        self.rec_walk_impl(&mut vec![], &f, node, acc)
+        Self::rec_walk_impl(&mut vec![], &f, node, acc)
     }
 
     fn find_invalid_lval_usage(&self, node: S<'a>) -> Vec<SyntaxError> {
@@ -3891,7 +3891,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                 match &arg.children {
                                     ScopeResolutionExpression(x) => {
                                         let txt = self.text(&x.qualifier);
-                                        let excludes = vec![
+                                        let excludes = [
                                             sn::classes::SELF,
                                             sn::classes::PARENT,
                                             sn::classes::STATIC,

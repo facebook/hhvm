@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import timeit
 
+import click
+
 from tabulate import tabulate
 
 
@@ -316,16 +318,58 @@ def benchmark_serializer():
     )
 
 
-def main() -> None:
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+def import_benchmark() -> None:
     benchmark_import()
-    print("\n")
+
+
+@click.command()
+def init_benchmark() -> None:
     benchmark_init()
-    print("\n")
+
+
+@click.command()
+def field_access_benchmark() -> None:
     benchmark_field_access()
-    print("\n")
+
+
+@click.command()
+def container_benchmark() -> None:
     benchmark_containers()
-    print("\n")
+
+
+@click.command()
+def serializer_benchmark() -> None:
     benchmark_serializer()
+
+
+@click.command()
+@click.pass_context
+def run_all(ctx) -> None:
+    ctx.invoke(import_benchmark)
+    print("\n")
+    ctx.invoke(init_benchmark)
+    print("\n")
+    ctx.invoke(field_access_benchmark)
+    print("\n")
+    ctx.invoke(container_benchmark)
+    print("\n")
+    ctx.invoke(serializer_benchmark)
+
+
+def main() -> None:
+    cli.add_command(run_all)
+    cli.add_command(import_benchmark)
+    cli.add_command(init_benchmark)
+    cli.add_command(field_access_benchmark)
+    cli.add_command(container_benchmark)
+    cli.add_command(serializer_benchmark)
+    cli()
 
 
 if __name__ == "__main__":

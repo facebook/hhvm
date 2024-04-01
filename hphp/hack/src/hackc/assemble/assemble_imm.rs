@@ -321,8 +321,8 @@ impl AssembleImm<hhbc::Local> for Lexer<'_> {
         match self.next() {
             Some(Token::Variable(v, p)) => {
                 let v = hhbc::intern(std::str::from_utf8(v)?);
-                if let Some(idx) = decl_map.get(&v) {
-                    Ok(hhbc::Local { idx: *idx })
+                if let Some(local) = decl_map.get(&v) {
+                    Ok(*local)
                 } else {
                     bail!("Unknown local var: {:?} at {:?}", v, p);
                 }

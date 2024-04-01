@@ -37,7 +37,7 @@ use crate::lexer::Lexer;
 use crate::token::Line;
 use crate::token::Token;
 
-pub(crate) type DeclMap = StringIdMap<u32>;
+pub(crate) type DeclMap = StringIdMap<hhbc::Local>;
 
 /// Assembles the hhas within f to a hhbc::Unit
 pub fn assemble(f: &Path) -> Result<(hhbc::Unit, PathBuf)> {
@@ -1328,9 +1328,14 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_is(Token::is_variadic);
     let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
-    let name = token_iter.expect_with(Token::into_variable)?;
-    let name = hhbc::intern(std::str::from_utf8(name)?);
-    decl_map.insert(name, decl_map.len() as u32);
+    let name_tok = token_iter.expect_with(Token::into_variable)?;
+    let name = hhbc::intern(std::str::from_utf8(name_tok)?);
+    if decl_map
+        .insert(name, hhbc::Local::new(decl_map.len()))
+        .is_some()
+    {
+        bail!("Duplicate parameter: {name} at {name_tok:?}");
+    }
     let dv = assemble_default_value(token_iter)?;
     let param = hhbc::Param {
         name,
@@ -1630,7 +1635,12 @@ fn assemble_decl_vars(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Res
         let var_nm = token_iter.expect_var()?;
         let var_nm = hhbc::intern(std::str::from_utf8(&var_nm)?);
         var_names.push(var_nm);
-        decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
+        if decl_map
+            .insert(var_nm, hhbc::Local::new(decl_map.len()))
+            .is_some()
+        {
+            bail!("Duplicate named local: {var_nm}");
+        }
     }
     token_iter.expect(Token::is_semicolon)?;
     Ok(var_names)

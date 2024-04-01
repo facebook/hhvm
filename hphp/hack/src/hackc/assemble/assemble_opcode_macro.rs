@@ -62,7 +62,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
         fn #name(
             tok: &'_ [u8],
             token_iter: &mut Lexer<'_>,
-            decl_map: &StringIdMap<u32>,
+            decl_map: &DeclMap,
             adata: &AdataMap,
         ) -> Result<hhbc::Instruct>{
             match tok {

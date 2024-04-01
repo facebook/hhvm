@@ -808,7 +808,6 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
 
 fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
-        adata: a_adata,
         functions: a_functions,
         classes: a_classes,
         modules: a_modules,
@@ -822,7 +821,6 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         error_symbols: _,
     } = a_unit;
     let Unit {
-        adata: b_adata,
         functions: b_functions,
         classes: b_classes,
         modules: b_modules,
@@ -835,8 +833,6 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
         missing_symbols: _,
         error_symbols: _,
     } = b_unit;
-
-    cmp_slice(a_adata, b_adata, cmp_eq).qualified("adata")?;
 
     cmp_map_t(a_typedefs, b_typedefs, cmp_typedef).qualified("typedefs")?;
 

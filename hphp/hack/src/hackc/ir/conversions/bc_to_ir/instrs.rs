@@ -928,9 +928,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             ))
         }
 
-        Opcode::Vec(id) | Opcode::Dict(id) | Opcode::Keyset(id) => {
-            Action::Immediate(ctx.adata[id.index()].clone().into())
-        }
+        Opcode::Vec(v) | Opcode::Dict(v) | Opcode::Keyset(v) => Action::Immediate(v.clone().into()),
 
         Opcode::AKExists => simple!(Hhbc::AKExists),
         Opcode::Add => simple!(Hhbc::Add),

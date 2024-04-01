@@ -43,7 +43,6 @@ use crate::helpers::*;
 /// The "interesting" bit happens in `body::compare_bodies()`.
 pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
     let Unit {
-        adata: a_adata,
         functions: a_functions,
         classes: a_classes,
         modules: a_modules,
@@ -57,7 +56,6 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
         missing_symbols: _,
     } = a_unit;
     let Unit {
-        adata: b_adata,
         functions: b_functions,
         classes: b_classes,
         modules: b_modules,
@@ -120,14 +118,14 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
         &path.qualified("functions"),
         a_functions,
         b_functions,
-        |path, a, b| sem_diff_function(path, a, &a_adata, b, &b_adata),
+        sem_diff_function,
     )?;
 
     sem_diff_map_t(
         &path.qualified("classes"),
         a_classes,
         b_classes,
-        |path, a, b| sem_diff_class(path, a, &a_adata, b, &b_adata),
+        sem_diff_class,
     )?;
 
     Ok(())
@@ -156,13 +154,7 @@ fn sem_diff_attributes(path: &CodePath<'_>, a: &[Attribute], b: &[Attribute]) ->
     sem_diff_slice(path, a, b, sem_diff_attribute)
 }
 
-fn sem_diff_body<'a>(
-    path: &CodePath<'_>,
-    a: &Body,
-    a_adata: &'a [TypedValue],
-    b: &Body,
-    b_adata: &'a [TypedValue],
-) -> Result<()> {
+fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
     let Body {
         attributes: a_attributes,
         attrs: a_attrs,
@@ -244,7 +236,7 @@ fn sem_diff_body<'a>(
     // them to be different.
 
     // This compares the instrs themselves.
-    crate::body::compare_bodies(path, a, a_adata, b, b_adata)
+    crate::body::compare_bodies(path, a, b)
 }
 
 fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result<()> {
@@ -293,13 +285,7 @@ fn sem_diff_param(path: &CodePath<'_>, a: &ParamEntry, b: &ParamEntry) -> Result
     Ok(())
 }
 
-fn sem_diff_class<'a>(
-    path: &CodePath<'_>,
-    a: &Class,
-    a_adata: &'a [TypedValue],
-    b: &Class,
-    b_adata: &'a [TypedValue],
-) -> Result<()> {
+fn sem_diff_class(path: &CodePath<'_>, a: &Class, b: &Class) -> Result<()> {
     let Class {
         attributes: a_attributes,
         base: a_base,
@@ -400,7 +386,7 @@ fn sem_diff_class<'a>(
         &path.qualified("methods"),
         a_methods,
         b_methods,
-        |path, a, b| sem_diff_method(path, a, a_adata, b, b_adata),
+        sem_diff_method,
     )?;
 
     Ok(())
@@ -501,13 +487,7 @@ fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal, b: &Fatal) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_function<'a>(
-    path: &CodePath<'_>,
-    a: &Function,
-    a_adata: &'a [TypedValue],
-    b: &Function,
-    b_adata: &'a [TypedValue],
-) -> Result<()> {
+fn sem_diff_function(path: &CodePath<'_>, a: &Function, b: &Function) -> Result<()> {
     let Function {
         name: a_name,
         body: a_body,
@@ -520,18 +500,12 @@ fn sem_diff_function<'a>(
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
+    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     Ok(())
 }
 
-fn sem_diff_method<'a>(
-    path: &CodePath<'_>,
-    a: &Method,
-    a_adata: &'a [TypedValue],
-    b: &Method,
-    b_adata: &'a [TypedValue],
-) -> Result<()> {
+fn sem_diff_method(path: &CodePath<'_>, a: &Method, b: &Method) -> Result<()> {
     let Method {
         visibility: a_visibility,
         name: a_name,
@@ -546,7 +520,7 @@ fn sem_diff_method<'a>(
     } = b;
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
+    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
     Ok(())
 }

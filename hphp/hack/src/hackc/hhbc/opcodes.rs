@@ -9,7 +9,6 @@ use emit_opcodes_macro::Targets;
 use ffi::Vector;
 use serde::Serialize;
 
-use crate::AdataId;
 use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::ClassGetCMode;
@@ -52,6 +51,7 @@ use crate::SwitchKind;
 use crate::Targets;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
+use crate::TypedValue;
 use crate::NUM_ACT_REC_CELLS;
 
 #[emit_opcodes_macro::emit_opcodes]

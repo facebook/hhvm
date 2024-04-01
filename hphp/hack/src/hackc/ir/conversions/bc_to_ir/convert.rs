@@ -35,13 +35,13 @@ pub fn bc_to_ir(unit: &Unit) -> ir::Unit {
     }
 
     for f in unit.functions.as_ref() {
-        crate::func::convert_function(&mut ir_unit, f, &unit.adata);
+        crate::func::convert_function(&mut ir_unit, f);
     }
 
     // This is where we convert the methods for all the classes.
     for (idx, c) in unit.classes.as_ref().iter().enumerate() {
         for m in c.methods.as_ref() {
-            crate::func::convert_method(&mut ir_unit, idx, m, &unit.adata);
+            crate::func::convert_method(&mut ir_unit, idx, m);
         }
     }
 

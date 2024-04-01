@@ -14,6 +14,7 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Vector;
 use hash::HashSet;
+use hhbc::AdataState;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -159,11 +160,34 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
         )?;
     }
 
+    let mut adata = AdataState::default();
+    for body in prog.functions.iter().map(|f| &f.body).chain(
+        prog.classes
+            .iter()
+            .flat_map(|c| c.methods.iter().map(|m| &m.body)),
+    ) {
+        for instr in &body.body_instrs {
+            use hhbc::Opcode;
+            match instr {
+                Instruct::Opcode(Opcode::Vec(a) | Opcode::Dict(a) | Opcode::Keyset(a)) => {
+                    adata.intern_value(a.clone());
+                }
+                _ => {}
+            }
+        }
+    }
+
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
-    concat(w, &prog.adata, |w, i, a| print_adata_region(ctx, w, i, a))?;
-    concat(w, &prog.functions, |w, _, f| print_fun_def(ctx, w, f))?;
-    concat(w, &prog.classes, |w, _, cd| print_class_def(ctx, w, cd))?;
+    concat(w, &adata.clone().finish(), |w, i, a| {
+        print_adata_region(ctx, w, i, a)
+    })?;
+    concat(w, &prog.functions, |w, _, f| {
+        print_fun_def(ctx, w, f, &adata)
+    })?;
+    concat(w, &prog.classes, |w, _, cd| {
+        print_class_def(ctx, w, cd, &adata)
+    })?;
     concat(w, &prog.modules, |w, _, cd| print_module_def(ctx, w, cd))?;
     concat(w, &prog.constants, |w, _, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, _, td| print_typedef(ctx, w, td))?;
@@ -298,7 +322,12 @@ where
     })
 }
 
-fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Result<()> {
+fn print_fun_def(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    fun_def: &Function,
+    adata: &AdataState,
+) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
@@ -333,7 +362,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function) -> Re
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &body.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels, adata)
         })?;
         newline(w)
     })?;
@@ -505,7 +534,12 @@ fn print_shadowed_tparams(w: &mut dyn Write, shadowed_tparams: &[ClassName]) -> 
     )
 }
 
-fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -> Result<()> {
+fn print_method_def(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    method_def: &Method,
+    adata: &AdataState,
+) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
@@ -543,14 +577,19 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method) -
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &body.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels, adata)
         })?;
         newline(w)?;
         w.write_all(b"  ")
     })
 }
 
-fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class) -> Result<()> {
+fn print_class_def(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    class_def: &Class,
+    adata: &AdataState,
+) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
@@ -596,7 +635,7 @@ fn print_class_def(ctx: &Context<'_>, w: &mut dyn Write, class_def: &Class) -> R
             print_property(c, w, x)?;
         }
         for m in class_def.methods.as_ref() {
-            print_method_def(c, w, m)?;
+            print_method_def(c, w, m, adata)?;
         }
         Ok(())
     })?;
@@ -793,6 +832,7 @@ fn print_body(
     body: &Body,
     coeffects: &Coeffects,
     dv_labels: &HashSet<Label>,
+    adata: &AdataState,
 ) -> Result<()> {
     print_doc_comment(ctx, w, body.doc_comment.as_ref())?;
     if body.is_memoize_wrapper {
@@ -827,15 +867,16 @@ fn print_body(
         .map(|e| e.param.name)
         .chain(body.decl_vars.iter().copied())
         .collect();
-    print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names)
+    print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names, adata)
 }
 
-fn print_instructions<'a, 'b>(
+fn print_instructions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    instrs: &'b [Instruct],
-    dv_labels: &'b HashSet<Label>,
-    local_names: &'b [StringId],
+    instrs: &[Instruct],
+    dv_labels: &HashSet<Label>,
+    local_names: &[StringId],
+    adata: &AdataState,
 ) -> Result<()> {
     let mut ctx = ctx.clone();
     for instr in instrs {
@@ -845,25 +886,25 @@ fn print_instructions<'a, 'b>(
             }
             Instruct::Pseudo(Pseudo::Label(_)) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)
+                print_instr(w, instr, dv_labels, local_names, adata)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchBegin) => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
                 ctx.indent_inc();
             }
             Instruct::Pseudo(Pseudo::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)
+                print_instr(w, instr, dv_labels, local_names, adata)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
             }
             _ => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
             }
         }
     }
@@ -931,15 +972,17 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo, dv_labels: &HashSet<Label>) -
     }
 }
 
-fn print_instr<'a, 'b>(
+fn print_instr(
     w: &mut dyn Write,
-    instr: &'b Instruct,
-    dv_labels: &'b HashSet<Label>,
-    local_names: &'b [StringId],
+    instr: &Instruct,
+    dv_labels: &HashSet<Label>,
+    local_names: &[StringId],
+    adata: &AdataState,
 ) -> Result<()> {
     match instr {
         Instruct::Opcode(opcode) => {
-            crate::print_opcode::PrintOpcode::new(opcode, dv_labels, local_names).print_opcode(w)
+            crate::print_opcode::PrintOpcode::new(opcode, dv_labels, local_names)
+                .print_opcode(w, adata)
         }
         Instruct::Pseudo(pseudo) => print_pseudo(w, pseudo, dv_labels),
     }

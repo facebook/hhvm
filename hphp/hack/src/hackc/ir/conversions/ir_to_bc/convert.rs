@@ -61,7 +61,6 @@ pub(crate) struct UnitBuilder {
 impl UnitBuilder {
     fn finish(self) -> hhbc::Unit {
         hhbc::Unit {
-            adata: self.adata_cache.finish().into(),
             functions: self.functions.into(),
             classes: self.classes.into(),
             typedefs: Default::default(),

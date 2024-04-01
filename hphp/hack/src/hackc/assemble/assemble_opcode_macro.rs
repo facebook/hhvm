@@ -44,7 +44,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             let imms = opcode
                 .immediates
                 .iter()
-                .map(|_| quote!(token_iter.assemble_imm(decl_map)?))
+                .map(|_| quote!(token_iter.assemble_imm(decl_map, adata)?))
                 .collect_vec();
 
             quote!((#(#imms),*))
@@ -63,6 +63,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             tok: &'_ [u8],
             token_iter: &mut Lexer<'_>,
             decl_map: &StringIdMap<u32>,
+            adata: &AdataMap,
         ) -> Result<hhbc::Instruct>{
             match tok {
                 #(#body)*
@@ -80,7 +81,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 /// turns into a handler for A, B, and C that looks something like:
 ///
 /// impl AssembleImm<'_, $ret_ty> for Lexer<'_> {
-///   fn assemble_imm(&mut self, _decl_map: &DeclMap) -> Result<$ret_ty> {
+///   fn assemble_imm(&mut self, _: &DeclMap, _: &AdataMap) -> Result<$ret_ty> {
 ///     use $ret_ty;
 ///     match self.expect(Token::into_identifier)? {
 ///       b"A" => E::A,
@@ -151,7 +152,7 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
 
     let output = quote! {
         impl AssembleImm<#ret_ty> for Lexer<'_> {
-            fn assemble_imm(&mut self, _: &DeclMap) -> Result<#ret_ty> {
+            fn assemble_imm(&mut self, _: &DeclMap, _: &AdataMap) -> Result<#ret_ty> {
                 use #ret_ty;
                 let tok = self.expect_token()?;
                 let id = tok.into_identifier()?;

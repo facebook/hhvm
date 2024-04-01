@@ -80,7 +80,6 @@ struct TranslationState {
 
   HPHP::RepoAuthType translateRepoAuthType(folly::StringPiece str);
   HPHP::MemberKey translateMemberKey(const hhbc::MemberKey& mkey);
-  ArrayData* getArrayfromAdataId(const AdataId& id);
 
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,8 +93,6 @@ struct TranslationState {
   UnitEmitter* ue;
   FuncEmitter* fe{nullptr};
   PreClassEmitter* pce{nullptr};
-  // Map of adata identifiers to their associated static arrays.
-  hphp_fast_map<uint32_t, ArrayData*> adataMap;
 
   // Used for Execption Handler entry.
   jit::stack<Offset> handler;
@@ -671,13 +668,6 @@ HPHP::MemberKey TranslationState::translateMemberKey(const hhbc::MemberKey& mkey
   not_reached();
 }
 
-ArrayData* TranslationState::getArrayfromAdataId(const AdataId& id) {
-  auto const it = adataMap.find(id.id);
-  assertx(it != adataMap.end());
-  assertx(it->second->isStatic());
-  return it->second;
-}
-
 void handleIVA(TranslationState& ts, const uint32_t& iva) {
   ts.fe->emitIVA(iva);
 }
@@ -770,8 +760,13 @@ void handleLAR(TranslationState& ts, const hhbc::LocalRange& lar) {
   encodeLocalRange(*ts.fe, lar_);
 }
 
-void handleAA(TranslationState& ts, const AdataId& id) {
-  auto const arr = ts.getArrayfromAdataId(id);
+void handleAA(TranslationState& ts, const hhbc::TypedValue& value) {
+  // hhbc::Unit does not have an adata table. Intern each array value,
+  // and use the id assigned by UnitEmitter:mergeArray().
+  auto tv = toTypedValue(value);
+  assertx(isArrayLikeType(tv.type()));
+  auto arr = tv.val().parr;
+  ArrayData::GetScalarArray(&arr);
   ts.fe->emitInt32(ts.ue->mergeArray(arr));
 }
 
@@ -1366,15 +1361,6 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   translateClassBody(ts, c, classUbs);
 }
 
-void translateAdata(TranslationState& ts, uint32_t id,
-                    const hhbc::TypedValue& value) {
-  auto tv = toTypedValue(value);
-  auto arr = tv.m_data.parr;
-  ArrayData::GetScalarArray(&arr);
-  ts.adataMap[id] = arr;
-  ts.ue->mergeArray(arr);
-}
-
 void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
   HPHP::Constant constant;
   constant.name = toStaticString(c.name._0);
@@ -1520,12 +1506,6 @@ void translateSymbolRefs(TranslationState& ts, const hhbc::SymbolRefs& s) {
 
 void translate(TranslationState& ts, const hhbc::Unit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
-  uint32_t adata_id = 0;
-  auto adata = range(unit.adata);
-  for (auto const& d : adata) {
-    translateAdata(ts, adata_id, d);
-    adata_id++;
-  }
 
   auto funcs = range(unit.functions);
   for (auto const& f : funcs) {

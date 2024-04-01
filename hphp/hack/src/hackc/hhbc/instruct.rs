@@ -434,3 +434,19 @@ impl Instruct {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn opcode_size() {
+        println!(
+            "sizeof TypedValue {}",
+            std::mem::size_of::<crate::TypedValue>()
+        );
+        println!(
+            "sizeof FCallArgs {}",
+            std::mem::size_of::<super::FCallArgs>()
+        );
+        println!("sizeof Opcode {}", std::mem::size_of::<super::Opcode>());
+    }
+}

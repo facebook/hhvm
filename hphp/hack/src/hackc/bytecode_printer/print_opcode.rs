@@ -9,7 +9,7 @@ use std::io::Result;
 use std::io::Write;
 
 use hash::HashSet;
-use hhbc::AdataId;
+use hhbc::AdataState;
 use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
 use hhbc::BytesId;
@@ -50,6 +50,7 @@ use hhbc::StringId;
 use hhbc::SwitchKind;
 use hhbc::TypeStructEnforceKind;
 use hhbc::TypeStructResolveOp;
+use hhbc::TypedValue;
 use hhbc_string_utils::float;
 use print_opcode::PrintOpcode;
 use print_opcode::PrintOpcodeTypes;
@@ -201,7 +202,8 @@ print_with_debug!(
     AsTypeStructExceptionKind
 );
 
-fn print_adata_id(w: &mut dyn Write, id: &AdataId) -> Result<()> {
+fn print_adata_id(w: &mut dyn Write, v: &TypedValue, adata: &AdataState) -> Result<()> {
+    let id = adata.index_of(v).unwrap();
     write!(w, "@{}", id)
 }
 

@@ -7,7 +7,6 @@ use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
 use hash::HashMap;
-use hhbc::AdataId;
 use hhbc::BytesId;
 use hhbc::ClassName;
 use hhbc::Dummy;
@@ -55,15 +54,10 @@ pub(crate) struct State<'a> {
     pub(crate) iterators: IterIdMap<IterState>,
     pub(crate) locals: HashMap<Local, Value>,
     pub(crate) stack: Vec<Value>,
-    adata: &'a [TypedValue],
 }
 
 impl<'a> State<'a> {
-    pub(crate) fn new(
-        body: &'a Body<'a>,
-        debug_name: &'static str,
-        adata: &'a [TypedValue],
-    ) -> Self {
+    pub(crate) fn new(body: &'a Body<'a>, debug_name: &'static str) -> Self {
         Self {
             body,
             debug_name,
@@ -71,7 +65,6 @@ impl<'a> State<'a> {
             iterators: Default::default(),
             locals: Default::default(),
             stack: Default::default(),
-            adata,
         }
     }
 
@@ -235,7 +228,6 @@ impl<'a> State<'a> {
             iterators: self.iterators.clone(),
             locals: self.locals.clone(),
             stack: self.stack.clone(),
-            adata: self.adata,
         }
     }
 
@@ -247,7 +239,6 @@ impl<'a> State<'a> {
             iterators: self.iterators.clone(),
             locals: self.locals.clone(),
             stack: vec![],
-            adata: self.adata,
         }
     }
 
@@ -670,7 +661,7 @@ impl<'a> State<'a> {
     fn step_constant(
         &mut self,
         builder: &mut InstrSeqBuilder<'a, '_>,
-        opcode: &Opcode,
+        opcode: &'a Opcode,
     ) -> Result<()> {
         let clean_instr = NodeInstr::Opcode(clean_opcode(opcode));
         debug_assert_eq!(opcode.num_inputs(), 0);
@@ -689,11 +680,9 @@ impl<'a> State<'a> {
 
         // For a constant the outputs are based entirely on the input instr.
         let output = match opcode {
-            Opcode::Dict(id) | Opcode::Keyset(id) | Opcode::Vec(id) => {
-                // But for an array-based constant we want to use the array data
-                // as an input instead of the AdataId index.
-                let i = id.id() as usize;
-                builder.compute_value(&clean_instr, 0, &[Input::ConstantArray(&self.adata[i])])
+            Opcode::Dict(a) | Opcode::Keyset(a) | Opcode::Vec(a) => {
+                // For an array constant we want to use the array data as an input
+                builder.compute_value(&clean_instr, 0, &[Input::ConstantArray(a)])
             }
             _ => builder.compute_constant(&clean_instr),
         };
@@ -1729,9 +1718,9 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::VerifyParamType(_)
         | Opcode::VerifyParamTypeTS(_) => opcode.clone(),
 
-        Opcode::Dict(_) => Opcode::Dict(AdataId::INVALID),
-        Opcode::Keyset(_) => Opcode::Keyset(AdataId::INVALID),
-        Opcode::Vec(_) => Opcode::Vec(AdataId::INVALID),
+        Opcode::Dict(_) => Opcode::Dict(TypedValue::Uninit),
+        Opcode::Keyset(_) => Opcode::Keyset(TypedValue::Uninit),
+        Opcode::Vec(_) => Opcode::Vec(TypedValue::Uninit),
 
         Opcode::MemoGetEager(_, dummy, _) => {
             Opcode::MemoGetEager([Label::INVALID, Label::INVALID], dummy, LocalRange::EMPTY)

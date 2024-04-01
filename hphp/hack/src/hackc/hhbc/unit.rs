@@ -17,13 +17,11 @@ use crate::ModuleName;
 use crate::SrcLoc;
 use crate::StringId;
 use crate::SymbolRefs;
-use crate::TypedValue;
 use crate::Typedef;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Unit {
-    pub adata: Vector<TypedValue>,
     pub functions: Vector<Function>,
     pub classes: Vector<Class>,
     pub modules: Vector<Module>,

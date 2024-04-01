@@ -162,7 +162,6 @@ impl<'i> Iterator for ListIterMut<'i> {
 }
 
 pub mod instr {
-    use hhbc::AdataId;
     use hhbc::AsTypeStructExceptionKind;
     use hhbc::BareThisOp;
     use hhbc::BytesId;
@@ -207,6 +206,7 @@ pub mod instr {
     use hhbc::SwitchKind;
     use hhbc::TypeStructEnforceKind;
     use hhbc::TypeStructResolveOp;
+    use hhbc::TypedValue;
 
     use crate::InstrSeq;
 

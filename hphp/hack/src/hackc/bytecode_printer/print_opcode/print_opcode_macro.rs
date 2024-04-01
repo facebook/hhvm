@@ -17,7 +17,7 @@
 ///
 /// ```
 /// impl<T> OpcodeDisplay for PrintMe<T> {
-///     fn print_opcode(&self, w: &mut Self::Write) -> Result<(), Self::Error> {
+///     fn print_opcode(&self, w: &mut Self::Write, &mut AdataState) -> Result<(), Self::Error> {
 ///         match self.0 {
 ///             PrintMe::Jmp(target1) => {
 ///                 write!(w, "Jmp ")?;

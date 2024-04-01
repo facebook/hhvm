@@ -105,7 +105,8 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
         impl #impl_generics #struct_name #ty_generics #where_clause {
             #vis fn print_opcode(
                 &self,
-                w: &mut <Self as PrintOpcodeTypes>::Write
+                w: &mut <Self as PrintOpcodeTypes>::Write,
+                adata: &AdataState,
             ) -> std::result::Result<(), <Self as PrintOpcodeTypes>::Error> {
                 match self.get_opcode() {
                     #(#body)*
@@ -205,7 +206,7 @@ impl Attributes {
 fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
     let name = Ident::new(name, Span::call_site());
     match imm {
-        ImmType::AA => quote!(print_adata_id(w, #name)?;),
+        ImmType::AA => quote!(print_adata_id(w, #name, adata)?;),
         ImmType::ARR(_sub_ty) => {
             let msg = format!("unsupported '{}'", name);
             quote!(todo!(#msg);)
@@ -301,7 +302,8 @@ mod tests {
                 impl<T> PrintMe<T> {
                     fn print_opcode(
                         &self,
-                        w: &mut <Self as PrintOpcodeTypes>::Write
+                        w: &mut <Self as PrintOpcodeTypes>::Write,
+                        adata: &AdataState,
                     ) -> std::result::Result<(), <Self as PrintOpcodeTypes>::Error>
                     {
                         match self.get_opcode() {
@@ -328,7 +330,7 @@ mod tests {
                             }
                             Opcode::TestAA(arr1) => {
                                 w.write_all(b"TestAA ")?;
-                                print_adata_id(w, arr1)?;
+                                print_adata_id(w, arr1, adata)?;
                             }
                             Opcode::TestARR(arr1) => {
                                 w.write_all(b"TestARR ")?;

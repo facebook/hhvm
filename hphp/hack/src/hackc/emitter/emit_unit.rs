@@ -71,7 +71,6 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
             loc: pos.into(),
             message: msg.into().into_bytes().into(),
         }),
-        adata: Default::default(),
         functions: Default::default(),
         classes: Default::default(),
         modules: Default::default(),
@@ -166,7 +165,7 @@ fn emit_unit_<'a, 'd>(
     };
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
-    let adata = std::mem::take(&mut emitter.adata_state).finish();
+    let _ = std::mem::take(&mut emitter.adata_state); // clear AdataState
     let module_use = emit_module_use_from_program(prog);
     let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;
@@ -222,7 +221,6 @@ fn emit_unit_<'a, 'd>(
         functions: functions.into(),
         typedefs: typedefs.into(),
         constants: constants.into(),
-        adata: adata.into(),
         file_attributes: file_attributes.into(),
         module_use,
         symbol_refs,

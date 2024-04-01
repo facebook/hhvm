@@ -11,7 +11,6 @@ use hhbc::Opcode;
 use hhbc::Pseudo;
 use hhbc::SrcLoc;
 use hhbc::StringId;
-use hhbc::TypedValue;
 use hhbc_gen::OpcodeData;
 use newtype::IdVec;
 
@@ -44,12 +43,10 @@ use crate::work_queue::WorkQueue;
 ///
 /// Finally we compare the two sequences to make sure that they're equal or we
 /// return an Err (see `Sequence::compare()`).
-pub(crate) fn compare_bodies<'a>(
+pub(crate) fn compare_bodies(
     path: &CodePath<'_>,
     body_a: &hhbc::Body,
-    a_adata: &'a [TypedValue],
     body_b: &hhbc::Body,
-    b_adata: &'a [TypedValue],
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 
@@ -57,7 +54,7 @@ pub(crate) fn compare_bodies<'a>(
     let b = Body::new(body_b);
 
     let mut value_builder = ValueBuilder::new();
-    work_queue.init_from_bodies(&mut value_builder, &a, a_adata, &b, b_adata);
+    work_queue.init_from_bodies(&mut value_builder, &a, &b);
 
     // If we loop more than this number of times it's almost certainly a bug.
     let mut infinite_loop = std::cmp::max(body_a.body_instrs.len(), body_b.body_instrs.len()) * 5;

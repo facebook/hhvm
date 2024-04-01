@@ -37,7 +37,12 @@ pub(crate) fn emit_func(
     labeler: &mut Labeler,
     adata_cache: &mut AdataState,
 ) -> (InstrSeq, Vec<StringId>) {
-    let mut intern_adata = |imm: &Immediate| adata_cache.intern(imm.clone().try_into().unwrap());
+    let mut intern_adata = |imm: &Immediate| {
+        // Identical array literals will be shared between funcs in the same unit.
+        adata_cache
+            .intern_value(imm.clone().try_into().unwrap())
+            .clone()
+    };
     let imm_to_opcode =
         ImmToOpcode::new_from_vec(Vec::from_iter(func.imms.iter().map(|imm| match imm {
             Immediate::Bool(false) => Opcode::False,

@@ -7,7 +7,6 @@ use ffi::Maybe;
 use hash::HashSet;
 use hhbc::Local;
 use hhbc::ParamEntry;
-use hhbc::TypedValue;
 use log::trace;
 
 use crate::body::Body;
@@ -26,12 +25,10 @@ impl<'a> WorkQueue<'a> {
         &mut self,
         value_builder: &mut ValueBuilder<'a>,
         a: &'a Body<'a>,
-        a_adata: &'a [TypedValue],
         b: &'a Body<'a>,
-        b_adata: &'a [TypedValue],
     ) {
-        let mut a_state = State::new(a, "A", a_adata);
-        let mut b_state = State::new(b, "B", b_adata);
+        let mut a_state = State::new(a, "A");
+        let mut b_state = State::new(b, "B");
 
         // Also need to handle entrypoints for defaults!
         for (idx, (ParamEntry { dv: dv_a, .. }, ParamEntry { dv: dv_b, .. })) in a

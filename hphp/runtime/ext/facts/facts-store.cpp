@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-array.h"
@@ -77,25 +78,6 @@ Optional<fs::path> resolvePathRelativeToRoot(
     return std::nullopt;
   return fs::relative(path, root);
 }
-
-/**
- * Cancel the request timeout when created, restart the request timeout when
- * destroyed.
- */
-struct TimeoutSuspender {
-  TimeoutSuspender() : m_timeoutSeconds{RID().getTimeout()} {
-    RID().setTimeout(0);
-  }
-  ~TimeoutSuspender() {
-    RID().setTimeout(m_timeoutSeconds);
-  }
-  int m_timeoutSeconds{0};
-
-  TimeoutSuspender(const TimeoutSuspender&) = delete;
-  TimeoutSuspender& operator=(const TimeoutSuspender&) = delete;
-  TimeoutSuspender(TimeoutSuspender&&) = delete;
-  TimeoutSuspender& operator=(TimeoutSuspender&&) = delete;
-};
 
 constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};

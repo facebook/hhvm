@@ -206,4 +206,25 @@ inline void check_non_safepoint_surprise() {
 
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * Cancel the request timeout when created, restart the request timeout when
+ * destroyed.
+ */
+struct TimeoutSuspender {
+  TimeoutSuspender() : m_timeoutSeconds{RID().getTimeout()} {
+    RID().setTimeout(0);
+  }
+  ~TimeoutSuspender() {
+    RID().setTimeout(m_timeoutSeconds);
+  }
+
+  TimeoutSuspender(const TimeoutSuspender&) = delete;
+  TimeoutSuspender& operator=(const TimeoutSuspender&) = delete;
+  TimeoutSuspender(TimeoutSuspender&&) = delete;
+  TimeoutSuspender& operator=(TimeoutSuspender&&) = delete;
+
+private:
+  int m_timeoutSeconds{0};
+};
+
 }

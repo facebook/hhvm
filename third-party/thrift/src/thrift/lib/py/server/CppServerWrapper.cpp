@@ -772,7 +772,7 @@ class CppServerWrapper : public ThriftServer {
   }
 
   void setNumCPUWorkerThreads(size_t numCPUWorkerThreads) {
-    BaseThriftServer::setNumCPUWorkerThreads(numCPUWorkerThreads);
+    ThriftServer::setNumCPUWorkerThreads(numCPUWorkerThreads);
   }
 
   void setWrapperName(object wrapperName) {

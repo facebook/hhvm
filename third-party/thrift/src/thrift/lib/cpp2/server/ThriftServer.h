@@ -65,6 +65,7 @@
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>
+#include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
@@ -325,7 +326,165 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     return threadManager_.get();
   }
 
+  /**
+   * Set the default priority for CPU worker threads. This will only apply when
+   * the thread manager type is SIMPLE or PRIORITY_QUEUE.
+   */
+  void setCPUWorkerThreadPriority(
+      concurrency::PosixThreadFactory::THREAD_PRIORITY priority) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    CHECK(!threadFactory_);
+    threadPriority_ = priority;
+  }
+
+  /**
+   * Set the ThreadFactory that will be used to create worker threads for the
+   * service.  If not set, a default factory will be used.  Must be called
+   * before the thread manager is started.
+   */
+  void setThreadFactory(
+      std::shared_ptr<concurrency::ThreadFactory> threadFactory) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    CHECK(!threadPriority_);
+    threadFactory_ = std::move(threadFactory);
+  }
+
+  /**
+   * Set the type of ThreadManager to use for this server.
+   */
+  void setThreadManagerType(ThreadManagerType threadManagerType) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    threadManagerType_ = threadManagerType;
+  }
+
+  /**
+   * Set the size of thread pools when using ThreadManagerType::PRIORITY
+   */
+  void setThreadManagerPoolSizes(
+      const std::array<size_t, concurrency::N_PRIORITIES>& poolSizes) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    for (std::size_t i = 0; i < concurrency::N_PRIORITIES; ++i) {
+      threadManagerPrioritiesAndPoolSizes_[i].second = poolSizes[i];
+    }
+  }
+
+  /**
+   * Set the priority and size of thread pools when using
+   * ThreadManagerType::PRIORITY.
+   */
+  void setThreadManagerPrioritiesAndPoolSizes(
+      const std::array<
+          std::pair<
+              apache::thrift::concurrency::PosixThreadFactory::THREAD_PRIORITY,
+              size_t>,
+          concurrency::N_PRIORITIES>& poolPrioritiesAndSizes) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    threadManagerPrioritiesAndPoolSizes_ = poolPrioritiesAndSizes;
+  }
+
+  /**
+   * Set the executors to use for ThreadManagerType::EXECUTOR_ADAPTER
+   */
+  void setThreadManagerExecutors(
+      std::array<std::shared_ptr<folly::Executor>, concurrency::N_PRIORITIES>
+          executors) {
+    threadManagerExecutors_ = executors;
+  }
+
+  void setThreadManagerExecutor(std::shared_ptr<folly::Executor> executor) {
+    threadManagerExecutors_.fill(executor);
+  }
+
+  void setThreadManagerExecutor(folly::Executor::KeepAlive<> ka) {
+    auto executor = std::make_shared<folly::VirtualExecutor>(std::move(ka));
+    threadManagerExecutors_.fill(executor);
+  }
+
+  void setThreadFactoryInit(
+      std::function<void()>&& threadInitializer,
+      std::function<void()>&& threadFinalizer = [] {}) {
+    // These must be valid callables
+    CHECK(threadInitializer);
+    CHECK(threadFinalizer);
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    CHECK(!threadManager_);
+    threadInitializer_ = std::move(threadInitializer);
+    threadFinalizer_ = std::move(threadFinalizer);
+  }
+
+  /**
+   * Get Thread Manager (for queuing mode).
+   *
+   * @return a shared pointer to the thread manager
+   */
+  std::shared_ptr<concurrency::ThreadManager> getThreadManager_deprecated()
+      const override {
+    std::shared_lock lock(threadManagerMutex_);
+    return tmLoggingWrapper_;
+  }
+
+  std::shared_ptr<folly::Executor> getThreadManager() const override {
+    std::shared_lock lock(threadManagerMutex_);
+    return threadManager_;
+  }
+
  private:
+  //! The type of thread manager to create.
+  ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
+
+  //! The thread pool sizes and priorities for priority thread manager.
+  //! If any of the pool sizes are set to non-zero then we will use this.
+  std::array<
+      std::pair<
+          apache::thrift::concurrency::PosixThreadFactory::THREAD_PRIORITY,
+          size_t>,
+      concurrency::N_PRIORITIES>
+      threadManagerPrioritiesAndPoolSizes_{
+          {{concurrency::PosixThreadFactory::HIGHER_PRI, 0},
+           {concurrency::PosixThreadFactory::HIGH_PRI, 0},
+           {concurrency::PosixThreadFactory::HIGH_PRI, 0},
+           {concurrency::PosixThreadFactory::NORMAL_PRI, 0},
+           {concurrency::PosixThreadFactory::LOWER_PRI, 0}}};
+
+  //! Executors to use for ThreadManagerExecutorAdapter.
+  std::array<std::shared_ptr<folly::Executor>, concurrency::N_PRIORITIES>
+      threadManagerExecutors_;
+
+  /**
+   * The thread manager used for sync calls.
+   */
+  mutable folly::SharedMutex threadManagerMutex_;
+  std::shared_ptr<apache::thrift::concurrency::ThreadManager> threadManager_;
+  // we need to make the wrapper stick to the server because the users calling
+  // getThreadManager are relying on the server to maintatin the tm lifetime
+  std::shared_ptr<apache::thrift::ThreadManagerLoggingWrapper>
+      tmLoggingWrapper_;
+
+  // Thread factory hooks if required. threadInitializer_ will be called when
+  // the thread is started before it starts handling requests and
+  // threadFinalizer_ will be called before the thread exits.
+  std::function<void()> threadInitializer_;
+  std::function<void()> threadFinalizer_;
+
+  // If set, the thread factory that should be used to create worker threads.
+  std::shared_ptr<concurrency::ThreadFactory> threadFactory_;
+
+  // The default thread priority to use (only applies to SIMPLE or
+  // PRIORITY_QUEUE ThreadManagerType and if no threadFactory supplied)
+  std::optional<concurrency::PosixThreadFactory::THREAD_PRIORITY>
+      threadPriority_;
+
   //! The ResourcePoolsSet used by this ThriftServer (if in ResourcePools
   //! are enabled).
   ResourcePoolSet resourcePoolSet_;
@@ -340,6 +499,21 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   CPUConcurrencyController cpuConcurrencyController_;
 
   IsOverloadedFunc isOverloaded_;
+
+  // This is meant to be used internally
+  // We separate setThreadManager and configureThreadManager
+  // so that we can have proper logging for the former
+  // These APIs will be deprecated eventually when ResourcePool
+  // migration is done.
+  void setThreadManagerInternal(
+      std::shared_ptr<apache::thrift::concurrency::ThreadManager>
+          threadManager) {
+    CHECK(configMutable());
+    std::lock_guard lock(threadManagerMutex_);
+    threadManager_ = threadManager;
+    tmLoggingWrapper_ =
+        std::make_shared<ThreadManagerLoggingWrapper>(threadManager_, this);
+  }
 
  public:
   AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {
@@ -388,6 +562,33 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     thriftConfig_.setMaxRequests(
         folly::observer::makeStaticObserver(std::optional{maxRequests}),
         AttributeSource::OVERRIDE);
+  }
+
+  /**
+   * Get the number of CPU (pool) threads
+   *
+   * @return number of CPU (pool) threads
+   */
+  size_t getNumCPUWorkerThreads() const {
+    return thriftConfig_.getNumCPUWorkerThreads();
+  }
+
+  /**
+   * Set the number of CPU (pool) threads.
+   * Only valid if you do not also set a threadmanager. This controls the number
+   * of normal priority threads; the Thrift thread manager can create additional
+   * threads for other priorities.
+   * If set to 0, the number of normal priority threads will be the same as
+   * number of CPU cores.
+   *
+   * @param number of CPU (pool) threads
+   */
+  void setNumCPUWorkerThreads(
+      size_t numCPUWorkerThreads,
+      AttributeSource source = AttributeSource::OVERRIDE) {
+    CHECK(!threadManager_);
+    thriftConfig_.setNumCPUWorkerThreads(
+        std::move(numCPUWorkerThreads), source);
   }
 
  private:

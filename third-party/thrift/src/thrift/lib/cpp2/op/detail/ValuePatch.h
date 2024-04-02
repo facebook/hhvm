@@ -126,18 +126,25 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       return op::decode<type::struct_t<Patch>>(prot, data_);
     }
 
-    auto result = protocol::detail::parseValue(prot, protocol::T_STRUCT);
-    data_ = protocol::fromValueStruct<type::struct_t<Patch>>(result);
-    if (data_.assign()) {
-      dynPatch_.reset();
-    } else {
-      dynPatch_ = std::move(result.as_object());
-    }
+    createFromObject(
+        protocol::detail::parseValue(prot, TType::T_STRUCT).as_object());
   }
 
  private:
   using Base::data_;
   std::optional<protocol::Object> dynPatch_;
+
+  void createFromObject(protocol::Object v) {
+    data_ = protocol::fromObjectStruct<type::struct_t<Patch>>(v);
+    if (data_.assign()) {
+      dynPatch_.reset();
+    } else {
+      dynPatch_ = std::move(v);
+    }
+  }
+
+  template <typename>
+  friend struct protocol::detail::ProtocolValueToThriftValue;
 };
 
 /// Patch for a Thrift bool.
@@ -546,5 +553,29 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
 
 } // namespace detail
 } // namespace op
+namespace protocol::detail {
+
+// When converting protocol::Object to AssignPatch, we need special logic here
+// to handle the case when protocol::Object is a dynamic patch and it might
+// contain operations other than assign.
+template <typename PatchStruct>
+struct ProtocolValueToThriftValue<type::adapted<
+    InlineAdapter<op::detail::AssignPatch<PatchStruct>>,
+    type::struct_t<PatchStruct>>> {
+  bool operator()(
+      const Object& obj, op::detail::AssignPatch<PatchStruct>& patch) {
+    patch.createFromObject(obj);
+    return true;
+  }
+  bool operator()(
+      const Value& obj, op::detail::AssignPatch<PatchStruct>& patch) {
+    if (auto p = obj.if_object()) {
+      operator()(*p, patch);
+      return true;
+    }
+    return false;
+  }
+};
+} // namespace protocol::detail
 } // namespace thrift
 } // namespace apache

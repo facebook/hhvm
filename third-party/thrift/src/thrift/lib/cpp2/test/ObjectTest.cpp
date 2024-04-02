@@ -314,6 +314,10 @@ TEST(ObjectTest, DirectlyAdaptedStruct) {
   const Object& object = *value.objectValue_ref();
   EXPECT_EQ(object.members_ref()->size(), 1);
   EXPECT_EQ(object.members_ref()->at(1), asValueStruct<type::i64_t>(42));
+
+  apache::thrift::test::basic::DirectlyAdaptedStruct s2;
+  detail::ProtocolValueToThriftValue<Tag>{}(value, s2);
+  EXPECT_EQ(s, s2);
 }
 
 TEST(ObjectTest, parseObject) {
@@ -1452,12 +1456,14 @@ void testSerializeValue(
   reader1.setInput(&buf1);
   reader2.setInput(&buf2);
 
-  type::native_type<Tag> t1, t2;
+  type::native_type<Tag> t1, t2, t3;
   op::decode<Tag>(reader1, t1);
   op::decode<Tag>(reader2, t2);
+  detail::ProtocolValueToThriftValue<Tag>{}(asValueStruct<Tag>(t), t3);
 
   EXPECT_EQ(t, t1);
   EXPECT_EQ(t, t2);
+  EXPECT_EQ(t, t3);
 
   EXPECT_TRUE(!deterministic || folly::IOBufEqualTo{}(buf1, buf2));
 }
@@ -1487,6 +1493,44 @@ TEST(ObjectTest, SerializeValueSize) {
 
   // Result is not deterministic since field id can be out of order
   testSerializeValue<type::struct_t<Bar>>(bar, false);
+}
+
+TEST(ObjectTest, Adapter) {
+  using test::basic::AdaptTestStruct;
+  AdaptTestStruct s;
+  s.timeout() = std::chrono::seconds(1);
+  s.data()->value = 10;
+  s.indirectionString()->val = "20";
+  s.double_wrapped_integer()->value.value = 30;
+  s.custom()->val = 40;
+  using Tag = type::struct_t<AdaptTestStruct>;
+  EXPECT_EQ(fromObjectStruct<Tag>(asValueStruct<Tag>(s).as_object()), s);
+}
+
+TEST(ObjectTest, ToThriftStructTypeMismatch) {
+  using facebook::thrift::lib::test::Bar;
+  using Tag = type::struct_t<Bar>;
+
+  Bar bar;
+  bar.field_3() = {"foo", "bar", "baz"};
+  bar.field_4()->field_1() = 42;
+  bar.field_4()->field_2() = "Everything";
+
+  {
+    auto obj = asValueStruct<Tag>(bar).as_object();
+    obj[FieldId{10}].as_list()[2].emplace_i32();
+    auto bar2 = fromObjectStruct<Tag>(obj);
+    EXPECT_TRUE(bar2.field_3()->empty());
+    EXPECT_EQ(bar2.field_4(), bar.field_4());
+  }
+  {
+    auto obj = asValueStruct<Tag>(bar).as_object();
+    obj[FieldId{20}].as_object()[FieldId{2}].emplace_i32();
+    auto bar2 = fromObjectStruct<Tag>(obj);
+    EXPECT_EQ(bar2.field_3(), bar.field_3());
+    EXPECT_EQ(bar2.field_4()->field_1(), 42);
+    EXPECT_EQ(bar2.field_4()->field_2(), "");
+  }
 }
 
 } // namespace

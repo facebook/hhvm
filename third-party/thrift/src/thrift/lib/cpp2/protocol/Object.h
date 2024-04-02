@@ -157,17 +157,17 @@ Value parseValue(const folly::IOBuf& buf, bool string_to_binary = true) {
 /// Convert protocol::Value to native thrift value.
 template <class Tag>
 auto fromValueStruct(const protocol::Value& v) {
-  // TODO: Use always-on reflection to optimize the performance.
-  return detail::deserializeBinaryProtocol<Tag>(
-      serializeValue<BinaryProtocolWriter>(v).get());
+  type::native_type<Tag> t;
+  detail::ProtocolValueToThriftValue<Tag>{}(v, t);
+  return t;
 }
 
 /// Convert protocol::Object to native thrift value.
 template <class Tag>
 auto fromObjectStruct(const protocol::Object& o) {
-  // TODO: Use always-on reflection to optimize the performance.
-  return detail::deserializeBinaryProtocol<Tag>(
-      serializeObject<BinaryProtocolWriter>(o).get());
+  type::native_type<Tag> t;
+  detail::ProtocolValueToThriftValue<Tag>{}(o, t);
+  return t;
 }
 
 // Returns whether the protocol::Value/ Object is its intrinsic default.

@@ -24,9 +24,11 @@
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
 #include <folly/Utility.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/GetStandardProtocol.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
@@ -944,14 +946,327 @@ type::AnyData toAny(
   return type::AnyData{data};
 }
 
-template <class Tag>
-auto deserializeBinaryProtocol(folly::IOBuf* buf) {
-  BinaryProtocolReader reader;
-  reader.setInput(buf);
-  type::native_type<Tag> t;
-  op::decode<Tag>(reader, t);
-  return t;
-}
+template <typename Tag>
+struct ProtocolValueToThriftValue;
+
+template <>
+struct ProtocolValueToThriftValue<type::bool_t> {
+  // return whether conversion succeed
+  template <typename T>
+  bool operator()(const Value& value, T& b) const {
+    if (auto p = value.if_bool()) {
+      b = *p;
+      return true;
+    }
+
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::byte_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& i) const {
+    if (auto p = value.if_byte()) {
+      i = *p;
+      return true;
+    }
+
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::i16_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& i) const {
+    if (auto p = value.if_i16()) {
+      i = *p;
+      return true;
+    }
+
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::i32_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& i) const {
+    if (auto p = value.if_i32()) {
+      i = *p;
+      return true;
+    }
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::i64_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& i) const {
+    if (auto p = value.if_i64()) {
+      i = *p;
+      return true;
+    }
+
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::float_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& f) const {
+    if (auto p = value.if_float()) {
+      f = *p;
+      return true;
+    }
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::double_t> {
+  template <typename T>
+  bool operator()(const Value& value, T& d) const {
+    if (auto p = value.if_double()) {
+      d = *p;
+      return true;
+    }
+    return false;
+  }
+};
+
+template <>
+struct ProtocolValueToThriftValue<type::string_t> {
+  template <typename StrType>
+  bool operator()(const Value& value, StrType& s) const {
+    if (auto p = value.if_string()) {
+      s = *p;
+      return true;
+    }
+    if (auto p = value.if_binary()) {
+      s.clear();
+      folly::io::Cursor cursor{&*p};
+      while (!cursor.isAtEnd()) {
+        const auto buf = cursor.peekBytes();
+        s.append((const char*)buf.data(), buf.size());
+        cursor += buf.size();
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  bool operator()(const Value& value, std::unique_ptr<folly::IOBuf>& s) const {
+    if (auto p = value.if_string()) {
+      s = folly::IOBuf::copyBuffer(p->data(), p->size());
+      return true;
+    }
+    if (auto p = value.if_binary()) {
+      s = p->clone();
+      return true;
+    }
+
+    return false;
+  }
+
+  bool operator()(const Value& value, folly::IOBuf& s) const {
+    std::unique_ptr<folly::IOBuf> buf;
+    if (auto ret = operator()(value, buf)) {
+      s = *buf;
+      return true;
+    }
+    return false;
+  }
+};
+
+// We can't distinguish string/binary type in binary/compact protocol,
+// Thus we need to handle them in the same way.
+template <>
+struct ProtocolValueToThriftValue<type::binary_t>
+    : ProtocolValueToThriftValue<type::string_t> {};
+
+template <typename T>
+struct ProtocolValueToThriftValue<type::enum_t<T>> {
+  template <typename U>
+  bool operator()(const Value& value, U& t) const {
+    if (auto p = value.if_i32()) {
+      t = static_cast<T>(*p);
+      return true;
+    }
+    return false;
+  }
+};
+
+template <typename Tag>
+struct ProtocolValueToThriftValue<type::list<Tag>> {
+  template <typename ListType>
+  bool operator()(const Value& value, ListType& list) const {
+    auto p = value.if_list();
+    if (!p) {
+      return false;
+    }
+    list.clear();
+    apache::thrift::detail::pm::reserve_if_possible(&list, p->size());
+    for (auto&& v : *p) {
+      if (!ProtocolValueToThriftValue<Tag>{}(v, list.emplace_back())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+};
+
+template <typename Tag>
+struct ProtocolValueToThriftValue<type::set<Tag>> {
+  template <typename SetType>
+  bool operator()(const Value& value, SetType& set) const {
+    type::native_type<Tag> elem;
+    auto p = value.if_set();
+
+    if (!p) {
+      return false;
+    }
+
+    set.clear();
+    apache::thrift::detail::pm::reserve_if_possible(&set, p->size());
+    for (auto&& v : *p) {
+      apache::thrift::op::clear<Tag>(elem);
+      if (!ProtocolValueToThriftValue<Tag>{}(v, elem)) {
+        return false;
+      }
+      set.emplace_hint(set.end(), std::move(elem));
+    }
+
+    return true;
+  }
+};
+
+template <typename KeyTag, typename ValueTag>
+struct ProtocolValueToThriftValue<type::map<KeyTag, ValueTag>> {
+  template <typename MapType>
+  bool operator()(const Value& value, MapType& map) const {
+    type::native_type<KeyTag> key;
+    type::native_type<ValueTag> val;
+    auto p = value.if_map();
+    if (!p) {
+      return false;
+    }
+    map.clear();
+    apache::thrift::detail::pm::reserve_if_possible(&map, p->size());
+    for (auto&& [k, v] : *p) {
+      apache::thrift::op::clear<KeyTag>(key);
+      apache::thrift::op::clear<ValueTag>(val);
+      if (!ProtocolValueToThriftValue<KeyTag>{}(k, key)) {
+        return false;
+      }
+      if (!ProtocolValueToThriftValue<ValueTag>{}(v, val)) {
+        return false;
+      }
+      map.emplace_hint(map.end(), std::move(key), std::move(val));
+    }
+    return true;
+  }
+};
+
+template <typename T, typename Tag>
+struct ProtocolValueToThriftValue<type::cpp_type<T, Tag>>
+    : ProtocolValueToThriftValue<Tag> {};
+
+template <typename Adapter, typename Tag>
+struct ProtocolValueToThriftValue<type::adapted<Adapter, Tag>> {
+  template <typename ObjectOrValue, typename U>
+  bool operator()(const ObjectOrValue& value, U& m) const {
+    // TODO: Optimize in-place adapter
+    type::native_type<Tag> orig;
+    auto ret = ProtocolValueToThriftValue<Tag>{}(value, orig);
+    m = Adapter::fromThrift(std::move(orig));
+    return ret;
+  }
+};
+
+template <typename Tag, typename Struct, int16_t FieldId>
+struct ProtocolValueToThriftValue<
+    type::field<Tag, FieldContext<Struct, FieldId>>> {
+  template <typename ObjectOrValue, typename U>
+  bool operator()(const ObjectOrValue& value, U& m, Struct&) const {
+    return ProtocolValueToThriftValue<Tag>{}(value, m);
+  }
+};
+
+template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
+struct ProtocolValueToThriftValue<
+    type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
+  using field_adapted_tag =
+      type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
+  static_assert(type::is_concrete_v<field_adapted_tag>);
+
+  template <typename ObjectOrValue, typename U, typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, bool>
+      operator()(const ObjectOrValue& value, U& m, Struct&) const {
+    return ProtocolValueToThriftValue<type::adapted<Adapter, Tag>>{}(value, m);
+  }
+
+  template <typename ObjectOrValue, typename U, typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, bool>
+      operator()(const ObjectOrValue& value, U& m, Struct& strct) const {
+    // TODO: Optimize in-place adapter
+    type::native_type<Tag> orig;
+    bool ret = ProtocolValueToThriftValue<Tag>{}(value, orig);
+    m = adapt_detail::fromThriftField<Adapter, FieldId>(std::move(orig), strct);
+    return ret;
+  }
+};
+
+template <class T>
+struct ProtocolValueToThriftValueStructure {
+  bool operator()(const Object& obj, T& s) const {
+    for (auto&& kv : obj) {
+      op::invoke_by_field_id<T>(
+          static_cast<FieldId>(kv.first),
+          [&](auto id) {
+            using Id = decltype(id);
+            op::get_native_type<T, Id> t;
+            if (ProtocolValueToThriftValue<op::get_field_tag<T, Id>>{}(
+                    kv.second, t, s)) {
+              using Ref = op::get_field_ref<T, Id>;
+              if constexpr (apache::thrift::detail::is_shared_or_unique_ptr_v<
+                                Ref>) {
+                op::get<Id>(s) =
+                    std::make_unique<op::get_native_type<T, Id>>(std::move(t));
+              } else {
+                op::get<Id>(s) = std::move(t);
+              }
+            }
+          },
+          [] {});
+    }
+    return true;
+  }
+  bool operator()(const Value& value, T& s) const {
+    if (auto p = value.if_object()) {
+      operator()(*p, s);
+      return true;
+    }
+    return false;
+  }
+};
+
+template <typename T>
+struct ProtocolValueToThriftValue<type::struct_t<T>>
+    : ProtocolValueToThriftValueStructure<T> {};
+template <typename T>
+struct ProtocolValueToThriftValue<type::union_t<T>>
+    : ProtocolValueToThriftValueStructure<T> {};
+template <typename T>
+struct ProtocolValueToThriftValue<type::exception_t<T>>
+    : ProtocolValueToThriftValueStructure<T> {};
 
 } // namespace detail
 } // namespace apache::thrift::protocol

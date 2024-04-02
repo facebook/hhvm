@@ -30,6 +30,7 @@ from testing.thrift_types import (
     ValueOrError,
 )
 from thrift.python.exceptions import (
+    ApplicationError,
     ApplicationErrorType,
     Error,
     TransportError,
@@ -54,6 +55,15 @@ class ExceptionTests(unittest.TestCase):
         z = UnfriendlyError(errortext="WAT!", code=22)
         self.assertNotEqual(z.errortext, str(z))
         self.assertNotEqual(str(y), str(z))
+
+    def test_application_error_fmt(self) -> None:
+        # TODO: make this like the below to match thrift-py3 version, which
+        # formats as "ApplicationErrorType.UNKNOWN".
+        # The python.ApplicationErrorType behavior is incorrect
+        self.assertEqual(f"{ApplicationErrorType.UNKNOWN}", "0")
+        err = ApplicationError(ApplicationErrorType.UNKNOWN, "oops")
+        self.assertIsInstance(err.type, ApplicationErrorType)
+        self.assertEqual(f"{err.type}", "0")
 
     def test_creation(self) -> None:
         msg = "something broke"

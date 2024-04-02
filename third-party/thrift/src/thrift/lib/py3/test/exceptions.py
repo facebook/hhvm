@@ -57,6 +57,14 @@ class ExceptionTests(unittest.TestCase):
         self.assertNotEqual(z.errortext, str(z))
         self.assertNotEqual(str(y), str(z))
 
+    def test_application_error_fmt(self) -> None:
+        self.assertEqual(
+            f"{ApplicationErrorType.UNKNOWN}", "ApplicationErrorType.UNKNOWN"
+        )
+        err = ApplicationError(ApplicationErrorType.UNKNOWN, "oops")
+        self.assertIsInstance(err.type, ApplicationErrorType)
+        self.assertEqual(f"{err.type}", "ApplicationErrorType.UNKNOWN")
+
     def test_creation_optional_from_python(self) -> None:
         msg = "something broke"
         UnusedError()

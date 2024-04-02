@@ -27,7 +27,7 @@ class Exception : public std::exception {
   explicit Exception(std::string const& msg);
   explicit Exception(const char* msg);
   Exception(const Exception&);
-  Exception(Exception& other) : Exception(folly::as_const(other)) {
+  Exception(Exception& other) : Exception(std::as_const(other)) {
   }
   Exception(Exception&&) noexcept;
 

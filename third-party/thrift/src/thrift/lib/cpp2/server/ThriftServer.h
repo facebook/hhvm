@@ -183,6 +183,17 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   };
 
   /**
+   * Behavior when a thrift client calls server with legacy transport, ie,
+   * header. Default behavior is determined by thrift flags
+   */
+  enum class LegacyTransport : int {
+    DEFAULT = 0, // Use thrift flags(server_header_reject_all) to decide whether
+                 // to reject or allow header traffic
+    DISABLED = 1, // Always reject header traffic
+    ALLOWED = 2, // Always allow header traffic
+  };
+
+  /**
    * The type of thread manager to create for the server.
    */
   enum class ThreadManagerType : int {
@@ -471,11 +482,19 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     return threadManager_;
   }
 
+  // Define Server behavior to allow or reject header traffic
+  void setLegacyTransport(LegacyTransport value) { legacyTransport_ = value; }
+
+  LegacyTransport getLegacyTransport() const { return legacyTransport_; }
+
   const Metadata& metadata() const { return metadata_; }
 
   Metadata& metadata() { return metadata_; }
 
  private:
+  // Server behavior to wrt header traffic
+  LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
+
   Metadata metadata_;
 
   //! The type of thread manager to create.

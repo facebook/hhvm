@@ -3698,7 +3698,7 @@ TEST(ThriftServer, RocketOnly) {
   auto serv = factory.create();
   ScopedServerThread sst(serv);
   serv->setLegacyTransport(
-      apache::thrift::BaseThriftServer::LegacyTransport::DISABLED);
+      apache::thrift::ThriftServer::LegacyTransport::DISABLED);
   folly::EventBase base;
 
   // Header rejected
@@ -3737,7 +3737,7 @@ TEST(ThriftServer, DisableHeaderReject) {
   auto serv = factory.create();
   ScopedServerThread sst(serv);
   serv->setLegacyTransport(
-      apache::thrift::BaseThriftServer::LegacyTransport::DISABLED);
+      apache::thrift::ThriftServer::LegacyTransport::DISABLED);
   folly::EventBase base;
 
   // Header traffic rejected
@@ -3753,7 +3753,7 @@ TEST(ThriftServer, DisableHeaderReject) {
   // Disabled header reject and connection accepted
   try {
     serv->setLegacyTransport(
-        apache::thrift::BaseThriftServer::LegacyTransport::ALLOWED);
+        apache::thrift::ThriftServer::LegacyTransport::ALLOWED);
     Client<TestService> client(HeaderClientChannel::newChannel(
         HeaderClientChannel::WithRocketUpgrade{},
         folly::AsyncSocket::newSocket(&base, *sst.getAddress())));

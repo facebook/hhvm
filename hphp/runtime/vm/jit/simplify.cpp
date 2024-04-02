@@ -174,7 +174,9 @@ DEBUG_ONLY bool validate(const State& env,
           (oldSrc->inst()->is(NewRFunc) &&
              canonical(oldSrc->inst()->src(1)) == src) ||
           (oldSrc->inst()->is(NewRClsMeth) &&
-             canonical(oldSrc->inst()->src(2)) == src)) {
+             canonical(oldSrc->inst()->src(2)) == src) ||
+          (oldSrc->inst()->is(ConstructClosure) &&
+             canonical(oldSrc->inst()->src(0)) == src)) {
         return true;
       }
     }
@@ -416,6 +418,19 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyLdClosureCtx(State& env, const IRInstruction* inst) {
+  auto const closure = canonical(inst->src(0));
+  if (!closure->inst()->is(ConstructClosure)) return nullptr;
+  return gen(env, AssertType, inst->typeParam(), closure->inst()->src(0));
+}
+
+SSATmp* simplifyLdClosureCls(State& env, const IRInstruction* inst) {
+  return simplifyLdClosureCtx(env, inst);
+}
+
+SSATmp* simplifyLdClosureThis(State& env, const IRInstruction* inst) {
+  return simplifyLdClosureCtx(env, inst);
+}
 
 SSATmp* simplifyLdFuncCls(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
@@ -4099,6 +4114,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdStructDictVal)
       X(LdTypeStructureVal)
       X(MethodExists)
+      X(LdClosureCls)
+      X(LdClosureThis)
       X(LdFuncCls)
       X(LdFuncInOutBits)
       X(LdFuncNumParams)

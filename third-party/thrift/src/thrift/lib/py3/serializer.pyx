@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from thrift.py3.exceptions cimport Error, GeneratedError as Py3GeneratedError
+from thrift.py3.exceptions cimport BaseError, GeneratedError as Py3GeneratedError
 from thrift.py3.types cimport Struct as Py3Struct
 from thrift.python.exceptions cimport GeneratedError as PythonGeneratedError
 from thrift.python.types cimport StructOrUnion as PythonStruct
@@ -52,7 +52,7 @@ def deserialize_with_length(structKlass, buf not None, protocol=Protocol.COMPACT
             length = (<Py3GeneratedError>instance)._fbthrift_deserialize(iobuf._this, protocol)
         return instance, length
     except Exception as e:
-        raise Error.__new__(Error, *e.args) from None
+        raise BaseError.__new__(BaseError, *e.args) from None
 
 
 def deserialize(structKlass, buf not None, protocol=Protocol.COMPACT):
@@ -84,7 +84,7 @@ def deserialize_from_header(structKlass, buf not None):
     try:
         cbuf = _fbthrift_iobuf.move(header.removeHeader(&queue, needed, pheaders))
     except Exception as e:
-        raise Error.__new__(Error, *e.args) from None
+        raise BaseError.__new__(BaseError, *e.args) from None
     if cbuf == NULL:
         raise BufferError("Bad data used for deserialize")
     protoid = Protocol(header.getProtocolId())

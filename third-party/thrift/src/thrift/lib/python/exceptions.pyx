@@ -23,7 +23,8 @@ from libcpp.utility cimport move as cmove
 
 cdef class Error(Exception):
     """base class for all thrift exceptions (TException)"""
-    pass
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
 cdef class ApplicationError(Error):

@@ -17,6 +17,7 @@ import types
 import typing
 
 class Error(Exception):
+    def __init__(self, *args: object) -> None: ...
     pass
 
 class ApplicationErrorType(enum.Enum):

@@ -17,6 +17,7 @@ from cpython.exc cimport PyErr_Occurred
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from libcpp.vector cimport vector
 from thrift.py3.common import RpcOptions
+from thrift.python.exceptions import Error
 
 from enum import Enum, Flag
 import itertools
@@ -70,21 +71,17 @@ class ProtocolErrorType(Enum):
     MISSING_REQUIRED_FIELD = cTProtocolExceptionType__MISSING_REQUIRED_FIELD
 
 
-cdef class Error(Exception):
-    """base class for all thrift exceptions (TException)"""
-    def __init__(self, *args):
-        super().__init__(*args)
 
 
 cdef create_Error(const cTException* ex):
     if not ex:
         return
     message = (<bytes>deref(ex).what()).decode('utf-8')
-    inst = <Error>Error.__new__(Error, message)
+    inst = <BaseError>BaseError.__new__(BaseError, message)
     return inst
 
 
-cdef class GeneratedError(Error):
+cdef class GeneratedError(BaseError):
     """This is the base class for all Generated Thrift Exceptions"""
 
     def __init__(self, *args, **kwargs):
@@ -163,7 +160,7 @@ cdef class GeneratedError(Error):
         raise NotImplementedError()
 
 
-cdef class ApplicationError(Error):
+cdef class ApplicationError(BaseError):
     """All Application Level Errors (TApplicationException)"""
 
     def __init__(ApplicationError self, type, str message):
@@ -195,7 +192,7 @@ cdef create_ApplicationError(const cTApplicationException* ex):
     return inst
 
 
-cdef class LibraryError(Error):
+cdef class LibraryError(BaseError):
     """Equivalent of a C++ TLibraryException"""
     def __init__(self, *args):
         super().__init__(*args)
@@ -275,7 +272,7 @@ cdef create_TransportError(const cTTransportException* ex):
 
 
 # Our Registry
-cdef vector[Handler] handlers;
+cdef vector[Handler] handlers
 
 
 cdef void addHandler(Handler handler):

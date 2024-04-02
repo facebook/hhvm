@@ -30,11 +30,8 @@ NAMESPACES = {
 
 table = []
 
-val_list = list(range(100))
-val_set = set(range(100))
 
-
-INIT_STATEMENT = f"""
+INIT_STATEMENT_MyStruct = """
 inst = MyStruct(
     val_bool=True,
     val_i32=42,
@@ -79,9 +76,9 @@ def benchmark_import():
     )
 
 
-def benchmark_init():
+def benchmark_init(init_statement: str, desc: str):
     def benchmark_single(flavor) -> float:
-        timer = timeit.Timer(stmt=INIT_STATEMENT, setup=get_import(flavor))
+        timer = timeit.Timer(stmt=init_statement, setup=get_import(flavor))
         results = timer.repeat(REPEAT, 1)
         min_value_ms = min(results) * 1000
         return f"{min_value_ms:.6f} ms"
@@ -90,7 +87,7 @@ def benchmark_init():
     print(
         tabulate(
             table,
-            headers=["Init", ""],
+            headers=[f"Init ({desc})", ""],
             tablefmt="github",
         )
     )
@@ -99,7 +96,12 @@ def benchmark_init():
 def benchmark_field_access():
     def benchmark_single(flavor, field_name, cached) -> float:
         access = f"_ = inst.{field_name}"
-        setup = f"{get_import(flavor)}; {INIT_STATEMENT}"
+        val_list = list(range(100))
+        val_set = set(range(100))
+        init_statement = INIT_STATEMENT_MyStruct.format(
+            val_list=val_list, val_set=val_set
+        )
+        setup = f"{get_import(flavor)}; {init_statement}"
         if cached:
             setup = f"{setup}\n{access}"
         timer = timeit.Timer(
@@ -271,7 +273,10 @@ from thrift.python.serializer import deserialize, serialize
 
 
 def get_serialize_setup(flavor: str) -> str:
-    return f"{get_import(flavor)}\n{INIT_STATEMENT}\n{SERIALIZER_IMPORT[flavor]}"
+    val_list = list(range(100))
+    val_set = set(range(100))
+    init_statement = INIT_STATEMENT_MyStruct.format(val_list=val_list, val_set=val_set)
+    return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT[flavor]}"
 
 
 def get_deserialize_setup(flavor: str) -> str:
@@ -330,7 +335,16 @@ def import_benchmark() -> None:
 
 @click.command()
 def init_benchmark() -> None:
-    benchmark_init()
+    for size in [1, 100, 1000]:
+        val_list = list(range(size))
+        val_set = set(range(size))
+        init_statement = INIT_STATEMENT_MyStruct.format(
+            val_list=val_list, val_set=val_set
+        )
+        benchmark_init(
+            init_statement, f"MyStruct with {size} elements for set and list"
+        )
+        print("\n")
 
 
 @click.command()

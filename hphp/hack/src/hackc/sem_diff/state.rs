@@ -1188,7 +1188,7 @@ impl<'a> State<'a> {
     }
 
     fn is_decl_var(&self, local: &Local) -> bool {
-        let idx = local.idx as usize;
+        let idx = local.index();
         let params_len = self.body.hhbc_body.params.len();
         let decl_vars_len = self.body.hhbc_body.decl_vars.len();
         params_len <= idx && idx < params_len + decl_vars_len

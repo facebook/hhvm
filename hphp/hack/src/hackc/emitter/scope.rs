@@ -129,8 +129,8 @@ where
 
 fn unset_unnamed_locals(start: Local, end: Local) -> InstrSeq {
     InstrSeq::gather(
-        (start.idx..end.idx)
-            .map(|idx| instr::unset_l(Local::new(idx as usize)))
+        (start.index()..end.index())
+            .map(|i| instr::unset_l(Local::new(i)))
             .collect(),
     )
 }

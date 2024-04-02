@@ -200,11 +200,11 @@ fn update_ant(inst: &Instruct, ant: &mut BitSet, catch_ant: Option<&BitSet>) {
         .must_write
         .iter()
         .chain(analysis.must_unset.iter())
-        .for_each(|loc| {
-            ant.remove(loc.idx as usize);
+        .for_each(|local| {
+            ant.remove(local.index());
         });
-    analysis.may_read.iter().for_each(|loc| {
-        ant.insert(loc.idx as usize);
+    analysis.may_read.iter().for_each(|local| {
+        ant.insert(local.index());
     });
 
     match &catch_ant {
@@ -235,11 +235,11 @@ fn update_avl(inst: &Instruct, avl: &mut BitSet, catch_avl: &mut Option<&mut Bit
         .must_write
         .iter()
         .chain(analysis.must_read.iter())
-        .for_each(|loc| {
-            avl.insert(loc.idx as usize);
+        .for_each(|local| {
+            avl.insert(local.index());
         });
-    analysis.must_unset.iter().for_each(|loc| {
-        avl.remove(loc.idx as usize);
+    analysis.must_unset.iter().for_each(|local| {
+        avl.remove(local.index());
     });
 }
 
@@ -400,13 +400,13 @@ fn max_local(instrs: &[Instruct]) -> usize {
             Instruct::Opcode(op) => op
                 .locals()
                 .iter()
-                .map(|loc| if loc.is_valid() { loc.idx } else { 0 })
+                .map(|local| if local.is_valid() { local.index() } else { 0 })
                 .max()
                 .unwrap_or(0),
             _ => 0,
         })
         .max()
-        .unwrap_or(0) as usize
+        .unwrap_or(0)
 }
 
 /// make_cfg converts a list of instructions into a Vec of basic blocks with
@@ -756,26 +756,26 @@ fn optimize_locals(
         la.may_read
             .iter()
             .chain(minstr_locals.iter())
-            .filter(|l| !ant.contains(l.idx as usize))
-            .for_each(|l| {
-                ret.push(Instruct::Opcode(Opcode::UnsetL(*l)));
+            .filter(|local| !ant.contains(local.index()))
+            .for_each(|local| {
+                ret.push(Instruct::Opcode(Opcode::UnsetL(*local)));
             });
         minstr_locals.clear();
         ret
     };
 
     match &instr {
-        Instruct::Opcode(Opcode::CGetL(loc) | Opcode::CUGetL(loc)) => {
-            let idx = loc.idx as usize;
+        Instruct::Opcode(Opcode::CGetL(local) | Opcode::CUGetL(local)) => {
+            let idx = local.index();
             if avl.contains(idx) && !ant.contains(idx) {
-                vec![Instruct::Opcode(Opcode::PushL(*loc))]
+                vec![Instruct::Opcode(Opcode::PushL(*local))]
             } else {
                 add_unsets(vec![instr.clone()])
             }
         }
 
-        Instruct::Opcode(Opcode::BaseL(loc, op, ro)) => {
-            let idx = loc.idx as usize;
+        Instruct::Opcode(Opcode::BaseL(local, op, ro)) => {
+            let idx = local.index();
             match (*op, *ro) {
                 (MOpMode::Unset | MOpMode::Define, _) => vec![instr.clone()],
                 (_, ReadonlyOp::CheckROCOW | ReadonlyOp::CheckMutROCOW) => vec![instr.clone()],
@@ -783,7 +783,7 @@ fn optimize_locals(
                     if avl.contains(idx) && !ant.contains(idx) {
                         *adj_minstr = true;
                         vec![
-                            Instruct::Opcode(Opcode::PushL(*loc)),
+                            Instruct::Opcode(Opcode::PushL(*local)),
                             Instruct::Opcode(Opcode::BaseC(0, mode)),
                         ]
                     } else {
@@ -806,11 +806,11 @@ fn optimize_locals(
             ))])
         }
 
-        Instruct::Opcode(Opcode::SetL(loc)) if !ant.contains(loc.idx as usize) => {
+        Instruct::Opcode(Opcode::SetL(local)) if !ant.contains(local.index()) => {
             vec![]
         }
 
-        Instruct::Opcode(Opcode::PopL(loc)) if !ant.contains(loc.idx as usize) => {
+        Instruct::Opcode(Opcode::PopL(local)) if !ant.contains(local.index()) => {
             vec![Instruct::Opcode(Opcode::PopC)]
         }
 

@@ -30,7 +30,7 @@ pub fn param_code_sets(num_params: usize, first_unnamed: Local) -> InstrSeq {
         (0..num_params)
             .flat_map(|i| {
                 let param_local = Local::new(i);
-                let temp_local = Local::new(first_unnamed.idx as usize + i);
+                let temp_local = Local::new(first_unnamed.index() + i);
                 get_memo_key_list(temp_local, param_local)
             })
             .collect(),

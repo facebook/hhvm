@@ -223,7 +223,7 @@ impl<'b> InstrEmitter<'b> {
             .enumerate()
             .map(|(_, (param, _))| {
                 let name = LocalId::Named(param.name);
-                let local = hhbc::Local::from_usize(next_local_idx);
+                let local = hhbc::Local::new(next_local_idx);
                 next_local_idx += 1;
                 (name, local)
             })
@@ -238,7 +238,7 @@ impl<'b> InstrEmitter<'b> {
                 match lid {
                     LocalId::Named(_) => {
                         locals.entry(*lid).or_insert_with(|| {
-                            let local = hhbc::Local::from_usize(next_local_idx);
+                            let local = hhbc::Local::new(next_local_idx);
                             next_local_idx += 1;
                             local
                         });
@@ -246,7 +246,7 @@ impl<'b> InstrEmitter<'b> {
                     LocalId::Unnamed(idx) => {
                         locals
                             .entry(*lid)
-                            .or_insert_with(|| hhbc::Local::from_usize(idx.as_usize()));
+                            .or_insert_with(|| hhbc::Local::new(idx.as_usize()));
                     }
                 }
             }
@@ -258,7 +258,7 @@ impl<'b> InstrEmitter<'b> {
         // locals.
         for (k, v) in locals.iter_mut() {
             if matches!(k, LocalId::Unnamed(_)) {
-                v.idx += next_local_idx as u32;
+                *v = hhbc::Local::new(v.index() + next_local_idx);
             }
         }
 
@@ -363,7 +363,7 @@ impl<'b> InstrEmitter<'b> {
             // variables are all contiguous...
             locals.iter().reduce(|x, y| {
                 assert!(
-                    x.as_usize() + 1 == y.as_usize(),
+                    x.index() + 1 == y.index(),
                     "non-linear locals: [{}]",
                     locals
                         .iter()

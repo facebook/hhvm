@@ -676,8 +676,8 @@ impl FunctionParser<'_> {
     }
 
     fn parse_iterator(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
-        parse!(tokenizer, "^" <iter_id:parse_u32> <op:["free":"free"; "next":"next"; "init":"init"]>);
-        let iter_id = IterId { idx: iter_id };
+        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "next":"next"; "init":"init"]>);
+        let iter_id = IterId::new(iter_id);
         Ok(match op.identifier() {
             "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
             "init" => {

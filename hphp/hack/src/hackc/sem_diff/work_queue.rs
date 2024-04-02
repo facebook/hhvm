@@ -41,7 +41,7 @@ impl<'a> WorkQueue<'a> {
             // Initialize parameter values
             let value = value_builder.alloc();
 
-            let local = Local::from_usize(idx);
+            let local = Local::new(idx);
             a_state.local_set(&local, value);
             b_state.local_set(&local, value);
 

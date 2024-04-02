@@ -970,7 +970,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             )?;
         }
         Hhbc::IterFree(iter_id, _loc) => {
-            write!(w, "iterator ^{} free", iter_id.idx)?;
+            write!(w, "iterator ^{} free", iter_id)?;
         }
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
@@ -1932,7 +1932,7 @@ fn print_terminator(
             write!(
                 w,
                 "iterator ^{} init from {} jmp to {} else {} with {}",
-                args.iter_id.idx,
+                args.iter_id,
                 FmtVid(func, *vid, verbose),
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
@@ -1943,7 +1943,7 @@ fn print_terminator(
             write!(
                 w,
                 "iterator ^{} next jmp to {} else {} with {}",
-                args.iter_id.idx,
+                args.iter_id,
                 FmtBid(func, args.targets[0], verbose),
                 FmtBid(func, args.targets[1], verbose),
                 FmtOptKeyValue(args.key_lid(), args.value_lid())

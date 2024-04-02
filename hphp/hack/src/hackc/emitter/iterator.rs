@@ -31,9 +31,7 @@ impl IterGen {
     fn gen(&mut self, kind: IterKind) -> IterId {
         self.iters.push(kind);
         self.count = std::cmp::max(self.count, self.iters.len() as u32);
-        IterId {
-            idx: (self.iters.len() - 1) as u32,
-        }
+        IterId::new(self.iters.len() - 1)
     }
 
     pub fn gen_iter(&mut self) -> IterId {
@@ -53,9 +51,7 @@ impl IterGen {
                 .rev()
                 .enumerate()
                 .map(|(i, it)| {
-                    let id = IterId {
-                        idx: (total - i - 1) as u32,
-                    };
+                    let id = IterId::new(total - i - 1);
                     match it {
                         IterKind::Iter => instr::iter_free(id),
                         IterKind::LIter(loc) => instr::l_iter_free(id, loc),

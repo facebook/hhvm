@@ -120,7 +120,7 @@ impl<'a> Body<'a> {
     }
 
     pub(crate) fn local_name(&self, local: Local) -> Option<StringId> {
-        let mut n = local.as_usize();
+        let mut n = local.index();
         let p = self.hhbc_body.params.len();
         if n < p {
             return Some(self.hhbc_body.params[n].param.name);

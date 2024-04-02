@@ -404,7 +404,7 @@ pub mod instr {
                 // Assert that the Locals are sequentially numbered.
                 let mut prev_id = head;
                 for id in tail {
-                    assert_eq!(prev_id.idx + 1, id.idx);
+                    assert_eq!(prev_id.index() + 1, id.index());
                     prev_id = id;
                 }
                 await_all(LocalRange {

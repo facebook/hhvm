@@ -655,11 +655,11 @@ fn convert_include(ctx: &mut Context<'_>, ie: &Opcode) {
 }
 
 fn convert_local(ctx: &mut Context<'_>, local: &hhbc::Local) -> LocalId {
-    if let Some(local) = ctx.named_local_lookup.get(local.as_usize()) {
+    if let Some(local) = ctx.named_local_lookup.get(local.index()) {
         *local
     } else {
         // Convert the hhbc::Local ID to a 0-based number.
-        let id = ir::UnnamedLocalId::from_usize(local.as_usize() - ctx.named_local_lookup.len());
+        let id = ir::UnnamedLocalId::from_usize(local.index() - ctx.named_local_lookup.len());
         LocalId::Unnamed(id)
     }
 }
@@ -669,7 +669,7 @@ fn convert_local_range(ctx: &mut Context<'_>, range: &hhbc::LocalRange) -> Box<[
     if range.start != hhbc::Local::INVALID && range.len != 0 {
         let size = range.len as usize;
         for idx in 0..size {
-            let local = hhbc::Local::from_usize(range.start.as_usize() + idx);
+            let local = hhbc::Local::new(range.start.index() + idx);
             let lid = convert_local(ctx, &local);
             locals.push(lid);
         }

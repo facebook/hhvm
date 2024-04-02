@@ -244,9 +244,9 @@ fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
 }
 
 fn print_local(w: &mut dyn Write, local: &Local, local_names: &[StringId]) -> Result<()> {
-    match local_names.get(local.idx as usize) {
+    match local_names.get(local.index()) {
         Some(name) => write!(w, "{}", name.as_str()),
-        None => write!(w, "_{}", local.idx),
+        None => write!(w, "_{}", local),
     }
 }
 

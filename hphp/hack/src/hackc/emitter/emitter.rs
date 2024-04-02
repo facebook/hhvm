@@ -70,6 +70,7 @@ pub struct Emitter<'d> {
 }
 
 impl<'d> Emitter<'d> {
+    #[allow(clippy::arc_with_non_send_sync)]
     pub fn new(
         opts: Options,
         systemlib: bool,
@@ -174,7 +175,7 @@ impl<'d> Emitter<'d> {
     /// Given a named local, return its name. Panic for unnamed locals
     /// indicating a logic bug in the compiler.
     pub fn local_name(&self, local: Local) -> StringId {
-        *self.named_locals.get_index(local.idx as usize).unwrap()
+        *self.named_locals.get_index(local.index()).unwrap()
     }
 
     pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {

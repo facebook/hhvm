@@ -1866,9 +1866,7 @@ fn assemble_memo_get_eager(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct>
 fn assemble_local_range(token_iter: &mut Lexer<'_>) -> Result<hhbc::LocalRange> {
     token_iter.expect_str(Token::is_identifier, "L")?;
     token_iter.expect(Token::is_colon)?;
-    let start = hhbc::Local {
-        idx: token_iter.expect_and_get_number()?,
-    };
+    let start = hhbc::Local::new(token_iter.expect_and_get_number()?);
     //token_iter.expect(Token::is_plus)?; // Not sure if this exists yet
     let len = token_iter.expect_and_get_number()?;
     Ok(hhbc::LocalRange { start, len })

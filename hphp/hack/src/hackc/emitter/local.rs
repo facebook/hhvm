@@ -125,13 +125,15 @@ pub struct Counter {
 
 impl Counter {
     fn new() -> Self {
-        Self { next: Local::ZERO }
+        Self {
+            next: Local::new(0),
+        }
     }
 
     fn next_unnamed(&mut self, dedicated: &Dedicated) -> Local {
         loop {
             let curr = self.next;
-            self.next.idx += 1;
+            self.next = Local::new(self.next.index() + 1);
 
             // make sure that newly allocated local don't stomp on dedicated locals
             match dedicated.label {

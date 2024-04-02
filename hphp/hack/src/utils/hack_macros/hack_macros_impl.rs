@@ -121,7 +121,6 @@ fn parse_stmts(src: &str, internal_offset: usize, span: Span) -> Result<Vec<ast:
             Some(Def::SetModule(module)) if module.1 == special_modules::DEFAULT => {
                 // if the program did not specify a module, the default module would
                 // have been automatically inserted here and can be safely ignored
-                ()
             }
             _ => panic!("Expected a single Def"),
         }

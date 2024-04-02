@@ -461,7 +461,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Some(const_refs) => {
                 let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
                     bumpalo::collections::Vec::with_capacity_in(const_refs.len(), self.arena);
-                elements.extend(const_refs.into_iter());
+                elements.extend(const_refs);
                 elements.sort_unstable();
                 elements.into_bump_slice()
             }
@@ -2133,12 +2133,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         };
 
         let ty_ = match (base_ty, type_arguments) {
-            ((_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
-                Ty_::Tfun(self.alloc(FunType {
-                    implicit_params: extend_capability_pos(f.implicit_params),
-                    ..*f
-                }))
-            }
+            ((_, "\\Pure"), &[&Ty(_, Ty_::Tfun(f))]) => Ty_::Tfun(self.alloc(FunType {
+                implicit_params: extend_capability_pos(f.implicit_params),
+                ..*f
+            })),
             _ => Ty_::Tapply(self.alloc((base_ty, type_arguments))),
         };
 
@@ -4445,7 +4443,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }
         }
 
-        props.extend(xhp_props.into_iter());
+        props.extend(xhp_props);
 
         if class_attributes.const_ {
             for prop in props.iter_mut() {
@@ -5313,7 +5311,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         open: Self::Output,
         rparen: Self::Output,
     ) -> Self::Output {
-        let fields = fields;
         let fields_iter = fields.iter();
         let mut fields = AssocListMut::new_in(self.arena);
         for node in fields_iter {

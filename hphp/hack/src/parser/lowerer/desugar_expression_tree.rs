@@ -99,7 +99,7 @@ pub fn desugar(
         global_function_pointers: vec![],
         static_method_pointers: vec![],
     };
-    let rewritten_expr = rewrite_expr(&mut temps, e, &visitor_name, &mut errors);
+    let rewritten_expr = rewrite_expr(&mut temps, e, visitor_name, &mut errors);
 
     let dollardollar_pos = rewrite_dollardollars(&mut temps.splices);
 
@@ -171,7 +171,7 @@ pub fn desugar(
     };
 
     let metadata = maketree_metadata(
-        &visitor_pos,
+        visitor_pos,
         &temps.splices,
         &temps.global_function_pointers,
         &temps.static_method_pointers,
@@ -328,7 +328,10 @@ impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
             // Don't recurse into Expression Trees
             ExpressionTree(_) | ETSplice(_) => Ok(()),
             // Only recurse into the left hand side of any pipe as the rhs has new $$
-            Pipe(p) => (&mut p.1).accept(env, self.object()),
+            Pipe(p) => {
+                let x = &mut p.1;
+                x.accept(env, self.object())
+            }
             // Otherwise, recurse completely on the other expressions
             _ => e.recurse(env, self.object()),
         }

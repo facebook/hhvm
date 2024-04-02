@@ -6141,7 +6141,7 @@ fn insert_default_module_if_missing_module_membership(program: &mut Vec<ast::Def
     }
 }
 
-fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
+fn post_process<'a>(_env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
     use aast::Def;
     use aast::Def::*;
     let mut saw_ns: Option<(ast::Sid, Vec<ast::Def>)> = None;
@@ -6159,7 +6159,7 @@ fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast
                 saw_ns = Some((n, vec![]));
             } else {
                 let mut acc_ = vec![];
-                post_process(env, defs, &mut acc_);
+                post_process(_env, defs, &mut acc_);
                 acc.push(Def::mk_namespace(n, acc_));
             }
 

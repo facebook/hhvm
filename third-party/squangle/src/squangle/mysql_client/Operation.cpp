@@ -629,7 +629,7 @@ void ConnectOperation::specializedRunImpl() {
     return;
   }
 
-  mysql_options(conn()->mysql(), MYSQL_OPT_CONNECT_ATTR_RESET, 0);
+  mysql_options(conn()->mysql(), MYSQL_OPT_CONNECT_ATTR_RESET, nullptr);
   for (const auto& [key, value] : attributes_) {
     mysql_options4(
         conn()->mysql(),
@@ -1013,7 +1013,7 @@ void FetchOperation::specializedRunImpl() {
     MYSQL* mysql = conn()->mysql();
     rendered_query_ = queries_.renderQuery(mysql);
 
-    mysql_options(mysql, MYSQL_OPT_QUERY_ATTR_RESET, 0);
+    mysql_options(mysql, MYSQL_OPT_QUERY_ATTR_RESET, nullptr);
     for (const auto& [key, value] : attributes_) {
       if (int retErrCode = setQueryAttribute(key, value)) {
         setAsyncClientError(

@@ -22,6 +22,8 @@
 #include <proxygen/lib/http/ProxygenErrorEnum.h>
 #include <proxygen/lib/http/Window.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
+#include <proxygen/lib/http/observer/HTTPTransactionObserverContainer.h>
+#include <proxygen/lib/http/observer/HTTPTransactionObserverInterface.h>
 #include <proxygen/lib/http/session/ByteEvents.h>
 #include <proxygen/lib/http/session/HTTP2PriorityQueue.h>
 #include <proxygen/lib/http/session/HTTPEvent.h>
@@ -1680,6 +1682,32 @@ class HTTPTransaction
 
   virtual bool addBufferMeta() noexcept;
 
+  bool addObserver(HTTPTransactionObserverContainer::Observer* observer) {
+    txnObserverContainer_.addObserver(observer);
+    return true;
+  }
+
+  bool addObserver(
+      std::shared_ptr<HTTPTransactionObserverContainer::Observer> observer) {
+    txnObserverContainer_.addObserver(std::move(observer));
+    return true;
+  }
+
+  bool removeObserver(HTTPTransactionObserverContainer::Observer* observer) {
+    txnObserverContainer_.removeObserver(observer);
+    return true;
+  }
+
+  bool removeObserver(
+      std::shared_ptr<HTTPTransactionObserverContainer::Observer> observer) {
+    txnObserverContainer_.removeObserver(std::move(observer));
+    return true;
+  }
+
+  HTTPTransactionObserverAccessor* getObserverAccessor() {
+    return &txnObserverAccessor_;
+  }
+
  private:
   HTTPTransaction(const HTTPTransaction&) = delete;
   HTTPTransaction& operator=(const HTTPTransaction&) = delete;
@@ -1818,6 +1846,31 @@ class HTTPTransaction
 
    private:
     HTTPTransaction& txn_;
+  };
+
+  class ObserverAccessor : public HTTPTransactionObserverAccessor {
+   public:
+    explicit ObserverAccessor(HTTPTransaction* txn) : txn_(txn) {
+      (void)txn_; // silence unused variable warning
+    }
+    ~ObserverAccessor() override = default;
+
+    bool addObserver(
+        HTTPTransactionObserverContainer::Observer* observer) override {
+      return txn_->addObserver(observer);
+    }
+
+    bool addObserver(std::shared_ptr<HTTPTransactionObserverContainer::Observer>
+                         observer) override {
+      return txn_->addObserver(std::move(observer));
+    }
+
+    [[nodiscard]] uint64_t getTxnId() const override {
+      return txn_->getID();
+    }
+
+   private:
+    HTTPTransaction* txn_;
   };
 
   RateLimitCallback rateLimitCallback_{*this};
@@ -2176,6 +2229,16 @@ class HTTPTransaction
   std::map<HTTPCodec::StreamID, TxnStreamWriteHandle> wtEgressStreams_;
   std::map<HTTPCodec::StreamID, TxnStreamReadHandle> wtIngressStreams_;
   TxnWebTransport webTransport_{*this};
+
+  ObserverAccessor txnObserverAccessor_;
+
+  // Container of observers for an HTTP transaction.
+  //
+  // This member MUST be last in the list of members to ensure it is destroyed
+  // first, before any other members are destroyed. This ensures that observers
+  // can inspect any session state available through public methods
+  // when destruction of the session begins.
+  HTTPTransactionObserverContainer txnObserverContainer_;
 };
 
 /**

@@ -163,6 +163,25 @@ using IsOverloadedFunc = folly::Function<bool(
 class ThriftServer : public apache::thrift::BaseThriftServer,
                      public wangle::ServerBootstrap<Pipeline> {
  public:
+  struct Metadata {
+    std::string configPath;
+    std::optional<std::string> serviceFramework;
+    std::optional<std::string> serviceFrameworkName;
+    std::optional<std::string> wrapper;
+    std::optional<std::string> languageFramework;
+    std::optional<std::set<std::string>> modules;
+    std::optional<std::string> tlsConfigSource;
+    std::optional<std::string> serverSourceLocation;
+
+    void addModule(std::string_view name) {
+      if (!modules) {
+        modules.emplace();
+      }
+
+      modules->emplace(name);
+    }
+  };
+
   /**
    * The type of thread manager to create for the server.
    */
@@ -452,7 +471,13 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     return threadManager_;
   }
 
+  const Metadata& metadata() const { return metadata_; }
+
+  Metadata& metadata() { return metadata_; }
+
  private:
+  Metadata metadata_;
+
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
 

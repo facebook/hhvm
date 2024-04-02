@@ -109,25 +109,6 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
  public:
-  struct Metadata {
-    std::string configPath;
-    std::optional<std::string> serviceFramework;
-    std::optional<std::string> serviceFrameworkName;
-    std::optional<std::string> wrapper;
-    std::optional<std::string> languageFramework;
-    std::optional<std::set<std::string>> modules;
-    std::optional<std::string> tlsConfigSource;
-    std::optional<std::string> serverSourceLocation;
-
-    void addModule(std::string_view name) {
-      if (!modules) {
-        modules.emplace();
-      }
-
-      modules->emplace(name);
-    }
-  };
-
   /**
    * Behavior when a thrift client calls server with legacy transport, ie,
    * header. Default behavior is determined by thrift flags
@@ -193,8 +174,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   // Server behavior to wrt header traffic
   LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
-
-  Metadata metadata_;
 
   std::shared_ptr<server::TServerEventHandler> eventHandler_;
   std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
@@ -1053,10 +1032,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   size_t getWriteBatchingByteSize() const {
     return thriftConfig_.getWriteBatchingByteSize().get();
   }
-
-  const Metadata& metadata() const { return metadata_; }
-
-  Metadata& metadata() { return metadata_; }
 
   /**
    * Ingress memory is the total memory used for receiving inflight requests.

@@ -527,7 +527,7 @@ class PythonAsyncProcessorFactory : public AsyncProcessorFactory {
 class CppServerWrapper : public ThriftServer {
  public:
   CppServerWrapper() {
-    BaseThriftServer::metadata().wrapper = "CppServerWrapper-py";
+    ThriftServer::metadata().wrapper = "CppServerWrapper-py";
   }
 
   void setAdapter(object adapter) {
@@ -776,12 +776,11 @@ class CppServerWrapper : public ThriftServer {
   }
 
   void setWrapperName(object wrapperName) {
-    BaseThriftServer::metadata().wrapper =
-        extract<std::string>(str(wrapperName));
+    ThriftServer::metadata().wrapper = extract<std::string>(str(wrapperName));
   }
 
   void setLanguageFrameworkName(object languageFrameworkName) {
-    BaseThriftServer::metadata().languageFramework =
+    ThriftServer::metadata().languageFramework =
         extract<std::string>(str(languageFrameworkName));
   }
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44df18c0d20a095e7c0808b96b40efaf>>
+// @generated SignedSource<<b5f31d22a4a76c588b3c0bc7f0ad7cf9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,6 +11,7 @@
 #![allow(unused_braces)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+#![allow(clippy::all)]
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::ast_defs::*;

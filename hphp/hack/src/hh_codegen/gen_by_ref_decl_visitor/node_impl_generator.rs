@@ -18,6 +18,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         #![allow(unused_braces)]
         #![allow(unused_imports)]
         #![allow(unused_variables)]
+        #![allow(clippy::all)]
 
         use super::node::Node;
         use super::visitor::Visitor;

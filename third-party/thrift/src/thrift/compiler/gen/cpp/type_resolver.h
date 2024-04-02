@@ -205,7 +205,9 @@ class type_resolver {
   std::string gen_storage_type(
       const std::string& native_type, reference_type& ref_type, const t_field&);
   std::string gen_container_type(
-      const t_container& node, type_resolve_fn resolve_fn);
+      const t_container& node,
+      type_resolve_fn resolve_fn,
+      const std::string* templte = nullptr);
   static std::string gen_adapted_type(
       const std::string* adapter, const std::string& standard_type);
   static std::string gen_adapted_type(

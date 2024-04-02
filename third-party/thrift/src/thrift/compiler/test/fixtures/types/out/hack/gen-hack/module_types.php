@@ -595,16 +595,25 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.map_i32_string_1261",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => \tmeta_ThriftMapType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "keyType" => \tmeta_ThriftType::fromShape(
+                              "name" => "module.map_i32_string_1261",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                )
-                              ),
-                              "valueType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                                    shape(
+                                      "keyType" => \tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                        )
+                                      ),
+                                      "valueType" => \tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                             )
@@ -712,14 +721,14 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'fieldG' => shape(
-          'field' => dict[],
-          'type' => dict[
+          'field' => dict[
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "template" => "folly::sorted_vector_map",
               )
             ),
           ],
+          'type' => dict[],
         ),
         'fieldH' => shape(
           'field' => dict[],

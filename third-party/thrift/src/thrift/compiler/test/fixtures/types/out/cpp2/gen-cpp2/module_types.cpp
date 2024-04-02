@@ -305,7 +305,7 @@ ContainerStruct& ContainerStruct::operator=([[maybe_unused]] ContainerStruct&& o
 }
 
 
-ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, ::apache::thrift::fixtures::types::map_i32_string_1261 fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg) :
+ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, folly::sorted_vector_map<::std::int32_t, ::std::string> fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg) :
     __fbthrift_field_fieldA(std::move(fieldA__arg)),
     __fbthrift_field_fieldB(std::move(fieldB__arg)),
     __fbthrift_field_fieldC(std::move(fieldC__arg)),
@@ -401,11 +401,11 @@ const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fiel
   return std::move(__fbthrift_field_fieldF);
 }
 
-const ::apache::thrift::fixtures::types::map_i32_string_1261& ContainerStruct::get_fieldG() const& {
+const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
   return __fbthrift_field_fieldG;
 }
 
-::apache::thrift::fixtures::types::map_i32_string_1261 ContainerStruct::get_fieldG() && {
+folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fieldG() && {
   return std::move(__fbthrift_field_fieldG);
 }
 

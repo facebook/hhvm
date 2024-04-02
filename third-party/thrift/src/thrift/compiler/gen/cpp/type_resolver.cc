@@ -411,13 +411,24 @@ std::string type_resolver::gen_standard_type(
     return gen_container_type(*tcontainer, resolve_fn);
   }
 
+  // If there's a template annotation on a typedef we have to pass it to the
+  // underlying container type.
+  if (const auto* templte = find_template(node)) {
+    if (const auto* tcontainer =
+            dynamic_cast<const t_container*>(node.get_true_type())) {
+      return gen_container_type(*tcontainer, resolve_fn, templte);
+    }
+  }
+
   // For everything else, just use namespaced name.
   return namespaces_.get_namespaced_name(node);
 }
 
 std::string type_resolver::gen_container_type(
-    const t_container& node, type_resolve_fn resolve_fn) {
-  const auto* val = find_template(node);
+    const t_container& node,
+    type_resolve_fn resolve_fn,
+    const std::string* val) {
+  val = val ? val : find_template(node);
   const auto& template_name =
       val ? *val : default_template(node.container_type());
 

@@ -66,7 +66,7 @@ std::shared_ptr<ThriftServer> createHttpServer() {
   server->setInterface(handler);
   server->setNumIOWorkerThreads(1);
   server->setThreadFactory(std::make_shared<PosixThreadFactory>());
-  server->setThreadManagerType(BaseThriftServer::ThreadManagerType::SIMPLE);
+  server->setThreadManagerType(ThriftServer::ThreadManagerType::SIMPLE);
   server->addRoutingHandler(createHTTP2RoutingHandler(*server));
   return server;
 }

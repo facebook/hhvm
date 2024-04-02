@@ -540,7 +540,7 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsRestartServer) {
   for (size_t i = 0; i < 2; ++i) {
     auto ts = make_shared<ThriftServer>();
     ts->setThreadManagerType(
-        apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+        apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
     ts->setNumCPUWorkerThreads(1);
     ts->setAddress({"::1", 0});
     ts->setIOThreadPool(std::make_shared<folly::IOThreadPoolExecutor>(1));

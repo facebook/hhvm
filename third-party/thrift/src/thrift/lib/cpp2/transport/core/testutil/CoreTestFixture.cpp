@@ -29,7 +29,7 @@ namespace thrift {
 using namespace testutil::testservice;
 
 CoreTestFixture::CoreTestFixture() : processor_(server_) {
-  server_.setThreadManagerType(BaseThriftServer::ThreadManagerType::SIMPLE);
+  server_.setThreadManagerType(ThriftServer::ThreadManagerType::SIMPLE);
   server_.setInterface(service_);
   server_.setup();
   channel_ = std::make_shared<FakeChannel>(&eventBase_);

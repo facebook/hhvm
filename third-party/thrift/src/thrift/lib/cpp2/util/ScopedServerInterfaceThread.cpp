@@ -43,7 +43,7 @@ ScopedServerInterfaceThread::ScopedServerInterfaceThread(
   auto tf = make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
   ts->setThreadFactory(std::move(tf));
   ts->setThreadManagerType(
-      apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+      apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
 
   // The default behavior is to keep N recent requests per IO worker in
   // memory. In unit-tests, this defers memory reclamation and potentially

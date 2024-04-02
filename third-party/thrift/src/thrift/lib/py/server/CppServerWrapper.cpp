@@ -686,7 +686,7 @@ class CppServerWrapper : public ThriftServer {
     if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
       setNumCPUWorkerThreads(count);
       setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
     } else {
       auto tm = ThreadManager::newSimpleThreadManager(count);
       auto poolThreadName = getCPUWorkerThreadName();
@@ -704,7 +704,7 @@ class CppServerWrapper : public ThriftServer {
     if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
       setNumCPUWorkerThreads(numThreads);
       setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::PRIORITY_QUEUE);
+          apache::thrift::ThriftServer::ThreadManagerType::PRIORITY_QUEUE);
     } else {
       auto tm = ThreadManager::newPriorityQueueThreadManager(numThreads);
       auto poolThreadName = getCPUWorkerThreadName();
@@ -727,7 +727,7 @@ class CppServerWrapper : public ThriftServer {
       size_t) {
     if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
       setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::PRIORITY);
+          apache::thrift::ThriftServer::ThreadManagerType::PRIORITY);
       setThreadManagerPoolSizes(
           {{high_important, high, important, normal, best_effort}});
     } else {

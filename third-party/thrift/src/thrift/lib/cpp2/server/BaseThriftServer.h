@@ -129,19 +129,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   };
 
   /**
-   * The type of thread manager to create for the server.
-   */
-  enum class ThreadManagerType : int {
-    PRIORITY = 0, //! Use a PriorityThreadManager
-    SIMPLE = 1, //! Use a SimpleThreadManager
-    PRIORITY_QUEUE = 2, //! Use a PriorityQueueThreadManager
-    EXECUTOR_ADAPTER = 3, //! Use ThreadManagerExecutorAdapter
-    EXECUTOR = 3 //! Another way to say EXECUTOR_ADAPTER
-    // In resource pools mode the executor is used directly, it is only wrapped
-    // in the ThreadManagerExecutorAdapter when in ThreadManager mode
-  };
-
-  /**
    * Behavior when a thrift client calls server with legacy transport, ie,
    * header. Default behavior is determined by thrift flags
    */

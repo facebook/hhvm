@@ -900,7 +900,7 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
           // We need at least 2 cpu threads for the test
           server.setNumCPUWorkerThreads(2);
           server.setThreadManagerType(
-              apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
           server.setThreadFactory(std::make_shared<PosixThreadFactory>(
               PosixThreadFactory::ATTACHED));
           server.setWorkersJoinTimeout(1s);

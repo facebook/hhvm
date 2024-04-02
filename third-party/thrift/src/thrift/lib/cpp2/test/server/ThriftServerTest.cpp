@@ -888,7 +888,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshot) {
               // We need at least 2 cpu threads for the test
               server.setNumCPUWorkerThreads(2);
               server.setThreadManagerType(
-                  apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+                  apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
               server.setThreadFactory(std::make_shared<PosixThreadFactory>(
                   PosixThreadFactory::ATTACHED));
             });
@@ -916,7 +916,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshotTimeout) {
               // We need at least 2 cpu threads for the test
               server.setNumCPUWorkerThreads(2);
               server.setThreadManagerType(
-                  apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+                  apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
               server.setThreadFactory(std::make_shared<PosixThreadFactory>(
                   PosixThreadFactory::ATTACHED));
             });
@@ -1415,7 +1415,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
         } else {
           ts.setCPUWorkerThreadName("tm");
           ts.setThreadManagerType(
-              apache::thrift::BaseThriftServer::ThreadManagerType::PRIORITY);
+              apache::thrift::ThriftServer::ThreadManagerType::PRIORITY);
           // Just allow the defaults to happen
         }
       });
@@ -1469,7 +1469,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
           ts.setThreadManager(tm);
         } else {
           ts.setThreadManagerType(
-              apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
           ts.setCPUWorkerThreadName("cpu");
           ts.setNumCPUWorkerThreads(1);
         }
@@ -3455,7 +3455,7 @@ TEST(ThriftServer, RocketOverQuic) {
       std::make_shared<apache::thrift::ThriftQuicServer>();
   server->setNumIOWorkerThreads(1);
   server->setThreadManagerType(
-      apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+      apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
   server->setNumCPUWorkerThreads(1);
   server->setThreadFactory(
       std::make_shared<apache::thrift::concurrency::PosixThreadFactory>());
@@ -3853,7 +3853,7 @@ TEST(ThriftServer, GetSetMaxRequests) {
       EXPECT_EQ(server.getMaxRequests(), target);
       // Make the thrift server simple to create
       server.setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
       server.setNumCPUWorkerThreads(1);
       server.setupThreadManager();
       EXPECT_EQ(server.getMaxRequests(), target);
@@ -3876,7 +3876,7 @@ TEST(ThriftServer, GetSetMaxRequests) {
       server.setInterface(std::make_shared<TestInterface>());
       // Make the thrift server simple to create
       server.setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
       server.setNumCPUWorkerThreads(1);
       server.setupThreadManager();
       server.setMaxRequests(target);
@@ -4050,7 +4050,7 @@ TEST_P(HeaderOrRocket, OnStartStopServingTest) {
               PosixThreadFactory::ATTACHED);
           // We need at least 2 threads for the test
           ts.setThreadManagerType(
-              apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
           ts.setNumCPUWorkerThreads(2);
           ts.setThreadFactory(std::move(tf));
           ts.addServerEventHandler(preStartHandler);

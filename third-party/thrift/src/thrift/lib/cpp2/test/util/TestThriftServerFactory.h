@@ -35,7 +35,7 @@ struct TestThriftServerFactory : public TestServerFactory {
       auto threadFactory =
           std::make_shared<apache::thrift::concurrency::PosixThreadFactory>();
       server->setThreadManagerType(
-          apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
       server->setNumCPUWorkerThreads(1);
       server->setThreadFactory(threadFactory);
     } else if (setupFunction_) {

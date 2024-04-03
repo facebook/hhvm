@@ -35,41 +35,50 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
-   * thrift service: FB303Service
-   * thrift function: simple_rpc
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void simple_rpc(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_int_parameter);
  protected:
   void simple_rpcImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_int_parameter, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void sync_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void sync_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic::ReservedKeyword& _return, ::std::int32_t p_int_parameter);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::Future<::test::fixtures::basic::ReservedKeyword> future_simple_rpc(::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> semifuture_simple_rpc(::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::Future<::test::fixtures::basic::ReservedKeyword> future_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::Future<std::pair<::test::fixtures::basic::ReservedKeyword, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::SemiFuture<std::pair<::test::fixtures::basic::ReservedKeyword, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(::std::int32_t p_int_parameter) {
     return co_simple_rpc<false>(nullptr, p_int_parameter);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
     return co_simple_rpc<true>(&rpcOptions, p_int_parameter);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(::std::int32_t p_int_parameter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_simple_rpc(p_int_parameter));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_simple_rpc(rpcOptions, p_int_parameter));
   }
@@ -122,13 +131,18 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void simple_rpc(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_int_parameter);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   static folly::exception_wrapper recv_wrapped_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   static void recv_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual void recv_instance_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   virtual folly::exception_wrapper recv_instance_wrapped_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

@@ -32,41 +32,50 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
-   * thrift service: PrimitivesService
-   * thrift function: init
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual void init(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual void init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
  protected:
   void initImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual ::std::int64_t sync_init(::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual ::std::int64_t sync_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::Future<::std::int64_t> future_init(::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::Future<::std::int64_t> future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
     return co_init<false>(nullptr, p_param0, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
     return co_init<true>(&rpcOptions, p_param0, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_init(p_param0, p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_init(rpcOptions, p_param0, p_param1));
   }
@@ -119,54 +128,68 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual void init(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   static folly::exception_wrapper recv_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   static ::std::int64_t recv_init(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual ::std::int64_t recv_instance_init(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::exception_wrapper recv_instance_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
-   * thrift service: PrimitivesService
-   * thrift function: method_that_throws
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual void method_that_throws(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual void method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void method_that_throwsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual ::cpp2::Result sync_method_that_throws();
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual ::cpp2::Result sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::Future<::cpp2::Result> future_method_that_throws();
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws();
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::Future<::cpp2::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::Future<std::pair<::cpp2::Result, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::SemiFuture<std::pair<::cpp2::Result, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
   folly::coro::Task<::cpp2::Result> co_method_that_throws() {
     return co_method_that_throws<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
   folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     return co_method_that_throws<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   folly::coro::Task<::cpp2::Result> co_method_that_throws() {
     co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws(rpcOptions));
   }
@@ -219,54 +242,68 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual void method_that_throws(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   static folly::exception_wrapper recv_wrapped_method_that_throws(::cpp2::Result& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   static ::cpp2::Result recv_method_that_throws(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual ::cpp2::Result recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method_that_throws(::cpp2::Result& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void method_that_throwsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/service-schema/src/module.thrift
-   * thrift service: PrimitivesService
-   * thrift function: return_void_method
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
  protected:
   void return_void_methodImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void sync_return_void_method(::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::Future<folly::Unit> future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   template <int = 0>
   folly::coro::Task<void> co_return_void_method(::std::int64_t p_id) {
     return co_return_void_method<false>(nullptr, p_id);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   template <int = 0>
   folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
     return co_return_void_method<true>(&rpcOptions, p_id);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   folly::coro::Task<void> co_return_void_method(::std::int64_t p_id) {
     co_await folly::coro::detachOnCancel(semifuture_return_void_method(p_id));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
     co_await folly::coro::detachOnCancel(semifuture_return_void_method(rpcOptions, p_id));
   }
@@ -317,13 +354,18 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   static folly::exception_wrapper recv_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   static void recv_return_void_method(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void recv_instance_return_void_method(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::exception_wrapper recv_instance_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

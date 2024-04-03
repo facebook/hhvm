@@ -32,41 +32,50 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
-   * thrift service: C
-   * thrift function: f
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void f(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void f(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void sync_f();
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void sync_f(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::Future<folly::Unit> future_f();
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_f();
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::Future<folly::Unit> future_f(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_f(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_f(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_f(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   template <int = 0>
   folly::coro::Task<void> co_f() {
     return co_f<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   template <int = 0>
   folly::coro::Task<void> co_f(apache::thrift::RpcOptions& rpcOptions) {
     return co_f<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   folly::coro::Task<void> co_f() {
     co_await folly::coro::detachOnCancel(semifuture_f());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   folly::coro::Task<void> co_f(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_f(rpcOptions));
   }
@@ -117,51 +126,62 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void f(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   static folly::exception_wrapper recv_wrapped_f(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   static void recv_f(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual void recv_instance_f(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::exception_wrapper recv_instance_wrapped_f(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void fT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
-   * thrift service: C
-   * thrift function: numbers
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual void numbers(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual void numbers(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void numbersImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual apache::thrift::ClientBufferedStream<::cpp2::number> sync_numbers();
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual apache::thrift::ClientBufferedStream<::cpp2::number> sync_numbers(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::number>> semifuture_numbers();
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::number>> semifuture_numbers(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::cpp2::number>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_numbers(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers() {
     return co_numbers<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers(apache::thrift::RpcOptions& rpcOptions) {
     return co_numbers<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers() {
     co_return co_await folly::coro::detachOnCancel(semifuture_numbers());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_numbers(rpcOptions));
   }
@@ -218,51 +238,64 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
 
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   static folly::exception_wrapper recv_wrapped_numbers(apache::thrift::ClientBufferedStream<::cpp2::number>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   static apache::thrift::ClientBufferedStream<::cpp2::number> recv_numbers(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual apache::thrift::ClientBufferedStream<::cpp2::number> recv_instance_numbers(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual folly::exception_wrapper recv_instance_wrapped_numbers(apache::thrift::ClientBufferedStream<::cpp2::number>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void numbersT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> numbersCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/doctext/src/module.thrift
-   * thrift service: C
-   * thrift function: thing
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void thing(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void thing(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
  protected:
   void thingImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void sync_thing(::std::string& _return, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void sync_thing(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::Future<::std::string> future_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::SemiFuture<::std::string> semifuture_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::Future<::std::string> future_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::SemiFuture<::std::string> semifuture_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
     return co_thing<false>(nullptr, p_a, p_b, p_c);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
     return co_thing<true>(&rpcOptions, p_a, p_b, p_c);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   folly::coro::Task<::std::string> co_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
     co_return co_await folly::coro::detachOnCancel(semifuture_thing(p_a, p_b, p_c));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   folly::coro::Task<::std::string> co_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
     co_return co_await folly::coro::detachOnCancel(semifuture_thing(rpcOptions, p_a, p_b, p_c));
   }
@@ -315,13 +348,18 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void thing(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   static folly::exception_wrapper recv_wrapped_thing(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   static void recv_thing(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual void recv_instance_thing(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::exception_wrapper recv_instance_wrapped_thing(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

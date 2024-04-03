@@ -35,41 +35,50 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
-   * thrift service: DbMixedStackArguments
-   * thrift function: getDataByKey0
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void getDataByKey0(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:
   void getDataByKey0Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void sync_getDataByKey0(::std::string& _return, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void sync_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_key);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::Future<::std::string> future_getDataByKey0(const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey0(const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::Future<::std::string> future_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey0(const ::std::string& p_key) {
     return co_getDataByKey0<false>(nullptr, p_key);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     return co_getDataByKey0<true>(&rpcOptions, p_key);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   folly::coro::Task<::std::string> co_getDataByKey0(const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey0(p_key));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   folly::coro::Task<::std::string> co_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey0(rpcOptions, p_key));
   }
@@ -122,54 +131,68 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void getDataByKey0(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_key);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   static folly::exception_wrapper recv_wrapped_getDataByKey0(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   static void recv_getDataByKey0(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual void recv_instance_getDataByKey0(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::exception_wrapper recv_instance_wrapped_getDataByKey0(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void getDataByKey0T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey0Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic/src/module.thrift
-   * thrift service: DbMixedStackArguments
-   * thrift function: getDataByKey1
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void getDataByKey1(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
  protected:
   void getDataByKey1Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void sync_getDataByKey1(::std::string& _return, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void sync_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_key);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::Future<::std::string> future_getDataByKey1(const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey1(const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::Future<::std::string> future_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey1(const ::std::string& p_key) {
     return co_getDataByKey1<false>(nullptr, p_key);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     return co_getDataByKey1<true>(&rpcOptions, p_key);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   folly::coro::Task<::std::string> co_getDataByKey1(const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey1(p_key));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   folly::coro::Task<::std::string> co_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey1(rpcOptions, p_key));
   }
@@ -222,13 +245,18 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void getDataByKey1(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_key);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   static folly::exception_wrapper recv_wrapped_getDataByKey1(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   static void recv_getDataByKey1(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void recv_instance_getDataByKey1(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::exception_wrapper recv_instance_wrapped_getDataByKey1(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

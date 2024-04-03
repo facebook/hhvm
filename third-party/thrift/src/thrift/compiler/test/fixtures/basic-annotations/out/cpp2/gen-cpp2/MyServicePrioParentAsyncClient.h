@@ -31,41 +31,50 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
-   * thrift service: MyServicePrioParent
-   * thrift function: ping
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void ping(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void pingImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void sync_ping();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void sync_ping(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::Future<folly::Unit> future_ping();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_ping();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::Future<folly::Unit> future_ping(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_ping(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   template <int = 0>
   folly::coro::Task<void> co_ping() {
     return co_ping<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   template <int = 0>
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
     return co_ping<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   folly::coro::Task<void> co_ping() {
     co_await folly::coro::detachOnCancel(semifuture_ping());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_ping(rpcOptions));
   }
@@ -116,54 +125,68 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void ping(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   static folly::exception_wrapper recv_wrapped_ping(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   static void recv_ping(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual void recv_instance_ping(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   virtual folly::exception_wrapper recv_instance_wrapped_ping(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
-   * thrift service: MyServicePrioParent
-   * thrift function: pong
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void pong(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void pong(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void pongImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void sync_pong();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void sync_pong(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::Future<folly::Unit> future_pong();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_pong();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::Future<folly::Unit> future_pong(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_pong(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_pong(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_pong(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   template <int = 0>
   folly::coro::Task<void> co_pong() {
     return co_pong<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   template <int = 0>
   folly::coro::Task<void> co_pong(apache::thrift::RpcOptions& rpcOptions) {
     return co_pong<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   folly::coro::Task<void> co_pong() {
     co_await folly::coro::detachOnCancel(semifuture_pong());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   folly::coro::Task<void> co_pong(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_pong(rpcOptions));
   }
@@ -214,13 +237,18 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void pong(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   static folly::exception_wrapper recv_wrapped_pong(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   static void recv_pong(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual void recv_instance_pong(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   virtual folly::exception_wrapper recv_instance_wrapped_pong(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

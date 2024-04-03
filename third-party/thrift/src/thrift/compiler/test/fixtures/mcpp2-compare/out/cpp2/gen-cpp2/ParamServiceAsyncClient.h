@@ -33,41 +33,50 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_i16_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void void_ret_i16_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
  protected:
   void void_ret_i16_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void sync_void_ret_i16_param(::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void sync_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_i16_param(::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_i16_param(::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_i16_param(::std::int16_t p_param1) {
     return co_void_ret_i16_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1) {
     return co_void_ret_i16_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   folly::coro::Task<void> co_void_ret_i16_param(::std::int16_t p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_i16_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   folly::coro::Task<void> co_void_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_i16_param(rpcOptions, p_param1));
   }
@@ -118,54 +127,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void void_ret_i16_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_i16_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   static void recv_void_ret_i16_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual void recv_instance_void_ret_i16_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_i16_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_i16_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_byte_i16_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void void_ret_byte_i16_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
  protected:
   void void_ret_byte_i16_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_param1, ::std::int16_t p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void sync_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void sync_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
     return co_void_ret_byte_i16_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2) {
     return co_void_ret_byte_i16_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   folly::coro::Task<void> co_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_byte_i16_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   folly::coro::Task<void> co_void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_param1, ::std::int16_t p_param2) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_byte_i16_param(rpcOptions, p_param1, p_param2));
   }
@@ -216,54 +239,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void void_ret_byte_i16_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_byte_i16_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   static void recv_void_ret_byte_i16_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual void recv_instance_void_ret_byte_i16_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_byte_i16_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_byte_i16_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_byte_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_map_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void void_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
  protected:
   void void_ret_map_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void sync_void_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void sync_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_void_ret_map_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_void_ret_map_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   folly::coro::Task<void> co_void_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   folly::coro::Task<void> co_void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_param(rpcOptions, p_param1));
   }
@@ -314,54 +351,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void void_ret_map_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_map_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   static void recv_void_ret_map_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual void recv_instance_void_ret_map_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_map_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_map_setlist_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void void_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
  protected:
   void void_ret_map_setlist_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void sync_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void sync_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
     return co_void_ret_map_setlist_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
     return co_void_ret_map_setlist_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   folly::coro::Task<void> co_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_setlist_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   folly::coro::Task<void> co_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_setlist_param(rpcOptions, p_param1, p_param2));
   }
@@ -412,54 +463,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void void_ret_map_setlist_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_map_setlist_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   static void recv_void_ret_map_setlist_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual void recv_instance_void_ret_map_setlist_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_setlist_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_map_setlist_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_map_typedef_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void void_ret_map_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::simpleTypeDef p_param1);
  protected:
   void void_ret_map_typedef_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::simpleTypeDef p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void sync_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void sync_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
     return co_void_ret_map_typedef_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1) {
     return co_void_ret_map_typedef_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   folly::coro::Task<void> co_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_typedef_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   folly::coro::Task<void> co_void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::simpleTypeDef p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_map_typedef_param(rpcOptions, p_param1));
   }
@@ -510,54 +575,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void void_ret_map_typedef_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::some::valid::ns::simpleTypeDef p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_map_typedef_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   static void recv_void_ret_map_typedef_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual void recv_instance_void_ret_map_typedef_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_map_typedef_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_map_typedef_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::simpleTypeDef p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_enum_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void void_ret_enum_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::MyEnumA p_param1);
  protected:
   void void_ret_enum_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::MyEnumA p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void sync_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void sync_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
     return co_void_ret_enum_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1) {
     return co_void_ret_enum_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   folly::coro::Task<void> co_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_enum_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   folly::coro::Task<void> co_void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyEnumA p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_enum_param(rpcOptions, p_param1));
   }
@@ -608,54 +687,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void void_ret_enum_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::some::valid::ns::MyEnumA p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_enum_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   static void recv_void_ret_enum_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual void recv_instance_void_ret_enum_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_enum_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_enum_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::MyEnumA p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_struct_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void void_ret_struct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
  protected:
   void void_ret_struct_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::MyStruct& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void sync_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void sync_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
     return co_void_ret_struct_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
     return co_void_ret_struct_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   folly::coro::Task<void> co_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_struct_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   folly::coro::Task<void> co_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_struct_param(rpcOptions, p_param1));
   }
@@ -706,54 +799,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void void_ret_struct_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::some::valid::ns::MyStruct& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_struct_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   static void recv_void_ret_struct_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual void recv_instance_void_ret_struct_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_struct_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_struct_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_struct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::MyStruct& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: void_ret_listunion_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void void_ret_listunion_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
  protected:
   void void_ret_listunion_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void sync_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void sync_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::Future<folly::Unit> future_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
     return co_void_ret_listunion_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   template <int = 0>
   folly::coro::Task<void> co_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
     return co_void_ret_listunion_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   folly::coro::Task<void> co_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_listunion_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   folly::coro::Task<void> co_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
     co_await folly::coro::detachOnCancel(semifuture_void_ret_listunion_param(rpcOptions, p_param1));
   }
@@ -804,54 +911,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void void_ret_listunion_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   static folly::exception_wrapper recv_wrapped_void_ret_listunion_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   static void recv_void_ret_listunion_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual void recv_instance_void_ret_listunion_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "void_ret_listunion_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_void_ret_listunion_param(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_listunion_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: bool_ret_i32_i64_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual void bool_ret_i32_i64_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual void bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
  protected:
   void bool_ret_i32_i64_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int64_t p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual bool sync_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual bool sync_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::Future<bool> future_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::Future<bool> future_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
     return co_bool_ret_i32_i64_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2) {
     return co_bool_ret_i32_i64_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   folly::coro::Task<bool> co_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_i32_i64_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   folly::coro::Task<bool> co_bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int64_t p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_i32_i64_param(rpcOptions, p_param1, p_param2));
   }
@@ -904,54 +1025,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual void bool_ret_i32_i64_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   static folly::exception_wrapper recv_wrapped_bool_ret_i32_i64_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   static bool recv_bool_ret_i32_i64_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual bool recv_instance_bool_ret_i32_i64_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_i32_i64_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_bool_ret_i32_i64_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_i32_i64_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: bool_ret_map_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual void bool_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual void bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
  protected:
   void bool_ret_map_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual bool sync_bool_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual bool sync_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::Future<bool> future_bool_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::Future<bool> future_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_bool_ret_map_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_bool_ret_map_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   folly::coro::Task<bool> co_bool_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_map_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   folly::coro::Task<bool> co_bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_map_param(rpcOptions, p_param1));
   }
@@ -1004,54 +1139,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual void bool_ret_map_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   static folly::exception_wrapper recv_wrapped_bool_ret_map_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   static bool recv_bool_ret_map_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual bool recv_instance_bool_ret_map_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_map_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_bool_ret_map_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: bool_ret_union_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual void bool_ret_union_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual void bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::ComplexUnion& p_param1);
  protected:
   void bool_ret_union_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::ComplexUnion& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual bool sync_bool_ret_union_param(const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual bool sync_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::Future<bool> future_bool_ret_union_param(const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_union_param(const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::Future<bool> future_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::SemiFuture<bool> semifuture_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_union_param(const ::some::valid::ns::ComplexUnion& p_param1) {
     return co_bool_ret_union_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   template <int = 0>
   folly::coro::Task<bool> co_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1) {
     return co_bool_ret_union_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   folly::coro::Task<bool> co_bool_ret_union_param(const ::some::valid::ns::ComplexUnion& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_union_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   folly::coro::Task<bool> co_bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::ComplexUnion& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bool_ret_union_param(rpcOptions, p_param1));
   }
@@ -1104,54 +1253,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual void bool_ret_union_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::some::valid::ns::ComplexUnion& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   static folly::exception_wrapper recv_wrapped_bool_ret_union_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   static bool recv_bool_ret_union_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual bool recv_instance_bool_ret_union_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "bool_ret_union_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_bool_ret_union_param(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_union_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::ComplexUnion& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: i64_ret_float_double_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual void i64_ret_float_double_param(std::unique_ptr<apache::thrift::RequestCallback> callback, float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual void i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, float p_param1, double p_param2);
  protected:
   void i64_ret_float_double_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, float p_param1, double p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual ::std::int64_t sync_i64_ret_float_double_param(float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual ::std::int64_t sync_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_float_double_param(float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_float_double_param(float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_float_double_param(float p_param1, double p_param2) {
     return co_i64_ret_float_double_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2) {
     return co_i64_ret_float_double_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_float_double_param(float p_param1, double p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_float_double_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, float p_param1, double p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_float_double_param(rpcOptions, p_param1, p_param2));
   }
@@ -1204,54 +1367,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual void i64_ret_float_double_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, float p_param1, double p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   static folly::exception_wrapper recv_wrapped_i64_ret_float_double_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   static ::std::int64_t recv_i64_ret_float_double_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual ::std::int64_t recv_instance_i64_ret_float_double_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_float_double_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_i64_ret_float_double_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_float_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, float p_param1, double p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: i64_ret_string_typedef_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual void i64_ret_string_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual void i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
  protected:
   void i64_ret_string_typedef_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual ::std::int64_t sync_i64_ret_string_typedef_param(const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual ::std::int64_t sync_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_string_typedef_param(const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_string_typedef_param(const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_string_typedef_param(const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2) {
     return co_i64_ret_string_typedef_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2) {
     return co_i64_ret_string_typedef_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_string_typedef_param(const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_string_typedef_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_string_typedef_param(rpcOptions, p_param1, p_param2));
   }
@@ -1304,54 +1481,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual void i64_ret_string_typedef_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   static folly::exception_wrapper recv_wrapped_i64_ret_string_typedef_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   static ::std::int64_t recv_i64_ret_string_typedef_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual ::std::int64_t recv_instance_i64_ret_string_typedef_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_string_typedef_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_i64_ret_string_typedef_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_string_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: i64_ret_i32_i32_i32_i32_i32_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual void i64_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual void i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
  protected:
   void i64_ret_i32_i32_i32_i32_i32_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual ::std::int64_t sync_i64_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual ::std::int64_t sync_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::Future<::std::int64_t> future_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
     return co_i64_ret_i32_i32_i32_i32_i32_param<false>(nullptr, p_param1, p_param2, p_param3, p_param4, p_param5);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
     return co_i64_ret_i32_i32_i32_i32_i32_param<true>(&rpcOptions, p_param1, p_param2, p_param3, p_param4, p_param5);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   folly::coro::Task<::std::int64_t> co_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
     co_return co_await folly::coro::detachOnCancel(semifuture_i64_ret_i32_i32_i32_i32_i32_param(rpcOptions, p_param1, p_param2, p_param3, p_param4, p_param5));
   }
@@ -1404,54 +1595,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual void i64_ret_i32_i32_i32_i32_i32_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   static folly::exception_wrapper recv_wrapped_i64_ret_i32_i32_i32_i32_i32_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   static ::std::int64_t recv_i64_ret_i32_i32_i32_i32_i32_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual ::std::int64_t recv_instance_i64_ret_i32_i32_i32_i32_i32_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "i64_ret_i32_i32_i32_i32_i32_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_i64_ret_i32_i32_i32_i32_i32_param(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_i32_i32_i32_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: double_ret_setstruct_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual void double_ret_setstruct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual void double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
  protected:
   void double_ret_setstruct_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual double sync_double_ret_setstruct_param(const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual double sync_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::Future<double> future_double_ret_setstruct_param(const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::SemiFuture<double> semifuture_double_ret_setstruct_param(const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::Future<double> future_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::SemiFuture<double> semifuture_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::Future<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::SemiFuture<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   template <int = 0>
   folly::coro::Task<double> co_double_ret_setstruct_param(const ::std::set<::some::valid::ns::MyStruct>& p_param1) {
     return co_double_ret_setstruct_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   template <int = 0>
   folly::coro::Task<double> co_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1) {
     return co_double_ret_setstruct_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   folly::coro::Task<double> co_double_ret_setstruct_param(const ::std::set<::some::valid::ns::MyStruct>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_double_ret_setstruct_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   folly::coro::Task<double> co_double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::some::valid::ns::MyStruct>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_double_ret_setstruct_param(rpcOptions, p_param1));
   }
@@ -1504,54 +1709,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual void double_ret_setstruct_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   static folly::exception_wrapper recv_wrapped_double_ret_setstruct_param(double& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   static double recv_double_ret_setstruct_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual double recv_instance_double_ret_setstruct_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "double_ret_setstruct_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_double_ret_setstruct_param(double& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void double_ret_setstruct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: string_ret_string_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void string_ret_string_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
  protected:
   void string_ret_string_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void sync_string_ret_string_param(::std::string& _return, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void sync_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::Future<::std::string> future_string_ret_string_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::SemiFuture<::std::string> semifuture_string_ret_string_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::Future<::std::string> future_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::SemiFuture<::std::string> semifuture_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_string_ret_string_param(const ::std::string& p_param1) {
     return co_string_ret_string_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     return co_string_ret_string_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   folly::coro::Task<::std::string> co_string_ret_string_param(const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_string_ret_string_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   folly::coro::Task<::std::string> co_string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_string_ret_string_param(rpcOptions, p_param1));
   }
@@ -1604,54 +1823,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void string_ret_string_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   static folly::exception_wrapper recv_wrapped_string_ret_string_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   static void recv_string_ret_string_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual void recv_instance_string_ret_string_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "string_ret_string_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_string_ret_string_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void string_ret_string_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: binary_ret_binary_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void binary_ret_binary_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
  protected:
   void binary_ret_binary_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void sync_binary_ret_binary_param(::std::string& _return, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void sync_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::Future<::std::string> future_binary_ret_binary_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::SemiFuture<::std::string> semifuture_binary_ret_binary_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::Future<::std::string> future_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::SemiFuture<::std::string> semifuture_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_binary_ret_binary_param(const ::std::string& p_param1) {
     return co_binary_ret_binary_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     return co_binary_ret_binary_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   folly::coro::Task<::std::string> co_binary_ret_binary_param(const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_binary_ret_binary_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   folly::coro::Task<::std::string> co_binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_binary_ret_binary_param(rpcOptions, p_param1));
   }
@@ -1704,54 +1937,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void binary_ret_binary_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   static folly::exception_wrapper recv_wrapped_binary_ret_binary_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   static void recv_binary_ret_binary_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual void recv_instance_binary_ret_binary_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "binary_ret_binary_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_binary_ret_binary_param(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void binary_ret_binary_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: map_ret_bool_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void map_ret_bool_param(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
  protected:
   void map_ret_bool_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void sync_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void sync_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::string, ::std::int64_t>& _return, bool p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::Future<::std::map<::std::string, ::std::int64_t>> future_map_ret_bool_param(bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::int64_t>> semifuture_map_ret_bool_param(bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::Future<::std::map<::std::string, ::std::int64_t>> future_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::int64_t>> semifuture_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::Future<std::pair<::std::map<::std::string, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::SemiFuture<std::pair<::std::map<::std::string, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_map_ret_bool_param(bool p_param1) {
     return co_map_ret_bool_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
     return co_map_ret_bool_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_map_ret_bool_param(bool p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_map_ret_bool_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_map_ret_bool_param(rpcOptions, p_param1));
   }
@@ -1804,54 +2051,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void map_ret_bool_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, bool p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   static folly::exception_wrapper recv_wrapped_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   static void recv_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual void recv_instance_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "map_ret_bool_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void map_ret_bool_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: list_ret_map_setlist_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void list_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
  protected:
   void list_ret_map_setlist_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void sync_list_ret_map_setlist_param(::std::vector<bool>& _return, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void sync_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, ::std::vector<bool>& _return, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::Future<::std::vector<bool>> future_list_ret_map_setlist_param(const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::SemiFuture<::std::vector<bool>> semifuture_list_ret_map_setlist_param(const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::Future<::std::vector<bool>> future_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::SemiFuture<::std::vector<bool>> semifuture_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::Future<std::pair<::std::vector<bool>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::SemiFuture<std::pair<::std::vector<bool>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<bool>> co_list_ret_map_setlist_param(const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2) {
     return co_list_ret_map_setlist_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<bool>> co_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2) {
     return co_list_ret_map_setlist_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   folly::coro::Task<::std::vector<bool>> co_list_ret_map_setlist_param(const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_ret_map_setlist_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   folly::coro::Task<::std::vector<bool>> co_list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_ret_map_setlist_param(rpcOptions, p_param1, p_param2));
   }
@@ -1904,54 +2165,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void list_ret_map_setlist_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   static folly::exception_wrapper recv_wrapped_list_ret_map_setlist_param(::std::vector<bool>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   static void recv_list_ret_map_setlist_param(::std::vector<bool>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual void recv_instance_list_ret_map_setlist_param(::std::vector<bool>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "list_ret_map_setlist_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_list_ret_map_setlist_param(::std::vector<bool>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: mapsetlistmapliststring_ret_listlistlist_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
  protected:
   void mapsetlistmapliststring_ret_listlistlist_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void sync_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void sync_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::Future<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> future_mapsetlistmapliststring_ret_listlistlist_param(const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::SemiFuture<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> semifuture_mapsetlistmapliststring_ret_listlistlist_param(const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::Future<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> future_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::SemiFuture<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> semifuture_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::Future<std::pair<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::SemiFuture<std::pair<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> co_mapsetlistmapliststring_ret_listlistlist_param(const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1) {
     return co_mapsetlistmapliststring_ret_listlistlist_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> co_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1) {
     return co_mapsetlistmapliststring_ret_listlistlist_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   folly::coro::Task<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> co_mapsetlistmapliststring_ret_listlistlist_param(const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_mapsetlistmapliststring_ret_listlistlist_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   folly::coro::Task<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>> co_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_mapsetlistmapliststring_ret_listlistlist_param(rpcOptions, p_param1));
   }
@@ -2004,54 +2279,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void mapsetlistmapliststring_ret_listlistlist_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   static folly::exception_wrapper recv_wrapped_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   static void recv_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual void recv_instance_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "mapsetlistmapliststring_ret_listlistlist_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void mapsetlistmapliststring_ret_listlistlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: typedef_ret_i32_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual void typedef_ret_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual void typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1);
  protected:
   void typedef_ret_i32_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual ::some::valid::ns::simpleTypeDef sync_typedef_ret_i32_param(::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual ::some::valid::ns::simpleTypeDef sync_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::Future<::some::valid::ns::simpleTypeDef> future_typedef_ret_i32_param(::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::SemiFuture<::some::valid::ns::simpleTypeDef> semifuture_typedef_ret_i32_param(::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::Future<::some::valid::ns::simpleTypeDef> future_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::SemiFuture<::some::valid::ns::simpleTypeDef> semifuture_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::Future<std::pair<::some::valid::ns::simpleTypeDef, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::SemiFuture<std::pair<::some::valid::ns::simpleTypeDef, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_typedef_ret_i32_param(::std::int32_t p_param1) {
     return co_typedef_ret_i32_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1) {
     return co_typedef_ret_i32_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_typedef_ret_i32_param(::std::int32_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_typedef_ret_i32_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_typedef_ret_i32_param(rpcOptions, p_param1));
   }
@@ -2104,54 +2393,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual void typedef_ret_i32_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   static folly::exception_wrapper recv_wrapped_typedef_ret_i32_param(::some::valid::ns::simpleTypeDef& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   static ::some::valid::ns::simpleTypeDef recv_typedef_ret_i32_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual ::some::valid::ns::simpleTypeDef recv_instance_typedef_ret_i32_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "typedef_ret_i32_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_typedef_ret_i32_param(::some::valid::ns::simpleTypeDef& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void typedef_ret_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: listtypedef_ret_typedef_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void listtypedef_ret_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
  protected:
   void listtypedef_ret_typedef_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::complexStructTypeDef& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void sync_listtypedef_ret_typedef_param(::std::vector<::some::valid::ns::simpleTypeDef>& _return, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void sync_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::simpleTypeDef>& _return, const ::some::valid::ns::complexStructTypeDef& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::simpleTypeDef>> future_listtypedef_ret_typedef_param(const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::simpleTypeDef>> semifuture_listtypedef_ret_typedef_param(const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::simpleTypeDef>> future_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::simpleTypeDef>> semifuture_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::Future<std::pair<::std::vector<::some::valid::ns::simpleTypeDef>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::some::valid::ns::simpleTypeDef>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::simpleTypeDef>> co_listtypedef_ret_typedef_param(const ::some::valid::ns::complexStructTypeDef& p_param1) {
     return co_listtypedef_ret_typedef_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::simpleTypeDef>> co_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1) {
     return co_listtypedef_ret_typedef_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::simpleTypeDef>> co_listtypedef_ret_typedef_param(const ::some::valid::ns::complexStructTypeDef& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listtypedef_ret_typedef_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::simpleTypeDef>> co_listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::complexStructTypeDef& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listtypedef_ret_typedef_param(rpcOptions, p_param1));
   }
@@ -2204,54 +2507,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void listtypedef_ret_typedef_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   static folly::exception_wrapper recv_wrapped_listtypedef_ret_typedef_param(::std::vector<::some::valid::ns::simpleTypeDef>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   static void recv_listtypedef_ret_typedef_param(::std::vector<::some::valid::ns::simpleTypeDef>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual void recv_instance_listtypedef_ret_typedef_param(::std::vector<::some::valid::ns::simpleTypeDef>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listtypedef_ret_typedef_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_listtypedef_ret_typedef_param(::std::vector<::some::valid::ns::simpleTypeDef>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void listtypedef_ret_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: enum_ret_double_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual void enum_ret_double_param(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual void enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1);
  protected:
   void enum_ret_double_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual ::some::valid::ns::MyEnumA sync_enum_ret_double_param(double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual ::some::valid::ns::MyEnumA sync_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::Future<::some::valid::ns::MyEnumA> future_enum_ret_double_param(double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyEnumA> semifuture_enum_ret_double_param(double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::Future<::some::valid::ns::MyEnumA> future_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyEnumA> semifuture_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::Future<std::pair<::some::valid::ns::MyEnumA, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::SemiFuture<std::pair<::some::valid::ns::MyEnumA, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_param(double p_param1) {
     return co_enum_ret_double_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1) {
     return co_enum_ret_double_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_param(double p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_enum_ret_double_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, double p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_enum_ret_double_param(rpcOptions, p_param1));
   }
@@ -2304,54 +2621,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual void enum_ret_double_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, double p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   static folly::exception_wrapper recv_wrapped_enum_ret_double_param(::some::valid::ns::MyEnumA& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   static ::some::valid::ns::MyEnumA recv_enum_ret_double_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual ::some::valid::ns::MyEnumA recv_instance_enum_ret_double_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_enum_ret_double_param(::some::valid::ns::MyEnumA& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void enum_ret_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: enum_ret_double_enum_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual void enum_ret_double_enum_param(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual void enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
  protected:
   void enum_ret_double_enum_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1, ::some::valid::ns::MyEnumA p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual ::some::valid::ns::MyEnumA sync_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual ::some::valid::ns::MyEnumA sync_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::Future<::some::valid::ns::MyEnumA> future_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyEnumA> semifuture_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::Future<::some::valid::ns::MyEnumA> future_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyEnumA> semifuture_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::Future<std::pair<::some::valid::ns::MyEnumA, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::SemiFuture<std::pair<::some::valid::ns::MyEnumA, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
     return co_enum_ret_double_enum_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
     return co_enum_ret_double_enum_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_enum_ret_double_enum_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_enum_ret_double_enum_param(rpcOptions, p_param1, p_param2));
   }
@@ -2404,54 +2735,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual void enum_ret_double_enum_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   static folly::exception_wrapper recv_wrapped_enum_ret_double_enum_param(::some::valid::ns::MyEnumA& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   static ::some::valid::ns::MyEnumA recv_enum_ret_double_enum_param(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual ::some::valid::ns::MyEnumA recv_instance_enum_ret_double_enum_param(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "enum_ret_double_enum_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_enum_ret_double_enum_param(::some::valid::ns::MyEnumA& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void enum_ret_double_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: listenum_ret_map_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void listenum_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
  protected:
   void listenum_ret_map_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void sync_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void sync_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::MyEnumA>& _return, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::MyEnumA>> future_listenum_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::MyEnumA>> semifuture_listenum_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::MyEnumA>> future_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::MyEnumA>> semifuture_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::Future<std::pair<::std::vector<::some::valid::ns::MyEnumA>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::some::valid::ns::MyEnumA>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_listenum_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_listenum_ret_map_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     return co_listenum_ret_map_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_listenum_ret_map_param(const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listenum_ret_map_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listenum_ret_map_param(rpcOptions, p_param1));
   }
@@ -2504,54 +2849,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void listenum_ret_map_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   static folly::exception_wrapper recv_wrapped_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   static void recv_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual void recv_instance_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listenum_ret_map_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void listenum_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: struct_ret_i16_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void struct_ret_i16_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
  protected:
   void struct_ret_i16_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void sync_struct_ret_i16_param(::some::valid::ns::MyStruct& _return, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void sync_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyStruct& _return, ::std::int16_t p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::Future<::some::valid::ns::MyStruct> future_struct_ret_i16_param(::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyStruct> semifuture_struct_ret_i16_param(::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::Future<::some::valid::ns::MyStruct> future_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::SemiFuture<::some::valid::ns::MyStruct> semifuture_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::Future<std::pair<::some::valid::ns::MyStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::SemiFuture<std::pair<::some::valid::ns::MyStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyStruct> co_struct_ret_i16_param(::std::int16_t p_param1) {
     return co_struct_ret_i16_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyStruct> co_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1) {
     return co_struct_ret_i16_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   folly::coro::Task<::some::valid::ns::MyStruct> co_struct_ret_i16_param(::std::int16_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_struct_ret_i16_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   folly::coro::Task<::some::valid::ns::MyStruct> co_struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_struct_ret_i16_param(rpcOptions, p_param1));
   }
@@ -2604,54 +2963,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void struct_ret_i16_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   static folly::exception_wrapper recv_wrapped_struct_ret_i16_param(::some::valid::ns::MyStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   static void recv_struct_ret_i16_param(::some::valid::ns::MyStruct& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual void recv_instance_struct_ret_i16_param(::some::valid::ns::MyStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "struct_ret_i16_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_struct_ret_i16_param(::some::valid::ns::MyStruct& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void struct_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: setstruct_ret_set_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void setstruct_ret_set_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_param1);
  protected:
   void setstruct_ret_set_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void sync_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void sync_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, ::std::set<::some::valid::ns::MyStruct>& _return, const ::std::set<::std::string>& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::Future<::std::set<::some::valid::ns::MyStruct>> future_setstruct_ret_set_param(const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::SemiFuture<::std::set<::some::valid::ns::MyStruct>> semifuture_setstruct_ret_set_param(const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::Future<::std::set<::some::valid::ns::MyStruct>> future_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::SemiFuture<::std::set<::some::valid::ns::MyStruct>> semifuture_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::Future<std::pair<::std::set<::some::valid::ns::MyStruct>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::SemiFuture<std::pair<::std::set<::some::valid::ns::MyStruct>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   template <int = 0>
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_setstruct_ret_set_param(const ::std::set<::std::string>& p_param1) {
     return co_setstruct_ret_set_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   template <int = 0>
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1) {
     return co_setstruct_ret_set_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_setstruct_ret_set_param(const ::std::set<::std::string>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_setstruct_ret_set_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_setstruct_ret_set_param(rpcOptions, p_param1));
   }
@@ -2704,54 +3077,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void setstruct_ret_set_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::std::string>& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   static folly::exception_wrapper recv_wrapped_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   static void recv_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual void recv_instance_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "setstruct_ret_set_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void setstruct_ret_set_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_param1);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: union_ret_i32_i32_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void union_ret_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
  protected:
   void union_ret_i32_i32_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void sync_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void sync_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::ComplexUnion& _return, ::std::int32_t p_param1, ::std::int32_t p_param2);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::Future<::some::valid::ns::ComplexUnion> future_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::SemiFuture<::some::valid::ns::ComplexUnion> semifuture_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::Future<::some::valid::ns::ComplexUnion> future_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::SemiFuture<::some::valid::ns::ComplexUnion> semifuture_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::Future<std::pair<::some::valid::ns::ComplexUnion, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::SemiFuture<std::pair<::some::valid::ns::ComplexUnion, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2) {
     return co_union_ret_i32_i32_param<false>(nullptr, p_param1, p_param2);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2) {
     return co_union_ret_i32_i32_param<true>(&rpcOptions, p_param1, p_param2);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_union_ret_i32_i32_param(p_param1, p_param2));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2) {
     co_return co_await folly::coro::detachOnCancel(semifuture_union_ret_i32_i32_param(rpcOptions, p_param1, p_param2));
   }
@@ -2804,54 +3191,68 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void union_ret_i32_i32_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   static folly::exception_wrapper recv_wrapped_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   static void recv_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual void recv_instance_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "union_ret_i32_i32_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void union_ret_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift
-   * thrift service: ParamService
-   * thrift function: listunion_string_param
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void listunion_string_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void listunion_string_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
  protected:
   void listunion_string_paramImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void sync_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void sync_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::ComplexUnion>& _return, const ::std::string& p_param1);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::ComplexUnion>> future_listunion_string_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::ComplexUnion>> semifuture_listunion_string_param(const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::Future<::std::vector<::some::valid::ns::ComplexUnion>> future_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::ComplexUnion>> semifuture_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::Future<std::pair<::std::vector<::some::valid::ns::ComplexUnion>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::some::valid::ns::ComplexUnion>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_listunion_string_param(const ::std::string& p_param1) {
     return co_listunion_string_param<false>(nullptr, p_param1);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     return co_listunion_string_param<true>(&rpcOptions, p_param1);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_listunion_string_param(const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listunion_string_param(p_param1));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1) {
     co_return co_await folly::coro::detachOnCancel(semifuture_listunion_string_param(rpcOptions, p_param1));
   }
@@ -2904,13 +3305,18 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void listunion_string_param(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_param1);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   static folly::exception_wrapper recv_wrapped_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   static void recv_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual void recv_instance_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "listunion_string_param"} */
   virtual folly::exception_wrapper recv_instance_wrapped_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

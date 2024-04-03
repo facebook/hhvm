@@ -37,14 +37,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_method();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_method(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   static folly::exception_wrapper recv_wrapped_method(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_method(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_method(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "method"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -55,14 +61,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodAndReponseImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   folly::coro::Task<apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodAndReponse();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   folly::coro::Task<apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodAndReponse(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   static folly::exception_wrapper recv_wrapped_methodAndReponse(apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   static apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodAndReponse(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   virtual apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodAndReponse(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodAndReponse"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodAndReponse(apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -73,14 +85,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodThrow();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodThrow(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   static folly::exception_wrapper recv_wrapped_methodThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodThrow(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodThrow(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -91,14 +109,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodSinkThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodSinkThrow();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodSinkThrow(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   static folly::exception_wrapper recv_wrapped_methodSinkThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodSinkThrow(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodSinkThrow(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodSinkThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodSinkThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -109,14 +133,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodFinalThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodFinalThrow();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodFinalThrow(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   static folly::exception_wrapper recv_wrapped_methodFinalThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodFinalThrow(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodFinalThrow(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFinalThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodFinalThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -127,14 +157,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodBothThrowImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodBothThrow();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodBothThrow(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   static folly::exception_wrapper recv_wrapped_methodBothThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodBothThrow(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodBothThrow(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodBothThrow"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodBothThrow(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -145,14 +181,20 @@ class Client<::cpp2::SinkService> : public apache::thrift::GeneratedAsyncClient 
   void methodFastImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodFast();
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodFast(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   static folly::exception_wrapper recv_wrapped_methodFast(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   static apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_methodFast(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   virtual apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse> recv_instance_methodFast(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/sink/src/module.thrift", "service": "SinkService", "function": "methodFast"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodFast(apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalResponse>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

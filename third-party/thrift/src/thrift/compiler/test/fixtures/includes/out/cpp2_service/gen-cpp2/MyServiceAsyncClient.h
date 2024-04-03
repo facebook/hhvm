@@ -33,41 +33,50 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/includes/src/service.thrift
-   * thrift service: MyService
-   * thrift function: query
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void query(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void query(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
  protected:
   void queryImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void sync_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void sync_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::Future<folly::Unit> future_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::Future<folly::Unit> future_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   template <int = 0>
   folly::coro::Task<void> co_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_query<false>(nullptr, p_s, p_i);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   template <int = 0>
   folly::coro::Task<void> co_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_query<true>(&rpcOptions, p_s, p_i);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   folly::coro::Task<void> co_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     co_await folly::coro::detachOnCancel(semifuture_query(p_s, p_i));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   folly::coro::Task<void> co_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     co_await folly::coro::detachOnCancel(semifuture_query(rpcOptions, p_s, p_i));
   }
@@ -118,54 +127,68 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void query(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   static folly::exception_wrapper recv_wrapped_query(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   static void recv_query(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual void recv_instance_query(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   virtual folly::exception_wrapper recv_instance_wrapped_query(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void queryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> queryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/includes/src/service.thrift
-   * thrift service: MyService
-   * thrift function: has_arg_docs
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void has_arg_docs(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void has_arg_docs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
  protected:
   void has_arg_docsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void sync_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void sync_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::Future<folly::Unit> future_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::Future<folly::Unit> future_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   template <int = 0>
   folly::coro::Task<void> co_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_has_arg_docs<false>(nullptr, p_s, p_i);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   template <int = 0>
   folly::coro::Task<void> co_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_has_arg_docs<true>(&rpcOptions, p_s, p_i);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   folly::coro::Task<void> co_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     co_await folly::coro::detachOnCancel(semifuture_has_arg_docs(p_s, p_i));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   folly::coro::Task<void> co_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     co_await folly::coro::detachOnCancel(semifuture_has_arg_docs(rpcOptions, p_s, p_i));
   }
@@ -216,13 +239,18 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void has_arg_docs(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   static folly::exception_wrapper recv_wrapped_has_arg_docs(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   static void recv_has_arg_docs(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual void recv_instance_has_arg_docs(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   virtual folly::exception_wrapper recv_instance_wrapped_has_arg_docs(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

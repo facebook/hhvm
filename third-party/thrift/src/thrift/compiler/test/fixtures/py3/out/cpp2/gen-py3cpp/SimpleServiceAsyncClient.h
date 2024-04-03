@@ -31,41 +31,50 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_five
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual void get_five(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual void get_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void get_fiveImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual ::std::int32_t sync_get_five();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual ::std::int32_t sync_get_five(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::Future<::std::int32_t> future_get_five();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_five();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::Future<::std::int32_t> future_get_five(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_five(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_five(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_five(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_five() {
     return co_get_five<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_five(apache::thrift::RpcOptions& rpcOptions) {
     return co_get_five<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   folly::coro::Task<::std::int32_t> co_get_five() {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_five());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   folly::coro::Task<::std::int32_t> co_get_five(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_five(rpcOptions));
   }
@@ -118,54 +127,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual void get_five(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   static folly::exception_wrapper recv_wrapped_get_five(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   static ::std::int32_t recv_get_five(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual ::std::int32_t recv_instance_get_five(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_five"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_five(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: add_five
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual void add_five(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual void add_five(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num);
  protected:
   void add_fiveImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual ::std::int32_t sync_add_five(::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual ::std::int32_t sync_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::Future<::std::int32_t> future_add_five(::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_add_five(::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::Future<::std::int32_t> future_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_add_five(::std::int32_t p_num) {
     return co_add_five<false>(nullptr, p_num);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num) {
     return co_add_five<true>(&rpcOptions, p_num);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   folly::coro::Task<::std::int32_t> co_add_five(::std::int32_t p_num) {
     co_return co_await folly::coro::detachOnCancel(semifuture_add_five(p_num));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   folly::coro::Task<::std::int32_t> co_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num) {
     co_return co_await folly::coro::detachOnCancel(semifuture_add_five(rpcOptions, p_num));
   }
@@ -218,54 +241,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual void add_five(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_num);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   static folly::exception_wrapper recv_wrapped_add_five(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   static ::std::int32_t recv_add_five(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual ::std::int32_t recv_instance_add_five(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual folly::exception_wrapper recv_instance_wrapped_add_five(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void add_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> add_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: do_nothing
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void do_nothing(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void do_nothing(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void do_nothingImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void sync_do_nothing();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void sync_do_nothing(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::Future<folly::Unit> future_do_nothing();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_do_nothing();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::Future<folly::Unit> future_do_nothing(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_do_nothing(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_do_nothing(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_do_nothing(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   template <int = 0>
   folly::coro::Task<void> co_do_nothing() {
     return co_do_nothing<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   template <int = 0>
   folly::coro::Task<void> co_do_nothing(apache::thrift::RpcOptions& rpcOptions) {
     return co_do_nothing<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   folly::coro::Task<void> co_do_nothing() {
     co_await folly::coro::detachOnCancel(semifuture_do_nothing());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   folly::coro::Task<void> co_do_nothing(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_do_nothing(rpcOptions));
   }
@@ -316,54 +353,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void do_nothing(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   static folly::exception_wrapper recv_wrapped_do_nothing(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   static void recv_do_nothing(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void recv_instance_do_nothing(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual folly::exception_wrapper recv_instance_wrapped_do_nothing(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void do_nothingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_nothingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: concat
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void concat(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void concat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second);
  protected:
   void concatImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void sync_concat(::std::string& _return, const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void sync_concat(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_first, const ::std::string& p_second);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::Future<::std::string> future_concat(const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::SemiFuture<::std::string> semifuture_concat(const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::Future<::std::string> future_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::SemiFuture<::std::string> semifuture_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_concat(const ::std::string& p_first, const ::std::string& p_second) {
     return co_concat<false>(nullptr, p_first, p_second);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second) {
     return co_concat<true>(&rpcOptions, p_first, p_second);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   folly::coro::Task<::std::string> co_concat(const ::std::string& p_first, const ::std::string& p_second) {
     co_return co_await folly::coro::detachOnCancel(semifuture_concat(p_first, p_second));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   folly::coro::Task<::std::string> co_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second) {
     co_return co_await folly::coro::detachOnCancel(semifuture_concat(rpcOptions, p_first, p_second));
   }
@@ -416,54 +467,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void concat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_first, const ::std::string& p_second);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   static folly::exception_wrapper recv_wrapped_concat(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   static void recv_concat(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void recv_instance_concat(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual folly::exception_wrapper recv_instance_wrapped_concat(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void concatT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concatCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_value
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual void get_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual void get_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
  protected:
   void get_valueImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual ::std::int32_t sync_get_value(const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual ::std::int32_t sync_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::Future<::std::int32_t> future_get_value(const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_value(const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::Future<::std::int32_t> future_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_value(const ::py3::simple::SimpleStruct& p_simple_struct) {
     return co_get_value<false>(nullptr, p_simple_struct);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct) {
     return co_get_value<true>(&rpcOptions, p_simple_struct);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   folly::coro::Task<::std::int32_t> co_get_value(const ::py3::simple::SimpleStruct& p_simple_struct) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_value(p_simple_struct));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   folly::coro::Task<::std::int32_t> co_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_value(rpcOptions, p_simple_struct));
   }
@@ -516,54 +581,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual void get_value(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   static folly::exception_wrapper recv_wrapped_get_value(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   static ::std::int32_t recv_get_value(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual ::std::int32_t recv_instance_get_value(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_value(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: negate
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual void negate(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual void negate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input);
  protected:
   void negateImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual bool sync_negate(bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual bool sync_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::Future<bool> future_negate(bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::SemiFuture<bool> semifuture_negate(bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::Future<bool> future_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::SemiFuture<bool> semifuture_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   template <int = 0>
   folly::coro::Task<bool> co_negate(bool p_input) {
     return co_negate<false>(nullptr, p_input);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   template <int = 0>
   folly::coro::Task<bool> co_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input) {
     return co_negate<true>(&rpcOptions, p_input);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   folly::coro::Task<bool> co_negate(bool p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_negate(p_input));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   folly::coro::Task<bool> co_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_negate(rpcOptions, p_input));
   }
@@ -616,54 +695,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual void negate(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, bool p_input);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   static folly::exception_wrapper recv_wrapped_negate(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   static bool recv_negate(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual bool recv_instance_negate(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual folly::exception_wrapper recv_instance_wrapped_negate(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void negateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> negateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: tiny
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual void tiny(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual void tiny(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input);
  protected:
   void tinyImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual ::std::int8_t sync_tiny(::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual ::std::int8_t sync_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::Future<::std::int8_t> future_tiny(::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::SemiFuture<::std::int8_t> semifuture_tiny(::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::Future<::std::int8_t> future_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::SemiFuture<::std::int8_t> semifuture_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::Future<std::pair<::std::int8_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::SemiFuture<std::pair<::std::int8_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   template <int = 0>
   folly::coro::Task<::std::int8_t> co_tiny(::std::int8_t p_input) {
     return co_tiny<false>(nullptr, p_input);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   template <int = 0>
   folly::coro::Task<::std::int8_t> co_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input) {
     return co_tiny<true>(&rpcOptions, p_input);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   folly::coro::Task<::std::int8_t> co_tiny(::std::int8_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_tiny(p_input));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   folly::coro::Task<::std::int8_t> co_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_tiny(rpcOptions, p_input));
   }
@@ -716,54 +809,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual void tiny(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int8_t p_input);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   static folly::exception_wrapper recv_wrapped_tiny(::std::int8_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   static ::std::int8_t recv_tiny(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual ::std::int8_t recv_instance_tiny(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual folly::exception_wrapper recv_instance_wrapped_tiny(::std::int8_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void tinyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tinyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: small
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual void small(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual void small(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input);
  protected:
   void smallImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual ::std::int16_t sync_small(::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual ::std::int16_t sync_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::Future<::std::int16_t> future_small(::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_small(::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::Future<::std::int16_t> future_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_small(::std::int16_t p_input) {
     return co_small<false>(nullptr, p_input);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input) {
     return co_small<true>(&rpcOptions, p_input);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   folly::coro::Task<::std::int16_t> co_small(::std::int16_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_small(p_input));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   folly::coro::Task<::std::int16_t> co_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_small(rpcOptions, p_input));
   }
@@ -816,54 +923,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual void small(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_input);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   static folly::exception_wrapper recv_wrapped_small(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   static ::std::int16_t recv_small(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual ::std::int16_t recv_instance_small(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual folly::exception_wrapper recv_instance_wrapped_small(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void smallT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> smallCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: big
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual void big(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual void big(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input);
  protected:
   void bigImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual ::std::int64_t sync_big(::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual ::std::int64_t sync_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::Future<::std::int64_t> future_big(::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_big(::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::Future<::std::int64_t> future_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_big(::std::int64_t p_input) {
     return co_big<false>(nullptr, p_input);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input) {
     return co_big<true>(&rpcOptions, p_input);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   folly::coro::Task<::std::int64_t> co_big(::std::int64_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_big(p_input));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   folly::coro::Task<::std::int64_t> co_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_big(rpcOptions, p_input));
   }
@@ -916,54 +1037,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual void big(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_input);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   static folly::exception_wrapper recv_wrapped_big(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   static ::std::int64_t recv_big(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual ::std::int64_t recv_instance_big(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual folly::exception_wrapper recv_instance_wrapped_big(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void bigT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bigCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: two
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual void two(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual void two(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input);
  protected:
   void twoImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual double sync_two(double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual double sync_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::Future<double> future_two(double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::SemiFuture<double> semifuture_two(double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::Future<double> future_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::SemiFuture<double> semifuture_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::Future<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::SemiFuture<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   template <int = 0>
   folly::coro::Task<double> co_two(double p_input) {
     return co_two<false>(nullptr, p_input);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   template <int = 0>
   folly::coro::Task<double> co_two(apache::thrift::RpcOptions& rpcOptions, double p_input) {
     return co_two<true>(&rpcOptions, p_input);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   folly::coro::Task<double> co_two(double p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_two(p_input));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   folly::coro::Task<double> co_two(apache::thrift::RpcOptions& rpcOptions, double p_input) {
     co_return co_await folly::coro::detachOnCancel(semifuture_two(rpcOptions, p_input));
   }
@@ -1016,54 +1151,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual void two(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, double p_input);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   static folly::exception_wrapper recv_wrapped_two(double& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   static double recv_two(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual double recv_instance_two(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual folly::exception_wrapper recv_instance_wrapped_two(double& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void twoT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> twoCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: expected_exception
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void expected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void expected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void expected_exceptionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void sync_expected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void sync_expected_exception(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::Future<folly::Unit> future_expected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_expected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::Future<folly::Unit> future_expected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_expected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_expected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_expected_exception(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   template <int = 0>
   folly::coro::Task<void> co_expected_exception() {
     return co_expected_exception<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   template <int = 0>
   folly::coro::Task<void> co_expected_exception(apache::thrift::RpcOptions& rpcOptions) {
     return co_expected_exception<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   folly::coro::Task<void> co_expected_exception() {
     co_await folly::coro::detachOnCancel(semifuture_expected_exception());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   folly::coro::Task<void> co_expected_exception(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_expected_exception(rpcOptions));
   }
@@ -1114,54 +1263,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void expected_exception(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   static folly::exception_wrapper recv_wrapped_expected_exception(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   static void recv_expected_exception(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void recv_instance_expected_exception(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual folly::exception_wrapper recv_instance_wrapped_expected_exception(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void expected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> expected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: unexpected_exception
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual void unexpected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual void unexpected_exception(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void unexpected_exceptionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual ::std::int32_t sync_unexpected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual ::std::int32_t sync_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::Future<::std::int32_t> future_unexpected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_unexpected_exception();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::Future<::std::int32_t> future_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_unexpected_exception() {
     return co_unexpected_exception<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_unexpected_exception(apache::thrift::RpcOptions& rpcOptions) {
     return co_unexpected_exception<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   folly::coro::Task<::std::int32_t> co_unexpected_exception() {
     co_return co_await folly::coro::detachOnCancel(semifuture_unexpected_exception());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   folly::coro::Task<::std::int32_t> co_unexpected_exception(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_unexpected_exception(rpcOptions));
   }
@@ -1214,54 +1377,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual void unexpected_exception(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   static folly::exception_wrapper recv_wrapped_unexpected_exception(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   static ::std::int32_t recv_unexpected_exception(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual ::std::int32_t recv_instance_unexpected_exception(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual folly::exception_wrapper recv_instance_wrapped_unexpected_exception(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void unexpected_exceptionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unexpected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: sum_i16_list
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual void sum_i16_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual void sum_i16_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers);
  protected:
   void sum_i16_listImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual ::std::int32_t sync_sum_i16_list(const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual ::std::int32_t sync_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i16_list(const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i16_list(const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i16_list(const ::std::vector<::std::int16_t>& p_numbers) {
     return co_sum_i16_list<false>(nullptr, p_numbers);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers) {
     return co_sum_i16_list<true>(&rpcOptions, p_numbers);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i16_list(const ::std::vector<::std::int16_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i16_list(p_numbers));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i16_list(rpcOptions, p_numbers));
   }
@@ -1314,54 +1491,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual void sum_i16_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int16_t>& p_numbers);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   static folly::exception_wrapper recv_wrapped_sum_i16_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   static ::std::int32_t recv_sum_i16_list(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual ::std::int32_t recv_instance_sum_i16_list(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sum_i16_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void sum_i16_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i16_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: sum_i32_list
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual void sum_i32_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual void sum_i32_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers);
  protected:
   void sum_i32_listImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual ::std::int32_t sync_sum_i32_list(const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual ::std::int32_t sync_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i32_list(const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i32_list(const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i32_list(const ::std::vector<::std::int32_t>& p_numbers) {
     return co_sum_i32_list<false>(nullptr, p_numbers);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers) {
     return co_sum_i32_list<true>(&rpcOptions, p_numbers);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i32_list(const ::std::vector<::std::int32_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i32_list(p_numbers));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i32_list(rpcOptions, p_numbers));
   }
@@ -1414,54 +1605,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual void sum_i32_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int32_t>& p_numbers);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   static folly::exception_wrapper recv_wrapped_sum_i32_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   static ::std::int32_t recv_sum_i32_list(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual ::std::int32_t recv_instance_sum_i32_list(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sum_i32_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void sum_i32_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i32_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: sum_i64_list
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual void sum_i64_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual void sum_i64_list(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers);
  protected:
   void sum_i64_listImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual ::std::int32_t sync_sum_i64_list(const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual ::std::int32_t sync_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i64_list(const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i64_list(const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::Future<::std::int32_t> future_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i64_list(const ::std::vector<::std::int64_t>& p_numbers) {
     return co_sum_i64_list<false>(nullptr, p_numbers);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers) {
     return co_sum_i64_list<true>(&rpcOptions, p_numbers);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i64_list(const ::std::vector<::std::int64_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i64_list(p_numbers));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   folly::coro::Task<::std::int32_t> co_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_i64_list(rpcOptions, p_numbers));
   }
@@ -1514,54 +1719,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual void sum_i64_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int64_t>& p_numbers);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   static folly::exception_wrapper recv_wrapped_sum_i64_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   static ::std::int32_t recv_sum_i64_list(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual ::std::int32_t recv_instance_sum_i64_list(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sum_i64_list(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void sum_i64_listT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i64_listCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: concat_many
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void concat_many(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void concat_many(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
   void concat_manyImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void sync_concat_many(::std::string& _return, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void sync_concat_many(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::vector<::std::string>& p_words);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::Future<::std::string> future_concat_many(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::SemiFuture<::std::string> semifuture_concat_many(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::Future<::std::string> future_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::SemiFuture<::std::string> semifuture_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_concat_many(const ::std::vector<::std::string>& p_words) {
     return co_concat_many<false>(nullptr, p_words);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     return co_concat_many<true>(&rpcOptions, p_words);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   folly::coro::Task<::std::string> co_concat_many(const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_concat_many(p_words));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   folly::coro::Task<::std::string> co_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_concat_many(rpcOptions, p_words));
   }
@@ -1614,54 +1833,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void concat_many(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   static folly::exception_wrapper recv_wrapped_concat_many(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   static void recv_concat_many(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void recv_instance_concat_many(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual folly::exception_wrapper recv_instance_wrapped_concat_many(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void concat_manyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concat_manyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: count_structs
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual void count_structs(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual void count_structs(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
  protected:
   void count_structsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual ::std::int32_t sync_count_structs(const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual ::std::int32_t sync_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::Future<::std::int32_t> future_count_structs(const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_count_structs(const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::Future<::std::int32_t> future_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_count_structs(const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
     return co_count_structs<false>(nullptr, p_items);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
     return co_count_structs<true>(&rpcOptions, p_items);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   folly::coro::Task<::std::int32_t> co_count_structs(const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_count_structs(p_items));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   folly::coro::Task<::std::int32_t> co_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_count_structs(rpcOptions, p_items));
   }
@@ -1714,54 +1947,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual void count_structs(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   static folly::exception_wrapper recv_wrapped_count_structs(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   static ::std::int32_t recv_count_structs(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual ::std::int32_t recv_instance_count_structs(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual folly::exception_wrapper recv_instance_wrapped_count_structs(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void count_structsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> count_structsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: sum_set
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual void sum_set(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual void sum_set(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers);
  protected:
   void sum_setImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual ::std::int32_t sync_sum_set(const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual ::std::int32_t sync_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::Future<::std::int32_t> future_sum_set(const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_set(const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::Future<::std::int32_t> future_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_set(const ::std::set<::std::int32_t>& p_numbers) {
     return co_sum_set<false>(nullptr, p_numbers);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers) {
     return co_sum_set<true>(&rpcOptions, p_numbers);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   folly::coro::Task<::std::int32_t> co_sum_set(const ::std::set<::std::int32_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_set(p_numbers));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   folly::coro::Task<::std::int32_t> co_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_set(rpcOptions, p_numbers));
   }
@@ -1814,54 +2061,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual void sum_set(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::std::int32_t>& p_numbers);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   static folly::exception_wrapper recv_wrapped_sum_set(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   static ::std::int32_t recv_sum_set(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual ::std::int32_t recv_instance_sum_set(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sum_set(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void sum_setT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_setCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: contains_word
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual void contains_word(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual void contains_word(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
  protected:
   void contains_wordImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual bool sync_contains_word(const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual bool sync_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::Future<bool> future_contains_word(const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::SemiFuture<bool> semifuture_contains_word(const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::Future<bool> future_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::SemiFuture<bool> semifuture_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   template <int = 0>
   folly::coro::Task<bool> co_contains_word(const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
     return co_contains_word<false>(nullptr, p_words, p_word);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   template <int = 0>
   folly::coro::Task<bool> co_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
     return co_contains_word<true>(&rpcOptions, p_words, p_word);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   folly::coro::Task<bool> co_contains_word(const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contains_word(p_words, p_word));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   folly::coro::Task<bool> co_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contains_word(rpcOptions, p_words, p_word));
   }
@@ -1914,54 +2175,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual void contains_word(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   static folly::exception_wrapper recv_wrapped_contains_word(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   static bool recv_contains_word(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual bool recv_instance_contains_word(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual folly::exception_wrapper recv_instance_wrapped_contains_word(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void contains_wordT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contains_wordCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_map_value
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void get_map_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void get_map_value(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
  protected:
   void get_map_valueImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void sync_get_map_value(::std::string& _return, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void sync_get_map_value(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::Future<::std::string> future_get_map_value(const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::SemiFuture<::std::string> semifuture_get_map_value(const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::Future<::std::string> future_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::SemiFuture<::std::string> semifuture_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_get_map_value(const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
     return co_get_map_value<false>(nullptr, p_words, p_key);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
     return co_get_map_value<true>(&rpcOptions, p_words, p_key);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   folly::coro::Task<::std::string> co_get_map_value(const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_map_value(p_words, p_key));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   folly::coro::Task<::std::string> co_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_map_value(rpcOptions, p_words, p_key));
   }
@@ -2014,54 +2289,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void get_map_value(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   static folly::exception_wrapper recv_wrapped_get_map_value(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   static void recv_get_map_value(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void recv_instance_get_map_value(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_map_value(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_map_valueT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_map_valueCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: map_length
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual void map_length(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual void map_length(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
  protected:
   void map_lengthImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual ::std::int16_t sync_map_length(const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual ::std::int16_t sync_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::Future<::std::int16_t> future_map_length(const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_map_length(const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::Future<::std::int16_t> future_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_map_length(const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
     return co_map_length<false>(nullptr, p_items);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
     return co_map_length<true>(&rpcOptions, p_items);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   folly::coro::Task<::std::int16_t> co_map_length(const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_map_length(p_items));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   folly::coro::Task<::std::int16_t> co_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_map_length(rpcOptions, p_items));
   }
@@ -2114,54 +2403,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual void map_length(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   static folly::exception_wrapper recv_wrapped_map_length(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   static ::std::int16_t recv_map_length(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual ::std::int16_t recv_instance_map_length(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual folly::exception_wrapper recv_instance_wrapped_map_length(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void map_lengthT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_lengthCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: sum_map_values
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual void sum_map_values(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual void sum_map_values(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
  protected:
   void sum_map_valuesImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual ::std::int16_t sync_sum_map_values(const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual ::std::int16_t sync_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::Future<::std::int16_t> future_sum_map_values(const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_sum_map_values(const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::Future<::std::int16_t> future_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::SemiFuture<::std::int16_t> semifuture_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_sum_map_values(const ::std::map<::std::string, ::std::int16_t>& p_items) {
     return co_sum_map_values<false>(nullptr, p_items);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items) {
     return co_sum_map_values<true>(&rpcOptions, p_items);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   folly::coro::Task<::std::int16_t> co_sum_map_values(const ::std::map<::std::string, ::std::int16_t>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_map_values(p_items));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   folly::coro::Task<::std::int16_t> co_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_sum_map_values(rpcOptions, p_items));
   }
@@ -2214,54 +2517,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual void sum_map_values(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   static folly::exception_wrapper recv_wrapped_sum_map_values(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   static ::std::int16_t recv_sum_map_values(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual ::std::int16_t recv_instance_sum_map_values(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual folly::exception_wrapper recv_instance_wrapped_sum_map_values(::std::int16_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void sum_map_valuesT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_map_valuesCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: complex_sum_i32
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual void complex_sum_i32(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual void complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
  protected:
   void complex_sum_i32Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual ::std::int32_t sync_complex_sum_i32(const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual ::std::int32_t sync_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::Future<::std::int32_t> future_complex_sum_i32(const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_complex_sum_i32(const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::Future<::std::int32_t> future_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_complex_sum_i32(const ::py3::simple::ComplexStruct& p_counter) {
     return co_complex_sum_i32<false>(nullptr, p_counter);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
     return co_complex_sum_i32<true>(&rpcOptions, p_counter);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   folly::coro::Task<::std::int32_t> co_complex_sum_i32(const ::py3::simple::ComplexStruct& p_counter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_complex_sum_i32(p_counter));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   folly::coro::Task<::std::int32_t> co_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_complex_sum_i32(rpcOptions, p_counter));
   }
@@ -2314,54 +2631,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual void complex_sum_i32(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::ComplexStruct& p_counter);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   static folly::exception_wrapper recv_wrapped_complex_sum_i32(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   static ::std::int32_t recv_complex_sum_i32(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual ::std::int32_t recv_instance_complex_sum_i32(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual folly::exception_wrapper recv_instance_wrapped_complex_sum_i32(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void complex_sum_i32T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> complex_sum_i32Ctx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: repeat_name
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void repeat_name(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void repeat_name(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
  protected:
   void repeat_nameImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void sync_repeat_name(::std::string& _return, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void sync_repeat_name(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::py3::simple::ComplexStruct& p_counter);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::Future<::std::string> future_repeat_name(const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::SemiFuture<::std::string> semifuture_repeat_name(const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::Future<::std::string> future_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::SemiFuture<::std::string> semifuture_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_repeat_name(const ::py3::simple::ComplexStruct& p_counter) {
     return co_repeat_name<false>(nullptr, p_counter);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
     return co_repeat_name<true>(&rpcOptions, p_counter);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   folly::coro::Task<::std::string> co_repeat_name(const ::py3::simple::ComplexStruct& p_counter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_repeat_name(p_counter));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   folly::coro::Task<::std::string> co_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
     co_return co_await folly::coro::detachOnCancel(semifuture_repeat_name(rpcOptions, p_counter));
   }
@@ -2414,54 +2745,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void repeat_name(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::ComplexStruct& p_counter);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   static folly::exception_wrapper recv_wrapped_repeat_name(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   static void recv_repeat_name(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void recv_instance_repeat_name(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual folly::exception_wrapper recv_instance_wrapped_repeat_name(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void repeat_nameT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> repeat_nameCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_struct
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void get_struct(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void get_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void get_structImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void sync_get_struct(::py3::simple::SimpleStruct& _return);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void sync_get_struct(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::SimpleStruct& _return);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_struct(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_struct(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct() {
     return co_get_struct<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct(apache::thrift::RpcOptions& rpcOptions) {
     return co_get_struct<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct() {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_struct());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_struct(rpcOptions));
   }
@@ -2514,54 +2859,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void get_struct(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   static folly::exception_wrapper recv_wrapped_get_struct(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   static void recv_get_struct(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void recv_instance_get_struct(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_struct(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: fib
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void fib(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void fib(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n);
  protected:
   void fibImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void sync_fib(::std::vector<::std::int32_t>& _return, ::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void sync_fib(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::std::int32_t>& _return, ::std::int16_t p_n);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::Future<::std::vector<::std::int32_t>> future_fib(::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::SemiFuture<::std::vector<::std::int32_t>> semifuture_fib(::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::Future<::std::vector<::std::int32_t>> future_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::SemiFuture<::std::vector<::std::int32_t>> semifuture_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::Future<std::pair<::std::vector<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::int32_t>> co_fib(::std::int16_t p_n) {
     return co_fib<false>(nullptr, p_n);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::int32_t>> co_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n) {
     return co_fib<true>(&rpcOptions, p_n);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   folly::coro::Task<::std::vector<::std::int32_t>> co_fib(::std::int16_t p_n) {
     co_return co_await folly::coro::detachOnCancel(semifuture_fib(p_n));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   folly::coro::Task<::std::vector<::std::int32_t>> co_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n) {
     co_return co_await folly::coro::detachOnCancel(semifuture_fib(rpcOptions, p_n));
   }
@@ -2614,54 +2973,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void fib(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_n);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   static folly::exception_wrapper recv_wrapped_fib(::std::vector<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   static void recv_fib(::std::vector<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void recv_instance_fib(::std::vector<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual folly::exception_wrapper recv_instance_wrapped_fib(::std::vector<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void fibT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fibCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: unique_words
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void unique_words(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void unique_words(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
   void unique_wordsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void sync_unique_words(::std::set<::std::string>& _return, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void sync_unique_words(apache::thrift::RpcOptions& rpcOptions, ::std::set<::std::string>& _return, const ::std::vector<::std::string>& p_words);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::Future<::std::set<::std::string>> future_unique_words(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_unique_words(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::Future<::std::set<::std::string>> future_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_unique_words(const ::std::vector<::std::string>& p_words) {
     return co_unique_words<false>(nullptr, p_words);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     return co_unique_words<true>(&rpcOptions, p_words);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   folly::coro::Task<::std::set<::std::string>> co_unique_words(const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_unique_words(p_words));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   folly::coro::Task<::std::set<::std::string>> co_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_unique_words(rpcOptions, p_words));
   }
@@ -2714,54 +3087,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void unique_words(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   static folly::exception_wrapper recv_wrapped_unique_words(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   static void recv_unique_words(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void recv_instance_unique_words(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual folly::exception_wrapper recv_instance_wrapped_unique_words(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void unique_wordsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unique_wordsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: words_count
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void words_count(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void words_count(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
  protected:
   void words_countImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void sync_words_count(::std::map<::std::string, ::std::int16_t>& _return, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void sync_words_count(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::string, ::std::int16_t>& _return, const ::std::vector<::std::string>& p_words);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::Future<::std::map<::std::string, ::std::int16_t>> future_words_count(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::int16_t>> semifuture_words_count(const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::Future<::std::map<::std::string, ::std::int16_t>> future_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::int16_t>> semifuture_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::Future<std::pair<::std::map<::std::string, ::std::int16_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::SemiFuture<std::pair<::std::map<::std::string, ::std::int16_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::int16_t>> co_words_count(const ::std::vector<::std::string>& p_words) {
     return co_words_count<false>(nullptr, p_words);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::int16_t>> co_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     return co_words_count<true>(&rpcOptions, p_words);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   folly::coro::Task<::std::map<::std::string, ::std::int16_t>> co_words_count(const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_words_count(p_words));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   folly::coro::Task<::std::map<::std::string, ::std::int16_t>> co_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_words_count(rpcOptions, p_words));
   }
@@ -2814,54 +3201,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void words_count(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   static folly::exception_wrapper recv_wrapped_words_count(::std::map<::std::string, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   static void recv_words_count(::std::map<::std::string, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void recv_instance_words_count(::std::map<::std::string, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual folly::exception_wrapper recv_instance_wrapped_words_count(::std::map<::std::string, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void words_countT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> words_countCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: set_enum
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual void set_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual void set_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum);
  protected:
   void set_enumImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual ::py3::simple::AnEnum sync_set_enum(::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual ::py3::simple::AnEnum sync_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::Future<::py3::simple::AnEnum> future_set_enum(::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::SemiFuture<::py3::simple::AnEnum> semifuture_set_enum(::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::Future<::py3::simple::AnEnum> future_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::SemiFuture<::py3::simple::AnEnum> semifuture_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::Future<std::pair<::py3::simple::AnEnum, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::SemiFuture<std::pair<::py3::simple::AnEnum, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::AnEnum> co_set_enum(::py3::simple::AnEnum p_in_enum) {
     return co_set_enum<false>(nullptr, p_in_enum);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::AnEnum> co_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum) {
     return co_set_enum<true>(&rpcOptions, p_in_enum);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   folly::coro::Task<::py3::simple::AnEnum> co_set_enum(::py3::simple::AnEnum p_in_enum) {
     co_return co_await folly::coro::detachOnCancel(semifuture_set_enum(p_in_enum));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   folly::coro::Task<::py3::simple::AnEnum> co_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum) {
     co_return co_await folly::coro::detachOnCancel(semifuture_set_enum(rpcOptions, p_in_enum));
   }
@@ -2914,54 +3315,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual void set_enum(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::py3::simple::AnEnum p_in_enum);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   static folly::exception_wrapper recv_wrapped_set_enum(::py3::simple::AnEnum& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   static ::py3::simple::AnEnum recv_set_enum(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual ::py3::simple::AnEnum recv_instance_set_enum(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual folly::exception_wrapper recv_instance_wrapped_set_enum(::py3::simple::AnEnum& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void set_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> set_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: list_of_lists
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void list_of_lists(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void list_of_lists(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
  protected:
   void list_of_listsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void sync_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void sync_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::std::vector<::std::int32_t>>& _return, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::Future<::std::vector<::std::vector<::std::int32_t>>> future_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::SemiFuture<::std::vector<::std::vector<::std::int32_t>>> semifuture_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::Future<::std::vector<::std::vector<::std::int32_t>>> future_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::SemiFuture<::std::vector<::std::vector<::std::int32_t>>> semifuture_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::Future<std::pair<::std::vector<::std::vector<::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::std::vector<::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::vector<::std::int32_t>>> co_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
     return co_list_of_lists<false>(nullptr, p_num_lists, p_num_items);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::vector<::std::int32_t>>> co_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
     return co_list_of_lists<true>(&rpcOptions, p_num_lists, p_num_items);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   folly::coro::Task<::std::vector<::std::vector<::std::int32_t>>> co_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_of_lists(p_num_lists, p_num_items));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   folly::coro::Task<::std::vector<::std::vector<::std::int32_t>>> co_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_of_lists(rpcOptions, p_num_lists, p_num_items));
   }
@@ -3014,54 +3429,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void list_of_lists(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   static folly::exception_wrapper recv_wrapped_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   static void recv_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void recv_instance_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual folly::exception_wrapper recv_instance_wrapped_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_of_listsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_listsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: word_character_frequency
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void word_character_frequency(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void word_character_frequency(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence);
  protected:
   void word_character_frequencyImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void sync_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void sync_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, const ::std::string& p_sentence);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::Future<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> future_word_character_frequency(const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> semifuture_word_character_frequency(const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::Future<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> future_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::SemiFuture<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> semifuture_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::Future<std::pair<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::SemiFuture<std::pair<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> co_word_character_frequency(const ::std::string& p_sentence) {
     return co_word_character_frequency<false>(nullptr, p_sentence);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> co_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence) {
     return co_word_character_frequency<true>(&rpcOptions, p_sentence);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   folly::coro::Task<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> co_word_character_frequency(const ::std::string& p_sentence) {
     co_return co_await folly::coro::detachOnCancel(semifuture_word_character_frequency(p_sentence));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   folly::coro::Task<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> co_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence) {
     co_return co_await folly::coro::detachOnCancel(semifuture_word_character_frequency(rpcOptions, p_sentence));
   }
@@ -3114,54 +3543,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void word_character_frequency(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_sentence);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   static folly::exception_wrapper recv_wrapped_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   static void recv_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void recv_instance_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual folly::exception_wrapper recv_instance_wrapped_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void word_character_frequencyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> word_character_frequencyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: list_of_sets
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void list_of_sets(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void list_of_sets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words);
  protected:
   void list_of_setsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void sync_list_of_sets(::std::vector<::std::set<::std::string>>& _return, const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void sync_list_of_sets(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::std::set<::std::string>>& _return, const ::std::string& p_some_words);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::Future<::std::vector<::std::set<::std::string>>> future_list_of_sets(const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::SemiFuture<::std::vector<::std::set<::std::string>>> semifuture_list_of_sets(const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::Future<::std::vector<::std::set<::std::string>>> future_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::SemiFuture<::std::vector<::std::set<::std::string>>> semifuture_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::Future<std::pair<::std::vector<::std::set<::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::std::set<::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::set<::std::string>>> co_list_of_sets(const ::std::string& p_some_words) {
     return co_list_of_sets<false>(nullptr, p_some_words);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::std::set<::std::string>>> co_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words) {
     return co_list_of_sets<true>(&rpcOptions, p_some_words);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   folly::coro::Task<::std::vector<::std::set<::std::string>>> co_list_of_sets(const ::std::string& p_some_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_of_sets(p_some_words));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   folly::coro::Task<::std::vector<::std::set<::std::string>>> co_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words) {
     co_return co_await folly::coro::detachOnCancel(semifuture_list_of_sets(rpcOptions, p_some_words));
   }
@@ -3214,54 +3657,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void list_of_sets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_some_words);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   static folly::exception_wrapper recv_wrapped_list_of_sets(::std::vector<::std::set<::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   static void recv_list_of_sets(::std::vector<::std::set<::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void recv_instance_list_of_sets(::std::vector<::std::set<::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual folly::exception_wrapper recv_instance_wrapped_list_of_sets(::std::vector<::std::set<::std::string>>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_of_setsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_setsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: nested_map_argument
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual void nested_map_argument(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual void nested_map_argument(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
  protected:
   void nested_map_argumentImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual ::std::int32_t sync_nested_map_argument(const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual ::std::int32_t sync_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::Future<::std::int32_t> future_nested_map_argument(const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_nested_map_argument(const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::Future<::std::int32_t> future_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_nested_map_argument(const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
     return co_nested_map_argument<false>(nullptr, p_struct_map);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
     return co_nested_map_argument<true>(&rpcOptions, p_struct_map);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   folly::coro::Task<::std::int32_t> co_nested_map_argument(const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
     co_return co_await folly::coro::detachOnCancel(semifuture_nested_map_argument(p_struct_map));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   folly::coro::Task<::std::int32_t> co_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
     co_return co_await folly::coro::detachOnCancel(semifuture_nested_map_argument(rpcOptions, p_struct_map));
   }
@@ -3314,54 +3771,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual void nested_map_argument(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   static folly::exception_wrapper recv_wrapped_nested_map_argument(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   static ::std::int32_t recv_nested_map_argument(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual ::std::int32_t recv_instance_nested_map_argument(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual folly::exception_wrapper recv_instance_wrapped_nested_map_argument(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void nested_map_argumentT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> nested_map_argumentCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: make_sentence
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void make_sentence(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void make_sentence(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
  protected:
   void make_sentenceImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void sync_make_sentence(::std::string& _return, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void sync_make_sentence(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::Future<::std::string> future_make_sentence(const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::SemiFuture<::std::string> semifuture_make_sentence(const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::Future<::std::string> future_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::SemiFuture<::std::string> semifuture_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_make_sentence(const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
     return co_make_sentence<false>(nullptr, p_word_chars);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
     return co_make_sentence<true>(&rpcOptions, p_word_chars);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   folly::coro::Task<::std::string> co_make_sentence(const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
     co_return co_await folly::coro::detachOnCancel(semifuture_make_sentence(p_word_chars));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   folly::coro::Task<::std::string> co_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
     co_return co_await folly::coro::detachOnCancel(semifuture_make_sentence(rpcOptions, p_word_chars));
   }
@@ -3414,54 +3885,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void make_sentence(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   static folly::exception_wrapper recv_wrapped_make_sentence(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   static void recv_make_sentence(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void recv_instance_make_sentence(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual folly::exception_wrapper recv_instance_wrapped_make_sentence(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void make_sentenceT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> make_sentenceCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_union
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void get_union(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void get_union(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
  protected:
   void get_unionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void sync_get_union(::std::set<::std::int32_t>& _return, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void sync_get_union(apache::thrift::RpcOptions& rpcOptions, ::std::set<::std::int32_t>& _return, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::Future<::std::set<::std::int32_t>> future_get_union(const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::SemiFuture<::std::set<::std::int32_t>> semifuture_get_union(const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::Future<::std::set<::std::int32_t>> future_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::SemiFuture<::std::set<::std::int32_t>> semifuture_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::Future<std::pair<::std::set<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::SemiFuture<std::pair<::std::set<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::int32_t>> co_get_union(const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
     return co_get_union<false>(nullptr, p_sets);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::int32_t>> co_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
     return co_get_union<true>(&rpcOptions, p_sets);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   folly::coro::Task<::std::set<::std::int32_t>> co_get_union(const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_union(p_sets));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   folly::coro::Task<::std::set<::std::int32_t>> co_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_union(rpcOptions, p_sets));
   }
@@ -3514,54 +3999,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void get_union(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   static folly::exception_wrapper recv_wrapped_get_union(::std::set<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   static void recv_get_union(::std::set<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void recv_instance_get_union(::std::set<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_union(::std::set<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_unionT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_unionCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_keys
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void get_keys(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void get_keys(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
  protected:
   void get_keysImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void sync_get_keys(::std::set<::std::string>& _return, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void sync_get_keys(apache::thrift::RpcOptions& rpcOptions, ::std::set<::std::string>& _return, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::Future<::std::set<::std::string>> future_get_keys(const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_get_keys(const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::Future<::std::set<::std::string>> future_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_get_keys(const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
     return co_get_keys<false>(nullptr, p_string_map);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
     return co_get_keys<true>(&rpcOptions, p_string_map);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   folly::coro::Task<::std::set<::std::string>> co_get_keys(const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_keys(p_string_map));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   folly::coro::Task<::std::set<::std::string>> co_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_keys(rpcOptions, p_string_map));
   }
@@ -3614,54 +4113,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void get_keys(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   static folly::exception_wrapper recv_wrapped_get_keys(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   static void recv_get_keys(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void recv_instance_get_keys(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_keys(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_keysT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_keysCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: lookup_double
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual void lookup_double(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual void lookup_double(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key);
  protected:
   void lookup_doubleImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual double sync_lookup_double(::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual double sync_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::Future<double> future_lookup_double(::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::SemiFuture<double> semifuture_lookup_double(::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::Future<double> future_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::SemiFuture<double> semifuture_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::Future<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::SemiFuture<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   template <int = 0>
   folly::coro::Task<double> co_lookup_double(::std::int32_t p_key) {
     return co_lookup_double<false>(nullptr, p_key);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   template <int = 0>
   folly::coro::Task<double> co_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key) {
     return co_lookup_double<true>(&rpcOptions, p_key);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   folly::coro::Task<double> co_lookup_double(::std::int32_t p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_lookup_double(p_key));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   folly::coro::Task<double> co_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key) {
     co_return co_await folly::coro::detachOnCancel(semifuture_lookup_double(rpcOptions, p_key));
   }
@@ -3714,54 +4227,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual void lookup_double(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_key);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   static folly::exception_wrapper recv_wrapped_lookup_double(double& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   static double recv_lookup_double(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual double recv_instance_lookup_double(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual folly::exception_wrapper recv_instance_wrapped_lookup_double(double& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void lookup_doubleT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lookup_doubleCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: retrieve_binary
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void retrieve_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void retrieve_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something);
  protected:
   void retrieve_binaryImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void sync_retrieve_binary(::std::string& _return, const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void sync_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_something);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::Future<::std::string> future_retrieve_binary(const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::SemiFuture<::std::string> semifuture_retrieve_binary(const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::Future<::std::string> future_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::SemiFuture<::std::string> semifuture_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_retrieve_binary(const ::std::string& p_something) {
     return co_retrieve_binary<false>(nullptr, p_something);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something) {
     return co_retrieve_binary<true>(&rpcOptions, p_something);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   folly::coro::Task<::std::string> co_retrieve_binary(const ::std::string& p_something) {
     co_return co_await folly::coro::detachOnCancel(semifuture_retrieve_binary(p_something));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   folly::coro::Task<::std::string> co_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something) {
     co_return co_await folly::coro::detachOnCancel(semifuture_retrieve_binary(rpcOptions, p_something));
   }
@@ -3814,54 +4341,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void retrieve_binary(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_something);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   static folly::exception_wrapper recv_wrapped_retrieve_binary(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   static void recv_retrieve_binary(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void recv_instance_retrieve_binary(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual folly::exception_wrapper recv_instance_wrapped_retrieve_binary(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void retrieve_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> retrieve_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: contain_binary
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void contain_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void contain_binary(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries);
  protected:
   void contain_binaryImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void sync_contain_binary(::std::set<::std::string>& _return, const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void sync_contain_binary(apache::thrift::RpcOptions& rpcOptions, ::std::set<::std::string>& _return, const ::std::vector<::std::string>& p_binaries);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::Future<::std::set<::std::string>> future_contain_binary(const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_contain_binary(const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::Future<::std::set<::std::string>> future_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::SemiFuture<::std::set<::std::string>> semifuture_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_contain_binary(const ::std::vector<::std::string>& p_binaries) {
     return co_contain_binary<false>(nullptr, p_binaries);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   template <int = 0>
   folly::coro::Task<::std::set<::std::string>> co_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries) {
     return co_contain_binary<true>(&rpcOptions, p_binaries);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   folly::coro::Task<::std::set<::std::string>> co_contain_binary(const ::std::vector<::std::string>& p_binaries) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contain_binary(p_binaries));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   folly::coro::Task<::std::set<::std::string>> co_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contain_binary(rpcOptions, p_binaries));
   }
@@ -3914,54 +4455,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void contain_binary(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_binaries);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   static folly::exception_wrapper recv_wrapped_contain_binary(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   static void recv_contain_binary(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void recv_instance_contain_binary(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual folly::exception_wrapper recv_instance_wrapped_contain_binary(::std::set<::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void contain_binaryT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: contain_enum
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void contain_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void contain_enum(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
  protected:
   void contain_enumImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void sync_contain_enum(::std::vector<::py3::simple::AnEnum>& _return, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void sync_contain_enum(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::py3::simple::AnEnum>& _return, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::Future<::std::vector<::py3::simple::AnEnum>> future_contain_enum(const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::SemiFuture<::std::vector<::py3::simple::AnEnum>> semifuture_contain_enum(const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::Future<::std::vector<::py3::simple::AnEnum>> future_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::SemiFuture<::std::vector<::py3::simple::AnEnum>> semifuture_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::Future<std::pair<::std::vector<::py3::simple::AnEnum>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::SemiFuture<std::pair<::std::vector<::py3::simple::AnEnum>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::py3::simple::AnEnum>> co_contain_enum(const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
     return co_contain_enum<false>(nullptr, p_the_enum);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::py3::simple::AnEnum>> co_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
     return co_contain_enum<true>(&rpcOptions, p_the_enum);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   folly::coro::Task<::std::vector<::py3::simple::AnEnum>> co_contain_enum(const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contain_enum(p_the_enum));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   folly::coro::Task<::std::vector<::py3::simple::AnEnum>> co_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
     co_return co_await folly::coro::detachOnCancel(semifuture_contain_enum(rpcOptions, p_the_enum));
   }
@@ -4014,54 +4569,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void contain_enum(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   static folly::exception_wrapper recv_wrapped_contain_enum(::std::vector<::py3::simple::AnEnum>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   static void recv_contain_enum(::std::vector<::py3::simple::AnEnum>& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void recv_instance_contain_enum(::std::vector<::py3::simple::AnEnum>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual folly::exception_wrapper recv_instance_wrapped_contain_enum(::std::vector<::py3::simple::AnEnum>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void contain_enumT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_enumCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_binary_union_struct
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void get_binary_union_struct(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u);
  protected:
   void get_binary_union_structImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void sync_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void sync_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::BinaryUnionStruct& _return, const ::py3::simple::BinaryUnion& p_u);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::Future<::py3::simple::BinaryUnionStruct> future_get_binary_union_struct(const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::SemiFuture<::py3::simple::BinaryUnionStruct> semifuture_get_binary_union_struct(const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::Future<::py3::simple::BinaryUnionStruct> future_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::SemiFuture<::py3::simple::BinaryUnionStruct> semifuture_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::Future<std::pair<::py3::simple::BinaryUnionStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::SemiFuture<std::pair<::py3::simple::BinaryUnionStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::BinaryUnionStruct> co_get_binary_union_struct(const ::py3::simple::BinaryUnion& p_u) {
     return co_get_binary_union_struct<false>(nullptr, p_u);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::BinaryUnionStruct> co_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u) {
     return co_get_binary_union_struct<true>(&rpcOptions, p_u);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   folly::coro::Task<::py3::simple::BinaryUnionStruct> co_get_binary_union_struct(const ::py3::simple::BinaryUnion& p_u) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_binary_union_struct(p_u));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   folly::coro::Task<::py3::simple::BinaryUnionStruct> co_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_binary_union_struct(rpcOptions, p_u));
   }
@@ -4114,54 +4683,68 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void get_binary_union_struct(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::BinaryUnion& p_u);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   static folly::exception_wrapper recv_wrapped_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   static void recv_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void recv_instance_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_binary_union_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/py3/src/module.thrift
-   * thrift service: SimpleService
-   * thrift function: get_struct_hidden
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void get_struct_hidden(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void get_struct_hiddenImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void sync_get_struct_hidden(::py3::simple::SimpleStruct& _return);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void sync_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::SimpleStruct& _return);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct_hidden();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct_hidden();
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden() {
     return co_get_struct_hidden<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   template <int = 0>
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
     return co_get_struct_hidden<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden() {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_struct_hidden());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_get_struct_hidden(rpcOptions));
   }
@@ -4214,13 +4797,18 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void get_struct_hidden(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   static folly::exception_wrapper recv_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   static void recv_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void recv_instance_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

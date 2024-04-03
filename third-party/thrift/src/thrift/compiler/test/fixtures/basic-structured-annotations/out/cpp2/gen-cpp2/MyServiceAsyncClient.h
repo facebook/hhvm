@@ -37,41 +37,50 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift
-   * thrift service: MyService
-   * thrift function: first
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void first(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void first(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void firstImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void sync_first(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic-structured-annotations::annotated_inline_string& _return);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> future_first();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> future_first(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::Future<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_first(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::SemiFuture<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_first(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first() {
     return co_first<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
     return co_first<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first() {
     co_return co_await folly::coro::detachOnCancel(semifuture_first());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_first(rpcOptions));
   }
@@ -124,54 +133,68 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void first(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   static folly::exception_wrapper recv_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   static void recv_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual void recv_instance_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::exception_wrapper recv_instance_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void firstT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> firstCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift
-   * thrift service: MyService
-   * thrift function: second
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual void second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual void second(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
  protected:
   void secondImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_count, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual bool sync_second(::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual bool sync_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::Future<bool> future_second(::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::SemiFuture<bool> semifuture_second(::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::Future<bool> future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::SemiFuture<bool> semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   template <int = 0>
   folly::coro::Task<bool> co_second(::std::int64_t p_count) {
     return co_second<false>(nullptr, p_count);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   template <int = 0>
   folly::coro::Task<bool> co_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
     return co_second<true>(&rpcOptions, p_count);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   folly::coro::Task<bool> co_second(::std::int64_t p_count) {
     co_return co_await folly::coro::detachOnCancel(semifuture_second(p_count));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   folly::coro::Task<bool> co_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
     co_return co_await folly::coro::detachOnCancel(semifuture_second(rpcOptions, p_count));
   }
@@ -224,13 +247,18 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual void second(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_count);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   static folly::exception_wrapper recv_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   static bool recv_second(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual bool recv_instance_second(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::exception_wrapper recv_instance_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

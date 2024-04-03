@@ -44,36 +44,40 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
-   * thrift service: BadInteraction
-   * thrift function: foo
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
  void foo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void fooImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   void sync_foo();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   void sync_foo(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   folly::SemiFuture<folly::Unit> semifuture_foo();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   folly::SemiFuture<folly::Unit> semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   template <int = 0>
   folly::coro::Task<void> co_foo() {
     return co_foo<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   template <int = 0>
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
     return co_foo<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   folly::coro::Task<void> co_foo() {
     co_await folly::coro::detachOnCancel(semifuture_foo());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_foo(rpcOptions));
   }
@@ -125,7 +129,9 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
 #endif // FOLLY_HAS_COROUTINES
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   static folly::exception_wrapper recv_wrapped_foo(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   static void recv_foo(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
@@ -133,42 +139,52 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fooCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "createBadInteraction"} */
   BadInteraction createBadInteraction();
- /**
-   * thrift file: thrift/compiler/test/fixtures/basic-annotations/src/module.thrift
-   * thrift service: BadService
-   * thrift function: bar
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual void bar(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual void bar(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void barImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual ::std::int32_t sync_bar();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual ::std::int32_t sync_bar(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::Future<::std::int32_t> future_bar();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar();
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::Future<::std::int32_t> future_bar(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bar(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_bar() {
     return co_bar<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RpcOptions& rpcOptions) {
     return co_bar<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   folly::coro::Task<::std::int32_t> co_bar() {
     co_return co_await folly::coro::detachOnCancel(semifuture_bar());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_bar(rpcOptions));
   }
@@ -221,13 +237,18 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual void bar(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   static folly::exception_wrapper recv_wrapped_bar(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   static ::std::int32_t recv_bar(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual ::std::int32_t recv_instance_bar(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::exception_wrapper recv_instance_wrapped_bar(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

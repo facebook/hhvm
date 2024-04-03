@@ -34,41 +34,50 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodA
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void methodA(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void methodA(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void methodAImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void sync_methodA();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void sync_methodA(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::Future<folly::Unit> future_methodA();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_methodA();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::Future<folly::Unit> future_methodA(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_methodA(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodA(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodA(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   template <int = 0>
   folly::coro::Task<void> co_methodA() {
     return co_methodA<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   template <int = 0>
   folly::coro::Task<void> co_methodA(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodA<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   folly::coro::Task<void> co_methodA() {
     co_await folly::coro::detachOnCancel(semifuture_methodA());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   folly::coro::Task<void> co_methodA(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_methodA(rpcOptions));
   }
@@ -119,54 +128,68 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void methodA(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   static folly::exception_wrapper recv_wrapped_methodA(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   static void recv_methodA(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual void recv_instance_methodA(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodA"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodA(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void methodAT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodACtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodB
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void methodB(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void methodB(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
  protected:
   void methodBImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void sync_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void sync_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::Future<folly::Unit> future_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::Future<folly::Unit> future_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   template <int = 0>
   folly::coro::Task<void> co_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
     return co_methodB<false>(nullptr, p_x, p_y, p_z);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   template <int = 0>
   folly::coro::Task<void> co_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
     return co_methodB<true>(&rpcOptions, p_x, p_y, p_z);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   folly::coro::Task<void> co_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
     co_await folly::coro::detachOnCancel(semifuture_methodB(p_x, p_y, p_z));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   folly::coro::Task<void> co_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
     co_await folly::coro::detachOnCancel(semifuture_methodB(rpcOptions, p_x, p_y, p_z));
   }
@@ -217,54 +240,68 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void methodB(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   static folly::exception_wrapper recv_wrapped_methodB(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   static void recv_methodB(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual void recv_instance_methodB(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodB"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodB(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void methodBT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodBCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodC
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual void methodC(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual void methodC(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void methodCImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual ::std::int32_t sync_methodC();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual ::std::int32_t sync_methodC(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::Future<::std::int32_t> future_methodC();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodC();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::Future<::std::int32_t> future_methodC(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodC(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodC(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodC(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodC() {
     return co_methodC<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodC(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodC<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   folly::coro::Task<::std::int32_t> co_methodC() {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodC());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   folly::coro::Task<::std::int32_t> co_methodC(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodC(rpcOptions));
   }
@@ -317,54 +354,68 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual void methodC(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   static folly::exception_wrapper recv_wrapped_methodC(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   static ::std::int32_t recv_methodC(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual ::std::int32_t recv_instance_methodC(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodC"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodC(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void methodCT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodCCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodD
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual void methodD(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual void methodD(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
  protected:
   void methodDImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual ::std::int32_t sync_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual ::std::int32_t sync_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::Future<::std::int32_t> future_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::Future<::std::int32_t> future_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
     return co_methodD<false>(nullptr, p_i, p_j, p_k);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
     return co_methodD<true>(&rpcOptions, p_i, p_j, p_k);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   folly::coro::Task<::std::int32_t> co_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodD(p_i, p_j, p_k));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   folly::coro::Task<::std::int32_t> co_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodD(rpcOptions, p_i, p_j, p_k));
   }
@@ -417,54 +468,68 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual void methodD(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   static folly::exception_wrapper recv_wrapped_methodD(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   static ::std::int32_t recv_methodD(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual ::std::int32_t recv_instance_methodD(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodD"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodD(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void methodDT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodDCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodE
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void methodE(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void methodE(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void methodEImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void sync_methodE(::test_cpp2::cpp_reflection::struct2& _return);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void sync_methodE(apache::thrift::RpcOptions& rpcOptions, ::test_cpp2::cpp_reflection::struct2& _return);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::Future<::test_cpp2::cpp_reflection::struct2> future_methodE();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> semifuture_methodE();
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::Future<::test_cpp2::cpp_reflection::struct2> future_methodE(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> semifuture_methodE(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::Future<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodE(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::SemiFuture<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodE(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE() {
     return co_methodE<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodE<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE() {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodE());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodE(rpcOptions));
   }
@@ -517,54 +582,68 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void methodE(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   static folly::exception_wrapper recv_wrapped_methodE(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   static void recv_methodE(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual void recv_instance_methodE(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodE"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodE(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>
   void methodET(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> methodECtx(apache::thrift::RpcOptions* rpcOptions);
  public:
- /**
-   * thrift file: thrift/compiler/test/fixtures/fatal/src/module.thrift
-   * thrift service: service3
-   * thrift function: methodF
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void methodF(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void methodF(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
  protected:
   void methodFImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void sync_methodF(::test_cpp2::cpp_reflection::struct3& _return, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void sync_methodF(apache::thrift::RpcOptions& rpcOptions, ::test_cpp2::cpp_reflection::struct3& _return, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::Future<::test_cpp2::cpp_reflection::struct3> future_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct3> semifuture_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::Future<::test_cpp2::cpp_reflection::struct3> future_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct3> semifuture_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::Future<std::pair<::test_cpp2::cpp_reflection::struct3, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::SemiFuture<std::pair<::test_cpp2::cpp_reflection::struct3, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
     return co_methodF<false>(nullptr, p_l, p_m, p_n);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
     return co_methodF<true>(&rpcOptions, p_l, p_m, p_n);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodF(p_l, p_m, p_n));
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
     co_return co_await folly::coro::detachOnCancel(semifuture_methodF(rpcOptions, p_l, p_m, p_n));
   }
@@ -617,13 +696,18 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void methodF(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   static folly::exception_wrapper recv_wrapped_methodF(::test_cpp2::cpp_reflection::struct3& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   static void recv_methodF(::test_cpp2::cpp_reflection::struct3& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual void recv_instance_methodF(::test_cpp2::cpp_reflection::struct3& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service3", "function": "methodF"} */
   virtual folly::exception_wrapper recv_instance_wrapped_methodF(::test_cpp2::cpp_reflection::struct3& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

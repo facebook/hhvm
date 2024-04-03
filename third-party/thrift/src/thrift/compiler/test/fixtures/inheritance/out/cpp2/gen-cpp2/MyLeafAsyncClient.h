@@ -36,41 +36,50 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   }
 
 
- /**
-   * thrift file: thrift/compiler/test/fixtures/inheritance/src/module.thrift
-   * thrift service: MyLeaf
-   * thrift function: do_leaf
-   */
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void do_leaf(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void do_leaf(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void do_leafImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
  public:
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void sync_do_leaf();
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void sync_do_leaf(apache::thrift::RpcOptions& rpcOptions);
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::Future<folly::Unit> future_do_leaf();
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_do_leaf();
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::Future<folly::Unit> future_do_leaf(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_do_leaf(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_do_leaf(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_do_leaf(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   template <int = 0>
   folly::coro::Task<void> co_do_leaf() {
     return co_do_leaf<false>(nullptr);
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   template <int = 0>
   folly::coro::Task<void> co_do_leaf(apache::thrift::RpcOptions& rpcOptions) {
     return co_do_leaf<true>(&rpcOptions);
   }
 #else
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   folly::coro::Task<void> co_do_leaf() {
     co_await folly::coro::detachOnCancel(semifuture_do_leaf());
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   folly::coro::Task<void> co_do_leaf(apache::thrift::RpcOptions& rpcOptions) {
     co_await folly::coro::detachOnCancel(semifuture_do_leaf(rpcOptions));
   }
@@ -121,13 +130,18 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
  public:
 #endif // FOLLY_HAS_COROUTINES
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void do_leaf(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
 
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   static folly::exception_wrapper recv_wrapped_do_leaf(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   static void recv_do_leaf(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual void recv_instance_do_leaf(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::exception_wrapper recv_instance_wrapped_do_leaf(::apache::thrift::ClientReceiveState& state);
  private:
   template <typename Protocol_, typename RpcOptions>

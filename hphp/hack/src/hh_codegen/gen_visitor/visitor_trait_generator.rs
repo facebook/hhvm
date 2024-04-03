@@ -38,6 +38,7 @@ pub trait VisitorTrait {
         Ok(quote! {
             #![allow(unused_imports)]
             #![allow(unused_variables)]
+            #![allow(clippy::all)]
 
             #uses
             #use_node

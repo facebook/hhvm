@@ -237,7 +237,7 @@ fn encode_root_name(s: &str) -> DictEntry {
     } else {
         hhbc::ClassName::from_ast_name_and_mangle(s).into_string()
     };
-    encode_entry("root_name", TypedValue::intern_string(&s))
+    encode_entry("root_name", TypedValue::intern_string(s))
 }
 
 fn get_typevars(tparams: &[&str]) -> Vec<DictEntry> {

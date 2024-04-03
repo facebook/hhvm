@@ -44,6 +44,7 @@ pub trait NodeImpl {
         Ok(quote! {
             #![allow(unused_imports)]
             #![allow(unused_variables)]
+            #![allow(clippy::all)]
 
             #use_node
             #use_visitor

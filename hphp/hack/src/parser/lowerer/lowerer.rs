@@ -4292,7 +4292,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
                 }
             }
         }
-        NameofExpression(_) if env.codegen() => {} // matches the ::class case
+        NameofExpression(_) if env.is_codegen() => {} // matches the ::class case
         // ::class strings
         ScopeResolutionExpression(c) => {
             if let Some(TK::Class) = token_kind(&c.name) {

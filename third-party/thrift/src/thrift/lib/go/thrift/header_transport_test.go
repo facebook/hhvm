@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"io"
-	"io/ioutil"
 	"testing"
 )
 
@@ -66,7 +65,7 @@ func testHeaderToProto(t *testing.T, clientType ClientType, tmb *MemoryBuffer, p
 			clientType, headertrans.clientType,
 		)
 	}
-	frame, err := ioutil.ReadAll(headertrans)
+	frame, err := io.ReadAll(headertrans)
 	if err != nil {
 		t.Fatalf("failed to read header transport frame: %s", err)
 	}
@@ -311,7 +310,7 @@ func TestHeaderZlib(t *testing.T) {
 		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
 	}
 
-	frame, err := ioutil.ReadAll(trans)
+	frame, err := io.ReadAll(trans)
 	if err != nil {
 		t.Fatalf("failed to read frame %d: %s", n, err)
 	}
@@ -342,7 +341,7 @@ func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {
 		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
 	}
 
-	frame, err := ioutil.ReadAll(trans)
+	frame, err := io.ReadAll(trans)
 	if err != nil {
 		t.Fatalf("failed to recv frame %d: %s", n, err)
 	}

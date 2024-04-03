@@ -22,7 +22,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"io/ioutil"
 )
 
 const DEFAULT_MAX_LENGTH = 16384000
@@ -135,7 +134,7 @@ func (p *FramedTransport) readFrameHeader() (uint32, error) {
 	}
 
 	framebuf := newLimitedByteReader(p.reader, int64(size))
-	out, err := ioutil.ReadAll(framebuf)
+	out, err := io.ReadAll(framebuf)
 	if err != nil {
 		return 0, err
 	}

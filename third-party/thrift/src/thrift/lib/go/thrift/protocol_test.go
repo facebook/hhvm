@@ -19,7 +19,6 @@ package thrift
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net"
 	"net/http"
@@ -87,7 +86,7 @@ type HTTPEchoServer struct{}
 type HTTPHeaderEchoServer struct{}
 
 func (p *HTTPEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	buf, err := ioutil.ReadAll(req.Body)
+	buf, err := io.ReadAll(req.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(buf)
@@ -98,7 +97,7 @@ func (p *HTTPEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (p *HTTPHeaderEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	buf, err := ioutil.ReadAll(req.Body)
+	buf, err := io.ReadAll(req.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(buf)

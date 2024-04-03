@@ -22,7 +22,7 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
+	"io"
 )
 
 const (
@@ -230,7 +230,7 @@ func (t *headerTransport) AddTransform(trans TransformID) error {
 // applyUntransform fully reads the frame and untransforms into a local buffer
 // we need to know the full size of the untransformed data
 func (t *headerTransport) applyUntransform() error {
-	out, err := ioutil.ReadAll(t.framebuf)
+	out, err := io.ReadAll(t.framebuf)
 	if err != nil {
 		return err
 	}

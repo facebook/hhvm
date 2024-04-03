@@ -1,0 +1,22 @@
+
+Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 28
+string(5) "C_str"
+object(TakesStr) (0) {
+}
+
+Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 30
+
+Notice: Implicit Class to string conversion for argument 1 passed to TakesStr::__construct() in %s/class-ptr/attributes.php on line 30
+string(5) "C_cls"
+object(TakesStr) (0) {
+}
+
+Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 33
+lazyclass(D_cls)
+object(TakesCls) (0) {
+}
+
+Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 35
+string(5) "D_str"
+object(TakesCls) (0) {
+}

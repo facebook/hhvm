@@ -641,7 +641,7 @@ fn parse_file(
     profile: &mut Profile,
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
-        mode: Mode::ForCodegen,
+        mode: namespace_env.mode,
         php5_compat_mode: !opts.hhbc.uvs,
         is_systemlib,
         for_debugger_eval,

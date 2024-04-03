@@ -98,7 +98,8 @@ fn desugar_and_replace_et_literals(flags: &EnvFlags, program: ast::Program, src:
 /// syntax.
 pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let type_directed = false;
-    let opts = Options::default();
+    let mut opts = Options::default();
+    opts.hhvm.parser_options.po_allow_unstable_features = true;
     let content = fs::read(filepath.path()).unwrap(); // consider: also show prefix?
     let source_text = SourceText::make(Arc::new(filepath), &content);
     let ns = Arc::new(NamespaceEnv::empty(

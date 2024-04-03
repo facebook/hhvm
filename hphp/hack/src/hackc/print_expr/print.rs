@@ -307,7 +307,7 @@ fn print_expr(
     use ast::Expr_;
     match expr {
         Expr_::Id(id) => print_expr_id(w, env, id.1.as_ref()),
-        Expr_::Lvar(lid) => w.write_all((lid.1).1.as_bytes()),
+        Expr_::Lvar(lid) => w.write_all(fixup_name(&(lid.1).1).as_bytes()),
         Expr_::Float(f) => {
             if f.contains('E') || f.contains('e') {
                 let s = format!(
@@ -685,9 +685,9 @@ fn print_expr(
             Some(expr) => print_expr(ctx, w, env, expr),
             _ => Ok(()),
         },
+        Expr_::ExpressionTree(et) => print_expr(ctx, w, env, &et.runtime_expr),
         Expr_::Package(_)
         | Expr_::Dollardollar(_)
-        | Expr_::ExpressionTree(_)
         | Expr_::Hole(_)
         | Expr_::KeyValCollection(_)
         | Expr_::Lplaceholder(_)
@@ -779,7 +779,7 @@ fn print_efun(
                 ", ",
                 use_list,
                 |w: &mut dyn Write, ast::CaptureLid(_, ast::Lid(_, id))| {
-                    w.write_all(local_id::get_name(id).as_bytes())
+                    w.write_all(fixup_name(local_id::get_name(id)).as_bytes())
                 },
             )
         })?;
@@ -870,6 +870,11 @@ fn print_statement(
     }
 }
 
+fn fixup_name(n: &str) -> String {
+    let re = Regex::new("^[$]([0-9]*)").unwrap();
+    re.replace(n, "$").into_owned()
+}
+
 fn print_fparam(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -886,7 +891,7 @@ fn print_fparam(
         print_hint(w, true, h)?;
         w.write_all(b" ")
     })?;
-    w.write_all(param.name.as_bytes())?;
+    w.write_all(fixup_name(&param.name).as_bytes())?;
     write::option(w, &param.expr, |w, e| {
         w.write_all(b" = ")?;
         print_expr(ctx, w, env, e)

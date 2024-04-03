@@ -15,7 +15,7 @@
 from enum import Enum, Flag
 from typing import Any
 
-from thrift.python.exceptions import Error as Error
+from thrift.python.exceptions import Error as Error, LibraryError as LibraryError
 
 class TransportErrorType(Enum):
     UNKNOWN: TransportErrorType = ...
@@ -76,9 +76,6 @@ class ApplicationError(Error):
     def __init__(self, type: ApplicationErrorType, message: str) -> None: ...
     type: ApplicationErrorType
     message: str
-
-class LibraryError(Error):
-    def __init__(self, *args: Any) -> None: ...
 
 class ProtocolError(LibraryError):
     def __init__(self, type: ProtocolErrorType, message: str) -> None: ...

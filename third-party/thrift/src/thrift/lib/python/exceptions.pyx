@@ -58,7 +58,8 @@ cdef ApplicationError create_ApplicationError(const cTApplicationException* ex):
 
 cdef class LibraryError(Error):
     """Equivalent of a C++ TLibraryException"""
-    pass
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
 cdef class TransportError(LibraryError):

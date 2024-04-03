@@ -22,7 +22,7 @@ from libc.stdint cimport uint32_t
 from libcpp.memory cimport shared_ptr
 from thrift.py3.common cimport RpcOptions, cThriftMetadata
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
-from thrift.python.exceptions cimport Error as BaseError
+from thrift.python.exceptions cimport Error as BaseError, LibraryError as cLibraryError
 from thrift.python.protocol cimport Protocol
 
 cdef extern from * namespace "std":
@@ -126,16 +126,13 @@ cdef object create_TransportError(const cTTransportException* ex)
 cdef object create_ProtocolError(const cTProtocolException* ex)
 
 
-cdef class LibraryError(BaseError):
-    pass
-
-cdef class ProtocolError(LibraryError):
+cdef class ProtocolError(cLibraryError):
     pass
 
 cdef class ApplicationError(BaseError):
     pass
 
-cdef class TransportError(LibraryError):
+cdef class TransportError(cLibraryError):
     pass
 
 cdef class GeneratedError(BaseError):

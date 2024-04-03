@@ -18,7 +18,6 @@ import typing
 
 class Error(Exception):
     def __init__(self, *args: object) -> None: ...
-    pass
 
 class ApplicationErrorType(enum.Enum):
     UNKNOWN: ApplicationErrorType = ...
@@ -40,6 +39,9 @@ class ApplicationError(Error):
     def __init__(self, type: ApplicationErrorType, message: str) -> None: ...
     type: ApplicationErrorType
     message: str
+
+class LibraryError(Error):
+    def __init__(self, *args: object) -> None: ...
 
 class TransportErrorType(enum.Enum):
     UNKNOWN: TransportErrorType = ...

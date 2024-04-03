@@ -17,7 +17,7 @@ from cpython.exc cimport PyErr_Occurred
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from libcpp.vector cimport vector
 from thrift.py3.common import RpcOptions
-from thrift.python.exceptions import Error
+from thrift.python.exceptions import Error, LibraryError
 
 from enum import Enum, Flag
 import itertools
@@ -192,21 +192,15 @@ cdef create_ApplicationError(const cTApplicationException* ex):
     return inst
 
 
-cdef class LibraryError(BaseError):
-    """Equivalent of a C++ TLibraryException"""
-    def __init__(self, *args):
-        super().__init__(*args)
-
-
 cdef create_LibraryError(const cTLibraryException* ex):
     if not ex:
         return
     message = (<bytes>deref(ex).what()).decode('utf-8')
-    inst = <LibraryError>LibraryError.__new__(LibraryError, message)
+    inst = <cLibraryError>cLibraryError.__new__(cLibraryError, message)
     return inst
 
 
-cdef class ProtocolError(LibraryError):
+cdef class ProtocolError(cLibraryError):
     """Equivalent of a C++ TProtocolException"""
     def __init__(self, type, str message):
         super().__init__(type, message)
@@ -229,7 +223,7 @@ cdef create_ProtocolError(const cTProtocolException* ex):
     return inst
 
 
-cdef class TransportError(LibraryError):
+cdef class TransportError(cLibraryError):
     """All Transport Level Errors (TTransportException)"""
 
     def __init__(self, type, str message, int errno, options, *args):

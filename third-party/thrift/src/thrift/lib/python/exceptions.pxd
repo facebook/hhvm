@@ -24,7 +24,7 @@ from thrift.python.protocol cimport Protocol
 
 cdef extern from "thrift/lib/cpp/Thrift.h" namespace "apache::thrift":
     cdef cppclass cTException "apache::thrift::TException":
-        const char* what() nogil
+        const char* what() noexcept nogil
 
     cdef cppclass cTLibraryException "apache::thrift::TLibraryException"(cTException):
         pass
@@ -49,8 +49,8 @@ cdef extern from "thrift/lib/cpp/TApplicationException.h" namespace "apache::thr
         INJECTED_FAILURE "apache::thrift::TApplicationException::INJECTED_FAILURE"
 
     cdef cppclass cTApplicationException "apache::thrift::TApplicationException"(cTException):
-        cTApplicationException(ApplicationErrorType type, const string& message) nogil except +
-        ApplicationErrorType getType() nogil
+        cTApplicationException(ApplicationErrorType type, const string& message) except + nogil
+        ApplicationErrorType getType() noexcept nogil
 
 
 cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apache::thrift::transport":
@@ -73,9 +73,9 @@ cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apa
         NETWORK_ERROR "apache::thrift::transport::TTransportException::NETWORK_ERROR"
 
     cdef cppclass cTTransportException "apache::thrift::transport::TTransportException"(cTLibraryException):
-        int getOptions()
-        TransportErrorType getType()
-        int getErrno()
+        int getOptions() noexcept
+        TransportErrorType getType() noexcept
+        int getErrno() noexcept
 
 
 cdef class Error(Exception):

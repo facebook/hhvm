@@ -37,7 +37,6 @@ namespace protocol {
 namespace detail {
 
 struct ApplyPatch {
- public:
   // Applies 'patch' to 'value' in-place.
   void operator()(const Object& patch, Value& value) const;
   void operator()(const Object& patch, bool& value) const;
@@ -53,7 +52,6 @@ struct ApplyPatch {
   void operator()(
       const Object& patch, folly::F14FastMap<Value, Value>& value) const;
   void operator()(const Object& patch, Object& value) const;
-  void operator()(Object&& patch, Object& value) const;
 };
 
 } // namespace detail

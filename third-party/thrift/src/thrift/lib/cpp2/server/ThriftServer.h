@@ -155,6 +155,9 @@ class ThriftServerStopController final {
 using IsOverloadedFunc = folly::Function<bool(
     const transport::THeader::StringToStringMap*, const std::string*) const>;
 
+using PreprocessFunc =
+    folly::Function<PreprocessResult(const server::PreprocessParams&) const>;
+
 /**
  *   This is yet another thrift server.
  *   Uses cpp2 style generated code.
@@ -556,6 +559,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   CPUConcurrencyController cpuConcurrencyController_;
 
   IsOverloadedFunc isOverloaded_;
+  PreprocessFunc preprocess_;
 
   // This is meant to be used internally
   // We separate setThreadManager and configureThreadManager
@@ -1517,9 +1521,14 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     LOG(INFO) << "thrift server: isOverloaded() set.";
   }
 
-  void setPreprocess(PreprocessFunc preprocess) override final {
+  // Do not try to access ThreadManager in this function as
+  // ThreadManagers are being deprecated from thrift server
+  // e.g. don't call getThreadManager() inside this
+  void setPreprocess(PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.setPreprocess).log(*this);
-    BaseThriftServer::setPreprocess(std::move(preprocess));
+    preprocess_ = std::move(preprocess);
+    runtimeServerActions_.setPreprocess = true;
+    LOG(INFO) << "thrift server: preprocess() set.";
   }
 
   /**

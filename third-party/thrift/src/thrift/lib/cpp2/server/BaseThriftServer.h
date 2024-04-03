@@ -71,9 +71,6 @@ typedef std::function<void(
     const apache::thrift::transport::THeader*, const folly::SocketAddress*)>
     GetHeaderHandlerFunc;
 
-using PreprocessFunc =
-    folly::Function<PreprocessResult(const server::PreprocessParams&) const>;
-
 template <typename T>
 class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
  public:
@@ -202,7 +199,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
 
-  PreprocessFunc preprocess_;
   std::function<int64_t(const std::string&)> getLoad_;
 
   getHandlerFunc getHandler_;
@@ -851,15 +847,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * @return listen backlog.
    */
   int getListenBacklog() const { return thriftConfig_.getListenBacklog(); }
-
-  // Do not try to access ThreadManager in this function as
-  // ThreadManagers are being deprecated from thrift server
-  // e.g. don't call getThreadManager() inside this
-  virtual void setPreprocess(PreprocessFunc preprocess) {
-    preprocess_ = std::move(preprocess);
-    runtimeServerActions_.setPreprocess = true;
-    LOG(INFO) << "thrift server: preprocess() set.";
-  }
 
   void setMethodsBypassMaxRequestsLimit(
       const std::vector<std::string>& methods,

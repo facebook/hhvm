@@ -33,5 +33,11 @@ class TypeInfoTests(unittest.TestCase):
     def test_ListTypeInfo(self) -> None:
         CTests(self).test_ListTypeInfo()
 
+    def test_ListTypeInfo_nested(self) -> None:
+        CTests(self).test_ListTypeInfo_nested()
+
     def test_SetTypeInfo(self) -> None:
         CTests(self).test_SetTypeInfo()
+
+    def test_SetTypeInfo_nested(self) -> None:
+        CTests(self).test_SetTypeInfo_nested()

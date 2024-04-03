@@ -14,7 +14,7 @@
 
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
-from thrift.python.types import ListTypeInfo, SetTypeInfo, typeinfo_i64, typeinfo_string
+from thrift.python.types import ListTypeInfo, Set, SetTypeInfo, typeinfo_i64, typeinfo_string
 
 cdef class TypeInfoTests():
     def __cinit__(self, unit_test):
@@ -29,6 +29,15 @@ cdef class TypeInfoTests():
         data = list_type_info.to_internal_data([1, 2, 3])
         self.ut.assertEqual(data, (1, 2, 3))
 
+    def test_ListTypeInfo_nested(self) -> None:
+        element_type_info = ListTypeInfo(typeinfo_i64)
+        list_type_info = ListTypeInfo(element_type_info)
+
+        init_val = [[1, 2], [3, 4], []]
+        data = list_type_info.to_internal_data(init_val)
+        self.ut.assertEqual(data, ((1, 2), (3, 4), ()))
+        self.ut.assertEqual(list_type_info.to_python_value(data), init_val)
+
     def test_SetTypeInfo(self) -> None:
         set_type_info = SetTypeInfo(typeinfo_i64)
 
@@ -40,6 +49,17 @@ cdef class TypeInfoTests():
 
         data = set_type_info.to_internal_data([1, 2, 3, 1, 2])
         self.ut.assertEqual(data, frozenset([1, 2, 3]))
+
+    def test_SetTypeInfo_nested(self) -> None:
+        element_type_info = SetTypeInfo(typeinfo_i64)
+        set_type_info = SetTypeInfo(element_type_info)
+
+        init_val = [[1]]
+        data = set_type_info.to_internal_data(init_val)
+        self.ut.assertEqual(data, frozenset({frozenset([1])}))
+
+        expected_python_val = Set(element_type_info, [[1]])
+        self.ut.assertEqual(set_type_info.to_python_value(data), expected_python_val)
 
     def test_IntegerTypeInfo(self) -> None:
         with self.ut.assertRaises(TypeError):

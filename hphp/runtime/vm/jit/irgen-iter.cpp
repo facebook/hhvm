@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include "hphp/util/struct-log.h"
@@ -108,6 +109,41 @@ void widenLocalIterBase(IRGS& env, int baseLocalId) {
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
+
+void emitIterBase(IRGS& env) {
+  auto const base = topC(env);
+  if (base->type().subtypeOfAny(TArrLike)) return;
+  if (!base->type().subtypeOfAny(TObj)) return interpOne(env);
+
+  if (auto cls = base->type().clsSpec().cls()) {
+    if (!env.irb->constrainValue(base, GuardConstraint(cls).setWeak())) {
+      using CT = CollectionType;
+
+      if (cls->classof(SystemLib::getHH_IteratorClass())) {
+        // nothing to do
+        return;
+      } else if (cls->classof(SystemLib::getConstMapClass()) ||
+                 cls->classof(SystemLib::getConstSetClass())) {
+        popC(env);
+        pushIncRef(env, gen(env, LdColDict, base));
+        decRef(env, base);
+        return;
+      } else if (collections::isType(cls, CT::Vector, CT::ImmVector)) {
+        // Can't use ConstVector, as that includes Pair.
+        popC(env);
+        pushIncRef(env, gen(env, LdColVec, base));
+        decRef(env, base);
+        return;
+      }
+    }
+  }
+
+  auto const ctx = curClass(env) ? cns(env, curClass(env)) : cns(env, nullptr);
+  auto const extracted = gen(env, IterExtractBase, base, ctx);
+  popC(env);
+  push(env, extracted);
+  decRef(env, base);
+}
 
 void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
   auto const base = topC(env, BCSPRelOffset{0}, DataTypeSpecific);

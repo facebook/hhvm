@@ -158,6 +158,7 @@ impl LowerInstrs<'_> {
             Hhbc::IsTypeC(_, IsTypeOp::Scalar, _) => hack::Hhbc::IsTypeScalar,
             Hhbc::IsTypeC(_, IsTypeOp::Str, _) => hack::Hhbc::IsTypeStr,
             Hhbc::IsTypeC(_, IsTypeOp::Vec, _) => hack::Hhbc::IsTypeVec,
+            Hhbc::IterBase(..) => hack::Hhbc::IterBase,
             Hhbc::LazyClassFromClass(..) => hack::Hhbc::LazyClassFromClass,
             Hhbc::Modulo(..) => hack::Hhbc::Modulo,
             Hhbc::Mul(..) => hack::Hhbc::Mul,

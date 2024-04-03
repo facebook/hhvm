@@ -187,6 +187,8 @@ pub(crate) enum Hhbc {
     IsTypeStructC,
     #[decl(fn hhbc_is_type_vec(*HackMixed) -> *HackMixed)]
     IsTypeVec,
+    #[decl(fn hhbc_iter_base(*HackMixed) -> *HackMixed)]
+    IterBase,
     #[decl(fn hhbc_iter_free(it: *Iterator) -> void)]
     IterFree,
     #[decl(fn hhbc_iter_init(it: **Iterator, key: **HackMixed, var: **HackMixed, container: *HackMixed) -> *HackBool)]

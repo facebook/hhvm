@@ -354,6 +354,8 @@ void cgIterFree(IRLS& env, const IRInstruction* inst) {
   implIterFree(env, inst, CallSpec::method(&Iter::free));
 }
 
+IMPL_OPCODE_CALL(IterExtractBase)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

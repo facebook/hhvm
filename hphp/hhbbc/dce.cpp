@@ -1523,6 +1523,7 @@ void dce(Env& env, const bc::Idx&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IsLateBoundCls&)   { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IssetS&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IsTypeStructC&)    { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::IterBase&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Lt&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Lte&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Mod&)              { pushRemovableIfNoThrow(env); }

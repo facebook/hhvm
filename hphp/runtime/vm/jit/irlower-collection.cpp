@@ -123,6 +123,7 @@ void cgLdColVec(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
+  // Can't use ConstVector, as that includes Pair.
   always_assert_flog(
     ty == TBottom ||
     collections::isType(cls, CollectionType::Vector, CollectionType::ImmVector),
@@ -143,9 +144,8 @@ void cgLdColDict(IRLS& env, const IRInstruction* inst) {
 
   always_assert_flog(
     ty == TBottom ||
-    collections::isType(cls,
-                        CollectionType::Map, CollectionType::ImmMap,
-                        CollectionType::Set, CollectionType::ImmSet),
+    cls->classof(SystemLib::getConstMapClass()) ||
+    cls->classof(SystemLib::getConstSetClass()),
     "LdColDict received an unsupported type: {}\n",
     ty.toString()
   );

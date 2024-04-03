@@ -1017,6 +1017,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IssetG => simple!(Hhbc::IssetG),
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),
+        Opcode::IterBase => simple!(Hhbc::IterBase),
         Opcode::IterFree => simple!(Hhbc::IterFree),
         Opcode::LIterFree => todo!(),
         Opcode::LIterInit => todo!(),

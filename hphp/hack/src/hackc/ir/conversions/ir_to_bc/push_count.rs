@@ -132,6 +132,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::IssetG(..)
             | Hhbc::IssetL(..)
             | Hhbc::IssetS(..)
+            | Hhbc::IterBase(..)
             | Hhbc::LateBoundCls(_)
             | Hhbc::LazyClassFromClass(..)
             | Hhbc::LockObj { .. }

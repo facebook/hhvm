@@ -286,6 +286,7 @@ where
             | Opcode::IssetG
             | Opcode::IssetL(..)
             | Opcode::IssetS
+            | Opcode::IterBase
             | Opcode::IterFree(..)
             | Opcode::Keyset(..)
             | Opcode::LIterFree(..)

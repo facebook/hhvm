@@ -496,6 +496,7 @@ pub enum Hhbc {
     IssetG(ValueId, LocId),
     IssetL(LocalId, LocId),
     IssetS([ValueId; 2], LocId),
+    IterBase(ValueId, LocId),
     #[has_operands(none)]
     IterFree(IterId, LocId),
     LateBoundCls(LocId),

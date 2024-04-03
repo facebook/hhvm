@@ -1421,6 +1421,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Incl
             | Opcode::InclOnce
             | Opcode::InitProp(..)
+            | Opcode::IterBase
             | Opcode::IterFree(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)
@@ -1604,6 +1605,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::IsLateBoundCls
         | Opcode::IssetG
         | Opcode::IssetS
+        | Opcode::IterBase
         | Opcode::LateBoundCls
         | Opcode::LazyClassFromClass
         | Opcode::LockObj

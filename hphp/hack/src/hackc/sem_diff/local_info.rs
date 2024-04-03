@@ -167,6 +167,7 @@ impl LocalInfo {
             | Opcode::IsTypeStructC(..)
             | Opcode::IssetG
             | Opcode::IssetS
+            | Opcode::IterBase
             | Opcode::IterFree(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)

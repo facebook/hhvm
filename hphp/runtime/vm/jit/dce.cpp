@@ -591,6 +591,7 @@ bool canDCE(const IRInstruction& inst) {
   case RBTraceMsg:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
+  case IterExtractBase:
   case IterInit:
   case IterInitK:
   case LIterInit:

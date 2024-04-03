@@ -1216,6 +1216,7 @@ fn emit_foreach_<'a, 'd>(
             InstrSeq::gather(vec![
                 collection_instrs,
                 emit_pos(&collection.1),
+                instr::iter_base(),
                 instr::iter_init(iter_args.clone(), loop_break_label),
             ])
         };

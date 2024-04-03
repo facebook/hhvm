@@ -4395,42 +4395,53 @@ OPTBLD_INLINE void iopLockObj() {
 
 namespace {
 
-void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
+void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
                   PC targetpc, IterTypeOp op) {
-  auto const local = base != nullptr;
-
-  if (!local) base = vmStack().topC();
-  auto val = frame_local(vmfp(), ita.valId);
+  auto base = local != nullptr ? *local : *vmStack().topC();
+  auto value = frame_local(vmfp(), ita.valId);
   auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  if (isArrayLikeType(type(base))) {
-    auto const arr = base->m_data.parr;
-    auto const res = key
-      ? new_iter_array_key_helper(op)(it, arr, val, key)
-      : new_iter_array_helper(op)(it, arr, val);
+  auto const handleArrayLike = [&](ArrayData* arr, IterTypeOp op) {
+    auto const res = ita.hasKey()
+      ? new_iter_array_key_helper(op)(it, arr, value, key)
+      : new_iter_array_helper(op)(it, arr, value);
     if (res == 0) pc = targetpc;
-    if (!local) vmStack().discard();
+  };
+
+  if (isArrayLikeType(type(base))) {
+    handleArrayLike(val(base).parr, op);
+    if (local == nullptr) vmStack().discard();
     return;
   }
 
-  // NOTE: It looks like we could call new_iter_object at this point. However,
-  // doing so is incorrect, since new_iter_array / new_iter_object only handle
-  // array-like and object bases, respectively. We may have some other kind of
-  // base which the generic Iter::init handles correctly.
-  //
-  // As a result, the simplest code we could have here is the generic case.
-  // It's also about as fast as it can get, because at this point, we're almost
-  // always going to create an object iter, which can't really be optimized.
-  //
+  if (local != nullptr) {
+    // We need to extract base, as LIterInit is not preceded by IterBase. Since
+    // the actual base and the local differs, we can't use the local anymore.
+    base = Iter::extractBase(base, arGetContextClass(vmfp()));
+    if (isArrayLikeType(type(base))) {
+      handleArrayLike(val(base).parr, IterTypeOp::NonLocal);
+      return;
+    }
+  }
 
-  if (it->init(base)) {
-    tvAsVariant(val) = it->val();
+  // The base is extracted and we already handled ArrayLike.
+  assertx(isObjectType(type(base)));
+
+  // If the object is on the stack, keep it there with its own refcount until
+  // we are done, so that the state is consistent if initObj() throws.
+  auto obj = local == nullptr
+    ? Object(val(base).pobj)
+    : Object::attach(val(base).pobj);
+
+  if (it->initObj(std::move(obj))) {
+    tvAsVariant(value) = it->value();
     if (key) tvAsVariant(key) = it->key();
   } else {
     pc = targetpc;
   }
-  if (!local) vmStack().popC();
+
+  if (local == nullptr) vmStack().popC();
 }
 
 void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
@@ -4454,6 +4465,12 @@ void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
   }
 }
 
+}
+
+OPTBLD_INLINE void iopIterBase() {
+  TypedValue* base = vmStack().topC();
+  if (LIKELY(isArrayLikeType(type(base)))) return;
+  tvMove(Iter::extractBase(*base, arGetContextClass(vmfp())), base);
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {

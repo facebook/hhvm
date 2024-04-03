@@ -402,6 +402,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::Incl
             | Opcode::InclOnce
             | Opcode::InitProp(..)
+            | Opcode::IterBase
             | Opcode::IterFree(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)

@@ -20,6 +20,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -32,6 +33,10 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/hash-collection.h"
 
 namespace HPHP {
 
@@ -95,12 +100,23 @@ IterImpl::IterImpl(const ArrayData* data) {
   arrInit(data);
 }
 
-IterImpl::IterImpl(ObjectData* obj) {
-  objInit<true>(obj);
-}
-
-IterImpl::IterImpl(ObjectData* obj, NoInc) {
-  objInit<false>(obj);
+IterImpl::IterImpl(Object&& obj) {
+  auto const o = obj.detach();
+  assertx(o->isIterator());
+  setObject(o);
+  try {
+    o->o_invoke_few_args(s_rewind, RuntimeCoeffects::fixme(), 0);
+  } catch (...) {
+    // At this point, this IterImpl "owns" a reference to the object and is
+    // responsible for dec-ref-ing it when the iterator is destroyed.
+    //
+    // Normally, the destructor takes care of this case, but we'll never invoke
+    // it if the exception is thrown before the constructor finishes, so we
+    // must manually dec-ref the object here.
+    decRefObj(o);
+    kill();
+    throw;
+  }
 }
 
 bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
@@ -164,43 +180,6 @@ void IterImpl::arrInit(const ArrayData* arr) {
   if (arr && incRef) arr->incRefCount();
 }
 
-template <bool incRef>
-void IterImpl::objInit(ObjectData* obj) {
-  assertx(obj);
-
-  if (LIKELY(obj->isCollection())) {
-    if (auto ad = collections::asArray(obj)) {
-      ad->incRefCount();
-      if (!incRef) decRefObj(obj);
-      setArrayData(ad);
-    } else {
-      assertx(obj->collectionType() == CollectionType::Pair);
-      auto arr = collections::toArray(obj);
-      if (!incRef) decRefObj(obj);
-      setArrayData(arr.detach());
-    }
-    return;
-  }
-
-  assertx(obj->instanceof(SystemLib::getHH_IteratorClass()));
-  setObject(obj);
-  if (incRef) obj->incRefCount();
-  try {
-    obj->o_invoke_few_args(s_rewind, RuntimeCoeffects::fixme(), 0);
-  } catch (...) {
-    // Regardless of whether the incRef template parameter is true or false,
-    // at this point, this IterImpl "owns" a reference to the object and is
-    // responsible for dec-ref-ing it when the iterator is destroyed.
-    //
-    // Normally, the destructor takes care of this case, but we'll never invoke
-    // it if the exception is thrown before the constructor finishes, so we
-    // must manually dec-ref the object here.
-    decRefObj(obj);
-    kill();
-    throw;
-  }
-}
-
 void IterImpl::kill() {
   if (!debug) return;
   // IterImpl is not POD, so we memset each POD field separately.
@@ -250,29 +229,55 @@ TypedValue IterImpl::secondVal() const {
 
 //////////////////////////////////////////////////////////////////////
 
-bool Iter::init(TypedValue* base) {
+TypedValue Iter::extractBase(TypedValue base, const Class* ctx) {
   assertx(!isArrayLikeType(type(base)));
-
-  // Get more easy cases out of the way: non-objects are not iterable.
-  // For these cases, we warn and branch to done.
   if (!isObjectType(type(base))) {
     SystemLib::throwInvalidForeachArgumentExceptionObject();
   }
 
-  if (base->m_data.pobj->isCollection()) {
-    new (&m_iter) IterImpl(base->m_data.pobj);
-  } else {
-    bool isIterator;
-    Object obj = base->m_data.pobj->iterableObject(isIterator);
-    if (isIterator) {
-      new (&m_iter) IterImpl(obj.detach(), IterImpl::noInc);
-    } else {
-      Class* ctx = arGetContextClass(vmfp());
-      Array iterArray(obj->o_toIterArray(ctx));
-      ArrayData* ad = iterArray.get();
-      new (&m_iter) IterImpl(ad);
+  auto const obj = val(base).pobj;
+  if (LIKELY(obj->isCollection())) {
+    switch (obj->collectionType()) {
+      case CollectionType::ImmVector:
+      case CollectionType::Vector: {
+        auto const vec = static_cast<BaseVector*>(obj)->arrayData();
+        vec->incRefCount();
+        return make_tv<KindOfVec>(vec);
+      }
+      case CollectionType::ImmMap:
+      case CollectionType::Map:
+      case CollectionType::ImmSet:
+      case CollectionType::Set: {
+        auto const dict =
+          static_cast<HashCollection*>(obj)->arrayData()->asArrayData();
+        dict->incRefCount();
+        return make_tv<KindOfDict>(dict);
+      }
+      case CollectionType::Pair: {
+        auto const pair = static_cast<c_Pair*>(obj);
+        auto vec = make_vec_array(
+          tvAsCVarRef(pair->at(0)),
+          tvAsCVarRef(pair->at(1))
+        );
+        return make_tv<KindOfVec>(vec.detach());
+      }
     }
+    not_reached();
   }
+
+  bool isIterator;
+  auto iterObj = obj->iterableObject(isIterator);
+  if (isIterator) {
+    return make_tv<KindOfObject>(iterObj.detach());
+  }
+
+  Array iterArray(obj->o_toIterArray(ctx));
+  return make_tv<KindOfDict>(iterArray.detach());
+}
+
+bool Iter::initObj(Object&& base) {
+  assertx(base->isIterator());
+  new (&m_iter) IterImpl(std::move(base));
 
   // If the object was empty, or if end throws, dec-ref it and branch to done.
   try {
@@ -642,7 +647,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
     if (obj->isIterator()) {
       TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
             __func__, dest, obj, ctx);
-      new (iter) IterImpl(obj, IterImpl::noInc);
+      new (iter) IterImpl(Object::attach(obj));
     } else {
       bool isIteratorAggregate;
       /*
@@ -659,7 +664,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
       if (isIteratorAggregate) {
         TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
               __func__, dest, obj, ctx);
-        new (iter) IterImpl(itObj.detach(), IterImpl::noInc);
+        new (iter) IterImpl(std::move(itObj));
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);

@@ -508,6 +508,7 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::IssetL(local)
             }
             Hhbc::IssetS(_, _) => Opcode::IssetS,
+            Hhbc::IterBase(..) => Opcode::IterBase,
             Hhbc::IterFree(iter_id, _) => Opcode::IterFree(iter_id),
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
             Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,

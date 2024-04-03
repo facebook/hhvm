@@ -1366,6 +1366,7 @@ impl FunctionParser<'_> {
             "isset_g" => I::Hhbc(H::IssetG(self.vid(tok)?, loc)),
             "isset_l" => I::Hhbc(H::IssetL(self.lid(tok)?, loc)),
             "isset_s" => parse_instr!(tok, I::Hhbc(H::IssetS([p0, p1], loc)), <p0:self.vid> "::" <p1:self.vid>),
+            "iter_base" => I::Hhbc(H::IterBase(self.vid(tok)?, loc)),
             "iterator" => self.parse_iterator(tok, loc)?,
             "jmp" => self.parse_jmp(tok, loc)?,
             "late_bound_cls" => I::Hhbc(H::LateBoundCls(loc)),

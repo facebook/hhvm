@@ -495,6 +495,9 @@ static CallMap s_callMap {
                                         DSSA, SSync, {{SSA, 0}}},
     {RaiseErrorOnInvalidIsAsExpressionType,
       errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
+
+    /* Iterators */
+    {IterExtractBase, Iter::extractBase, DTV, SSync, {{TV, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

@@ -69,6 +69,10 @@ namespace {
 
 const StaticString s_MethCallerHelper("__SystemLib\\MethCallerHelper");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+const StaticString s_ConstMap("ConstMap");
+const StaticString s_ConstSet("ConstSet");
+const StaticString s_ConstVector("ConstVector");
+const StaticString s_Iterator("HH\\Iterator");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
 const StaticString s_Closure("Closure");
@@ -4822,6 +4826,40 @@ void in(ISS& env, const bc::LockObj& op) {
     return bail();
   }
   reduce(env);
+}
+
+void in(ISS& env, const bc::IterBase&) {
+  auto const t = topC(env);
+  if (t.subtypeOf(BArrLike)) return reduce(env);
+
+  auto const iterator = subObj(builtin_class(env.index, s_Iterator.get()));
+  if (t.subtypeOf(iterator)) return reduce(env);
+
+  auto tOut = TBottom;
+  auto hasEffects = !t.subtypeOf(BArrLike | BObj);
+  if (t.couldBe(BArrLike)) tOut |= intersection_of(t, TArrLike);
+  if (t.couldBe(BObj)) {
+    auto const tObj = intersection_of(t, TObj);
+    auto const map = subObj(builtin_class(env.index, s_ConstMap.get()));
+    auto const set = subObj(builtin_class(env.index, s_ConstSet.get()));
+    auto const vector = subObj(builtin_class(env.index, s_ConstVector.get()));
+    if (tObj.subtypeOf(iterator)) {
+      tOut |= tObj;
+    } else if (tObj.subtypeOf(map)) {
+      tOut |= TDict;
+    } else if (tObj.subtypeOf(set)) {
+      tOut |= TDict;  // Sets are still backed by dicts rather than keysets
+    } else if (tObj.subtypeOf(vector)) {
+      tOut |= TVec;  // Note: this includes Pair
+    } else {
+      tOut |= union_of(TArrLike, TObj);
+      hasEffects = true;
+    }
+  }
+
+  if (!hasEffects) effect_free(env);
+  popC(env);
+  push(env, tOut);
 }
 
 namespace {

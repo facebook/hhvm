@@ -842,6 +842,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
 
+  case IterExtractBase:
+    return may_load_store(AEmpty, AEmpty);
+
   case IterInit:
   case LIterInit:
   case IterNext:

@@ -2769,6 +2769,16 @@ ReqBindJmp and CallFuncEntry.
 
 16. Iterators
 
+| IterExtractBase, D(Dict|Vec|Obj), S(Obj) S(Cls|Nullptr), PRc
+
+  Extract iterator base from an object. D is:
+  - the underlying vec if S0 is a Vector or ImmVector
+  - the underlying dict if S0 is a Map, ImmMap, Set or ImmSet
+  - a vec of two elements if S0 is a Pair
+  - an object implementing the Iterator interface if S0 is an Iterator or
+    an IteratorAggregate that eventually produces an Iterator
+  - a dict of properties of the object otherwise
+
 | IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
 
 | IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA

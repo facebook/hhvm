@@ -329,6 +329,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InterpOne:
   case IssetElem:
   case IssetProp:
+  case IterExtractBase:
   case IterInit:
   case IterInitK:
   case IterNext:

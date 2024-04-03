@@ -290,6 +290,7 @@ static const struct {
 
   /*** 11. Iterator instructions ***/
 
+  { OpIterBase,    {Stack1,           Stack1,       OutUnknown      }},
   { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
   { OpLIterInit,   {Local,            Local,        OutUnknown      }},
   { OpIterNext,    {None,             Local,        OutUnknown      }},

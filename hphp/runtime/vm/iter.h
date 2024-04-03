@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/unaligned-typed-value.h"
@@ -145,8 +146,7 @@ struct IterImpl {
   IterImpl(const ArrayData* data, Local) {
     setArrayData<true>(data);
   }
-  explicit IterImpl(ObjectData* obj);
-  IterImpl(ObjectData* obj, NoInc);
+  explicit IterImpl(Object&& obj);
 
   // Destructor
   ~IterImpl();
@@ -316,9 +316,6 @@ private:
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
 
-  template <bool incRef>
-  void objInit(ObjectData* obj);
-
   // Set all IterImpl fields for iteration over an array:
   //  - m_data is either the array, or null (for local iterators).
   //  - The type fields union is set based on the array type.
@@ -428,9 +425,13 @@ struct alignas(16) Iter {
   Iter() = delete;
   ~Iter() = delete;
 
+  // Validates iterator base and extract the underlying array or iterator.
+  // Assumes the base is not an array.
+  static TypedValue extractBase(TypedValue base, const Class* ctx);
+
   // Returns true if the base is non-empty. Only used for non-local iterators.
   // For local iterators, use new_iter_array / new_iter_array_key below.
-  bool init(TypedValue* base);
+  bool initObj(Object&& base);
 
   // Returns true if there are more elems. Only used for non-local iterators.
   // For local iterators, use liter_next_ind / liter_next_key_ind below.
@@ -442,7 +443,7 @@ struct alignas(16) Iter {
   // Get the current key and value. Assumes that the iter is not at its end.
   // These methods will inc-ref the key and value before returning it.
   Variant key() { return m_iter.first(); }
-  Variant val() { return m_iter.second(); };
+  Variant value() { return m_iter.second(); }
 
   // It's valid to call end() on a killed iter, but the iter is otherwise dead.
   // In debug builds, this method will overwrite the iterator with garbage.

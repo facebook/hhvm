@@ -42,28 +42,29 @@ function params_and_locals(int $a) : void {
 // CHECK:   n1: *HackMixed = load &$d
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3: *HackMixed = load &$d
-// CHECK:   n4 = $builtins.hhbc_iter_init(&iter0, &$k, &$v, n3)
+// CHECK:   n4 = $builtins.hhbc_iter_base(n3)
+// CHECK:   n5 = $builtins.hhbc_iter_init(&iter0, &$k, &$v, n4)
 // CHECK:   jmp b1, b6
 // CHECK: #b1:
-// CHECK:   prune $builtins.hack_is_true(n4)
+// CHECK:   prune $builtins.hack_is_true(n5)
 // CHECK:   jmp b2
 // CHECK: #b2:
-// CHECK:   n5: *HackMixed = load &iter0
-// CHECK:   n6 = $builtins.hhbc_iter_next(n5, &$k, &$v)
+// CHECK:   n6: *HackMixed = load &iter0
+// CHECK:   n7 = $builtins.hhbc_iter_next(n6, &$k, &$v)
 // CHECK:   jmp b4, b5
 // CHECK:   .handlers b3
-// CHECK: #b3(n7: *HackMixed):
-// CHECK:   n8: *HackMixed = load &iter0
-// CHECK:   n9 = $builtins.hhbc_iter_free(n8)
-// CHECK:   throw n7
+// CHECK: #b3(n8: *HackMixed):
+// CHECK:   n9: *HackMixed = load &iter0
+// CHECK:   n10 = $builtins.hhbc_iter_free(n9)
+// CHECK:   throw n8
 // CHECK: #b4:
-// CHECK:   prune $builtins.hack_is_true(n6)
+// CHECK:   prune $builtins.hack_is_true(n7)
 // CHECK:   jmp b7
 // CHECK: #b5:
-// CHECK:   prune ! $builtins.hack_is_true(n6)
+// CHECK:   prune ! $builtins.hack_is_true(n7)
 // CHECK:   jmp b2
 // CHECK: #b6:
-// CHECK:   prune ! $builtins.hack_is_true(n4)
+// CHECK:   prune ! $builtins.hack_is_true(n5)
 // CHECK:   jmp b7
 // CHECK: #b7:
 // CHECK:   ret null

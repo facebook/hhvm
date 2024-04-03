@@ -58,6 +58,8 @@ namespace HPHP::SystemLib {
   x(Serializable,,)                             \
   x(ArrayAccess,,)                              \
   x(ArrayIterator,,)                            \
+  x(ConstMap,,)                                 \
+  x(ConstSet,,)                                 \
   x(DirectoryIterator,,)                        \
   x(IteratorAggregate,,)                        \
   x(Countable,,)                                \

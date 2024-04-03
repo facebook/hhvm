@@ -2688,13 +2688,38 @@ iterator ID, an value output local ID, and optionally a key output local ID.
 Below, when we refer to "the iterator ID in %1", "the value local given in %1",
 etc., we're referring to these IDs.
 
-IterInit  <IterArgs> <rel offset>    [C]  ->  []
+IterBase    [C]  ->  [C:Arr|Obj]
 
-  Initialize an iterator. This instruction takes a "base" in $1. It creates an
-  iterator with ID given in %1 pointing to the beginning of $1 and, if $1 has
-  base-internal iteration state (see below), rewinds $1. It then checks if the
-  base is empty. If so, it frees the iterator (with an implicit IterFree) and
-  transfers control to the target %2.
+  Extract iterator base from $1.
+
+    - If $1 is array-like, pushes $1 onto the stack.
+
+    - If $1 is a collection object, pushes the underlying vec or dict onto
+      the stack.
+
+    - If $1 is an object that implements Iterator, pushes $1 onto the stack.
+
+    - If $1 is an object that implements the IteratorAggregate interface, then
+      we repeatedly execute "x = x->getIterator()" until x is no longer an
+      object that implements the IteratorAggregate interface. If x is now an
+      object that implements the Iterator interface, pushes x onto the stack.
+      Otherwise, we throw an object of type Exception.
+
+    - If $1 is an object that does not match any of the cases above, then we
+      create a dict that contains all accessible properties of the base's class,
+      in the order that they were defined, then push that dict onto the stack.
+      Keys and values of the dict correspond to the property names and values.
+
+    - If $1 is not an array-like or object, an exception is thrown.
+
+IterInit  <IterArgs> <rel offset>    [C:Arr|Obj]  ->  []
+
+  Initialize an iterator. This instruction takes a "base" in $1, which might be
+  an array-like or an object implementing the Iterator interface. It creates
+  an iterator with ID given in %1 pointing to the beginning of $1 and, if $1 is
+  an Iterator object, rewinds $1. It then checks if the base is empty. If so,
+  it frees the iterator (with an implicit IterFree) and transfers control to
+  the target %2.
 
   If the base is non-empty, this instruction writes the value of the base's
   first element to the value local given in %1. If the iterator is a key-value
@@ -2712,37 +2737,19 @@ IterInit  <IterArgs> <rel offset>    [C]  ->  []
       The "is empty" check is a check on the length of $1, and "get key" and
       "get value" load $1's first element.
 
-    - If $1 is a collection object, then we'll unpack or create the underlying
-      vec or dict and then create a new array iterator, as above.
-
-    - If $1 is an object that implements Iterator, or if it is an instance of
-      an extension class that implements Traversable, then we create a new
-      object iterator. We call $1->rewind() to reset the base's internal state,
-      then call $1->valid() to check if $1 is non-empty. If $1 is valid, then we
-      call $1->current() (and $1->key()) to get the $1's first value (and key).
-
-    - If $1 is an object that implements the IteratorAggregate interface, then
-      we repeatedly execute "x = x->getIterator()" until x is no longer an
-      object that implements the IteratorAggregate interface. If x is now an
-      object that implements the Iterator interface, we create a new object
-      iterator as above. Otherwise, we throw an object of type Exception.
-
-    - If $1 is an object that does not match any of the cases above, then we
-      create a new default class iterator (with no base-internal state) that
-      iterates over accessible properties of the base's class, in the order
-      that they were defined. "get key" returns the name of the first property,
-      and "get value" returns the $1's value for that property.
-
-    - If $1 is not an array-like or object, this method raises a warning
-      and transfers control to the target %2.
+    - If $1 is an object that implements Iterator, then we create a new object
+      iterator. We call $1->rewind() to reset the base's internal state, then
+      call $1->valid() to check if $1 is non-empty. If $1 is valid, then we call
+      $1->current() (and $1->key()) to get the $1's first value (and key).
 
 LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
 
   Initialize iterator with local. If the local specified by %2 is array-like,
   this instruction creates an array iterator pointing to the beginning of %2,
   but leaves %2 in its local rather than copying it into the iterator and
-  inc-ref-ing it. Otherwise, it behaves as IterInit, except that the base comes
-  from the local %2 rather than from the stack.
+  inc-ref-ing it. Otherwise, it behaves as a combination of IterBase and
+  IterInit, except that the base comes from the local %2 rather than from
+  the stack.
 
   If the base is non-empty, this instruction sets the output value (and, for
   key-value iterators, the output key) to the first element of the base.

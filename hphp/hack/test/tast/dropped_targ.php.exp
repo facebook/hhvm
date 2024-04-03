@@ -22,14 +22,14 @@
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([5:11-12], "__SupportDynamicType"); ua_params = [] }];
       c_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((string), [3:34-65], (String "union_intersection_type_hints"))] }];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
          }
         ];
       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
@@ -38,13 +38,13 @@
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((string), [3:34-65], (String "union_intersection_type_hints"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
        fd_mode = Mstrict; fd_name = ([9:10-18], "\\dropped1");
@@ -110,13 +110,13 @@
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((string), [3:34-65], (String "union_intersection_type_hints"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
        fd_mode = Mstrict; fd_name = ([9:10-18], "\\dropped1");

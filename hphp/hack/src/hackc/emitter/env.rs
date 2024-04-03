@@ -199,11 +199,13 @@ impl<'s> Env<'s> {
 
 #[cfg(test)]
 mod tests {
+    use oxidized::namespace_env::Mode;
+
     use super::*;
 
     #[test]
     fn make_env() {
-        let namespace = Arc::new(NamespaceEnv::empty(vec![], false, false));
+        let namespace = Arc::new(NamespaceEnv::empty(vec![], Mode::ForTypecheck, false));
         let _: Env<'_> = Env::default(namespace);
     }
 }

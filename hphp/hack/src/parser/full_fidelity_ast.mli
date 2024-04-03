@@ -14,7 +14,7 @@
 type env [@@deriving show]
 
 val make_env (* Optional parts *) :
-  ?codegen:bool ->
+  ?mode:Namespace_env.mode ->
   ?php5_compat_mode:bool ->
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->

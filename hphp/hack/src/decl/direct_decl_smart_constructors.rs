@@ -36,6 +36,7 @@ use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::file_info::Mode;
 use oxidized_by_ref::method_flags::MethodFlags;
 use oxidized_by_ref::namespace_env::Env as NamespaceEnv;
+use oxidized_by_ref::namespace_env::Mode as NamespaceMode;
 use oxidized_by_ref::nast;
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::prop_flags::PropFlags;
@@ -602,7 +603,7 @@ impl<'a> NamespaceBuilder<'a> {
                 fun_uses: SMap::empty(),
                 const_uses: SMap::empty(),
                 name: None,
-                is_codegen: false,
+                mode: NamespaceMode::ForTypecheck,
                 disable_xhp_element_mangling,
             }],
             elaborate_xhp_namespaces_for_facts,

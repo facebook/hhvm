@@ -302,6 +302,7 @@ mod tests {
     use nast::TypeHint;
     use nast::Variance;
     use oxidized::namespace_env;
+    use oxidized::namespace_env::Mode;
 
     use super::*;
 
@@ -329,7 +330,7 @@ mod tests {
             methods,
             xhp_children: Default::default(),
             xhp_attrs: Default::default(),
-            namespace: Arc::new(namespace_env::Env::empty(vec![], false, false)),
+            namespace: Arc::new(namespace_env::Env::empty(vec![], Mode::ForTypecheck, false)),
             user_attributes: Default::default(),
             file_attributes: Default::default(),
             docs_url: Default::default(),

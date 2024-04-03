@@ -13,6 +13,7 @@ use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast_defs;
+use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
@@ -61,7 +62,7 @@ struct Context {
     in_classish: bool,
     in_static_methodish: bool,
     is_any_local_fun: bool,
-    is_typechecker: bool,
+    mode: Mode,
 }
 
 struct Checker {
@@ -221,14 +222,14 @@ impl<'ast> Visitor<'ast> for Checker {
             }
         } else if let Some(efun) = p.2.as_efun() {
             match efun.fun.ctxs {
-                None if c.is_any_local_fun && c.is_typechecker => {
+                None if c.is_any_local_fun && matches!(c.mode, Mode::ForTypecheck) => {
                     self.add_error(&efun.fun.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
             }
         } else if let Some((f, ..)) = p.2.as_lfun() {
             match f.ctxs {
-                None if c.is_any_local_fun && c.is_typechecker => {
+                None if c.is_any_local_fun && matches!(c.mode, Mode::ForTypecheck) => {
                     self.add_error(&f.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
@@ -238,13 +239,13 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, mode: Mode) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
         in_classish: false,
         in_static_methodish: false,
         is_any_local_fun: false,
-        is_typechecker,
+        mode,
     };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

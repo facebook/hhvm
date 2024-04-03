@@ -43,6 +43,7 @@ use std::sync::Arc;
 use env::Env;
 use env::ProgramSpecificOptions;
 use oxidized::namespace_env;
+use oxidized::namespace_env::Mode;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
 use oxidized::typechecker_options::TypecheckerOptions;
@@ -66,7 +67,7 @@ pub fn elaborate_program_for_codegen(
     program: &mut nast::Program,
     opts: &CodegenOpts,
 ) -> Result<(), Vec1<NamingPhaseError>> {
-    assert!(ns_env.is_codegen);
+    assert!(matches!(ns_env.mode, Mode::ForCodegen));
     let tco = TypecheckerOptions {
         po_codegen: true,
         po_disable_xhp_element_mangling: ns_env.disable_xhp_element_mangling,
@@ -205,7 +206,11 @@ pub fn elaborate_stmt(
 fn ns_env(tco: &TypecheckerOptions) -> Arc<namespace_env::Env> {
     Arc::new(namespace_env::Env::empty(
         tco.po_auto_namespace_map.clone(),
-        tco.po_codegen,
+        if tco.po_codegen {
+            Mode::ForCodegen
+        } else {
+            Mode::ForTypecheck
+        },
         tco.po_disable_xhp_element_mangling,
     ))
 }

@@ -8,6 +8,7 @@ file_info::SiKind
 ident::Ident
 lazy::Lazy
 method_flags::MethodFlags
+namespace_env::Mode
 package::PackageRelationship
 prop_flags::PropFlags
 saved_state_rollouts::Flag

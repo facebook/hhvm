@@ -24,6 +24,7 @@ use oxidized::ast::Stmt_;
 use oxidized::ast_defs;
 use oxidized::ast_defs::*;
 use oxidized::local_id;
+use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 
 use crate::lowerer::Env;
@@ -236,13 +237,16 @@ pub fn desugar(
     let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {
         make_tree
     } else {
-        let body = if env.codegen {
-            let mut b = splice_assignments.clone();
-            b.extend(function_pointers.clone());
-            b.push(wrap_return(make_tree, &et_literal_pos));
-            b
-        } else {
-            vec![wrap_return(make_tree, &et_literal_pos)]
+        let body = match env.codegen {
+            Mode::ForCodegen => {
+                let mut b = splice_assignments.clone();
+                b.extend(function_pointers.clone());
+                b.push(wrap_return(make_tree, &et_literal_pos));
+                b
+            }
+            Mode::ForTypecheck => {
+                vec![wrap_return(make_tree, &et_literal_pos)]
+            }
         };
 
         let lambda_args = match &dollardollar_pos {

@@ -112,7 +112,11 @@ let handle_existing_file args filename =
       if dump_needed || print_errors then (
         let env =
           Full_fidelity_ast.make_env
-            ~codegen:args.codegen
+            ~mode:
+              (if args.codegen then
+                Namespace_env.ForCodegen
+              else
+                Namespace_env.ForTypecheck)
             ~php5_compat_mode:args.php5_compat_mode
             ~elaborate_namespaces:args.elaborate_namespaces
             ~include_line_comments:args.include_line_comments

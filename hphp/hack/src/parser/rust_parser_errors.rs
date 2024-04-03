@@ -13,6 +13,7 @@ use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
 use itertools::Itertools;
 use naming_special_names_rust as sn;
+use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::lexable_token::LexableToken;
@@ -270,7 +271,7 @@ struct Env<'a, State> {
     context: Context<'a>,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    mode: Mode,
     systemlib: bool,
 }
 
@@ -280,7 +281,7 @@ impl<'a, State> Env<'a, State> {
     }
 
     fn is_typechecker(&self) -> bool {
-        !self.codegen
+        matches!(self.mode, Mode::ForTypecheck)
     }
 
     fn is_hhi_mode(&self) -> bool {
@@ -1272,7 +1273,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
           // Preview features with an ongoing release should be allowed by the
           // runtime, but not the typechecker
           || (feature.get_feature_status() == FeatureStatus::OngoingRelease
-            && self.env.codegen);
+            && matches!(self.env.mode, Mode::ForCodegen));
 
         if !enabled {
             self.errors.push(make_error_from_node(
@@ -3024,7 +3025,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // Preview features with an ongoing release should be allowed by the
         // runtime, but not the typechecker
         let enabled = self.env.context.active_unstable_features.contains(&feature)
-            || (feature.get_feature_status() == FeatureStatus::OngoingRelease && self.env.codegen);
+            || (feature.get_feature_status() == FeatureStatus::OngoingRelease
+                && matches!(self.env.mode, Mode::ForCodegen));
         (feature, enabled)
     }
 
@@ -5732,7 +5734,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         parser_options: ParserOptions,
         hhvm_compat_mode: bool,
         hhi_mode: bool,
-        codegen: bool,
+        mode: Mode,
         systemlib: bool,
         default_unstable_features: HashSet<UnstableFeatures>,
     ) -> (Vec<SyntaxError>, bool) {
@@ -5751,7 +5753,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             },
             hhvm_compat_mode,
             hhi_mode,
-            codegen,
+            mode,
             systemlib,
         };
         Self::new(env).parse_errors_impl()
@@ -5763,7 +5765,7 @@ pub fn parse_errors<'a, State: Clone>(
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    ns_mode: Mode,
     systemlib: bool,
     default_unstable_features: HashSet<UnstableFeatures>,
 ) -> (Vec<SyntaxError>, bool) {
@@ -5773,7 +5775,7 @@ pub fn parse_errors<'a, State: Clone>(
         parser_options,
         hhvm_compat_mode,
         hhi_mode,
-        codegen,
+        ns_mode,
         systemlib,
         default_unstable_features,
     )
@@ -5785,7 +5787,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    ns_mode: Mode,
     systemlib: bool,
     default_unstable_features: HashSet<UnstableFeatures>,
 ) -> (Vec<SyntaxError>, bool) {
@@ -5795,7 +5797,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         parser_options,
         hhvm_compat_mode,
         hhi_mode,
-        codegen,
+        ns_mode,
         systemlib,
         default_unstable_features,
     )

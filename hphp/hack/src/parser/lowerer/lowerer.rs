@@ -50,6 +50,7 @@ use oxidized::errors::NastCheck;
 use oxidized::file_info;
 use oxidized::global_options::GlobalOptions;
 use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::lexable_token::LexablePositionedToken;
@@ -168,7 +169,7 @@ const EXP_RECURSION_LIMIT: usize = 30_000;
 
 #[derive(Clone)]
 pub struct Env<'a> {
-    pub codegen: bool,
+    pub codegen: oxidized::namespace_env::Mode,
     quick_mode: bool,
     /// Show errors even in quick mode.
     /// Hotfix until we can properly set up saved states to surface parse errors during
@@ -194,7 +195,7 @@ pub struct Env<'a> {
 
 impl<'a> Env<'a> {
     pub fn make(
-        codegen: bool,
+        codegen: oxidized::namespace_env::Mode,
         quick_mode: bool,
         show_all_errors: bool,
         mode: file_info::Mode,
@@ -242,11 +243,11 @@ impl<'a> Env<'a> {
     }
 
     pub fn is_typechecker(&self) -> bool {
-        !self.codegen
+        matches!(self.codegen, Mode::ForTypecheck)
     }
 
-    fn codegen(&self) -> bool {
-        self.codegen
+    fn is_codegen(&self) -> bool {
+        matches!(self.codegen, Mode::ForCodegen)
     }
 
     fn source_text(&self) -> &SourceText<'a> {
@@ -402,7 +403,7 @@ fn raise_parsing_error_pos(pos: &Pos, env: &mut Env<'_>, msg: &str) {
 }
 
 fn raise_parsing_error_(pos: Pos, env: &mut Env<'_>, msg: &str) {
-    if env.should_surface_error() || env.codegen() {
+    if env.should_surface_error() || env.is_codegen() {
         env.parsing_errors().push((pos, String::from(msg)))
     }
 }
@@ -829,7 +830,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 );
             }
 
-            if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
+            if env.file_mode() != file_info::Mode::Mhhi && !env.is_codegen() {
                 let sn = strip_ns(&name);
                 if sn.starts_with(sn::coeffects::CONTEXTS)
                     || sn.starts_with(sn::coeffects::CAPABILITIES)
@@ -1404,12 +1405,12 @@ fn p_expr_lit<'a>(
         Token(_) => {
             let s = expr.text(env.indexed_source_text.source_text());
             let check_lint_err = |e: &mut Env<'a>, s: &str, expected: &str| {
-                if !e.codegen() && s != expected {
+                if !e.is_codegen() && s != expected {
                     raise_lint_error(e, LintError::lowercase_constant(p_pos(expr, e), s));
                 }
             };
             match (location, token_kind(expr)) {
-                (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
+                (ExprLocation::InDoubleQuotedString, _) if env.is_codegen() => {
                     Ok(Expr_::String(mk_str(expr, env, s, unesc_dbl)))
                 }
                 (_, Some(TK::DecimalLiteral))
@@ -1932,7 +1933,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
         if env.parser_options.po_disallow_silence {
             raise_parsing_error(op, env, &syntax_error::no_silence);
         }
-        if env.codegen() {
+        if env.is_codegen() {
             let expr = p_expr(operand, env)?;
             mk_unop(Usilence, expr)
         } else {
@@ -2538,7 +2539,7 @@ fn p_obj_get<'a>(
     name: S<'a>,
     e: &mut Env<'a>,
 ) -> Result<Expr_> {
-    if recv.is_object_creation_expression() && !e.codegen() {
+    if recv.is_object_creation_expression() && !e.is_codegen() {
         raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
     }
     let recv = p_expr(recv, e)?;
@@ -2560,13 +2561,13 @@ where
     F: FnOnce(&[u8]) -> Vec<u8>,
 {
     if let Some(kind) = token_kind(node) {
-        if env.codegen() && TK::XHPStringLiteral == kind {
+        if env.is_codegen() && TK::XHPStringLiteral == kind {
             let p = p_pos(node, env);
             /* for XHP string literals (attribute values) just extract
             value from quotes and decode HTML entities  */
             let text = html_entities::decode(get_quoted_content(node.full_text(env.source_text())));
             Ok(ast::Expr::new((), p, Expr_::make_string(text)))
-        } else if env.codegen() && TK::XHPBody == kind {
+        } else if env.is_codegen() && TK::XHPBody == kind {
             let p = p_pos(node, env);
             /* for XHP body - only decode HTML entities */
             let text = html_entities::decode(&unesc_xhp(node.full_text(env.source_text())));
@@ -2588,7 +2589,7 @@ fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute> {
             let name = p_pstring(&c.name, env)?;
             let expr = if attr_expr.is_braced_expression()
                 && env.file_mode() == file_info::Mode::Mhhi
-                && !env.codegen()
+                && !env.is_codegen()
             {
                 ast::Expr::new((), env.mk_none_pos(), Expr_::Null)
             } else {
@@ -2890,12 +2891,14 @@ fn p_concurrent_stmt<'a>(
         return p_stmt(&c.statement, env);
     }
     Ok(new(
-        if env.codegen {
+        match env.codegen {
+            Mode::ForCodegen =>
             // Existing uses and tests have different expectations for the location depending
             // on whether it's for codegen or not
-            p_pos(&c.keyword, env)
-        } else {
-            pos
+            {
+                p_pos(&c.keyword, env)
+            }
+            Mode::ForTypecheck => pos,
         },
         S_::mk_concurrent(p_block(true, &c.statement, env)?),
     ))
@@ -3655,7 +3658,7 @@ fn rewrite_effect_polymorphism<'a>(
         match *context_hint.1 {
             HfunContext(ref name) => match hint_by_param.get_mut::<str>(name) {
                 Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
-                    Some(_) if env.codegen() => {}
+                    Some(_) if env.is_codegen() => {}
                     Some(ref mut param_hint) => rewrite_fun_ctx(env, tparams, param_hint, name),
                     None => raise_parsing_error_pos(
                         param_pos,
@@ -3682,7 +3685,7 @@ fn rewrite_effect_polymorphism<'a>(
                                 )
                             } else {
                                 match hint_opt {
-                                    Some(_) if env.codegen() => {}
+                                    Some(_) if env.is_codegen() => {}
                                     Some(ref mut param_hint) => {
                                         let mut rewrite = |h| {
                                             rewrite_arg_ctx(
@@ -3734,7 +3737,7 @@ fn rewrite_effect_polymorphism<'a>(
                             env,
                             &syntax_error::ctx_generic_invalid(id, haccess_string(id, csts)),
                         ),
-                        Some(true) if env.codegen() => {}
+                        Some(true) if env.is_codegen() => {}
                         Some(true) => {
                             let left_id = ast::Id(
                                 context_hint.0.clone(),
@@ -4107,8 +4110,8 @@ fn p_fun_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
     };
     let p = p_pos(node, env);
     match &node.children {
-        FunctionDeclaration(c) if env.codegen() => get_pos(&c.declaration_header, p),
-        MethodishDeclaration(c) if env.codegen() => get_pos(&c.function_decl_header, p),
+        FunctionDeclaration(c) if env.is_codegen() => get_pos(&c.declaration_header, p),
+        MethodishDeclaration(c) if env.is_codegen() => get_pos(&c.function_decl_header, p),
         _ => p,
     }
 }
@@ -4160,7 +4163,7 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
                 }
                 _ => {
                     if !env.top_level_statements
-                        && ((env.file_mode() == file_info::Mode::Mhhi && !env.codegen())
+                        && ((env.file_mode() == file_info::Mode::Mhhi && !env.is_codegen())
                             || env.quick_mode)
                     {
                         mk_noop_result(env)
@@ -5010,7 +5013,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                         return;
                     }
                 };
-            if env.codegen() {
+            if env.is_codegen() {
                 member_init.reverse();
             }
             member_init.append(&mut body.0);
@@ -5459,7 +5462,7 @@ fn check_effect_polymorphic_reification<'a>(
 fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result<ast::Expr> {
     match &node.children {
         SimpleInitializer(c) => p_expr(&c.value, env),
-        _ if env.file_mode() == file_info::Mode::Mhhi && !env.codegen() => {
+        _ if env.file_mode() == file_info::Mode::Mhhi && !env.is_codegen() => {
             // We use Omitted as a placeholder here because we don't care about
             // the constant's value when in HHI mode
             Ok(Expr::new((), default_pos, Expr_::Omitted))
@@ -6029,7 +6032,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             }
             Ok(vec![ast::Def::mk_class(enum_class)])
         }
-        InclusionDirective(c) if env.file_mode() != file_info::Mode::Mhhi || env.codegen() => {
+        InclusionDirective(c) if env.file_mode() != file_info::Mode::Mhhi || env.is_codegen() => {
             let expr = p_expr(&c.expression, env)?;
             Ok(vec![ast::Def::mk_stmt(ast::Stmt::new(
                 p_pos(node, env),
@@ -6200,7 +6203,7 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
     }
     let mut program = vec![];
     post_process(env, acc, &mut program);
-    if env.codegen() {
+    if env.is_codegen() {
         insert_default_module_if_missing_module_membership(&mut program);
     }
     ast::Program(program)

@@ -87,6 +87,7 @@ file_info::Mode
 file_info::NameType
 file_info::SiKind
 map_reduce_ffi::MapReducer
+namespace_env::Mode
 naming_types::KindOfType
 naming_types::NameKind
 saved_state_rollouts::Flag

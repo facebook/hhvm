@@ -61,6 +61,7 @@ i_set::ISet
 ident::Ident
 local_id::map::Map
 method_flags::MethodFlags
+namespace_env::Mode
 nast::shape_map::ShapeMap
 nast::Sid
 oxidized::aast_defs::Abstraction

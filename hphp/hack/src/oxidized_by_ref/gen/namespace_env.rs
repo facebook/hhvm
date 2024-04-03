@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<368257bd4c4688bbc50cd37c51ed2c99>>
+// @generated SignedSource<<3bed87827624431f9c93356714d9ee44>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
@@ -17,6 +18,31 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show, ord)")]
+#[repr(u8)]
+pub enum Mode {
+    ForTypecheck,
+    ForCodegen,
+}
+impl TrivialDrop for Mode {}
+arena_deserializer::impl_deserialize_in_arena!(Mode);
 
 #[derive(
     Clone,
@@ -50,7 +76,7 @@ pub struct Env<'a> {
     pub const_uses: s_map::SMap<'a, &'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Option<&'a str>,
-    pub is_codegen: bool,
+    pub mode: Mode,
     pub disable_xhp_element_mangling: bool,
 }
 impl<'a> TrivialDrop for Env<'a> {}

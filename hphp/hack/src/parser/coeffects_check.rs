@@ -23,6 +23,7 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::local_id;
+use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
@@ -511,10 +512,10 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, mode: Mode) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context::new();
-    context.set_is_typechecker(is_typechecker);
+    context.set_is_typechecker(matches!(mode, Mode::ForTypecheck));
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

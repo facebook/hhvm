@@ -26,7 +26,7 @@ impl NamespaceEnv for namespace_env::Env {
         self.disable_xhp_element_mangling
     }
     fn is_codegen(&self) -> bool {
-        self.is_codegen
+        matches!(self.mode, namespace_env::Mode::ForCodegen)
     }
     fn name(&self) -> Option<&str> {
         match &self.name {
@@ -63,7 +63,7 @@ impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
         self.disable_xhp_element_mangling
     }
     fn is_codegen(&self) -> bool {
-        self.is_codegen
+        matches!(self.mode, oxidized_by_ref::namespace_env::Mode::ForCodegen)
     }
     fn name(&self) -> Option<&str> {
         self.name

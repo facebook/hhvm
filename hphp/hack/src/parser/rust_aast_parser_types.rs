@@ -12,14 +12,15 @@ use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
 use oxidized::errors::Error;
 use oxidized::file_info;
+use oxidized::namespace_env::Mode as NamespaceMode;
 use oxidized::parser_options::ParserOptions;
 use oxidized::pos::Pos;
 use oxidized::scoured_comments::ScouredComments;
 use parser_core_types::syntax_error::SyntaxError;
 
-#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep, Default)]
+#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 pub struct Env {
-    pub codegen: bool,
+    pub mode: NamespaceMode,
     pub php5_compat_mode: bool,
     pub elaborate_namespaces: bool,
     pub include_line_comments: bool,
@@ -29,6 +30,23 @@ pub struct Env {
     pub for_debugger_eval: bool,
     pub parser_options: ParserOptions,
     pub scour_comments: bool,
+}
+
+impl Default for Env {
+    fn default() -> Env {
+        Env {
+            mode: NamespaceMode::ForTypecheck,
+            php5_compat_mode: false,
+            elaborate_namespaces: false,
+            include_line_comments: false,
+            quick_mode: false,
+            show_all_errors: false,
+            is_systemlib: false,
+            for_debugger_eval: false,
+            parser_options: ParserOptions::default(),
+            scour_comments: false,
+        }
+    }
 }
 
 #[derive(Debug, ToOcamlRep)]

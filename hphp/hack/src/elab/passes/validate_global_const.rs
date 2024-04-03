@@ -60,6 +60,7 @@ mod tests {
     use nast::Hint;
     use nast::Pos;
     use oxidized::namespace_env;
+    use oxidized::namespace_env::Mode;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -79,7 +80,7 @@ mod tests {
             type_: r#type,
             namespace: Arc::new(namespace_env::Env {
                 name: namespace,
-                ..namespace_env::Env::empty(vec![], false, false)
+                ..namespace_env::Env::empty(vec![], Mode::ForTypecheck, false)
             }),
             span: Pos::NONE,
             emit_id: None,

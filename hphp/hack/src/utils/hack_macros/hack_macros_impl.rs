@@ -18,6 +18,7 @@ use oxidized::ast::Def;
 use oxidized::ast::Pos;
 use oxidized::ast::Program;
 use oxidized::errors;
+use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
@@ -477,7 +478,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     };
 
     let env = Env {
-        codegen: true,
+        mode: Mode::ForCodegen,
         elaborate_namespaces: false,
         include_line_comments: false,
         parser_options,

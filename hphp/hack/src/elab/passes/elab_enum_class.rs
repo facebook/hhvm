@@ -114,6 +114,7 @@ mod tests {
     use nast::Pos;
     use nast::UserAttributes;
     use oxidized::namespace_env;
+    use oxidized::namespace_env::Mode;
     use oxidized::s_map::SMap;
 
     use super::*;
@@ -148,7 +149,7 @@ mod tests {
                 fun_uses: SMap::default(),
                 const_uses: SMap::default(),
                 name: None,
-                is_codegen: false,
+                mode: Mode::ForTypecheck,
                 disable_xhp_element_mangling: false,
             }),
             user_attributes: UserAttributes::default(),

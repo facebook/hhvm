@@ -43,7 +43,7 @@ Errors:
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
@@ -100,7 +100,7 @@ Errors:
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
        c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
        c_module = None });
@@ -108,7 +108,7 @@ Errors:
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-21], "\\class_const");
        fd_fun =
        { f_span = [20:1-104:2]; f_readonly_this = None; f_annotation = (); 
@@ -230,7 +230,7 @@ Errors:
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
        fd_fun =
        { f_span = [107:1-155:2]; f_readonly_this = None; f_annotation = (); 
@@ -415,7 +415,7 @@ Errors:
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([157:10-23], "\\invalid_exprs");
        fd_fun =
        { f_span = [157:1-194:2]; f_readonly_this = None; f_annotation = (); 

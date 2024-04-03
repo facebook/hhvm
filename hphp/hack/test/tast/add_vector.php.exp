@@ -87,7 +87,7 @@
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([12:7-20], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None;
       c_doc_comment =
@@ -104,7 +104,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([28:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
        c_emit_id = None; c_internal = false; c_module = None });
@@ -118,7 +118,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([29:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
        c_emit_id = None; c_internal = false; c_module = None });
@@ -132,7 +132,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([30:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
        c_emit_id = None; c_internal = false; c_module = None });
@@ -140,7 +140,7 @@
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([32:10-14], "\\test");
        fd_fun =
        { f_span = [32:1-37:2]; f_readonly_this = None; f_annotation = (); 
@@ -243,7 +243,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([12:7-20], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None;
        c_doc_comment =
@@ -254,7 +254,7 @@
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([32:10-14], "\\test");
        fd_fun =
        { f_span = [32:1-37:2]; f_readonly_this = None; f_annotation = (); 

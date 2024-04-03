@@ -14,7 +14,7 @@ open Scoured_comments
 
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env = {
-  codegen: bool;
+  mode: Namespace_env.mode;
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
   include_line_comments: bool;
@@ -30,7 +30,7 @@ type env = {
 [@@deriving show]
 
 let make_env
-    ?(codegen = false)
+    ?(mode = Namespace_env.ForTypecheck)
     ?(php5_compat_mode = false)
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
@@ -39,9 +39,10 @@ let make_env
     ?(parser_options = ParserOptions.default)
     ?(is_systemlib = false)
     (file : Relative_path.t) : env =
+  let codegen = Namespace_env.(equal_mode mode ForCodegen) in
   let parser_options = ParserOptions.with_codegen parser_options codegen in
   {
-    codegen;
+    mode;
     php5_compat_mode;
     elaborate_namespaces;
     include_line_comments;
@@ -148,7 +149,7 @@ let process_syntax_errors
 let make_rust_env (env : env) : Rust_aast_parser_types.env =
   Rust_aast_parser_types.
     {
-      codegen = env.codegen;
+      mode = env.mode;
       elaborate_namespaces = env.elaborate_namespaces;
       php5_compat_mode = env.php5_compat_mode;
       include_line_comments = env.include_line_comments;
@@ -202,10 +203,9 @@ let process_lowerer_result
       fi_mode = r.file_mode;
       ast = r.aast;
       content =
-        (if env.codegen then
-          ""
-        else
-          SourceText.text source_text);
+        (match env.mode with
+        | Namespace_env.ForCodegen -> ""
+        | Namespace_env.ForTypecheck -> SourceText.text source_text);
       comments = r.scoured_comments;
     })
 

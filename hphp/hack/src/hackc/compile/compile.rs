@@ -36,6 +36,7 @@ use options::ParserOptions;
 use oxidized::ast;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::namespace_env::Mode;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::ExperimentalFeature;
 use oxidized::naming_phase_error::NamingPhaseError;
@@ -311,7 +312,7 @@ fn emit_unit_from_ast<'d>(
 fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
     NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
-        true, /* is_codegen */
+        Mode::ForCodegen,
         emitter
             .options()
             .hhvm
@@ -640,7 +641,7 @@ fn parse_file(
     profile: &mut Profile,
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
-        codegen: true,
+        mode: Mode::ForCodegen,
         php5_compat_mode: !opts.hhbc.uvs,
         is_systemlib,
         for_debugger_eval,

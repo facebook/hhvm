@@ -16,6 +16,7 @@ use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast::*;
 use oxidized::namespace_env;
+use oxidized::namespace_env::Mode;
 
 fn is_special_identifier(name: &str) -> bool {
     use lazy_static::lazy_static;
@@ -53,11 +54,12 @@ impl Env {
         }
     }
 
-    // TODO: While elaboration for codegen and typing is similar, there are currently a
-    // couple differences between the two and are toggled by this flag (XHP).
-    // It would be nice to eventually eliminate the discrepancies between the two.
+    // TODO: While elaboration for codegen and typing is similar, there are several
+    // differences between the two and are toggled by this flag (including XHP,
+    // and expression trees). It would be nice to eventually eliminate the discrepancies
+    // between the two.
     pub fn in_codegen(&self) -> bool {
-        self.namespace.is_codegen
+        matches!(self.namespace.mode, Mode::ForCodegen)
     }
 
     fn extend_tparams(&mut self, tparaml: &[Tparam]) {
@@ -112,7 +114,11 @@ fn contexts_ns() -> Arc<namespace_env::Env> {
             // used in the OCaml visitor at the moment. Since we don't elaborate
             // context names in codegen, perhaps these settings don't end up
             // being relevant.
-            oxidized::global_options::GlobalOptions::default().po_codegen,
+            if oxidized::global_options::GlobalOptions::default().po_codegen {
+                Mode::ForCodegen
+            } else {
+                Mode::ForTypecheck
+            },
             oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
         )
     })
@@ -124,7 +130,11 @@ fn unsafe_contexts_ns() -> Arc<namespace_env::Env> {
         ..namespace_env::Env::empty(
             vec![],
             // As above, these look wrong, but may be irrelevant.
-            oxidized::global_options::GlobalOptions::default().po_codegen,
+            if oxidized::global_options::GlobalOptions::default().po_codegen {
+                Mode::ForCodegen
+            } else {
+                Mode::ForTypecheck
+            },
             oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
         )
     })

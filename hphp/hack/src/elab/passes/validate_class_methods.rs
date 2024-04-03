@@ -61,6 +61,7 @@ mod tests {
     use nast::UserAttributes;
     use nast::Visibility;
     use oxidized::namespace_env;
+    use oxidized::namespace_env::Mode;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -117,7 +118,7 @@ mod tests {
             methods,
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: Arc::new(namespace_env::Env::empty(vec![], false, false)),
+            namespace: Arc::new(namespace_env::Env::empty(vec![], Mode::ForTypecheck, false)),
             user_attributes: Default::default(),
             file_attributes: vec![],
             docs_url: None,

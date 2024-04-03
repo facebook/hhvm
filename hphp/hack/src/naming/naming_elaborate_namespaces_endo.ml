@@ -39,7 +39,10 @@ let make_env namespace = { namespace; type_params = SSet.empty }
  *   couple differences between the two and are toggled by this flag (XHP).
  * It would be nice to eventually eliminate the discrepancies between the two.
  *)
-let in_codegen env = env.namespace.Namespace_env.ns_is_codegen
+let in_codegen env =
+  Namespace_env.equal_mode
+    env.namespace.Namespace_env.ns_mode
+    Namespace_env.ForCodegen
 
 let is_special_identifier =
   let special_identifiers =

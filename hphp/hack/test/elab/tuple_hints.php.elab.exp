@@ -107,7 +107,7 @@ Program(
                     },
                     const_uses: {},
                     name: None,
-                    is_codegen: false,
+                    mode: ForTypecheck,
                     disable_xhp_element_mangling: false,
                 },
                 file_attributes: [],

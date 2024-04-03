@@ -14,6 +14,7 @@ use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::namespace_env::Mode;
 use oxidized::pos::Pos;
 use parser_core_types::source_text::SourceText;
 use relative_path::RelativePath;
@@ -102,7 +103,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let source_text = SourceText::make(Arc::new(filepath), &content);
     let ns = Arc::new(NamespaceEnv::empty(
         opts.hhvm.aliased_namespaces_cloned().collect(),
-        true,
+        Mode::ForCodegen,
         opts.hhvm.parser_options.po_disable_xhp_element_mangling,
     ));
     match crate::parse_file(

@@ -14,6 +14,7 @@ use bumpalo::Bump;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
@@ -108,7 +109,11 @@ ocaml_ffi! {
             parser_options,
             hhvm_compat_mode,
             hhi_mode,
-            codegen,
+            if codegen {
+                Mode::ForCodegen
+            } else {
+                Mode::ForTypecheck
+            },
             is_systemlib,
             HashSet::default(),
         );

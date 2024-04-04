@@ -141,9 +141,7 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
             return EVP_EncryptFinal_ex(encryptCtx, cipher, outLen) == 1;
           }
         };
-        // TODO(T180781189): make transformBufferBlocks not take a template
-        // parameter for the block size.
-        encFuncBlocks<16>(EVPEncImpl{encryptCtx}, plaintext, ciphertext);
+        encFuncBlocks(EVPEncImpl{encryptCtx}, plaintext, ciphertext, 16);
       } else {
         encFunc(encryptCtx, plaintext, ciphertext);
       }
@@ -239,8 +237,8 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(
             return EVP_DecryptFinal_ex(decryptCtx, outm, outLen) == 1;
           }
         };
-        return decFuncBlocks<16>(
-            EVPDecImpl{decryptCtx}, ciphertext, plaintext, tagOut);
+        return decFuncBlocks(
+            EVPDecImpl{decryptCtx}, ciphertext, plaintext, tagOut, 16);
       } else {
         return decFunc(decryptCtx, ciphertext, plaintext, tagOut);
       }

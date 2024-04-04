@@ -77,26 +77,37 @@ void transformBuffer(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
  *
  * func is expected to take data from some input buffer, do some operation on it
  * and then place the result of the operation into an output buffer.  It only
- * should write to output in blocks of size BlockSize.  Data from the input
+ * should write to output in blocks of size blockSize.  Data from the input
  * buffer must be internally buffered by func if it can not write a full block
  * to output.
  */
-template <size_t BlockSize, typename Func>
-folly::io::RWPrivateCursor
-transformBufferBlocks(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
+constexpr size_t kTransformBufferBlocksMaxBlocksize = 128;
+template <typename Func>
+folly::io::RWPrivateCursor transformBufferBlocks(
+    const folly::IOBuf& in,
+    folly::IOBuf& out,
+    Func func,
+    size_t blockSize) {
+  // For simplicity in implementation, this function is used only within the
+  // context of ciphertext transformation, which operates on blocks size less
+  // than 128 bytes.
+  if (blockSize == 0 || blockSize > kTransformBufferBlocksMaxBlocksize) {
+    throw std::out_of_range("invalid transformBufferBlocks blockSize");
+  }
+
   size_t internallyBuffered = 0;
   folly::io::RWPrivateCursor output(&out);
   folly::io::Cursor input(&in);
 
   // block to handle writes along output buffer boundaries
-  std::array<uint8_t, BlockSize> blockBuffer = {};
+  std::array<uint8_t, kTransformBufferBlocksMaxBlocksize> blockBuffer = {};
 
   // ensure buffers are fine
   while (!input.isAtEnd()) {
     auto inputRange = input.peekBytes();
     auto inputLen = inputRange.size();
     auto outputLen = output.peekBytes().size();
-    if (inputLen + internallyBuffered < BlockSize) {
+    if (inputLen + internallyBuffered < blockSize) {
       // input doesn't have enough - we can call func and it should
       // internally buffer.
       // This should be safe to just internally buffer since we took into
@@ -106,7 +117,7 @@ transformBufferBlocks(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
       // only update input offsets
       internallyBuffered += inputLen;
       input.skip(inputLen);
-    } else if (outputLen < BlockSize) {
+    } else if (outputLen < blockSize) {
       // we have at least a block to write from input + internal buffer, so
       // output didn't have enough room in this case
       // copy a block from input in temp and then push onto output
@@ -114,16 +125,16 @@ transformBufferBlocks(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
           blockBuffer.data(),
           inputRange.data(),
           // only provide it the amount needed for one block
-          BlockSize - internallyBuffered);
-      DCHECK_EQ(numWritten, BlockSize)
-          << "did not write full block bs=" << BlockSize
+          blockSize - internallyBuffered);
+      DCHECK_EQ(numWritten, blockSize)
+          << "did not write full block bs=" << blockSize
           << " wrote=" << numWritten;
 
       // push the block onto output
-      output.push(blockBuffer.data(), BlockSize);
+      output.push(blockBuffer.data(), blockSize);
 
       // advance input
-      input.skip(BlockSize - internallyBuffered);
+      input.skip(blockSize - internallyBuffered);
       internallyBuffered = 0;
     } else {
       // we have at least one block that can be written from input to output
@@ -131,10 +142,10 @@ transformBufferBlocks(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
       auto numSharedBytes = std::min(outputLen, inputLen + internallyBuffered);
 
       // this is the number we can safely (and expect) to write to output
-      auto numBlockBytes = numSharedBytes - (numSharedBytes % BlockSize);
+      auto numBlockBytes = numSharedBytes - (numSharedBytes % blockSize);
 
       // try to grab as much from input - we can grab up to BlockSize - 1 more
-      auto maxToTake = (numBlockBytes - internallyBuffered) + (BlockSize - 1);
+      auto maxToTake = (numBlockBytes - internallyBuffered) + (blockSize - 1);
       auto numToTake = std::min(inputLen, maxToTake);
       auto numWritten =
           func(output.writableData(), inputRange.data(), numToTake);
@@ -145,7 +156,7 @@ transformBufferBlocks(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
       input.skip(numToTake);
       output.skip(numWritten);
       // recalculate internal buffer state
-      internallyBuffered = (internallyBuffered + numToTake) % BlockSize;
+      internallyBuffered = (internallyBuffered + numToTake) % blockSize;
     }
   }
   return output;

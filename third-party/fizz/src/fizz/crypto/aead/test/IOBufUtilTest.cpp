@@ -132,10 +132,13 @@ TEST(IOBufUtilTest, TransformBufferBlocks) {
   auto output = createBuf(16);
 
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
 }
@@ -149,10 +152,13 @@ TEST(IOBufUtilTest, TransformBufferBlocksSplit) {
   output->prependChain(std::move(fragment1));
 
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
 }
@@ -172,10 +178,13 @@ TEST(IOBufUtilTest, TransformBufferBlocksInputFragmented) {
   output->append(24);
 
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
 }
@@ -195,10 +204,13 @@ TEST(IOBufUtilTest, TransformBufferBlocksOutputFragmented) {
   output->prependChain(createBuf(7));
 
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
 }
@@ -208,10 +220,13 @@ TEST(IOBufUtilTest, TransformBufferBlocksInputFragmented2) {
   auto output = createBuf(10);
   output->prependChain(createBuf(6));
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
 }
@@ -237,12 +252,38 @@ TEST(IOBufUtilTest, TransformBufferBlocksFragmented) {
   output->prependChain(createBuf(7));
 
   BlockWriter writer;
-  transformBufferBlocks<8>(
-      *buf, *output, [&writer](uint8_t* out, const uint8_t* in, size_t len) {
+  transformBufferBlocks(
+      *buf,
+      *output,
+      [&writer](uint8_t* out, const uint8_t* in, size_t len) {
         return writer.copy(out, in, len);
-      });
+      },
+      8);
   IOBufEqualTo eq;
   EXPECT_TRUE(eq(buf, output));
+}
+
+TEST(IOBufUtilTest, TransformBufferBlocksRange) {
+  auto buf = IOBuf::copyBuffer("1111111122222222");
+  auto output = createBuf(10);
+  EXPECT_THROW(
+      {
+        transformBufferBlocks(
+            *buf,
+            *output,
+            [](uint8_t*, const uint8_t*, size_t) { return 0; },
+            0);
+      },
+      std::out_of_range);
+  EXPECT_THROW(
+      {
+        transformBufferBlocks(
+            *buf,
+            *output,
+            [](uint8_t*, const uint8_t*, size_t) { return 0; },
+            256);
+      },
+      std::out_of_range);
 }
 
 } // namespace test

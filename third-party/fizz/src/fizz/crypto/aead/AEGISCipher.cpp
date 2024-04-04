@@ -156,15 +156,8 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
           return ret == 0;
         }
       };
-      if (self.mms_ == AEGISCipher::kAEGIS128LMMS) {
-        encFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-            EVPEncImpl(self, tagTemp), plaintext, ciphertext);
-      } else if (self.mms_ == AEGISCipher::kAEGIS256MMS) {
-        encFuncBlocks<AEGISCipher::kAEGIS256MMS>(
-            EVPEncImpl(self, tagTemp), plaintext, ciphertext);
-      } else {
-        throw std::runtime_error("Unsupported AEGIS state size");
-      }
+      encFuncBlocks(
+          EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_);
     }
 
     void final(int tagLen, void* tagOut) {
@@ -253,15 +246,8 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
         }
       };
 
-      if (self.mms_ == AEGISCipher::kAEGIS128LMMS) {
-        return decFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-            EVPDecImpl(self), ciphertext, plaintext, tagOut);
-      } else if (self.mms_ == AEGISCipher::kAEGIS256MMS) {
-        return decFuncBlocks<AEGISCipher::kAEGIS256MMS>(
-            EVPDecImpl(self), ciphertext, plaintext, tagOut);
-      } else {
-        throw std::runtime_error("Unsupported AEGIS state size");
-      }
+      return decFuncBlocks(
+          EVPDecImpl(self), ciphertext, plaintext, tagOut, self.mms_);
     }
   };
   return decryptHelper(

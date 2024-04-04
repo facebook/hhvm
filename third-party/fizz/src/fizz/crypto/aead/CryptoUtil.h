@@ -37,16 +37,17 @@ createIV(uint64_t seqNum, size_t ivLength, folly::ByteRange trafficIvKey) {
  *     * bool EVPDecImp::decryptFinal - returns if decryption is finalized
  * successfully
  */
-template <size_t BS, class EVPDecImpl>
+template <class EVPDecImpl>
 bool decFuncBlocks(
     EVPDecImpl&& impl,
     const folly::IOBuf& ciphertext,
     folly::IOBuf& output,
-    folly::MutableByteRange tagOut) {
+    folly::MutableByteRange tagOut,
+    size_t blockSize) {
   size_t totalWritten = 0;
   size_t totalInput = 0;
   int outLen = 0;
-  auto outputCursor = transformBufferBlocks<BS>(
+  auto outputCursor = transformBufferBlocks(
       ciphertext,
       output,
       [&](uint8_t* plain, const uint8_t* cipher, size_t len) {
@@ -59,7 +60,8 @@ bool decFuncBlocks(
         totalWritten += outLen;
         totalInput += len;
         return static_cast<size_t>(outLen);
-      });
+      },
+      blockSize);
 
   if (!impl.setExpectedTag(tagOut.size(), tagOut.begin())) {
     throw std::runtime_error("Decryption error");
@@ -72,7 +74,7 @@ bool decFuncBlocks(
     return impl.decryptFinal(outputCursor.writableData(), &outLen);
   } else {
     // we need to copy nicely - this should be at most one block
-    std::array<uint8_t, BS> block = {};
+    std::array<uint8_t, kTransformBufferBlocksMaxBlocksize> block = {};
     auto res = impl.decryptFinal(block.data(), &outLen);
     if (!res) {
       return false;
@@ -89,15 +91,16 @@ bool decFuncBlocks(
  *     * bool EVPDecImp::encryptFinal - returns if encryption is finalized
  * successfully
  */
-template <size_t BS, class EVPEncImpl>
+template <class EVPEncImpl>
 void encFuncBlocks(
     EVPEncImpl&& impl,
     const folly::IOBuf& plaintext,
-    folly::IOBuf& output) {
+    folly::IOBuf& output,
+    size_t blockSize) {
   size_t totalWritten = 0;
   size_t totalInput = 0;
   int outLen = 0;
-  auto outputCursor = transformBufferBlocks<BS>(
+  auto outputCursor = transformBufferBlocks(
       plaintext,
       output,
       [&](uint8_t* cipher, const uint8_t* plain, size_t len) {
@@ -115,7 +118,8 @@ void encFuncBlocks(
         totalWritten += outLen;
         totalInput += len;
         return static_cast<size_t>(outLen);
-      });
+      },
+      blockSize);
 
   // We might end up needing to write more in the final encrypt stage
   auto numBuffered = totalInput - totalWritten;
@@ -126,7 +130,7 @@ void encFuncBlocks(
     }
   } else {
     // we need to copy nicely - this should be at most one block
-    std::array<uint8_t, BS> block = {};
+    std::array<uint8_t, kTransformBufferBlocksMaxBlocksize> block = {};
     if (!impl.encryptFinal(block.data(), &outLen)) {
       throw std::runtime_error("Encryption error");
     }

@@ -172,6 +172,12 @@ fn test_enumerate_fn_enum() {
 }
 
 #[test]
+fn test_enum_display() {
+    assert_eq!(format!("{:}", TestEnum::FOO), "FOO");
+    assert_eq!(format!("{:10}:", TestEnum::FOO), "FOO       :");
+}
+
+#[test]
 fn test_deserialize_skip_seq() {
     let v2 = TestSkipV2::default();
     let bytes = serialize!(CompactProtocol, |w| Serialize::write(&v2, w));

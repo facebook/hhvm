@@ -19,6 +19,7 @@
 
 use std::ffi::CStr;
 use std::fmt;
+use std::fmt::Display;
 use std::future::Future;
 use std::pin::Pin;
 
@@ -51,8 +52,8 @@ pub fn enum_display(
     number: i32,
 ) -> fmt::Result {
     match variants_by_number.binary_search_by_key(&number, |entry| entry.1) {
-        Ok(i) => formatter.write_str(variants_by_number[i].0),
-        Err(_) => write!(formatter, "{}", number),
+        Ok(i) => variants_by_number[i].0.fmt(formatter),
+        Err(_) => number.fmt(formatter),
     }
 }
 

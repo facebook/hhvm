@@ -2292,5 +2292,29 @@ std::string ThriftServer::RuntimeServerActions::explain() const {
   return result;
 }
 
+/* static */ ThriftServer::ProcessedModuleSet
+ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
+  ProcessedModuleSet result;
+
+  for (auto& info : specs.infos) {
+    std::vector<std::shared_ptr<TProcessorEventHandler>> legacyEventHandlers =
+        info.module->getLegacyEventHandlers();
+    std::vector<std::shared_ptr<server::TServerEventHandler>>
+        legacyServerEventHandlers = info.module->getLegacyServerEventHandlers();
+
+    result.modules.emplace_back(std::move(info));
+
+    result.coalescedLegacyEventHandlers.insert(
+        result.coalescedLegacyEventHandlers.end(),
+        std::make_move_iterator(legacyEventHandlers.begin()),
+        std::make_move_iterator(legacyEventHandlers.end()));
+    result.coalescedLegacyServerEventHandlers.insert(
+        result.coalescedLegacyServerEventHandlers.end(),
+        std::make_move_iterator(legacyServerEventHandlers.begin()),
+        std::make_move_iterator(legacyServerEventHandlers.end()));
+  }
+
+  return result;
+}
 } // namespace thrift
 } // namespace apache

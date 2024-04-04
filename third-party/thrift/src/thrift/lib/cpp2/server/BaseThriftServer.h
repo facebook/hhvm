@@ -48,7 +48,6 @@
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
-#include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
@@ -1090,39 +1089,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   const ThriftServerConfig& getThriftServerConfig() const {
     return thriftConfig_;
-  }
-
- protected:
-  struct ModulesSpecification {
-    struct Info {
-      std::unique_ptr<ServerModule> module;
-      std::string name;
-    };
-    std::vector<Info> infos;
-    std::unordered_set<std::string> names;
-  } unprocessedModulesSpecification_;
-
-  struct ProcessedModuleSet {
-    std::vector<ModulesSpecification::Info> modules;
-    /**
-     * Event handlers from all modules coalesced into one list.
-     */
-    std::vector<std::shared_ptr<TProcessorEventHandler>>
-        coalescedLegacyEventHandlers;
-    std::vector<std::shared_ptr<server::TServerEventHandler>>
-        coalescedLegacyServerEventHandlers;
-  };
-  static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
-
- public:
-  void addModule(std::unique_ptr<ServerModule> module) {
-    CHECK(configMutable());
-    auto name = module->getName();
-    if (unprocessedModulesSpecification_.names.count(name)) {
-      throw std::invalid_argument("Duplicate module name");
-    }
-    unprocessedModulesSpecification_.infos.emplace_back(
-        ModulesSpecification::Info{std::move(module), std::move(name)});
   }
 };
 

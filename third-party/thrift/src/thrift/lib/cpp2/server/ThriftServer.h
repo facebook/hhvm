@@ -64,6 +64,7 @@
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
+#include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>
 #include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
@@ -957,6 +958,27 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   std::atomic<ServiceHealth> cachedServiceHealth_{};
 #endif
 
+  struct ModulesSpecification {
+    struct Info {
+      std::unique_ptr<ServerModule> module;
+      std::string name;
+    };
+    std::vector<Info> infos;
+    std::unordered_set<std::string> names;
+  } unprocessedModulesSpecification_;
+
+  struct ProcessedModuleSet {
+    std::vector<ModulesSpecification::Info> modules;
+    /**
+     * Event handlers from all modules coalesced into one list.
+     */
+    std::vector<std::shared_ptr<TProcessorEventHandler>>
+        coalescedLegacyEventHandlers;
+    std::vector<std::shared_ptr<server::TServerEventHandler>>
+        coalescedLegacyServerEventHandlers;
+  };
+  static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
+
   struct ProcessedServiceDescription {
     ProcessedModuleSet modules;
     std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory;
@@ -1014,6 +1036,18 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   };
   ProcessedServiceDescription::UniquePtr processedServiceDescription_{nullptr};
 
+ public:
+  void addModule(std::unique_ptr<ServerModule> module) {
+    CHECK(configMutable());
+    auto name = module->getName();
+    if (unprocessedModulesSpecification_.names.count(name)) {
+      throw std::invalid_argument("Duplicate module name");
+    }
+    unprocessedModulesSpecification_.infos.emplace_back(
+        ModulesSpecification::Info{std::move(module), std::move(name)});
+  }
+
+ private:
   /**
    * Collects service handlers of the current service of a specific type.
    */

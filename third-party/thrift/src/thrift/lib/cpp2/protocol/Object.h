@@ -121,7 +121,7 @@ std::unique_ptr<folly::IOBuf> serializeObject(const Object& val) {
 // Serialization of protocol::Object with MaskedProtocolData.
 template <class Protocol>
 std::unique_ptr<folly::IOBuf> serializeObject(
-    const Object& obj, MaskedProtocolData& protocolData) {
+    const Object& obj, const MaskedProtocolData& protocolData) {
   assert(*protocolData.protocol() == detail::get_standard_protocol<Protocol>);
   Protocol prot;
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());

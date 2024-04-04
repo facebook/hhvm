@@ -782,9 +782,9 @@ template <class Protocol>
 void writeRawField(
     Protocol& prot,
     FieldId fieldId,
-    MaskedProtocolData& protocolData,
-    MaskedData& maskedData) {
-  auto& nestedMaskedData = maskedData.fields_ref().value()[fieldId];
+    const MaskedProtocolData& protocolData,
+    const MaskedData& maskedData) {
+  const auto& nestedMaskedData = maskedData.fields_ref().value().at(fieldId);
   // When value doesn't exist in the object, maskedData should have full field.
   if (!nestedMaskedData.full_ref()) {
     throw std::runtime_error("incompatible value and maskedData");
@@ -802,8 +802,8 @@ template <class Protocol>
 void writeRawMapValue(
     Protocol& prot,
     TType valueType,
-    MaskedProtocolData& protocolData,
-    MaskedData& maskedData) {
+    const MaskedProtocolData& protocolData,
+    const MaskedData& maskedData) {
   // When value doesn't exist in the object, maskedData should have full field.
   if (!maskedData.full_ref()) {
     throw std::runtime_error("incompatible value and maskedData");
@@ -820,8 +820,8 @@ template <class Protocol>
 void serializeObject(
     Protocol& prot,
     const Object& obj,
-    MaskedProtocolData& protocolData,
-    MaskedData& maskedData) {
+    const MaskedProtocolData& protocolData,
+    const MaskedData& maskedData) {
   if (!maskedData.fields_ref()) {
     throw std::runtime_error("incompatible value and maskedData");
   }
@@ -849,7 +849,7 @@ void serializeObject(
     if (folly::get_ptr(*maskedData.fields_ref(), fieldId) == nullptr) {
       serializeValue(prot, fieldVal);
     } else { // recursively serialize value with maskedData
-      auto& nextMaskedData = maskedData.fields_ref().value()[fieldId];
+      const auto& nextMaskedData = maskedData.fields_ref().value().at(fieldId);
       serializeValue(prot, fieldVal, protocolData, nextMaskedData);
     }
     prot.writeFieldEnd();
@@ -866,8 +866,8 @@ template <class Protocol>
 void serializeValue(
     Protocol& prot,
     const Value& value,
-    MaskedProtocolData& protocolData,
-    MaskedData& maskedData) {
+    const MaskedProtocolData& protocolData,
+    const MaskedData& maskedData) {
   switch (value.getType()) {
     case Value::Type::objectValue: {
       return serializeObject(prot, value.as_object(), protocolData, maskedData);

@@ -144,8 +144,9 @@ void cgLdColDict(IRLS& env, const IRInstruction* inst) {
 
   always_assert_flog(
     ty == TBottom ||
-    cls->classof(SystemLib::getConstMapClass()) ||
-    cls->classof(SystemLib::getConstSetClass()),
+    collections::isType(cls,
+                        CollectionType::Map, CollectionType::ImmMap,
+                        CollectionType::Set, CollectionType::ImmSet),
     "LdColDict received an unsupported type: {}\n",
     ty.toString()
   );

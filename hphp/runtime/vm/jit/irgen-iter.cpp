@@ -122,8 +122,9 @@ void emitIterBase(IRGS& env) {
       if (cls->classof(SystemLib::getHH_IteratorClass())) {
         // nothing to do
         return;
-      } else if (cls->classof(SystemLib::getConstMapClass()) ||
-                 cls->classof(SystemLib::getConstSetClass())) {
+      } else if (collections::isType(cls,
+                                     CT::Map, CT::ImmMap,
+                                     CT::Set, CT::ImmSet)) {
         popC(env);
         pushIncRef(env, gen(env, LdColDict, base));
         decRef(env, base);

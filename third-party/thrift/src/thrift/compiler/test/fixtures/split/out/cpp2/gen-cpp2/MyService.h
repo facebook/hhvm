@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_ping();
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_ping(apache::thrift::HandlerCallback<void>::Ptr callback);
   virtual void sync_getRandomData(::std::string& /*_return*/);
   [[deprecated("Use sync_getRandomData instead")]] virtual void getRandomData(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getRandomData();
@@ -63,7 +63,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getRandomData();
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getRandomData(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_getRandomData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
+  virtual void async_tm_getRandomData(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback);
   virtual void sync_sink(::std::int64_t /*sink*/);
   [[deprecated("Use sync_sink instead")]] virtual void sink(::std::int64_t /*sink*/);
   virtual folly::Future<folly::Unit> future_sink(::std::int64_t p_sink);
@@ -72,7 +72,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_sink(::std::int64_t p_sink);
   virtual folly::coro::Task<void> co_sink(apache::thrift::RequestParams params, ::std::int64_t p_sink);
 #endif
-  virtual void async_tm_sink(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_sink);
+  virtual void async_tm_sink(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_sink);
   virtual void sync_putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/);
   [[deprecated("Use sync_putDataById instead")]] virtual void putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/);
   virtual folly::Future<folly::Unit> future_putDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
@@ -81,7 +81,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_putDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
   virtual folly::coro::Task<void> co_putDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
 #endif
-  virtual void async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
+  virtual void async_tm_putDataById(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
   virtual bool sync_hasDataById(::std::int64_t /*id*/);
   [[deprecated("Use sync_hasDataById instead")]] virtual bool hasDataById(::std::int64_t /*id*/);
   virtual folly::Future<bool> future_hasDataById(::std::int64_t p_id);
@@ -90,7 +90,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<bool> co_hasDataById(::std::int64_t p_id);
   virtual folly::coro::Task<bool> co_hasDataById(apache::thrift::RequestParams params, ::std::int64_t p_id);
 #endif
-  virtual void async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_id);
+  virtual void async_tm_hasDataById(apache::thrift::HandlerCallback<bool>::Ptr callback, ::std::int64_t p_id);
   virtual void sync_getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
   [[deprecated("Use sync_getDataById instead")]] virtual void getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataById(::std::int64_t p_id);
@@ -99,7 +99,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataById(::std::int64_t p_id);
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataById(apache::thrift::RequestParams params, ::std::int64_t p_id);
 #endif
-  virtual void async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, ::std::int64_t p_id);
+  virtual void async_tm_getDataById(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, ::std::int64_t p_id);
   virtual void sync_deleteDataById(::std::int64_t /*id*/);
   [[deprecated("Use sync_deleteDataById instead")]] virtual void deleteDataById(::std::int64_t /*id*/);
   virtual folly::Future<folly::Unit> future_deleteDataById(::std::int64_t p_id);
@@ -108,7 +108,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_deleteDataById(::std::int64_t p_id);
   virtual folly::coro::Task<void> co_deleteDataById(apache::thrift::RequestParams params, ::std::int64_t p_id);
 #endif
-  virtual void async_tm_deleteDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id);
+  virtual void async_tm_deleteDataById(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_id);
   virtual void sync_lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/);
   [[deprecated("Use sync_lobDataById instead")]] virtual void lobDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/);
   virtual folly::Future<folly::Unit> future_lobDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
@@ -117,7 +117,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_lobDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
   virtual folly::coro::Task<void> co_lobDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
 #endif
-  virtual void async_tm_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
+  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
  private:
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_ping{apache::thrift::detail::si::InvocationType::AsyncTm};

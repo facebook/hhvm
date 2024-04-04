@@ -58,7 +58,7 @@ class ServiceHandler<::test::fixtures::basic::FooService> : public apache::thrif
   virtual folly::coro::Task<void> co_simple_rpc();
   virtual folly::coro::Task<void> co_simple_rpc(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_simple_rpc(apache::thrift::HandlerCallback<void>::Ptr callback);
  private:
   static ::test::fixtures::basic::FooServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_rpc{apache::thrift::detail::si::InvocationType::AsyncTm};

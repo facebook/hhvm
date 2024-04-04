@@ -25,44 +25,38 @@ namespace thrift {
 class AsyncLoadHandler2
     : public apache::thrift::ServiceHandler<test::LoadTest> {
  public:
-  void async_eb_noop(std::unique_ptr<HandlerCallback<void>> callback) override;
-  void async_eb_onewayNoop(
-      std::unique_ptr<HandlerCallbackBase> callback) override;
-  void async_eb_asyncNoop(
-      std::unique_ptr<HandlerCallback<void>> callback) override;
+  void async_eb_noop(HandlerCallback<void>::Ptr callback) override;
+  void async_eb_onewayNoop(HandlerCallbackBase::Ptr callback) override;
+  void async_eb_asyncNoop(HandlerCallback<void>::Ptr callback) override;
   void async_eb_sleep(
-      std::unique_ptr<HandlerCallback<void>> callback,
-      int64_t microseconds) override;
+      HandlerCallback<void>::Ptr callback, int64_t microseconds) override;
   void async_eb_onewaySleep(
-      std::unique_ptr<HandlerCallbackBase> callback,
-      int64_t microseconds) override;
+      HandlerCallbackBase::Ptr callback, int64_t microseconds) override;
   void sync_burn(int64_t microseconds) override;
   folly::Future<folly::Unit> future_burn(int64_t microseconds) override;
   void sync_onewayBurn(int64_t microseconds) override;
   folly::Future<folly::Unit> future_onewayBurn(int64_t microseconds) override;
   void async_eb_badSleep(
-      std::unique_ptr<HandlerCallback<void>> callback,
-      int64_t microseconds) override;
+      HandlerCallback<void>::Ptr callback, int64_t microseconds) override;
   void async_eb_badBurn(
-      std::unique_ptr<HandlerCallback<void>> callback,
-      int64_t microseconds) override;
+      HandlerCallback<void>::Ptr callback, int64_t microseconds) override;
   void async_eb_throwError(
-      std::unique_ptr<HandlerCallback<void>> callback, int32_t code) override;
+      HandlerCallback<void>::Ptr callback, int32_t code) override;
   void async_eb_throwUnexpected(
-      std::unique_ptr<HandlerCallback<void>> callback, int32_t code) override;
+      HandlerCallback<void>::Ptr callback, int32_t code) override;
   void async_eb_onewayThrow(
-      std::unique_ptr<HandlerCallbackBase> callback, int32_t code) override;
+      HandlerCallbackBase::Ptr callback, int32_t code) override;
   void async_eb_send(
-      std::unique_ptr<HandlerCallback<void>> callback,
+      HandlerCallback<void>::Ptr callback,
       std::unique_ptr<std::string> data) override;
   void async_eb_onewaySend(
-      std::unique_ptr<HandlerCallbackBase> callback,
+      HandlerCallbackBase::Ptr callback,
       std::unique_ptr<std::string> data) override;
   void async_eb_recv(
-      std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
+      HandlerCallback<std::unique_ptr<std::string>>::Ptr callback,
       int64_t bytes) override;
   void async_eb_sendrecv(
-      std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
+      HandlerCallback<std::unique_ptr<std::string>>::Ptr callback,
       std::unique_ptr<std::string> data,
       int64_t recvBytes) override;
   void sync_echo(
@@ -70,14 +64,14 @@ class AsyncLoadHandler2
   folly::Future<std::unique_ptr<std::string>> future_echo(
       std::unique_ptr<std::string> data) override;
   void async_eb_add(
-      std::unique_ptr<HandlerCallback<int64_t>>, int64_t a, int64_t b) override;
+      HandlerCallback<int64_t>::Ptr, int64_t a, int64_t b) override;
   void async_eb_largeContainer(
-      std::unique_ptr<HandlerCallback<void>> callback,
+      HandlerCallback<void>::Ptr callback,
       std::unique_ptr<std::vector<test::BigStruct>> items) override;
 
   void async_eb_iterAllFields(
-      std::unique_ptr<HandlerCallback<
-          std::unique_ptr<std::vector<test::BigStruct>>>> callback,
+      HandlerCallback<std::unique_ptr<std::vector<test::BigStruct>>>::Ptr
+          callback,
       std::unique_ptr<std::vector<test::BigStruct>> items) override;
 };
 

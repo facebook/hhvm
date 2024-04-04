@@ -19,7 +19,7 @@ MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceWrapper::async_tm_ping(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -37,7 +37,7 @@ void MyServiceWrapper::async_tm_ping(
     });
 }
 void MyServiceWrapper::async_tm_getRandomData(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) {
+  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -55,7 +55,7 @@ void MyServiceWrapper::async_tm_getRandomData(
     });
 }
 void MyServiceWrapper::async_tm_hasDataById(
-  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
+  apache::thrift::HandlerCallback<bool>::Ptr callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -77,7 +77,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_getDataById(
-  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
+  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -99,7 +99,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_putDataById(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+  apache::thrift::HandlerCallback<void>::Ptr callback
     , int64_t id
     , std::unique_ptr<std::string> data
 ) {
@@ -124,7 +124,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_lobDataById(
-  std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
+  apache::thrift::HandlerCallbackBase::Ptr callback
     , int64_t id
     , std::unique_ptr<std::string> dataStr
 ) {
@@ -149,7 +149,7 @@ dataStr = std::move(dataStr)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_cppDoNothing(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -195,7 +195,7 @@ MyServicePrioParentWrapper::MyServicePrioParentWrapper(PyObject *obj, folly::Exe
 
 
 void MyServicePrioParentWrapper::async_tm_ping(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -213,7 +213,7 @@ void MyServicePrioParentWrapper::async_tm_ping(
     });
 }
 void MyServicePrioParentWrapper::async_tm_pong(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -258,7 +258,7 @@ MyServicePrioChildWrapper::MyServicePrioChildWrapper(PyObject *obj, folly::Execu
   }
 
 void MyServicePrioChildWrapper::async_tm_pang(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -304,7 +304,7 @@ BadServiceWrapper::BadServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void BadServiceWrapper::async_tm_bar(
-  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) {
+  apache::thrift::HandlerCallback<int32_t>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -353,7 +353,7 @@ FooBarBazServiceWrapper::FooBarBazServiceWrapper(PyObject *obj, folly::Executor*
 
 
 void FooBarBazServiceWrapper::async_tm_foo(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -371,7 +371,7 @@ void FooBarBazServiceWrapper::async_tm_foo(
     });
 }
 void FooBarBazServiceWrapper::async_tm_bar(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -389,7 +389,7 @@ void FooBarBazServiceWrapper::async_tm_bar(
     });
 }
 void FooBarBazServiceWrapper::async_tm_baz(
-  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  apache::thrift::HandlerCallback<void>::Ptr callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

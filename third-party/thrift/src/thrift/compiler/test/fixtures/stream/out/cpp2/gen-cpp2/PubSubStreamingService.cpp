@@ -60,7 +60,7 @@ folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_returnstream(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_returnstream(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -168,7 +168,7 @@ folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_streamthrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_streamthrows(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -276,7 +276,7 @@ folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -384,7 +384,7 @@ folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows2(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_servicethrows2(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -492,7 +492,7 @@ folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_boththrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_boththrows(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -600,7 +600,7 @@ folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::st
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamstreamthrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamstreamthrows(apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -708,7 +708,7 @@ folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::st
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamservicethrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamservicethrows(apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -816,7 +816,7 @@ folly::coro::Task<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::st
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamboththrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> callback, ::std::int32_t p_foo) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_tm_responseandstreamboththrows(apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::Ptr callback, ::std::int32_t p_foo) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -890,7 +890,7 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_eb_returnstreamFast(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
+void apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::async_eb_returnstreamFast(apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>::Ptr callback, ::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("returnstreamFast"));
 }
 

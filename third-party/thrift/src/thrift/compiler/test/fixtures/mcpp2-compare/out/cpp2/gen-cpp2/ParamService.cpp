@@ -26,7 +26,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::some::valid::ns::ParamServiceServiceInfoHolder apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_void_ret_i16_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int16_t /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_void_ret_i16_param(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int16_t /*param1*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("void_ret_i16_param"));
 }
 
@@ -65,7 +65,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_byte_i16_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int8_t p_param1, ::std::int16_t p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_byte_i16_param(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int8_t p_param1, ::std::int16_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -175,7 +175,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_param(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -285,7 +285,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_setlist_param(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -395,7 +395,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_typedef_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::some::valid::ns::simpleTypeDef p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_typedef_param(apache::thrift::HandlerCallback<void>::Ptr callback, ::some::valid::ns::simpleTypeDef p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -505,7 +505,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_enum_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::some::valid::ns::MyEnumA p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_enum_param(apache::thrift::HandlerCallback<void>::Ptr callback, ::some::valid::ns::MyEnumA p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -615,7 +615,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_struct_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_struct_param(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -725,7 +725,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_listunion_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_listunion_param(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -834,7 +834,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_i32_i64_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int32_t p_param1, ::std::int64_t p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_i32_i64_param(apache::thrift::HandlerCallback<bool>::Ptr callback, ::std::int32_t p_param1, ::std::int64_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -942,7 +942,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_map_param(apache::thrift::HandlerCallback<bool>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1050,7 +1050,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_union_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_union_param(apache::thrift::HandlerCallback<bool>::Ptr callback, std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1158,7 +1158,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_float_double_param(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, float p_param1, double p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_float_double_param(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, float p_param1, double p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1266,7 +1266,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_string_typedef_param(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_string_typedef_param(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1340,7 +1340,7 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_i64_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, ::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("i64_ret_i32_i32_i32_i32_i32_param"));
 }
 
@@ -1378,7 +1378,7 @@ folly::coro::Task<double> apache::thrift::ServiceHandler<::some::valid::ns::Para
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_double_ret_setstruct_param(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_double_ret_setstruct_param(apache::thrift::HandlerCallback<double>::Ptr callback, std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1488,7 +1488,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_string_ret_string_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_string_ret_string_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1600,7 +1600,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_binary_ret_binary_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_binary_ret_binary_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1712,7 +1712,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> ap
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_map_ret_bool_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>> callback, bool p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_map_ret_bool_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::Ptr callback, bool p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1824,7 +1824,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<bool>>> apache::thrift::ServiceH
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_list_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_list_ret_map_setlist_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>::Ptr callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1936,7 +1936,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>> callback, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>::Ptr callback, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2046,7 +2046,7 @@ folly::coro::Task<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandl
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_typedef_ret_i32_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>> callback, ::std::int32_t p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_typedef_ret_i32_param(apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>::Ptr callback, ::std::int32_t p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2120,7 +2120,7 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_listtypedef_ret_typedef_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>> callback, std::unique_ptr<::some::valid::ns::complexStructTypeDef> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_listtypedef_ret_typedef_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>::Ptr callback, std::unique_ptr<::some::valid::ns::complexStructTypeDef> /*param1*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("listtypedef_ret_typedef_param"));
 }
 
@@ -2158,7 +2158,7 @@ folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::s
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>> callback, double p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_param(apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>::Ptr callback, double p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2266,7 +2266,7 @@ folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::s
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_enum_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_enum_param(apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>::Ptr callback, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2376,7 +2376,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>> ap
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listenum_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listenum_ret_map_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2452,7 +2452,7 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_struct_ret_i16_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>> callback, ::std::int16_t /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_struct_ret_i16_param(apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>::Ptr callback, ::std::int16_t /*param1*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("struct_ret_i16_param"));
 }
 
@@ -2492,7 +2492,7 @@ folly::coro::Task<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apac
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_setstruct_ret_set_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>> callback, std::unique_ptr<::std::set<::std::string>> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_setstruct_ret_set_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::Ptr callback, std::unique_ptr<::std::set<::std::string>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2604,7 +2604,7 @@ folly::coro::Task<std::unique_ptr<::some::valid::ns::ComplexUnion>> apache::thri
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_union_ret_i32_i32_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>> callback, ::std::int32_t p_param1, ::std::int32_t p_param2) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_union_ret_i32_i32_param(apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2716,7 +2716,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listunion_string_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>> callback, std::unique_ptr<::std::string> p_param1) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listunion_string_param(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::Ptr callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

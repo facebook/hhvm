@@ -58,7 +58,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   virtual folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1);
   virtual folly::coro::Task<::std::int64_t> co_init(apache::thrift::RequestParams params, ::std::int64_t p_param0, ::std::int64_t p_param1);
 #endif
-  virtual void async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  virtual void async_tm_init(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
   virtual ::cpp2::Result sync_method_that_throws();
   [[deprecated("Use sync_method_that_throws instead")]] virtual ::cpp2::Result method_that_throws();
   virtual folly::Future<::cpp2::Result> future_method_that_throws();
@@ -67,7 +67,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   virtual folly::coro::Task<::cpp2::Result> co_method_that_throws();
   virtual folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_method_that_throws(std::unique_ptr<apache::thrift::HandlerCallback<::cpp2::Result>> callback);
+  virtual void async_tm_method_that_throws(apache::thrift::HandlerCallback<::cpp2::Result>::Ptr callback);
   virtual void sync_return_void_method(::std::int64_t /*id*/);
   [[deprecated("Use sync_return_void_method instead")]] virtual void return_void_method(::std::int64_t /*id*/);
   virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id);
@@ -76,7 +76,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   virtual folly::coro::Task<void> co_return_void_method(::std::int64_t p_id);
   virtual folly::coro::Task<void> co_return_void_method(apache::thrift::RequestParams params, ::std::int64_t p_id);
 #endif
-  virtual void async_tm_return_void_method(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id);
+  virtual void async_tm_return_void_method(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_id);
  private:
   static ::cpp2::PrimitivesServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};

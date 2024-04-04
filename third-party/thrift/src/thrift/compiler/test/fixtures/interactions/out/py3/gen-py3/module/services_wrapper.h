@@ -24,12 +24,12 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
     folly::Executor *executor;
   public:
     explicit MyServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
-    void async_tm_interact(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
+    void async_tm_foo(apache::thrift::HandlerCallback<void>::Ptr callback) override;
+    void async_tm_interact(apache::thrift::HandlerCallback<void>::Ptr callback
         , int32_t arg
     ) override;
-    void async_tm_interactFast(std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback) override;
-    void async_tm_serialize(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback) override;
+    void async_tm_interactFast(apache::thrift::HandlerCallback<int32_t>::Ptr callback) override;
+    void async_tm_serialize(apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback) override;
     std::unique_ptr<MyInteractionIf> createMyInteraction() override;
     std::unique_ptr<MyInteractionFastIf> createMyInteractionFast() override;
     std::unique_ptr<SerialInteractionIf> createSerialInteraction() override;

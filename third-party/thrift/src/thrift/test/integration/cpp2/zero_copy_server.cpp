@@ -202,8 +202,8 @@ class ZeroCopyServiceImpl
   ~ZeroCopyServiceImpl() override = default;
 
   void async_eb_echo(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf>>> callback,
+      apache::thrift::HandlerCallback<
+          std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf>>::Ptr callback,
       std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf> data) override {
     std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf> ret;
     if (FLAGS_size <= 0) {

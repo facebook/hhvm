@@ -61,7 +61,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::MyService>::co_pi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_ping(apache::thrift::HandlerCallback<void>::Ptr callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -172,7 +172,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_getRandomData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_getRandomData(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -282,7 +282,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::co_ha
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_id) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_hasDataById(apache::thrift::HandlerCallback<bool>::Ptr callback, ::std::int64_t p_id) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -392,7 +392,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, ::std::int64_t p_id) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_getDataById(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, ::std::int64_t p_id) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -503,7 +503,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::MyService>::co_pu
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_putDataById(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -613,7 +613,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::MyService>::co_lo
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

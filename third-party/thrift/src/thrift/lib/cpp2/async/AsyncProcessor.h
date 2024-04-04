@@ -1201,6 +1201,8 @@ class HandlerCallbackBase {
   }
 
  public:
+  using Ptr = std::shared_ptr<HandlerCallbackBase>;
+
   HandlerCallbackBase() : eb_(nullptr), reqCtx_(nullptr), protoSeqId_(0) {}
 
   HandlerCallbackBase(
@@ -1366,6 +1368,7 @@ class HandlerCallback : public HandlerCallbackBase {
   using cob_ptr = typename Helper::CobPtr;
 
  public:
+  using Ptr = std::shared_ptr<HandlerCallback<T>>;
   using ResultType = std::decay_t<typename Helper::InputType>;
 
  public:
@@ -1413,6 +1416,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   using cob_ptr = SerializedResponse (*)(ContextStack*);
 
  public:
+  using Ptr = std::shared_ptr<HandlerCallback<void>>;
   using ResultType = void;
 
   HandlerCallback() : cp_(nullptr) {}
@@ -1466,6 +1470,9 @@ template <typename InteractionIf, typename Response>
 class HandlerCallback<TileAndResponse<InteractionIf, Response>> final
     : public HandlerCallback<Response> {
  public:
+  using Ptr = std::shared_ptr<
+      HandlerCallback<TileAndResponse<InteractionIf, Response>>>;
+
   void result(TileAndResponse<InteractionIf, Response>&& r) {
     if (this->fulfillTilePromise(std::move(r.tile))) {
       if constexpr (!std::is_void_v<Response>) {

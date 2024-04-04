@@ -24,7 +24,7 @@ class MockMcThriftServerHandler
   class ThriftContext {
    public:
     explicit ThriftContext(
-        std::unique_ptr<apache::thrift::HandlerCallback<Reply>> callback)
+        std::shared_ptr<apache::thrift::HandlerCallback<Reply>> callback)
         : callback_(std::move(callback)) {}
 
     static void reply(ThriftContext&& ctx, Reply&& reply) {
@@ -33,13 +33,13 @@ class MockMcThriftServerHandler
     }
 
    private:
-    std::unique_ptr<apache::thrift::HandlerCallback<Reply>> callback_;
+    typename apache::thrift::HandlerCallback<Reply>::Ptr callback_;
   };
 
  public:
   void async_eb_mcGet(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McGetReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McGetReply>::Ptr
+          callback,
       const facebook::memcache::McGetRequest& request) override final {
     auto key = request.key_ref()->fullKey();
     if (key == "__mockmc__.want_load_shedding") {
@@ -52,8 +52,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcSet(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McSetReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McSetReply>::Ptr
+          callback,
       const facebook::memcache::McSetRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -61,8 +61,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcDelete(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McDeleteReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>::Ptr
+          callback,
       const facebook::memcache::McDeleteRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -70,8 +70,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcLeaseGet(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McLeaseGetReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>::Ptr
+          callback,
       const facebook::memcache::McLeaseGetRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -79,8 +79,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcLeaseSet(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McLeaseSetReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>::Ptr
+          callback,
       const facebook::memcache::McLeaseSetRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -88,8 +88,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcAdd(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McAddReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McAddReply>::Ptr
+          callback,
       const facebook::memcache::McAddRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -97,8 +97,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcReplace(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McReplaceReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>::Ptr
+          callback,
       const facebook::memcache::McReplaceRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -106,8 +106,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcGets(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McGetsReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>::Ptr
+          callback,
       const facebook::memcache::McGetsRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -115,8 +115,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcCas(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McCasReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McCasReply>::Ptr
+          callback,
       const facebook::memcache::McCasRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -124,8 +124,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcIncr(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McIncrReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>::Ptr
+          callback,
       const facebook::memcache::McIncrRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -133,8 +133,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcDecr(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McDecrReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>::Ptr
+          callback,
       const facebook::memcache::McDecrRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -142,8 +142,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcMetaget(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McMetagetReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>::Ptr
+          callback,
       const facebook::memcache::McMetagetRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -151,8 +151,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcAppend(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McAppendReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>::Ptr
+          callback,
       const facebook::memcache::McAppendRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -160,8 +160,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcPrepend(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McPrependReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>::Ptr
+          callback,
       const facebook::memcache::McPrependRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -169,8 +169,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcTouch(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McTouchReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>::Ptr
+          callback,
       const facebook::memcache::McTouchRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -178,8 +178,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcFlushRe(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McFlushReReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>::Ptr
+          callback,
       const facebook::memcache::McFlushReRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -187,8 +187,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcFlushAll(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McFlushAllReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>::Ptr
+          callback,
       const facebook::memcache::McFlushAllRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -196,8 +196,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcGat(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McGatReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McGatReply>::Ptr
+          callback,
       const facebook::memcache::McGatRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -205,8 +205,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcGats(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McGatsReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>::Ptr
+          callback,
       const facebook::memcache::McGatsRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(
@@ -214,8 +214,8 @@ class MockMcThriftServerHandler
   }
 
   virtual void async_eb_mcVersion(
-      std::unique_ptr<apache::thrift::HandlerCallback<
-          facebook::memcache::McVersionReply>> callback,
+      apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>::Ptr
+          callback,
       const facebook::memcache::McVersionRequest& request) override final {
     auto reqCopy = request;
     onRequest_.onRequest(

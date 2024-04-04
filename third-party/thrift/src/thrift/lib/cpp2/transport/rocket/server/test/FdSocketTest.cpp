@@ -40,8 +40,7 @@ struct ServerResponseEnqueuedInterface : public TestInterface {
       : sendQueue_(sendQueue), responseEnqueuedBaton_(responseEnqueuedBaton) {}
 
   void async_eb_eventBaseAsync(
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<std::unique_ptr<std::string>>>
+      apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr
           callback) override {
     MessagePair resPair;
     CHECK(sendQueue_->read(resPair));

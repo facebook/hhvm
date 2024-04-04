@@ -24,32 +24,32 @@ class PubSubStreamingServiceWrapper : virtual public PubSubStreamingServiceSvIf 
     folly::Executor *executor;
   public:
     explicit PubSubStreamingServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_returnstream(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_tm_returnstream(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t i32_from
         , int32_t i32_to
     ) override;
-    void async_tm_streamthrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_tm_streamthrows(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_servicethrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_tm_servicethrows(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_servicethrows2(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_tm_servicethrows2(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_boththrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_tm_boththrows(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_responseandstreamstreamthrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
+    void async_tm_responseandstreamstreamthrows(apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_responseandstreamservicethrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
+    void async_tm_responseandstreamservicethrows(apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_tm_responseandstreamboththrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
+    void async_tm_responseandstreamboththrows(apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
         , int32_t foo
     ) override;
-    void async_eb_returnstreamFast(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+    void async_eb_returnstreamFast(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
         , int32_t i32_from
         , int32_t i32_to
     ) override;

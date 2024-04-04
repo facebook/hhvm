@@ -1528,8 +1528,7 @@ TEST_P(HeaderOrRocket, StickyToThreadPool) {
 TEST_P(HeaderOrRocket, CancellationTest) {
   class NotCalledBackHandler {
    public:
-    explicit NotCalledBackHandler(
-        std::unique_ptr<HandlerCallback<void>> callback)
+    explicit NotCalledBackHandler(HandlerCallback<void>::Ptr callback)
         : thriftCallback_{std::move(callback)},
           cancelCallback_(
               thriftCallback_->getConnectionContext()
@@ -1549,7 +1548,7 @@ TEST_P(HeaderOrRocket, CancellationTest) {
       cancelBaton.post();
     }
 
-    std::unique_ptr<HandlerCallback<void>> thriftCallback_;
+    HandlerCallback<void>::Ptr thriftCallback_;
     folly::CancellationCallback cancelCallback_;
   };
 
@@ -1559,8 +1558,7 @@ TEST_P(HeaderOrRocket, CancellationTest) {
     using NotCalledBackHandlers =
         std::vector<std::shared_ptr<NotCalledBackHandler>>;
 
-    void async_tm_notCalledBack(
-        std::unique_ptr<HandlerCallback<void>> cb) override {
+    void async_tm_notCalledBack(HandlerCallback<void>::Ptr cb) override {
       auto handler = std::make_shared<NotCalledBackHandler>(std::move(cb));
       notCalledBackHandlers_.lock()->push_back(std::move(handler));
       handlersCV_.notify_one();
@@ -1968,8 +1966,8 @@ TEST_P(OverloadTest, Test) {
     void voidResponse() override { block.wait(); }
 
     void async_eb_eventBaseAsync(
-        std::unique_ptr<HandlerCallback<std::unique_ptr<::std::string>>>
-            callback) override {
+        HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback)
+        override {
       callback->appOverloadedException("method loadshedding request");
     }
   };
@@ -3106,8 +3104,7 @@ class ServerResponseEnqueuedInterface : public TestInterface {
       : responseEnqueuedBaton_(responseEnqueuedBaton) {}
 
   void async_eb_eventBaseAsync(
-      std::unique_ptr<
-          apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>
+      apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr
           callback) override {
     // Since `eventBaseAsync` is a `thread = 'eb'` method, this runs on
     // the IO thread, and we can guarantee that the baton is posted
@@ -4178,7 +4175,7 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
   class DummyStatusHandler : public apache::thrift::ServiceHandler<DummyStatus>,
                              public StatusServerInterface {
     void async_eb_getStatus(
-        std::unique_ptr<HandlerCallback<std::int64_t>> callback) override {
+        HandlerCallback<std::int64_t>::Ptr callback) override {
       ThriftServer* server = callback->getRequestContext()
                                  ->getConnectionContext()
                                  ->getWorker()

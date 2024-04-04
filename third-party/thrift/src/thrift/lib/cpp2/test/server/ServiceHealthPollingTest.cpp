@@ -54,8 +54,7 @@ class Handler : public apache::thrift::ServiceHandler<DummyStatus>,
   }
 
   void async_eb_getStatus(
-      std::unique_ptr<apache::thrift::HandlerCallback<std::int64_t>> callback)
-      override {
+      apache::thrift::HandlerCallback<std::int64_t>::Ptr callback) override {
     ThriftServer* server = callback->getRequestContext()
                                ->getConnectionContext()
                                ->getWorker()

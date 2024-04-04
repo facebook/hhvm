@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
   virtual folly::coro::Task<void> co_mapList(apache::thrift::RequestParams params, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
 #endif
-  virtual void async_tm_mapList(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
+  virtual void async_tm_mapList(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
   virtual void sync_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/);
   [[deprecated("Use sync_mapSet instead")]] virtual void mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
@@ -63,7 +63,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
   virtual folly::coro::Task<void> co_mapSet(apache::thrift::RequestParams params, std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
 #endif
-  virtual void async_tm_mapSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
+  virtual void async_tm_mapSet(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
   virtual void sync_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/);
   [[deprecated("Use sync_listMap instead")]] virtual void listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
@@ -72,7 +72,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
   virtual folly::coro::Task<void> co_listMap(apache::thrift::RequestParams params, std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
 #endif
-  virtual void async_tm_listMap(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
+  virtual void async_tm_listMap(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
   virtual void sync_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/);
   [[deprecated("Use sync_listSet instead")]] virtual void listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
@@ -81,7 +81,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
   virtual folly::coro::Task<void> co_listSet(apache::thrift::RequestParams params, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
 #endif
-  virtual void async_tm_listSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
+  virtual void async_tm_listSet(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
   virtual void sync_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/);
   [[deprecated("Use sync_turtles instead")]] virtual void turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
@@ -90,7 +90,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
   virtual folly::coro::Task<void> co_turtles(apache::thrift::RequestParams params, std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
 #endif
-  virtual void async_tm_turtles(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
+  virtual void async_tm_turtles(apache::thrift::HandlerCallback<void>::Ptr callback, std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
  private:
   static ::cpp2::NestedContainersServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_mapList{apache::thrift::detail::si::InvocationType::AsyncTm};

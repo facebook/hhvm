@@ -29,10 +29,10 @@
 #endif
 {{/function:eb}}
 {{#function:oneway?}}
-  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback{{function:comma}}{{ > service_common/function_param_list_server}});
+  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}});
 {{/function:oneway?}}
 {{^function:oneway?}}
-  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallback<{{ > types/return_type_server}}>> callback{{function:comma}}{{ > service_common/function_param_list_server}});
+  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallback<{{ > types/return_type_server}}>::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}});
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
   virtual std::unique_ptr<{{type:name}}If> {{function:cpp_name}}();

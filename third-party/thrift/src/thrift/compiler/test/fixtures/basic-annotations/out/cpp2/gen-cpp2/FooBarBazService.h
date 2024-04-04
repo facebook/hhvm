@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_foo();
   virtual folly::coro::Task<void> co_foo(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_foo(apache::thrift::HandlerCallback<void>::Ptr callback);
   virtual void sync_bar();
   [[deprecated("Use sync_bar instead")]] virtual void bar();
   virtual folly::Future<folly::Unit> future_bar();
@@ -63,7 +63,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_bar();
   virtual folly::coro::Task<void> co_bar(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_bar(apache::thrift::HandlerCallback<void>::Ptr callback);
   virtual void sync_baz();
   [[deprecated("Use sync_baz instead")]] virtual void baz();
   virtual folly::Future<folly::Unit> future_baz();
@@ -72,7 +72,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
   virtual folly::coro::Task<void> co_baz();
   virtual folly::coro::Task<void> co_baz(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_baz(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_baz(apache::thrift::HandlerCallback<void>::Ptr callback);
  private:
   static ::cpp2::FooBarBazServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_foo{apache::thrift::detail::si::InvocationType::AsyncTm};

@@ -1579,11 +1579,11 @@ folly::Future<T> future(
 }
 
 using CallbackBase = HandlerCallbackBase;
-using CallbackBasePtr = std::unique_ptr<CallbackBase>;
+using CallbackBasePtr = std::shared_ptr<CallbackBase>;
 template <typename T>
 using Callback = HandlerCallback<T>;
 template <typename T>
-using CallbackPtr = std::unique_ptr<Callback<T>>;
+using CallbackPtr = std::shared_ptr<Callback<T>>;
 
 class AsyncTmPrep {
   ServerInterface* si_;

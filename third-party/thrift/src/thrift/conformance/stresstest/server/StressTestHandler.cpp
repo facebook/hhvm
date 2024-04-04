@@ -26,13 +26,12 @@ namespace stress {
 
 StressTestHandler::StressTestHandler() {}
 
-void StressTestHandler::async_eb_ping(
-    std::unique_ptr<HandlerCallback<void>> callback) {
+void StressTestHandler::async_eb_ping(HandlerCallback<void>::Ptr callback) {
   callback->done();
 }
 
 void StressTestHandler::async_tm_requestResponseTm(
-    std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
+    HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
     std::unique_ptr<BasicRequest> request) {
   if (request->processInfo()->processingMode() == ProcessingMode::Async) {
     auto* tm = callback->getThreadManager();
@@ -47,7 +46,7 @@ void StressTestHandler::async_tm_requestResponseTm(
 }
 
 void StressTestHandler::async_eb_requestResponseEb(
-    std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
+    HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
     std::unique_ptr<BasicRequest> request) {
   if (request->processInfo()->processingMode() == ProcessingMode::Async) {
     auto* evb = callback->getEventBase();
@@ -109,7 +108,7 @@ StressTestHandler::sinkTm(std::unique_ptr<StreamRequest> request) {
 }
 
 void StressTestHandler::requestResponseImpl(
-    std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
+    HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
     std::unique_ptr<BasicRequest> request) const {
   simulateWork(
       *request->processInfo()->processingTimeMs(),

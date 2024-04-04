@@ -40,20 +40,18 @@ void TestInterface::echoRequest(
   _return = *req + kEchoSuffix;
 }
 
-void TestInterface::async_tm_serializationTest(
-    std::unique_ptr<StringCob> callback, bool) {
+void TestInterface::async_tm_serializationTest(StringCob::Ptr callback, bool) {
   std::unique_ptr<std::string> sp(new std::string("hello world"));
   callback->result(std::move(sp));
 }
 
-void TestInterface::async_eb_eventBaseAsync(
-    std::unique_ptr<StringCob> callback) {
+void TestInterface::async_eb_eventBaseAsync(StringCob::Ptr callback) {
   std::unique_ptr<std::string> hello(new std::string("hello world"));
   callback->result(std::move(hello));
 }
 
 void TestInterface::async_tm_notCalledBack(
-    std::unique_ptr<apache::thrift::HandlerCallback<void>>) {}
+    apache::thrift::HandlerCallback<void>::Ptr) {}
 
 void TestInterface::echoIOBuf(
     std::unique_ptr<folly::IOBuf>& ret, std::unique_ptr<folly::IOBuf> buf) {

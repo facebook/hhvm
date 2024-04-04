@@ -58,7 +58,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey0(std::unique_ptr<::std::string> p_key);
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey0(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_key);
 #endif
-  virtual void async_tm_getDataByKey0(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key);
+  virtual void async_tm_getDataByKey0(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_key);
   virtual void sync_getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   [[deprecated("Use sync_getDataByKey1 instead")]] virtual void getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataByKey1(std::unique_ptr<::std::string> p_key);
@@ -67,7 +67,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey1(std::unique_ptr<::std::string> p_key);
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey1(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_key);
 #endif
-  virtual void async_tm_getDataByKey1(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key);
+  virtual void async_tm_getDataByKey1(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_key);
  private:
   static ::test::fixtures::basic::DbMixedStackArgumentsServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey0{apache::thrift::detail::si::InvocationType::AsyncTm};

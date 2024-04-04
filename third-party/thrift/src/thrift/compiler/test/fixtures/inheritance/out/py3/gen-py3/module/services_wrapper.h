@@ -34,7 +34,7 @@ class MyRootWrapper : virtual public MyRootSvIf {
     folly::Executor *executor;
   public:
     explicit MyRootWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_do_root(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_do_root(apache::thrift::HandlerCallback<void>::Ptr callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -45,7 +45,7 @@ std::shared_ptr<apache::thrift::ServerInterface> MyRootInterface(PyObject *if_ob
 class MyNodeWrapper : public ::cpp2::MyRootWrapper, virtual public MyNodeSvIf {
   public:
     explicit MyNodeWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_do_mid(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_do_mid(apache::thrift::HandlerCallback<void>::Ptr callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
@@ -56,7 +56,7 @@ std::shared_ptr<apache::thrift::ServerInterface> MyNodeInterface(PyObject *if_ob
 class MyLeafWrapper : public ::cpp2::MyNodeWrapper, virtual public MyLeafSvIf {
   public:
     explicit MyLeafWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_do_leaf(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_do_leaf(apache::thrift::HandlerCallback<void>::Ptr callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

@@ -363,7 +363,7 @@ TEST_P(
   class Status : public apache::thrift::ServiceHandler<DummyStatus>,
                  public StatusServerInterface {
     void async_eb_getStatus(
-        std::unique_ptr<HandlerCallback<std::int64_t>> callback) override {
+        HandlerCallback<std::int64_t>::Ptr callback) override {
       callback->result(360);
     }
   };
@@ -442,7 +442,7 @@ TEST_P(
   class Status : public apache::thrift::ServiceHandler<DummyStatus>,
                  public StatusServerInterface {
     void async_eb_getStatus(
-        std::unique_ptr<HandlerCallback<std::int64_t>> callback) override {
+        HandlerCallback<std::int64_t>::Ptr callback) override {
       callback->result(360);
     }
   };

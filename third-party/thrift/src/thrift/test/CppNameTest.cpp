@@ -73,8 +73,7 @@ class MyServiceImpl : public apache::thrift::ServiceHandler<MyService> {
   }
 
   void async_tm_cppDoNothing(
-      std::unique_ptr<apache::thrift::HandlerCallback<void>> callback)
-      override {
+      apache::thrift::HandlerCallback<void>::Ptr callback) override {
     callCount_++;
     callback->done();
   }

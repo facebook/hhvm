@@ -54,7 +54,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<void> co_doBland();
   virtual folly::coro::Task<void> co_doBland(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_doBland(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_doBland(apache::thrift::HandlerCallback<void>::Ptr callback);
   virtual void sync_doRaise();
   [[deprecated("Use sync_doRaise instead")]] virtual void doRaise();
   virtual folly::Future<folly::Unit> future_doRaise();
@@ -63,7 +63,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<void> co_doRaise();
   virtual folly::coro::Task<void> co_doRaise(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_doRaise(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void async_tm_doRaise(apache::thrift::HandlerCallback<void>::Ptr callback);
   virtual void sync_get200(::std::string& /*_return*/);
   [[deprecated("Use sync_get200 instead")]] virtual void get200(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get200();
@@ -72,7 +72,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_get200();
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_get200(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_get200(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
+  virtual void async_tm_get200(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback);
   virtual void sync_get500(::std::string& /*_return*/);
   [[deprecated("Use sync_get500 instead")]] virtual void get500(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get500();
@@ -81,7 +81,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_get500();
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_get500(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_get500(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
+  virtual void async_tm_get500(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback);
  private:
   static ::cpp2::RaiserServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_doBland{apache::thrift::detail::si::InvocationType::AsyncTm};

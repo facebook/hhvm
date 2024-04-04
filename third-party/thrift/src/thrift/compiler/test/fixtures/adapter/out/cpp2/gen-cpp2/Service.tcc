@@ -55,7 +55,7 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_func<ProtocolIn_,ProtocolOut_>

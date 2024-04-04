@@ -64,7 +64,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodSer
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::GoodService>::async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::async_tm_bar(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -168,7 +168,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::GoodService>::Bad
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::async_tm_foo(apache::thrift::HandlerCallback<void>::Ptr callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

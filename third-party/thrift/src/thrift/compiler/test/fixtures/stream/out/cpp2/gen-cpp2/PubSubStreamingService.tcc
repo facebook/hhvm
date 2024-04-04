@@ -96,7 +96,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_returnstream<ProtocolIn_,ProtocolOut_>
@@ -173,7 +173,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_streamthrows<ProtocolIn_,ProtocolOut_>
@@ -260,7 +260,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_servicethrows<ProtocolIn_,ProtocolOut_>
@@ -354,7 +354,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_servicethrows2<ProtocolIn_,ProtocolOut_>
@@ -458,7 +458,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_boththrows<ProtocolIn_,ProtocolOut_>
@@ -562,7 +562,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_responseandstreamstreamthrows<ProtocolIn_,ProtocolOut_>
@@ -651,7 +651,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_responseandstreamservicethrows<ProtocolIn_,ProtocolOut_>
@@ -747,7 +747,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_responseandstreamboththrows<ProtocolIn_,ProtocolOut_>
@@ -858,7 +858,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
+  auto callback = std::make_shared<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_returnstreamFast<ProtocolIn_,ProtocolOut_>

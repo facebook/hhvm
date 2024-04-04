@@ -95,8 +95,13 @@ const Value* findOp(const Object& patch, PatchOp op) {
   return patch.if_contains(static_cast<FieldId>(op));
 }
 
-template <typename Tag>
-decltype(auto) argAs(const Value& value) {
+Value* findOp(Object&& patch, PatchOp op) {
+  return patch.if_contains(static_cast<FieldId>(op));
+}
+
+template <typename Tag, typename V>
+decltype(auto) argAs(V&& value) {
+  static_assert(std::is_same_v<folly::remove_cvref_t<V>, Value>);
   using Id = type::field_id_tag<static_cast<FieldId>(type::base_type_v<Tag>)>;
   constexpr auto expected = static_cast<Value::Type>(Id::value);
   if (value.getType() != Value::Type(Id::value)) {
@@ -105,13 +110,22 @@ decltype(auto) argAs(const Value& value) {
         util::enumNameSafe<Value::Type>(expected),
         util::enumNameSafe<Value::Type>(value.getType())));
   }
-  return *op::get<Id, Value>(value);
+  return *op::get<Id, Value>(std::forward<V>(value));
 }
 
 template <typename Tag>
 bool applyAssign(const Object& patch, value_native_type<Tag>& value) {
   if (const Value* arg = findOp(patch, PatchOp::Assign)) {
     value = argAs<Tag>(*arg);
+    return true;
+  }
+  return false;
+}
+
+template <typename Tag>
+bool applyAssign(Object&& patch, value_native_type<Tag>& value) {
+  if (Value* arg = findOp(std::move(patch), PatchOp::Assign)) {
+    value = argAs<Tag>(std::move(*arg));
     return true;
   }
   return false;
@@ -407,7 +421,9 @@ void ApplyPatch::operator()(
   }
 }
 
-void ApplyPatch::operator()(const Object& patch, Object& value) const {
+template <class Patch>
+void impl(Patch&& patch, Object& value) {
+  static_assert(std::is_same_v<folly::remove_cvref_t<Patch>, Object>);
   checkOps(
       patch,
       Value::Type::objectValue,
@@ -419,7 +435,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
        PatchOp::EnsureUnion,
        PatchOp::PatchAfter,
        PatchOp::Add});
-  if (applyAssign<type::struct_c>(patch, value)) {
+  if (applyAssign<type::struct_c>(std::forward<Patch>(patch), value)) {
     return; // Ignore all other ops.
   }
 
@@ -511,6 +527,14 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     // TODO(afuller): Implement field-wise add.
   }
 }
+
+void ApplyPatch::operator()(const Object& patch, Object& value) const {
+  impl(patch, value);
+}
+void ApplyPatch::operator()(Object&& patch, Object& value) const {
+  impl(std::move(patch), value);
+}
+
 // Inserts the next mask to getIncludesRef(mask)[id].
 // Skips if mask is allMask (already includes all fields), or next is noneMask.
 template <typename Id, typename F>

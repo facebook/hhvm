@@ -2,7 +2,7 @@
 
 function myPrintfWithANameThatIsSoLongItBreaksTheDeclarationUp(
   string $format,
-  ...
+  ...$args
 ) {
   // ...
 }

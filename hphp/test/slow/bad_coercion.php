@@ -7,7 +7,7 @@ function test_is_nan($v) :mixed{
 
 <<__EntryPoint>>
 function main_bad_coercion() :mixed{
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest) ==> {
     throw new Exception($errstr);
 });
 

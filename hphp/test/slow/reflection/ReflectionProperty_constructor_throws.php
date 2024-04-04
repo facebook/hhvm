@@ -4,7 +4,7 @@ class C {}
 
 <<__EntryPoint>>
 function main_reflection_property_constructor_throws(): mixed {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

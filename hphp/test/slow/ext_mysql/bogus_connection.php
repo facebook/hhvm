@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_bogus_connection(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

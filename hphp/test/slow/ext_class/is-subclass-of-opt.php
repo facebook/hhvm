@@ -34,7 +34,7 @@ function main() :mixed{
 
 <<__EntryPoint>>
 function main_is_subclass_of_opt(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

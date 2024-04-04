@@ -1,7 +1,7 @@
 <?hh
 
 class Info { public static bool $sawHackArrNotice = false; }
-function handler($_errno, $errstr, ...) :mixed{
+function handler($_errno, $errstr, ...$_rest):mixed{
   if (
     !Info::$sawHackArrNotice &&
     $errstr === 'Hack Array Compat: Comparing PHP array with Hack array'

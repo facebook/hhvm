@@ -25,7 +25,7 @@ function test($fn) {
 
 <<__EntryPoint>>
 function main(): mixed {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$rest) ==> {
     throw new Exception($errstr);
   });
   $o = new Foo;

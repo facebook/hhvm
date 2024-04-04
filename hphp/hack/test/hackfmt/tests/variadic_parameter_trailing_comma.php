@@ -1,6 +1,6 @@
 <?hh
 
-function myPrintfWithANameThatIsSoLongItBreaksTheDeclarationUp(string $format, ...) {
+function myPrintfWithANameThatIsSoLongItBreaksTheDeclarationUp(string $format, ...$args) {
   // ...
 }
 

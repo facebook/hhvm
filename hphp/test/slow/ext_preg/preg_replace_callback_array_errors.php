@@ -13,7 +13,7 @@ function test($fn) {
 
 <<__EntryPoint>>
 function main_preg_replace_callback_array_errors(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

@@ -5,7 +5,7 @@ function memo(): void {}
 
 <<__EntryPoint>>
 function main(): void {
-  set_error_handler((...) ==> {
+  set_error_handler((...$_args) ==> {
     HH\ImplicitContext\soft_run_with(
       memo<>,
       'abc',

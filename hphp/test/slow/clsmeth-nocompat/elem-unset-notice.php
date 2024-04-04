@@ -55,7 +55,7 @@ function unset_inner() :mixed{
   var_dump($cm);
 }
 
-function handle_error($_no, $msg, ...) :mixed{
+function handle_error($_no, $msg, ...$_rest) :mixed{
   if ($msg === 'Implicit clsmeth to varray conversion') {
     echo "[NOTICE] $msg\n";
     return true;

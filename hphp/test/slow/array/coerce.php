@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_coerce(): mixed{
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
   try { var_dump(Locale::lookup(new stdClass, 'foo')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

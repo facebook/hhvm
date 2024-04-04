@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_804() :mixed{
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
   try {

@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) :mixed{
+function handle_error($_no, $msg, ...$_rest) :mixed{
   if ($msg === 'Cannot use a scalar value as an array') {
     echo "[NOTICE] $msg\n";
     return true;

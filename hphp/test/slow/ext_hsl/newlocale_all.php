@@ -5,7 +5,7 @@ use namespace HH\Lib\_Private\_Str;
 
 <<__EntryPoint>>
 function main(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
   $en_gb = L\newlocale_all('en_GB.UTF-8');

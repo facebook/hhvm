@@ -3,7 +3,7 @@
 // disable array -> "Array" conversion notice
 <<__EntryPoint>>
 function main(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     if (HH\Lib\Str\starts_with($errstr, "Argument ")) {
       throw new Exception($errstr);
     }

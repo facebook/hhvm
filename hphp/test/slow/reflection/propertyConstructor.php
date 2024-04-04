@@ -8,7 +8,7 @@ class Foo {
 
 <<__EntryPoint>>
 function main_property_constructor(): mixed {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

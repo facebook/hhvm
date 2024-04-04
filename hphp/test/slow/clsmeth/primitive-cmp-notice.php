@@ -1,7 +1,7 @@
 <?hh
 
 class Info { public static bool $SawError = false; }
-function handle_error($_errno, $msg, ...) :mixed{
+function handle_error($_errno, $msg, ...$_rest) :mixed{
   if (Info::$SawError) return false;
   if (
     !preg_match('/Implicit clsmeth to [^ ]+ conversion/', $msg) &&

@@ -20,7 +20,7 @@ class CountCharsTest {
 
 <<__EntryPoint>>
 function main_count_chars(): mixed {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

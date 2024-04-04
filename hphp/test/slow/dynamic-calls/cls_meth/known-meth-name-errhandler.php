@@ -9,7 +9,7 @@ function main() :mixed{
 }
 
 class Handler {
-  static function derp($errno, $errstr, $errfile, $errline, ...) :mixed{
+  static function derp($errno, $errstr, $errfile, $errline, ...$_rest) :mixed{
     $errnames = dict[
       E_NOTICE => 'E_NOTICE',
       E_WARNING => 'E_WARNING',

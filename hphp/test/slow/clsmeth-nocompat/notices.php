@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_errno, $str, ...) :mixed{
+function handle_error($_errno, $str, ...$_rest) :mixed{
   echo " (error: $str)";
   return true;
 }

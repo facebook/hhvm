@@ -6,7 +6,7 @@
 
 <<__EntryPoint>>
 function main_1436_htmlspecialchars(): mixed {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

@@ -52,7 +52,7 @@ function main2() :mixed{
 
 <<__EntryPoint>>
 function main_entry(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

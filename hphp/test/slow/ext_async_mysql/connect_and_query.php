@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_connect_and_query(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

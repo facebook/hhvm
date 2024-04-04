@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $str, ...) :mixed{
+function handle_error($_no, $str, ...$_rest) :mixed{
   if ($str === 'Cannot use a scalar value as an array') {
     echo "** SCALAR AS ARRAY\n";
     return true;

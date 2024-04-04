@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) :mixed{
+function handle_error($_no, $msg, ...$_rest) :mixed{
   $matches = null;
   $pat1 = '/Argument ([0-9]+) passed to ([^(]+)\(\) must be an instance of ([^,]+), clsmeth given/';
   if (preg_match_with_matches($pat1, $msg, inout $matches)) {

@@ -5,7 +5,7 @@ namespace BuiltinBadParams;
 
 <<__EntryPoint>>
 function main(): mixed {
-  \set_error_handler(($errno, $errstr, ...) ==> {
+  \set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new \Exception($errstr);
   });
 

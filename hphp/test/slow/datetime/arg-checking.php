@@ -12,7 +12,7 @@ function test($fn) {
 
 <<__EntryPoint>>
 function main_arg_checking(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
 

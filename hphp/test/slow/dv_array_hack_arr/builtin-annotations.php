@@ -49,7 +49,7 @@ function parameters() :mixed{
 
 <<__EntryPoint>>
 function main_builtin_annotations(): void {
-  set_error_handler(($errno, $errstr, ...) ==> {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
     throw new Exception($errstr);
   });
   return_values();

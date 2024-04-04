@@ -2,7 +2,7 @@
 
 function LV(mixed $x): mixed { return __hhvm_intrinsics\launder_value($x); }
 
-function handle_error($_errno, $msg, ...) :mixed{
+function handle_error($_errno, $msg, ...$_rest) :mixed{
   $matches = null;
   $pat1 =
     "/(Static p|P)roperty '(Props::[a-z_]+)' declared as type ".

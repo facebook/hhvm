@@ -23,7 +23,7 @@
 #include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClient.h>
 #include <thrift/lib/cpp2/transport/core/testutil/ServerConfigsMock.h>
 #include <thrift/lib/cpp2/transport/http2/client/H2ClientConnection.h>

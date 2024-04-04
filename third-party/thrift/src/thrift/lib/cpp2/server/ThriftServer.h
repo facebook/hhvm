@@ -46,6 +46,7 @@
 #include <folly/synchronization/CallOnce.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
+#include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
@@ -159,6 +160,37 @@ using IsOverloadedFunc = folly::Function<bool(
 using PreprocessFunc =
     folly::Function<PreprocessResult(const server::PreprocessParams&) const>;
 
+typedef std::function<void(
+    folly::EventBase*,
+    wangle::ConnectionManager*,
+    std::shared_ptr<folly::AsyncTransport>,
+    std::unique_ptr<folly::IOBuf>)>
+    getHandlerFunc;
+
+typedef std::function<void(
+    const apache::thrift::transport::THeader*, const folly::SocketAddress*)>
+    GetHeaderHandlerFunc;
+
+template <typename T>
+class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
+ public:
+  explicit ThriftServerAsyncProcessorFactory(std::shared_ptr<T> t) {
+    svIf_ = t;
+  }
+
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    return std::unique_ptr<apache::thrift::AsyncProcessor>(
+        new typename T::ProcessorType(svIf_.get()));
+  }
+
+  std::vector<ServiceHandlerBase*> getServiceHandlers() override {
+    return {svIf_.get()};
+  }
+
+ private:
+  std::shared_ptr<T> svIf_;
+};
+
 /**
  *   This is yet another thrift server.
  *   Uses cpp2 style generated code.
@@ -236,6 +268,137 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
     std::string explain() const;
   };
+
+  std::shared_ptr<server::TServerEventHandler> getEventHandler() const {
+    return eventHandler_;
+  }
+
+  /**
+   * If a view of the event handlers is needed that does not need to extend
+   * their lifetime beyond that of the BaseThriftServer, this method allows
+   * obtaining the raw pointer rather than the more expensive shared_ptr. Since
+   * unsynchronized setServerEventHandler / addServerEventHandler /
+   * getEventHandler calls are not permitted, use cases that get the handler,
+   * inform it of some action, and then discard the handle immediately can use
+   * getEventHandlersUnsafe.
+   */
+  const std::vector<std::shared_ptr<server::TServerEventHandler>>&
+  getEventHandlersUnsafe() const {
+    return eventHandlers_;
+  }
+
+  /**
+   * DEPRECATED! Please use addServerEventHandler instead.
+   */
+  void setServerEventHandler(
+      std::shared_ptr<server::TServerEventHandler> eventHandler) {
+    if (eventHandler_) {
+      eventHandlers_.erase(std::find(
+          eventHandlers_.begin(), eventHandlers_.end(), eventHandler_));
+    }
+    eventHandler_ = std::move(eventHandler);
+    if (eventHandler_) {
+      eventHandlers_.push_back(eventHandler_);
+    }
+  }
+
+  void addServerEventHandler(
+      std::shared_ptr<server::TServerEventHandler> eventHandler) {
+    eventHandlers_.push_back(eventHandler);
+  }
+
+  void removeServerEventHandler(
+      std::shared_ptr<server::TServerEventHandler> eventHandler) {
+    eventHandlers_.erase(
+        std::remove(eventHandlers_.begin(), eventHandlers_.end(), eventHandler),
+        eventHandlers_.end());
+  }
+
+  /**
+   * DEPRECATED! Use setInterface instead.
+   */
+  void setProcessorFactory(std::shared_ptr<AsyncProcessorFactory> pFac);
+
+  /**
+   * Sets the main server interface that exposes user-defined methods.
+   */
+  void setInterface(std::shared_ptr<AsyncProcessorFactory> iface) {
+    setProcessorFactory(std::move(iface));
+  }
+
+  const std::shared_ptr<apache::thrift::AsyncProcessorFactory>&
+  getProcessorFactory() const {
+    return cpp2Pfac_;
+  }
+
+  concurrency::ThreadManager::ExecutionScope getRequestExecutionScope(
+      Cpp2RequestContext* ctx, concurrency::PRIORITY defaultPriority) override {
+    if (applicationServerInterface_) {
+      return applicationServerInterface_->getRequestExecutionScope(
+          ctx, defaultPriority);
+    }
+    return ServerConfigs::getRequestExecutionScope(ctx, defaultPriority);
+  }
+
+  /**
+   * Sets the interface that will be used for monitoring connections only.
+   */
+  void setMonitoringInterface(
+      std::shared_ptr<MonitoringServerInterface> iface) {
+    CHECK(configMutable());
+    monitoringServiceHandler_ = std::move(iface);
+  }
+
+  const std::shared_ptr<MonitoringServerInterface>& getMonitoringInterface()
+      const {
+    return monitoringServiceHandler_;
+  }
+
+  /**
+   * Sets the interface that will be used for status RPCs only.
+   */
+  void setStatusInterface(std::shared_ptr<StatusServerInterface> iface) {
+    CHECK(configMutable());
+    statusServiceHandler_ = std::move(iface);
+  }
+
+  const std::shared_ptr<StatusServerInterface>& getStatusInterface() {
+    return statusServiceHandler_;
+  }
+
+  /**
+   * Sets the interface that will be used for control RPCs only.
+   */
+  void setControlInterface(std::shared_ptr<ControlServerInterface> iface) {
+    CHECK(configMutable());
+    controlServiceHandler_ = std::move(iface);
+  }
+
+  const std::shared_ptr<ControlServerInterface>& getControlInterface() const {
+    return controlServiceHandler_;
+  }
+
+  /**
+   * Sets the interface that will be used for security RPCs only.
+   */
+  void setSecurityInterface(std::shared_ptr<SecurityServerInterface> iface) {
+    CHECK(configMutable());
+    securityServiceHandler_ = std::move(iface);
+  }
+
+  const std::shared_ptr<SecurityServerInterface>& getSecurityInterface() const {
+    return securityServiceHandler_;
+  }
+
+  void setGetHandler(getHandlerFunc func) { getHandler_ = func; }
+
+  getHandlerFunc getGetHandler() { return getHandler_; }
+
+  void setGetHeaderHandler(GetHeaderHandlerFunc func) {
+    getHeaderHandler_ = func;
+  }
+
+  GetHeaderHandlerFunc getGetHeaderHandler() { return getHeaderHandler_; }
 
   bool resourcePoolEnabled() const override {
     return getRuntimeServerActions().resourcePoolEnabled;
@@ -530,6 +693,29 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
  private:
+  // Cpp2 ProcessorFactory.
+  std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
+
+  ServerInterface* applicationServerInterface_{};
+
+  // Explicitly set monitoring service interface handler
+  std::shared_ptr<MonitoringServerInterface> monitoringServiceHandler_;
+
+  // Explicitly set status service interface handler
+  std::shared_ptr<StatusServerInterface> statusServiceHandler_;
+
+  // Explicitly set control service interface handler
+  std::shared_ptr<ControlServerInterface> controlServiceHandler_;
+
+  // Explicitly set security service interface handler
+  std::shared_ptr<SecurityServerInterface> securityServiceHandler_;
+
+  std::shared_ptr<server::TServerEventHandler> eventHandler_;
+  std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
+
+  getHandlerFunc getHandler_;
+  GetHeaderHandlerFunc getHeaderHandler_;
+
   // Server behavior to wrt header traffic
   LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
 
@@ -1675,13 +1861,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     }
     return serverSockets;
   }
-
-  /**
-   * Sets an explicit AsyncProcessorFactory and sets the ThriftProcessor
-   * to use for custom transports
-   */
-  virtual void setProcessorFactory(
-      std::shared_ptr<AsyncProcessorFactory> pFac) override;
 
   /**
    * Returns an AsyncProcessorFactory that wraps the user-provided service and

@@ -34,9 +34,7 @@
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
-
 #include <thrift/lib/cpp/concurrency/Thread.h>
-#include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/Flags.h>
@@ -59,36 +57,6 @@ class ConnectionManager;
 namespace apache {
 namespace thrift {
 
-typedef std::function<void(
-    folly::EventBase*,
-    wangle::ConnectionManager*,
-    std::shared_ptr<folly::AsyncTransport>,
-    std::unique_ptr<folly::IOBuf>)>
-    getHandlerFunc;
-
-typedef std::function<void(
-    const apache::thrift::transport::THeader*, const folly::SocketAddress*)>
-    GetHeaderHandlerFunc;
-
-template <typename T>
-class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
- public:
-  explicit ThriftServerAsyncProcessorFactory(std::shared_ptr<T> t) {
-    svIf_ = t;
-  }
-
-  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
-    return std::unique_ptr<apache::thrift::AsyncProcessor>(
-        new typename T::ProcessorType(svIf_.get()));
-  }
-
-  std::vector<ServiceHandlerBase*> getServiceHandlers() override {
-    return {svIf_.get()};
-  }
-
- private:
-  std::shared_ptr<T> svIf_;
-};
 class BaseThriftServer;
 namespace detail {
 /**
@@ -105,26 +73,6 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
  private:
-  // Cpp2 ProcessorFactory.
-  std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
-
-  ServerInterface* applicationServerInterface_{};
-
-  // Explicitly set monitoring service interface handler
-  std::shared_ptr<MonitoringServerInterface> monitoringServiceHandler_;
-
-  // Explicitly set status service interface handler
-  std::shared_ptr<StatusServerInterface> statusServiceHandler_;
-
-  // Explicitly set control service interface handler
-  std::shared_ptr<ControlServerInterface> controlServiceHandler_;
-
-  // Explicitly set security service interface handler
-  std::shared_ptr<SecurityServerInterface> securityServiceHandler_;
-
-  std::shared_ptr<server::TServerEventHandler> eventHandler_;
-  std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
-
   // TODO: T176242251 we use unique_ptr and just pass raw pointer / reference in
   // rocket's stack. If the object is owned by ThriftServer, then we know it
   // will outlive every RocketServerConnection (and related) objects.
@@ -161,9 +109,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::function<int64_t(const std::string&)> getLoad_;
 
-  getHandlerFunc getHandler_;
-  GetHeaderHandlerFunc getHeaderHandler_;
-
   ClientIdentityHook clientIdentityHook_;
 
   BaseThriftServer();
@@ -172,51 +117,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   ~BaseThriftServer() override {}
 
  public:
-  std::shared_ptr<server::TServerEventHandler> getEventHandler() const {
-    return eventHandler_;
-  }
-
-  /**
-   * If a view of the event handlers is needed that does not need to extend
-   * their lifetime beyond that of the BaseThriftServer, this method allows
-   * obtaining the raw pointer rather than the more expensive shared_ptr. Since
-   * unsynchronized setServerEventHandler / addServerEventHandler /
-   * getEventHandler calls are not permitted, use cases that get the handler,
-   * inform it of some action, and then discard the handle immediately can use
-   * getEventHandlersUnsafe.
-   */
-  const std::vector<std::shared_ptr<server::TServerEventHandler>>&
-  getEventHandlersUnsafe() const {
-    return eventHandlers_;
-  }
-
-  /**
-   * DEPRECATED! Please use addServerEventHandler instead.
-   */
-  void setServerEventHandler(
-      std::shared_ptr<server::TServerEventHandler> eventHandler) {
-    if (eventHandler_) {
-      eventHandlers_.erase(std::find(
-          eventHandlers_.begin(), eventHandlers_.end(), eventHandler_));
-    }
-    eventHandler_ = std::move(eventHandler);
-    if (eventHandler_) {
-      eventHandlers_.push_back(eventHandler_);
-    }
-  }
-
-  void addServerEventHandler(
-      std::shared_ptr<server::TServerEventHandler> eventHandler) {
-    eventHandlers_.push_back(eventHandler);
-  }
-
-  void removeServerEventHandler(
-      std::shared_ptr<server::TServerEventHandler> eventHandler) {
-    eventHandlers_.erase(
-        std::remove(eventHandlers_.begin(), eventHandlers_.end(), eventHandler),
-        eventHandlers_.end());
-  }
-
   /**
    * Returns a reference to the custom allocator used by the server when parsing
    * Thrift frames.
@@ -527,94 +427,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   bool getEnableCodel() const { return thriftConfig_.getEnableCodel().get(); }
 
   /**
-   * Sets the main server interface that exposes user-defined methods.
-   */
-  void setInterface(std::shared_ptr<AsyncProcessorFactory> iface) {
-    setProcessorFactory(std::move(iface));
-  }
-
-  /**
-   * DEPRECATED! Use setInterface instead.
-   */
-  virtual void setProcessorFactory(
-      std::shared_ptr<AsyncProcessorFactory> pFac) {
-    CHECK(configMutable());
-    cpp2Pfac_ = pFac;
-    applicationServerInterface_ = nullptr;
-    for (auto* serviceHandler : cpp2Pfac_->getServiceHandlers()) {
-      if (auto serverInterface =
-              dynamic_cast<ServerInterface*>(serviceHandler)) {
-        applicationServerInterface_ = serverInterface;
-        break;
-      }
-    }
-  }
-
-  const std::shared_ptr<apache::thrift::AsyncProcessorFactory>&
-  getProcessorFactory() const {
-    return cpp2Pfac_;
-  }
-
-  concurrency::ThreadManager::ExecutionScope getRequestExecutionScope(
-      Cpp2RequestContext* ctx, concurrency::PRIORITY defaultPriority) override {
-    if (applicationServerInterface_) {
-      return applicationServerInterface_->getRequestExecutionScope(
-          ctx, defaultPriority);
-    }
-    return ServerConfigs::getRequestExecutionScope(ctx, defaultPriority);
-  }
-
-  /**
-   * Sets the interface that will be used for monitoring connections only.
-   */
-  void setMonitoringInterface(
-      std::shared_ptr<MonitoringServerInterface> iface) {
-    CHECK(configMutable());
-    monitoringServiceHandler_ = std::move(iface);
-  }
-
-  const std::shared_ptr<MonitoringServerInterface>& getMonitoringInterface()
-      const {
-    return monitoringServiceHandler_;
-  }
-
-  /**
-   * Sets the interface that will be used for status RPCs only.
-   */
-  void setStatusInterface(std::shared_ptr<StatusServerInterface> iface) {
-    CHECK(configMutable());
-    statusServiceHandler_ = std::move(iface);
-  }
-
-  const std::shared_ptr<StatusServerInterface>& getStatusInterface() {
-    return statusServiceHandler_;
-  }
-
-  /**
-   * Sets the interface that will be used for control RPCs only.
-   */
-  void setControlInterface(std::shared_ptr<ControlServerInterface> iface) {
-    CHECK(configMutable());
-    controlServiceHandler_ = std::move(iface);
-  }
-
-  const std::shared_ptr<ControlServerInterface>& getControlInterface() const {
-    return controlServiceHandler_;
-  }
-
-  /**
-   * Sets the interface that will be used for security RPCs only.
-   */
-  void setSecurityInterface(std::shared_ptr<SecurityServerInterface> iface) {
-    CHECK(configMutable());
-    securityServiceHandler_ = std::move(iface);
-  }
-
-  const std::shared_ptr<SecurityServerInterface>& getSecurityInterface() const {
-    return securityServiceHandler_;
-  }
-
-  /**
    * Set the task expire time
    *
    */
@@ -826,16 +638,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   std::function<int64_t(const std::string&)> getGetLoad() const {
     return getLoad_;
   }
-
-  void setGetHandler(getHandlerFunc func) { getHandler_ = func; }
-
-  getHandlerFunc getGetHandler() { return getHandler_; }
-
-  void setGetHeaderHandler(GetHeaderHandlerFunc func) {
-    getHeaderHandler_ = func;
-  }
-
-  GetHeaderHandlerFunc getGetHeaderHandler() { return getHeaderHandler_; }
 
   /**
    * Set the client identity hook for the server, which will be called in

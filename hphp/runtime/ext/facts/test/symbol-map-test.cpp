@@ -624,6 +624,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
             },
             std::move(indexedMethodAttributes),
             true,
+            true,
             std::chrono::milliseconds(5000)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
@@ -644,6 +645,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
             std::move(root),
             [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
             std::move(indexedMethodAttributes),
+            true,
             true,
             std::chrono::milliseconds(5000)),
         std::move(exec)});

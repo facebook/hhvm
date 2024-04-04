@@ -117,6 +117,7 @@ SymbolMap::SymbolMap(
     AutoloadDB::Opener dbOpener,
     hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs,
     bool enableBlockingDbWait,
+    bool useSymbolMapForGetFilesWithAttrAndAnyVal,
     std::chrono::milliseconds blockingDbWaitTimeout)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1,
@@ -125,7 +126,9 @@ SymbolMap::SymbolMap(
       m_dbVault{std::move(dbOpener)},
       m_indexedMethodAttrs{std::move(indexedMethodAttrs)},
       m_enableBlockingDbWait{enableBlockingDbWait},
-      m_blockingDbWaitTimeout{blockingDbWaitTimeout} {
+      m_blockingDbWaitTimeout{blockingDbWaitTimeout},
+      m_useSymbolMapForGetFilesWithAttrAndAnyVal{
+          useSymbolMapForGetFilesWithAttrAndAnyVal} {
   assertx(m_root.is_absolute());
 }
 
@@ -787,8 +790,8 @@ std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(
     Symbol<SymKind::Type> attr,
     const folly::dynamic& value) {
   using PathVec = std::vector<Path>;
-  // This API uses a 'db only' strategy because it is unable to update
-  // the symbol map without overfetching.  That means:
+  // We have a flag to control whether this function uses the memory map
+  // or a 'db only' strategy.  If the flag is not set, then we will.
   // 1) never look in memory for the answer
   // 2) always wait for db commit before returning from db
   // 3) never try to update memory with the answer.
@@ -797,7 +800,27 @@ std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(
   // gonna do it.
   auto paths = readOrUpdate<PathVec>(
       [&](const UNUSED Data& data) -> Optional<PathVec> {
-        return std::nullopt;
+        if (!m_useSymbolMapForGetFilesWithAttrAndAnyVal) {
+          return std::nullopt;
+        }
+        auto pathsWithAttr = data.m_fileAttrs.getKeysWithAttribute(attr);
+        if (!pathsWithAttr) {
+          return std::nullopt;
+        }
+        PathVec pathsRet;
+        for (auto&& path : *pathsWithAttr) {
+          auto args = data.m_fileAttrs.getAttributeArgs(path, attr);
+          if (!args) {
+            return std::nullopt;
+          }
+          for (auto&& arg : *args) {
+            if (arg == value) {
+              pathsRet.push_back(path);
+              break;
+            }
+          }
+        }
+        return pathsRet;
       },
       [&](std::shared_ptr<AutoloadDB> db) -> PathVec {
         // This is necessary to prevent a race condition where the db isn't

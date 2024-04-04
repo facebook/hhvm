@@ -30,6 +30,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - std::string Autoload.Logging = "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm", UNKNOWN
 - uint32_t Autoload.DB.BlockingDbWaitTimeoutMs = 5000, UNKNOWN
 - bool Autoload.DB.EnableBlockingDbWait = true, UNKNOWN
+- bool Autoload.DB.UseSymbolMapForGetFilesWithAttributeAndAnyVal = true, UNKNOWN
 - bool Autoload.AllowLoggingPropagation = false, UNKNOWN
 - bool Autoload.RethrowExceptions = true, UNKNOWN
 - uint32_t Autoload.PerfSampleRate = 0, UNKNOWN

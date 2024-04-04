@@ -96,6 +96,7 @@ struct SymbolMap {
       AutoloadDB::Opener dbOpener,
       hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes,
       bool enableBlockingDbWait,
+      bool useSymbolMapForGetFilesWithAttrAndAnyVal,
       std::chrono::milliseconds blockingDbwWaitTimeout);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
@@ -626,6 +627,7 @@ struct SymbolMap {
   const hphp_vector_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
   const bool m_enableBlockingDbWait;
   const std::chrono::milliseconds m_blockingDbWaitTimeout;
+  const bool m_useSymbolMapForGetFilesWithAttrAndAnyVal;
 };
 
 } // namespace Facts

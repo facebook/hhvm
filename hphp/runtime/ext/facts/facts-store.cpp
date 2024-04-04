@@ -472,6 +472,7 @@ struct FactsStoreImpl final
             std::move(dbOpener),
             std::move(indexedMethodAttributes),
             Cfg::Autoload::DBEnableBlockingDbWait,
+            Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
             std::chrono::milliseconds(Cfg::Autoload::DBBlockingDbWaitTimeoutMs),
         },
         m_watcher{std::move(watcher)},
@@ -487,6 +488,7 @@ struct FactsStoreImpl final
             std::move(dbOpener),
             std::move(indexedMethodAttributes),
             Cfg::Autoload::DBEnableBlockingDbWait,
+            Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
             std::chrono::milliseconds(
                 Cfg::Autoload::DBBlockingDbWaitTimeoutMs)} {}
 

@@ -8,10 +8,12 @@ import (
     "strings"
 
     module0 "module0"
+    module2 "module2"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = module0.GoUnusedProtection__
+var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = strings.Split
@@ -199,6 +201,50 @@ err := result.Read(p)
 if err != nil {
     return err
 }
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type Enum = module2.Enum
+
+const (
+    Enum_A Enum = module2.Enum_A
+    Enum_B Enum = module2.Enum_B
+    Enum_C Enum = module2.Enum_C
+)
+
+// Enum value maps for Enum
+var (
+    EnumToName  = module2.EnumToName
+    EnumToValue = module2.EnumToValue
+)
+
+// Deprecated: Use EnumToValue instead (e.g. `x, ok := EnumToValue["name"]`).
+func EnumFromString(s string) (Enum, error) {
+    return module2.EnumFromString(s)
+}
+
+func NewEnum() Enum {
+    return 0
+}
+
+func WriteEnum(item Enum, p thrift.Format) error {
+    if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadEnum(p thrift.Format) (Enum, error) {
+    var decodeResult Enum
+    decodeErr := func() error {
+        enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := module2.Enum(enumResult)
         decodeResult = result
         return nil
     }()

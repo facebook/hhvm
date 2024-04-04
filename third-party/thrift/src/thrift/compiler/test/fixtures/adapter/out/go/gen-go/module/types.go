@@ -684,6 +684,22 @@ if err != nil {
 
 type AdaptedEnum = ThriftAdaptedEnum
 
+const (
+    AdaptedEnum_Zero AdaptedEnum = ThriftAdaptedEnum_Zero
+    AdaptedEnum_One AdaptedEnum = ThriftAdaptedEnum_One
+)
+
+// Enum value maps for ThriftAdaptedEnum
+var (
+    AdaptedEnumToName  = ThriftAdaptedEnumToName
+    AdaptedEnumToValue = ThriftAdaptedEnumToValue
+)
+
+// Deprecated: Use AdaptedEnumToValue instead (e.g. `x, ok := AdaptedEnumToValue["name"]`).
+func AdaptedEnumFromString(s string) (AdaptedEnum, error) {
+    return ThriftAdaptedEnumFromString(s)
+}
+
 func NewAdaptedEnum() AdaptedEnum {
     return 0
 }

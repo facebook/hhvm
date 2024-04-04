@@ -18,6 +18,24 @@ var _ = thrift.ZERO
 
 type MyCompany = Company
 
+const (
+    MyCompany_FACEBOOK MyCompany = Company_FACEBOOK
+    MyCompany_WHATSAPP MyCompany = Company_WHATSAPP
+    MyCompany_OCULUS MyCompany = Company_OCULUS
+    MyCompany_INSTAGRAM MyCompany = Company_INSTAGRAM
+)
+
+// Enum value maps for Company
+var (
+    MyCompanyToName  = CompanyToName
+    MyCompanyToValue = CompanyToValue
+)
+
+// Deprecated: Use MyCompanyToValue instead (e.g. `x, ok := MyCompanyToValue["name"]`).
+func MyCompanyFromString(s string) (MyCompany, error) {
+    return CompanyFromString(s)
+}
+
 func NewMyCompany() MyCompany {
     return 0
 }

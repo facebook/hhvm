@@ -15,6 +15,7 @@
  */
 
 include "module0.thrift"
+include "module2.thrift"
 include "thrift/annotation/go.thrift"
 
 typedef string Plate
@@ -24,6 +25,7 @@ typedef list<string> Drivers
 typedef module0.Accessory Accessory
 @go.Name{name = "CarPartName"}
 typedef module0.PartName PartName
+typedef module2.Enum Enum
 
 struct Automobile {
   1: Plate plate;

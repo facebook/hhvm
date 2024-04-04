@@ -5,6 +5,7 @@ package module1 // [[[ program thrift source path ]]]
 
 import (
     module0 "module0"
+    module2 "module2"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
@@ -18,6 +19,7 @@ func mapsCopy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
 }
 
 var _ = module0.GoUnusedProtection__
+var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
 // TODO: uncomment when can safely upgrade to Go 1.21 without requiring any rollback.
@@ -106,6 +108,10 @@ var (
     premadeThriftType_list_module1_Car = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module1_Car),
+            )
+    premadeThriftType_module2_Enum = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module2.Enum"),
             )
 )
 
@@ -296,6 +302,7 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
 
     // ...now add enum metadatas from recursively included programs.
     mapsCopy(allEnumsMap, module0.GetEnumsMetadata())
+    mapsCopy(allEnumsMap, module2.GetEnumsMetadata())
 
     return allEnumsMap
 }
@@ -311,6 +318,7 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
 
     // ...now add struct metadatas from recursively included programs.
     mapsCopy(allStructsMap, module0.GetStructsMetadata())
+    mapsCopy(allStructsMap, module2.GetStructsMetadata())
 
     return allStructsMap
 }
@@ -326,6 +334,7 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
 
     // ...now add exception metadatas from recursively included programs.
     mapsCopy(allExceptionsMap, module0.GetExceptionsMetadata())
+    mapsCopy(allExceptionsMap, module2.GetExceptionsMetadata())
 
     return allExceptionsMap
 }
@@ -341,6 +350,7 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
 
     // ...now add service metadatas from recursively included programs.
     mapsCopy(allServicesMap, module0.GetServicesMetadata())
+    mapsCopy(allServicesMap, module2.GetServicesMetadata())
 
     return allServicesMap
 }

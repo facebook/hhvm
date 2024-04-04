@@ -20,6 +20,14 @@
 
 }}
 type {{typedef:go_name}} = {{#typedef:type}}{{> common/type}}{{/typedef:type}}
+{{#typedef:type}}
+{{#type:enum?}}
+{{#type:enum}}
+
+{{> types/typedef_enum}}
+{{/type:enum}}
+{{/type:enum?}}
+{{/typedef:type}}
 
 {{! new function }}
 {{> types/typedef_method_new}}

@@ -32,7 +32,7 @@ template <typename Reader, typename Writer, bool Printable>
 struct RWPair {
   using reader = Reader;
   using writer = Writer;
-  using printable = folly::bool_constant<Printable>;
+  using printable = std::bool_constant<Printable>;
 };
 
 using protocol_type_pairs = ::testing::Types<

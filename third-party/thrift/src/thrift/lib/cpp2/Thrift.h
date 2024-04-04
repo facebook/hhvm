@@ -86,11 +86,11 @@ struct struct_private_access {
   //  members of the type to which it is a friend. Making these function
   //  templates is a workaround.
   template <typename T>
-  static folly::bool_constant<T::__fbthrift_cpp2_gen_json> //
+  static std::bool_constant<T::__fbthrift_cpp2_gen_json> //
   __fbthrift_cpp2_gen_json();
 
   template <typename T>
-  static folly::bool_constant<T::__fbthrift_cpp2_is_runtime_annotation> //
+  static std::bool_constant<T::__fbthrift_cpp2_is_runtime_annotation> //
   __fbthrift_cpp2_is_runtime_annotation();
 
   template <typename T>
@@ -183,7 +183,7 @@ struct IsThriftUnion : std::false_type {};
 
 template <typename T>
 struct IsThriftUnion<T, folly::void_t<typename T::__fbthrift_cpp2_type>>
-    : folly::bool_constant<T::__fbthrift_cpp2_is_union> {};
+    : std::bool_constant<T::__fbthrift_cpp2_is_union> {};
 
 // __fbthrift_clear_terse_fields should be called for a terse struct field
 // before deserialization so that it only clears out terse fields in a terse

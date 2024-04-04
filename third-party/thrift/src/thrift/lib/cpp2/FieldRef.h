@@ -1965,7 +1965,7 @@ class union_field_ref {
   friend class union_field_ref;
   friend struct detail::union_value_unsafe_fn;
 
-  using is_cpp_ref_or_boxed = folly::bool_constant<
+  using is_cpp_ref_or_boxed = std::bool_constant<
       detail::is_boxed_value_ptr_v<folly::remove_cvref_t<T>> ||
       detail::is_shared_or_unique_ptr_v<folly::remove_cvref_t<T>>>;
 

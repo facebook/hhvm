@@ -126,7 +126,7 @@ struct is_abstract {
 template <typename CTag>
 struct is_a {
   template <typename Tag>
-  using apply = folly::bool_constant<type::is_a_v<Tag, CTag>>;
+  using apply = std::bool_constant<type::is_a_v<Tag, CTag>>;
 };
 } // namespace bound
 
@@ -166,26 +166,26 @@ template <typename T>
 struct is_concrete<service_t<T>> : std::true_type {};
 
 template <typename VTag>
-struct is_concrete<list<VTag>> : folly::bool_constant<is_concrete_v<VTag>> {};
+struct is_concrete<list<VTag>> : std::bool_constant<is_concrete_v<VTag>> {};
 template <typename KTag>
-struct is_concrete<set<KTag>> : folly::bool_constant<is_concrete_v<KTag>> {};
+struct is_concrete<set<KTag>> : std::bool_constant<is_concrete_v<KTag>> {};
 template <typename KTag, typename VTag>
 struct is_concrete<map<KTag, VTag>>
-    : folly::bool_constant<is_concrete_v<KTag> && is_concrete_v<VTag>> {};
+    : std::bool_constant<is_concrete_v<KTag> && is_concrete_v<VTag>> {};
 
 template <typename Adapter, typename Tag>
 struct is_concrete<adapted<Adapter, Tag>>
-    : folly::bool_constant<is_concrete_v<Tag>> {};
+    : std::bool_constant<is_concrete_v<Tag>> {};
 template <typename T, typename Tag>
-struct is_concrete<cpp_type<T, Tag>>
-    : folly::bool_constant<is_concrete_v<Tag>> {};
+struct is_concrete<cpp_type<T, Tag>> : std::bool_constant<is_concrete_v<Tag>> {
+};
 
 template <typename Tag, typename Context>
 struct is_concrete<field<Tag, Context>>
-    : folly::bool_constant<is_concrete_v<Tag>> {};
+    : std::bool_constant<is_concrete_v<Tag>> {};
 template <typename Adapter, typename Tag, typename Context>
 struct is_concrete<field<adapted<Adapter, Tag>, Context>>
-    : folly::bool_constant<is_concrete_v<Tag>> {};
+    : std::bool_constant<is_concrete_v<Tag>> {};
 
 template <>
 struct is_thrift_type_tag<all_c> : std::true_type {};
@@ -224,21 +224,21 @@ struct is_thrift_type_tag<service_c> : std::true_type {};
 
 template <typename VTag>
 struct is_thrift_type_tag<list<VTag>>
-    : folly::bool_constant<is_thrift_type_tag_v<VTag>> {};
+    : std::bool_constant<is_thrift_type_tag_v<VTag>> {};
 template <typename KTag>
 struct is_thrift_type_tag<set<KTag>>
-    : folly::bool_constant<is_thrift_type_tag_v<KTag>> {};
+    : std::bool_constant<is_thrift_type_tag_v<KTag>> {};
 template <typename KTag, typename VTag>
 struct is_thrift_type_tag<map<KTag, VTag>>
-    : folly::bool_constant<
+    : std::bool_constant<
           is_thrift_type_tag_v<KTag> && is_thrift_type_tag_v<VTag>> {};
 
 template <typename Adapter, typename Tag>
 struct is_thrift_type_tag<adapted<Adapter, Tag>>
-    : folly::bool_constant<is_thrift_type_tag_v<Tag>> {};
+    : std::bool_constant<is_thrift_type_tag_v<Tag>> {};
 template <typename T, typename Tag>
 struct is_thrift_type_tag<cpp_type<T, Tag>>
-    : folly::bool_constant<is_thrift_type_tag_v<Tag>> {};
+    : std::bool_constant<is_thrift_type_tag_v<Tag>> {};
 
 template <typename Tag, typename Context>
 struct is_thrift_type_tag<field<Tag, Context>> : std::true_type {};

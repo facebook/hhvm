@@ -257,7 +257,7 @@ template <typename T>
 constexpr bool uses_one_thread_v =
     folly::is_detected_v<detail::uses_one_thread_, T>;
 template <typename T>
-struct uses_one_thread_ : folly::bool_constant<uses_one_thread_v<T>> {};
+struct uses_one_thread_ : std::bool_constant<uses_one_thread_v<T>> {};
 
 // Auxiliary class to isolate the queue code. Clean ups also happen in this
 // class, it mainly manages the ConnectPoolOperation and

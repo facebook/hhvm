@@ -25,8 +25,8 @@
     {
       "refid": "classapache_1_1thrift_1_1union__field__ref_1a7f69bc29bd7d6d4bd328440e248c7327",
       "prot": "private",
-      "type_html": "folly::bool_constant&lt;\n    <code>detail::is_boxed_value_ptr_v</code>&lt;folly::remove_cvref_t&lt;T&gt;&gt; ||\n    detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::is_cpp_ref_or_boxed =  folly::bool_constant&lt; detail::is_boxed_value_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt; || detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt;&gt;",
+      "type_html": "std::bool_constant&lt;\n    <code>detail::is_boxed_value_ptr_v</code>&lt;folly::remove_cvref_t&lt;T&gt;&gt; ||\n    detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt;&gt;",
+      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::is_cpp_ref_or_boxed =  std::bool_constant&lt; detail::is_boxed_value_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt; || detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt;&gt;",
       "argsstring_html": "",
       "name_html": "is_cpp_ref_or_boxed",
       "location": {

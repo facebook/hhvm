@@ -36,7 +36,7 @@ template <typename Reader, typename Writer>
 struct Serializer {
  private:
   template <typename T>
-  using is_thrift_class = folly::bool_constant<is_thrift_class_v<T>>;
+  using is_thrift_class = std::bool_constant<is_thrift_class_v<T>>;
 
   template <typename T>
   static void warn_unless(folly::tag_t<T>, const char* which, std::false_type) {

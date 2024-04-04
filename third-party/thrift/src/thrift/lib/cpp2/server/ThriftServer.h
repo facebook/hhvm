@@ -209,6 +209,33 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     // in the ThreadManagerExecutorAdapter when in ThreadManager mode
   };
 
+  struct RuntimeServerActions {
+    bool userSuppliedThreadManager{false};
+    bool userSuppliedResourcePools{false};
+    bool interactionInService{false};
+    bool wildcardMethods{false};
+    bool noServiceRequestInfo{false};
+    bool activeRequestTrackingDisabled{false};
+    bool setPreprocess{false};
+    bool setIsOverloaded{false};
+    bool resourcePoolFlagSet{false};
+    bool codelEnabled{false};
+    bool setupThreadManagerBeforeHandler{false};
+    std::string executorToThreadManagerUnexpectedFunctionName{};
+
+    bool resourcePoolEnablementLocked{false};
+    bool resourcePoolRuntimeRequested{false};
+    bool resourcePoolRuntimeDisabled{false};
+    bool resourcePoolEnabled{false};
+
+    bool resourcePoolEnabledGflag{false};
+    bool resourcePoolDisabledGflag{false};
+
+    bool checkComplete{false};
+
+    std::string explain() const;
+  };
+
   bool resourcePoolEnabled() const override {
     return getRuntimeServerActions().resourcePoolEnabled;
   }
@@ -494,11 +521,22 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   Metadata& metadata() { return metadata_; }
 
+  /**
+   * Get the flags used to support migrations and rollouts.
+   */
+  RuntimeServerActions& getRuntimeServerActions() const {
+    return runtimeServerActions_;
+  }
+
  private:
   // Server behavior to wrt header traffic
   LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
 
   Metadata metadata_;
+
+  //! Flags used to track certain actions of thrift servers to help support
+  //! migrations and rollouts.
+  mutable RuntimeServerActions runtimeServerActions_;
 
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};

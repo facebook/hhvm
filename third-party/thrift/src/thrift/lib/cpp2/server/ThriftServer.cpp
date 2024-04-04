@@ -2275,5 +2275,22 @@ ThriftServer::InjectedFailure ThriftServer::CumulativeFailureInjection::test()
   return InjectedFailure::NONE;
 }
 
+std::string ThriftServer::RuntimeServerActions::explain() const {
+  std::string result;
+  result = std::string(userSuppliedThreadManager ? "setThreadManager, " : "") +
+      (userSuppliedResourcePools ? "userSuppliedResourcePools, " : "") +
+      (interactionInService ? "interactionInService, " : "") +
+      (wildcardMethods ? "wildcardMethods, " : "") +
+      (noServiceRequestInfo ? "noServiceRequestInfo, " : "") +
+      (activeRequestTrackingDisabled ? "activeRequestTrackingDisabled, " : "") +
+      (setPreprocess ? "setPreprocess, " : "") +
+      (setIsOverloaded ? "setIsOverloaded, " : "") +
+      (codelEnabled ? "codelEnabled, " : "") +
+      (setupThreadManagerBeforeHandler ? "setupThreadManagerBeforeHandler, "
+                                       : "") +
+      (!resourcePoolFlagSet ? "thriftFlagNotSet, " : "");
+  return result;
+}
+
 } // namespace thrift
 } // namespace apache

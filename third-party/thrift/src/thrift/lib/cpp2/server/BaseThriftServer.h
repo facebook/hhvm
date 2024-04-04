@@ -105,41 +105,6 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
- public:
-  struct RuntimeServerActions {
-    bool userSuppliedThreadManager{false};
-    bool userSuppliedResourcePools{false};
-    bool interactionInService{false};
-    bool wildcardMethods{false};
-    bool noServiceRequestInfo{false};
-    bool activeRequestTrackingDisabled{false};
-    bool setPreprocess{false};
-    bool setIsOverloaded{false};
-    bool resourcePoolFlagSet{false};
-    bool codelEnabled{false};
-    bool setupThreadManagerBeforeHandler{false};
-    std::string executorToThreadManagerUnexpectedFunctionName{};
-
-    bool resourcePoolEnablementLocked{false};
-    bool resourcePoolRuntimeRequested{false};
-    bool resourcePoolRuntimeDisabled{false};
-    bool resourcePoolEnabled{false};
-
-    bool resourcePoolEnabledGflag{false};
-    bool resourcePoolDisabledGflag{false};
-
-    bool checkComplete{false};
-
-    std::string explain() const;
-  };
-
-  /**
-   * Get the flags used to support migrations and rollouts.
-   */
-  RuntimeServerActions& getRuntimeServerActions() const {
-    return runtimeServerActions_;
-  }
-
  private:
   // Cpp2 ProcessorFactory.
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
@@ -188,10 +153,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   //! The server's listening port
   std::optional<uint16_t> port_;
-
-  //! Flags used to track certain actions of thrift servers to help support
-  //! migrations and rollouts.
-  mutable RuntimeServerActions runtimeServerActions_;
 
   // Notification of various server events. Note that once observer_ has been
   // set, it cannot be set again and will remain alive for (at least) the

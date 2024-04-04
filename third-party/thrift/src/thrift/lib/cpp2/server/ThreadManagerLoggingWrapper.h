@@ -21,7 +21,7 @@
 
 namespace apache::thrift {
 
-class BaseThriftServer;
+class ThriftServer;
 
 // This is a logging wrapper that wraps a ThreadManager
 // It logs the methods that are of interest to ResourcePool rollout
@@ -31,7 +31,7 @@ class ThreadManagerLoggingWrapper : public concurrency::PriorityThreadManager {
  public:
   ThreadManagerLoggingWrapper(
       std::shared_ptr<concurrency::ThreadManager> tm,
-      const BaseThriftServer* server,
+      const ThriftServer* server,
       bool shouldLog = true)
       : tm_(std::move(tm)), server_(server), shouldLog_(shouldLog) {
     priorityThreadManager_ = dynamic_cast<PriorityThreadManager*>(tm_.get());
@@ -193,7 +193,7 @@ class ThreadManagerLoggingWrapper : public concurrency::PriorityThreadManager {
 
  private:
   std::shared_ptr<concurrency::ThreadManager> tm_;
-  const BaseThriftServer* server_;
+  const ThriftServer* server_;
   bool shouldLog_;
   // logging should only be done once if any as
   // it's quite expensive

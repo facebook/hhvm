@@ -140,22 +140,5 @@ std::string BaseThriftServer::getLoadInfo(int64_t load) const {
   return stream.str();
 }
 
-std::string BaseThriftServer::RuntimeServerActions::explain() const {
-  std::string result;
-  result = std::string(userSuppliedThreadManager ? "setThreadManager, " : "") +
-      (userSuppliedResourcePools ? "userSuppliedResourcePools, " : "") +
-      (interactionInService ? "interactionInService, " : "") +
-      (wildcardMethods ? "wildcardMethods, " : "") +
-      (noServiceRequestInfo ? "noServiceRequestInfo, " : "") +
-      (activeRequestTrackingDisabled ? "activeRequestTrackingDisabled, " : "") +
-      (setPreprocess ? "setPreprocess, " : "") +
-      (setIsOverloaded ? "setIsOverloaded, " : "") +
-      (codelEnabled ? "codelEnabled, " : "") +
-      (setupThreadManagerBeforeHandler ? "setupThreadManagerBeforeHandler, "
-                                       : "") +
-      (!resourcePoolFlagSet ? "thriftFlagNotSet, " : "");
-  return result;
-}
-
 } // namespace thrift
 } // namespace apache

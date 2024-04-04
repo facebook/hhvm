@@ -705,12 +705,13 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
       return prot.writeBinary(value.as_binary());
     case Value::Type::listValue: {
       TType elemType = protocol::T_I64;
-      uint32_t size = value.as_list().size();
+      const auto& listVal = value.as_list();
+      uint32_t size = listVal.size();
       if (size > 0) {
-        elemType = getTType(value.as_list().at(0));
+        elemType = getTType(listVal.at(0));
       }
       auto serializedSize = prot.writeListBegin(elemType, size);
-      for (const auto& val : value.as_list()) {
+      for (const auto& val : listVal) {
         ensureSameType(val, elemType);
         serializedSize += serializeValue(prot, val);
       }
@@ -720,13 +721,14 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::mapValue: {
       TType keyType = protocol::T_STRING;
       TType valueType = protocol::T_I64;
-      uint32_t size = value.as_map().size();
+      const auto& mapVal = value.as_map();
+      uint32_t size = mapVal.size();
       if (size > 0) {
-        keyType = getTType(value.as_map().begin()->first);
-        valueType = getTType(value.as_map().begin()->second);
+        keyType = getTType(mapVal.begin()->first);
+        valueType = getTType(mapVal.begin()->second);
       }
       auto serializedSize = prot.writeMapBegin(keyType, valueType, size);
-      for (const auto& [key, val] : value.as_map()) {
+      for (const auto& [key, val] : mapVal) {
         ensureSameType(key, keyType);
         ensureSameType(val, valueType);
         serializedSize += serializeValue(prot, key);
@@ -737,12 +739,13 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     }
     case Value::Type::setValue: {
       TType elemType = protocol::T_I64;
-      uint32_t size = value.as_set().size();
+      const auto& setVal = value.as_set();
+      uint32_t size = setVal.size();
       if (size > 0) {
-        elemType = getTType(*value.as_set().begin());
+        elemType = getTType(*setVal.begin());
       }
       auto serializedSize = prot.writeSetBegin(elemType, size);
-      for (const auto& val : value.as_set()) {
+      for (const auto& val : setVal) {
         ensureSameType(val, elemType);
         serializedSize += serializeValue(prot, val);
       }
@@ -877,10 +880,11 @@ void serializeValue(
       TType valueType = protocol::T_I64;
 
       // compute size, keyType, and valueType
-      uint32_t size = value.as_map().size();
+      const auto& mapVal = value.as_map();
+      uint32_t size = mapVal.size();
       if (size > 0) {
-        keyType = getTType(value.as_map().begin()->first);
-        valueType = getTType(value.as_map().begin()->second);
+        keyType = getTType(mapVal.begin()->first);
+        valueType = getTType(mapVal.begin()->second);
       }
       for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
         const Value& key = getByValueId(*protocolData.keys(), keyValueId);
@@ -890,7 +894,7 @@ void serializeValue(
           valueType = toTType(
               *getByValueId(*protocolData.values(), valueId).wireType());
         }
-        if (folly::get_ptr(value.as_map(), key) == nullptr) {
+        if (folly::get_ptr(mapVal, key) == nullptr) {
           ++size;
         }
       }
@@ -909,16 +913,16 @@ void serializeValue(
         ensureSameType(key, keyType);
         serializeValue(prot, key);
         // no need to serialize the value
-        if (folly::get_ptr(value.as_map(), key) == nullptr) {
+        if (folly::get_ptr(mapVal, key) == nullptr) {
           writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
           continue;
         }
         // recursively serialize value with maskedData
-        const Value& val = value.as_map().at(key);
+        const Value& val = mapVal.at(key);
         ensureSameType(val, valueType);
         serializeValue(prot, val, protocolData, nestedMaskedData);
       }
-      for (const auto& [key, val] : value.as_map()) {
+      for (const auto& [key, val] : mapVal) {
         if (keys.find(key) != keys.end()) { // already serailized
           continue;
         }

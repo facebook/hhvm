@@ -19,11 +19,25 @@
 
 #include "mcrouter/lib/fbi/util.h"
 
-#define fbi_futex_wait(p, val) \
-  syscall(SYS_futex, (p), FUTEX_WAIT | FUTEX_PRIVATE_FLAG, (val), NULL, NULL, 0)
+#define fbi_futex_wait(p, val)         \
+  syscall(                             \
+      SYS_futex,                       \
+      (p),                             \
+      FUTEX_WAIT | FUTEX_PRIVATE_FLAG, \
+      (val),                           \
+      nullptr,                         \
+      nullptr,                         \
+      0)
 
-#define fbi_futex_wake(p, n) \
-  syscall(SYS_futex, (p), FUTEX_WAKE | FUTEX_PRIVATE_FLAG, (n), NULL, NULL, 0)
+#define fbi_futex_wake(p, n)           \
+  syscall(                             \
+      SYS_futex,                       \
+      (p),                             \
+      FUTEX_WAKE | FUTEX_PRIVATE_FLAG, \
+      (n),                             \
+      nullptr,                         \
+      nullptr,                         \
+      0)
 
 void counting_sem_init(counting_sem_t* sem, int32_t val) {
   sem->cnt.store(std::max(val, 0), std::memory_order_release);

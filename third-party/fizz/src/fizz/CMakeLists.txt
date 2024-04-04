@@ -125,7 +125,6 @@ set(FIZZ_HEADER_DIRS
   server
   util
   tool
-  third-party
 )
 
 set(FIZZ_TEST_HEADER_DIRS
@@ -157,23 +156,6 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
     ${FIZZ_TEST_HEADERS}
     ${headers})
 endforeach()
-
-if(FIZZ_BUILD_AEGIS)
-    set(FIZZ_AESNI_SOURCES
-      third-party/libsodium-aegis/aegis128l/aesni/aead_aegis128l_aesni.c
-      third-party/libsodium-aegis/aegis256/aesni/aead_aegis256_aesni.c
-    )
-    set_source_files_properties(${FIZZ_AESNI_SOURCES} PROPERTIES COMPILE_OPTIONS "-maes;-mssse3")
-
-    set(FIZZ_AEGIS_SOURCES
-      ${FIZZ_AESNI_SOURCES}
-      third-party/libsodium-aegis/aegis128l/aead_aegis128l.c
-      third-party/libsodium-aegis/aegis128l/soft/aead_aegis128l_soft.c
-      third-party/libsodium-aegis/aegis256/aead_aegis256.c
-      third-party/libsodium-aegis/aegis256/soft/aead_aegis256_soft.c
-      third-party/libsodium-aegis/private/softaes.c
-    )
-endif()
 
 set(FIZZ_SOURCES
   compression/CertDecompressionManager.cpp
@@ -251,7 +233,6 @@ set(FIZZ_SOURCES
   tool/FizzCommandCommon.cpp
   util/FizzUtil.cpp
   util/Tracing.cpp
-  ${FIZZ_AEGIS_SOURCES}
 )
 
 

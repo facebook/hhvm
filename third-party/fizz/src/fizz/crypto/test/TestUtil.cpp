@@ -97,10 +97,10 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
       break;
 #if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      cipher = AEGISCipher::make128L();
+      cipher = AEGIS::make128L();
       break;
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      cipher = AEGISCipher::make256();
+      cipher = AEGIS::make256();
       break;
 #endif
     default:

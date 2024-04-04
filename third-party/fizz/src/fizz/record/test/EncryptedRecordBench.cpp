@@ -243,7 +243,7 @@ void encryptAEGIS(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = AEGISCipher::make128L();
+    aead = AEGIS::make128L();
     aead->setKey(getAegisKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {
@@ -264,8 +264,8 @@ void decryptAEGIS(uint32_t n, size_t size) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead = AEGISCipher::make128L();
-    auto readAead = AEGISCipher::make128L();
+    auto writeAead = AEGIS::make128L();
+    auto readAead = AEGIS::make128L();
     writeAead->setKey(getAegisKey());
     readAead->setKey(getAegisKey());
     write.setAead(folly::ByteRange(), std::move(writeAead));

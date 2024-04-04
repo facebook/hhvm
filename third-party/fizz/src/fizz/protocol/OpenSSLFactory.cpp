@@ -41,9 +41,9 @@ std::unique_ptr<Aead> OpenSSLFactory::makeAead(CipherSuite cipher) const {
       return OpenSSLEVPCipher::makeCipher<AESOCB128>();
 #if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return AEGISCipher::make256();
+      return AEGIS::make256();
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return AEGISCipher::make128L();
+      return AEGIS::make128L();
 #endif
     default:
       throw std::runtime_error("aead: not implemented");

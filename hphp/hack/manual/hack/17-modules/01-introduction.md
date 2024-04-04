@@ -1,7 +1,7 @@
 Modules are an experimental feature for organizing code and separating your internal and external APIs. Modules are collections of Hack files that share an identity or utility.
 
 ## Module definitions
-You can define a new module with the `new module` keywords.
+You can define a new module with a `new module` declaration:
 
 ```hack file:foomodule.hack
 //// module.hack
@@ -29,7 +29,7 @@ class Foo {
 ```
 
 ## Module level visibility: `internal`
-By placing your code in modules, you can use a new visibility keyword: `internal`. An `internal` symbol can only be accessed from within the module.
+By placing your code in a module, you can use a new visibility keyword: `internal`. An `internal` symbol can only be accessed from within the module.
 
 ```hack file:foomodule.hack
 //// foo_class.hack

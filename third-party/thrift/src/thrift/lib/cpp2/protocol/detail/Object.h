@@ -546,7 +546,7 @@ MaskedDecodeResultValue parseValueWithMask(
     return result;
   }
   if (readMask.isNoneMask()) { // do not deserialize
-    if (!KeepExcludedData) { // no need to store
+    if constexpr (!KeepExcludedData) { // no need to store
       apache::thrift::skip(prot, arg_type);
       return result;
     }
@@ -586,9 +586,11 @@ MaskedDecodeResultValue parseValueWithMask(
         if (!apache::thrift::empty(nestedResult.included)) {
           object[FieldId{fid}] = std::move(nestedResult.included);
         }
-        if (KeepExcludedData && !apache::thrift::empty(nestedResult.excluded)) {
-          result.excluded.fields_ref().ensure()[FieldId{fid}] =
-              std::move(nestedResult.excluded);
+        if constexpr (KeepExcludedData) {
+          if (!apache::thrift::empty(nestedResult.excluded)) {
+            result.excluded.fields_ref().ensure()[FieldId{fid}] =
+                std::move(nestedResult.excluded);
+          }
         }
         prot.readFieldEnd();
       }
@@ -619,13 +621,15 @@ MaskedDecodeResultValue parseValueWithMask(
         if (!apache::thrift::empty(nestedResult.included)) {
           map[keyValue] = std::move(nestedResult.included);
         }
-        if (KeepExcludedData && !apache::thrift::empty(nestedResult.excluded)) {
-          auto& keys = protocolData.keys().ensure();
-          keys.push_back(keyValue);
-          type::ValueId id =
-              type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
-          result.excluded.values_ref().ensure()[id] =
-              std::move(nestedResult.excluded);
+        if constexpr (KeepExcludedData) {
+          if (!apache::thrift::empty(nestedResult.excluded)) {
+            auto& keys = protocolData.keys().ensure();
+            keys.push_back(keyValue);
+            type::ValueId id = type::ValueId{
+                apache::thrift::util::i32ToZigzag(keys.size() - 1)};
+            result.excluded.values_ref().ensure()[id] =
+                std::move(nestedResult.excluded);
+          }
         }
       }
       prot.readMapEnd();

@@ -1886,6 +1886,21 @@ ThriftServer::checkOverload(
   return {};
 }
 
+int64_t ThriftServer::getLoad(
+    const std::string& counter, bool check_custom) const {
+  if (check_custom && getLoad_) {
+    return getLoad_(counter);
+  }
+
+  const auto activeRequests = getActiveRequests();
+
+  if (VLOG_IS_ON(1)) {
+    FB_LOG_EVERY_MS(INFO, 1000 * 10) << getLoadInfo(activeRequests);
+  }
+
+  return activeRequests;
+}
+
 std::string ThriftServer::getLoadInfo(int64_t load) const {
   auto ioGroup = getIOGroupSafe();
   auto workerFactory = ioGroup != nullptr

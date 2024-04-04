@@ -400,6 +400,20 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   GetHeaderHandlerFunc getGetHeaderHandler() { return getHeaderHandler_; }
 
+  // Get load of the server.
+  int64_t getLoad(
+      const std::string& counter = "", bool check_custom = true) const final;
+
+  void setGetLoad(std::function<int64_t(const std::string&)> getLoad) {
+    getLoad_ = getLoad;
+  }
+
+  std::function<int64_t(const std::string&)> getGetLoad() const {
+    return getLoad_;
+  }
+
+  std::string getLoadInfo(int64_t load) const;
+
   bool resourcePoolEnabled() const override {
     return getRuntimeServerActions().resourcePoolEnabled;
   }
@@ -785,6 +799,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   IsOverloadedFunc isOverloaded_;
   PreprocessFunc preprocess_;
+
+  std::function<int64_t(const std::string&)> getLoad_;
 
   // This is meant to be used internally
   // We separate setThreadManager and configureThreadManager
@@ -1349,8 +1365,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   // returns descriptive error if application is unable to process request
   PreprocessResult preprocess(
       const server::PreprocessParams& params) const final;
-
-  std::string getLoadInfo(int64_t load) const override;
 
   /*
    * Use a ZeroCopyEnableFunc to decide when to use zerocopy mode

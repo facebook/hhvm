@@ -93,27 +93,5 @@ bool BaseThriftServer::getTaskExpireTimeForRequest(
   }
   return queueTimeout != taskTimeout;
 }
-
-int64_t BaseThriftServer::getLoad(
-    const std::string& counter, bool check_custom) const {
-  if (check_custom && getLoad_) {
-    return getLoad_(counter);
-  }
-
-  const auto activeRequests = getActiveRequests();
-
-  if (VLOG_IS_ON(1)) {
-    FB_LOG_EVERY_MS(INFO, 1000 * 10) << getLoadInfo(activeRequests);
-  }
-
-  return activeRequests;
-}
-
-std::string BaseThriftServer::getLoadInfo(int64_t load) const {
-  std::stringstream stream;
-  stream << "Load is: " << load << " active requests";
-  return stream.str();
-}
-
 } // namespace thrift
 } // namespace apache

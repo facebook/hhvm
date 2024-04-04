@@ -107,8 +107,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
 
-  std::function<int64_t(const std::string&)> getLoad_;
-
   ClientIdentityHook clientIdentityHook_;
 
   BaseThriftServer();
@@ -252,11 +250,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
         folly::observer::makeStaticObserver(std::optional{useClientTimeout}),
         source);
   }
-
-  // Get load of the server.
-  int64_t getLoad(
-      const std::string& counter = "", bool check_custom = true) const final;
-  virtual std::string getLoadInfo(int64_t load) const;
 
   void setObserver(const std::shared_ptr<server::TServerObserver>& observer) {
     auto locked = observer_.wlock();
@@ -629,14 +622,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   const folly::sorted_vector_set<std::string>&
   getMethodsBypassMaxRequestsLimit() const {
     return thriftConfig_.getMethodsBypassMaxRequestsLimit();
-  }
-
-  void setGetLoad(std::function<int64_t(const std::string&)> getLoad) {
-    getLoad_ = getLoad;
-  }
-
-  std::function<int64_t(const std::string&)> getGetLoad() const {
-    return getLoad_;
   }
 
   /**

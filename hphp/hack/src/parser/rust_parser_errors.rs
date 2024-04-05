@@ -148,7 +148,7 @@ impl UnstableFeatures {
             UnstableFeatures::ClassType => Unstable,
             UnstableFeatures::FunctionReferences => Unstable,
             UnstableFeatures::FunctionTypeOptionalParams => OngoingRelease,
-            UnstableFeatures::ExpressionTreeMap => Preview,
+            UnstableFeatures::ExpressionTreeMap => OngoingRelease,
         }
     }
 }

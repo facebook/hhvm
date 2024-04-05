@@ -20,3 +20,19 @@ struct TestStruct {
   1: string unqualified_string;
   2: optional string optional_string;
 }
+
+struct TestStructWithDefaultValues {
+  1: i32 unqualified_integer = 42;
+
+  2: optional i32 optional_integer = 43;
+
+  3: TestStruct unqualified_struct = TestStruct{unqualified_string = "hello"};
+
+  4: optional TestStruct optional_struct = TestStruct{
+    unqualified_string = "world",
+  };
+
+  5: TestStruct unqualified_struct_intrinsic_default;
+
+  6: optional TestStruct optional_struct_intrinsic_default;
+}

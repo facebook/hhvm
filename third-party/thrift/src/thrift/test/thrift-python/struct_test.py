@@ -22,18 +22,50 @@ from thrift.python.types import StructMeta
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestStruct as TestStructMutable,
+    TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
+    TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
 )
 
 
 class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
+    def setUp(self) -> None:
+        # Disable maximum printed diff length.
+        self.maxDiff = None
+
     def test_creation(self) -> None:
         # Field initialization at instantiation time
         w_new = TestStructImmutable(unqualified_string="hello, world!")
         self.assertEqual(w_new.unqualified_string, "hello, world!")
+
+    def test_default_values(self) -> None:
+        # Custom default values:
+        # Newly created instance has custom default values for non-optional
+        # fields, but custom default values for optional fields are ignored.
+        self.assertEquals(
+            TestStructWithDefaultValuesImmutable(),
+            TestStructWithDefaultValuesImmutable(
+                unqualified_integer=42,
+                optional_integer=None,
+                unqualified_struct=TestStructImmutable(unqualified_string="hello"),
+                optional_struct=None,
+            ),
+        )
+
+        # Intrinsic default values:
+        # optional struct field is None
+        self.assertIsNone(
+            TestStructWithDefaultValuesImmutable().optional_struct_intrinsic_default
+        )
+
+        # unqualified struct field is default-initialized
+        self.assertEquals(
+            TestStructImmutable(),
+            TestStructWithDefaultValuesImmutable().unqualified_struct_intrinsic_default,
+        )
 
     def test_type_safety(self) -> None:
         # Field type is validated on instantiation
@@ -87,6 +119,9 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
+    def setUp(self) -> None:
+        # Disable maximum printed diff length.
+        self.maxDiff = None
 
     def test_creation_and_assignment(self) -> None:
         w_mutable = TestStructMutable()
@@ -96,6 +131,32 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(w_mutable.unqualified_string, None)
         w_mutable.unqualified_string = "hello, world!"
         self.assertEqual(w_mutable.unqualified_string, "hello, world!")
+
+    def test_default_values(self) -> None:
+        # Custom default values:
+        # DO_BEFORE(aristidis,20240505): Add support for custom default values
+        # to mutable thrift-python types (similar to immutable types).
+        self.assertEquals(
+            TestStructWithDefaultValuesMutable(),
+            TestStructWithDefaultValuesMutable(
+                unqualified_integer=None,
+                optional_integer=None,
+                unqualified_struct=None,
+                optional_struct=None,
+            ),
+        )
+
+        # Intrinsic default values:
+        # optional struct field is None
+        self.assertIsNone(
+            TestStructWithDefaultValuesMutable().optional_struct_intrinsic_default
+        )
+
+        # DO_BEFORE(aristidis,20240506): unqualified struct field should be
+        # default-initialized.
+        self.assertIsNone(
+            TestStructWithDefaultValuesMutable().unqualified_struct_intrinsic_default,
+        )
 
     def test_equality_and_hashability(self) -> None:
         # Equality

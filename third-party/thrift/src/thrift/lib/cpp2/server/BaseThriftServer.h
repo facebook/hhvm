@@ -72,12 +72,6 @@ ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
  private:
-  // TODO: T176242251 we use unique_ptr and just pass raw pointer / reference in
-  // rocket's stack. If the object is owned by ThriftServer, then we know it
-  // will outlive every RocketServerConnection (and related) objects.
-  std::shared_ptr<rocket::ParserAllocatorType> customAllocatorForParser_{
-      nullptr};
-
   friend ThriftServerConfig& detail::getThriftServerConfig(BaseThriftServer&);
 
  protected:
@@ -90,26 +84,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   ~BaseThriftServer() override {}
 
  public:
-  /**
-   * Returns a reference to the custom allocator used by the server when parsing
-   * Thrift frames.
-   */
-  std::shared_ptr<rocket::ParserAllocatorType> getCustomAllocatorForParser() {
-    return customAllocatorForParser_;
-  }
-
-  /**
-   * Sets the custom allocator used by the server. The allocator is use by the
-   * server to allocate memory for the IOBufs when parsing incoming frames.
-   *
-   * @param customAllocator A unique pointer to the custom allocator. The
-   * BaseThriftServer will take over the ownership
-   */
-  void setCustomAllocatorForParser(
-      std::shared_ptr<rocket::ParserAllocatorType> customParserAllocator) {
-    customAllocatorForParser_ = std::move(customParserAllocator);
-  }
-
   /**
    * Indicate whether it is safe to modify the server config through setters.
    * This roughly corresponds to whether the IO thread pool could be servicing

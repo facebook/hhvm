@@ -98,7 +98,7 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
         if (off.value() == 0) {
           v << copy{base, ld.d};
         } else {
-          v << addqi{off.value(), base, ld.d, v.makeReg()};
+          v << lea{base[off.value()], ld.d};
         }
       });
       return;

@@ -822,6 +822,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   bool isPrimaryServer_{false};
 
+  // Notification of various server events. Note that once observer_ has been
+  // set, it cannot be set again and will remain alive for (at least) the
+  // lifetime of *this.
+  folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
+  std::atomic<server::TServerObserver*> observerPtr_{nullptr};
+
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
 
@@ -907,6 +913,23 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
  public:
+  void setObserver(const std::shared_ptr<server::TServerObserver>& observer) {
+    auto locked = observer_.wlock();
+    if (*locked) {
+      throw std::logic_error("Server already has an observer installed");
+    }
+    *locked = observer;
+    observerPtr_.store(locked->get());
+  }
+
+  server::TServerObserver* getObserver() const final {
+    return observerPtr_.load(std::memory_order_relaxed);
+  }
+
+  std::shared_ptr<server::TServerObserver> getObserverShared() const {
+    return observer_.copy();
+  }
+
   AdaptiveConcurrencyController& getAdaptiveConcurrencyController() final {
     return adaptiveConcurrencyController_;
   }

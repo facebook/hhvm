@@ -84,12 +84,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   ThriftServerConfig thriftConfig_;
 
  protected:
-  // Notification of various server events. Note that once observer_ has been
-  // set, it cannot be set again and will remain alive for (at least) the
-  // lifetime of *this.
-  folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
-  std::atomic<server::TServerObserver*> observerPtr_{nullptr};
-
   ClientIdentityHook clientIdentityHook_;
 
   BaseThriftServer();
@@ -232,23 +226,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     thriftConfig_.setUseClientTimeout(
         folly::observer::makeStaticObserver(std::optional{useClientTimeout}),
         source);
-  }
-
-  void setObserver(const std::shared_ptr<server::TServerObserver>& observer) {
-    auto locked = observer_.wlock();
-    if (*locked) {
-      throw std::logic_error("Server already has an observer installed");
-    }
-    *locked = observer;
-    observerPtr_.store(locked->get());
-  }
-
-  server::TServerObserver* getObserver() const final {
-    return observerPtr_.load(std::memory_order_relaxed);
-  }
-
-  std::shared_ptr<server::TServerObserver> getObserverShared() const {
-    return observer_.copy();
   }
 
   /**

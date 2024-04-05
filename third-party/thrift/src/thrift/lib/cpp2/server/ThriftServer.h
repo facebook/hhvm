@@ -780,6 +780,9 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     return runtimeServerActions_;
   }
 
+  void setAsPrimaryServer() { isPrimaryServer_ = true; }
+  bool isPrimaryServer() const { return isPrimaryServer_; }
+
  private:
   // Cpp2 ProcessorFactory.
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
@@ -812,6 +815,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   //! Flags used to track certain actions of thrift servers to help support
   //! migrations and rollouts.
   mutable RuntimeServerActions runtimeServerActions_;
+
+  /**
+   * In cases where multiple services are running in the same process, this
+   * will be used to indicate which is the primary server.
+   */
+  bool isPrimaryServer_{false};
 
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};

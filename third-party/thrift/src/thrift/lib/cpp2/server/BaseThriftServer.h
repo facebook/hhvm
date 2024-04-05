@@ -83,16 +83,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
  protected:
   ThriftServerConfig thriftConfig_;
 
-  /**
-   * In cases where multiple services are running in the same process, this
-   * will be used to indicate which is the primary server.
-   */
-  bool isPrimaryServer_{false};
-
- public:
-  void setAsPrimaryServer() { isPrimaryServer_ = true; }
-  bool isPrimaryServer() const { return isPrimaryServer_; }
-
  protected:
   // Notification of various server events. Note that once observer_ has been
   // set, it cannot be set again and will remain alive for (at least) the

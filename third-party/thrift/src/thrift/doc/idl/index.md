@@ -878,26 +878,29 @@ The element, key, and value types can be any Thrift type, including nested conta
 default_value ::=  "=" initializer
 ```
 
-All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the intrinsic default for that type. The intrinsic default values for Thrift types are listed below:
+Every Thrift type has a _standard default value_:
 
 * bool: `false`
 * Integer types: 0
-* enum: 0 (even enum has no value for zero)
-* float and double: 0.0
+* enum: 0 (even if that enum has no enumerator with value zero)
+* float and double: +0.0
 * string and binary: empty string
 * containers: empty container
-* structs: language-dependent: empty struct for C++, null/None for Hack/Python/Java
+* structs:
+  * each optional field is not present
+  * each non-optional field is set to its custom default if an initializer was provided or (recursively) to the standard default value for its type.
+* unions: empty union
 
-Default values are used as follows:
-
-* To initialize required fields (fields with the qualifier `required`).
-* As the value used to serialize an unqualified field (a field with no qualifier) when this field is *not present*.
+An instance of a Thrift struct that is initialized without an explicit value should be initialized to its standard default value.
 
 :::note
-The concepts "required", "unqualified", and "not present" are described in more detail below.
+When initializing or deserializing a struct in Java, or in Hack without the `nonnullables` compiler option, unqualified fields that are not present / explicitly initialized will be set to null/None instead of their standard default values.
 :::
 
-In addition, default values can be used in generated code to provide default behaviors when fields have not been initialized. For example, the method `getValueOrDefault()` can be provided for a field that returns the value of the field when present, and the default value when not present.
+
+:::note
+The concepts "optional", "unqualified", and "not present" are described in more detail below.
+:::
 
 ```
 enum Foo { A = 1, B = 2, C = 3}
@@ -909,10 +912,33 @@ struct Bar {
   1: i64 field1 = 10;  // default value is 10
   2: i64 field2;  // default value is 0
   3: map<i32, string> field3 = {15 : 'a_value', 2: 'b_value'};  // default value is the map with two entries
-  4: list<Foo> = [Foo.A, Foo.B, Foo.A];  // default value is a list with three entries
-  5: Person person = {"age": 40, "name": "John"}; // default value is a struct with these default values
+  4: list<Foo> field4 = [Foo.A, Foo.B, Foo.A];  // default value is a list with three entries
+  5: Person field5 = Person{age = 40, name = "John"}; // default value is a struct with these default values
+  6: Foo field6; // default value is 0 (unnamed)
 }
 ```
+### Intrinsic Default Value
+
+Every Thrift type also has an _intrinsic default value_. The intrinsic default value of a type is the same as its standard default value except for structs, where custom field initializers are ignored.
+
+For example, the intrinsic default value of `struct Bar` above is:
+
+```
+Bar {
+    field1 = 0,  // vs. standard default value: 10
+    field2 = 0,  // same as standard default value
+    field3 = {}, // vs. {15 : 'a_value', 2: 'b_value'}
+    field4 = [], // vs. [Foo.A, Foo.B, Foo.A]
+    field5 = Person{age = 0, name = ""}, // vs. Person{age = 40, name = "John"}
+    field6 = 0.  // same
+}
+```
+
+:::note
+In practice, users are less likely to interact with intrinsic default values than the standard ones, but they are nonetheless relevant in specific use cases such as [Terse Fields](./#terse-fields).
+
+In C++, the `apache::thrift::clear()` function sets objects to their instrinsic default values.
+:::
 
 :::caution
 Avoid using default values on optional fields. It is not possible to tell if the server sent the value, or if it is just the default value.
@@ -974,9 +1000,9 @@ Optional fields start their lifecycle as *not present* (when the object is initi
 Unqualified fields are just like optional fields with the following difference: When an object with an unqualified field is serialized and the field is *not present*, the default value of the field is serialized as the value for that field.
 
 :::note
-Regarding unqualified vs. optional field, we don't have a generalized strong recommendation on which one should be used. It depends on individual use cases. If you need to know whether the field is explicit set or not, use optional fields.
+Regarding unqualified vs. optional field, we don't have a generalized strong recommendation on which one should be used. It depends on individual use cases. If you need to know whether the field is explicitly set or not, use optional fields.
 :::
 
 ### Terse Fields
 
-Terse fields do not distinguish whether they are explicitly set. They are skipped during serialization if their values are equal to the [intrinsic default values](./#intrinsic-default-values).
+Terse fields are skipped during serialization if their values are equal to the [_intrinsic default values_](./#intrinsic-default-value) for their types. There is no difference between a terse field set to its intrinsic default and not set at all.

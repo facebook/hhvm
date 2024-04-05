@@ -45,12 +45,12 @@ let if_unsat (f : env -> env * TL.subtype_prop) (env, p) =
   else
     (env, p)
 
-let ( ||| ) ~fail (env, p1) (f : env -> env * TL.subtype_prop) =
+let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
   if TL.is_valid p1 then
     (env, p1)
   else
     let (env, p2) = f env in
-    (env, TL.disj ~fail p1 p2)
+    (env, TL.disj ~fail:None p1 p2)
 
 (* We *know* that the assertion is unsatisfiable *)
 let invalid ~fail env = (env, TL.invalid ~fail)

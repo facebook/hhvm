@@ -96,7 +96,7 @@
                       ((C), [12:5-20],
                        (New (((C), [12:9-10], (CI ([12:9-10], "\\C"))), 
                           [],
-                          [((~dict<nothing, nothing>), [12:11-19],
+                          [((dict<nothing, nothing>), [12:11-19],
                             (Call
                                { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
                                  targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];

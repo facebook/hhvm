@@ -1071,7 +1071,6 @@ end = struct
       lty_sub
       (r_super, lty_supers)
       env =
-    let ( ||| ) = ( ||| ) ~fail in
     (* We *know* that the assertion is unsatisfiable *)
     let invalid_env env = invalid ~fail env in
     let default_subtype_help env =
@@ -2021,8 +2020,6 @@ end = struct
       (r_super, (class_id_super, exact_super, tyl_super))
       env : env * TL.subtype_prop =
     let invalid_env = invalid ~fail in
-    let ( ||| ) = ( ||| ) ~fail in
-
     let (cid_super, cid_sub) = (snd class_id_super, snd class_id_sub) in
     let (exact_match, both_exact) =
       match (exact_sub, exact_super) with
@@ -2804,7 +2801,6 @@ end = struct
                * not complete.
                * TODO(T120921930): Don't do this if require_completeness is set.
                *)
-              let ( ||| ) = ( ||| ) ~fail in
               List.fold_left
                 tyl_sub
                 ~init:(env, TL.invalid ~fail)
@@ -3017,7 +3013,6 @@ end = struct
                      ty_super = lty_inner;
                    }
           else
-            let ( ||| ) = ( ||| ) ~fail in
             env
             |> simplify
                  ~subtype_env
@@ -3230,7 +3225,6 @@ end = struct
           | None -> invalid env ~fail
           | Some new_visited ->
             let subtype_env = Subtype_env.set_visited subtype_env new_visited in
-            let ( ||| ) = ( ||| ) ~fail in
             (* Collect all the lower bounds ("super" constraints) on the
              * generic parameter, and check ty_sub against each of them in turn
              * until one of them succeeds *)
@@ -4023,7 +4017,6 @@ end = struct
                   }
                 env
           in
-          let ( ||| ) = ( ||| ) ~fail in
           default_subtype
             ~subtype_env
             ~this_ty
@@ -5110,7 +5103,6 @@ end = struct
       (* First, we try to discharge the subtype query on the bound; if
        * that fails, we mint a fresh rigid type variable to represent
        * the concrete type constant and try to solve the query using it *)
-      let ( ||| ) = ( ||| ) ~fail in
       let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
       simplify
         ~subtype_env
@@ -5753,7 +5745,6 @@ end = struct
 
   let simplify_intersection_l
       ~subtype_env ~this_ty ~fail ~mk_prop (sub_supportdyn, tys_sub) rhs env =
-    let ( ||| ) = ( ||| ) ~fail in
     (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
      * not complete.
      * TODO(T120921930): Don't do this if require_completeness is set.
@@ -5775,7 +5766,6 @@ end = struct
       rhs_for_mixed
       env =
     begin
-      let ( ||| ) = ( ||| ) ~fail in
       let lty_sub =
         mk (reason_generic, Tgeneric (generic_nm, generic_ty_args))
       in
@@ -5888,7 +5878,6 @@ end = struct
       ((reason_super, rhs_subtype, rhs_other) as rhs)
       env =
     let (env, ty_sub) = Env.expand_type env ty_sub in
-    let ( ||| ) = ( ||| ) ~fail in
 
     match deref ty_sub with
     | (r, Toption ty) ->
@@ -6753,7 +6742,9 @@ end = struct
     match prop with
     | TL.Conj props ->
       tell_all ty_sub ty_super env ~ty_errs:[] ~remain:[] props on_error
-    | TL.Disj (inf_err_opt, props) ->
+    (* Encodes the invalid proposition with an accompanying error *)
+    | TL.Disj (inf_err_opt, []) -> (env, inf_err_opt, [])
+    | TL.Disj (_, props) ->
       log_non_singleton_disj
         ty_sub
         ty_super
@@ -6769,15 +6760,7 @@ end = struct
         "after simplification"
         prop
         props;
-      tell_exists
-        ty_sub
-        ty_super
-        env
-        ~ty_errs:[]
-        ~remain:[]
-        ~inf_err_opt
-        props
-        on_error
+      tell_exists ty_sub ty_super env ~ty_errs:[] ~remain:[] props on_error
     | TL.IsSubtype (coerce, ty_sub, ty_super) ->
       tell_cstr env (coerce, ty_sub, ty_super) on_error
 
@@ -6867,16 +6850,11 @@ end = struct
       in
       tell_all ty_sub ty_super env ~ty_errs ~remain props on_error
 
-  and tell_exists
-      ty_sub ty_super env ~ty_errs ~remain ~inf_err_opt props on_error =
+  and tell_exists ty_sub ty_super env ~ty_errs ~remain props on_error =
     (* For now, just find the first prop in the disjunction that works *)
     match props with
     | [] ->
-      (* TODO[mjt]: let's not drop the errors accumulated across the disjunction
-         on the floor; we can handle this with a new typing error constructor
-         then figure out how/if we should display the underlying failures
-         to the user.
-      *)
+      let inf_err_opt = Typing_error.intersect_opt ty_errs in
       (env, inf_err_opt, List.rev remain)
     | prop :: props ->
       let (prop_env, prop_inf_err, prop_remain) =
@@ -6885,15 +6863,7 @@ end = struct
       (match prop_inf_err with
       | Some ty_err ->
         let ty_errs = ty_err :: ty_errs and remain = prop_remain @ remain in
-        tell_exists
-          ty_sub
-          ty_super
-          env
-          ~ty_errs
-          ~remain
-          ~inf_err_opt
-          props
-          on_error
+        tell_exists ty_sub ty_super env ~ty_errs ~remain props on_error
       | _ -> (prop_env, None, List.rev remain))
 
   let prop_to_env ty_sub ty_super env prop on_error =

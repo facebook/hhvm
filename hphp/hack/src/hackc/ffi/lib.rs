@@ -13,11 +13,11 @@
 //! handful of these types.
 
 #![cfg_attr(UNSTABLE_DEBUG_SLICE, feature(min_specialization))]
-
-pub mod ffi;
+pub mod maybe;
+pub mod vector;
 
 pub use triomphe::OffsetArc;
 
-pub use crate::ffi::Maybe;
-pub use crate::ffi::Maybe::*;
-pub use crate::ffi::Vector;
+pub use crate::maybe::Maybe;
+pub use crate::maybe::Maybe::*;
+pub use crate::vector::Vector;

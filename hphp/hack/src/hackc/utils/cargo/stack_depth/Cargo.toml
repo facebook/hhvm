@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../stack_depth.rs"
 
 [dependencies]
-ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
+ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc-gen = { version = "0.0.0", path = "../../../../../../tools/hhbc-gen" }
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }

@@ -12,7 +12,7 @@ path = "../../emit_type_hint.rs"
 
 [dependencies]
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
-ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
+ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }

@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../decl_vars.rs"
 
 [dependencies]
-ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
+ffi = { version = "0.0.0", path = "../../../ffi/ffi" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }

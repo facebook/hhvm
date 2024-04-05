@@ -28,7 +28,6 @@
 #include <folly/Memory.h>
 #include <folly/Portability.h>
 #include <folly/SharedMutex.h>
-#include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
 #include <folly/VirtualExecutor.h>
 #include <folly/io/SocketOptionMap.h>
@@ -95,12 +94,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   bool isPrimaryServer() const { return isPrimaryServer_; }
 
  protected:
-  //! The server's listening addresses
-  std::vector<folly::SocketAddress> addresses_;
-
-  //! The server's listening port
-  std::optional<uint16_t> port_;
-
   // Notification of various server events. Note that once observer_ has been
   // set, it cannot be set again and will remain alive for (at least) the
   // lifetime of *this.
@@ -266,80 +259,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::shared_ptr<server::TServerObserver> getObserverShared() const {
     return observer_.copy();
-  }
-
-  /**
-   * Set the address(es) to listen on.
-   */
-  void setAddress(const folly::SocketAddress& address) {
-    setAddresses({address});
-  }
-
-  void setAddress(folly::SocketAddress&& address) {
-    setAddresses({std::move(address)});
-  }
-
-  void setAddress(const char* ip, uint16_t port) {
-    setAddresses({folly::SocketAddress(ip, port)});
-  }
-
-  void setAddress(const std::string& ip, uint16_t port) {
-    setAddresses({folly::SocketAddress(ip, port)});
-  }
-
-  void setAddresses(std::vector<folly::SocketAddress> addresses) {
-    CHECK(!addresses.empty());
-    CHECK(configMutable());
-    port_.reset();
-    addresses_ = std::move(addresses);
-  }
-
-  /**
-   * Get the address the server is listening on.
-   *
-   * This should generally only be called after setup() has finished.
-   *
-   * (The address may be uninitialized until setup() has run.  If called from
-   * another thread besides the main server thread, the caller is responsible
-   * for providing their own synchronization to ensure that setup() is not
-   * modifying the address while they are using it.)
-   */
-  const folly::SocketAddress& getAddress() const { return addresses_.at(0); }
-
-  const std::vector<folly::SocketAddress>& getAddresses() const {
-    return addresses_;
-  }
-
-  const std::string getAddressAsString() const {
-    return getAddress().isInitialized() ? getAddress().describe()
-                                        : std::to_string(port_.value_or(0));
-  }
-
-  /**
-   * Set the port to listen on.
-   */
-  void setPort(uint16_t port) {
-    CHECK(configMutable());
-    port_ = port;
-    addresses_.at(0).reset();
-  }
-
-  bool isPortSet() {
-    if (!getAddress().isInitialized()) {
-      return port_.has_value();
-    }
-    return true;
-  }
-
-  /**
-   * Get the port.
-   */
-  uint16_t getPort() {
-    auto addr = getAddress();
-    if (!addr.isInitialized()) {
-      return port_.value_or(0);
-    }
-    return addr.isFamilyInet() ? addr.getPort() : 0;
   }
 
   /**

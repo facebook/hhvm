@@ -34,11 +34,11 @@
 
 namespace apache {
 namespace thrift {
-BaseThriftServer::BaseThriftServer() : thriftConfig_(), addresses_(1) {}
+BaseThriftServer::BaseThriftServer() : thriftConfig_() {}
 
 BaseThriftServer::BaseThriftServer(
     const ThriftServerInitialConfig& initialConfig)
-    : thriftConfig_(initialConfig), addresses_(1) {}
+    : thriftConfig_(initialConfig) {}
 
 bool BaseThriftServer::getTaskExpireTimeForRequest(
     const apache::thrift::transport::THeader& requestHeader,

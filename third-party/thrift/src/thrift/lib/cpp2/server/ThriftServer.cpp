@@ -259,6 +259,7 @@ ThriftServer::ThriftServer()
           makeCPUConcurrencyControllerConfigInternal(),
           *this,
           detail::getThriftServerConfig(*this)},
+      addresses_(1),
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
           std::chrono::steady_clock::now().time_since_epoch().count()) {
@@ -276,6 +277,7 @@ ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
           detail::makeCPUConcurrencyControllerConfig(this),
           *this,
           detail::getThriftServerConfig(*this)},
+      addresses_(1),
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
           std::chrono::steady_clock::now().time_since_epoch().count()) {

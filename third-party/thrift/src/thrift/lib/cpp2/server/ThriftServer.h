@@ -269,6 +269,80 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     std::string explain() const;
   };
 
+  /**
+   * Set the address(es) to listen on.
+   */
+  void setAddress(const folly::SocketAddress& address) {
+    setAddresses({address});
+  }
+
+  void setAddress(folly::SocketAddress&& address) {
+    setAddresses({std::move(address)});
+  }
+
+  void setAddress(const char* ip, uint16_t port) {
+    setAddresses({folly::SocketAddress(ip, port)});
+  }
+
+  void setAddress(const std::string& ip, uint16_t port) {
+    setAddresses({folly::SocketAddress(ip, port)});
+  }
+
+  void setAddresses(std::vector<folly::SocketAddress> addresses) {
+    CHECK(!addresses.empty());
+    CHECK(configMutable());
+    port_.reset();
+    addresses_ = std::move(addresses);
+  }
+
+  /**
+   * Get the address the server is listening on.
+   *
+   * This should generally only be called after setup() has finished.
+   *
+   * (The address may be uninitialized until setup() has run.  If called from
+   * another thread besides the main server thread, the caller is responsible
+   * for providing their own synchronization to ensure that setup() is not
+   * modifying the address while they are using it.)
+   */
+  const folly::SocketAddress& getAddress() const { return addresses_.at(0); }
+
+  const std::vector<folly::SocketAddress>& getAddresses() const {
+    return addresses_;
+  }
+
+  const std::string getAddressAsString() const {
+    return getAddress().isInitialized() ? getAddress().describe()
+                                        : std::to_string(port_.value_or(0));
+  }
+
+  /**
+   * Set the port to listen on.
+   */
+  void setPort(uint16_t port) {
+    CHECK(configMutable());
+    port_ = port;
+    addresses_.at(0).reset();
+  }
+
+  bool isPortSet() {
+    if (!getAddress().isInitialized()) {
+      return port_.has_value();
+    }
+    return true;
+  }
+
+  /**
+   * Get the port.
+   */
+  uint16_t getPort() {
+    auto addr = getAddress();
+    if (!addr.isInitialized()) {
+      return port_.value_or(0);
+    }
+    return addr.isFamilyInet() ? addr.getPort() : 0;
+  }
+
   std::shared_ptr<server::TServerEventHandler> getEventHandler() const {
     return eventHandler_;
   }
@@ -796,6 +870,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   folly::observer::Observer<CPUConcurrencyController::Config>
   makeCPUConcurrencyControllerConfigInternal();
   CPUConcurrencyController cpuConcurrencyController_;
+
+  //! The server's listening addresses
+  std::vector<folly::SocketAddress> addresses_;
+
+  //! The server's listening port
+  std::optional<uint16_t> port_;
 
   IsOverloadedFunc isOverloaded_;
   PreprocessFunc preprocess_;
@@ -1886,7 +1966,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * Logically, this is an apache::thrift::MultiplexAsyncProcessorFactory with
    * the following composition:
    *
-   *    ┌────────────────────────┐
+   *    ┌────────────────────���───┐
    *    │      User Service      │
    *    │ (setProcessorFactory)  │  │
    *    └────────────────────────┘  │

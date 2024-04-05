@@ -49,7 +49,7 @@ void MysqlClientBase::logQueryFailure(
     const std::string& error,
     const Connection& conn) {
   auto conn_context = conn.getConnectionContext();
-  stats()->incrFailedQueries(conn_context, mysqlErrno);
+  stats()->incrFailedQueries(conn_context, mysqlErrno, error);
 
   if (db_logger_) {
     db_logger_->logQueryFailure(
@@ -78,7 +78,7 @@ void MysqlClientBase::logConnectionFailure(
     unsigned int mysqlErrno,
     const std::string& error,
     const db::ConnectionContextBase* connection_context) {
-  stats()->incrFailedConnections(connection_context, mysqlErrno);
+  stats()->incrFailedConnections(connection_context, mysqlErrno, error);
 
   if (db_logger_) {
     db_logger_->logConnectionFailure(

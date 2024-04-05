@@ -97,12 +97,14 @@ class DBCounterBase {
   // failed connections
   virtual void incrFailedConnections(
       const db::ConnectionContextBase* context,
-      unsigned int mysql_errno) = 0;
+      unsigned int mysql_errno,
+      const std::string& errStr) = 0;
 
   // query failures
   virtual void incrFailedQueries(
       const db::ConnectionContextBase* context,
-      unsigned int mysql_errno) = 0;
+      unsigned int mysql_errno,
+      const std::string& errStr) = 0;
 
   // query successes
   virtual void incrSucceededQueries(
@@ -152,7 +154,8 @@ class SimpleDbCounter : public DBCounterBase {
 
   void incrFailedConnections(
       const db::ConnectionContextBase* /* context */,
-      unsigned int /* unused */) override {
+      unsigned int /* unused */,
+      const std::string& /* unused */) override {
     failed_connections_.fetch_add(1, std::memory_order_relaxed);
   }
 
@@ -163,7 +166,8 @@ class SimpleDbCounter : public DBCounterBase {
 
   void incrFailedQueries(
       const db::ConnectionContextBase* /* context */,
-      unsigned int /* unused */) override {
+      unsigned int /* unused */,
+      const std::string& /* unused */) override {
     failed_queries_.fetch_add(1, std::memory_order_relaxed);
   }
 

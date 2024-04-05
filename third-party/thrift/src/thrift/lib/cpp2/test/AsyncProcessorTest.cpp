@@ -153,8 +153,7 @@ class AsyncProcessorMethodResolutionTestP
     auto runner = std::make_unique<ScopedServerInterfaceThread>(
         std::move(service), std::move(configureServer));
     if (transportType() == TransportType::HTTP2) {
-      auto& thriftServer =
-          dynamic_cast<ThriftServer&>(runner->getThriftServer());
+      auto& thriftServer = runner->getThriftServer();
       thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
     }
     return runner;

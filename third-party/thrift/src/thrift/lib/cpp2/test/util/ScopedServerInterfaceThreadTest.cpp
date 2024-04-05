@@ -205,7 +205,7 @@ TEST(ScopedServerInterfaceThread, ctor_with_thriftserver) {
 TEST(ScopedServerInterfaceThread, configureCbCalled) {
   std::atomic<bool> configCalled{false};
   ScopedServerInterfaceThread ssit(
-      make_shared<SimpleServiceImpl>(), "::1", 0, [&](BaseThriftServer&) {
+      make_shared<SimpleServiceImpl>(), "::1", 0, [&](ThriftServer&) {
         configCalled = true;
       });
   EXPECT_TRUE(configCalled);
@@ -495,8 +495,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
       std::move(h2_options), server.getThriftProcessor(), server);
 }
 
-void addH2RoutingHandler(BaseThriftServer& server) {
-  auto& thriftServer = static_cast<ThriftServer&>(server);
+void addH2RoutingHandler(ThriftServer& thriftServer) {
   thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
 }
 

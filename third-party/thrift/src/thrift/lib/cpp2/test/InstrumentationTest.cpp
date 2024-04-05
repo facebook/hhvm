@@ -379,8 +379,7 @@ class RequestInstrumentationTest : public testing::Test {
     Impl(ScopedServerInterfaceThread::ServerConfigCb&& serverCfgCob = {})
         : handler_(std::make_shared<TestInterface>()),
           server_(handler_, "::1", 0, std::move(serverCfgCob)),
-          thriftServer_(
-              dynamic_cast<ThriftServer*>(&server_.getThriftServer())) {}
+          thriftServer_(&server_.getThriftServer()) {}
     std::shared_ptr<TestInterface> handler_;
     apache::thrift::ScopedServerInterfaceThread server_;
     ThriftServer* thriftServer_;
@@ -911,9 +910,7 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
           return {
               folly::makeSemiFuture().deferValue([&](folly::Unit) {
                 auto snapshot =
-                    dynamic_cast<ThriftServer&>(runner.getThriftServer())
-                        .getServerSnapshot()
-                        .get();
+                    runner.getThriftServer().getServerSnapshot().get();
                 ASSERT_EQ(snapshot.requests.size(), 1);
                 // We exit here with a specific exit code to test that this
                 // code is reached

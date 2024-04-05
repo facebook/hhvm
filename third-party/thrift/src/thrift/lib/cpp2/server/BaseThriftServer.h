@@ -84,8 +84,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   ThriftServerConfig thriftConfig_;
 
  protected:
-  ClientIdentityHook clientIdentityHook_;
-
   BaseThriftServer();
 
   explicit BaseThriftServer(const ThriftServerInitialConfig& initialConfig);
@@ -509,17 +507,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   getMethodsBypassMaxRequestsLimit() const {
     return thriftConfig_.getMethodsBypassMaxRequestsLimit();
   }
-
-  /**
-   * Set the client identity hook for the server, which will be called in
-   * Cpp2ConnContext(). It can be used to cache client identities for each
-   * connection. They can be retrieved with Cpp2ConnContext::getPeerIdentities.
-   */
-  void setClientIdentityHook(ClientIdentityHook func) {
-    clientIdentityHook_ = func;
-  }
-
-  ClientIdentityHook getClientIdentityHook() { return clientIdentityHook_; }
 
   virtual void serve() = 0;
 

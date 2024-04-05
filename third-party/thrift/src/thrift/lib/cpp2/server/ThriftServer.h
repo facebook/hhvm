@@ -783,6 +783,17 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setAsPrimaryServer() { isPrimaryServer_ = true; }
   bool isPrimaryServer() const { return isPrimaryServer_; }
 
+  /**
+   * Set the client identity hook for the server, which will be called in
+   * Cpp2ConnContext(). It can be used to cache client identities for each
+   * connection. They can be retrieved with Cpp2ConnContext::getPeerIdentities.
+   */
+  void setClientIdentityHook(ClientIdentityHook func) {
+    clientIdentityHook_ = func;
+  }
+
+  ClientIdentityHook getClientIdentityHook() { return clientIdentityHook_; }
+
  private:
   // Cpp2 ProcessorFactory.
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
@@ -896,6 +907,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   PreprocessFunc preprocess_;
 
   std::function<int64_t(const std::string&)> getLoad_;
+
+  ClientIdentityHook clientIdentityHook_;
 
   // This is meant to be used internally
   // We separate setThreadManager and configureThreadManager

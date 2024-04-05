@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a60dafd68a16f5c171d7fefa229c635c>>
+// @generated SignedSource<<d2a7bb227670da1983ed08fcf4e7aafd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+#![allow(clippy::all)]
 use crate::ast_defs::*;
 impl ShapeFieldName {
     pub fn mk_sflit_int(p0: Pstring) -> Self {

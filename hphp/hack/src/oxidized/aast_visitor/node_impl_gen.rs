@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8cc9232084c7f055893dd5d063750d7>>
+// @generated SignedSource<<ecbb2c3d1a4d3489eaf140ef80ed942d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+#![allow(clippy::all)]
 use super::node::Node;
 use super::type_params::Params;
 use super::visitor::Visitor;

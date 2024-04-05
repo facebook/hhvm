@@ -91,6 +91,7 @@ fn mk_file(file: &syn::File, uses: Vec<&str>) -> TokenStream {
     let enums = get_enums(file);
     let content = enums.into_iter().map(mk_impl);
     quote! {
+        #![allow(clippy::all)]
         #(use #uses;)*
         #(#content)*
     }

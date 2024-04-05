@@ -247,7 +247,10 @@ class RootRoute {
       if (enableAsyncDlBroadcast_) {
         auto reqCopy = std::make_shared<const McDeleteRequest>(req);
         auto r = rh[0];
-        folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
+        folly::fibers::addTask([r, reqCopy]() {
+          fiber_local<RouterInfo>::setDistributionTargetRegion("");
+          r->route(*reqCopy);
+        });
         // for async return carbon::Result::NOTFOUND:
         return createReply(DefaultReply, req);
       } else {

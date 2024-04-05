@@ -1451,7 +1451,9 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
     let actual_max = List.length lambda_ft.ft_params in
     (* actual must be able to take at least as many args as expected expects
      * and require no more than expected requires *)
-    if actual_max < expected_max then
+    let too_few = actual_max < expected_max in
+    let too_many = actual_min > expected_min in
+    if too_few then
       Typing_error_utils.add_typing_error ~env
       @@ Typing_error.primary
            (Typing_error.Primary.Typing_too_few_args
@@ -1461,8 +1463,7 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 pos = lambda_pos;
                 decl_pos = def_pos;
               });
-    (* Errors.typing_too_few_args expected_max lambda_max lambda_pos def_pos; *)
-    if actual_min > expected_min then
+    if too_many then
       Typing_error_utils.add_typing_error ~env
       @@ Typing_error.primary
            (Typing_error.Primary.Typing_too_many_args
@@ -1471,9 +1472,10 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 actual = actual_min;
                 pos = lambda_pos;
                 decl_pos = def_pos;
-              })
+              });
+    not (too_few || too_many)
     (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
-  | (_, _) -> ()
+  | (_, _) -> true
 
 (* The variadic capture argument is an array listing the passed
  * variable arguments for the purposes of the function body; callsites
@@ -9050,8 +9052,8 @@ end = struct
 
     (* Is the return type declared? *)
     let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
-    let check_body_under_known_params ~supportdyn env ?ret_ty ft :
-        env * _ * locl_ty =
+    let check_body_under_known_params
+        ~ty_mismatch_opt ~supportdyn env ?ret_ty ft : env * _ * locl_ty =
       let (env, (tefun, ft, support_dynamic_type)) =
         closure_make
           ~should_invalidate_fakes
@@ -9073,6 +9075,7 @@ end = struct
         else
           ty
       in
+      let tefun = hole_on_ty_mismatch ~ty_mismatch_opt tefun in
       (env, tefun, ty)
     in
     let (env, eexpected) =
@@ -9093,7 +9096,9 @@ end = struct
       make_result env p Aast.Omitted (MakeType.dynamic (Reason.Rwitness p))
     | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
       (* First check that arities match up *)
-      check_lambda_arity env p (get_pos ty) declared_ft expected_ft;
+      let arity_ok =
+        check_lambda_arity env p (get_pos ty) declared_ft expected_ft
+      in
       (* Use declared types for parameters in preference to those determined
        * by the context (expected parameters): they might be more general. *)
       let rec replace_non_declared_types
@@ -9157,7 +9162,18 @@ end = struct
         | _ -> Some expected_ft.ft_ret
       in
       Typing_log.increment_feature_count env FL.Lambda.contextual_params;
-      check_body_under_known_params ~supportdyn env ?ret_ty expected_ft
+      let ty_mismatch_opt =
+        if arity_ok then
+          None
+        else
+          Some (mk (Reason.Rnone, Tfun declared_ft), ty)
+      in
+      check_body_under_known_params
+        ~ty_mismatch_opt
+        ~supportdyn
+        env
+        ?ret_ty
+        expected_ft
     | _ ->
       (* If all parameters are annotated with explicit types, then type-check
        * the body under those assumptions and pick up the result type *)
@@ -9172,7 +9188,11 @@ end = struct
             FL.Lambda.no_params
           else
             FL.Lambda.explicit_params);
-        check_body_under_known_params ~supportdyn:false env declared_ft
+        check_body_under_known_params
+          ~ty_mismatch_opt:None
+          ~supportdyn:false
+          env
+          declared_ft
       ) else (
         match eexpected with
         | Some (_pos, _ur, supportdyn, expected_ty, _)
@@ -9222,7 +9242,11 @@ end = struct
             in
             { declared_ft with ft_params }
           in
-          check_body_under_known_params ~supportdyn env expected_ft
+          check_body_under_known_params
+            ~ty_mismatch_opt:None
+            ~supportdyn
+            env
+            expected_ft
         | _ ->
           (* Missing types in parameter and result will have been replaced by fresh type variables *)
           Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
@@ -9240,6 +9264,7 @@ end = struct
              but is actually inferred from the surrounding context
              (don't think this matters in practice, since we check lambdas separately) *)
           check_body_under_known_params
+            ~ty_mismatch_opt:None
             ~supportdyn
             env
             ~ret_ty:declared_ft.ft_ret

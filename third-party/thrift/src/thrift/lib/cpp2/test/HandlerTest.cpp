@@ -46,7 +46,7 @@ MATCHER(IsMissingResult, "") {
 TEST_F(HandlerTest, async_eb_result_nullptr) {
   struct Handler : apache::thrift::ServiceHandler<HandlerGeneric> {
     void async_eb_get_string_eb(
-        HandlerCallback<unique_ptr<string>>::Ptr callback) override {
+        unique_ptr<HandlerCallback<unique_ptr<string>>> callback) override {
       callback->result(unique_ptr<string>(nullptr));
     }
   };
@@ -61,7 +61,7 @@ TEST_F(HandlerTest, async_eb_result_nullptr) {
 TEST_F(HandlerTest, async_tm_result_nullptr) {
   struct Handler : apache::thrift::ServiceHandler<HandlerGeneric> {
     void async_tm_get_string(
-        HandlerCallback<unique_ptr<string>>::Ptr callback) override {
+        unique_ptr<HandlerCallback<unique_ptr<string>>> callback) override {
       callback->result(unique_ptr<string>(nullptr));
     }
   };

@@ -62,7 +62,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::async_tm_getDataByKey0(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_key) {
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::async_tm_getDataByKey0(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -175,7 +175,7 @@ folly::coro::Task<::std::string> apache::thrift::ServiceHandler<::cpp2::DbMixedS
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::async_tm_getDataByKey1(apache::thrift::HandlerCallback<::std::string>::Ptr callback, const ::std::string& p_key) {
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::async_tm_getDataByKey1(std::unique_ptr<apache::thrift::HandlerCallback<::std::string>> callback, const ::std::string& p_key) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

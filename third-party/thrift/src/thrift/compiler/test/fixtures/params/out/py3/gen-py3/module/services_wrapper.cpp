@@ -19,7 +19,7 @@ NestedContainersWrapper::NestedContainersWrapper(PyObject *obj, folly::Executor*
 
 
 void NestedContainersWrapper::async_tm_mapList(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<std::map<int32_t,std::vector<int32_t>>> foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -41,7 +41,7 @@ foo = std::move(foo)    ]() mutable {
     });
 }
 void NestedContainersWrapper::async_tm_mapSet(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<std::map<int32_t,std::set<int32_t>>> foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -63,7 +63,7 @@ foo = std::move(foo)    ]() mutable {
     });
 }
 void NestedContainersWrapper::async_tm_listMap(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<std::vector<std::map<int32_t,int32_t>>> foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -85,7 +85,7 @@ foo = std::move(foo)    ]() mutable {
     });
 }
 void NestedContainersWrapper::async_tm_listSet(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<std::vector<std::set<int32_t>>> foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -107,7 +107,7 @@ foo = std::move(foo)    ]() mutable {
     });
 }
 void NestedContainersWrapper::async_tm_turtles(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<std::vector<std::vector<std::map<int32_t,std::map<int32_t,std::set<int32_t>>>>>> foo
 ) {
   auto ctx = callback->getRequestContext();

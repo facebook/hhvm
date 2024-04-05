@@ -19,7 +19,7 @@ TestServiceWrapper::TestServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void TestServiceWrapper::async_tm_test(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

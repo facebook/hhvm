@@ -60,7 +60,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_five(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_five(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -168,7 +168,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_add_five(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, ::std::int32_t p_num) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_add_five(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, ::std::int32_t p_num) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -277,7 +277,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::py3::simple::SimpleServ
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_do_nothing(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_do_nothing(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -388,7 +388,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_concat(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_concat(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -498,7 +498,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_value(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -606,7 +606,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::py3::simple::SimpleServ
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_negate(apache::thrift::HandlerCallback<bool>::Ptr callback, bool p_input) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_negate(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, bool p_input) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -714,7 +714,7 @@ folly::coro::Task<::std::int8_t> apache::thrift::ServiceHandler<::py3::simple::S
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_tiny(apache::thrift::HandlerCallback<::std::int8_t>::Ptr callback, ::std::int8_t p_input) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_tiny(std::unique_ptr<apache::thrift::HandlerCallback<::std::int8_t>> callback, ::std::int8_t p_input) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -822,7 +822,7 @@ folly::coro::Task<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_small(apache::thrift::HandlerCallback<::std::int16_t>::Ptr callback, ::std::int16_t p_input) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_small(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, ::std::int16_t p_input) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -930,7 +930,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_big(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, ::std::int64_t p_input) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_big(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_input) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1038,7 +1038,7 @@ folly::coro::Task<double> apache::thrift::ServiceHandler<::py3::simple::SimpleSe
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_two(apache::thrift::HandlerCallback<double>::Ptr callback, double p_input) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_two(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, double p_input) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1147,7 +1147,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::py3::simple::SimpleServ
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_expected_exception(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_expected_exception(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1256,7 +1256,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_unexpected_exception(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_unexpected_exception(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1364,7 +1364,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i16_list(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::vector<::std::int16_t>> p_numbers) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i16_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int16_t>> p_numbers) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1472,7 +1472,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i32_list(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::vector<::std::int32_t>> p_numbers) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i32_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int32_t>> p_numbers) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1580,7 +1580,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i64_list(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::vector<::std::int64_t>> p_numbers) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_i64_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int64_t>> p_numbers) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1690,7 +1690,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_concat_many(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_concat_many(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1800,7 +1800,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_count_structs(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_count_structs(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1908,7 +1908,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_set(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::set<::std::int32_t>> p_numbers) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_set(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::set<::std::int32_t>> p_numbers) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2016,7 +2016,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::py3::simple::SimpleServ
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contains_word(apache::thrift::HandlerCallback<bool>::Ptr callback, std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contains_word(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2126,7 +2126,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_map_value(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_map_value(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2236,7 +2236,7 @@ folly::coro::Task<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_map_length(apache::thrift::HandlerCallback<::std::int16_t>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_map_length(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2344,7 +2344,7 @@ folly::coro::Task<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_map_values(apache::thrift::HandlerCallback<::std::int16_t>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_sum_map_values(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2452,7 +2452,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_complex_sum_i32(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_complex_sum_i32(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2562,7 +2562,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_repeat_name(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_repeat_name(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2674,7 +2674,7 @@ folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_struct(apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_struct(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2786,7 +2786,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::std::int32_t>>> apache::thrift
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_fib(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::int32_t>>>::Ptr callback, ::std::int16_t p_n) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_fib(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::int32_t>>>> callback, ::std::int16_t p_n) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2898,7 +2898,7 @@ folly::coro::Task<std::unique_ptr<::std::set<::std::string>>> apache::thrift::Se
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_unique_words(apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::Ptr callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_unique_words(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3010,7 +3010,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>> ap
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_words_count(apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>::Ptr callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_words_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3120,7 +3120,7 @@ folly::coro::Task<::py3::simple::AnEnum> apache::thrift::ServiceHandler<::py3::s
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_set_enum(apache::thrift::HandlerCallback<::py3::simple::AnEnum>::Ptr callback, ::py3::simple::AnEnum p_in_enum) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_set_enum(std::unique_ptr<apache::thrift::HandlerCallback<::py3::simple::AnEnum>> callback, ::py3::simple::AnEnum p_in_enum) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3230,7 +3230,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_list_of_lists(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_list_of_lists(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3342,7 +3342,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::map<::std::st
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_word_character_frequency(apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>::Ptr callback, std::unique_ptr<::std::string> p_sentence) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_word_character_frequency(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>> callback, std::unique_ptr<::std::string> p_sentence) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3454,7 +3454,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::std::set<::std::string>>>> apa
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_list_of_sets(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::set<::std::string>>>>::Ptr callback, std::unique_ptr<::std::string> p_some_words) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_list_of_sets(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::set<::std::string>>>>> callback, std::unique_ptr<::std::string> p_some_words) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3564,7 +3564,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_nested_map_argument(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback, std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_nested_map_argument(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3674,7 +3674,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_make_sentence(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_make_sentence(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3786,7 +3786,7 @@ folly::coro::Task<std::unique_ptr<::std::set<::std::int32_t>>> apache::thrift::S
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_union(apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::int32_t>>>::Ptr callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_union(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::int32_t>>>> callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -3898,7 +3898,7 @@ folly::coro::Task<std::unique_ptr<::std::set<::std::string>>> apache::thrift::Se
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_keys(apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::Ptr callback, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_keys(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4008,7 +4008,7 @@ folly::coro::Task<double> apache::thrift::ServiceHandler<::py3::simple::SimpleSe
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_lookup_double(apache::thrift::HandlerCallback<double>::Ptr callback, ::std::int32_t p_key) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_lookup_double(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, ::std::int32_t p_key) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4118,7 +4118,7 @@ folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_retrieve_binary(apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::Ptr callback, std::unique_ptr<::std::string> p_something) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_retrieve_binary(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_something) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4230,7 +4230,7 @@ folly::coro::Task<std::unique_ptr<::std::set<::std::string>>> apache::thrift::Se
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contain_binary(apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::Ptr callback, std::unique_ptr<::std::vector<::std::string>> p_binaries) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contain_binary(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_binaries) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4342,7 +4342,7 @@ folly::coro::Task<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>> apache:
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contain_enum(apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>::Ptr callback, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_contain_enum(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>> callback, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4454,7 +4454,7 @@ folly::coro::Task<std::unique_ptr<::py3::simple::BinaryUnionStruct>> apache::thr
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_binary_union_struct(apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::BinaryUnionStruct>>::Ptr callback, std::unique_ptr<::py3::simple::BinaryUnion> p_u) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_binary_union_struct(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::BinaryUnionStruct>>> callback, std::unique_ptr<::py3::simple::BinaryUnion> p_u) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -4566,7 +4566,7 @@ folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_struct_hidden(apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_struct_hidden(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

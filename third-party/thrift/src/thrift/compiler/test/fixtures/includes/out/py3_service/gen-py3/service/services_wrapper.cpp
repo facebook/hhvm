@@ -19,7 +19,7 @@ MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceWrapper::async_tm_query(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<::cpp2::MyStruct> s
     , std::unique_ptr<::cpp2::Included> i
 ) {
@@ -44,7 +44,7 @@ i = std::move(i)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_has_arg_docs(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<::cpp2::MyStruct> s
     , std::unique_ptr<::cpp2::Included> i
 ) {

@@ -31,12 +31,12 @@ class TestInterface
   typedef apache::thrift::HandlerCallback<std::unique_ptr<std::string>>
       StringCob;
   void async_tm_serializationTest(
-      StringCob::Ptr callback, bool inEventBase) override;
+      std::unique_ptr<StringCob> callback, bool inEventBase) override;
 
-  void async_eb_eventBaseAsync(StringCob::Ptr callback) override;
+  void async_eb_eventBaseAsync(std::unique_ptr<StringCob> callback) override;
 
   void async_tm_notCalledBack(
-      apache::thrift::HandlerCallback<void>::Ptr cb) override;
+      std::unique_ptr<apache::thrift::HandlerCallback<void>> cb) override;
 
   void echoIOBuf(
       std::unique_ptr<folly::IOBuf>& ret,

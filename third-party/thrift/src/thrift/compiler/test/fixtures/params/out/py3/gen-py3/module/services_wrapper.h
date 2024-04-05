@@ -24,19 +24,19 @@ class NestedContainersWrapper : virtual public NestedContainersSvIf {
     folly::Executor *executor;
   public:
     explicit NestedContainersWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_mapList(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_mapList(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<std::map<int32_t,std::vector<int32_t>>> foo
     ) override;
-    void async_tm_mapSet(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_mapSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<std::map<int32_t,std::set<int32_t>>> foo
     ) override;
-    void async_tm_listMap(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_listMap(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<std::vector<std::map<int32_t,int32_t>>> foo
     ) override;
-    void async_tm_listSet(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_listSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<std::vector<std::set<int32_t>>> foo
     ) override;
-    void async_tm_turtles(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_turtles(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<std::vector<std::vector<std::map<int32_t,std::map<int32_t,std::set<int32_t>>>>>> foo
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

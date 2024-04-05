@@ -659,7 +659,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
   auto tm = ThreadManager::newSimpleThreadManager(1);
 
   apache::thrift::Cpp2RequestContext cpp2reqCtx(nullptr);
-  auto cb = std::make_shared<
+  auto cb = std::make_unique<
       apache::thrift::HandlerCallback<std::unique_ptr<SumResponse>>>(
       nullptr,
       nullptr,
@@ -671,7 +671,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
       &cpp2reqCtx);
   handler.async_tm_computeSumThrows(std::move(cb), nullptr);
 
-  auto cb2 = std::make_shared<apache::thrift::HandlerCallback<int32_t>>(
+  auto cb2 = std::make_unique<apache::thrift::HandlerCallback<int32_t>>(
       nullptr,
       nullptr,
       nullptr,
@@ -682,7 +682,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
       &cpp2reqCtx);
   handler.async_tm_computeSumThrowsPrimitive(std::move(cb2), 0, 0);
 
-  auto cb3 = std::make_shared<apache::thrift::HandlerCallbackBase>(
+  auto cb3 = std::make_unique<apache::thrift::HandlerCallbackBase>(
       nullptr, nullptr, nullptr, ebt.getEventBase(), tm.get(), &cpp2reqCtx);
   handler.async_tm_onewayRequest(std::move(cb3), 0);
 }

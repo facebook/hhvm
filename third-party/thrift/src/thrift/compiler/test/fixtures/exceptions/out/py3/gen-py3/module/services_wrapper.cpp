@@ -19,7 +19,7 @@ RaiserWrapper::RaiserWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void RaiserWrapper::async_tm_doBland(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -37,7 +37,7 @@ void RaiserWrapper::async_tm_doBland(
     });
 }
 void RaiserWrapper::async_tm_doRaise(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -55,7 +55,7 @@ void RaiserWrapper::async_tm_doRaise(
     });
 }
 void RaiserWrapper::async_tm_get200(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -73,7 +73,7 @@ void RaiserWrapper::async_tm_get200(
     });
 }
 void RaiserWrapper::async_tm_get500(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

@@ -110,7 +110,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_i16_param<ProtocolIn_,ProtocolOut_>
@@ -184,7 +184,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_byte_i16_param<ProtocolIn_,ProtocolOut_>
@@ -256,7 +256,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_map_param<ProtocolIn_,ProtocolOut_>
@@ -330,7 +330,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_map_setlist_param<ProtocolIn_,ProtocolOut_>
@@ -402,7 +402,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_map_typedef_param<ProtocolIn_,ProtocolOut_>
@@ -474,7 +474,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_enum_param<ProtocolIn_,ProtocolOut_>
@@ -546,7 +546,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_struct_param<ProtocolIn_,ProtocolOut_>
@@ -618,7 +618,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_void_ret_listunion_param<ProtocolIn_,ProtocolOut_>
@@ -692,7 +692,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<bool>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<bool>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_bool_ret_i32_i64_param<ProtocolIn_,ProtocolOut_>
@@ -766,7 +766,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<bool>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<bool>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_bool_ret_map_param<ProtocolIn_,ProtocolOut_>
@@ -840,7 +840,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<bool>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<bool>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_bool_ret_union_param<ProtocolIn_,ProtocolOut_>
@@ -916,7 +916,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int64_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int64_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_i64_ret_float_double_param<ProtocolIn_,ProtocolOut_>
@@ -992,7 +992,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(apa
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int64_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int64_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_i64_ret_string_typedef_param<ProtocolIn_,ProtocolOut_>
@@ -1077,7 +1077,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int64_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int64_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_i64_ret_i32_i32_i32_i32_i32_param<ProtocolIn_,ProtocolOut_>
@@ -1151,7 +1151,7 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<double>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<double>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_double_ret_setstruct_param<ProtocolIn_,ProtocolOut_>
@@ -1225,7 +1225,7 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_string_ret_string_param<ProtocolIn_,ProtocolOut_>
@@ -1299,7 +1299,7 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_binary_ret_binary_param<ProtocolIn_,ProtocolOut_>
@@ -1373,7 +1373,7 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_map_ret_bool_param<ProtocolIn_,ProtocolOut_>
@@ -1449,7 +1449,7 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_list_ret_map_setlist_param<ProtocolIn_,ProtocolOut_>
@@ -1523,7 +1523,7 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_mapsetlistmapliststring_ret_listlistlist_param<ProtocolIn_,ProtocolOut_>
@@ -1597,7 +1597,7 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_typedef_ret_i32_param<ProtocolIn_,ProtocolOut_>
@@ -1674,7 +1674,7 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(ap
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_listtypedef_ret_typedef_param<ProtocolIn_,ProtocolOut_>
@@ -1748,7 +1748,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_enum_ret_double_param<ProtocolIn_,ProtocolOut_>
@@ -1824,7 +1824,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(apach
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_enum_ret_double_enum_param<ProtocolIn_,ProtocolOut_>
@@ -1898,7 +1898,7 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_listenum_ret_map_param<ProtocolIn_,ProtocolOut_>
@@ -1975,7 +1975,7 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_struct_ret_i16_param<ProtocolIn_,ProtocolOut_>
@@ -2049,7 +2049,7 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_setstruct_ret_set_param<ProtocolIn_,ProtocolOut_>
@@ -2125,7 +2125,7 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_union_ret_i32_i32_param<ProtocolIn_,ProtocolOut_>
@@ -2199,7 +2199,7 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(apache::t
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_listunion_string_param<ProtocolIn_,ProtocolOut_>

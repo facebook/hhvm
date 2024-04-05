@@ -51,7 +51,7 @@ class SimpleServiceImpl
  public:
   ~SimpleServiceImpl() override {}
   void async_tm_add(
-      HandlerCallback<int64_t>::Ptr cb, int64_t a, int64_t b) override {
+      unique_ptr<HandlerCallback<int64_t>> cb, int64_t a, int64_t b) override {
     cb->result(a + b);
   }
 
@@ -155,7 +155,9 @@ TEST(ScopedServerInterfaceThread, newRemoteClient) {
     };
     std::atomic<size_t> conns{0};
     void async_tm_add(
-        HandlerCallback<int64_t>::Ptr cb, int64_t a, int64_t b) override {
+        unique_ptr<HandlerCallback<int64_t>> cb,
+        int64_t a,
+        int64_t b) override {
       auto r = cb->getConnectionContext();
       auto eb = cb->getEventBase();
       eb->runInEventBaseThread([cb = std::move(cb), r, a, b] {

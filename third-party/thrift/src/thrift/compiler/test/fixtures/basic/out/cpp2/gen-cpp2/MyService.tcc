@@ -66,7 +66,7 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_ping<ProtocolIn_,ProtocolOut_>
@@ -136,7 +136,7 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_getRandomData<ProtocolIn_,ProtocolOut_>
@@ -210,7 +210,7 @@ void MyServiceAsyncProcessor::executeRequest_sink(apache::thrift::ServerRequest&
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_sink<ProtocolIn_,ProtocolOut_>
@@ -284,7 +284,7 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_putDataById<ProtocolIn_,ProtocolOut_>
@@ -356,7 +356,7 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<bool>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<bool>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
@@ -430,7 +430,7 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_getDataById<ProtocolIn_,ProtocolOut_>
@@ -504,7 +504,7 @@ void MyServiceAsyncProcessor::executeRequest_deleteDataById(apache::thrift::Serv
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_deleteDataById<ProtocolIn_,ProtocolOut_>
@@ -573,7 +573,7 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallbackBase>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , nullptr
     , nullptr
@@ -622,7 +622,7 @@ void MyServiceAsyncProcessor::executeRequest_invalid_return_for_hack(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<float>>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<float>>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_invalid_return_for_hack<ProtocolIn_,ProtocolOut_>
@@ -694,7 +694,7 @@ void MyServiceAsyncProcessor::executeRequest_rpc_skipped_codegen(apache::thrift:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_rpc_skipped_codegen<ProtocolIn_,ProtocolOut_>

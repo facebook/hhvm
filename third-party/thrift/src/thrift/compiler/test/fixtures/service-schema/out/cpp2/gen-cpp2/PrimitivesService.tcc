@@ -57,7 +57,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int64_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int64_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_init<ProtocolIn_,ProtocolOut_>
@@ -129,7 +129,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::cpp2::Result>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::cpp2::Result>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_method_that_throws<ProtocolIn_,ProtocolOut_>
@@ -220,7 +220,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<void>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_return_void_method<ProtocolIn_,ProtocolOut_>

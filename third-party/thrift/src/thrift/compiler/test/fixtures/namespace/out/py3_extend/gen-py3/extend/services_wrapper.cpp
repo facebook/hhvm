@@ -18,7 +18,7 @@ ExtendTestServiceWrapper::ExtendTestServiceWrapper(PyObject *obj, folly::Executo
   }
 
 void ExtendTestServiceWrapper::async_tm_check(
-  apache::thrift::HandlerCallback<bool>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
     , std::unique_ptr<::cpp2::HsFoo> struct1
 ) {
   auto ctx = callback->getRequestContext();

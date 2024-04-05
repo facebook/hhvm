@@ -270,12 +270,12 @@ apache::thrift::ServerStream<int32_t> TestStreamServiceMock::requestWithBlob(
 }
 
 void TestStreamServiceMock::async_eb_leakCallback(
-    apache::thrift::HandlerCallback<
-        apache::thrift::ServerStream<int32_t>>::Ptr) {}
+    std::unique_ptr<apache::thrift::HandlerCallback<
+        apache::thrift::ServerStream<int32_t>>>) {}
 
 void TestStreamServiceMock::async_eb_orderRequestStream(
-    apache::thrift::HandlerCallback<
-        apache::thrift::ResponseAndServerStream<int32_t, int32_t>>::Ptr cb) {
+    std::unique_ptr<apache::thrift::HandlerCallback<
+        apache::thrift::ResponseAndServerStream<int32_t, int32_t>>> cb) {
 #if FOLLY_HAS_COROUTINES
   auto stream = folly::coro::co_invoke(
       [eb = cb->getEventBase()]() -> folly::coro::AsyncGenerator<int32_t&&> {
@@ -289,7 +289,7 @@ void TestStreamServiceMock::async_eb_orderRequestStream(
 }
 
 void TestStreamServiceMock::async_eb_orderRequestResponse(
-    apache::thrift::HandlerCallback<int32_t>::Ptr cb) {
+    std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> cb) {
   cb->result(++order_);
 }
 

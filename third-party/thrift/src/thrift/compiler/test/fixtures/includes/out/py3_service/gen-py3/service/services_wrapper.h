@@ -24,11 +24,11 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
     folly::Executor *executor;
   public:
     explicit MyServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_query(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_query(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<::cpp2::MyStruct> s
         , std::unique_ptr<::cpp2::Included> i
     ) override;
-    void async_tm_has_arg_docs(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_has_arg_docs(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<::cpp2::MyStruct> s
         , std::unique_ptr<::cpp2::Included> i
     ) override;

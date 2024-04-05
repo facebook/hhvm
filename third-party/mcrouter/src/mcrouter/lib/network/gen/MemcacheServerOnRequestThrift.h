@@ -29,121 +29,121 @@ class MemcacheServerOnRequestThrift : public thrift::MemcacheSvIf {
           std::shared_ptr<ServerOnRequest>> serverOnRequestMap)
       : serverOnRequestMap_(std::move(serverOnRequestMap)) {}
   void async_eb_mcAdd(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback,
       const facebook::memcache::McAddRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcAppend(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>> callback,
       const facebook::memcache::McAppendRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcCas(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>> callback,
       const facebook::memcache::McCasRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcDecr(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>> callback,
       const facebook::memcache::McDecrRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcDelete(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>> callback,
       const facebook::memcache::McDeleteRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcFlushAll(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>> callback,
       const facebook::memcache::McFlushAllRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcFlushRe(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>> callback,
       const facebook::memcache::McFlushReRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcGat(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>> callback,
       const facebook::memcache::McGatRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcGats(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>> callback,
       const facebook::memcache::McGatsRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcGet(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetReply>> callback,
       const facebook::memcache::McGetRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcGets(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>> callback,
       const facebook::memcache::McGetsRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcIncr(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>> callback,
       const facebook::memcache::McIncrRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcLeaseGet(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>> callback,
       const facebook::memcache::McLeaseGetRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcLeaseSet(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>> callback,
       const facebook::memcache::McLeaseSetRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcMetaget(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>> callback,
       const facebook::memcache::McMetagetRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcPrepend(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>> callback,
       const facebook::memcache::McPrependRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcReplace(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>> callback,
       const facebook::memcache::McReplaceRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcSet(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>> callback,
       const facebook::memcache::McSetRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcTouch(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>> callback,
       const facebook::memcache::McTouchRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcVersion(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
       const facebook::memcache::McVersionRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
@@ -173,7 +173,7 @@ class MemcacheServerOnRequestThrift : public thrift::MemcacheSvIf {
   template <class Request>
    void onRequestThriftHelper(
        const Request& request,
-       std::shared_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
+       std::unique_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
            callback) {
      getServerOnRequest(callback->getEventBase())
          ->onRequestThrift(

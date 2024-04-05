@@ -58,7 +58,7 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
   virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> co_simple_rpc(::std::int32_t p_int_parameter);
   virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> co_simple_rpc(apache::thrift::RequestParams params, ::std::int32_t p_int_parameter);
 #endif
-  virtual void async_tm_simple_rpc(apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::Ptr callback, ::std::int32_t p_int_parameter);
+  virtual void async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>> callback, ::std::int32_t p_int_parameter);
  private:
   static ::test::fixtures::basic::FB303ServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_rpc{apache::thrift::detail::si::InvocationType::AsyncTm};

@@ -103,7 +103,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_get<ProtocolIn_,ProtocolOut_>
@@ -175,7 +175,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_getter<ProtocolIn_,ProtocolOut_>
@@ -247,7 +247,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_lists<ProtocolIn_,ProtocolOut_>
@@ -319,7 +319,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_maps<ProtocolIn_,ProtocolOut_>
@@ -391,7 +391,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_name<ProtocolIn_,ProtocolOut_>
@@ -463,7 +463,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(apac
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_name_to_value<ProtocolIn_,ProtocolOut_>
@@ -535,7 +535,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_names<ProtocolIn_,ProtocolOut_>
@@ -607,7 +607,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_prefix_tree<ProtocolIn_,ProtocolOut_>
@@ -679,7 +679,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_sets<ProtocolIn_,ProtocolOut_>
@@ -751,7 +751,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_setter<ProtocolIn_,ProtocolOut_>
@@ -823,7 +823,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_str<ProtocolIn_,ProtocolOut_>
@@ -895,7 +895,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_strings<ProtocolIn_,ProtocolOut_>
@@ -967,7 +967,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_type<ProtocolIn_,ProtocolOut_>
@@ -1039,7 +1039,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_value<ProtocolIn_,ProtocolOut_>
@@ -1111,7 +1111,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(apac
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_value_to_name<ProtocolIn_,ProtocolOut_>
@@ -1183,7 +1183,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_values<ProtocolIn_,ProtocolOut_>
@@ -1255,7 +1255,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(apache::thrift:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_id<ProtocolIn_,ProtocolOut_>
@@ -1327,7 +1327,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_ids<ProtocolIn_,ProtocolOut_>
@@ -1399,7 +1399,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_descriptor<ProtocolIn_,ProtocolOut_>
@@ -1471,7 +1471,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_descriptors<ProtocolIn_,ProtocolOut_>
@@ -1543,7 +1543,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(apache::thrift
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_key<ProtocolIn_,ProtocolOut_>
@@ -1615,7 +1615,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(apache::thrif
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_keys<ProtocolIn_,ProtocolOut_>
@@ -1687,7 +1687,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(apache:
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_annotation<ProtocolIn_,ProtocolOut_>
@@ -1759,7 +1759,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(apache
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_annotations<ProtocolIn_,ProtocolOut_>
@@ -1831,7 +1831,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_member<ProtocolIn_,ProtocolOut_>
@@ -1903,7 +1903,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(apache::th
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_members<ProtocolIn_,ProtocolOut_>
@@ -1975,7 +1975,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(apache::thri
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_field<ProtocolIn_,ProtocolOut_>
@@ -2047,7 +2047,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(apache::thr
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int32_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int32_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_fields<ProtocolIn_,ProtocolOut_>

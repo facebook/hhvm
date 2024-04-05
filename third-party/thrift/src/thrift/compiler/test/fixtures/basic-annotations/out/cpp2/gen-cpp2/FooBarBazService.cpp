@@ -61,7 +61,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::FooBarBazService>
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_foo(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -171,7 +171,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::FooBarBazService>
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_bar(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -281,7 +281,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::FooBarBazService>
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_baz(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::async_tm_baz(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

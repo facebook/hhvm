@@ -102,29 +102,29 @@ class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
   }
 
  protected:
-  void async_tm_doBland(HandlerCallback<void>::Ptr cb) override {
+  void async_tm_doBland(unique_ptr<HandlerCallback<void>> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_doRaise(HandlerCallback<void>::Ptr cb) override {
+  void async_tm_doRaise(unique_ptr<HandlerCallback<void>> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_get200(HandlerCallback<string>::Ptr cb) override {
+  void async_tm_get200(unique_ptr<HandlerCallback<string>> cb) override {
     go_(std::move(cb));
   }
-  void async_tm_get500(HandlerCallback<string>::Ptr cb) override {
+  void async_tm_get500(unique_ptr<HandlerCallback<string>> cb) override {
     go_(std::move(cb));
   }
 
   template <typename E>
-  Function<void(HandlerCallbackBase::Ptr)> wrap(E e) {
-    return [e = std::move(e)](HandlerCallbackBase::Ptr cb) mutable {
+  Function<void(unique_ptr<HandlerCallbackBase>)> wrap(E e) {
+    return [e = std::move(e)](unique_ptr<HandlerCallbackBase> cb) mutable {
       cb->exception(e());
     };
   }
 
  private:
   vector<shared_ptr<TProcessorEventHandler>> handlers_;
-  Function<void(HandlerCallbackBase::Ptr)> go_;
+  Function<void(unique_ptr<HandlerCallbackBase>)> go_;
 };
 
 class BugServiceHandler : public apache::thrift::ServiceHandler<Bug> {

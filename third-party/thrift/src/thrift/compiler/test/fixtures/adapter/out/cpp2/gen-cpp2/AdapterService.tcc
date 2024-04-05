@@ -51,7 +51,7 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_count<ProtocolIn_,ProtocolOut_>
@@ -125,7 +125,7 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_adaptedTypes<ProtocolIn_,ProtocolOut_>

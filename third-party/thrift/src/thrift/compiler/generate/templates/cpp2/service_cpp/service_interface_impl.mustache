@@ -80,11 +80,11 @@ folly::coro::Task<{{ > types/return_type_server}}> {{ > service_common/service_c
 #endif // FOLLY_HAS_COROUTINES
 {{#function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
+void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
 {{/function:oneway?}}
 {{^function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(apache::thrift::HandlerCallback<{{ > types/return_type_server}}>::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
+void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallback<{{ > types/return_type_server}}>> callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
 {{/function:oneway?}}
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
@@ -186,13 +186,13 @@ determineInvocationType:
 {{#function:eb}}{{!Event base codegen}}
 {{#function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr /*callback*/{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
+void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallbackBase> /*callback*/{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
   LOG(DFATAL) << "Function {{function:cpp_name}} is unimplemented";
 }
 {{/function:oneway?}}
 {{^function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(apache::thrift::HandlerCallback<{{ > types/return_type_server}}>::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
+void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(std::unique_ptr<apache::thrift::HandlerCallback<{{ > types/return_type_server}}>> callback{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("{{function:name}}"));
 }
 {{/function:oneway?}}

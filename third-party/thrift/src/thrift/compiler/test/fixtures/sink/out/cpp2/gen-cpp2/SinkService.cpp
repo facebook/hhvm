@@ -60,7 +60,7 @@ folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::Fi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_method(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_method(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -168,7 +168,7 @@ folly::coro::Task<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialRespo
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodAndReponse(apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodAndReponse(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -276,7 +276,7 @@ folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::Fi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodThrow(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -384,7 +384,7 @@ folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::Fi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodSinkThrow(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodSinkThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -492,7 +492,7 @@ folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::Fi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodFinalThrow(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodFinalThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -600,7 +600,7 @@ folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::Fi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodBothThrow(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_tm_methodBothThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -674,7 +674,7 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_eb_methodFast(apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::SinkService>::async_eb_methodFast(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("methodFast"));
 }
 

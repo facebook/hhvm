@@ -34,7 +34,7 @@ class AWrapper : virtual public ASvIf {
     folly::Executor *executor;
   public:
     explicit AWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_foo(apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Foo>>::Ptr callback) override;
+    void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Foo>>> callback) override;
     std::unique_ptr<IIf> createI() override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
@@ -46,10 +46,10 @@ std::shared_ptr<apache::thrift::ServerInterface> AInterface(PyObject *if_object,
 class BWrapper : public ::cpp2::AWrapper, virtual public BSvIf {
   public:
     explicit BWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_bar(apache::thrift::HandlerCallback<void>::Ptr callback
+    void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
         , std::unique_ptr<::cpp2::Foo> foo
     ) override;
-    void async_tm_stream_stuff(apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback) override;
+    void async_tm_stream_stuff(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

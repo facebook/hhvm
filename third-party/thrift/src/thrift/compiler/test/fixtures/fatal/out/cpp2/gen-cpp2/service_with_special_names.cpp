@@ -60,7 +60,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_get(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_get(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -168,7 +168,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_getter(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_getter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -276,7 +276,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_lists(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_lists(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -384,7 +384,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_maps(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_maps(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -492,7 +492,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_name(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -600,7 +600,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_name_to_value(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_name_to_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -708,7 +708,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_names(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_names(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -816,7 +816,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_prefix_tree(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_prefix_tree(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -924,7 +924,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_sets(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_sets(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1032,7 +1032,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_setter(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_setter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1140,7 +1140,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_str(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_str(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1248,7 +1248,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_strings(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_strings(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1356,7 +1356,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_type(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_type(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1464,7 +1464,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_value(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1572,7 +1572,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_value_to_name(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_value_to_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1680,7 +1680,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_values(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_values(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1788,7 +1788,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_id(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_id(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -1896,7 +1896,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_ids(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_ids(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2004,7 +2004,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_descriptor(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_descriptor(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2112,7 +2112,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_descriptors(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_descriptors(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2220,7 +2220,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_key(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_key(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2328,7 +2328,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_keys(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_keys(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2436,7 +2436,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_annotation(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_annotation(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2544,7 +2544,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_annotations(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_annotations(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2652,7 +2652,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_member(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_member(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2760,7 +2760,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_members(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_members(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2868,7 +2868,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_field(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_field(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -2976,7 +2976,7 @@ folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cp
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_fields(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::async_tm_fields(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

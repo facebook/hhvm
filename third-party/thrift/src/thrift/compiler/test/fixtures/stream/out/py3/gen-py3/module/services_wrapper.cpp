@@ -19,7 +19,7 @@ PubSubStreamingServiceWrapper::PubSubStreamingServiceWrapper(PyObject *obj, foll
 
 
 void PubSubStreamingServiceWrapper::async_tm_returnstream(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t i32_from
     , int32_t i32_to
 ) {
@@ -44,7 +44,7 @@ i32_to    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_streamthrows(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -66,7 +66,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_servicethrows(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -88,7 +88,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_servicethrows2(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -110,7 +110,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_boththrows(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -132,7 +132,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_responseandstreamstreamthrows(
-  apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -154,7 +154,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_responseandstreamservicethrows(
-  apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -176,7 +176,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_tm_responseandstreamboththrows(
-  apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>> callback
     , int32_t foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -198,7 +198,7 @@ foo    ]() mutable {
     });
 }
 void PubSubStreamingServiceWrapper::async_eb_returnstreamFast(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
     , int32_t i32_from
     , int32_t i32_to
 ) {

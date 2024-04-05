@@ -58,7 +58,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
   virtual folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_int1);
   virtual folly::coro::Task<::std::int64_t> co_init(apache::thrift::RequestParams params, ::std::int64_t p_int1);
 #endif
-  virtual void async_tm_init(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, ::std::int64_t p_int1);
+  virtual void async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_int1);
  private:
   static ::test::namespace_from_package_without_module_name::TestServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};

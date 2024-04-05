@@ -24,10 +24,10 @@ class RaiserWrapper : virtual public RaiserSvIf {
     folly::Executor *executor;
   public:
     explicit RaiserWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_doBland(apache::thrift::HandlerCallback<void>::Ptr callback) override;
-    void async_tm_doRaise(apache::thrift::HandlerCallback<void>::Ptr callback) override;
-    void async_tm_get200(apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) override;
-    void async_tm_get500(apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) override;
+    void async_tm_doBland(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_doRaise(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_get200(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) override;
+    void async_tm_get500(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

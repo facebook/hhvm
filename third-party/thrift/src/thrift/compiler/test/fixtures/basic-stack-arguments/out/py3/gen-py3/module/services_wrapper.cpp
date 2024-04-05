@@ -19,7 +19,7 @@ MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceWrapper::async_tm_hasDataById(
-  apache::thrift::HandlerCallback<bool>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -41,7 +41,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_getDataById(
-  apache::thrift::HandlerCallback<std::string>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::string>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -63,7 +63,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_putDataById(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , int64_t id
     , const std::string& data
 ) {
@@ -88,7 +88,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_lobDataById(
-  apache::thrift::HandlerCallbackBase::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
     , int64_t id
     , const std::string& data
 ) {
@@ -141,7 +141,7 @@ MyServiceFastWrapper::MyServiceFastWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceFastWrapper::async_eb_hasDataById(
-  apache::thrift::HandlerCallback<bool>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -163,7 +163,7 @@ id    ]() mutable {
     });
 }
 void MyServiceFastWrapper::async_eb_getDataById(
-  apache::thrift::HandlerCallback<std::string>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::string>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -185,7 +185,7 @@ id    ]() mutable {
     });
 }
 void MyServiceFastWrapper::async_eb_putDataById(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , int64_t id
     , const std::string& data
 ) {
@@ -210,7 +210,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceFastWrapper::async_eb_lobDataById(
-  apache::thrift::HandlerCallbackBase::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
     , int64_t id
     , const std::string& data
 ) {
@@ -263,7 +263,7 @@ DbMixedStackArgumentsWrapper::DbMixedStackArgumentsWrapper(PyObject *obj, folly:
 
 
 void DbMixedStackArgumentsWrapper::async_tm_getDataByKey0(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
     , std::unique_ptr<std::string> key
 ) {
   auto ctx = callback->getRequestContext();
@@ -285,7 +285,7 @@ key = std::move(key)    ]() mutable {
     });
 }
 void DbMixedStackArgumentsWrapper::async_tm_getDataByKey1(
-  apache::thrift::HandlerCallback<std::string>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::string>> callback
     , const std::string& key
 ) {
   auto ctx = callback->getRequestContext();

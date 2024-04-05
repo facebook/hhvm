@@ -59,7 +59,7 @@ class ServiceHandler<::py3::simple::RederivedService> : virtual public ::py3::si
   virtual folly::coro::Task<::std::int32_t> co_get_seven();
   virtual folly::coro::Task<::std::int32_t> co_get_seven(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_get_seven(apache::thrift::HandlerCallback<::std::int32_t>::Ptr callback);
+  virtual void async_tm_get_seven(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
  private:
   static ::py3::simple::RederivedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_seven{apache::thrift::detail::si::InvocationType::AsyncTm};

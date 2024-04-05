@@ -53,12 +53,12 @@ class BenchmarkHandler
     chunk_.data()->append(FLAGS_chunk_size);
   }
 
-  void async_eb_noop(HandlerCallback<void>::Ptr callback) override {
+  void async_eb_noop(std::unique_ptr<HandlerCallback<void>> callback) override {
     stats_->add(kNoop_);
     callback->done();
   }
 
-  void async_eb_onewayNoop(HandlerCallbackBase::Ptr) override {
+  void async_eb_onewayNoop(std::unique_ptr<HandlerCallbackBase>) override {
     stats_->add(kNoop_);
   }
 
@@ -69,7 +69,7 @@ class BenchmarkHandler
   }
 
   void async_eb_sum(
-      HandlerCallback<std::unique_ptr<TwoInts>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<TwoInts>>> callback,
       std::unique_ptr<TwoInts> input) override {
     stats_->add(kSum_);
     auto result = std::make_unique<TwoInts>();

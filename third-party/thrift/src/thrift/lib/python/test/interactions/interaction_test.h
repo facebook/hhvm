@@ -60,16 +60,16 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
   }
 
   void async_tm_newAddition(
-      apache::thrift::HandlerCallback<
-          apache::thrift::TileAndResponse<AdditionIf, void>>::Ptr cb) override {
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::TileAndResponse<AdditionIf, void>>> cb) override {
     auto handler =
         std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
     cb->result({std::move(handler)});
   }
 
   void async_tm_initializedAddition(
-      apache::thrift::HandlerCallback<
-          apache::thrift::TileAndResponse<AdditionIf, int>>::Ptr cb,
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::TileAndResponse<AdditionIf, int>>> cb,
       int x) override {
     auto handler =
         std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
@@ -78,9 +78,9 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
   }
 
   void async_tm_stringifiedAddition(
-      apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<
-          AdditionIf,
-          std::unique_ptr<std::string>>>::Ptr cb,
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::
+              TileAndResponse<AdditionIf, std::unique_ptr<std::string>>>> cb,
       int x) override {
     auto handler =
         std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();

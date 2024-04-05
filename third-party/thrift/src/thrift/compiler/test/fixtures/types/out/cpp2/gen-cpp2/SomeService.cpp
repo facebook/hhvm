@@ -62,7 +62,7 @@ folly::coro::Task<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>> a
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::async_tm_bounce_map(apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>::Ptr callback, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m) {
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::async_tm_bounce_map(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>> callback, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -174,7 +174,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::async_tm_binary_keyed_map(apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>::Ptr callback, std::unique_ptr<::std::vector<::std::int64_t>> p_r) {
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::async_tm_binary_keyed_map(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>> callback, std::unique_ptr<::std::vector<::std::int64_t>> p_r) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

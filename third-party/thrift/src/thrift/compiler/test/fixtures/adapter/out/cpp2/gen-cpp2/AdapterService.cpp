@@ -62,7 +62,7 @@ folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>> apa
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_count(apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::Ptr callback) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -174,7 +174,7 @@ folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> apac
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_adaptedTypes(apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::Ptr callback, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_adaptedTypes(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

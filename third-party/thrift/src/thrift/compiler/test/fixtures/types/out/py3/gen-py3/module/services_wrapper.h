@@ -27,10 +27,10 @@ class SomeServiceWrapper : virtual public SomeServiceSvIf {
     folly::Executor *executor;
   public:
     explicit SomeServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_bounce_map(apache::thrift::HandlerCallback<std::unique_ptr<std::unordered_map<int32_t,std::string>>>::Ptr callback
+    void async_tm_bounce_map(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::unordered_map<int32_t,std::string>>>> callback
         , std::unique_ptr<std::unordered_map<int32_t,std::string>> m
     ) override;
-    void async_tm_binary_keyed_map(apache::thrift::HandlerCallback<std::unique_ptr<std::map<std::string,int64_t>>>::Ptr callback
+    void async_tm_binary_keyed_map(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::map<std::string,int64_t>>>> callback
         , std::unique_ptr<std::vector<int64_t>> r
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

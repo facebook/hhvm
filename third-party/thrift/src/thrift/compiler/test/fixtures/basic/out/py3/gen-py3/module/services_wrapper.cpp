@@ -21,7 +21,7 @@ FooServiceWrapper::FooServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void FooServiceWrapper::async_tm_simple_rpc(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -67,7 +67,7 @@ FB303ServiceWrapper::FB303ServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void FB303ServiceWrapper::async_tm_simple_rpc(
-  apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>> callback
     , int32_t int_parameter
 ) {
   auto ctx = callback->getRequestContext();
@@ -117,7 +117,7 @@ MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyServiceWrapper::async_tm_ping(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -135,7 +135,7 @@ void MyServiceWrapper::async_tm_ping(
     });
 }
 void MyServiceWrapper::async_tm_getRandomData(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -153,7 +153,7 @@ void MyServiceWrapper::async_tm_getRandomData(
     });
 }
 void MyServiceWrapper::async_tm_sink(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , int64_t sink
 ) {
   auto ctx = callback->getRequestContext();
@@ -175,7 +175,7 @@ sink    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_putDataById(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , int64_t id
     , std::unique_ptr<std::string> data
 ) {
@@ -200,7 +200,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_hasDataById(
-  apache::thrift::HandlerCallback<bool>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -222,7 +222,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_getDataById(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -244,7 +244,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_deleteDataById(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , int64_t id
 ) {
   auto ctx = callback->getRequestContext();
@@ -266,7 +266,7 @@ id    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_lobDataById(
-  apache::thrift::HandlerCallbackBase::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallbackBase> callback
     , int64_t id
     , std::unique_ptr<std::string> data
 ) {
@@ -291,7 +291,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_invalid_return_for_hack(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::set<float>>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::set<float>>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -309,7 +309,7 @@ void MyServiceWrapper::async_tm_invalid_return_for_hack(
     });
 }
 void MyServiceWrapper::async_tm_rpc_skipped_codegen(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -355,7 +355,7 @@ DbMixedStackArgumentsWrapper::DbMixedStackArgumentsWrapper(PyObject *obj, folly:
 
 
 void DbMixedStackArgumentsWrapper::async_tm_getDataByKey0(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
     , std::unique_ptr<std::string> key
 ) {
   auto ctx = callback->getRequestContext();
@@ -377,7 +377,7 @@ key = std::move(key)    ]() mutable {
     });
 }
 void DbMixedStackArgumentsWrapper::async_tm_getDataByKey1(
-  apache::thrift::HandlerCallback<std::unique_ptr<std::string>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<std::string>>> callback
     , std::unique_ptr<std::string> key
 ) {
   auto ctx = callback->getRequestContext();

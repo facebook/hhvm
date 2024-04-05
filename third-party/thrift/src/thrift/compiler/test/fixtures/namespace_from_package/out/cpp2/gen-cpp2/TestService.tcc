@@ -51,7 +51,7 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_shared<apache::thrift::HandlerCallback<::std::int64_t>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::std::int64_t>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_init<ProtocolIn_,ProtocolOut_>

@@ -61,7 +61,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::MyNode>::co_do_mi
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyNode>::async_tm_do_mid(apache::thrift::HandlerCallback<void>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::MyNode>::async_tm_do_mid(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

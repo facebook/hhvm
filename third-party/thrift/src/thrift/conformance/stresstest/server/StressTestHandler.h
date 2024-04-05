@@ -26,26 +26,26 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
  public:
   StressTestHandler();
 
-  void async_eb_ping(HandlerCallback<void>::Ptr callback) override;
+  void async_eb_ping(std::unique_ptr<HandlerCallback<void>> callback) override;
 
   void async_tm_echo(
-      HandlerCallback<std::unique_ptr<std::string>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
       std::unique_ptr<::std::string> payload) override {
     callback->result(std::move(payload));
   }
 
   void async_eb_echoEb(
-      HandlerCallback<std::unique_ptr<std::string>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
       std::unique_ptr<::std::string> payload) override {
     callback->result(std::move(payload));
   }
 
   void async_tm_requestResponseTm(
-      HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
       std::unique_ptr<BasicRequest> request) override;
 
   void async_eb_requestResponseEb(
-      HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
       std::unique_ptr<BasicRequest> request) override;
 
   ResponseAndServerStream<BasicResponse, BasicResponse> streamTm(
@@ -56,7 +56,7 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
 
  private:
   void requestResponseImpl(
-      HandlerCallback<std::unique_ptr<BasicResponse>>::Ptr callback,
+      std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
       std::unique_ptr<BasicRequest> request) const;
 
   void simulateWork(int64_t timeMs, WorkSimulationMode mode) const;

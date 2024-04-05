@@ -19,7 +19,7 @@ MyRootWrapper::MyRootWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void MyRootWrapper::async_tm_do_root(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -64,7 +64,7 @@ MyNodeWrapper::MyNodeWrapper(PyObject *obj, folly::Executor* exc)
   }
 
 void MyNodeWrapper::async_tm_do_mid(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -109,7 +109,7 @@ MyLeafWrapper::MyLeafWrapper(PyObject *obj, folly::Executor* exc)
   }
 
 void MyLeafWrapper::async_tm_do_leaf(
-  apache::thrift::HandlerCallback<void>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

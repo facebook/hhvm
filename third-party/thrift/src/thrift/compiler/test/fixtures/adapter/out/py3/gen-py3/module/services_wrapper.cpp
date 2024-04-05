@@ -21,7 +21,7 @@ ServiceWrapper::ServiceWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void ServiceWrapper::async_tm_func(
-  apache::thrift::HandlerCallback<int32_t>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
     , std::unique_ptr<std::string> arg1
     , std::unique_ptr<std::string> arg2
     , std::unique_ptr<::facebook::thrift::test::Foo> arg3
@@ -77,7 +77,7 @@ AdapterServiceWrapper::AdapterServiceWrapper(PyObject *obj, folly::Executor* exc
 
 
 void AdapterServiceWrapper::async_tm_count(
-  apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -95,7 +95,7 @@ void AdapterServiceWrapper::async_tm_count(
     });
 }
 void AdapterServiceWrapper::async_tm_adaptedTypes(
-  apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback
     , std::unique_ptr<::facebook::thrift::test::HeapAllocated> arg
 ) {
   auto ctx = callback->getRequestContext();

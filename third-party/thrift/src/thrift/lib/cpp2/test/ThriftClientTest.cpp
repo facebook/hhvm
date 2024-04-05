@@ -114,7 +114,7 @@ TEST_F(ThriftClientTest, SyncRpcOptionsTimeout) {
    public:
     DelayHandler(milliseconds delay) : delay_(delay) {}
     void async_eb_eventBaseAsync(
-        HandlerCallback<unique_ptr<string>>::Ptr cb) override {
+        unique_ptr<HandlerCallback<unique_ptr<string>>> cb) override {
       auto eb = cb->getEventBase();
       eb->runAfterDelay(
           [cb = std::move(cb)] { cb->result("hello world"); }, delay_.count());

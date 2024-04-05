@@ -30,13 +30,13 @@ class AServerOnRequestThrift : public thrift::ASvIf {
           std::shared_ptr<ServerOnRequest>> serverOnRequestMap)
       : serverOnRequestMap_(std::move(serverOnRequestMap)) {}
   void async_eb_testA(
-      std::shared_ptr<apache::thrift::HandlerCallback<carbon::test::A::TestAReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<carbon::test::A::TestAReply>> callback,
       const carbon::test::A::TestARequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
   }
   void async_eb_mcVersion(
-      std::shared_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
+      std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback,
       const facebook::memcache::McVersionRequest& request) override final {
     onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
         request, std::move(callback));
@@ -66,7 +66,7 @@ class AServerOnRequestThrift : public thrift::ASvIf {
   template <class Request>
    void onRequestThriftHelper(
        const Request& request,
-       std::shared_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
+       std::unique_ptr<apache::thrift::HandlerCallback<typename Request::reply_type>>
            callback) {
      getServerOnRequest(callback->getEventBase())
          ->onRequestThrift(

@@ -31,7 +31,7 @@ class ServiceWrapper : virtual public ServiceSvIf {
     folly::Executor *executor;
   public:
     explicit ServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_func(apache::thrift::HandlerCallback<int32_t>::Ptr callback
+    void async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<int32_t>> callback
         , std::unique_ptr<std::string> arg1
         , std::unique_ptr<std::string> arg2
         , std::unique_ptr<::facebook::thrift::test::Foo> arg3
@@ -49,8 +49,8 @@ class AdapterServiceWrapper : virtual public AdapterServiceSvIf {
     folly::Executor *executor;
   public:
     explicit AdapterServiceWrapper(PyObject *if_object, folly::Executor *exc);
-    void async_tm_count(apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::Ptr callback) override;
-    void async_tm_adaptedTypes(apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::Ptr callback
+    void async_tm_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback) override;
+    void async_tm_adaptedTypes(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback
         , std::unique_ptr<::facebook::thrift::test::HeapAllocated> arg
     ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;

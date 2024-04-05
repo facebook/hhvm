@@ -68,16 +68,15 @@ class TestStreamServiceMock
       std::unique_ptr<folly::IOBuf> val) override;
 
   void async_eb_leakCallback(
-      apache::thrift::HandlerCallback<
-          apache::thrift::ServerStream<int32_t>>::Ptr) override;
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::ServerStream<int32_t>>>) override;
 
   void async_eb_orderRequestStream(
-      apache::thrift::HandlerCallback<
-          apache::thrift::ResponseAndServerStream<int32_t, int32_t>>::Ptr)
-      override;
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::ResponseAndServerStream<int32_t, int32_t>>>) override;
 
   void async_eb_orderRequestResponse(
-      apache::thrift::HandlerCallback<int32_t>::Ptr) override;
+      std::unique_ptr<apache::thrift::HandlerCallback<int32_t>>) override;
 
   apache::thrift::ServerStream<int32_t> leakPublisherCheck() override;
 

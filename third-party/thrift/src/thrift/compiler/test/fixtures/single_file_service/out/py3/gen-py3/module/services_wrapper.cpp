@@ -19,7 +19,7 @@ AWrapper::AWrapper(PyObject *obj, folly::Executor* exc)
 
 
 void AWrapper::async_tm_foo(
-  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Foo>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Foo>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
@@ -67,7 +67,7 @@ BWrapper::BWrapper(PyObject *obj, folly::Executor* exc)
   }
 
 void BWrapper::async_tm_bar(
-  apache::thrift::HandlerCallback<void>::Ptr callback
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback
     , std::unique_ptr<::cpp2::Foo> foo
 ) {
   auto ctx = callback->getRequestContext();
@@ -89,7 +89,7 @@ foo = std::move(foo)    ]() mutable {
     });
 }
 void BWrapper::async_tm_stream_stuff(
-  apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>::Ptr callback) {
+  std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,

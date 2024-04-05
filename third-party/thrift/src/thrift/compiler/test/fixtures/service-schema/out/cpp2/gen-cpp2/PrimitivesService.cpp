@@ -66,7 +66,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::cpp2::Primiti
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_init(apache::thrift::HandlerCallback<::std::int64_t>::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -174,7 +174,7 @@ folly::coro::Task<::cpp2::Result> apache::thrift::ServiceHandler<::cpp2::Primiti
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_method_that_throws(apache::thrift::HandlerCallback<::cpp2::Result>::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_method_that_throws(std::unique_ptr<apache::thrift::HandlerCallback<::cpp2::Result>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -283,7 +283,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::PrimitivesService
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_return_void_method(apache::thrift::HandlerCallback<void>::Ptr callback, ::std::int64_t p_id) {
+void apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::async_tm_return_void_method(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

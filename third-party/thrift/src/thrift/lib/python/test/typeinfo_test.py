@@ -41,3 +41,21 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_SetTypeInfo_nested(self) -> None:
         CTests(self).test_SetTypeInfo_nested()
+
+    def test_TypeInfo(self) -> None:
+        CTests(self).test_TypeInfo()
+
+    def test_StructTypeInfo(self) -> None:
+        CTests(self).test_StructTypeInfo()
+
+    def test_EnumTypeInfo(self) -> None:
+        CTests(self).test_EnumTypeInfo()
+
+    def test_AdaptedTypeInfo(self) -> None:
+        CTests(self).test_AdaptedTypeInfo()
+
+    def test_IOBufTypeInfo(self) -> None:
+        CTests(self).test_IOBufTypeInfo()
+
+    def test_MapTypeInfo(self) -> None:
+        CTests(self).test_MapTypeInfo()

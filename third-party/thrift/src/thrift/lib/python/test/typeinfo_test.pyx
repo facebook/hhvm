@@ -14,7 +14,22 @@
 
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
-from thrift.python.types import ListTypeInfo, Set, SetTypeInfo, typeinfo_i64, typeinfo_string
+from thrift.python.types import (
+    AdaptedTypeInfo,
+    EnumTypeInfo,
+    ListTypeInfo,
+    Map,
+    MapTypeInfo,
+    Set,
+    SetTypeInfo,
+    StructTypeInfo,
+    typeinfo_bool,
+    typeinfo_i64,
+    typeinfo_iobuf,
+    typeinfo_string,
+)
+from thrift.python.test.containers.thrift_types import Foo, Bar
+from thrift.python.test.adapters.atoi import AtoiAdapter
 
 cdef class TypeInfoTests():
     def __cinit__(self, unit_test):
@@ -80,3 +95,69 @@ cdef class TypeInfoTests():
 
         data = typeinfo_string.to_internal_data("AbC")
         self.ut.assertEqual(data, b"AbC")
+
+    def test_TypeInfo(self) -> None:
+        with self.ut.assertRaises(TypeError):
+            typeinfo_bool.to_internal_data(None)
+
+        data = typeinfo_bool.to_internal_data(True)
+        self.ut.assertEqual(data, True)
+
+    def test_StructTypeInfo(self) -> None:
+        struct_type_info = StructTypeInfo(Foo)
+
+        with self.ut.assertRaises(TypeError):
+            struct_type_info.to_internal_data(None)
+
+        data = struct_type_info.to_internal_data(Foo(value=11))
+        self.ut.assertEqual(
+                struct_type_info.to_python_value(data),
+                Foo(value=11))
+
+    def test_EnumTypeInfo(self) -> None:
+        enum_type_info = EnumTypeInfo(Bar)
+
+        with self.ut.assertRaises(TypeError):
+            enum_type_info.to_internal_data(None)
+
+        with self.ut.assertRaises(TypeError):
+            enum_type_info.to_python_value(None)
+
+        data = enum_type_info.to_internal_data(Bar.ONE)
+        self.ut.assertEqual(enum_type_info.to_python_value(data), Bar.ONE)
+
+    def test_AdaptedTypeInfo(self) -> None:
+        adapted_type_info = AdaptedTypeInfo(typeinfo_string, AtoiAdapter, lambda: None)
+
+        with self.ut.assertRaises(TypeError):
+            adapted_type_info.to_internal_data(None)
+
+        with self.ut.assertRaises(TypeError):
+            adapted_type_info.to_python_value(None)
+
+        data = adapted_type_info.to_internal_data(1)
+        self.ut.assertEqual(typeinfo_string.to_internal_data("1"), data)
+
+        internal_str_data = typeinfo_string.to_internal_data("21")
+        self.ut.assertEqual(21, adapted_type_info.to_python_value(internal_str_data))
+
+    def test_IOBufTypeInfo(self) -> None:
+        self.ut.assertEqual(None, typeinfo_iobuf.to_internal_data(None))
+
+        with self.ut.assertRaises(TypeError):
+            self.ut.assertEqual("abc", typeinfo_iobuf.to_internal_data("abc"))
+
+        self.ut.assertEqual(None, typeinfo_iobuf.to_python_value(None))
+        self.ut.assertEqual("abc", typeinfo_iobuf.to_python_value("abc"))
+
+    def test_MapTypeInfo(self) -> None:
+        map_type_info = MapTypeInfo(typeinfo_string, typeinfo_i64)
+
+        with self.ut.assertRaises(TypeError):
+            map_type_info.to_internal_data(None)
+
+        data = map_type_info.to_internal_data({"a":1, "b":2})
+        self.ut.assertEqual(data, ((b"a", 1), (b"b", 2)))
+        expected_python_val = Map(typeinfo_string, typeinfo_i64, {"a": 1, "b":2})
+        self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
+

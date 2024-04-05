@@ -25,6 +25,12 @@ struct Foo {
   1: i32 value;
 }
 
+enum Bar {
+  UNKNOWN = 0,
+  ONE = 1,
+  TWO = 2,
+}
+
 struct Lists {
   3: list<bool> boolList;
   14: list<byte> byteList;

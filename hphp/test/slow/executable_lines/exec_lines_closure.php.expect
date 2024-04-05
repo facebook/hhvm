@@ -1,0 +1,6 @@
+Executable lines on closure
+vec(3) {
+  int(5)
+  int(6)
+  int(7)
+}

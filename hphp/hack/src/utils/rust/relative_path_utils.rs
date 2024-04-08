@@ -200,7 +200,7 @@ mod tests {
 
         // filter_map
         std::env::set_current_dir(&root)?;
-        let v = vec![
+        let v = [
             PathBuf::from("a.php"),
             PathBuf::from("../ao.php"), // outside root
             PathBuf::from("d/b.php"),

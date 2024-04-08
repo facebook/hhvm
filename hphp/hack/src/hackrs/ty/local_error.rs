@@ -17,6 +17,7 @@ use crate::decl_error::DeclError;
 use crate::reason::Reason;
 
 #[derive(Clone, Debug)]
+#[allow(dead_code)] // field `0` is never read
 pub struct ErrorMessage<P>(P, String);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]

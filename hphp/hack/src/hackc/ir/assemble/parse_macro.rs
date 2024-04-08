@@ -67,6 +67,7 @@ pub fn parse(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 const DEBUG: bool = false;
 
 #[derive(Debug)]
+#[allow(dead_code)] // field `0` is never read
 struct ParseError(Span, String);
 
 impl fmt::Display for ParseError {

@@ -3345,6 +3345,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             CollectionLiteralExpression(x) => {
+                #[allow(dead_code)] // field `0` is never read
                 enum Status {
                     ValidClass(String),
                     ValidClassEt(String),

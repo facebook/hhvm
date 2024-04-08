@@ -342,6 +342,7 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         match std::fs::OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(true)
             .open(&self.path)
         {
             Err(e) => Err(e).path_context(&self.path, "open(WR)"),
@@ -567,6 +568,7 @@ impl<T, E: Into<anyhow::Error>> UnexpectedContext<T> for Result<T, E> {
 ///   let guard2 = lock.exclusive()?;
 /// }
 #[derive(Debug)]
+#[allow(dead_code)] // field `0` is never read
 struct DropRef<'a, S>(&'a S);
 
 impl<'a, S> Drop for DropRef<'a, S> {

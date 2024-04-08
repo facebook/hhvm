@@ -198,7 +198,7 @@ impl<'de> Deserialize<'de> for RelativePath {
                     }
                 };
                 let path = match path_str {
-                    Some(path_str) if path_str.is_empty() => None,
+                    Some("") => None,
                     Some(path_str) => Some(PathBuf::from(path_str)),
                     None => {
                         return Err(E::invalid_value(

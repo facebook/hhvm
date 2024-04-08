@@ -266,13 +266,21 @@ impl Parse for DeclArg {
 
 #[derive(Debug)]
 enum DeclTy {
-    Ellipsis(token::Dot3),
+    #[allow(dead_code)]
+    Ellipsis(token::Dot3), // field `0` is never read
+    #[allow(dead_code)]
     Float(Ident),
+    #[allow(dead_code)]
     Int(Ident),
+    #[allow(dead_code)]
     Noreturn(Ident),
+    #[allow(dead_code)]
     Ptr(token::Star, Box<DeclTy>),
+    #[allow(dead_code)]
     String(Ident),
+    #[allow(dead_code)]
     Type(Ident),
+    #[allow(dead_code)]
     Void(Ident),
 }
 

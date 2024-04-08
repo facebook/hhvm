@@ -292,12 +292,14 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
 }
 
 void HHVM_FUNCTION(debugger_dump, const Variant& variable) {
-  VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
-  vs.serialize(variable,
-               false, // ret
-               false, // keepCount
-               true  // outputHookOnly
-              );
+  if (!variable.isNull()) {
+    VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+    vs.serialize(variable,
+                false, // ret
+                false, // keepCount
+                true  // outputHookOnly
+                );
+  }
 }
 
 /*

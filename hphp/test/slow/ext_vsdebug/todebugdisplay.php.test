@@ -16,5 +16,6 @@ function innerFunc() {
 }
 <<__EntryPoint>> function main() {
 innerFunc();
+debugger_dump(null); // no-op
 echo "hello world 2\n";
 }

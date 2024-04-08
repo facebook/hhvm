@@ -177,6 +177,37 @@ if (BUILD_SAMPLES)
       LIBRARY DESTINATION ${LIB_INSTALL_DIR}
   )
 
+  add_library(
+      proxygenhqserver
+      samples/hq/HQServer.cpp
+      samples/hq/FizzContext.cpp
+  )
+  target_compile_options(
+    proxygenhqserver
+      PRIVATE
+          ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+   )
+  if (BUILD_SHARED_LIBS)
+      set_property(TARGET proxygenhqserver PROPERTY POSITION_INDEPENDENT_CODE ON)
+      if (DEFINED PACKAGE_VERSION)
+          set_target_properties(proxygenhqserver PROPERTIES VERSION ${PACKAGE_VERSION})
+      endif()
+  endif()
+
+  target_link_libraries(
+      proxygenhqserver
+      PUBLIC
+          proxygen
+          proxygenhqloggerhelper
+
+  )
+  install(
+      TARGETS proxygenhqserver
+      EXPORT proxygen-exports
+      ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+      LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  )
+
   add_executable(hq
       samples/hq/main.cpp
       samples/hq/FizzContext.cpp

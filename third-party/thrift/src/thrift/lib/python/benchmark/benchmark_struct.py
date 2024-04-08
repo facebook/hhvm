@@ -40,6 +40,7 @@ inst = MyStruct(
     val_binary=b"hello world",
     val_list={val_list},
     val_set={val_set},
+    val_map={val_map},
 )
 """
 
@@ -99,7 +100,7 @@ def benchmark_field_access():
         val_list = list(range(100))
         val_set = set(range(100))
         init_statement = INIT_STATEMENT_MyStruct.format(
-            val_list=val_list, val_set=val_set
+            val_list=val_list, val_set=val_set, val_map={}
         )
         setup = f"{get_import(flavor)}; {init_statement}"
         if cached:
@@ -275,7 +276,9 @@ from thrift.python.serializer import deserialize, serialize
 def get_serialize_setup(flavor: str) -> str:
     val_list = list(range(100))
     val_set = set(range(100))
-    init_statement = INIT_STATEMENT_MyStruct.format(val_list=val_list, val_set=val_set)
+    init_statement = INIT_STATEMENT_MyStruct.format(
+        val_list=val_list, val_set=val_set, val_map={}
+    )
     return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT[flavor]}"
 
 
@@ -339,11 +342,19 @@ def init_benchmark() -> None:
         val_list = list(range(size))
         val_set = set(range(size))
         init_statement = INIT_STATEMENT_MyStruct.format(
-            val_list=val_list, val_set=val_set
+            val_list=val_list, val_set=val_set, val_map={}
         )
         benchmark_init(
             init_statement, f"MyStruct with {size} elements for set and list"
         )
+        print("\n")
+
+    for size in [1, 100, 1000]:
+        val_map = {i: f"str_{i}" for i in range(size)}
+        init_statement = INIT_STATEMENT_MyStruct.format(
+            val_list=[], val_set=[], val_map=val_map
+        )
+        benchmark_init(init_statement, f"MyStruct with {size} elements for map")
         print("\n")
 
 

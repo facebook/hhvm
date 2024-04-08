@@ -32,7 +32,8 @@ class ConnectionStats {
   virtual void recordRequest() = 0;
 
   virtual void recordResponse(
-      folly::Optional<uint16_t> responseCode = folly::none) = 0;
+      folly::Optional<uint16_t> responseCode = folly::none,
+      bool hasRetryAfterHeader = false) = 0;
 
   virtual void recordDuration(size_t duration) = 0;
 
@@ -61,8 +62,8 @@ class TLConnectionStats : public ConnectionStats {
 
   void recordRequest() override;
 
-  void recordResponse(
-      folly::Optional<uint16_t> responseCode = folly::none) override;
+  void recordResponse(folly::Optional<uint16_t> responseCode = folly::none,
+                      bool hasRetryAfterHeader = false) override;
 
   void recordDuration(size_t duration) override;
 
@@ -82,6 +83,7 @@ class TLConnectionStats : public ConnectionStats {
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
   std::optional<TLResponseCodeStats> responseCodes_;
+  std::optional<StatsWrapper::TLTimeseriesMinute> upstreamLoadShed_;
   std::optional<StatsWrapper::TLHistogram> totalDuration_;
 
   std::optional<StatsWrapper::TLCounter> currConns_;

@@ -17,6 +17,7 @@ TLConnectionStats::TLConnectionStats(const std::string& prefix,
   req_.emplace(prefix + "_req", SUM, RATE); // RATE used
   egressBytes_.emplace(prefix + "_egress_bytes", SUM);
   responseCodes_.emplace(prefix + "_", verbosity);
+  upstreamLoadShed_.emplace(prefix + "_req_was_loadshed_by_upstream", SUM);
 
   if (verbosity > 8) {
     resp_.emplace(prefix + "_resp", SUM);
@@ -61,10 +62,15 @@ void TLConnectionStats::recordRequest() {
   BaseStats::addToOptionalStat(req_, 1);
 }
 
-void TLConnectionStats::recordResponse(folly::Optional<uint16_t> responseCode) {
+void TLConnectionStats::recordResponse(folly::Optional<uint16_t> responseCode,
+                                       bool hasRetryAfterHeader) {
   BaseStats::addToOptionalStat(resp_, 1);
   if (responseCodes_ && responseCode.has_value()) {
     responseCodes_->addStatus(responseCode.value());
+    if (upstreamLoadShed_ && hasRetryAfterHeader &&
+        responseCode.value() == 503) {
+      upstreamLoadShed_->add(1);
+    }
   }
 }
 

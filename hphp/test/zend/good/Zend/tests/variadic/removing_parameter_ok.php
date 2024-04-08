@@ -1,8 +1,6 @@
 <?hh
 
-/* Theoretically this should be valid because it weakens the constraint, but
- * PHP does not allow this (for non-variadics), so I'm not allowing it here, too,
- * to stay consistent. */
+/* PHP does not allow this, but it's sound, so we permit it. */
 
 interface DB {
     public function query($query, ...$params):mixed;

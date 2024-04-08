@@ -2023,14 +2023,15 @@ void checkDeclarationCompat(const PreClass* preClass,
   const Func::ParamInfoVec& iparams = imeth->params();
 
   auto const ivariadic = imeth->hasVariadicCaptureParam();
-  if (ivariadic && !func->hasVariadicCaptureParam()) {
+  auto const variadic = func->hasVariadicCaptureParam();
+  if (ivariadic && !variadic) {
     raiseIncompat(preClass, imeth);
   }
 
-  // Verify that meth has at least as many parameters as imeth.
-  if (func->numParams() < imeth->numParams()) {
-    // This check doesn't require special casing for variadics, because
-    // it's not ok to turn a variadic function into a non-variadic.
+  // Verify that func has at least as many parameters as imeth.
+  // If func is variadic, then the check isn't necessary because it can
+  // take an arbitrary number of parameters
+  if (!variadic && func->numParams() < imeth->numParams()) {
     raiseIncompat(preClass, imeth);
   }
   // Verify that the typehints for meth's parameters are compatible with
@@ -2039,8 +2040,6 @@ void checkDeclarationCompat(const PreClass* preClass,
   {
     size_t i = 0;
     for (; i < imeth->numNonVariadicParams(); ++i) {
-      auto const& p = params[i];
-      if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       if (!iparams[i].hasDefaultValue()) {
         // The leftmost of imeth's contiguous trailing optional parameters
         // must start somewhere to the right of this parameter (which may

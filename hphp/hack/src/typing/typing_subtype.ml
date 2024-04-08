@@ -2470,26 +2470,6 @@ end = struct
         ~ty_sub:(LoclType ty_sub)
         ~ty_super:(LoclType ty_super)
     in
-    (* We *know* that the assertion is unsatisfiable *)
-    let invalid_env env = invalid ~fail env in
-    (* We don't know whether the assertion is valid or not *)
-    let default env =
-      mk_issubtype_prop
-        ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
-        env
-        (LoclType ty_sub)
-        (LoclType ty_super)
-    in
-    let default_subtype_help env =
-      default_subtype
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_supportdyn; super_like; ty_super }
-        env
-    in
     match deref ty_super with
     | (r_super, Tvar var_super) -> begin
       match deref ty_sub with
@@ -2592,7 +2572,14 @@ end = struct
               (LoclType ty_super)
       end
     end
-    | (_, Tintersection _) when is_union ty_sub -> default_subtype_help env
+    | (_, Tintersection _) when is_union ty_sub ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     | (_, Tintersection tyl) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
@@ -2606,7 +2593,14 @@ end = struct
                 ~lhs:{ sub_supportdyn; ty_sub }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
     (* Empty union encodes the bottom type nothing *)
-    | (_, Tunion []) -> default_subtype_help env
+    | (_, Tunion []) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
     | (_, Tunion [ty_super']) ->
       simplify
@@ -3081,7 +3075,7 @@ end = struct
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
     end
-    | (_, Taccess _) -> invalid_env env
+    | (_, Taccess _) -> invalid ~fail env
     | (_r_super, Tgeneric (name_super, tyargs_super)) -> begin
       let (generic_lower_bounds, other_lower_bounds) =
         let rec fixpoint new_set bounds_set =
@@ -3579,7 +3573,14 @@ end = struct
             ))
     end
     | (_, Tdynamic) when is_dynamic ty_sub -> valid env
-    | (_, Tdynamic) -> default_subtype_help env
+    | (_, Tdynamic) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     | (r_super, Tprim prim_sup) -> begin
       match (deref ty_sub, prim_sup) with
       | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
@@ -3615,8 +3616,21 @@ end = struct
     | (_, Tany _) ->
       (match deref ty_sub with
       | (_, Tany _) -> valid env
-      | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype_help env
-      | _ when subtype_env.Subtype_env.no_top_bottom -> default env
+      | (_, (Tunion _ | Tintersection _ | Tvar _)) ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_supportdyn; super_like; ty_super }
+          env
+      | _ when subtype_env.Subtype_env.no_top_bottom ->
+        mk_issubtype_prop
+          ~sub_supportdyn
+          ~coerce:subtype_env.Subtype_env.coerce
+          env
+          (LoclType ty_sub)
+          (LoclType ty_super)
       | _ -> valid env)
     | (r_super, Tfun ft_super) ->
       (match deref ty_sub with
@@ -3631,7 +3645,14 @@ end = struct
           r_super
           ft_super
           env
-      | _ -> default_subtype_help env)
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_supportdyn; super_like; ty_super }
+          env)
     | (_, Ttuple tyl_super) ->
       (match get_node ty_sub with
       | Ttuple tyl_sub
@@ -3649,7 +3670,14 @@ end = struct
           (env, TL.valid)
           tyl_sub
           tyl_super
-      | _ -> default_subtype_help env)
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_supportdyn; super_like; ty_super }
+          env)
     | ( r_super,
         Tshape
           {
@@ -3658,7 +3686,6 @@ end = struct
             s_fields = fdm_super;
           } ) ->
       let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env ty_sub in
-      let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
       (match deref lty with
       | ( r_sub,
           Tshape
@@ -3672,6 +3699,9 @@ end = struct
            * they are equal type. *)
           valid env
         else
+          let sub_supportdyn =
+            Option.is_some sub_supportdyn || sub_supportdyn'
+          in
           simplify_subtype_shape
             ~subtype_env
             ~env
@@ -3679,7 +3709,14 @@ end = struct
             ~super_like
             (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
             (super_supportdyn, r_super, shape_kind_super, fdm_super)
-      | _ -> default_subtype_help env)
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_supportdyn; super_like; ty_super }
+          env)
     | (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup)) -> begin
       match get_node ty_sub with
       | Tvec_or_dict (lty_key_sub, lty_val_sub) ->
@@ -3981,7 +4018,14 @@ end = struct
     | (_, Tunapplied_alias n_sup) ->
       (match deref ty_sub with
       | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
-      | _ -> default_subtype_help env)
+      | _ ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_supportdyn; super_like; ty_super }
+          env)
     | (r_super, Tneg (Neg_prim prim_super)) -> begin
       match deref ty_sub with
       | (r_sub, Tneg (Neg_prim prim_sub)) ->

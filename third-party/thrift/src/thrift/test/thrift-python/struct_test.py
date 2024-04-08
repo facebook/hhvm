@@ -45,7 +45,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         # Custom default values:
         # Newly created instance has custom default values for non-optional
         # fields, but custom default values for optional fields are ignored.
-        self.assertEquals(
+        self.assertEqual(
             TestStructWithDefaultValuesImmutable(),
             TestStructWithDefaultValuesImmutable(
                 unqualified_integer=42,
@@ -62,7 +62,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         )
 
         # unqualified struct field is default-initialized
-        self.assertEquals(
+        self.assertEqual(
             TestStructImmutable(),
             TestStructWithDefaultValuesImmutable().unqualified_struct_intrinsic_default,
         )
@@ -136,7 +136,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Custom default values:
         # DO_BEFORE(aristidis,20240505): Add support for custom default values
         # to mutable thrift-python types (similar to immutable types).
-        self.assertEquals(
+        self.assertEqual(
             TestStructWithDefaultValuesMutable(),
             TestStructWithDefaultValuesMutable(
                 unqualified_integer=None,

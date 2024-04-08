@@ -956,9 +956,11 @@ inline void processViaExecuteRequest(
     // mark oneway
     if (notOnewayOrWildcard &&
         !serverRequest.request()->getShouldStartProcessing()) {
+      // eventBase declared here to ensure computed before std::move below
+      auto eventBase = detail::ServerRequestHelper::eventBase(serverRequest);
       HandlerCallbackBase::releaseRequest(
           detail::ServerRequestHelper::request(std::move(serverRequest)),
-          detail::ServerRequestHelper::eventBase(serverRequest));
+          eventBase);
       return;
     }
 

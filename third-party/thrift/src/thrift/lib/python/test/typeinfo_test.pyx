@@ -23,6 +23,7 @@ from thrift.python.types import (
     Set,
     SetTypeInfo,
     StructTypeInfo,
+    TypeInfoBase,
     typeinfo_bool,
     typeinfo_i64,
     typeinfo_iobuf,
@@ -37,6 +38,7 @@ cdef class TypeInfoTests():
 
     def test_ListTypeInfo(self) -> None:
         list_type_info = ListTypeInfo(typeinfo_i64)
+        self.ut.assertTrue(isinstance(list_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             list_type_info.to_internal_data(None)
@@ -47,6 +49,7 @@ cdef class TypeInfoTests():
     def test_ListTypeInfo_nested(self) -> None:
         element_type_info = ListTypeInfo(typeinfo_i64)
         list_type_info = ListTypeInfo(element_type_info)
+        self.ut.assertTrue(isinstance(list_type_info, TypeInfoBase))
 
         init_val = [[1, 2], [3, 4], []]
         data = list_type_info.to_internal_data(init_val)
@@ -55,6 +58,7 @@ cdef class TypeInfoTests():
 
     def test_SetTypeInfo(self) -> None:
         set_type_info = SetTypeInfo(typeinfo_i64)
+        self.ut.assertTrue(isinstance(set_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             set_type_info.to_internal_data(None)
@@ -68,6 +72,7 @@ cdef class TypeInfoTests():
     def test_SetTypeInfo_nested(self) -> None:
         element_type_info = SetTypeInfo(typeinfo_i64)
         set_type_info = SetTypeInfo(element_type_info)
+        self.ut.assertTrue(isinstance(set_type_info, TypeInfoBase))
 
         init_val = [[1]]
         data = set_type_info.to_internal_data(init_val)
@@ -77,6 +82,7 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(set_type_info.to_python_value(data), expected_python_val)
 
     def test_IntegerTypeInfo(self) -> None:
+        self.ut.assertTrue(isinstance(typeinfo_i64, TypeInfoBase))
         with self.ut.assertRaises(TypeError):
             typeinfo_i64.to_internal_data(None)
 
@@ -87,6 +93,7 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(data, 2**63 - 1)
 
     def test_StringTypeInfo(self) -> None:
+        self.ut.assertTrue(isinstance(typeinfo_string, TypeInfoBase))
         with self.ut.assertRaises(TypeError):
             typeinfo_string.to_internal_data(None)
 
@@ -97,6 +104,7 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(data, b"AbC")
 
     def test_TypeInfo(self) -> None:
+        self.ut.assertTrue(isinstance(typeinfo_bool, TypeInfoBase))
         with self.ut.assertRaises(TypeError):
             typeinfo_bool.to_internal_data(None)
 
@@ -105,6 +113,7 @@ cdef class TypeInfoTests():
 
     def test_StructTypeInfo(self) -> None:
         struct_type_info = StructTypeInfo(Foo)
+        self.ut.assertTrue(isinstance(struct_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             struct_type_info.to_internal_data(None)
@@ -116,6 +125,7 @@ cdef class TypeInfoTests():
 
     def test_EnumTypeInfo(self) -> None:
         enum_type_info = EnumTypeInfo(Bar)
+        self.ut.assertTrue(isinstance(enum_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             enum_type_info.to_internal_data(None)
@@ -128,6 +138,7 @@ cdef class TypeInfoTests():
 
     def test_AdaptedTypeInfo(self) -> None:
         adapted_type_info = AdaptedTypeInfo(typeinfo_string, AtoiAdapter, lambda: None)
+        self.ut.assertTrue(isinstance(adapted_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             adapted_type_info.to_internal_data(None)
@@ -142,7 +153,10 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(21, adapted_type_info.to_python_value(internal_str_data))
 
     def test_IOBufTypeInfo(self) -> None:
-        self.ut.assertEqual(None, typeinfo_iobuf.to_internal_data(None))
+        self.ut.assertTrue(isinstance(typeinfo_iobuf, TypeInfoBase))
+        
+        with self.ut.assertRaises(TypeError):
+            typeinfo_iobuf.to_internal_data(None)
 
         with self.ut.assertRaises(TypeError):
             self.ut.assertEqual("abc", typeinfo_iobuf.to_internal_data("abc"))
@@ -152,6 +166,7 @@ cdef class TypeInfoTests():
 
     def test_MapTypeInfo(self) -> None:
         map_type_info = MapTypeInfo(typeinfo_string, typeinfo_i64)
+        self.ut.assertTrue(isinstance(map_type_info, TypeInfoBase))
 
         with self.ut.assertRaises(TypeError):
             map_type_info.to_internal_data(None)

@@ -76,7 +76,14 @@ cdef public api cIOBuf* get_cIOBuf(object buf):
 cdef public api object create_IOBuf(unique_ptr[cIOBuf] ciobuf):
     return from_unique_ptr(cmove(ciobuf))
 
-cdef class TypeInfo:
+cdef class TypeInfoBase:
+    cdef to_internal_data(self, object value):
+        raise NotImplementedError("Not implemented on base TypeInfoBase class")
+
+    cdef to_python_value(self, object value):
+        raise NotImplementedError("Not implemented on base TypeInfoBase class")
+
+cdef class TypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, pytypes):
         cdef TypeInfo inst = TypeInfo.__new__(TypeInfo)
@@ -85,20 +92,20 @@ cdef class TypeInfo:
         return inst
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, object value):
+    cpdef to_internal_data(self, object value):
         if not isinstance(value, self.pytypes):
             raise TypeError(f'value {value} is not a {self.pytypes !r}, is actually of type {type(value)}')
         return value
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         return value
 
     def to_container_value(self, object value):
         return self.to_internal_data(value)
 
 
-cdef class IntegerTypeInfo:
+cdef class IntegerTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj, min_value, max_value):
         cdef IntegerTypeInfo inst = IntegerTypeInfo.__new__(IntegerTypeInfo)
@@ -117,14 +124,14 @@ cdef class IntegerTypeInfo:
         return value
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         return value
 
     def to_container_value(self, object value not None):
         return self.to_internal_data(value)
 
 
-cdef class StringTypeInfo:
+cdef class StringTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj):
         cdef StringTypeInfo inst = StringTypeInfo.__new__(StringTypeInfo)
@@ -146,7 +153,7 @@ cdef class StringTypeInfo:
             ) from e
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         """
         Returns a Unicode object decoded from the given encoded string.
 
@@ -166,17 +173,17 @@ cdef class StringTypeInfo:
         return value
 
 
-cdef class IOBufTypeInfo:
+cdef class IOBufTypeInfo(TypeInfoBase):
     @staticmethod
     cdef create(const cTypeInfo& cpp_obj):
         cdef IOBufTypeInfo inst = IOBufTypeInfo.__new__(IOBufTypeInfo)
         inst.cpp_obj = &cpp_obj
         return inst
 
-    def to_internal_data(self, IOBuf value):
-        return value
+    cpdef to_internal_data(self, object value):
+        return <IOBuf?>value
 
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         return value
 
     def to_container_value(self, IOBuf value):
@@ -280,6 +287,12 @@ cdef class StructInfo:
             if PyCallable_Check(type_info):
                 type_info = type_info()
 
+            # The rest of the code assumes that all the `TypeInfo` classes extend
+            # from `TypeInfoBase`. Instances are typecast to `TypeInfoBase` before
+            # the `to_internal_data()` and `to_python_value()` methods are called.
+            if not isinstance(type_info, TypeInfoBase):
+                raise TypeError(f"{type(type_info).__name__} is not subclass of TypeInfoBase.")
+
             Py_INCREF(type_info)
             PyTuple_SET_ITEM(type_infos, idx, type_info)
             self.name_to_index[name] = idx
@@ -304,7 +317,7 @@ cdef class StructInfo:
             type_info = self.type_infos[idx]
             if isinstance(type_info, AdaptedTypeInfo):
                 type_info = (<AdaptedTypeInfo>type_info)._orig_type_info
-            default_value = type_info.to_internal_data(default_value)
+            default_value = (<TypeInfoBase>type_info).to_internal_data(default_value)
             dynamic_struct_info.addFieldValue(idx, default_value)
 
 
@@ -362,7 +375,7 @@ cdef to_container_elements_no_convert(type_info):
     return isinstance(type_info, (TypeInfo, IntegerTypeInfo)) or type_info is typeinfo_iobuf
 
 
-cdef class ListTypeInfo:
+cdef class ListTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
         self.cpp_obj = make_unique[cListTypeInfo](getCTypeInfo(val_info))
@@ -371,20 +384,14 @@ cdef class ListTypeInfo:
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, value not None):
-        if isinstance(self.val_info, IntegerTypeInfo):
-            return self.to_internal_from_values(value, <IntegerTypeInfo>self.val_info)
-
-        if isinstance(self.val_info, StringTypeInfo):
-            return self.to_internal_from_values(value, <StringTypeInfo>self.val_info)
-
-        return tuple(self.val_info.to_internal_data(v) for v in value)
+    cpdef to_internal_data(self, object value):
+        return self.to_internal_from_values(value, <TypeInfoBase>self.val_info)
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         cdef List inst = List.__new__(List)
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else tuple(self.val_info.to_python_value(v) for v in value)
+        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else self.to_python_from_values(value, <TypeInfoBase>self.val_info)
         return inst
 
     def to_container_value(self, object value not None):
@@ -392,8 +399,8 @@ cdef class ListTypeInfo:
             return value
         return List(self.val_info, value)
 
-    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info):
-        cdef idx = 0
+    cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info):
+        cdef size_t idx = 0
         cdef tuple tpl = PyTuple_New(len(values))
         for idx, value in enumerate(values):
             internal_data = val_type_info.to_internal_data(value)
@@ -402,8 +409,18 @@ cdef class ListTypeInfo:
 
         return tpl
 
+    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info):
+        cdef size_t idx = 0
+        cdef tuple tpl = PyTuple_New(len(values))
+        for idx, value in enumerate(values):
+            python_value = val_type_info.to_python_value(value)
+            Py_INCREF(python_value)
+            PyTuple_SET_ITEM(tpl, idx, python_value)
 
-cdef class SetTypeInfo:
+        return tpl
+
+
+cdef class SetTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
         self.val_info = val_info
         self.cpp_obj = make_unique[cSetTypeInfo](getCTypeInfo(val_info))
@@ -412,20 +429,14 @@ cdef class SetTypeInfo:
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, value not None):
-        if isinstance(self.val_info, IntegerTypeInfo):
-            return self.to_internal_from_values(value, <IntegerTypeInfo>self.val_info)
-
-        if isinstance(self.val_info, StringTypeInfo):
-            return self.to_internal_from_values(value, <StringTypeInfo>self.val_info)
-
-        return frozenset(self.val_info.to_internal_data(v) for v in value)
+    cpdef to_internal_data(self, object value):
+        return self.to_internal_from_values(value, <TypeInfoBase>self.val_info)
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         cdef Set inst = Set.__new__(Set)
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else frozenset(self.val_info.to_python_value(v) for v in value)
+        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else self.to_python_from_values(value, <TypeInfoBase>self.val_info)
         return inst
 
     def to_container_value(self, object value not None):
@@ -433,15 +444,22 @@ cdef class SetTypeInfo:
             return value
         return Set(self.val_info, value)
 
-    cdef to_internal_from_values(self, object values, FusedTypeInfo val_type_info):
-        cdef frozenset frozen_set = PyFrozenSet_New([])
+    cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info):
+        cdef frozenset frozen_set = PyFrozenSet_New(<object>NULL)
         for value in values:
             PySet_Add(frozen_set, val_type_info.to_internal_data(value))
 
         return frozen_set
 
+    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info):
+        cdef frozenset frozen_set = PyFrozenSet_New(<object>NULL)
+        for value in values:
+            PySet_Add(frozen_set, val_type_info.to_python_value(value))
 
-cdef class MapTypeInfo:
+        return frozen_set
+
+
+cdef class MapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
         self.key_info = key_info
         self.val_info = val_info
@@ -454,19 +472,18 @@ cdef class MapTypeInfo:
         return self.cpp_obj.get().get()
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, value not None):
-        return tuple(
-            (self.key_info.to_internal_data(k), self.val_info.to_internal_data(v)) for k, v in value.items()
-        )
+    cpdef to_internal_data(self, object value):
+        if value is None:
+            raise TypeError("Argument 'value' must not be None")
+
+        return self.to_internal_from_values(value)
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         cdef Map inst = Map.__new__(Map)
         inst._fbthrift_key_info = self.key_info
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = {
-            self.key_info.to_python_value(k): self.val_info.to_python_value(v) for k, v in value
-        }
+        inst._fbthrift_elements = self.to_python_from_values(value)
         return inst
 
     def to_container_value(self, object value not None):
@@ -474,8 +491,18 @@ cdef class MapTypeInfo:
             return value
         return Map(self.key_info, self.val_info, value)
 
+    def to_internal_from_values(self, object values):
+        return tuple(
+            (self.key_info.to_internal_data(k), self.val_info.to_internal_data(v)) for k, v in values.items()
+        )
 
-cdef class StructTypeInfo:
+    def to_python_from_values(self, object values):
+        return {
+            self.key_info.to_python_value(k): self.val_info.to_python_value(v) for k, v in values
+        }
+
+
+cdef class StructTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
         py_struct_info = klass._fbthrift_struct_info
@@ -493,7 +520,7 @@ cdef class StructTypeInfo:
     cdef const cTypeInfo* get(self):
         return &self.cpp_obj
 
-    def to_internal_data(self, value not None):
+    cpdef to_internal_data(self, object value):
         """
         Validates and converts the given (struct) `value` to a format that the
         serializer can udnerstand.
@@ -524,7 +551,7 @@ cdef class StructTypeInfo:
         raise TypeError(f"{self._class} not supported")
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         return self._class._fbthrift_create(value)
 
     def to_container_value(self, object value not None):
@@ -533,11 +560,11 @@ cdef class StructTypeInfo:
         return value
 
 
-cdef class EnumTypeInfo:
+cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
 
-    def to_internal_data(self, value not None):
+    cpdef to_internal_data(self, object value):
         """
         Validates and converts the given (enum) `value` to a format that the
         serializaer can understand.
@@ -569,7 +596,7 @@ cdef class EnumTypeInfo:
         return value._fbthrift_value_
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         try:
             return self._class(value)
         except ValueError:
@@ -581,15 +608,18 @@ cdef class EnumTypeInfo:
         return value
 
 
-cdef class AdaptedTypeInfo:
+cdef class AdaptedTypeInfo(TypeInfoBase):
     def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
         self._orig_type_info = orig_type_info
         self._adapter_info = adapter_info
         self._transitive_annotation = transitive_annotation
 
     # validate and convert to format serializer may understand
-    def to_internal_data(self, value not None):
-        return self._orig_type_info.to_internal_data(
+    cpdef to_internal_data(self, object value):
+        if value is None:
+            raise TypeError("Argument 'value' must not be None")
+
+        return (<TypeInfoBase>self._orig_type_info).to_internal_data(
             self._adapter_info.to_thrift(
                 value,
                 transitive_annotation=self._transitive_annotation(),
@@ -597,9 +627,9 @@ cdef class AdaptedTypeInfo:
         )
 
     # convert deserialized data to user format
-    def to_python_value(self, object value):
+    cpdef to_python_value(self, object value):
         return self._adapter_info.from_thrift(
-            self._orig_type_info.to_python_value(value),
+            (<TypeInfoBase>self._orig_type_info).to_python_value(value),
             transitive_annotation=self._transitive_annotation(),
         )
 
@@ -696,7 +726,7 @@ cdef class Struct(StructOrUnion):
             set_struct_field(
                 self._fbthrift_data,
                 field_index,
-                struct_info.type_infos[field_index].to_internal_data(value),
+                (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value),
             )
         except TypeError as e:
             raise TypeError(f"field '{name}' encountered TypeError: {str(e)}") from e
@@ -730,7 +760,7 @@ cdef class Struct(StructOrUnion):
                         self,
                         transitive_annotation=transitive_annotation(),
                     )
-                value_to_copy = struct_info.type_infos[field_index].to_internal_data(value)
+                value_to_copy = (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value)
             set_struct_field(new_inst._fbthrift_data, field_index, value_to_copy)
         if kwargs:
             raise TypeError(f"__call__() got an expected keyword argument '{kwargs.keys()[0]}'")
@@ -813,7 +843,7 @@ cdef class Struct(StructOrUnion):
         adapter_info = field_info[5]
         data = self._fbthrift_data[index + 1]
         if data is not None:
-            py_value = struct_info.type_infos[index].to_python_value(data)
+            py_value = (<TypeInfoBase>struct_info.type_infos[index]).to_python_value(data)
             if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
                 py_value = adapter_class.from_thrift_field(
@@ -845,7 +875,7 @@ cdef class Struct(StructOrUnion):
         """
         for index, name, type_info in self._fbthrift_primitive_types:
             data = self._fbthrift_data[index + 1]
-            val = type_info.to_python_value(data) if data is not None else None
+            val = (<TypeInfoBase>type_info).to_python_value(data) if data is not None else None
             object.__setattr__(self, name, val)
 
     cdef _fbthrift_fully_populate_cache(self):

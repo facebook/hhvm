@@ -3194,6 +3194,7 @@ end = struct
         env
     (* -- C-Access-R -------------------------------------------------------- *)
     | (_, (_, Taccess _)) -> invalid ~fail env
+    (* -- C-Generic-R ------------------------------------------------------- *)
     | (_, (_r_super, Tgeneric (name_super, tyargs_super))) -> begin
       let (generic_lower_bounds, other_lower_bounds) =
         let rec fixpoint new_set bounds_set =
@@ -3310,6 +3311,7 @@ end = struct
             env |> try_bounds bounds |> if_unsat (invalid ~fail)
         )
     end
+    (* -- C-Nonnull-R ------------------------------------------------------- *)
     | (_, (r_nonnull, Tnonnull)) -> begin
       match deref ty_sub with
       | ( _,
@@ -3350,6 +3352,7 @@ end = struct
             }
           env
     end
+    (* -- C-Dynamic-R ------------------------------------------------------- *)
     | (_, (r_dynamic, Tdynamic))
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && (Subtype_env.coercing_to_dynamic subtype_env
@@ -3699,6 +3702,7 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
+    (* -- C-Prim-R ---------------------------------------------------------- *)
     | (_, (r_super, Tprim prim_sup)) -> begin
       match (deref ty_sub, prim_sup) with
       | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
@@ -3731,6 +3735,7 @@ end = struct
             }
           env
     end
+    (* -- C-Any-R ----------------------------------------------------------- *)
     | (_, (_, Tany _)) ->
       (match deref ty_sub with
       | (_, Tany _) -> valid env
@@ -3750,6 +3755,7 @@ end = struct
           (LoclType ty_sub)
           (LoclType ty_super)
       | _ -> valid env)
+    (* -- C-Fun-R ----------------------------------------------------------- *)
     | (_, (r_super, Tfun ft_super)) ->
       (match deref ty_sub with
       | (r_sub, Tfun ft_sub) ->
@@ -3771,6 +3777,7 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
+    (* -- C-Tuple-R --------------------------------------------------------- *)
     | (_, (_, Ttuple tyl_super)) ->
       (match get_node ty_sub with
       | Ttuple tyl_sub
@@ -3796,6 +3803,7 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
+    (* -- C-Shape-R --------------------------------------------------------- *)
     | ( _,
         ( r_super,
           Tshape
@@ -3836,6 +3844,7 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
+    (* -- C-Vec-or-Dict-R --------------------------------------------------- *)
     | (_, (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup))) -> begin
       match get_node ty_sub with
       | Tvec_or_dict (lty_key_sub, lty_val_sub) ->
@@ -3929,6 +3938,7 @@ end = struct
           env
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
     end
+    (* -- C-Newtype-R ------------------------------------------------------- *)
     | (_, (r_supportdyn, Tnewtype (name_super, [lty_inner], bound_super)))
       when String.equal name_super SN.Classes.cSupportDyn -> begin
       match deref ty_sub with
@@ -4134,6 +4144,7 @@ end = struct
             ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env)
     end
+    (* -- C-Vec-or-Dict-R --------------------------------------------------- *)
     | (_, (_, Tunapplied_alias n_sup)) ->
       (match deref ty_sub with
       | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
@@ -4145,6 +4156,7 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
+    (* -- C-Neg-R ----------------------------------------------------------- *)
     | (_, (r_super, Tneg (Neg_prim prim_super))) -> begin
       match deref ty_sub with
       | (r_sub, Tneg (Neg_prim prim_sub)) ->
@@ -4235,6 +4247,7 @@ end = struct
             }
           env
     end
+    (* -- C-Class-R --------------------------------------------------------- *)
     | (_, (r_super, Tclass (class_id_super, Nonexact cr_super, tyargs_super)))
       when (not (Class_refinement.is_empty cr_super))
            && (subtype_env.Subtype_env.require_soundness

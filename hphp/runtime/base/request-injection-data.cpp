@@ -588,12 +588,16 @@ void RequestInjectionData::updateJit() {
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
-  m_sflagsAndStkPtr->fetch_and(~flag);
+  if (m_sflagsAndStkPtr != nullptr) {
+    m_sflagsAndStkPtr->fetch_and(~flag);
+  }
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
-  m_sflagsAndStkPtr->fetch_or(flag);
+  if (m_sflagsAndStkPtr != nullptr) {
+    m_sflagsAndStkPtr->fetch_or(flag);
+  }
 }
 
 void RequestInjectionData::sendSignal(int signum) {

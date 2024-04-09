@@ -159,6 +159,10 @@ class HQSession
     }
   }
 
+  std::shared_ptr<QuicProtocolInfo> getQuicInfo() {
+    return quicInfo_;
+  }
+
   void setForceUpstream1_1(bool force) {
     forceUpstream1_1_ = force;
   }

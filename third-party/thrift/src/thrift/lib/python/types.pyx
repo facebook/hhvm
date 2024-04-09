@@ -781,25 +781,25 @@ cdef class Struct(StructOrUnion):
                 return False
         return True
 
-    def __lt__(self, other):
+    def __fbthrift_compare_less(self, other, return_if_same_type):
         if type(self) != type(other):
             return NotImplemented
         for name, value in self:
             other_value = getattr(other, name)
             if value == other_value:
                 continue
+            if value is None:
+                return True
+            if other_value is None:
+                return False
             return value < other_value
-        return False
+        return return_if_same_type
+
+    def __lt__(self, other):
+        return self.__fbthrift_compare_less(other, False)
 
     def __le__(self, other):
-        if type(self) != type(other):
-            return NotImplemented
-        for name, value in self:
-            other_value = getattr(other, name)
-            if value == other_value:
-                continue
-            return value < other_value
-        return True
+        return self.__fbthrift_compare_less(other, True)
 
     def __hash__(Struct self):
         value_tuple = tuple(v for _, v in self)

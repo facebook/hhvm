@@ -35,6 +35,7 @@ from testing.types import (
     Reserved,
     Runtime,
     SlowCompare,
+    StringBucket,
     UnusedError,
 )
 from thrift.py3.common import Protocol
@@ -398,3 +399,40 @@ class NumericalConversionsTests(unittest.TestCase):
         if field3:
             self.assertEqual(field3.val, 3)
             self.assertEqual(field3.name, "33")
+
+    def test_compare_optional(self) -> None:
+        x = StringBucket()
+        y = StringBucket()
+
+        # Both are default so they are equal and neither are greater
+        self.assertFalse(x < y)
+        self.assertFalse(x > y)
+        self.assertTrue(x <= y)
+        self.assertTrue(x >= y)
+
+        x = StringBucket(one="one")
+
+        # x has a field set so it's greater
+        self.assertFalse(x < y)
+        self.assertTrue(x > y)
+        self.assertFalse(x <= y)
+        self.assertTrue(x >= y)
+
+        # x has an optional field set so even though it's empty string, "" > None
+        x = StringBucket(two="")
+        self.assertFalse(x < y)
+        self.assertTrue(x > y)
+        self.assertFalse(x <= y)
+        self.assertTrue(x >= y)
+
+        # comparisons happen in field order so because y.one > x.one, y > x
+        y = StringBucket(one="one")
+        self.assertTrue(x < y)
+        self.assertFalse(x > y)
+        self.assertTrue(x <= y)
+        self.assertFalse(x >= y)
+
+        z = easy()
+        with self.assertRaises(TypeError):
+            # pyre-fixme[58]: Test to make sure that invalid comparison errors out
+            z < y  # noqa: B015

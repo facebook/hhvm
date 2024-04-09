@@ -15,6 +15,7 @@
 import dataclasses
 import importlib
 import types
+import typing
 import unittest
 
 from thrift.python.mutable_types import MutableStruct, MutableStructOrUnion
@@ -100,6 +101,20 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertEqual(mapping[w_new], 456)
         self.assertEqual(mapping[w_new2], 456)
 
+    def test_ordering(self) -> None:
+        self.assertLess(
+            TestStructImmutable(unqualified_string="a"),
+            TestStructImmutable(unqualified_string="b"),
+        )
+        self.assertLess(
+            TestStructImmutable(unqualified_string="a", optional_string="z"),
+            TestStructImmutable(unqualified_string="b", optional_string="a"),
+        )
+        self.assertGreater(
+            TestStructImmutable(unqualified_string="b", optional_string="z"),
+            TestStructImmutable(unqualified_string="b", optional_string="a"),
+        )
+
     def test_type(self) -> None:
         self.assertEqual(type(TestStructImmutable), StructMeta)
         self.assertEqual(type(TestStructImmutable()), TestStructImmutable)
@@ -116,6 +131,40 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             set(TestStructImmutable(unqualified_string="hello")),
             {("unqualified_string", "hello"), ("optional_string", None)},
         )
+
+    def test_del_attribute(self) -> None:
+        w = TestStructImmutable(unqualified_string="hello, world!")
+
+        # Attributes of immutable types cannot be deleted.
+        #
+        # Note the interesting (and somewhat inconsistent) current behavior:
+        # Calling `del` prior to accessing an attribute raises an AttributeError
+        # (at the cinder level), but doing so after accessing it is a silent
+        # no-op.
+        with self.assertRaisesRegex(AttributeError, "unqualified_string"):
+            del w.unqualified_string
+        self.assertEqual(w.unqualified_string, "hello, world!")
+        del w.unqualified_string  # silent no-op
+        self.assertEqual(w.unqualified_string, "hello, world!")
+
+        # However, a new instance of the object can be created with a specific
+        # attribute "deleted", by explicitly assigning it the "None" value:
+        w_cleared = w(unqualified_string=None)
+        self.assertEqual(w_cleared.unqualified_string, "")
+
+        # "Deleting" a field (by creating a new instance) resets it to its
+        # *standard default value*, i.e. the custom default value if provided
+        # (see thrift/doc/idl/index.md#default-values).
+        w_default_values = TestStructWithDefaultValuesImmutable(unqualified_integer=123)
+        self.assertEqual(w_default_values.unqualified_integer, 123)
+        w_default_values_cleared = w_default_values(unqualified_integer=None)
+        self.assertEqual(w_default_values_cleared.unqualified_integer, 42)
+
+    def test_type_hints(self) -> None:
+        # thrift-python immutable structs do not include type hints directly
+        # (although a separate .pyi interface is generated to allow tooling to
+        # do static type checking)
+        self.assertEqual(typing.get_type_hints(TestStructImmutable), {})
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
@@ -182,6 +231,17 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotIn(w_mutable, [w_mutable2])
         self.assertNotIn(w_mutable, (w_mutable2,))
 
+    def test_ordering(self) -> None:
+        # DO_BEFORE(aristidis, 20240515): ordering for mutable thrift-python
+        with self.assertRaisesRegex(
+            TypeError,
+            "'<' not supported between instances of 'TestStruct' and 'TestStruct'",
+        ):
+            self.assertLess(
+                TestStructMutable(unqualified_string="a"),
+                TestStructMutable(unqualified_string="b"),
+            )
+
     def test_subclass(self) -> None:
         with self.assertRaisesRegex(
             TypeError, "Inheriting from thrift-python data types is forbidden:"
@@ -240,4 +300,41 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertSetEqual(
             set(TestStructMutable(unqualified_string="hello")),
             {("unqualified_string", "hello"), ("optional_string", None)},
+        )
+
+    def test_del_attribute(self) -> None:
+        w = TestStructMutable(unqualified_string="hello, world!")
+        self.assertEqual(w.unqualified_string, "hello, world!")
+
+        # Deleting an attribute on a (mutable) thrift-python instance should
+        # reset it to its standard default value (see
+        # thrift/doc/idl/index.md#default-values).
+
+        # NOTE: this is not currently implemented: deleting the attribute
+        # removes it from the instance altogether:
+        del w.unqualified_string
+        # DO_BEFORE(aristidis, 20240508): Support deleting attribute of mutable
+        # thrift-python struct instance.
+        with self.assertRaisesRegex(
+            AttributeError, "'TestStruct' object has no attribute 'unqualified_string'"
+        ):
+            self.assertEqual(w.unqualified_string, "")
+
+        w_default_values = TestStructWithDefaultValuesMutable(unqualified_integer=123)
+        self.assertEqual(w_default_values.unqualified_integer, 123)
+        del w_default_values.unqualified_integer
+        # DO_BEFORE(aristidis, 20240508): Support deleting attribute of mutable
+        # thrift-python struct instance.
+        with self.assertRaisesRegex(
+            AttributeError,
+            "'TestStructWithDefaultValues' object has no attribute 'unqualified_integer'",
+        ):
+            self.assertEqual(w_default_values.unqualified_integer, 42)
+
+    def test_type_hints(self) -> None:
+        # DO_BEFORE(aristidis, 20240601): Fix type hints for mutable
+        # thrift-python types (should not be `typing.Any`).
+        self.assertEqual(
+            typing.get_type_hints(TestStructMutable),
+            {"unqualified_string": typing.Any, "optional_string": typing.Any},
         )

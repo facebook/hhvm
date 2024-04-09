@@ -4415,26 +4415,9 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* local,
     return;
   }
 
-  if (local != nullptr) {
-    // We need to extract base, as LIterInit is not preceded by IterBase. Since
-    // the actual base and the local differs, we can't use the local anymore.
-    base = Iter::extractBase(base, arGetContextClass(vmfp()));
-    if (isArrayLikeType(type(base))) {
-      handleArrayLike(val(base).parr, IterTypeOp::NonLocal);
-      return;
-    }
-  }
-
   // The base is extracted and we already handled ArrayLike.
   assertx(isObjectType(type(base)));
-
-  // If the object is on the stack, keep it there with its own refcount until
-  // we are done, so that the state is consistent if initObj() throws.
-  auto obj = local == nullptr
-    ? Object(val(base).pobj)
-    : Object::attach(val(base).pobj);
-
-  if (it->initObj(std::move(obj))) {
+  if (it->initObj(Object(val(base).pobj))) {
     tvAsVariant(value) = it->value();
     if (key) tvAsVariant(key) = it->key();
   } else {

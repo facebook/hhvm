@@ -736,6 +736,47 @@ end = struct
     ty_super: locl_ty;
   }
 
+  (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
+  let rewrite_optional_supportdyn_r ~lhs ~rhs env =
+    let (env, ty_super) = Env.expand_type env rhs.ty_super in
+    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
+    match (deref ty_sub, deref ty_super) with
+    | ( ( _,
+          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
+          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
+        (r_super, Toption ty_inner) ) ->
+      let (env, ty_inner) = Env.expand_type env ty_inner in
+
+      (match get_node ty_inner with
+      | Tnewtype (name, [tyarg], _)
+        when String.equal name SN.Classes.cSupportDyn ->
+        let tyarg = MakeType.nullable r_super tyarg in
+        let ty_super = MakeType.supportdyn r_super tyarg in
+        let lhs = { lhs with ty_sub }
+        and rhs =
+          { super_like = rhs.super_like; super_supportdyn = false; ty_super }
+        in
+        (env, Some (lhs, rhs))
+      | _ -> (env, None))
+    | _ -> (env, None)
+
+  (** List of disjoint rewrite rules used to improve error reporting and completness
+      rather than implmenting our declarative subtyping rules *)
+  let rewrites = [rewrite_optional_supportdyn_r]
+
+  let rewrite_prop ~lhs ~rhs env =
+    let rec aux lhs rhs env rws =
+      match rws with
+      | [] -> (env, (lhs, rhs))
+      | rw :: rws ->
+        (match rw ~lhs ~rhs env with
+        | (env, Some (lhs, rhs)) -> (env, (lhs, rhs))
+        | (env, _) -> aux lhs rhs env rws)
+    in
+    aux lhs rhs env rewrites
+
   let log_simplify
       subtype_env
       this_ty
@@ -2456,6 +2497,7 @@ end = struct
 
   and simplify ~subtype_env ~this_ty ~lhs ~rhs env =
     let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
+    let (env, (lhs, rhs)) = rewrite_prop ~lhs ~rhs env in
     let { sub_supportdyn; ty_sub } = lhs
     and { super_supportdyn; super_like; ty_super } = rhs in
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
@@ -2936,21 +2978,6 @@ end = struct
         (r_super, Toption lty_inner) ) ->
       let (env, lty_inner) = Env.expand_type env lty_inner in
       (match (deref ty_sub, get_node lty_inner) with
-      (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
-      | (_, Tnewtype (name, [tyarg], _))
-        when String.equal name SN.Classes.cSupportDyn ->
-        let tyarg = MakeType.nullable r_super tyarg in
-        simplify
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = MakeType.supportdyn r_super tyarg;
-            }
-          env
       (*   supportdyn<t> <: ?u   iff
        *   nonnull & supportdyn<t> <: u   iff
        *   supportdyn<nonnull & t> <: u

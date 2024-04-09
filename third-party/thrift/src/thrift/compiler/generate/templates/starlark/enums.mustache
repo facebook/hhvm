@@ -1,9 +1,9 @@
 {{#program:enums?}}
-__StarlarkEnum__ = record(name=str.type, value=int.type)
+__StarlarkEnum__ = record(name=str, value=int)
 {{#program:enums}}
 __{{enum:name}}_enum__ = record(
   {{#enum:values}}
-    {{enum_value:name}} = __StarlarkEnum__.type,
+    {{enum_value:name}} = __StarlarkEnum__,
   {{/enum:values}}
 )
 

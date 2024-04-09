@@ -1,4 +1,4 @@
-__StarlarkEnum__ = record(name=str.type, value=int.type)
+__StarlarkEnum__ = record(name=str, value=int)
 __EmptyEnum_enum__ = record(
 )
 
@@ -6,10 +6,10 @@ EmptyEnum = __EmptyEnum_enum__(
 )
 
 __City_enum__ = record(
-    NYC = __StarlarkEnum__.type,
-    MPK = __StarlarkEnum__.type,
-    SEA = __StarlarkEnum__.type,
-    LON = __StarlarkEnum__.type,
+    NYC = __StarlarkEnum__,
+    MPK = __StarlarkEnum__,
+    SEA = __StarlarkEnum__,
+    LON = __StarlarkEnum__,
 )
 
 City = __City_enum__(
@@ -20,10 +20,10 @@ City = __City_enum__(
 )
 
 __Company_enum__ = record(
-    FACEBOOK = __StarlarkEnum__.type,
-    WHATSAPP = __StarlarkEnum__.type,
-    OCULUS = __StarlarkEnum__.type,
-    INSTAGRAM = __StarlarkEnum__.type,
+    FACEBOOK = __StarlarkEnum__,
+    WHATSAPP = __StarlarkEnum__,
+    OCULUS = __StarlarkEnum__,
+    INSTAGRAM = __StarlarkEnum__,
 )
 
 Company = __Company_enum__(

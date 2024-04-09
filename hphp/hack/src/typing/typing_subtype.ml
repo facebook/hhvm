@@ -2523,7 +2523,12 @@ end = struct
     | ((_, Tvar var_sub), (_, Tvar var_super)) when Tvid.equal var_sub var_super
       ->
       valid env
-    | (_, (_r_super, Tvar _var_super)) -> begin
+    | ( ( _,
+          ( Tany _ | Tnonnull | Tdynamic | Tprim _ | Tvar _ | Tfun _ | Ttuple _
+          | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _ | Taccess _
+          | Tnewtype _ | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _
+            ) ),
+        (_r_super, Tvar _var_super) ) -> begin
       match subtype_env.Subtype_env.coerce with
       | Some cd ->
         mk_issubtype_prop

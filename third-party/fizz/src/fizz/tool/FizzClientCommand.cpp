@@ -803,6 +803,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
 
   if (ech) {
     // Use default ECH config values.
+    echConfigList = ech::ECHConfigList{};
     auto echConfigContents = getDefaultECHConfigs();
     echConfigList->configs = std::move(echConfigContents);
   } else if (!echConfigsBase64.empty()) {

@@ -3810,7 +3810,21 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     (* -- C-Shape-R --------------------------------------------------------- *)
-    | ( _,
+    | ((r_sub, Tnewtype (name_sub, _, ty_bound_sub)), (_, Tshape _)) ->
+      Common.simplify_newtype_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop:simplify
+        (sub_supportdyn, r_sub, name_sub, ty_bound_sub)
+        rhs
+        env
+    | ( ( r_sub,
+          Tshape
+            {
+              s_origin = origin_sub;
+              s_unknown_value = shape_kind_sub;
+              s_fields = fdm_sub;
+            } ),
         ( r_super,
           Tshape
             {
@@ -3818,38 +3832,32 @@ end = struct
               s_unknown_value = shape_kind_super;
               s_fields = fdm_super;
             } ) ) ->
-      let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env ty_sub in
-      (match deref lty with
-      | ( r_sub,
-          Tshape
-            {
-              s_origin = origin_sub;
-              s_unknown_value = shape_kind_sub;
-              s_fields = fdm_sub;
-            } ) ->
-        if same_type_origin origin_super origin_sub then
-          (* Fast path for shape types: if they have the same origin,
-           * they are equal type. *)
-          valid env
-        else
-          let sub_supportdyn =
-            Option.is_some sub_supportdyn || sub_supportdyn'
-          in
-          simplify_subtype_shape
-            ~subtype_env
-            ~env
-            ~this_ty
-            ~super_like
-            (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
-            (super_supportdyn, r_super, shape_kind_super, fdm_super)
-      | _ ->
-        default_subtype
+      if same_type_origin origin_super origin_sub then
+        (* Fast path for shape types: if they have the same origin,
+         * they are equal type. *)
+        valid env
+      else
+        let sub_supportdyn = Option.is_some sub_supportdyn in
+        simplify_subtype_shape
           ~subtype_env
+          ~env
           ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_supportdyn; super_like; ty_super }
-          env)
+          ~super_like
+          (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
+          (super_supportdyn, r_super, shape_kind_super, fdm_super)
+    | ( ( _,
+          ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
+          | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _
+          | Tvec_or_dict _ | Ttuple _ | Tdynamic | Tneg _ | Tdependent _
+          | Tvar _ | Tunapplied_alias _ ) ),
+        (_, Tshape _) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     (* -- C-Vec-or-Dict-R --------------------------------------------------- *)
     | (_, (r_super, Tvec_or_dict (lty_key_sup, lty_val_sup))) -> begin
       match get_node ty_sub with

@@ -925,6 +925,37 @@ end = struct
     | Tclass (id, _, _) -> (env, id)
     | _ -> failwith "This type is not a Tclass"
 
+  let generic_lower_bounds env ty_super =
+    let rec fixpoint new_set bounds_set =
+      if Typing_set.is_empty new_set then
+        bounds_set
+      else
+        let add_set =
+          Typing_set.fold
+            (fun ty add_set ->
+              match get_node ty with
+              | Tgeneric (name, targs) ->
+                let gen_bounds = Env.get_lower_bounds env name targs in
+                Typing_set.union add_set gen_bounds
+              | _ -> add_set)
+            new_set
+            Typing_set.empty
+        in
+        let bounds_set = Typing_set.union new_set bounds_set in
+        let new_set = Typing_set.diff add_set bounds_set in
+        fixpoint new_set bounds_set
+    in
+    let lower_bounds =
+      fixpoint (Typing_set.singleton ty_super) Typing_set.empty
+    in
+    Typing_set.fold
+      (fun bound_ty (g_set, o_set) ->
+        match get_node bound_ty with
+        | Tgeneric (name, []) -> (SSet.add name g_set, o_set)
+        | _ -> (g_set, Typing_set.add bound_ty o_set))
+      lower_bounds
+      (SSet.empty, Typing_set.empty)
+
   (* If it's clear from the syntax of the type that null isn't in ty, return true.
  *)
   let rec null_not_subtype ty =
@@ -3197,35 +3228,7 @@ end = struct
     (* -- C-Generic-R ------------------------------------------------------- *)
     | (_, (_r_super, Tgeneric (name_super, tyargs_super))) -> begin
       let (generic_lower_bounds, other_lower_bounds) =
-        let rec fixpoint new_set bounds_set =
-          if Typing_set.is_empty new_set then
-            bounds_set
-          else
-            let add_set =
-              Typing_set.fold
-                (fun ty add_set ->
-                  match get_node ty with
-                  | Tgeneric (name, targs) ->
-                    let gen_bounds = Env.get_lower_bounds env name targs in
-                    Typing_set.union add_set gen_bounds
-                  | _ -> add_set)
-                new_set
-                Typing_set.empty
-            in
-            let bounds_set = Typing_set.union new_set bounds_set in
-            let new_set = Typing_set.diff add_set bounds_set in
-            fixpoint new_set bounds_set
-        in
-        let lower_bounds =
-          fixpoint (Typing_set.singleton ty_super) Typing_set.empty
-        in
-        Typing_set.fold
-          (fun bound_ty (g_set, o_set) ->
-            match get_node bound_ty with
-            | Tgeneric (name, []) -> (SSet.add name g_set, o_set)
-            | _ -> (g_set, Typing_set.add bound_ty o_set))
-          lower_bounds
-          (SSet.empty, Typing_set.empty)
+        generic_lower_bounds env ty_super
       in
       match get_node ty_sub with
       | Tgeneric (name_sub, []) when SSet.mem name_sub generic_lower_bounds ->

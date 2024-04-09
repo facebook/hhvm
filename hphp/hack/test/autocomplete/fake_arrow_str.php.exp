@@ -116,7 +116,7 @@ SORT TEXT: none
 Str\replace_every_nonrecursive
   INSERT Str\replace_every_nonrecursive(
   INSERT , ${1:\$replacements})
-  (function(string $haystack, KeyedContainer<string, string> $replacements): string)
+  (function(string $haystack, KeyedContainer<string, string> $replacements)[]: string)
 SORT TEXT: none
 Str\replace_every_nonrecursive_ci
   INSERT Str\replace_every_nonrecursive_ci(

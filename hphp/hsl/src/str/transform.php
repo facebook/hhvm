@@ -273,7 +273,7 @@ function replace_every_ci(
 function replace_every_nonrecursive(
   string $haystack,
   KeyedContainer<string, string> $replacements,
-): string {
+)[]: string {
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements));
 }
 

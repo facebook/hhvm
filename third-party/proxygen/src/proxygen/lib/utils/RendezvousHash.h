@@ -38,10 +38,11 @@ class RendezvousHash : public ConsistentHash {
   std::vector<size_t> selectNUnweighted(const uint64_t key,
                                         const size_t rank) const;
 
- private:
+ protected:
   size_t getNthByWeightedHash(const uint64_t key,
                               const size_t modRank,
                               std::vector<size_t>* returnRankIds) const;
+
   uint64_t computeHash(const char* data, size_t len) const;
 
   uint64_t computeHash(uint64_t i) const;

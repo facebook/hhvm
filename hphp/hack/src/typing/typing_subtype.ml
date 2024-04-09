@@ -3715,38 +3715,33 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     (* -- C-Prim-R ---------------------------------------------------------- *)
-    | (_, (r_super, Tprim prim_sup)) -> begin
-      match (deref ty_sub, prim_sup) with
-      | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
-      | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
-      | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_sup ->
-        valid env
-      | ((_, Toption arg_ty_sub), Nast.Tnull) ->
-        simplify
-          ~subtype_env
-          ~this_ty
-          ~lhs:{ sub_supportdyn; ty_sub = arg_ty_sub }
-          ~rhs:
-            {
-              super_like = false;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tprim prim_sup);
-            }
-          env
-      | (_, _) ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_super, Tprim prim_sup);
-            }
-          env
-    end
+    | ((_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum)) -> valid env
+    | ((_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey)) ->
+      valid env
+    | ((_, Tprim prim_sub), (_, Tprim prim_sup))
+      when Aast.equal_tprim prim_sub prim_sup ->
+      valid env
+    | ((_, Tprim _), (_, Tprim _)) -> invalid env ~fail
+    | ((_, Toption arg_ty_sub), (_, Tprim Nast.Tnull)) ->
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = arg_ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        env
+    | ( ( _,
+          ( Tany _ | Tdynamic | Tunion _ | Toption _ | Tintersection _
+          | Tdependent _ | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _
+          | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
+          | Tunapplied_alias _ | Tvar _ ) ),
+        (_, Tprim _) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super }
+        env
     (* -- C-Any-R ----------------------------------------------------------- *)
     | (_, (_, Tany _)) ->
       (match deref ty_sub with

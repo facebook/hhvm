@@ -1179,6 +1179,33 @@ fn emit_foreach_<'a, 'd>(
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     let liter_local = check_l_iter(e, env, pos, collection, iterator, block)?;
+    if let Some(loc) = liter_local {
+        let liter_label = e.label_gen_mut().next_regular();
+        let done_label = e.label_gen_mut().next_regular();
+        Ok(InstrSeq::gather(vec![
+            instr::c_get_quiet_l(loc),
+            instr::is_type_c(IsTypeOp::ArrLike),
+            instr::jmp_nz(liter_label),
+            emit_foreach_impl(e, env, pos, collection, iterator, block, None)?,
+            instr::jmp(done_label),
+            instr::label(liter_label),
+            emit_foreach_impl(e, env, pos, collection, iterator, block, liter_local)?,
+            instr::label(done_label),
+        ]))
+    } else {
+        emit_foreach_impl(e, env, pos, collection, iterator, block, None)
+    }
+}
+
+fn emit_foreach_impl<'a, 'd>(
+    e: &mut Emitter<'d>,
+    env: &mut Env<'a>,
+    pos: &Pos,
+    collection: &ast::Expr,
+    iterator: &ast::AsExpr,
+    block: &[ast::Stmt],
+    liter_local: Option<Local>,
+) -> Result<InstrSeq> {
     let collection_instrs = if liter_local.is_none() {
         emit_expr::emit_expr(e, env, collection)?
     } else {

@@ -1272,14 +1272,17 @@ TEST_P(HQUpstreamSessionTest, Observer_RequestStarted) {
           .build());
   hqSession_->addObserver(observerSubscribed.get());
 
+  HTTPTransactionObserverAccessor* actualTxnObserverAccessor;
   // expect to see a request started with header 'x-meta-test-header' having
   // value 'abc123'
   EXPECT_CALL(*observerSubscribed, requestStarted(_, _))
-      .WillOnce(Invoke(
-          [](HTTPSessionObserverAccessor*,
-             const proxygen::MockSessionObserver::RequestStartedEvent& event) {
-            auto hdrs = event.requestHeaders;
-            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+      .WillOnce(
+          Invoke([&](HTTPSessionObserverAccessor*,
+                     const MockSessionObserver::RequestStartedEvent& event) {
+            EXPECT_EQ(
+                event.requestHeaders.getSingleOrEmpty("x-meta-test-header"),
+                "abc123");
+            actualTxnObserverAccessor = event.txnObserverAccessor;
           }));
 
   auto handler = openTransaction();
@@ -1297,6 +1300,7 @@ TEST_P(HQUpstreamSessionTest, Observer_RequestStarted) {
                std::move(std::get<1>(resp)),
                true);
   flushAndLoop();
+  EXPECT_EQ(actualTxnObserverAccessor, handler->txn_->getObserverAccessor());
   hqSession_->closeWhenIdle();
 }
 

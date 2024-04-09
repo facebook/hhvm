@@ -4498,15 +4498,17 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
 
   EXPECT_CALL(*observerUnsubscribed, requestStarted(_, _)).Times(0);
 
+  HTTPTransactionObserverAccessor* actualTxnObserverAccessor;
   // Subscribed observer expects to receive RequestStarted callback, with a
   // request header x-meta-test-header and value "abc123"
   EXPECT_CALL(*observerSubscribed, requestStarted(_, _))
       .WillOnce(Invoke(
-          [](HTTPSessionObserverAccessor*,
-             const proxygen::HTTPSessionObserverInterface::RequestStartedEvent&
-                 event) {
-            auto hdrs = event.requestHeaders;
-            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+          [&](HTTPSessionObserverAccessor*,
+              const HTTPSessionObserverInterface::RequestStartedEvent& event) {
+            EXPECT_EQ(
+                event.requestHeaders.getSingleOrEmpty("x-meta-test-header"),
+                "abc123");
+            actualTxnObserverAccessor = event.txnObserverAccessor;
           }));
 
   auto handler = addSimpleStrictHandler();
@@ -4523,9 +4525,8 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
   HTTPMessage req = getGetRequest();
   req.getHeaders().add("x-meta-test-header", "abc123");
   sendRequest(req);
-
   flushRequestsAndLoop(true, milliseconds(0));
-
+  EXPECT_EQ(actualTxnObserverAccessor, handler->txn_->getObserverAccessor());
   expectDetachSession();
 }
 

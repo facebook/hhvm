@@ -15,6 +15,8 @@
 
 namespace proxygen {
 
+class HTTPTransactionObserverAccessor;
+
 /**
  * Accessor object "observed" by HTTPSessionObservers.
  *
@@ -61,6 +63,7 @@ class HTTPSessionObserverInterface {
   struct RequestStartedEvent {
     const TimePoint timestamp;
     const HTTPHeaders& requestHeaders;
+    HTTPTransactionObserverAccessor* txnObserverAccessor;
 
     // Do not support copy or move given that requestHeaders is a ref.
     RequestStartedEvent(RequestStartedEvent&&) = delete;
@@ -73,12 +76,15 @@ class HTTPSessionObserverInterface {
           maybeTimestampRef;
       folly::Optional<std::reference_wrapper<const HTTPHeaders>>
           maybeHTTPHeadersRef;
+      HTTPTransactionObserverAccessor* maybeTxnObserverAccessorPtr;
       explicit BuilderFields() = default;
     };
 
     struct Builder : public BuilderFields {
       Builder&& setTimestamp(const TimePoint& timestamp);
       Builder&& setHeaders(const proxygen::HTTPHeaders& headers);
+      Builder&& setTxnObserverAccessor(
+          proxygen::HTTPTransactionObserverAccessor* txnObserverAccessor);
       RequestStartedEvent build() &&;
       explicit Builder() = default;
     };

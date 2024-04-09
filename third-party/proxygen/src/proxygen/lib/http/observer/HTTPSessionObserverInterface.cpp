@@ -26,6 +26,14 @@ HTTPSessionObserverInterface::RequestStartedEvent::Builder::setHeaders(
   return std::move(*this);
 }
 
+HTTPSessionObserverInterface::RequestStartedEvent::Builder&&
+HTTPSessionObserverInterface::RequestStartedEvent::Builder::
+    setTxnObserverAccessor(
+        proxygen::HTTPTransactionObserverAccessor* txnObserverAccessor) {
+  maybeTxnObserverAccessorPtr = txnObserverAccessor;
+  return std::move(*this);
+}
+
 HTTPSessionObserverInterface::RequestStartedEvent
 HTTPSessionObserverInterface::RequestStartedEvent::Builder::build() && {
   return RequestStartedEvent(*this);
@@ -35,7 +43,8 @@ HTTPSessionObserverInterface::RequestStartedEvent::RequestStartedEvent(
     const RequestStartedEvent::BuilderFields& builderFields)
     : timestamp(*CHECK_NOTNULL(builderFields.maybeTimestampRef.get_pointer())),
       requestHeaders(
-          *CHECK_NOTNULL(builderFields.maybeHTTPHeadersRef.get_pointer())) {
+          *CHECK_NOTNULL(builderFields.maybeHTTPHeadersRef.get_pointer())),
+      txnObserverAccessor(builderFields.maybeTxnObserverAccessorPtr) {
 }
 
 HTTPSessionObserverInterface::PreWriteEvent::Builder&&

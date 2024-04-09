@@ -862,6 +862,12 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
     infoCallback_->onIngressMessage(*this, *msg.get());
   }
 
+  HTTPTransaction* txn = findTransaction(streamID);
+  if (!txn) {
+    invalidStream(streamID);
+    return;
+  }
+
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
   if (isDownstream()) {
@@ -870,6 +876,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
               .setTimestamp(HTTPSessionObserverInterface::Clock::now())
               .setHeaders(msgPtr->getHeaders())
+              .setTxnObserverAccessor(txn->getObserverAccessor())
               .build();
       sessionObserverContainer_.invokeInterfaceMethod<
           HTTPSessionObserverInterface::Events::RequestStarted>(
@@ -877,12 +884,6 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
             observer->requestStarted(observed, event);
           });
     }
-  }
-
-  HTTPTransaction* txn = findTransaction(streamID);
-  if (!txn) {
-    invalidStream(streamID);
-    return;
   }
 
   HTTPTransaction::DestructorGuard dg(txn);
@@ -1651,6 +1652,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
             .setHeaders(headers.getHeaders())
+            .setTxnObserverAccessor(txn->getObserverAccessor())
             .build();
     sessionObserverContainer_.invokeInterfaceMethod<
         HTTPSessionObserverInterface::Events::RequestStarted>(

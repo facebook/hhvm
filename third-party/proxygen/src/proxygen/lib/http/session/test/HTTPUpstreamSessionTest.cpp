@@ -3251,14 +3251,17 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
 
   EXPECT_CALL(*observerUnsubscribed, requestStarted(_, _)).Times(0);
 
+  HTTPTransactionObserverAccessor* actualTxnObserverAccessor;
   // expect to see a request started with header 'x-meta-test-header' having
   // value 'abc123'
   EXPECT_CALL(*observerSubscribed, requestStarted(_, _))
-      .WillOnce(Invoke(
-          [](HTTPSessionObserverAccessor*,
-             const proxygen::MockSessionObserver::RequestStartedEvent& event) {
-            auto hdrs = event.requestHeaders;
-            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+      .WillOnce(
+          Invoke([&](HTTPSessionObserverAccessor*,
+                     const MockSessionObserver::RequestStartedEvent& event) {
+            EXPECT_EQ(
+                event.requestHeaders.getSingleOrEmpty("x-meta-test-header"),
+                "abc123");
+            actualTxnObserverAccessor = event.txnObserverAccessor;
           }));
   auto egressCodec = makeServerCodec();
   folly::IOBufQueue output(folly::IOBufQueue::cacheChainLength());
@@ -3291,6 +3294,7 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
   req.getHeaders().add("x-meta-test-header", "abc123");
   handler->sendRequest(req);
   readAndLoop(input->data(), input->length());
+  EXPECT_EQ(actualTxnObserverAccessor, handler->txn_->getObserverAccessor());
   httpSession_->destroy();
 }
 

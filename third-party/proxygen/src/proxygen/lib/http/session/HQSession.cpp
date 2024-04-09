@@ -2530,6 +2530,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
               .setTimestamp(HTTPSessionObserverInterface::Clock::now())
               .setHeaders(msgPtr->getHeaders())
+              .setTxnObserverAccessor(txn_.getObserverAccessor())
               .build();
       session_.sessionObserverContainer_.invokeInterfaceMethod<
           HTTPSessionObserverInterface::Events::RequestStarted>(
@@ -2886,6 +2887,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
             .setHeaders(headers.getHeaders())
+            .setTxnObserverAccessor(txn->getObserverAccessor())
             .build();
     session_.sessionObserverContainer_.invokeInterfaceMethod<
         HTTPSessionObserverInterface::Events::RequestStarted>(

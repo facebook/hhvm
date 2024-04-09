@@ -58,7 +58,7 @@ folly::Try<apache::thrift::RpcResponseComplete<hellogoodbye::GoodbyeReply>> send
   auto reply = thriftClient->sync_complete_goodbye(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
@@ -97,7 +97,7 @@ folly::Try<apache::thrift::RpcResponseComplete<hellogoodbye::HelloReply>> sendSy
   auto reply = thriftClient->sync_complete_hello(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
@@ -133,7 +133,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
   auto reply = thriftClient->sync_complete_mcVersion(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;

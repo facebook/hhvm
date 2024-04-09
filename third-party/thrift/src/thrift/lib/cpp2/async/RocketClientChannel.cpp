@@ -586,7 +586,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       folly::Try<rocket::Payload>&& payload) noexcept override {
     folly::Try<FirstResponsePayload> response;
     folly::Try<folly::SocketFds> tryFds;
-    RpcSizeStats stats;
+    RpcTransportStats stats;
     stats.requestSerializedSizeBytes = requestSerializedSize_;
     stats.requestWireSizeBytes = requestWireSize_;
     stats.requestMetadataAndPayloadSizeBytes = requestMetadataAndPayloadSize_;

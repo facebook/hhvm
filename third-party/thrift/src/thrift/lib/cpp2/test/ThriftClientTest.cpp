@@ -177,7 +177,7 @@ TEST_F(ThriftClientTest, SyncCallRequestResponse) {
     EXPECT_TRUE(response->response.hasValue());
     EXPECT_EQ(*response->response, "123");
 
-    auto& stats = response->responseContext.rpcSizeStats;
+    auto& stats = response->responseContext.rpcTransportStats;
     EXPECT_LE(1, stats.requestSerializedSizeBytes);
     EXPECT_LE(stats.requestWireSizeBytes, stats.requestSerializedSizeBytes);
     EXPECT_LE(

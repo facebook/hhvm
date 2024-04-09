@@ -58,7 +58,7 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::CustomReply>> sendS
   auto reply = thriftClient->sync_complete_customRequest(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
@@ -94,7 +94,7 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::DummyThriftReply>> 
   auto reply = thriftClient->sync_complete_thrift_test(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
@@ -130,7 +130,7 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::ThriftTestReply>> s
   auto reply = thriftClient->sync_complete_test(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
@@ -166,7 +166,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
   auto reply = thriftClient->sync_complete_mcVersion(
       std::move(rpcOptions), request);
   if (rpcStatsContext && reply.hasValue()) {
-      auto& stats = reply->responseContext.rpcSizeStats;
+      auto& stats = reply->responseContext.rpcTransportStats;
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;

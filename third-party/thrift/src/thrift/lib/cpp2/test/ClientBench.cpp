@@ -67,7 +67,7 @@ class DummyChannel : public apache::thrift::RequestChannel {
         SerializedResponse(staticState.serializedResponse().buffer->clone()),
         nullptr,
         nullptr,
-        RpcSizeStats()));
+        RpcTransportStats()));
   }
   void sendRequestNoResponse(
       const RpcOptions&,

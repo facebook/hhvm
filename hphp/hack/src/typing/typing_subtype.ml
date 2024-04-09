@@ -3786,31 +3786,29 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     (* -- C-Tuple-R --------------------------------------------------------- *)
-    | (_, (_, Ttuple tyl_super)) ->
-      (match get_node ty_sub with
-      | Ttuple tyl_sub
-        when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
-        wfold_left2
-          (fun res ty_sub ty_super ->
-            let ty_super = Sd.liken ~super_like env ty_super in
-            res
-            &&& simplify
-                  ~subtype_env
-                  ~this_ty:None
-                  ~lhs:{ sub_supportdyn; ty_sub }
-                  ~rhs:
-                    { super_like = false; super_supportdyn = false; ty_super })
-          (env, TL.valid)
-          tyl_sub
-          tyl_super
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_supportdyn; super_like; ty_super }
-          env)
+    | ((_, Ttuple tyl_sub), (_, Ttuple tyl_super))
+      when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
+      wfold_left2
+        (fun res ty_sub ty_super ->
+          let ty_super = Sd.liken ~super_like env ty_super in
+          res
+          &&& simplify
+                ~subtype_env
+                ~this_ty:None
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
+        (env, TL.valid)
+        tyl_sub
+        tyl_super
+    | ((_, Ttuple _), (_, Ttuple _)) -> invalid env ~fail
+    | (_, (_, Ttuple _)) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     (* -- C-Shape-R --------------------------------------------------------- *)
     | ( _,
         ( r_super,

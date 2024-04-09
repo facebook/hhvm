@@ -8,6 +8,10 @@
 
 #include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/OpenSSLFactory.h>
+#if FIZZ_HAVE_OQS
+#include <fizz/crypto/exchange/HybridKeyExchange.h>
+#include <fizz/experimental/crypto/exchange/OQSKeyExchange.h>
+#endif
 
 namespace fizz {
 
@@ -24,6 +28,31 @@ std::unique_ptr<KeyExchange> OpenSSLFactory::makeKeyExchange(
       return std::make_unique<OpenSSLECKeyExchange<P521>>();
     case NamedGroup::x25519:
       return std::make_unique<X25519KeyExchange>();
+#if FIZZ_HAVE_OQS
+    case NamedGroup::x25519_kyber512:
+      return std::make_unique<HybridKeyExchange>(
+          std::make_unique<X25519KeyExchange>(),
+          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
+    case NamedGroup::secp256r1_kyber512:
+      return std::make_unique<HybridKeyExchange>(
+          std::make_unique<OpenSSLECKeyExchange<P256>>(),
+          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
+    case NamedGroup::kyber512:
+      return OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512);
+    case NamedGroup::x25519_kyber768_draft00:
+    case NamedGroup::x25519_kyber768_experimental:
+      return std::make_unique<HybridKeyExchange>(
+          std::make_unique<X25519KeyExchange>(),
+          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+    case NamedGroup::secp256r1_kyber768_draft00:
+      return std::make_unique<HybridKeyExchange>(
+          std::make_unique<OpenSSLECKeyExchange<P256>>(),
+          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+    case NamedGroup::secp384r1_kyber768:
+      return std::make_unique<HybridKeyExchange>(
+          std::make_unique<OpenSSLECKeyExchange<P384>>(),
+          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+#endif
     default:
       throw std::runtime_error("ke: not implemented");
   }

@@ -23,6 +23,7 @@ struct QuicProtocolInfo : public wangle::ProtocolInfo {
   folly::Optional<quic::ConnectionId> clientConnectionId;
   folly::Optional<quic::ConnectionId> serverConnectionId;
   folly::Optional<quic::TransportSettings> transportSettings;
+  folly::Optional<std::string> fingerprint;
 
   uint32_t ptoCount{0};
   uint32_t totalPTOCount{0};

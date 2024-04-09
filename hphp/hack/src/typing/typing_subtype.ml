@@ -3326,46 +3326,44 @@ end = struct
         let bounds = Typing_set.elements other_lower_bounds in
         env |> try_bounds bounds |> if_unsat (invalid ~fail))
     (* -- C-Nonnull-R ------------------------------------------------------- *)
-    | (_, (r_nonnull, Tnonnull)) -> begin
-      match deref ty_sub with
-      | ( _,
+    | ( ( _,
           ( Tprim
               Ast_defs.(
                 ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
                 | Tnoreturn ))
           | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvec_or_dict _
-          | Taccess _ ) ) ->
-        valid env
-      (* supportdyn<t> <: nonnull iff t <: nonnull *)
-      | (r, Tnewtype (name, [tyarg], _))
-        when String.equal name SN.Classes.cSupportDyn ->
+          | Taccess _ ) ),
+        (_, Tnonnull) ) ->
+      valid env
+    (* supportdyn<t> <: nonnull iff t <: nonnull *)
+    | ((r, Tnewtype (name, [tyarg], _)), (r_nonnull, Tnonnull))
+      when String.equal name SN.Classes.cSupportDyn ->
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty
+           ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg }
+           ~rhs:
+             {
+               super_like = false;
+               super_supportdyn = false;
+               ty_super = mk (r_nonnull, Tnonnull);
+             }
+    (* negations always contain null *)
+    | ((_, Tneg _), (_, Tnonnull)) -> invalid ~fail env
+    | ( ( _,
+          ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tdynamic
+          | Tprim Aast.(Tvoid | Tnull)
+          | Tvar _ | Tgeneric _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
+            ) ),
+        (_, Tnonnull) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super }
         env
-        |> simplify
-             ~subtype_env
-             ~this_ty
-             ~lhs:{ sub_supportdyn = Some r; ty_sub = tyarg }
-             ~rhs:
-               {
-                 super_like = false;
-                 super_supportdyn = false;
-                 ty_super = mk (r_nonnull, Tnonnull);
-               }
-      (* negations always contain null *)
-      | (_, Tneg _) -> invalid ~fail env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:
-            {
-              super_like;
-              super_supportdyn = false;
-              ty_super = mk (r_nonnull, Tnonnull);
-            }
-          env
-    end
     (* -- C-Dynamic-R ------------------------------------------------------- *)
     | (_, (r_dynamic, Tdynamic))
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt

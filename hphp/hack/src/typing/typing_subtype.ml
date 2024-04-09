@@ -2927,7 +2927,13 @@ end = struct
         (_, Toption ty_inner) )
       when expands_to_nonnull ty_inner ~env ->
       valid env
-    | (_, (r_super, Toption lty_inner)) ->
+    (* -- C-Option-R -------------------------------------------------------- *)
+    | ( ( _,
+          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
+          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
+        (r_super, Toption lty_inner) ) ->
       let (env, lty_inner) = Env.expand_type env lty_inner in
       (match (deref ty_sub, get_node lty_inner) with
       (* ?supportdyn<t> is equivalent to supportdyn<?t> *)

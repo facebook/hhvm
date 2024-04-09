@@ -2583,16 +2583,130 @@ end = struct
                 ~this_ty
                 ~lhs:{ sub_supportdyn; ty_sub }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
+    (* -- C-Bot-R ----------------------------------------------------------- *)
     (* Empty union encodes the bottom type nothing *)
-    | (_, (_, Tunion [])) ->
-      default_subtype
+    | ((_, Tunion []), (_, Tunion [])) -> (env, TL.valid)
+    | ((_, Tunion tyl), (_, Tunion [])) ->
+      let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
+        simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
+      in
+      Common.simplify_union_l
         ~subtype_env
         ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_supportdyn; super_like; ty_super }
+        ~mk_prop
+        (sub_supportdyn, tyl)
+        rhs
         env
-    (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
+    | ((r_sub, Tintersection tyl), (_, Tunion [])) ->
+      (* A & B <: C iif A <: C | !B *)
+      (match Subtype_negation.find_type_with_exact_negation env tyl with
+      | (env, Some non_ty, tyl) -> begin
+        let (env, ty_super) = TUtils.union env ty_super non_ty in
+        let ty_sub = MakeType.intersection r_sub tyl in
+        simplify
+          ~subtype_env
+          ~this_ty:None
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          env
+      end
+      | _ ->
+        let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
+          simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
+        in
+        (* Otherwise use the incomplete common case which doesn't require inspection of the rhs *)
+        Common.simplify_intersection_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, tyl)
+          rhs
+          env)
+    | ((r, Tnewtype (n, _, ty)), (_, Tunion [])) ->
+      let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
+        simplify ~subtype_env ~this_ty ~lhs ~rhs env
+      in
+      Common.simplify_newtype_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop
+        (sub_supportdyn, r, n, ty)
+        rhs
+        env
+    | ((_, Tgeneric _), (_, Tunion []))
+      when subtype_env.Subtype_env.require_completeness ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    | ((r_generic, Tgeneric (name_sub, tyargs)), (_, Tunion [])) -> begin
+      match
+        VisitedGoals.try_add_visited_generic_sub
+          subtype_env.Subtype_env.visited
+          name_sub
+          ty_super
+      with
+      | None ->
+        (* If we've seen this type parameter before then we must have gone
+             * round a cycle so we fail
+        *)
+        invalid ~fail env
+      | Some new_visited -> begin
+        let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+
+        let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
+          simplify ~subtype_env ~this_ty ~lhs ~rhs env
+        in
+        Common.simplify_generic_l
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~mk_prop
+          (sub_supportdyn, r_generic, name_sub, tyargs)
+          { super_like; super_supportdyn = false; ty_super }
+          { super_like = false; super_supportdyn = false; ty_super }
+          env
+      end
+    end
+    | ((r, Tdependent (dep_ty, ty)), (_, Tunion [])) ->
+      let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
+        simplify ~subtype_env ~this_ty ~lhs ~rhs env
+      in
+      Common.simplify_dependent_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop
+        (sub_supportdyn, r, dep_ty, ty)
+        rhs
+        env
+    | ((_, Tany _), (_, Tunion [])) when subtype_env.Subtype_env.no_top_bottom
+      ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    | ((_, Tany _), (_, Tunion [])) -> valid env
+    | ((_, Tdynamic), (_, Tunion []))
+      when Subtype_env.coercing_from_dynamic subtype_env ->
+      valid env
+    | ((_, Tvar _), (_, Tunion [])) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    | ( ( _,
+          ( Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _ | Ttuple _
+          | Tshape _ | Tvec_or_dict _ | Taccess _ | Tunapplied_alias _
+          | Tclass _ | Tneg _ ) ),
+        (_, Tunion []) ) ->
+      invalid env ~fail
     | (_, (_, Tunion [ty_super'])) ->
       simplify
         ~subtype_env

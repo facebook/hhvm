@@ -3743,25 +3743,23 @@ end = struct
         ~rhs:{ super_like; super_supportdyn = false; ty_super }
         env
     (* -- C-Any-R ----------------------------------------------------------- *)
-    | (_, (_, Tany _)) ->
-      (match deref ty_sub with
-      | (_, Tany _) -> valid env
-      | (_, (Tunion _ | Tintersection _ | Tvar _)) ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_supportdyn; super_like; ty_super }
-          env
-      | _ when subtype_env.Subtype_env.no_top_bottom ->
-        mk_issubtype_prop
-          ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
-          env
-          (LoclType ty_sub)
-          (LoclType ty_super)
-      | _ -> valid env)
+    | ((_, Tany _), (_, Tany _)) -> valid env
+    | ((_, (Tunion _ | Tintersection _ | Tvar _)), (_, Tany _)) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
+    | (_, (_, Tany _)) when subtype_env.Subtype_env.no_top_bottom ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    | (_, (_, Tany _)) -> valid env
     (* -- C-Fun-R ----------------------------------------------------------- *)
     | (_, (r_super, Tfun ft_super)) ->
       (match deref ty_sub with

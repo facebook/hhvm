@@ -821,6 +821,33 @@ end = struct
       | _ -> (env, None))
     | _ -> (env, None)
 
+  (* A <: ?B iff A & nonnull <: B
+     Only apply if B is a type variable or an intersection, to avoid oscillating
+     forever between this case and the previous one. *)
+  let rewrite_intersection_l_option_r ~lhs ~rhs env =
+    let (env, ty_sub) = Env.expand_type env lhs.ty_sub in
+    let (env, ty_super) = Env.expand_type env rhs.ty_super in
+    match (deref ty_sub, deref ty_super) with
+    | ((_r_sub, Tintersection ty_subs), (r_super, Toption ty_inner_super))
+      when let (_, non_ty_opt, _) =
+             Subtype_negation.find_type_with_exact_negation env ty_subs
+           in
+           Option.is_none non_ty_opt ->
+      let (env, ty_inner_super) = Env.expand_type env ty_inner_super in
+      (match get_node ty_inner_super with
+      | Tvar _
+      | Tintersection _ ->
+        let (env, ty_sub) =
+          Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
+        in
+        let lhs = { lhs with ty_sub }
+        and rhs =
+          { rhs with super_supportdyn = false; ty_super = ty_inner_super }
+        in
+        (env, Some (lhs, rhs))
+      | _ -> (env, None))
+    | _ -> (env, None)
+
   (** List of disjoint rewrite rules used to improve error reporting and completness
       rather than implmenting our declarative subtyping rules *)
   let rewrites =
@@ -828,6 +855,7 @@ end = struct
       rewrite_optional_supportdyn_r;
       rewrite_union_var_arraykey_l;
       rewrite_intersection_l_union_r;
+      rewrite_intersection_l_option_r;
     ]
 
   let rewrite_prop ~lhs ~rhs env =
@@ -2965,23 +2993,6 @@ end = struct
           ~subtype_env
           ~this_ty:None
           ~lhs:{ sub_supportdyn = Some r; ty_sub = ty_sub' }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
-          env
-      (* A <: ?B iff A & nonnull <: B
-         Only apply if B is a type variable or an intersection, to avoid oscillating
-         forever between this case and the previous one. *)
-      | ((_, Tintersection tyl), (Tintersection _ | Tvar _))
-        when let (_, non_ty_opt, _) =
-               Subtype_negation.find_type_with_exact_negation env tyl
-             in
-             Option.is_none non_ty_opt ->
-        let (env, ty_sub') =
-          Inter.intersect env ~r:r_super ty_sub (MakeType.nonnull r_super)
-        in
-        simplify
-          ~subtype_env
-          ~this_ty:None
-          ~lhs:{ sub_supportdyn; ty_sub = ty_sub' }
           ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
           env
       (* null is the type of null and is a subtype of any option type. *)

@@ -565,17 +565,11 @@ template <typename T, typename I>
 static bool defineSymbols(
     const T& symbols,
     boost::dynamic_bitset<>& define,
-    bool failIsFatal,
     Stats::StatCounter counter,
     I lambda
 ) {
-  auto i = define.find_first();
-  if (failIsFatal) {
-    if (i == define.npos) i = define.find_first();
-  }
-
   bool madeProgress = false;
-  for (; i != define.npos; i = define.find_next(i)) {
+  for (auto i = define.find_first(); i != define.npos; i = define.find_next(i)) {
     auto& symbol = symbols[i];
     Stats::inc(Stats::UnitMerge_mergeable);
     Stats::inc(counter);
@@ -632,7 +626,7 @@ void Unit::mergeImpl() {
   bool failIsFatal = false;
   do {
     bool madeProgress = defineSymbols(
-      m_preClasses, preClasses, failIsFatal, Stats::UnitMerge_mergeable_class,
+      m_preClasses, preClasses, Stats::UnitMerge_mergeable_class,
       [&](const PreClassPtr& preClass) {
         // Anonymous classes doesn't need to be defined because they will be
         // defined when used
@@ -647,7 +641,7 @@ void Unit::mergeImpl() {
 
     // We do type alias last because they may depend on classes that needs to
     // be defined first
-    madeProgress |= defineSymbols(m_typeAliases, typeAliases, failIsFatal,
+    madeProgress |= defineSymbols(m_typeAliases, typeAliases,
       Stats::UnitMerge_mergeable_typealias,
       [&](const PreTypeAlias& typeAlias) {
         assertx(typeAlias.isPersistent() ==

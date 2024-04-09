@@ -491,14 +491,25 @@ cdef class MapTypeInfo(TypeInfoBase):
             return value
         return Map(self.key_info, self.val_info, value)
 
-    def to_internal_from_values(self, object values):
-        return tuple(
-            (self.key_info.to_internal_data(k), self.val_info.to_internal_data(v)) for k, v in values.items()
-        )
+    cdef to_internal_from_values(self, object values):
+        cdef TypeInfoBase key_type_info = self.key_info
+        cdef TypeInfoBase val_type_info = self.val_info
+        cdef int idx = 0
+        cdef tuple tpl = PyTuple_New(len(values))
+        for idx, (key, value) in enumerate(values.items()):
+            internal_key_data = key_type_info.to_internal_data(key)
+            internal_value_data = val_type_info.to_internal_data(value)
+            internal_data = (internal_key_data, internal_value_data)
+            Py_INCREF(internal_data)
+            PyTuple_SET_ITEM(tpl, idx, internal_data)
 
-    def to_python_from_values(self, object values):
+        return tpl
+
+    cdef to_python_from_values(self, object values):
+        cdef TypeInfoBase key_type_info = self.key_info
+        cdef TypeInfoBase val_type_info = self.val_info
         return {
-            self.key_info.to_python_value(k): self.val_info.to_python_value(v) for k, v in values
+            key_type_info.to_python_value(k): val_type_info.to_python_value(v) for k, v in values
         }
 
 

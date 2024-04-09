@@ -176,3 +176,17 @@ cdef class TypeInfoTests():
         expected_python_val = Map(typeinfo_string, typeinfo_i64, {"a": 1, "b":2})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)
 
+    def test_MapTypeInfo_nested(self) -> None:
+        # Map[str, Map[int, List[int]]]
+        inner_value_type = ListTypeInfo(typeinfo_i64)
+        value_type_info = MapTypeInfo(typeinfo_i64, inner_value_type)
+        map_type_info = MapTypeInfo(typeinfo_string, value_type_info)
+        self.ut.assertTrue(isinstance(map_type_info, TypeInfoBase))
+
+        with self.ut.assertRaises(TypeError):
+            map_type_info.to_internal_data(None)
+
+        data = map_type_info.to_internal_data({"a":{1:[1,2]}, "b":{}})
+        self.ut.assertEqual(data, ((b"a", ((1, (1, 2)),)), (b"b", ())))
+        expected_python_val = Map(typeinfo_string, value_type_info, {"a": {1: [1, 2]}, "b":{}})
+        self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)

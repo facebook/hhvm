@@ -149,6 +149,8 @@ cdef class MapTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get(self)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
+    cdef to_internal_from_values(self, object)
+    cdef to_python_from_values(self, object)
 
 cdef class StructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj

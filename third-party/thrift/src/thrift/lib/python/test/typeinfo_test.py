@@ -59,3 +59,6 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_MapTypeInfo(self) -> None:
         CTests(self).test_MapTypeInfo()
+
+    def test_MapTypeInfo_nested(self) -> None:
+        CTests(self).test_MapTypeInfo_nested()

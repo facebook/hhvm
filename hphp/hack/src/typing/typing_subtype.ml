@@ -3761,27 +3761,30 @@ end = struct
         (LoclType ty_super)
     | (_, (_, Tany _)) -> valid env
     (* -- C-Fun-R ----------------------------------------------------------- *)
-    | (_, (r_super, Tfun ft_super)) ->
-      (match deref ty_sub with
-      | (r_sub, Tfun ft_sub) ->
-        simplify_funs
-          ~subtype_env
-          ~check_return:true
-          ~for_override:false
-          ~super_like
-          r_sub
-          ft_sub
-          r_super
-          ft_super
-          env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_supportdyn; super_like; ty_super }
-          env)
+    | ((r_sub, Tfun ft_sub), (r_super, Tfun ft_super)) ->
+      simplify_funs
+        ~subtype_env
+        ~check_return:true
+        ~for_override:false
+        ~super_like
+        r_sub
+        ft_sub
+        r_super
+        ft_super
+        env
+    | ( ( _,
+          ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
+          | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
+          | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _
+          | Tdependent _ | Tvar _ | Tunapplied_alias _ ) ),
+        (_, Tfun _) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_supportdyn; super_like; ty_super }
+        env
     (* -- C-Tuple-R --------------------------------------------------------- *)
     | (_, (_, Ttuple tyl_super)) ->
       (match get_node ty_sub with

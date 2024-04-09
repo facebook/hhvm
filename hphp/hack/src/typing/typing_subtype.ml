@@ -2554,15 +2554,24 @@ end = struct
             (LoclType ty_sub)
             (LoclType ty_super)
     end
-    | (_, (_, Tintersection _)) when is_union ty_sub ->
-      default_subtype
+    (* -- C-Inter-R --------------------------------------------------------- *)
+    | ((_, Tunion ty_subs), (_, Tintersection _)) ->
+      let mk_prop ~subtype_env ~this_ty:_ ~lhs ~rhs env =
+        simplify ~subtype_env ~this_ty:None ~lhs ~rhs env
+      in
+      Common.simplify_union_l
         ~subtype_env
         ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_supportdyn; super_like; ty_super }
+        ~mk_prop
+        (sub_supportdyn, ty_subs)
+        rhs
         env
-    | (_, (_, Tintersection tyl)) ->
+    | ( ( _,
+          ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tvar _ | Tfun _
+          | Ttuple _ | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _
+          | Taccess _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
+          | Tclass _ | Tneg _ ) ),
+        (_, Tintersection tyl) ) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
        * t <: t1 /\  ... /\ t <: tn

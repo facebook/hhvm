@@ -581,10 +581,6 @@ module Subtype_negation = struct
     find env tyl []
 end
 
-let expands_to_nonnull ty ~env =
-  let (_, ty) = Env.expand_type env ty in
-  is_nonnull ty
-
 let get_tyvar_opt t =
   match t with
   | LoclType lt -> begin
@@ -910,6 +906,24 @@ end = struct
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
       false
+
+  let expands_to ty ~p ~env =
+    let (_, ty) = Env.expand_type env ty in
+    p ty
+
+  let expands_to_nonnull ty ~env = expands_to ty ~p:is_nonnull ~env
+
+  let expands_to_class ty ~env =
+    expands_to ty ~env ~p:(fun ty ->
+        match get_node ty with
+        | Tclass _ -> true
+        | _ -> false)
+
+  let class_id_exn ty ~env =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tclass (id, _, _) -> (env, id)
+    | _ -> failwith "This type is not a Tclass"
 
   (* If it's clear from the syntax of the type that null isn't in ty, return true.
  *)
@@ -3111,16 +3125,31 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
         env
-    | (_, (_r_super, Tdependent (dep_ty_sup, bound_sup))) -> begin
-      let (env, bound_sup) = Env.expand_type env bound_sup in
-      match (deref ty_sub, get_node bound_sup) with
-      | ((_, Tclass _), Tclass ((_, x), _, _)) when is_final_and_invariant env x
-        ->
+    (* -- C-Dep-R ----------------------------------------------------------- *)
+    | ((_, Tdependent (d_sub, bound_sub)), (_, Tdependent (d_sup, bound_sup)))
+      when equal_dependent_type d_sub d_sup ->
+      simplify
+        ~subtype_env
+        ~this_ty:(Option.first_some this_ty (Some ty_sub))
+        ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
+        ~rhs:
+          { super_like = false; super_supportdyn = false; ty_super = bound_sup }
+        env
+    | ((_, Tdependent (_, bound_sub)), (_, Tdependent _)) ->
+      simplify
+        ~subtype_env
+        ~this_ty:(Option.first_some this_ty (Some ty_sub))
+        ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        env
+    | ((r_sub, Tclass ((_, y), _, _)), (_r_super, Tdependent (_, bound_sup)))
+      when expands_to_class bound_sup ~env ->
+      let (env, ((_, x) as id)) = class_id_exn bound_sup ~env in
+
+      if is_final_and_invariant env x then
         (* For final class C, there is no difference between `this as X` and `X`,
-         * and `expr<#n> as X` and `X`.
-         * But we need to take care with variant classes, since we can't
-         * statically guarantee their runtime type.
-         *)
+           and `expr<#n> as X` and `X`. But we need to take care with variant
+           classes, since we can't statically guarantee their runtime type. *)
         simplify
           ~subtype_env
           ~this_ty
@@ -3132,8 +3161,7 @@ end = struct
               ty_super = bound_sup;
             }
           env
-      | ((r_sub, Tclass ((_, y), _, _)), Tclass (((_, x) as id), _, _tyl_super))
-        ->
+      else
         let fail =
           if String.equal x y then
             let p = Reason.to_pos r_sub in
@@ -3151,37 +3179,20 @@ end = struct
               ~ty_super:(LoclType ty_super)
         in
         invalid env ~fail
-      | ((_, Tdependent (d_sub, bound_sub)), _) ->
-        let this_ty = Option.first_some this_ty (Some ty_sub) in
-        (* Dependent types are identical but bound might be different *)
-        if equal_dependent_type d_sub dep_ty_sup then
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = bound_sup;
-              }
-            env
-        else
-          simplify
-            ~subtype_env
-            ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = bound_sub }
-            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-            env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_like; super_supportdyn = false; ty_super }
-          env
-    end
+    | ( ( _,
+          ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
+          | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
+          | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _ | Tfun _
+          | Tvar _ | Tunapplied_alias _ ) ),
+        (_, Tdependent _) ) ->
+      default_subtype
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn = false; ty_super }
+        env
+    (* -- C-Access-R -------------------------------------------------------- *)
     | (_, (_, Taccess _)) -> invalid ~fail env
     | (_, (_r_super, Tgeneric (name_super, tyargs_super))) -> begin
       let (generic_lower_bounds, other_lower_bounds) =

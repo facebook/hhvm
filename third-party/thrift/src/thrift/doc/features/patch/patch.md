@@ -40,6 +40,14 @@ file `[thrift_file_name]_patch.thrift`. It takes the following arguments
 Any extra arguments will be forwarded to the internal Patch's thrift_library.
 
 ### Example
+For Thrift file `foo.thrift`
+
+```thrift
+// In thrift file
+struct Foo {
+  1: optional string message;
+};
+```
 
 In TARGETS, for
 
@@ -76,7 +84,7 @@ thrift_library(
 )
 ```
 
-So that this can be used later in C++
+So that this can be used later in C++, and dependencies can be included automatically via autodeps.
 
 ```cpp
 // MyService.cpp
@@ -89,7 +97,6 @@ auto createPatch() {
 }
 ```
 
-Dependencies can be included automatically via autodeps.
 
 ### Dynamic Patch
 
@@ -108,7 +115,7 @@ the generated Thrift header.
 - Dynamic Patch, or Schema-less Patch, is a schema-less representation of static
   patch that is consumed with dynamic type `protocol::Object`.
   - Pros: Can be used without Thrift file.
-  - Cons: Less user-friendly APIs.
+  - Cons: Less user-friendly APIs. You don't need to enable Thrift Patch for any Thrift file.
 
 ### Deprecated Workflow
 

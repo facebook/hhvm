@@ -223,6 +223,7 @@
         <field name="logErrorSampleRatio" id="2" type="int32" />
         <data name="requestId" id="3" type="varStringEncoding" />
         <data name="routingTarget" id="4" type="varStringEncoding" />
+        <data name="requestAttemptId" id="5" type="varStringEncoding" />
     </sbe:message>
 
     <sbe:message name="ResponseRpcMetadata" id="7" description="response rpc metadata">

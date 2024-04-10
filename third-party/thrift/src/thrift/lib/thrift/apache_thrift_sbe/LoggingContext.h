@@ -123,6 +123,8 @@ private:
      *       V0_BLOCK -> V0_REQUESTID_DONE [label="  requestId(?)  "];
      *       V0_REQUESTID_DONE -> V0_REQUESTID_DONE [label="  routingTargetLength()  "];
      *       V0_REQUESTID_DONE -> V0_ROUTINGTARGET_DONE [label="  routingTarget(?)  "];
+     *       V0_ROUTINGTARGET_DONE -> V0_ROUTINGTARGET_DONE [label="  requestAttemptIdLength()  "];
+     *       V0_ROUTINGTARGET_DONE -> V0_REQUESTATTEMPTID_DONE [label="  requestAttemptId(?)  "];
      *   }
      * }</pre>
      */
@@ -132,10 +134,11 @@ private:
         V0_BLOCK = 1,
         V0_REQUESTID_DONE = 2,
         V0_ROUTINGTARGET_DONE = 3,
+        V0_REQUESTATTEMPTID_DONE = 4,
     };
 
-    static const std::string STATE_NAME_LOOKUP[4];
-    static const std::string STATE_TRANSITIONS_LOOKUP[4];
+    static const std::string STATE_NAME_LOOKUP[5];
+    static const std::string STATE_TRANSITIONS_LOOKUP[5];
 
     static std::string codecStateName(CodecState state)
     {
@@ -412,7 +415,7 @@ public:
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
         switch (m_codecState)
         {
-            case CodecState::V0_ROUTINGTARGET_DONE:
+            case CodecState::V0_REQUESTATTEMPTID_DONE:
                 return;
             default:
                 throw AccessOrderError(std::string("Not fully encoded, current state: ") +
@@ -1089,6 +1092,257 @@ public:
     }
     #endif
 
+    SBE_NODISCARD static const char *requestAttemptIdMetaAttribute(const MetaAttribute metaAttribute) SBE_NOEXCEPT
+    {
+        switch (metaAttribute)
+        {
+            case MetaAttribute::PRESENCE: return "required";
+            default: return "";
+        }
+    }
+
+    static const char *requestAttemptIdCharacterEncoding() SBE_NOEXCEPT
+    {
+        return "UTF-8";
+    }
+
+    static SBE_CONSTEXPR std::uint64_t requestAttemptIdSinceVersion() SBE_NOEXCEPT
+    {
+        return 0;
+    }
+
+    bool requestAttemptIdInActingVersion() SBE_NOEXCEPT
+    {
+        return true;
+    }
+
+    static SBE_CONSTEXPR std::uint16_t requestAttemptIdId() SBE_NOEXCEPT
+    {
+        return 5;
+    }
+
+    static SBE_CONSTEXPR std::uint64_t requestAttemptIdHeaderLength() SBE_NOEXCEPT
+    {
+        return 4;
+    }
+
+private:
+    void onRequestAttemptIdLengthAccessed() const
+    {
+        switch (codecState())
+        {
+            case CodecState::V0_ROUTINGTARGET_DONE:
+                break;
+            default:
+                throw AccessOrderError(std::string("Illegal field access order. ") +
+                    "Cannot decode length of var data \"requestAttemptId\" in state: " + codecStateName(codecState()) +
+                    ". Expected one of these transitions: [" + codecStateTransitions(codecState()) +
+                    "]. Please see the diagram in the docs of the enum LoggingContext::CodecState.");
+        }
+    }
+
+public:
+    SBE_NODISCARD std::uint32_t requestAttemptIdLength() const
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdLengthAccessed();
+#endif
+        std::uint32_t length;
+        std::memcpy(&length, m_buffer + sbePosition(), sizeof(std::uint32_t));
+        return SBE_LITTLE_ENDIAN_ENCODE_32(length);
+    }
+
+private:
+    void onRequestAttemptIdAccessed()
+    {
+        switch (codecState())
+        {
+            case CodecState::V0_ROUTINGTARGET_DONE:
+                codecState(CodecState::V0_REQUESTATTEMPTID_DONE);
+                break;
+            default:
+                throw AccessOrderError(std::string("Illegal field access order. ") +
+                    "Cannot access field \"requestAttemptId\" in state: " + codecStateName(codecState()) +
+                    ". Expected one of these transitions: [" + codecStateTransitions(codecState()) +
+                    "]. Please see the diagram in the docs of the enum LoggingContext::CodecState.");
+        }
+    }
+
+public:
+    std::uint64_t skipRequestAttemptId()
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue;
+        std::memcpy(&lengthFieldValue, m_buffer + lengthPosition, sizeof(std::uint32_t));
+        std::uint64_t dataLength = SBE_LITTLE_ENDIAN_ENCODE_32(lengthFieldValue);
+        sbePosition(lengthPosition + lengthOfLengthField + dataLength);
+        return dataLength;
+    }
+
+    SBE_NODISCARD const char *requestAttemptId()
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint32_t lengthFieldValue;
+        std::memcpy(&lengthFieldValue, m_buffer + sbePosition(), sizeof(std::uint32_t));
+        const char *fieldPtr = m_buffer + sbePosition() + 4;
+        sbePosition(sbePosition() + 4 + SBE_LITTLE_ENDIAN_ENCODE_32(lengthFieldValue));
+        return fieldPtr;
+    }
+
+    std::uint64_t getRequestAttemptId(char *dst, const std::uint64_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::uint32_t lengthFieldValue;
+        std::memcpy(&lengthFieldValue, m_buffer + lengthPosition, sizeof(std::uint32_t));
+        std::uint64_t dataLength = SBE_LITTLE_ENDIAN_ENCODE_32(lengthFieldValue);
+        std::uint64_t bytesToCopy = length < dataLength ? length : dataLength;
+        std::uint64_t pos = sbePosition();
+        sbePosition(pos + dataLength);
+        std::memcpy(dst, m_buffer + pos, static_cast<std::size_t>(bytesToCopy));
+        return bytesToCopy;
+    }
+
+    char* putRequestAttemptId(const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            return m_buffer + pos;
+        }
+        return nullptr;
+    }
+
+    LoggingContext &putRequestAttemptId(const char *src, const std::uint32_t length)
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        std::uint32_t lengthFieldValue = SBE_LITTLE_ENDIAN_ENCODE_32(length);
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::memcpy(m_buffer + lengthPosition, &lengthFieldValue, sizeof(std::uint32_t));
+        if (length != std::uint32_t(0))
+        {
+            std::uint64_t pos = sbePosition();
+            sbePosition(pos + length);
+            std::memcpy(m_buffer + pos, src, length);
+        }
+        return *this;
+    }
+
+    std::string getRequestAttemptIdAsString()
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::uint32_t lengthFieldValue;
+        std::memcpy(&lengthFieldValue, m_buffer + lengthPosition, sizeof(std::uint32_t));
+        std::uint64_t dataLength = SBE_LITTLE_ENDIAN_ENCODE_32(lengthFieldValue);
+        std::uint64_t pos = sbePosition();
+        const std::string result(m_buffer + pos, dataLength);
+        sbePosition(pos + dataLength);
+        return result;
+    }
+
+    std::string getRequestAttemptIdAsJsonEscapedString()
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::ostringstream oss;
+        std::string s = getRequestAttemptIdAsString();
+
+        for (const auto c : s)
+        {
+            switch (c)
+            {
+                case '"': oss << "\\\""; break;
+                case '\\': oss << "\\\\"; break;
+                case '\b': oss << "\\b"; break;
+                case '\f': oss << "\\f"; break;
+                case '\n': oss << "\\n"; break;
+                case '\r': oss << "\\r"; break;
+                case '\t': oss << "\\t"; break;
+
+                default:
+                    if ('\x00' <= c && c <= '\x1f')
+                    {
+                        oss << "\\u" << std::hex << std::setw(4)
+                            << std::setfill('0') << (int)(c);
+                    }
+                    else
+                    {
+                        oss << c;
+                    }
+            }
+        }
+
+        return oss.str();
+    }
+
+    #if __cplusplus >= 201703L
+    std::string_view getRequestAttemptIdAsStringView()
+    {
+#if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
+        onRequestAttemptIdAccessed();
+#endif
+        std::uint64_t lengthOfLengthField = 4;
+        std::uint64_t lengthPosition = sbePosition();
+        sbePosition(lengthPosition + lengthOfLengthField);
+        std::uint32_t lengthFieldValue;
+        std::memcpy(&lengthFieldValue, m_buffer + lengthPosition, sizeof(std::uint32_t));
+        std::uint64_t dataLength = SBE_LITTLE_ENDIAN_ENCODE_32(lengthFieldValue);
+        std::uint64_t pos = sbePosition();
+        const std::string_view result(m_buffer + pos, dataLength);
+        sbePosition(pos + dataLength);
+        return result;
+    }
+    #endif
+
+    LoggingContext &putRequestAttemptId(const std::string &str)
+    {
+        if (str.length() > 1073741824)
+        {
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
+        }
+        return putRequestAttemptId(str.data(), static_cast<std::uint32_t>(str.length()));
+    }
+
+    #if __cplusplus >= 201703L
+    LoggingContext &putRequestAttemptId(const std::string_view str)
+    {
+        if (str.length() > 1073741824)
+        {
+            throw std::runtime_error("std::string too long for length type [E109] in LoggingContext");
+        }
+        return putRequestAttemptId(str.data(), static_cast<std::uint32_t>(str.length()));
+    }
+    #endif
+
 template<typename CharT, typename Traits>
 friend std::basic_ostream<CharT, Traits> & operator << (
     std::basic_ostream<CharT, Traits> &builder, const LoggingContext &_writer)
@@ -1123,6 +1377,11 @@ friend std::basic_ostream<CharT, Traits> & operator << (
     builder << '"' <<
         writer.getRoutingTargetAsJsonEscapedString().c_str() << '"';
 
+    builder << ", ";
+    builder << R"("requestAttemptId": )";
+    builder << '"' <<
+        writer.getRequestAttemptIdAsJsonEscapedString().c_str() << '"';
+
     builder << '}';
 
     return builder;
@@ -1132,6 +1391,7 @@ void skip()
 {
     skipRequestId();
     skipRoutingTarget();
+    skipRequestAttemptId();
 }
 
 SBE_NODISCARD static SBE_CONSTEXPR bool isConstLength() SBE_NOEXCEPT
@@ -1141,7 +1401,8 @@ SBE_NODISCARD static SBE_CONSTEXPR bool isConstLength() SBE_NOEXCEPT
 
 SBE_NODISCARD static std::size_t computeLength(
     std::size_t requestIdLength = 0,
-    std::size_t routingTargetLength = 0)
+    std::size_t routingTargetLength = 0,
+    std::size_t requestAttemptIdLength = 0)
 {
 #if defined(__GNUG__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -1163,6 +1424,13 @@ SBE_NODISCARD static std::size_t computeLength(
     }
     length += routingTargetLength;
 
+    length += requestAttemptIdHeaderLength();
+    if (requestAttemptIdLength > 1073741824LL)
+    {
+        throw std::runtime_error("requestAttemptIdLength too long for length type [E109]  in LoggingContext");
+    }
+    length += requestAttemptIdLength;
+
     return length;
 #if defined(__GNUG__) && !defined(__clang__)
 #pragma GCC diagnostic pop
@@ -1172,19 +1440,21 @@ SBE_NODISCARD static std::size_t computeLength(
 // prevent double free error
 #if defined(SBE_ENABLE_PRECEDENCE_CHECKS)
 
-const std::string LoggingContext::STATE_NAME_LOOKUP[4] =
+const std::string LoggingContext::STATE_NAME_LOOKUP[5] =
 {
     "NOT_WRAPPED",
     "V0_BLOCK",
     "V0_REQUESTID_DONE",
     "V0_ROUTINGTARGET_DONE",
+    "V0_REQUESTATTEMPTID_DONE",
 };
 
-const std::string LoggingContext::STATE_TRANSITIONS_LOOKUP[4] =
+const std::string LoggingContext::STATE_TRANSITIONS_LOOKUP[5] =
 {
     "\"wrap(version=0)\"",
     "\"logSampleRatio(?)\", \"logErrorSampleRatio(?)\", \"requestIdLength()\", \"requestId(?)\"",
     "\"routingTargetLength()\", \"routingTarget(?)\"",
+    "\"requestAttemptIdLength()\", \"requestAttemptId(?)\"",
     "",
 };
 

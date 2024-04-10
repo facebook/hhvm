@@ -128,6 +128,8 @@ module FunParam : sig
     t
 
   val as_record : t -> record
+
+  val default : t
 end
 
 module ClassElt : sig

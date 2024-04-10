@@ -2539,6 +2539,90 @@ end = struct
       }
   end
 
+  (* Compute an expected type for a labmda that is being called with the
+     given args. Where the type of the argument isn't obvious (without actual
+     type checking, just use a fresh tyvar *)
+  let lambda_expected p env fun_ args =
+    let get_arg_params env ((pk : Ast_defs.param_kind), (exp : (_, _) Aast.expr))
+        : env * locl_ty fun_param =
+      let fresh env p =
+        Env.fresh_type_reason
+          ~variance:Ast_defs.Contravariant
+          env
+          p
+          (Reason.Rtype_variable p)
+      in
+      let (env, fp_type) =
+        match pk with
+        | Ast_defs.Pinout _ ->
+          Env.fresh_type_reason
+            ~variance:Ast_defs.Invariant
+            env
+            p
+            (Reason.Rtype_variable p)
+        | _ ->
+          let ((), p, exp_) = exp in
+          (match exp_ with
+          | Null -> (env, MakeType.null (Reason.Rwitness p))
+          | True
+          | False ->
+            (env, MakeType.bool (Reason.Rwitness p))
+          | Int _ -> (env, MakeType.int (Reason.Rwitness p))
+          | Float _ -> (env, MakeType.float (Reason.Rwitness p))
+          | String _ -> (env, MakeType.string (Reason.Rwitness p))
+          | Lvar (_, lv) when Env.is_local_present env lv ->
+            let locl = Env.get_local env lv in
+            if locl.Typing_local_types.defined then
+              (env, locl.Typing_local_types.ty)
+            else
+              fresh env p
+          | Dollardollar _ ->
+            let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
+            if Env.is_local_present env dd_var then
+              let locl = Env.get_local env dd_var in
+              if locl.Typing_local_types.defined then
+                (env, locl.Typing_local_types.ty)
+              else
+                fresh env p
+            else
+              fresh env p
+          | _ -> fresh env p)
+      in
+      let param =
+        {
+          fp_pos = Pos_or_decl.of_raw_pos p;
+          fp_name = None;
+          fp_type;
+          fp_flags = Typing_defs_flags.FunParam.default;
+          fp_def_value = None;
+        }
+      in
+      (env, param)
+    in
+    let (env, ft_params) = List.map_env ~f:get_arg_params env args in
+    let ft_flags = Decl_nast.lambda_flags fun_ in
+    let (env, ft_ret) =
+      Env.fresh_type_reason
+        ~variance:Ast_defs.Covariant
+        env
+        p
+        (Reason.Rtype_variable p)
+    in
+    ( env,
+      mk
+        ( Reason.Rwitness p,
+          Tfun
+            {
+              ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params;
+              ft_implicit_params =
+                { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
+              ft_ret;
+              ft_flags;
+              ft_cross_package = None;
+            } ) )
+
   let coerce_nonlike_and_like
       ~coerce_for_op ~coerce env pos reason ty ety ety_like =
     let (env1, err1) =
@@ -5812,6 +5896,7 @@ end = struct
     (* Function invocation *)
     | Id id -> dispatch_id env id
     | _ ->
+      let fun_opt = Aast_utils.get_fun_expr e in
       (* If we are immediately calling an lambda, then we don't want to conservatively
          invalidate the refinements, because it won't escape. However, we do need to
          invalidate any refinements that the argument expressions would invalidate.
@@ -5823,11 +5908,21 @@ end = struct
           {
             default with
             immediately_called_lambda =
-              Aast_utils.is_fun_expr e
+              Option.is_some fun_opt
               && List.for_all ~f:(fun (_, e) -> Aast_utils.is_const_expr e) el;
           }
       in
-      let (env, te, fty) = expr ~expected:None ~ctxt env e in
+      let env = Env.open_tyvars env p in
+      let (env, fun_expected) =
+        match fun_opt with
+        | Some fun_ ->
+          let (env, ty) = lambda_expected p env fun_ el in
+          (env, Some (ExpectedTy.make p Reason.URparam ty))
+        | None -> (env, None)
+      in
+      let (env, te, fty) = expr ~expected:fun_expected ~ctxt env e in
+      let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let ((env, ty_err_opt1), fty) =
         Typing_solver.expand_type_and_solve
           ~description_of_expected:"a function value"

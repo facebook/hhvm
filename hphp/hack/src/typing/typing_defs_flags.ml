@@ -206,6 +206,8 @@ module FunParam = struct
       readonly = readonly t;
     }
 
+  let default = 0
+
   let pp fmt t = pp_record fmt (as_record t)
 
   let show t = Format.asprintf "%a" pp t

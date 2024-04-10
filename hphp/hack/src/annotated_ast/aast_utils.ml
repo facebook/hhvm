@@ -111,13 +111,13 @@ let get_virtual_expr expr =
     | None -> expr)
   | _ -> expr
 
-let rec is_fun_expr expr =
+let rec get_fun_expr expr =
   match expr with
-  | (_, _, Lfun _)
-  | (_, _, Efun _) ->
-    true
-  | (_, _, Hole (e, _, _, _)) -> is_fun_expr e
-  | _ -> false
+  | (_, _, Lfun (f, _))
+  | (_, _, Efun { ef_fun = f; _ }) ->
+    Some f
+  | (_, _, Hole (e, _, _, _)) -> get_fun_expr e
+  | _ -> None
 
 let rec is_const_expr (_, _, expr_) =
   match expr_ with

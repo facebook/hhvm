@@ -132,7 +132,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         upper_bounds: a_upper_bounds,
         shadowed_tparams: a_shadowed_tparams,
         params: a_params,
-        return_type_info: a_return_type_info,
+        return_type: a_return_type,
         doc_comment: a_doc_comment,
         stack_depth: a_stack_depth,
         span: a_span,
@@ -149,7 +149,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         upper_bounds: b_upper_bounds,
         shadowed_tparams: b_shadowed_tparams,
         params: b_params,
-        return_type_info: b_return_type_info,
+        return_type: b_return_type,
         doc_comment: b_doc_comment,
         stack_depth: b_stack_depth,
         span: b_span,
@@ -165,7 +165,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
         .qualified("is_memoize_wrapper_lsb")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_eq(a_stack_depth, b_stack_depth).qualified("stack_depth")?;
-    cmp_eq(a_return_type_info, b_return_type_info).qualified("return_type_info")?;
+    cmp_eq(a_return_type, b_return_type).qualified("return_type")?;
     cmp_eq(a_upper_bounds, b_upper_bounds).qualified("upper_bounds")?;
     cmp_eq(a_shadowed_tparams, b_shadowed_tparams).qualified("shadowed_tparams")?;
     cmp_eq(a_span, b_span).qualified("span")?;

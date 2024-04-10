@@ -36,7 +36,7 @@ pub struct Body {
     /// tparam on the containing class.
     pub shadowed_tparams: Vector<ClassName>,
     pub params: Vector<ParamEntry>,
-    pub return_type_info: Maybe<TypeInfo>,
+    pub return_type: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
     /// The statically computed stack depth for this Body. This can be computed
     /// using the hhbc::compute_stack_depth() function.

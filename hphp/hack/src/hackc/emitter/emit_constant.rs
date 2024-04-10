@@ -35,7 +35,7 @@ fn emit_constant_cinit<'a, 'd>(
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
     let original_name = hhbc::FunctionName::intern(&name);
     let ret = constant.type_.as_ref();
-    let return_type_info = ret
+    let return_type = ret
         .map(|h| {
             emit_type_hint::hint_to_type_info(
                 &Kind::Return,
@@ -47,7 +47,7 @@ fn emit_constant_cinit<'a, 'd>(
         })
         .transpose()?;
     init.map(|instrs| {
-        let verify_instr = match return_type_info {
+        let verify_instr = match return_type {
             None => instr::empty(),
             Some(_) => instr::verify_ret_type_c(),
         };
@@ -67,7 +67,7 @@ fn emit_constant_cinit<'a, 'd>(
             attrs,
             Coeffects::default(),
             vec![], /* params */
-            return_type_info,
+            return_type,
             None, /* doc_comment */
             Some(env),
             Span::from_pos(&constant.span),

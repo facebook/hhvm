@@ -1238,7 +1238,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
 
   translateCoeffects(ts, f.body.coeffects);
 
-  auto retTypeInfo = maybeOrElse(f.body.return_type_info,
+  auto retTypeInfo = maybeOrElse(f.body.return_type,
       [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
@@ -1286,7 +1286,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
 
   translateCoeffects(ts, m.body.coeffects);
 
-  auto retTypeInfo = maybeOrElse(m.body.return_type_info,
+  auto retTypeInfo = maybeOrElse(m.body.return_type,
     [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
     [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 

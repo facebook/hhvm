@@ -483,7 +483,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc:
     let upper_bounds = assemble_upper_bounds(token_iter)?;
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter)?;
     let span = assemble_span(token_iter)?;
-    let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(token_iter)?;
     let mut decl_map = DeclMap::default();
     let params = assemble_params(token_iter, &mut decl_map)?;
@@ -495,7 +495,7 @@ fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc:
         attributes,
         attrs,
         params,
-        return_type_info,
+        return_type,
         shadowed_tparams,
         upper_bounds,
         span,
@@ -1032,7 +1032,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhb
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
-    let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     // Assemble_name
 
     let name = assemble_function_name(token_iter)?;
@@ -1048,7 +1048,7 @@ fn assemble_function(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhb
         attributes,
         attrs,
         params,
-        return_type_info,
+        return_type,
         shadowed_tparams,
         upper_bounds,
         span,
@@ -1371,7 +1371,7 @@ fn assemble_body(
     attributes: Vec<Attribute>,
     attrs: hhbc::Attr,
     params: Vec<ParamEntry>,
-    return_type_info: Maybe<hhbc::TypeInfo>,
+    return_type: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<ClassName>,
     upper_bounds: Vec<hhbc::UpperBound>,
     span: hhbc::Span,
@@ -1436,7 +1436,7 @@ fn assemble_body(
         is_memoize_wrapper_lsb,
         doc_comment,
         params: params.into(),
-        return_type_info,
+        return_type,
         shadowed_tparams: shadowed_tparams.into(),
         stack_depth,
         upper_bounds: upper_bounds.into(),

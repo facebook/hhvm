@@ -342,7 +342,7 @@ fn print_fun_def(
     )?;
     print_span(w, &body.span)?;
     w.write_all(b" ")?;
-    option(w, body.return_type_info.as_ref(), |w, ti| {
+    option(w, body.return_type.as_ref(), |w, ti| {
         print_type_info(w, ti)?;
         w.write_all(b" ")
     })?;
@@ -555,7 +555,7 @@ fn print_method_def(
     )?;
     print_span(w, &body.span)?;
     w.write_all(b" ")?;
-    option(w, body.return_type_info.as_ref(), |w, t| {
+    option(w, body.return_type.as_ref(), |w, t| {
         print_type_info(w, t)?;
         w.write_all(b" ")
     })?;

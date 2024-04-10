@@ -167,7 +167,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         upper_bounds: a_upper_bounds,
         shadowed_tparams: a_shadowed_tparams,
         params: a_params,
-        return_type_info: a_return_type_info,
+        return_type: a_return_type,
         doc_comment: a_doc_comment,
         stack_depth: _,
         span: a_span,
@@ -184,7 +184,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         upper_bounds: b_upper_bounds,
         shadowed_tparams: b_shadowed_tparams,
         params: b_params,
-        return_type_info: b_return_type_info,
+        return_type: b_return_type,
         doc_comment: b_doc_comment,
         stack_depth: _,
         span: b_span,
@@ -211,11 +211,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
         b_is_memoize_wrapper_lsb,
     )?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
-    sem_diff_eq(
-        &path.qualified("return_type_info"),
-        a_return_type_info,
-        b_return_type_info,
-    )?;
+    sem_diff_eq(&path.qualified("return_type"), a_return_type, b_return_type)?;
     sem_diff_eq(
         &path.qualified("upper_bounds"),
         a_upper_bounds,

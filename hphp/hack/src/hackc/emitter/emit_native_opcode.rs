@@ -41,11 +41,11 @@ pub fn emit_body<'a, 'd>(
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params);
-    let return_type_info = emit_body::emit_return_type_info(tparams.as_slice(), false, ret);
+    let return_type = emit_body::emit_return_type(tparams.as_slice(), false, ret);
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
-            return_type_info.and_then(|rti| {
+            return_type.and_then(|rti| {
                 let body_instrs = Vec::from_iter(body_instrs.iter().cloned());
                 let params = Vec::from_iter(params.into_iter().map(|(param, _)| ParamEntry {
                     param,
@@ -60,7 +60,7 @@ pub fn emit_body<'a, 'd>(
                     body_instrs: body_instrs.into(),
                     coeffects,
                     params: params.into(),
-                    return_type_info: Maybe::Just(rti),
+                    return_type: Maybe::Just(rti),
                     decl_vars: Default::default(),
                     doc_comment: Default::default(),
                     is_memoize_wrapper: Default::default(),

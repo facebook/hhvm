@@ -82,7 +82,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
-    let return_type_info = emit_body::emit_return_type_info(
+    let return_type = emit_body::emit_return_type(
         &tparams,
         f.fun_kind.is_fasync(), /* skip_awaitable */
         f.ret.1.as_ref(),
@@ -119,7 +119,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     let mut body = make_wrapper_body(
         emitter,
         env,
-        return_type_info,
+        return_type,
         attributes,
         coeffects,
         params,
@@ -369,7 +369,7 @@ fn make_memoize_function_no_params_code<'a, 'd>(
 fn make_wrapper_body<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: Env<'a>,
-    return_type_info: TypeInfo,
+    return_type: TypeInfo,
     attributes: Vec<Attribute>,
     coeffects: Coeffects,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
@@ -389,7 +389,7 @@ fn make_wrapper_body<'a, 'd>(
         Attr::AttrNone,
         coeffects,
         params,
-        Some(return_type_info),
+        Some(return_type),
         None, /* doc comment */
         Some(&env),
         span,

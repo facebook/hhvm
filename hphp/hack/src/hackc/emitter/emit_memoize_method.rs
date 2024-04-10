@@ -216,11 +216,8 @@ fn emit_memoize_wrapper_body<'a, 'd>(
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect();
-    let return_type_info = emit_body::emit_return_type_info(
-        &tparams[..],
-        args.flags.contains(Flags::IS_ASYNC),
-        args.ret,
-    )?;
+    let return_type =
+        emit_body::emit_return_type(&tparams[..], args.flags.contains(Flags::IS_ASYNC), args.ret)?;
     let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
@@ -228,7 +225,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
         emitter,
         env,
         hhas_params,
-        return_type_info,
+        return_type,
         span,
         attributes,
         coeffects,
@@ -240,7 +237,7 @@ fn emit<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: &mut Env<'a>,
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
-    return_type_info: TypeInfo,
+    return_type: TypeInfo,
     span: Span,
     attributes: Vec<Attribute>,
     coeffects: Coeffects,
@@ -260,7 +257,7 @@ fn emit<'a, 'd>(
         instrs,
         hhas_params,
         decl_vars,
-        return_type_info,
+        return_type,
         span,
         attributes,
         coeffects,
@@ -534,7 +531,7 @@ fn make_wrapper<'a, 'd>(
     instrs: InstrSeq,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
-    return_type_info: TypeInfo,
+    return_type: TypeInfo,
     span: Span,
     attributes: Vec<Attribute>,
     coeffects: Coeffects,
@@ -552,7 +549,7 @@ fn make_wrapper<'a, 'd>(
         Attr::AttrNone,
         coeffects,
         params,
-        Some(return_type_info),
+        Some(return_type),
         None,
         Some(env),
         span,

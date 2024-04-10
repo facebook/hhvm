@@ -101,7 +101,7 @@ pub fn emit_body<'b, 'd>(
     emitter.label_gen_mut().reset();
     emitter.iterator_mut().reset();
 
-    let return_type_info = make_return_type_info(
+    let return_type = make_return_type(
         args.flags.contains(Flags::SKIP_AWAITABLE),
         args.flags.contains(Flags::NATIVE),
         args.ret,
@@ -130,7 +130,7 @@ pub fn emit_body<'b, 'd>(
         emitter,
         return_value,
         &params,
-        &return_type_info,
+        &return_type,
         args.ret,
         args.pos,
         args.default_dropthrough,
@@ -180,7 +180,7 @@ pub fn emit_body<'b, 'd>(
             attrs,
             coeffects,
             params,
-            Some(return_type_info),
+            Some(return_type),
             args.doc_comment.to_owned(),
             Some(&env),
             span,
@@ -306,7 +306,7 @@ fn make_decl_vars<'a, 'd>(
     Ok(decl_vars.into_iter().map(hhbc::intern).collect())
 }
 
-pub fn emit_return_type_info(
+pub fn emit_return_type(
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
@@ -323,19 +323,19 @@ pub fn emit_return_type_info(
     }
 }
 
-fn make_return_type_info(
+fn make_return_type(
     skip_awaitable: bool,
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
 ) -> Result<TypeInfo> {
-    let return_type_info = emit_return_type_info(tp_names, skip_awaitable, ret);
+    let return_type = emit_return_type(tp_names, skip_awaitable, ret);
     if is_native {
-        return return_type_info.map(|rti| {
+        return return_type.map(|rti| {
             emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)
         });
     };
-    return_type_info
+    return_type
 }
 
 pub fn make_env<'a>(
@@ -372,7 +372,7 @@ pub fn make_body<'a, 'd>(
     attrs: Attr,
     coeffects: Coeffects,
     mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
-    return_type_info: Option<TypeInfo>,
+    return_type: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a>>,
     span: Span,
@@ -439,7 +439,7 @@ pub fn make_body<'a, 'd>(
             .map(|s| ClassName::intern(&s))
             .collect(),
         params: params.into(),
-        return_type_info: return_type_info.into(),
+        return_type: return_type.into(),
         doc_comment: doc_comment
             .map(|(_, comment)| comment.into_bytes().into())
             .into(),
@@ -620,16 +620,16 @@ fn set_emit_statement_state<'d>(
     emitter: &mut Emitter<'d>,
     default_return_value: InstrSeq,
     params: &[(Param, Option<(Label, ast::Expr)>)],
-    return_type_info: &TypeInfo,
-    return_type: Option<&ast::Hint>,
+    return_type: &TypeInfo,
+    return_type_hint: Option<&ast::Hint>,
     pos: &Pos,
     default_dropthrough: Option<InstrSeq>,
     flags: Flags,
     is_generator: bool,
 ) {
-    let verify_return = match &return_type_info.user_type {
+    let verify_return = match &return_type.user_type {
         Just(s) if s.is_empty() => None,
-        _ if return_type_info.has_type_constraint() && !is_generator => return_type.cloned(),
+        _ if return_type.has_type_constraint() && !is_generator => return_type_hint.cloned(),
         _ => None,
     };
     let default_dropthrough = if default_dropthrough.is_some() {

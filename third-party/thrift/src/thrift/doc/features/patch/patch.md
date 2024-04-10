@@ -39,6 +39,10 @@ file `[thrift_file_name]_patch.thrift`. It takes the following arguments
 
 Any extra arguments will be forwarded to the internal Patch's thrift_library.
 
+## SafePatch
+
+When Thrift Patch is serialized (i.e. to send over the wire or storage), Thrift SafePatch must be used. It provides safe means of transport Thrift Patch over the wire and guarantees that any serialized instance will either be correctly applied or clearly and deterministically fail, for any combination of producer and consumer. Thrift SafePatch also provides backward compatiblity as well as protect from consuming invalid forward consumption.
+
 ### Example
 For Thrift file `foo.thrift`
 
@@ -91,9 +95,35 @@ So that this can be used later in C++, and dependencies can be included automati
 #include "path/to/gen-cpp2/foo_patch_types.h"
 
 auto createPatch() {
-  apache::thrift::op::patch_type<Foo> patch;
+  using apache::thrift;
+  op::patch_type<Foo> patch;
   patch.patch<ident::message>() += "suffix";
   return patch;
+}
+
+void consumePatch(Foo& myFoo) {
+  auto patch = createPatch();
+  patch.apply(myFoo);
+}
+```
+
+And, to send over the wire, you must use Thrift SafePatch to avoid silent data corruption and achieve backward compatiblity.
+
+```cpp
+// MyService.cpp
+#include "path/to/gen-cpp2/foo_patch_types.h"
+
+auto createSafePatch() {
+  using apache::thrift;
+  auto patch = createPatch();
+  op::safe_patch_type<Foo> safePatch = op::toSafePatch<Foo>(patch);
+}
+
+void consumeSafePatch(Foo& myFoo) {
+  using apache::thrift;
+  auto safePatch = createSafePatch();
+  auto patch = op::fromSafePatch<Foo>(safePatch);
+  patch.apply(myFoo);
 }
 ```
 
@@ -256,6 +286,23 @@ static_assert(std::is_same_v<apache::thrift::op::patch_type<MyStruct>, MyStructP
 static_assert(std::is_same_v<MyStruct, MyStructPatch::value_type>);
 ```
 
+You can get the SafePatch type from the original type. e.g.,
+```cpp
+static_assert(std::is_same_v<apache::thrift::op::safe_patch_type<MyStruct>, MyStructSafePatch>);
+```
+
+### SafePatch
+
+You can convert the Patch type to the SafePatch type and vice versa. e.g.,
+
+```cpp
+MyStructPatch patch;
+MyStructSafePatch safePatch;
+patch = op::fromSafePatch<MyStruct>(safePatch);
+safePatch = op::toSafePatch<MyStruct>(patch);
+```
+
+
 ### Debugging
 
 You can use [`apache::thrift::op::prettyPrintPatch`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Patch.h#L118-L125) to pretty-print Thrift Patch for debugging purposes.
@@ -280,6 +327,9 @@ protocol::applyPatch(dynamicPatch, dynamicStruct);
 
 EXPECT_EQ(dynamicStruct[FieldId{1}].as_string(), "(hi)");
 
+// SafePatch
+protocol::Object safePatch = protocol::toSafePatch(dynamicPatch);
+dynamicPatch = protocol::fromSafePatch(safePatch);
 ```
 
 You can find all dynamic patch APIs [here](../../../ref/cpp/file/thrift/lib/cpp2/protocol/Patch.h).

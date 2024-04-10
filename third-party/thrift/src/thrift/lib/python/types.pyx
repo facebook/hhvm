@@ -724,24 +724,6 @@ cdef class Struct(StructOrUnion):
     def __init__(self, **kwargs):
         self._fbthrift_populate_primitive_fields()
 
-    def try_set_struct_field(
-        Struct self,
-        int field_index,
-        StructInfo struct_info,
-        str name,
-        object value
-    ) -> None:
-        """Try to set a structure's field, and indicate what field failed to be
-        set if a TypeError is raised."""
-        try:
-            set_struct_field(
-                self._fbthrift_data,
-                field_index,
-                (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value),
-            )
-        except TypeError as e:
-            raise TypeError(f"field '{name}' encountered TypeError: {str(e)}") from e
-
     def __call__(self, **kwargs):
         if not kwargs:
             return self
@@ -935,11 +917,10 @@ cdef class Struct(StructOrUnion):
                             transitive_annotation=transitive_annotation(),
                         )
 
-            self.try_set_struct_field(
-                    field_index,
-                    struct_info,
-                    name,
-                    value,
+            set_struct_field(
+                self._fbthrift_data,
+                field_index,
+                (<TypeInfoBase>struct_info.type_infos[field_index]).to_internal_data(value),
             )
 
         # If any fields remain unset, initialize them with their respective default values.

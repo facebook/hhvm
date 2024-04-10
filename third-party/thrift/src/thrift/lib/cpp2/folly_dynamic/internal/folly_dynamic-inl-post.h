@@ -274,14 +274,14 @@ struct dynamic_converter_impl<apache::thrift::type::union_t<T>> {
     const auto& [name, entry] = *input.items().begin();
 
     const bool found = apache::thrift::op::find_by_field_id<T>(
-        [&, &name = name, &entry = entry](auto id) {
+        [&, &nameRef = name, &entryRef = entry](auto id) {
           using Id = decltype(id);
           using FieldTag = apache::thrift::op::get_field_tag<T, Id>;
 
-          if (apache::thrift::op::get_name_v<T, Id> == name.stringPiece()) {
-            if (!entry.isNull()) {
+          if (apache::thrift::op::get_name_v<T, Id> == nameRef.stringPiece()) {
+            if (!entryRef.isNull()) {
               dynamic_converter_impl<FieldTag>::from(
-                  out, entry, format, adherence);
+                  out, entryRef, format, adherence);
             }
             return true;
           }

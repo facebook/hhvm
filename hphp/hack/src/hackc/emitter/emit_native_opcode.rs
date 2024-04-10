@@ -34,45 +34,39 @@ pub fn emit_body<'a, 'd>(
     coeffects: Coeffects,
     ret: Option<&aast::Hint>,
 ) -> Result<Body> {
-    let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs);
+    let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs)?;
     let mut tparams = scope
         .get_tparams()
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
-    let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params);
-    let return_type = emit_body::emit_return_type(tparams.as_slice(), false, ret);
+    let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params)?;
+    let rti = emit_body::emit_return_type(tparams.as_slice(), false, ret)?;
 
-    body_instrs.and_then(|body_instrs| {
-        params.and_then(|params| {
-            return_type.and_then(|rti| {
-                let body_instrs = Vec::from_iter(body_instrs.iter().cloned());
-                let params = Vec::from_iter(params.into_iter().map(|(param, _)| ParamEntry {
-                    param,
-                    dv: Maybe::Nothing,
-                }));
-                let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs)
-                    .map_err(error::Error::from_error)?;
+    let body_instrs = Vec::from_iter(body_instrs.iter().cloned());
+    let params = Vec::from_iter(params.into_iter().map(|(param, _)| ParamEntry {
+        param,
+        dv: Maybe::Nothing,
+    }));
+    let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs)
+        .map_err(error::Error::from_error)?;
 
-                Ok(Body {
-                    attributes: attributes.into(),
-                    attrs,
-                    body_instrs: body_instrs.into(),
-                    coeffects,
-                    params: params.into(),
-                    return_type: Maybe::Just(rti),
-                    decl_vars: Default::default(),
-                    doc_comment: Default::default(),
-                    is_memoize_wrapper: Default::default(),
-                    is_memoize_wrapper_lsb: Default::default(),
-                    num_iters: Default::default(),
-                    shadowed_tparams: Default::default(),
-                    stack_depth,
-                    upper_bounds: Default::default(),
-                    span: Default::default(),
-                })
-            })
-        })
+    Ok(Body {
+        attributes: attributes.into(),
+        attrs,
+        body_instrs: body_instrs.into(),
+        coeffects,
+        params: params.into(),
+        return_type: Maybe::Just(rti),
+        decl_vars: Default::default(),
+        doc_comment: Default::default(),
+        is_memoize_wrapper: Default::default(),
+        is_memoize_wrapper_lsb: Default::default(),
+        num_iters: Default::default(),
+        shadowed_tparams: Default::default(),
+        stack_depth,
+        upper_bounds: Default::default(),
+        span: Default::default(),
     })
 }
 

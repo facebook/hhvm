@@ -85,12 +85,12 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
 }
 
 /// This is the entry point from hh_single_compile
-pub fn emit_unit<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+pub fn emit_unit(
+    emitter: &mut Emitter<'_>,
     namespace: Arc<namespace_env::Env>,
-    tast: &'a ast::Program,
+    ast: ast::Program,
 ) -> Result<Unit> {
-    let result = emit_unit_(emitter, namespace, tast);
+    let result = emit_unit_(emitter, namespace, ast);
     match result {
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => emit_fatal_unit(op, pos, msg),
@@ -149,10 +149,10 @@ where
     }
 }
 
-fn emit_unit_<'a, 'd>(
+fn emit_unit_<'d>(
     emitter: &mut Emitter<'d>,
     namespace: Arc<namespace_env::Env>,
-    prog: &'a ast::Program,
+    prog: ast::Program,
 ) -> Result<Unit> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;

@@ -23,7 +23,6 @@ use anyhow::Result;
 use bstr::ByteSlice;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
-use emit_unit::emit_unit;
 use env::emitter::Emitter;
 use error::Error;
 use error::ErrorKind;
@@ -221,18 +220,18 @@ pub fn from_text<'d>(
 fn rewrite_and_emit<'p, 'd>(
     emitter: &mut Emitter<'d>,
     namespace_env: Arc<NamespaceEnv>,
-    ast: &'p mut ast::Program,
+    mut ast: ast::Program,
     profile: &'p mut Profile,
 ) -> Result<Unit, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
-    let result = rewrite_program::rewrite_program(emitter, ast, Arc::clone(&namespace_env));
+    let result = rewrite_program::rewrite_program(emitter, &mut ast, Arc::clone(&namespace_env));
     profile.rewrite_peak = stack_limit::peak() as u64;
     stack_limit::reset();
     let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_unit_from_ast(emitter, namespace_env, ast)
+            emit_unit::emit_unit(emitter, namespace_env, ast)
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(fatal_op, pos, msg) => {
@@ -301,14 +300,6 @@ pub fn unit_to_string(
     Ok(())
 }
 
-fn emit_unit_from_ast<'d>(
-    emitter: &mut Emitter<'d>,
-    namespace: Arc<NamespaceEnv>,
-    ast: &mut ast::Program,
-) -> Result<Unit, Error> {
-    emit_unit(emitter, namespace, ast)
-}
-
 fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
     NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -355,7 +346,7 @@ fn emit_unit_from_text<'d>(
             ) {
                 Ok(()) => profile_rust::time(move || {
                     (
-                        rewrite_and_emit(emitter, namespace_env, &mut ast, profile),
+                        rewrite_and_emit(emitter, namespace_env, ast, profile),
                         profile,
                     )
                 }),

@@ -1089,7 +1089,7 @@ void translateFunctionBody(TranslationState& ts,
     translateParameter(ts, ubs, classUbs, shadowedTParams, hasReifiedGenerics, p);
   }
 
-  auto instrs = range(b.body_instrs);
+  auto instrs = range(b.instrs);
   for (auto const& instr : instrs) {
     translateInstruction(ts, instr);
   }

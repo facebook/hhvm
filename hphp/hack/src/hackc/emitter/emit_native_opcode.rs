@@ -34,7 +34,7 @@ pub fn emit_body<'a, 'd>(
     coeffects: Coeffects,
     ret: Option<&aast::Hint>,
 ) -> Result<Body> {
-    let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs)?;
+    let instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs)?;
     let mut tparams = scope
         .get_tparams()
         .iter()
@@ -43,18 +43,18 @@ pub fn emit_body<'a, 'd>(
     let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params)?;
     let rti = emit_body::emit_return_type(tparams.as_slice(), false, ret)?;
 
-    let body_instrs = Vec::from_iter(body_instrs.iter().cloned());
+    let instrs = Vec::from_iter(instrs.iter().cloned());
     let params = Vec::from_iter(params.into_iter().map(|(param, _)| ParamEntry {
         param,
         dv: Maybe::Nothing,
     }));
-    let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs)
-        .map_err(error::Error::from_error)?;
+    let stack_depth =
+        stack_depth::compute_stack_depth(&params, &instrs).map_err(error::Error::from_error)?;
 
     Ok(Body {
         attributes: attributes.into(),
         attrs,
-        body_instrs: body_instrs.into(),
+        instrs: instrs.into(),
         coeffects,
         params: params.into(),
         return_type: Maybe::Just(rti),

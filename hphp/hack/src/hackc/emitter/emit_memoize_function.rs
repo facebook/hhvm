@@ -102,7 +102,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
             None
         };
     let mut env = Env::default(Arc::clone(&fd.namespace)).with_scope(scope);
-    let (body_instrs, decl_vars) = make_memoize_function_code(
+    let (instrs, decl_vars) = make_memoize_function_code(
         emitter,
         &mut env,
         &f.span,
@@ -124,7 +124,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         coeffects,
         params,
         decl_vars,
-        body_instrs,
+        instrs,
         Span::from_pos(&f.span),
     )?;
 
@@ -374,12 +374,12 @@ fn make_wrapper_body<'a, 'd>(
     coeffects: Coeffects,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<StringId>,
-    body_instrs: InstrSeq,
+    instrs: InstrSeq,
     span: Span,
 ) -> Result<Body> {
     emit_body::make_body(
         emitter,
-        body_instrs,
+        instrs,
         decl_vars,
         true,   /* is_memoize_wrapper */
         false,  /* is_memoize_wrapper_lsb */

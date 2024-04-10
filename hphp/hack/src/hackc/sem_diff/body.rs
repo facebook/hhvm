@@ -57,7 +57,7 @@ pub(crate) fn compare_bodies(
     work_queue.init_from_bodies(&mut value_builder, &a, &b);
 
     // If we loop more than this number of times it's almost certainly a bug.
-    let mut infinite_loop = std::cmp::max(body_a.body_instrs.len(), body_b.body_instrs.len()) * 5;
+    let mut infinite_loop = std::cmp::max(body_a.instrs.len(), body_b.instrs.len()) * 5;
 
     while let Some((a, b)) = work_queue.pop() {
         let seq_a = a.collect(&mut value_builder).context("collecting a")?;
@@ -137,7 +137,7 @@ impl<'a> Body<'a> {
         hhbc_body: &'a hhbc::Body,
     ) -> (HashMap<Label, InstrPtr>, IdVec<InstrPtr, Rc<SrcLoc>>) {
         let mut label_to_ip = HashMap::default();
-        let mut ip_to_loc = Vec::with_capacity(hhbc_body.body_instrs.len());
+        let mut ip_to_loc = Vec::with_capacity(hhbc_body.instrs.len());
         let mut cur_loc = Rc::new(SrcLoc::default());
         for (ip, instr) in body_instrs(hhbc_body) {
             match instr {
@@ -185,7 +185,7 @@ impl<'a> Body<'a> {
 fn body_instrs<'a>(
     hhbc_body: &'a hhbc::Body,
 ) -> impl DoubleEndedIterator<Item = (InstrPtr, &'a Instruct)> {
-    hhbc_body.body_instrs.iter().enumerate().map(|(i, instr)| {
+    hhbc_body.instrs.iter().enumerate().map(|(i, instr)| {
         let ip = InstrPtr::from_usize(i);
         (ip, instr)
     })

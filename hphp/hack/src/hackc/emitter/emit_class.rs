@@ -424,9 +424,8 @@ fn emit_reified_init_method<'a, 'd>(
             type_info: Just(TypeInfo::new(Just(hhbc::intern("HH\\varray")), tc)),
         }];
 
-        let body_instrs =
-            emit_reified_init_body(emitter, env, num_reified, ast_class, param_local)?;
-        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
+        let instrs = emit_reified_init_body(emitter, env, num_reified, ast_class, param_local)?;
+        let instrs = emit_pos::emit_pos_then(&ast_class.span, instrs);
         Ok(Some(make_86method(
             emitter,
             *REIFIED_INIT_METH_NAME,

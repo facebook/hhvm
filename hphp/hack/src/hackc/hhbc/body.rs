@@ -25,7 +25,7 @@ pub struct Body {
     pub attributes: Vector<Attribute>,
     pub attrs: Attr,
     /// Must have been compacted with InstrSeq::compact_iter().
-    pub body_instrs: Vector<Instruct>,
+    pub instrs: Vector<Instruct>,
     pub coeffects: Coeffects,
     pub decl_vars: Vector<StringId>,
     pub num_iters: usize,

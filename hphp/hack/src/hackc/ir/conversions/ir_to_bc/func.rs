@@ -49,7 +49,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     // Now emit the instructions.
     trace!("-- emit instrs");
     let mut labeler = emitter::Labeler::new(&func);
-    let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, adata);
+    let (instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, adata);
 
     let return_type = func.return_type.into();
 
@@ -70,13 +70,13 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let upper_bounds = func.upper_bounds.into();
 
     let shadowed_tparams = func.shadowed_tparams;
-    let body_instrs = body_instrs.to_vec();
-    let stack_depth = stack_depth::compute_stack_depth(&params, &body_instrs).unwrap();
+    let instrs = instrs.to_vec();
+    let stack_depth = stack_depth::compute_stack_depth(&params, &instrs).unwrap();
 
     hhbc::Body {
         attributes: func.attributes.into(),
         attrs: func.attrs,
-        body_instrs: body_instrs.into(),
+        instrs: instrs.into(),
         coeffects: func.coeffects,
         decl_vars: decl_vars.into(),
         doc_comment,

@@ -158,7 +158,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
     let Body {
         attributes: a_attributes,
         attrs: a_attrs,
-        body_instrs: _,
+        instrs: _,
         coeffects: a_coeffects,
         decl_vars: _,
         num_iters: a_num_iters,
@@ -175,7 +175,7 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
     let Body {
         attributes: b_attributes,
         attrs: b_attrs,
-        body_instrs: _,
+        instrs: _,
         coeffects: b_coeffects,
         decl_vars: _,
         num_iters: b_num_iters,

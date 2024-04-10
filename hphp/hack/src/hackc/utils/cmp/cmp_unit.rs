@@ -123,7 +123,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
         attributes: a_attributes,
         attrs: a_attrs,
-        body_instrs: a_body_instrs,
+        instrs: a_instrs,
         coeffects: a_coeffects,
         decl_vars: a_decl_vars,
         num_iters: a_num_iters,
@@ -140,7 +140,7 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
         attributes: b_attributes,
         attrs: b_attrs,
-        body_instrs: b_body_instrs,
+        instrs: b_instrs,
         coeffects: b_coeffects,
         decl_vars: b_decl_vars,
         num_iters: b_num_iters,
@@ -172,18 +172,18 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
 
     cmp_slice(a_decl_vars, b_decl_vars, cmp_eq).qualified("decl_vars")?;
 
-    if a_body_instrs.len() != b_body_instrs.len() {
+    if a_instrs.len() != b_instrs.len() {
         bail!(
             "Mismatch in instruct lengths: {} vs {}",
-            a_body_instrs.len(),
-            b_body_instrs.len()
+            a_instrs.len(),
+            b_instrs.len()
         );
     }
 
-    for (idx, (a_instr, b_instr)) in a_body_instrs.iter().zip(b_body_instrs.iter()).enumerate() {
+    for (idx, (a_instr, b_instr)) in a_instrs.iter().zip(b_instrs.iter()).enumerate() {
         cmp_instr(a_instr, b_instr)
             .indexed(&idx.to_string())
-            .qualified("body_instrs")?;
+            .qualified("instrs")?;
     }
 
     Ok(())

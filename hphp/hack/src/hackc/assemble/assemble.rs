@@ -1428,7 +1428,7 @@ fn assemble_body(
     Ok(hhbc::Body {
         attributes: attributes.into(),
         attrs,
-        body_instrs: instrs.into(),
+        instrs: instrs.into(),
         coeffects,
         decl_vars: decl_vars.into(),
         num_iters,

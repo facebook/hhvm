@@ -166,7 +166,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
             .iter()
             .flat_map(|c| c.methods.iter().map(|m| &m.body)),
     ) {
-        for instr in &body.body_instrs {
+        for instr in &body.instrs {
             use hhbc::Opcode;
             match instr {
                 Instruct::Opcode(Opcode::Vec(a) | Opcode::Dict(a) | Opcode::Keyset(a)) => {
@@ -867,7 +867,7 @@ fn print_body(
         .map(|e| e.param.name)
         .chain(body.decl_vars.iter().copied())
         .collect();
-    print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names, adata)
+    print_instructions(ctx, w, &body.instrs, dv_labels, &local_names, adata)
 }
 
 fn print_instructions(

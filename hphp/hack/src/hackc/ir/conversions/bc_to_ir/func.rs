@@ -54,7 +54,7 @@ fn convert_body(body: &Body) -> ir::Func {
     let Body {
         ref attributes,
         attrs,
-        ref body_instrs,
+        ref instrs,
         ref coeffects,
         ref decl_vars,
         ref doc_comment,
@@ -91,7 +91,7 @@ fn convert_body(body: &Body) -> ir::Func {
         upper_bounds: upper_bounds.clone().into(),
     };
 
-    let mut ctx = Context::new(func, body_instrs);
+    let mut ctx = Context::new(func, instrs);
 
     for e in params.as_ref() {
         let ir_param = convert_param(&mut ctx, e);

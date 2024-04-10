@@ -155,7 +155,7 @@ pub fn emit_body<'b, 'd>(
     } else {
         None
     };
-    let body_instrs = make_body_instrs(
+    let instrs = make_body_instrs(
         emitter,
         &mut env,
         &params,
@@ -170,7 +170,7 @@ pub fn emit_body<'b, 'd>(
     Ok((
         make_body(
             emitter,
-            body_instrs,
+            instrs,
             decl_vars,
             false, // is_memoize_wrapper
             false, // is_memoize_wrapper_lsb
@@ -225,11 +225,11 @@ fn make_body_instrs<'a, 'd>(
 
     let header = InstrSeq::gather(vec![begin_label, header_content]);
 
-    let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
+    let mut instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
-        modify_prog_for_debugger_eval(&mut body_instrs);
+        modify_prog_for_debugger_eval(&mut instrs);
     };
-    Ok(body_instrs)
+    Ok(instrs)
 }
 
 fn make_header_content<'a, 'd>(
@@ -362,7 +362,7 @@ fn make_params<'a, 'd>(
 
 pub fn make_body<'a, 'd>(
     emitter: &mut Emitter<'d>,
-    mut body_instrs: InstrSeq,
+    mut instrs: InstrSeq,
     decl_vars: Vec<StringId>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
@@ -378,7 +378,7 @@ pub fn make_body<'a, 'd>(
     span: Span,
 ) -> Result<Body> {
     if emitter.options().compiler_flags.relabel {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+        label_rewriter::relabel_function(&mut params, &mut instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -420,14 +420,14 @@ pub fn make_body<'a, 'd>(
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
-    let body_instrs = opt_body::optimize_body(emitter, body_instrs, params.len(), &decl_vars);
-    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+    let instrs = opt_body::optimize_body(emitter, instrs, params.len(), &decl_vars);
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), instrs.as_ref())
         .map_err(error::Error::from_error)?;
 
     Ok(Body {
         attributes: attributes.into(),
         attrs,
-        body_instrs: body_instrs.into(),
+        instrs: instrs.into(),
         coeffects,
         decl_vars: decl_vars.into(),
         num_iters,
@@ -766,7 +766,7 @@ pub fn get_tp_names_set(tparams: &[ast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 
-fn modify_prog_for_debugger_eval(_body_instrs: &mut InstrSeq) {
+fn modify_prog_for_debugger_eval(_: &mut InstrSeq) {
     unimplemented!() // SF(2021-03-17): I found it like this.
 }
 

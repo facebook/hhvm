@@ -65,11 +65,14 @@ class StdSerializer : public ProtocolSerializer<
 
 template <typename Tag, type::StandardProtocol... Ps>
 void registerStdSerializers(type::TypeRegistry& registry) {
-  // Duplicate registration of standard types is not an error: use the first
-  // registered serializer.
-  bool result[] = {registry.registerSerializer(
-      std::make_unique<StdSerializer<Tag, Ps>>(), type::Type::get<Tag>())...};
-  (void)result;
+  for (auto result :
+       std::array<bool, sizeof...(Ps)>{{registry.registerSerializer(
+           std::make_unique<StdSerializer<Tag, Ps>>(),
+           type::Type::get<Tag>())...}}) {
+    if (!result) {
+      folly::throw_exception<std::runtime_error>("Could not register type.");
+    }
+  }
 }
 
 } // namespace op

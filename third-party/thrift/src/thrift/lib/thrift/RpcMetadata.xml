@@ -223,6 +223,7 @@
         <field name="logErrorSampleRatio" id="2" type="int32" />
         <data name="requestId" id="3" type="varStringEncoding" />
         <data name="routingTarget" id="4" type="varStringEncoding" />
+        <!-- NOTE: in thrift IDL, this is added as int32 -->
         <data name="requestAttemptId" id="5" type="varStringEncoding" />
     </sbe:message>
 

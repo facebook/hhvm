@@ -36,7 +36,7 @@ fn compute_general_po(
     func: &Func,
     splitter: impl Fn(&[BlockId]) -> Option<(&BlockId, &[BlockId])>,
 ) -> Vec<BlockId> {
-    let blocks = &func.blocks;
+    let blocks = &func.repr.blocks;
     let mut result = Vec::with_capacity(blocks.len());
     if blocks.is_empty() {
         return result;
@@ -49,7 +49,7 @@ fn compute_general_po(
 
     mark_block(&mut stack, &mut already_pushed, func, Func::ENTRY_BID);
 
-    for (_, dv) in &func.params {
+    for (_, dv) in &func.repr.params {
         if let Some(dv) = dv {
             mark_block(&mut stack, &mut already_pushed, func, dv.init);
         }

@@ -54,7 +54,7 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     let return_type = func.return_type.into();
 
     let span = func.span;
-    let params = Vec::from_iter(func.params.into_iter().map(|(param, dv)| {
+    let params = Vec::from_iter(func.repr.params.into_iter().map(|(param, dv)| {
         ParamEntry {
             param,
             dv: dv
@@ -76,19 +76,21 @@ pub(crate) fn convert_func(mut func: ir::Func, adata: &mut AdataState) -> hhbc::
     hhbc::Body {
         attributes: func.attributes.into(),
         attrs: func.attrs,
-        instrs: instrs.into(),
         coeffects: func.coeffects,
-        decl_vars: decl_vars.into(),
         doc_comment,
         is_memoize_wrapper: func.is_memoize_wrapper,
         is_memoize_wrapper_lsb: func.is_memoize_wrapper_lsb,
         num_iters: func.num_iters,
-        params: params.into(),
         return_type,
         shadowed_tparams: shadowed_tparams.into(),
         upper_bounds,
-        stack_depth,
         span,
+        repr: hhbc::BcRepr {
+            instrs: instrs.into(),
+            decl_vars: decl_vars.into(),
+            params: params.into(),
+            stack_depth,
+        },
     }
 }
 

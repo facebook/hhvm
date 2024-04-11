@@ -60,7 +60,9 @@ impl fmt::Display for DisplayFunc<'_> {
         writeln!(w, "}}")?;
 
         if verbose {
-            let mut unused: InstrIdSet = (0..func.instrs.len()).map(InstrId::from_usize).collect();
+            let mut unused: InstrIdSet = (0..func.repr.instrs.len())
+                .map(InstrId::from_usize)
+                .collect();
             for iid in func.body_iids() {
                 unused.remove(&iid);
             }
@@ -76,7 +78,7 @@ impl fmt::Display for DisplayFunc<'_> {
 
                 writeln!(w, "unowned:")?;
                 for iid in unused {
-                    writeln!(w, "  {iid}: {:?}", func.instrs[iid])?;
+                    writeln!(w, "  {iid}: {:?}", func.repr.instrs[iid])?;
                 }
             }
         }

@@ -518,7 +518,7 @@ pub(crate) fn print_func_body(
         writeln!(w, "  .is_memoize_wrapper_lsb")?;
     }
 
-    for cid in func.imms.keys() {
+    for cid in func.repr.imms.keys() {
         writeln!(
             w,
             "  .const {} = {}",
@@ -527,7 +527,7 @@ pub(crate) fn print_func_body(
         )?;
     }
 
-    for (id, func::ExFrame { parent, catch_bid }) in &func.ex_frames {
+    for (id, func::ExFrame { parent, catch_bid }) in &func.repr.ex_frames {
         write!(
             w,
             "  .ex_frame {}: catch={}",
@@ -549,8 +549,8 @@ pub(crate) fn print_func_body(
         live_instrs,
         verbose,
     };
-    for bid in func.blocks.keys() {
-        let block = &func.blocks[bid];
+    for bid in func.repr.blocks.keys() {
+        let block = &func.repr.blocks[bid];
         write!(w, "{}", FmtBid(func, bid, false))?;
         if !block.params.is_empty() {
             write!(

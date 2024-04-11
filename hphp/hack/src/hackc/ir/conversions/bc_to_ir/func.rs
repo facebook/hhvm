@@ -54,19 +54,22 @@ fn convert_body(body: &Body) -> ir::Func {
     let Body {
         ref attributes,
         attrs,
-        ref instrs,
         ref coeffects,
-        ref decl_vars,
         ref doc_comment,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         num_iters,
-        ref params,
         ref return_type,
         ref shadowed_tparams,
         ref upper_bounds,
-        stack_depth: _,
         span,
+        repr:
+            hhbc::BcRepr {
+                ref instrs,
+                ref decl_vars,
+                ref params,
+                stack_depth: _,
+            },
     } = *body;
 
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
@@ -74,28 +77,30 @@ fn convert_body(body: &Body) -> ir::Func {
     let func = ir::Func {
         attributes: attributes.to_vec(),
         attrs,
-        blocks: Default::default(),
         coeffects: coeffects.clone(),
         doc_comment: doc_comment.clone().map(|c| c.clone().into()).into(),
-        ex_frames: Default::default(),
-        instrs: Default::default(),
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        imms: Default::default(),
-        locs,
         num_iters,
-        params: Default::default(),
         return_type: return_type.clone().into(),
         shadowed_tparams: shadowed_tparams.clone().into(),
         span,
         upper_bounds: upper_bounds.clone().into(),
+        repr: ir::IrRepr {
+            blocks: Default::default(),
+            ex_frames: Default::default(),
+            instrs: Default::default(),
+            imms: Default::default(),
+            locs,
+            params: Default::default(),
+        },
     };
 
     let mut ctx = Context::new(func, instrs);
 
     for e in params.as_ref() {
         let ir_param = convert_param(&mut ctx, e);
-        ctx.builder.func.params.push(ir_param);
+        ctx.builder.func.repr.params.push(ir_param);
         if let ffi::Just(dv) = e.dv.as_ref() {
             // This default value will jump to a different start than the
             // Func::ENTRY_BID.

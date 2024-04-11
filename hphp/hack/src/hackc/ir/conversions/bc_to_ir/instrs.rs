@@ -1181,14 +1181,14 @@ fn add_catch_work(ctx: &mut Context<'_>, mut tcid: TryCatchId) {
             }
             TryCatchId::Try(exid) => {
                 // Catch block is the catch of this exid.
-                ctx.add_work_bid(ctx.builder.func.ex_frames[&exid].catch_bid);
+                ctx.add_work_bid(ctx.builder.func.repr.ex_frames[&exid].catch_bid);
                 return;
             }
             TryCatchId::Catch(exid) => {
                 // Catch block is the catch of the parent. If our parent is a
                 // Try(_) then we want its catch. If our parent is a Catch(_)
                 // then we want its parent's stuff.
-                tcid = ctx.builder.func.ex_frames[&exid].parent;
+                tcid = ctx.builder.func.repr.ex_frames[&exid].parent;
             }
         }
     }

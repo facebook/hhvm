@@ -108,14 +108,14 @@ fn add_reified_parameter(func: &mut Func) {
             },
         }),
     };
-    func.params.push((param, None));
+    func.repr.params.push((param, None));
 }
 
 fn add_self_trait_parameter(func: &mut Func) {
     // We insert a `self` parameter so infer's analysis can
     // do its job. We don't use `$` so we are sure we don't clash with
     // existing Hack user defined variables.
-    func.params.push((
+    func.repr.params.push((
         ir::Param {
             name: ir::string_id!("self"),
             is_variadic: false,

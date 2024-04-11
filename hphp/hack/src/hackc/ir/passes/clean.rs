@@ -113,7 +113,7 @@ fn remove_common_args(func: &mut Func) {
     );
 
     let mut remap: IdVec<InstrId, ValueId> = IdVec::new_from_vec(
-        (0..func.instrs.len())
+        (0..func.repr.instrs.len())
             .map(|iid| ValueId::from_instr(InstrId::from_usize(iid)))
             .collect(),
     );
@@ -383,17 +383,16 @@ fn lookup(remap: &mut IdVec<InstrId, ValueId>, vid: ValueId) -> ValueId {
 
 fn renumber(func: &mut Func) {
     let mut remap: ValueIdMap<ValueId> = ValueIdMap::default();
-    let mut src_instrs = std::mem::take(&mut func.instrs);
+    let mut src_instrs = std::mem::take(&mut func.repr.instrs);
     let mut dst_instrs: IdVec<InstrId, Instr> = IdVec::with_capacity(func.instrs_len());
 
     for bid in func.block_ids() {
         let block = func.block_mut(bid);
-
         block.params = remapper(&mut remap, &mut src_instrs, &block.params, &mut dst_instrs);
         block.iids = remapper(&mut remap, &mut src_instrs, &block.iids, &mut dst_instrs);
     }
 
-    func.instrs = dst_instrs;
+    func.repr.instrs = dst_instrs;
     func.remap_vids(&remap);
 }
 

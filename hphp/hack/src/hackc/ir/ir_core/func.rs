@@ -155,23 +155,28 @@ impl TryCatchId {
 pub struct Func {
     pub attributes: Vec<Attribute>,
     pub attrs: Attr,
-    pub blocks: IdVec<BlockId, Block>,
     pub coeffects: Coeffects,
     pub doc_comment: Option<Vec<u8>>,
-    pub ex_frames: ExFrameIdMap<ExFrame>,
-    pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub imms: IdVec<ImmId, Immediate>,
-    pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
-    pub params: Vec<(Param, Option<DefaultValue>)>,
     pub return_type: Option<TypeInfo>,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassName>,
     pub span: Span,
     pub upper_bounds: Vec<UpperBound>,
+    pub repr: IrRepr,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct IrRepr {
+    pub blocks: IdVec<BlockId, Block>,
+    pub ex_frames: ExFrameIdMap<ExFrame>,
+    pub instrs: IdVec<InstrId, Instr>,
+    pub imms: IdVec<ImmId, Immediate>,
+    pub locs: IdVec<LocId, SrcLoc>,
+    pub params: Vec<(Param, Option<DefaultValue>)>,
 }
 
 impl Func {
@@ -179,32 +184,32 @@ impl Func {
     pub const ENTRY_BID: BlockId = BlockId(0);
 
     pub fn alloc_imm(&mut self, imm: Immediate) -> ImmId {
-        let cid = ImmId::from_usize(self.imms.len());
-        self.imms.push(imm);
+        let cid = ImmId::from_usize(self.repr.imms.len());
+        self.repr.imms.push(imm);
         cid
     }
 
     pub fn alloc_instr(&mut self, i: Instr) -> InstrId {
-        let iid = InstrId::from_usize(self.instrs.len());
-        self.instrs.push(i);
+        let iid = InstrId::from_usize(self.repr.instrs.len());
+        self.repr.instrs.push(i);
         iid
     }
 
     pub fn alloc_instr_in(&mut self, bid: BlockId, i: Instr) -> InstrId {
         let iid = self.alloc_instr(i);
-        self.blocks[bid].iids.push(iid);
+        self.repr.blocks[bid].iids.push(iid);
         iid
     }
 
     pub fn alloc_param_in(&mut self, bid: BlockId) -> InstrId {
         let iid = self.alloc_instr(Instr::param());
-        self.blocks[bid].params.push(iid);
+        self.repr.blocks[bid].params.push(iid);
         iid
     }
 
     pub fn alloc_bid(&mut self, block: Block) -> BlockId {
-        let bid = BlockId::from_usize(self.blocks.len());
-        self.blocks.push(block);
+        let bid = BlockId::from_usize(self.repr.blocks.len());
+        self.repr.blocks.push(block);
         bid
     }
 
@@ -216,30 +221,31 @@ impl Func {
     pub fn block_ids(&self) -> BlockIdIterator {
         BlockIdIterator {
             current: Self::ENTRY_BID,
-            limit: BlockId(self.blocks.len() as u32),
+            limit: BlockId(self.repr.blocks.len() as u32),
         }
     }
 
     pub fn block_mut(&mut self, bid: BlockId) -> &mut Block {
-        self.blocks.get_mut(bid).unwrap()
+        self.repr.blocks.get_mut(bid).unwrap()
     }
 
     /// Yields normal instructions in bodies (not immediates or params).
     pub fn body_iids(&self) -> impl DoubleEndedIterator<Item = InstrId> + '_ {
-        self.block_ids().flat_map(|bid| self.blocks[bid].iids())
+        self.block_ids()
+            .flat_map(|bid| self.repr.blocks[bid].iids())
     }
 
     pub fn body_instrs(&self) -> impl DoubleEndedIterator<Item = &Instr> + '_ {
-        self.body_iids().map(|iid| &self.instrs[iid])
+        self.body_iids().map(|iid| &self.repr.instrs[iid])
     }
 
     pub fn catch_target(&self, bid: BlockId) -> BlockId {
         fn get_catch_frame(func: &Func, tcid: TryCatchId) -> Option<&ExFrame> {
             match tcid {
                 TryCatchId::None => None,
-                TryCatchId::Try(exid) => Some(&func.ex_frames[&exid]),
+                TryCatchId::Try(exid) => Some(&func.repr.ex_frames[&exid]),
                 TryCatchId::Catch(exid) => {
-                    let parent = func.ex_frames[&exid].parent;
+                    let parent = func.repr.ex_frames[&exid].parent;
                     get_catch_frame(func, parent)
                 }
             }
@@ -272,11 +278,11 @@ impl Func {
     }
 
     pub fn get_block(&self, bid: BlockId) -> Option<&Block> {
-        self.blocks.get(bid)
+        self.repr.blocks.get(bid)
     }
 
     pub fn get_imm(&self, cid: ImmId) -> Option<&Immediate> {
-        self.imms.get(cid)
+        self.repr.imms.get(cid)
     }
 
     pub fn get_edges(&self, bid: BlockId) -> Option<&[BlockId]> {
@@ -284,24 +290,23 @@ impl Func {
     }
 
     pub fn get_instr(&self, iid: InstrId) -> Option<&Instr> {
-        self.instrs.get(iid)
+        self.repr.instrs.get(iid)
     }
 
     pub fn get_instr_mut(&mut self, iid: InstrId) -> Option<&mut Instr> {
-        self.instrs.get_mut(iid)
+        self.repr.instrs.get_mut(iid)
     }
 
     pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param> {
         match lid {
-            LocalId::Named(name) => {
-                (self.params.iter()).find_map(|(p, _)| if p.name == name { Some(p) } else { None })
-            }
+            LocalId::Named(name) => (self.repr.params.iter())
+                .find_map(|(p, _)| if p.name == name { Some(p) } else { None }),
             LocalId::Unnamed(_) => None,
         }
     }
 
     pub fn get_loc(&self, loc: LocId) -> Option<&SrcLoc> {
-        self.locs.get(loc)
+        self.repr.locs.get(loc)
     }
 
     pub fn get_terminator(&self, bid: BlockId) -> Option<&Terminator> {
@@ -319,7 +324,7 @@ impl Func {
     }
 
     pub fn instrs_len(&self) -> usize {
-        self.instrs.len()
+        self.repr.instrs.len()
     }
 
     pub fn instr_mut(&mut self, iid: InstrId) -> &mut Instr {
@@ -353,8 +358,8 @@ impl Func {
     // Visits all the instructions in the block and uses the `remap` mapping on
     // them. Does not renumber the instructions of the block itself.
     pub fn remap_block_vids(&mut self, bid: BlockId, remap: &ValueIdMap<ValueId>) {
-        let block = self.blocks.get_mut(bid).unwrap();
-        block.remap_vids(&mut self.instrs, remap)
+        let block = self.repr.blocks.get_mut(bid).unwrap();
+        block.remap_vids(&mut self.repr.instrs, remap)
     }
 
     // Rewrite instructions using the remap mapping. Won't renumber the
@@ -370,13 +375,13 @@ impl Func {
     /// themselves (so a remapping with b1 -> b2 won't remap block b1 to b2,
     /// just references to b1 will be remapped to b2).
     pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
-        for (_, dv) in &mut self.params {
+        for (_, dv) in &mut self.repr.params {
             if let Some(dv) = dv.as_mut() {
                 dv.init = remap.get(&dv.init).copied().unwrap_or(dv.init);
             }
         }
 
-        for instr in self.instrs.iter_mut() {
+        for instr in self.repr.instrs.iter_mut() {
             for bid in instr.edges_mut() {
                 *bid = remap.get(bid).copied().unwrap_or(*bid);
             }

@@ -1428,19 +1428,21 @@ fn assemble_body(
     Ok(hhbc::Body {
         attributes: attributes.into(),
         attrs,
-        instrs: instrs.into(),
         coeffects,
-        decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         doc_comment,
-        params: params.into(),
         return_type,
         shadowed_tparams: shadowed_tparams.into(),
-        stack_depth,
         upper_bounds: upper_bounds.into(),
         span,
+        repr: hhbc::BcRepr {
+            instrs: instrs.into(),
+            decl_vars: decl_vars.into(),
+            params: params.into(),
+            stack_depth,
+        },
     })
 }
 

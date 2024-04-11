@@ -44,7 +44,7 @@ pub(crate) fn emit_func(
             .clone()
     };
     let imm_to_opcode =
-        ImmToOpcode::new_from_vec(Vec::from_iter(func.imms.iter().map(|imm| match imm {
+        ImmToOpcode::new_from_vec(Vec::from_iter(func.repr.imms.iter().map(|imm| match imm {
             Immediate::Bool(false) => Opcode::False,
             Immediate::Bool(true) => Opcode::True,
             Immediate::Dir => Opcode::Dir,
@@ -80,7 +80,7 @@ pub(crate) fn emit_func(
             LocalId::Named(name) => Some(name),
             LocalId::Unnamed(_) => None,
         })
-        .skip(func.params.len())
+        .skip(func.repr.params.len())
         .collect();
 
     (InstrSeq::List(ctx.instrs), decl_vars)
@@ -159,7 +159,7 @@ impl Labeler {
 
 fn compute_block_entry_edges(func: &ir::Func) -> BlockIdMap<usize> {
     let mut edges = BlockIdMap::default();
-    for (_, dv) in &func.params {
+    for (_, dv) in &func.repr.params {
         if let Some(dv) = dv {
             edges.entry(dv.init).and_modify(|e| *e += 1).or_insert(1);
         }
@@ -218,6 +218,7 @@ impl<'b> InstrEmitter<'b> {
         // The parameters are required to be the first named locals. We can't
         // control that.
         let mut locals: HashMap<LocalId, hhbc::Local> = func
+            .repr
             .params
             .iter()
             .enumerate()

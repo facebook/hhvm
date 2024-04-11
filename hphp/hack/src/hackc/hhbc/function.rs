@@ -47,6 +47,6 @@ impl Function {
     }
 
     pub fn params(&self) -> &[ParamEntry] {
-        self.body.params.as_ref()
+        self.body.repr.params.as_ref()
     }
 }

@@ -45,13 +45,13 @@ pub fn run(func: &mut Func) -> bool {
     }
 
     // Function params
-    for idx in 0..func.params.len() {
-        if let (_, Some(dv)) = &func.params[idx] {
+    for idx in 0..func.repr.params.len() {
+        if let (_, Some(dv)) = &func.repr.params[idx] {
             if let Some(target) = forward_edge(func, dv.init, 1, &predecessors) {
                 changed = true;
                 predecessors[dv.init] -= 1;
                 predecessors[target] += 1;
-                func.params[idx].1.as_mut().unwrap().init = target;
+                func.repr.params[idx].1.as_mut().unwrap().init = target;
             }
         }
     }
@@ -64,7 +64,7 @@ pub fn run(func: &mut Func) -> bool {
         let mut remap = BlockIdMap::default();
         remap.insert(target, Func::ENTRY_BID);
         func.remap_bids(&remap);
-        func.blocks.swap(Func::ENTRY_BID, target);
+        func.repr.blocks.swap(Func::ENTRY_BID, target);
     }
 
     if changed {
@@ -332,7 +332,7 @@ mod test {
             testutils::Block::ret("d"),
             testutils::Block::ret("e"),
         ]);
-        func.params.push(mk_param("x", BlockId(1)));
+        func.repr.params.push(mk_param("x", BlockId(1)));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
 
         eprintln!("FUNC:\n{}", print::DisplayFunc::new(&func, true));
@@ -346,7 +346,7 @@ mod test {
             testutils::Block::ret("d"),
             testutils::Block::ret("e"),
         ]);
-        expected.params.push(mk_param("x", BlockId(1)));
+        expected.repr.params.push(mk_param("x", BlockId(1)));
         *expected.instr_mut(InstrId(1)) = Instr::enter(BlockId(0), ir_core::LocId::NONE);
 
         testutils::assert_func_struct_eq(&func, &expected);

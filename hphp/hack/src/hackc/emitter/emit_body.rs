@@ -427,9 +427,7 @@ pub fn make_body<'a, 'd>(
     Ok(Body {
         attributes: attributes.into(),
         attrs,
-        instrs: instrs.into(),
         coeffects,
-        decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
@@ -438,13 +436,17 @@ pub fn make_body<'a, 'd>(
             .into_iter()
             .map(|s| ClassName::intern(&s))
             .collect(),
-        params: params.into(),
         return_type: return_type.into(),
         doc_comment: doc_comment
             .map(|(_, comment)| comment.into_bytes().into())
             .into(),
-        stack_depth,
         span,
+        repr: hhbc::BcRepr {
+            instrs: instrs.into(),
+            decl_vars: decl_vars.into(),
+            params: params.into(),
+            stack_depth,
+        },
     })
 }
 

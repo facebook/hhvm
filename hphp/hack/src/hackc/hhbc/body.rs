@@ -11,8 +11,8 @@ use serde::Serialize;
 use crate::Attribute;
 use crate::ClassName;
 use crate::Coeffects;
-use crate::DefaultValue;
 use crate::Instruct;
+use crate::Label;
 use crate::Param;
 use crate::Span;
 use crate::StringId;
@@ -24,10 +24,7 @@ use crate::UpperBound;
 pub struct Body {
     pub attributes: Vector<Attribute>,
     pub attrs: Attr,
-    /// Must have been compacted with InstrSeq::compact_iter().
-    pub instrs: Vector<Instruct>,
     pub coeffects: Coeffects,
-    pub decl_vars: Vector<StringId>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
@@ -35,13 +32,23 @@ pub struct Body {
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vector<ClassName>,
-    pub params: Vector<ParamEntry>,
     pub return_type: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
+    pub span: Span,
+    pub repr: BcRepr,
+}
+
+#[derive(Debug, Serialize)]
+#[repr(C)]
+pub struct BcRepr {
+    /// Must have been compacted with InstrSeq::compact_iter().
+    pub instrs: Vector<Instruct>,
+    pub decl_vars: Vector<StringId>,
+
     /// The statically computed stack depth for this Body. This can be computed
     /// using the hhbc::compute_stack_depth() function.
     pub stack_depth: usize,
-    pub span: Span,
+    pub params: Vector<ParamEntry>,
 }
 
 #[derive(Debug, Serialize)]
@@ -49,4 +56,11 @@ pub struct Body {
 pub struct ParamEntry {
     pub param: Param,
     pub dv: Maybe<DefaultValue>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct DefaultValue {
+    pub label: Label,
+    pub expr: Vector<u8>,
 }

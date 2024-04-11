@@ -33,9 +33,10 @@ impl<'a> WorkQueue<'a> {
         // Also need to handle entrypoints for defaults!
         for (idx, (ParamEntry { dv: dv_a, .. }, ParamEntry { dv: dv_b, .. })) in a
             .hhbc_body
+            .repr
             .params
             .iter()
-            .zip(b.hhbc_body.params.iter())
+            .zip(b.hhbc_body.repr.params.iter())
             .enumerate()
         {
             // Initialize parameter values

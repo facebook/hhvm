@@ -144,7 +144,7 @@ impl SeqBuilder<'_> {
                         } else {
                             TryCatchId::None
                         };
-                        self.builder.func.ex_frames.insert(
+                        self.builder.func.repr.ex_frames.insert(
                             exid,
                             ir::func::ExFrame {
                                 parent,

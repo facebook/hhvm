@@ -118,6 +118,7 @@ pub use self::func::ExFrameId;
 pub use self::func::Filename;
 pub use self::func::Func;
 pub use self::func::Function;
+pub use self::func::IrRepr;
 pub use self::func::Method;
 pub use self::func::TryCatchId;
 pub use self::func_builder::FuncBuilder;

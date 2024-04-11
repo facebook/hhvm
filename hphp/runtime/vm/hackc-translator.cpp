@@ -1084,12 +1084,12 @@ void translateFunctionBody(TranslationState& ts,
   ts.fe->isMemoizeWrapperLSB = b.is_memoize_wrapper_lsb;
   ts.fe->setNumIterators(b.num_iters);
 
-  auto params = range(b.params);
+  auto params = range(b.repr.params);
   for (auto const& p : params) {
     translateParameter(ts, ubs, classUbs, shadowedTParams, hasReifiedGenerics, p);
   }
 
-  auto instrs = range(b.instrs);
+  auto instrs = range(b.repr.instrs);
   for (auto const& instr : instrs) {
     translateInstruction(ts, instr);
   }
@@ -1098,7 +1098,7 @@ void translateFunctionBody(TranslationState& ts,
   if (dc) ts.fe->docComment = makeDocComment(dc.value());
 
   // Parsing parameters must come before decl_vars
-  auto decl_vars = range(b.decl_vars);
+  auto decl_vars = range(b.repr.decl_vars);
   for (auto const& dv : decl_vars) {
     auto const dvName = toNamedLocalStaticString(dv);
     ts.fe->allocVarId(dvName);
@@ -1116,7 +1116,7 @@ void translateFunctionBody(TranslationState& ts,
     }
   }
 
-  ts.fe->maxStackCells = b.stack_depth;
+  ts.fe->maxStackCells = b.repr.stack_depth;
 
   // finish function
   while (ts.fe->numLocals() < ts.maxUnnamed) {

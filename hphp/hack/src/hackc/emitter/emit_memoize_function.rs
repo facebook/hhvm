@@ -130,7 +130,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
 
     let mut flags = FunctionFlags::empty();
     flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
-    let has_variadic = emit_param::has_variadic(&body.params);
+    let has_variadic = emit_param::has_variadic(&body.repr.params);
     body.attrs = get_attrs_for_fun(emitter, fd, &body.attributes, false, has_variadic);
     Ok(Function {
         name: original_id,

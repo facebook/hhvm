@@ -215,10 +215,13 @@ impl<'b> FunctionParser<'b> {
         // print_function() and print_method().
         let mut builder = FuncBuilder::with_func(Func {
             return_type,
-            params,
             upper_bounds: tparams,
             shadowed_tparams,
             attrs,
+            repr: ir_core::IrRepr {
+                params,
+                ..Default::default()
+            },
             ..Default::default()
         });
 
@@ -299,23 +302,24 @@ impl<'b> FunctionParser<'b> {
     }
 
     fn latch_blocks(&mut self) {
-        assert!(self.builder.func.instrs.is_empty());
+        assert!(self.builder.func.repr.instrs.is_empty());
 
         // Sort the blocks.  BlockId::NONE (where the params all live) will end
         // up at the end.
         self.blocks.sort_by_key(|block| block.bid);
 
-        let func_blocks = &mut self.builder.func.blocks;
+        let func_blocks = &mut self.builder.func.repr.blocks;
 
         let count_instrs: usize = self.blocks.iter().map(|bi| bi.instrs.len()).sum();
         self.builder
             .func
+            .repr
             .instrs
             .resize(count_instrs, Instr::tombstone());
 
         let mut unused_iids: InstrIdSet = (0..count_instrs).map(InstrId::from_usize).collect();
 
-        let func_instrs = &mut self.builder.func.instrs;
+        let func_instrs = &mut self.builder.func.repr.instrs;
 
         // Place the Instrs with known InstrIds.
         for bi in &mut self.blocks {
@@ -1198,14 +1202,11 @@ impl FunctionParser<'_> {
     fn parse_const(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <idx:parse_imm_id> "=" <value:parse_imm()>);
 
-        if self.builder.func.imms.len() <= idx.as_usize() {
-            self.builder
-                .func
-                .imms
-                .resize(idx.as_usize() + 1, Immediate::Uninit);
+        if self.builder.func.repr.imms.len() <= idx.as_usize() {
+            (self.builder.func.repr.imms).resize(idx.as_usize() + 1, Immediate::Uninit);
         }
         self.builder.imm_lookup.insert(value.clone(), idx);
-        self.builder.func.imms[idx] = value;
+        self.builder.func.repr.imms[idx] = value;
         Ok(())
     }
 
@@ -1232,7 +1233,7 @@ impl FunctionParser<'_> {
         };
 
         let frame = ExFrame { parent, catch_bid };
-        self.builder.func.ex_frames.insert(num, frame);
+        self.builder.func.repr.ex_frames.insert(num, frame);
 
         Ok(())
     }
@@ -1462,11 +1463,8 @@ impl FunctionParser<'_> {
             instrs: Default::default(),
         });
 
-        if self.builder.func.blocks.len() <= bid.as_usize() {
-            self.builder
-                .func
-                .blocks
-                .resize_with(bid.as_usize() + 1, Block::default);
+        if self.builder.func.repr.blocks.len() <= bid.as_usize() {
+            (self.builder.func.repr.blocks).resize_with(bid.as_usize() + 1, Block::default);
         }
 
         self.builder.start_block(bid);

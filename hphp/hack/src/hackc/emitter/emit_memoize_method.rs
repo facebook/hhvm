@@ -184,7 +184,7 @@ fn make_memoize_wrapper_method<'a, 'd>(
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
-    let has_variadic = emit_param::has_variadic(&body.params);
+    let has_variadic = emit_param::has_variadic(&body.repr.params);
     body.attrs = get_attrs_for_method(
         emitter,
         method,

@@ -350,6 +350,6 @@ fn cmp_method(a: &ir::Method, b: &ir::Method) -> Ordering {
         })
         .then_with(|| {
             // Same name - use param count.
-            a.func.params.len().cmp(&b.func.params.len())
+            a.func.repr.params.len().cmp(&b.func.repr.params.len())
         })
 }

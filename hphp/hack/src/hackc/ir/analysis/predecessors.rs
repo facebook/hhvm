@@ -26,7 +26,7 @@ pub fn compute_predecessor_blocks(func: &Func, flags: PredecessorFlags) -> Prede
         mark_edge(&mut predecessors, BlockId::NONE, Func::ENTRY_BID);
 
         // Handle the default params.
-        for (_, dv) in &func.params {
+        for (_, dv) in &func.repr.params {
             if let Some(dv) = dv {
                 mark_edge(&mut predecessors, BlockId::NONE, dv.init);
             }
@@ -98,14 +98,14 @@ fn mark_edge(predecessors: &mut Predecessors, src: BlockId, dst: BlockId) {
 /// Compute the number of incoming control-flow edges to each block. If there are no
 /// critical edges, this is also the number of predecessor blocks.
 pub fn compute_num_predecessors(func: &Func, flags: PredecessorFlags) -> IdVec<BlockId, u32> {
-    let mut counts = IdVec::new_from_vec(vec![0; func.blocks.len()]);
+    let mut counts = IdVec::new_from_vec(vec![0; func.repr.blocks.len()]);
 
     if flags.mark_entry_blocks {
         // Entry
         counts[BlockId::NONE] += 1;
 
         // Default Params
-        for (_, dv) in &func.params {
+        for (_, dv) in &func.repr.params {
             if let Some(dv) = dv {
                 counts[dv.init] += 1;
             }

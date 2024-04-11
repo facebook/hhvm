@@ -63,7 +63,7 @@ pub(crate) fn lower_instrs(builder: &mut FuncBuilder, func_info: &FuncInfo<'_>) 
     };
 
     let mut bid = Func::ENTRY_BID;
-    while bid.0 < builder.func.blocks.len() as u32 {
+    while bid.0 < builder.func.repr.blocks.len() as u32 {
         lowerer.changed = true;
         while lowerer.changed {
             // The lowered instructions may have emitted stuff that needs to be

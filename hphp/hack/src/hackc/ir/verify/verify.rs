@@ -288,7 +288,7 @@ impl<'b> VerifyFunc<'b> {
             FullInstrId::Imm(cid) => {
                 check!(
                     self,
-                    self.func.imms.get(cid).is_some(),
+                    self.func.repr.imms.get(cid).is_some(),
                     "iid {} refers to missing constant {}",
                     src_iid,
                     cid
@@ -456,7 +456,7 @@ impl<'b> VerifyFunc<'b> {
         for &bid in instr.edges() {
             check!(
                 self,
-                self.func.blocks.get(bid).is_some(),
+                self.func.repr.blocks.get(bid).is_some(),
                 "iid {} refers to missing block {}",
                 iid,
                 bid

@@ -123,36 +123,42 @@ fn cmp_body(a: &Body, b: &Body) -> Result {
     let Body {
         attributes: a_attributes,
         attrs: a_attrs,
-        instrs: a_instrs,
         coeffects: a_coeffects,
-        decl_vars: a_decl_vars,
         num_iters: a_num_iters,
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
         upper_bounds: a_upper_bounds,
         shadowed_tparams: a_shadowed_tparams,
-        params: a_params,
         return_type: a_return_type,
         doc_comment: a_doc_comment,
-        stack_depth: a_stack_depth,
         span: a_span,
+        repr:
+            hhbc::BcRepr {
+                instrs: a_instrs,
+                decl_vars: a_decl_vars,
+                params: a_params,
+                stack_depth: a_stack_depth,
+            },
     } = a;
     let Body {
         attributes: b_attributes,
         attrs: b_attrs,
-        instrs: b_instrs,
         coeffects: b_coeffects,
-        decl_vars: b_decl_vars,
         num_iters: b_num_iters,
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
         upper_bounds: b_upper_bounds,
         shadowed_tparams: b_shadowed_tparams,
-        params: b_params,
         return_type: b_return_type,
         doc_comment: b_doc_comment,
-        stack_depth: b_stack_depth,
         span: b_span,
+        repr:
+            hhbc::BcRepr {
+                instrs: b_instrs,
+                decl_vars: b_decl_vars,
+                params: b_params,
+                stack_depth: b_stack_depth,
+            },
     } = b;
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;

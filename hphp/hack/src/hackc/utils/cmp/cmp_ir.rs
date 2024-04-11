@@ -267,40 +267,46 @@ fn cmp_func(a: &Func, b: &Func) -> Result {
     let Func {
         attributes: a_attributes,
         attrs: a_attrs,
-        blocks: a_blocks,
         coeffects: a_coeffects,
-        imms: _,
         doc_comment: a_doc_comment,
-        ex_frames: a_ex_frames,
-        instrs: a_instrs,
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
         span: a_span,
-        locs: _,
         num_iters: a_num_iters,
-        params: a_params,
         return_type: a_return_type,
         shadowed_tparams: a_shadowed_tparams,
         upper_bounds: a_upper_bounds,
+        repr:
+            ir::IrRepr {
+                blocks: a_blocks,
+                imms: _,
+                ex_frames: a_ex_frames,
+                instrs: a_instrs,
+                locs: _,
+                params: a_params,
+            },
     } = a;
     let Func {
         attributes: b_attributes,
         attrs: b_attrs,
-        blocks: b_blocks,
         coeffects: b_coeffects,
-        imms: _,
         doc_comment: b_doc_comment,
-        ex_frames: b_ex_frames,
-        instrs: b_instrs,
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
         span: b_span,
-        locs: _,
         num_iters: b_num_iters,
-        params: b_params,
         return_type: b_return_type,
         shadowed_tparams: b_shadowed_tparams,
         upper_bounds: b_upper_bounds,
+        repr:
+            ir::IrRepr {
+                blocks: b_blocks,
+                imms: _,
+                ex_frames: b_ex_frames,
+                instrs: b_instrs,
+                locs: _,
+                params: b_params,
+            },
     } = b;
 
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;

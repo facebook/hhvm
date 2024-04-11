@@ -294,7 +294,7 @@ pub fn from_ast<'a, 'd>(
     flags.set(MethodFlags::IS_PAIR_GENERATOR, is_pair_generator);
     flags.set(MethodFlags::IS_CLOSURE_BODY, is_closure_body);
 
-    let has_variadic = emit_param::has_variadic(&body.params);
+    let has_variadic = emit_param::has_variadic(&body.repr.params);
     body.attrs = get_attrs_for_method(
         emitter,
         method,

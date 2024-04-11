@@ -166,7 +166,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
             .iter()
             .flat_map(|c| c.methods.iter().map(|m| &m.body)),
     ) {
-        for instr in &body.instrs {
+        for instr in &body.repr.instrs {
             use hhbc::Opcode;
             match instr {
                 Instruct::Opcode(Opcode::Vec(a) | Opcode::Dict(a) | Opcode::Keyset(a)) => {
@@ -560,8 +560,8 @@ fn print_method_def(
         w.write_all(b" ")
     })?;
     w.write_all(method_def.name.as_bstr())?;
-    let dv_labels = find_dv_labels(&body.params);
-    print_params(ctx, w, &body.params, &dv_labels)?;
+    let dv_labels = find_dv_labels(&body.repr.params);
+    print_params(ctx, w, &body.repr.params, &dv_labels)?;
     if method_def.flags.contains(MethodFlags::IS_GENERATOR) {
         w.write_all(b" isGenerator")?;
     }
@@ -847,10 +847,10 @@ fn print_body(
         ctx.newline(w)?;
         write!(w, ".numiters {};", body.num_iters)?;
     }
-    if !body.decl_vars.is_empty() {
+    if !body.repr.decl_vars.is_empty() {
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
-        concat_by(w, " ", &body.decl_vars, |w, _, var| {
+        concat_by(w, " ", &body.repr.decl_vars, |w, _, var| {
             let var = var.as_str().as_bytes();
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
@@ -862,12 +862,13 @@ fn print_body(
     }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
     let local_names: Vec<_> = body
+        .repr
         .params
         .iter()
         .map(|e| e.param.name)
-        .chain(body.decl_vars.iter().copied())
+        .chain(body.repr.decl_vars.iter().copied())
         .collect();
-    print_instructions(ctx, w, &body.instrs, dv_labels, &local_names, adata)
+    print_instructions(ctx, w, &body.repr.instrs, dv_labels, &local_names, adata)
 }
 
 fn print_instructions(

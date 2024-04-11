@@ -10,7 +10,6 @@ use serde::Serialize;
 
 use crate::Attribute;
 use crate::Constraint;
-use crate::Label;
 use crate::StringId;
 use crate::TypeInfo;
 
@@ -23,13 +22,6 @@ pub struct Param {
     pub is_readonly: bool,
     pub user_attributes: Vector<Attribute>,
     pub type_info: Maybe<TypeInfo>,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-#[repr(C)]
-pub struct DefaultValue {
-    pub label: Label,
-    pub expr: Vector<u8>,
 }
 
 impl Param {

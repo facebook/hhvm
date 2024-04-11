@@ -54,19 +54,21 @@ pub fn emit_body<'a, 'd>(
     Ok(Body {
         attributes: attributes.into(),
         attrs,
-        instrs: instrs.into(),
         coeffects,
-        params: params.into(),
         return_type: Maybe::Just(rti),
-        decl_vars: Default::default(),
         doc_comment: Default::default(),
         is_memoize_wrapper: Default::default(),
         is_memoize_wrapper_lsb: Default::default(),
         num_iters: Default::default(),
         shadowed_tparams: Default::default(),
-        stack_depth,
         upper_bounds: Default::default(),
         span: Default::default(),
+        repr: hhbc::BcRepr {
+            instrs: instrs.into(),
+            params: params.into(),
+            decl_vars: Default::default(),
+            stack_depth,
+        },
     })
 }
 

@@ -124,7 +124,7 @@ impl Thing {
     fn num_params(&self) -> usize {
         match self {
             Thing::Class(_) => 0,
-            Thing::Func(f) => f.func.params.len(),
+            Thing::Func(f) => f.func.repr.params.len(),
         }
     }
 

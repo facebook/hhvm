@@ -221,7 +221,7 @@ pub(crate) fn lower_and_write_func(
         write_func(txf, this_ty, func, Arc::new(func_info))
     }
 
-    let has_defaults = func.params.iter().any(|(_, dv)| dv.is_some());
+    let has_defaults = func.repr.params.iter().any(|(_, dv)| dv.is_some());
     if has_defaults {
         // When a function has defaults we need to split it into multiple
         // functions which each take a different number of parameters,
@@ -256,8 +256,9 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
     // Caution here: If we have varargs then the final param is "magic".  Since
     // we're before lowering the 0ReifiedGenerics param won't exist yet.
-    let mut max_params = orig_func.params.len();
+    let mut max_params = orig_func.repr.params.len();
     let min_params = orig_func
+        .repr
         .params
         .iter()
         .take_while(|(_, dv)| dv.is_none())
@@ -268,7 +269,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
 
     let has_reified = orig_func.is_reified();
     let mut variadic_idx = None;
-    if orig_func.params[max_params - 1].0.is_variadic {
+    if orig_func.repr.params[max_params - 1].0.is_variadic {
         max_params -= 1;
         variadic_idx = Some(max_params);
     }
@@ -280,10 +281,10 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             arguments: vec![].into(),
         });
 
-        let target_bid = func.params[param_count].1.as_ref().map(|dv| dv.init);
-        func.params.truncate(param_count);
+        let target_bid = func.repr.params[param_count].1.as_ref().map(|dv| dv.init);
+        func.repr.params.truncate(param_count);
         for i in min_params..param_count {
-            func.params[i].1 = None;
+            func.repr.params[i].1 = None;
         }
 
         // replace the entrypoint with a jump to the initializer.
@@ -293,7 +294,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             if let Some(variadic_idx) = variadic_idx {
                 // We need to fake up setting an empty variadic parameter.
                 let new_vec = func.alloc_imm(ir::TypedValue::vec(vec![]).into());
-                let lid = LocalId::Named(orig_func.params[variadic_idx].0.name);
+                let lid = LocalId::Named(orig_func.repr.params[variadic_idx].0.name);
                 let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
                 block.push(iid);
             }
@@ -310,7 +311,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
         let exit_bid = {
             let mut block = ir::Block::default();
             let mut params = Vec::new();
-            for (param, _) in &orig_func.params {
+            for (param, _) in &orig_func.repr.params {
                 let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
                 let iid = func.alloc_instr(instr);
                 block.iids.push(iid);
@@ -341,7 +342,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             func.alloc_bid(block)
         };
 
-        for instr in func.instrs.iter_mut() {
+        for instr in func.repr.instrs.iter_mut() {
             match instr {
                 Instr::Terminator(Terminator::Enter(bid, _)) => *bid = exit_bid,
                 _ => {}
@@ -360,7 +361,7 @@ fn write_func(
     mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
-    let params = std::mem::take(&mut func.params);
+    let params = std::mem::take(&mut func.repr.params);
     let (tx_params, param_lids): (Vec<_>, Vec<_>) =
         compute_func_params(&params, this_ty).into_iter().unzip();
 
@@ -462,7 +463,7 @@ pub(crate) fn write_func_decl(
     mut func: ir::Func,
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
-    let params = std::mem::take(&mut func.params);
+    let params = std::mem::take(&mut func.repr.params);
     let param_tys = compute_func_params(&params, this_ty)
         .into_iter()
         .map(|(param, _)| textual::Ty::clone(&param.ty))
@@ -1423,7 +1424,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 
     pub(crate) fn update_loc(&mut self, loc: LocId) -> Result {
         if loc != LocId::NONE {
-            let new = &self.func.locs[loc];
+            let new = &self.func.repr.locs[loc];
             self.fb.write_loc(new)?;
         }
         Ok(())

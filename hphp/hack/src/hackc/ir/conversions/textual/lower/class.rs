@@ -168,7 +168,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             flags: attrs | Attr::AttrStatic,
             attributes: attributes.into(),
             visibility: Visibility::Public,
-            initial_value: value.into(),
+            initial_value: value,
             type_info,
             doc_comment: Default::default(),
         };
@@ -210,7 +210,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
             flags: Attr::AttrStatic,
             attributes: attributes.into(),
             visibility: Visibility::Public,
-            initial_value: initializer.into(),
+            initial_value: initializer,
             type_info,
             doc_comment: Default::default(),
         };
@@ -238,7 +238,7 @@ fn create_default_closure_constructor(class: &mut Class) {
                 user_attributes: vec![].into(),
                 type_info: ir::Maybe::Just(prop.type_info.clone()),
             };
-            fb.func.params.push((param, None));
+            fb.func.repr.params.push((param, None));
 
             let lid = LocalId::Named(prop.name.as_string_id());
             let value = fb.emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, loc)));

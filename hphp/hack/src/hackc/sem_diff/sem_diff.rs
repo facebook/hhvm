@@ -158,36 +158,42 @@ fn sem_diff_body(path: &CodePath<'_>, a: &Body, b: &Body) -> Result<()> {
     let Body {
         attributes: a_attributes,
         attrs: a_attrs,
-        instrs: _,
         coeffects: a_coeffects,
-        decl_vars: _,
         num_iters: a_num_iters,
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
         upper_bounds: a_upper_bounds,
         shadowed_tparams: a_shadowed_tparams,
-        params: a_params,
         return_type: a_return_type,
         doc_comment: a_doc_comment,
-        stack_depth: _,
         span: a_span,
+        repr:
+            hhbc::BcRepr {
+                instrs: _,
+                decl_vars: _,
+                params: a_params,
+                stack_depth: _,
+            },
     } = a;
     let Body {
         attributes: b_attributes,
         attrs: b_attrs,
-        instrs: _,
         coeffects: b_coeffects,
-        decl_vars: _,
         num_iters: b_num_iters,
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
         upper_bounds: b_upper_bounds,
         shadowed_tparams: b_shadowed_tparams,
-        params: b_params,
         return_type: b_return_type,
         doc_comment: b_doc_comment,
-        stack_depth: _,
         span: b_span,
+        repr:
+            hhbc::BcRepr {
+                instrs: _,
+                decl_vars: _,
+                params: b_params,
+                stack_depth: _,
+            },
     } = b;
 
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;

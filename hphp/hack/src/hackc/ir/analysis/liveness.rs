@@ -84,7 +84,7 @@ impl LiveInstrs {
         let mut live = LiveInstrs {
             instr_last_use: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
             instrs_dead_at: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
-            blocks: IdVec::new_from_vec(vec![Default::default(); func.blocks.len()]),
+            blocks: IdVec::new_from_vec(vec![Default::default(); func.repr.blocks.len()]),
         };
 
         // Start by computing what InstrIds are introduced and referenced in

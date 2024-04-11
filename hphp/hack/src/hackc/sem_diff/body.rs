@@ -57,7 +57,7 @@ pub(crate) fn compare_bodies(
     work_queue.init_from_bodies(&mut value_builder, &a, &b);
 
     // If we loop more than this number of times it's almost certainly a bug.
-    let mut infinite_loop = std::cmp::max(body_a.instrs.len(), body_b.instrs.len()) * 5;
+    let mut infinite_loop = std::cmp::max(body_a.repr.instrs.len(), body_b.repr.instrs.len()) * 5;
 
     while let Some((a, b)) = work_queue.pop() {
         let seq_a = a.collect(&mut value_builder).context("collecting a")?;
@@ -121,14 +121,14 @@ impl<'a> Body<'a> {
 
     pub(crate) fn local_name(&self, local: Local) -> Option<StringId> {
         let mut n = local.index();
-        let p = self.hhbc_body.params.len();
+        let p = self.hhbc_body.repr.params.len();
         if n < p {
-            return Some(self.hhbc_body.params[n].param.name);
+            return Some(self.hhbc_body.repr.params[n].param.name);
         }
         n -= p;
-        let v = self.hhbc_body.decl_vars.len();
+        let v = self.hhbc_body.repr.decl_vars.len();
         if n < v {
-            return Some(self.hhbc_body.decl_vars[n]);
+            return Some(self.hhbc_body.repr.decl_vars[n]);
         }
         None
     }
@@ -137,7 +137,7 @@ impl<'a> Body<'a> {
         hhbc_body: &'a hhbc::Body,
     ) -> (HashMap<Label, InstrPtr>, IdVec<InstrPtr, Rc<SrcLoc>>) {
         let mut label_to_ip = HashMap::default();
-        let mut ip_to_loc = Vec::with_capacity(hhbc_body.instrs.len());
+        let mut ip_to_loc = Vec::with_capacity(hhbc_body.repr.instrs.len());
         let mut cur_loc = Rc::new(SrcLoc::default());
         for (ip, instr) in body_instrs(hhbc_body) {
             match instr {
@@ -185,7 +185,7 @@ impl<'a> Body<'a> {
 fn body_instrs<'a>(
     hhbc_body: &'a hhbc::Body,
 ) -> impl DoubleEndedIterator<Item = (InstrPtr, &'a Instruct)> {
-    hhbc_body.instrs.iter().enumerate().map(|(i, instr)| {
+    hhbc_body.repr.instrs.iter().enumerate().map(|(i, instr)| {
         let ip = InstrPtr::from_usize(i);
         (ip, instr)
     })

@@ -66,6 +66,7 @@ impl FuncBuilder {
     /// Create a FuncBuilder to edit a Func.
     pub fn with_func(func: Func) -> Self {
         let imm_lookup: HashMap<Immediate, ImmId> = func
+            .repr
             .imms
             .iter()
             .enumerate()
@@ -73,6 +74,7 @@ impl FuncBuilder {
             .collect();
 
         let loc_lookup: HashMap<SrcLoc, LocId> = func
+            .repr
             .locs
             .iter()
             .enumerate()
@@ -107,8 +109,8 @@ impl FuncBuilder {
         match self.loc_lookup.entry(loc) {
             Entry::Occupied(e) => *e.get(),
             Entry::Vacant(e) => {
-                let id = LocId::from_usize(self.func.locs.len());
-                self.func.locs.push(e.key().clone());
+                let id = LocId::from_usize(self.func.repr.locs.len());
+                self.func.repr.locs.push(e.key().clone());
                 e.insert(id);
                 id
             }
@@ -116,15 +118,15 @@ impl FuncBuilder {
     }
 
     pub fn alloc_bid(&mut self) -> BlockId {
-        let bid = BlockId::from_usize(self.func.blocks.len());
-        self.func.blocks.push(Block::default());
+        let bid = BlockId::from_usize(self.func.repr.blocks.len());
+        self.func.repr.blocks.push(Block::default());
         bid
     }
 
     pub fn alloc_bid_based_on(&mut self, basis: BlockId) -> BlockId {
-        let basis = &self.func.blocks[basis];
-        let bid = BlockId::from_usize(self.func.blocks.len());
-        self.func.blocks.push(Block {
+        let basis = &self.func.repr.blocks[basis];
+        let bid = BlockId::from_usize(self.func.repr.blocks.len());
+        self.func.repr.blocks.push(Block {
             pname_hint: basis.pname_hint.clone(),
             tcid: basis.tcid,
             ..Block::default()
@@ -141,11 +143,11 @@ impl FuncBuilder {
     }
 
     pub fn cur_block(&self) -> &Block {
-        &self.func.blocks[self.cur_bid]
+        &self.func.repr.blocks[self.cur_bid]
     }
 
     pub fn cur_block_mut(&mut self) -> &mut Block {
-        &mut self.func.blocks[self.cur_bid]
+        &mut self.func.repr.blocks[self.cur_bid]
     }
 
     pub fn alloc_param(&mut self) -> ValueId {
@@ -169,10 +171,10 @@ impl FuncBuilder {
 
     pub fn finish(self) -> Func {
         let mut func = self.func;
-        while !func.blocks.is_empty() {
-            let bid = BlockId::from_usize(func.blocks.len() - 1);
-            if func.blocks[bid].iids.is_empty() {
-                func.blocks.pop();
+        while !func.repr.blocks.is_empty() {
+            let bid = BlockId::from_usize(func.repr.blocks.len() - 1);
+            if func.repr.blocks[bid].iids.is_empty() {
+                func.repr.blocks.pop();
             } else {
                 break;
             }
@@ -190,7 +192,7 @@ impl FuncBuilder {
         // Steal the block contents so we can loop through them without a func
         // borrow, and clear the old block's body so we can append to it as we
         // go.
-        let rb = &mut self.func.blocks[bid];
+        let rb = &mut self.func.repr.blocks[bid];
         let rb_len = rb.iids.len();
         let block_snapshot = std::mem::replace(&mut rb.iids, Vec::with_capacity(rb_len));
 
@@ -229,7 +231,7 @@ impl FuncBuilder {
         // Swapping in a tombstone solves this problem and avoids needing to
         // clone().  The tombstone instr being there temporarily is OK because
         // we know nothing will look it up (although they technically could).
-        let mut instr = std::mem::replace(&mut self.func.instrs[iid], Instr::tombstone());
+        let mut instr = std::mem::replace(&mut self.func.repr.instrs[iid], Instr::tombstone());
 
         // Snap through any relaced instrs to the real value.
         self.replace_operands(&mut instr);
@@ -251,8 +253,8 @@ impl FuncBuilder {
             }
             Instr::Special(Special::Tombstone) => {}
             other => {
-                self.func.instrs[iid] = other;
-                self.func.blocks[self.cur_bid].iids.push(iid);
+                self.func.repr.instrs[iid] = other;
+                self.func.repr.blocks[self.cur_bid].iids.push(iid);
             }
         }
     }
@@ -281,7 +283,7 @@ impl FuncBuilder {
         }
 
         if iid == InstrId::from_usize(src.as_usize() + 1 + idx as usize) {
-            if idx < Self::num_selects(&self.func.instrs[src]) {
+            if idx < Self::num_selects(&self.func.repr.instrs[src]) {
                 // If the rewriter didn't do anything interesting with the
                 // original Instr then we just want to keep the Select
                 // as-is.

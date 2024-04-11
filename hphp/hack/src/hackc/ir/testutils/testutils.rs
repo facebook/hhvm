@@ -244,11 +244,11 @@ fn cmp_func_struct_eq(func_a: &Func, func_b: &Func) -> Result<(), String> {
 
     let mut pending_cmp: Vec<(BlockId, BlockId)> = vec![(Func::ENTRY_BID, Func::ENTRY_BID)];
     cmp_eq!(
-        func_a.params.len(),
-        func_b.params.len(),
+        func_a.repr.params.len(),
+        func_b.repr.params.len(),
         "param length mismatch",
     )?;
-    for ((_, dv_a), (_, dv_b)) in func_a.params.iter().zip(func_b.params.iter()) {
+    for ((_, dv_a), (_, dv_b)) in func_a.repr.params.iter().zip(func_b.repr.params.iter()) {
         match (dv_a, dv_b) {
             (Some(dv_a), Some(dv_b)) => {
                 pending_cmp.push((dv_a.init, dv_b.init));

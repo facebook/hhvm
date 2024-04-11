@@ -157,8 +157,9 @@ impl MakeSSA {
                 ..Default::default()
             },
         );
-        let block_info: IdVec<BlockId, BlockInfo> =
-            (0..func.blocks.len()).map(|_| Default::default()).collect();
+        let block_info: IdVec<BlockId, BlockInfo> = (0..func.repr.blocks.len())
+            .map(|_| Default::default())
+            .collect();
         MakeSSA {
             predecessors,
             block_info,
@@ -183,8 +184,8 @@ impl MakeSSA {
         for bid in func.block_ids() {
             let info = &mut self.block_info[bid];
 
-            for &iid in &func.blocks[bid].iids {
-                match func.instrs[iid] {
+            for &iid in &func.repr.blocks[bid].iids {
+                match func.repr.instrs[iid] {
                     Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
                         note_live(&mut dataflow_stack, info, bid, iid, var)
                     }
@@ -337,7 +338,7 @@ impl MakeSSA {
 
                 // Record any additional Params.
                 if !info.extra_params.is_empty() {
-                    let bparams = &mut rw.func.blocks[bid].params;
+                    let bparams = &mut rw.func.repr.blocks[bid].params;
                     for (_, param) in &info.extra_params {
                         bparams.push(*param);
                     }
@@ -495,7 +496,7 @@ mod test {
         let res = run(&mut func);
         assert!(res);
 
-        assert_eq!(func.blocks.len(), 1);
+        assert_eq!(func.repr.blocks.len(), 1);
         let mut it = func.body_instrs();
 
         let instr = it.next();

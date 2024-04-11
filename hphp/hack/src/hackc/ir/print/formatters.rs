@@ -289,7 +289,7 @@ impl Display for FmtFuncParams<'_> {
         write!(
             w,
             "({})",
-            FmtSep::comma(&func.params, |w, param| crate::print::print_param(
+            FmtSep::comma(&func.repr.params, |w, param| crate::print::print_param(
                 w, func, param
             ))
         )
@@ -559,7 +559,7 @@ pub struct FmtLocId<'a>(pub &'a Func, pub LocId);
 impl Display for FmtLocId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtLocId(func, loc_id) = *self;
-        if let Some(loc) = func.locs.get(loc_id) {
+        if let Some(loc) = func.repr.locs.get(loc_id) {
             FmtLoc(loc).fmt(f)
         } else {
             write!(f, "<unknown loc #{loc_id}>")

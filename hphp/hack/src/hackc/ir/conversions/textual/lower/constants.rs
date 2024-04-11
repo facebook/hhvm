@@ -23,7 +23,7 @@ use log::trace;
 /// handling blocks) and remap their uses to the emitted values.
 pub(crate) fn write_constants(builder: &mut FuncBuilder) {
     // Rewrite some types of constants.
-    for c in builder.func.imms.iter_mut() {
+    for c in builder.func.repr.imms.iter_mut() {
         match c {
             Immediate::File => {
                 // Rewrite __FILE__ as a simple string since the real filename
@@ -124,13 +124,13 @@ fn insert_constants(builder: &mut FuncBuilder, start_bid: BlockId) {
     let mut old_iids = std::mem::take(&mut builder.func.block_mut(start_bid).iids);
     builder.cur_block_mut().iids.append(&mut old_iids);
 
-    builder.func.blocks.swap(start_bid, new_bid);
+    builder.func.repr.blocks.swap(start_bid, new_bid);
 
     remap_constants(&mut builder.func, &bids, remap);
 
     for (vid, src) in fixups {
         let iid = vid.instr().unwrap();
-        builder.func.instrs[iid] = Instr::Special(instr::Special::Copy(src));
+        builder.func.repr.instrs[iid] = Instr::Special(instr::Special::Copy(src));
     }
 }
 

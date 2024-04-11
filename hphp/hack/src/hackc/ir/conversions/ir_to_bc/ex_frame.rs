@@ -105,7 +105,7 @@ fn find_or_insert_frame<'c>(
     func: &ir::Func,
     exid: ir::ExFrameId,
 ) -> &'c mut ExFrame {
-    let parent_tcid: TryCatchId = func.ex_frames[&exid].parent;
+    let parent_tcid: TryCatchId = func.repr.ex_frames[&exid].parent;
     let parent_frame = get_frame(root, func, parent_tcid);
     if let Some(frame) = find_frame(parent_frame, exid) {
         parent_frame[frame].frame_mut()
@@ -167,15 +167,16 @@ mod test {
                 tcid,
                 ..Block::default()
             };
-            assert!(bid == func.blocks.len());
-            func.blocks.push(block);
+            assert!(bid == func.repr.blocks.len());
+            func.repr.blocks.push(block);
         }
 
         for (exid, (parent, catch_bid)) in ex_frames {
             let exid = ir::ExFrameId::from_usize(exid);
             let parent = parent.map_or(TryCatchId::None, conv_tcid);
             let catch_bid = BlockId::from_usize(catch_bid);
-            func.ex_frames
+            func.repr
+                .ex_frames
                 .insert(exid, ir::func::ExFrame { parent, catch_bid });
         }
 

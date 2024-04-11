@@ -24,7 +24,7 @@ pub fn rpo_sort(func: &mut Func) {
 
     // Create the mapping from old BlockId to new BlockId.
     // Dead blocks will have a BlockId::NONE entry.
-    let remap = order_to_remap(&rpo, func.blocks.len());
+    let remap = order_to_remap(&rpo, func.repr.blocks.len());
 
     // Update successor edges for surviving blocks to use the new BlockIds.
     // (Note that this double loop will make it so that the closer to RPO we
@@ -40,7 +40,7 @@ pub fn rpo_sort(func: &mut Func) {
         }
     }
 
-    for (_, dv) in &mut func.params {
+    for (_, dv) in &mut func.repr.params {
         if let Some(dv) = dv.as_mut() {
             if let Some(target) = remap.get(dv.init) {
                 dv.init = *target;
@@ -49,7 +49,7 @@ pub fn rpo_sort(func: &mut Func) {
     }
 
     // Update catch_bids for TryCatch frames.
-    for ex_frame in &mut func.ex_frames.values_mut() {
+    for ex_frame in &mut func.repr.ex_frames.values_mut() {
         let bid = &mut ex_frame.catch_bid;
         if *bid != BlockId::NONE {
             let target = remap[*bid];
@@ -61,9 +61,9 @@ pub fn rpo_sort(func: &mut Func) {
     }
 
     // Drop dead blocks and put the others in the RPO order specified by remap.
-    permute_and_truncate(&mut func.blocks, remap);
+    permute_and_truncate(&mut func.repr.blocks, remap);
 
-    assert_eq!(func.blocks.len(), rpo.len());
+    assert_eq!(func.repr.blocks.len(), rpo.len());
 }
 
 /// Invert the block order in order to map each old BlockId to its new BlockId.
@@ -125,7 +125,7 @@ where
 /// Are the Blocks in func already in the order specified by rpo?
 fn block_order_matches(func: &Func, order: &[BlockId]) -> bool {
     // See if the ordering is the no-op ordering [0, 1, 2, 3, blocks.len()).
-    order.len() == func.blocks.len()
+    order.len() == func.repr.blocks.len()
         && order.iter().enumerate().all(|(i, &b)| {
             let bid_as_usize: usize = b.into();
             i == bid_as_usize
@@ -291,6 +291,7 @@ mod tests {
             rpo_sort(&mut func);
 
             let order = func
+                .repr
                 .blocks
                 .iter()
                 .map(|b| b.pname_hint.as_ref().map_or("", String::as_str))
@@ -348,12 +349,13 @@ mod tests {
             rpo_sort(&mut rfunc);
 
             fn bname<'a>(func: &'a Func, bid: BlockId) -> &'a str {
-                func.blocks[bid]
+                func.repr.blocks[bid]
                     .pname_hint
                     .as_ref()
                     .map_or("", String::as_str)
             }
             let actual = func
+                .repr
                 .blocks
                 .iter()
                 .enumerate()

@@ -156,7 +156,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
     };
     flags.set(FunctionFlags::GENERATOR, is_gen);
     flags.set(FunctionFlags::PAIR_GENERATOR, is_pair_gen);
-    let has_variadic = emit_param::has_variadic(&body.params);
+    let has_variadic = emit_param::has_variadic(&body.repr.params);
     body.attrs =
         emit_memoize_function::get_attrs_for_fun(e, fd, &body.attributes, memoized, has_variadic);
     let normal_function = Function {

@@ -58,13 +58,23 @@ bool noError(quic::QuicErrorCode error) {
           *error.asTransportErrorCode() == quic::TransportErrorCode::NO_ERROR);
 }
 
-bool isVlogLevel(quic::TransportErrorCode code) {
+bool isVlogLevel(const quic::TransportErrorCode& code) {
   return code == quic::TransportErrorCode::INVALID_MIGRATION;
 }
 
-bool isVlogLevel(quic::QuicErrorCode error) {
-  return error.type() == quic::QuicErrorCode::Type::TransportErrorCode &&
-         isVlogLevel(*error.asTransportErrorCode());
+bool isVlogLevel(const quic::LocalErrorCode& code) {
+  return code == quic::LocalErrorCode::CONNECTION_ABANDONED;
+}
+
+bool isVlogLevel(const quic::QuicErrorCode& error) {
+  switch (error.type()) {
+    case quic::QuicErrorCode::Type::TransportErrorCode:
+      return isVlogLevel(*error.asTransportErrorCode());
+    case quic::QuicErrorCode::Type::LocalErrorCode:
+      return isVlogLevel(*error.asLocalErrorCode());
+    default:
+      return false;
+  }
 }
 
 // handleSessionError is mostly setup to process application error codes
